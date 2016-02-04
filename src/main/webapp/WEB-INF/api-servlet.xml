@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd
+       ">
+
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter"/>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <mvc:cors>
+        <mvc:mapping path="/**" allowed-origins="*" allowed-headers="*"
+                     allowed-methods="HEAD,PUT,POST,PATCH,TRACE,DELETE,GET"/>
+    </mvc:cors>
+
+    <security:global-method-security secured-annotations="enabled"/>
+
+    <context:component-scan base-package="com.angkorteam.mbaas.api"/>
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="104857600"/>
+    </bean>
+
+    <bean id="dataSource" class="com.angkorteam.mbaas.factory.BasicDataSourceFactory"/>
+
+
+    <bean id="context" class="com.angkorteam.mbaas.factory.DSLContextFactory"/>
+
+    <bean id="encryptor" class="com.angkorteam.mbaas.factory.StringEncryptorFactory"/>
+
+    <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.PlaintextPasswordEncoder"/>
+
+    <bean id="detailsService" class="com.angkorteam.mbaas.factory.UserDetailsServiceFactory">
+        <property name="context" ref="context"/>
+    </bean>
+
+    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.TokenAuthenticationEntryPoint">
+        <property name="realmName" value="MBaas API"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="com.angkorteam.mbaas.factory.JdbcTemplateFactory">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="gson" class="com.angkorteam.mbaas.factory.GsonFactory"/>
+
+    <bean id="authenticationFilter" class="com.angkorteam.mbaas.TokenAuthenticationFilter">
+        <constructor-arg ref="authenticationManager"/>
+        <property name="context" ref="context"/>
+    </bean>
+
+    <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager"
+                   entry-point-ref="authenticationEntryPoint">
+        <security:custom-filter ref="authenticationFilter" position="BASIC_AUTH_FILTER"/>
+        <security:csrf disabled="true"/>
+        <security:intercept-url pattern="/api/user/signup" access="permitAll"/>
+        <security:intercept-url pattern="/api/login" access="permitAll"/>
+        <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
+    </security:http>
+
+    <security:authentication-manager id="authenticationManager">
+        <security:authentication-provider user-service-ref="detailsService">
+            <security:password-encoder ref="passwordEncoder"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+</beans>
