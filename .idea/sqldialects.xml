@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="SqlDialectMappings">
-    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V1__user_ddl.sql" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V2__token_ddl.sql" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V3__application_ddl.sql" dialect="MySQL" />
-  </component>
-</project>
