@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.api;
 
 import com.angkorteam.baasbox.sdk.java.json.*;
+import com.angkorteam.baasbox.sdk.java.request.SendPushNotificationRequest;
 import com.angkorteam.baasbox.sdk.java.response.StringResponse;
 import com.angkorteam.baasbox.sdk.java.response.SuccessResponse;
 import com.angkorteam.mbaas.request.*;
@@ -47,21 +48,21 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.POST, path = "/login",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> loginPost(@RequestBody LoginRequest request) {
+    public ResponseEntity<Response> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(null);
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/signup",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> signupPost(@RequestBody SignupRequest request) {
+    public ResponseEntity<Response> signup(@RequestBody SignupRequest request) {
         return ResponseEntity.ok(null);
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/logout",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> logoutPost(
+    public ResponseEntity<Response> logout(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody Request request
@@ -72,7 +73,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.POST, path = "/logout/{pushToken}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> logoutPost(
+    public ResponseEntity<Response> logout(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("pushToken") String pushToken,
@@ -83,7 +84,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.PUT, path = "/me/suspend",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> suspendUserPut(
+    public ResponseEntity<Response> suspendUser(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody Request request) {
@@ -93,7 +94,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.PUT, path = "/admin/user/suspend/{username}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> suspendUserPut(
+    public ResponseEntity<Response> suspendUser(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
@@ -104,7 +105,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.PUT, path = "/admin/user/activate/{username}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> activateUserPut(
+    public ResponseEntity<Response> activateUser(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
@@ -115,7 +116,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.GET, path = "/me",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> loggedUserProfileGet(
+    public ResponseEntity<Response> loggedUserProfile(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody Request request) {
@@ -125,7 +126,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.PUT, path = "/me",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> updateUserProfilePut(
+    public ResponseEntity<Response> updateUserProfile(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody UpdateUserProfileRequest request) {
@@ -135,7 +136,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.GET, path = "/user/{username}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> fetchUserProfileGet(
+    public ResponseEntity<Response> fetchUserProfile(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
@@ -146,7 +147,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.GET, path = "/users",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> fetchUsersGet(
+    public ResponseEntity<Response> fetchUsers(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody FetchUsersRequest request) {
@@ -156,7 +157,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.PUT, path = "/me/password",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> changePasswordPut(
+    public ResponseEntity<Response> changePassword(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody ChangePasswordJson request) {
@@ -166,7 +167,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.PUT, path = "/me/username",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> changeUsernamePut(
+    public ResponseEntity<Response> changeUsername(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody ChangeUsernameRequest request) {
@@ -176,7 +177,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.GET, path = "/user/{username}/password/reset",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> passwordResetGet(
+    public ResponseEntity<Response> passwordReset(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
@@ -187,7 +188,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.GET, path = "/social",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> socialGet(
+    public ResponseEntity<Response> social(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody Request request) {
@@ -197,7 +198,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.POST, path = "/social/{socialNetwork}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> socialLoginPost(
+    public ResponseEntity<Response> socialLogin(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("socialNetwork") String socialNetwork,
@@ -208,7 +209,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.PUT, path = "/social/{socialNetwork}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> socialLinkPut(
+    public ResponseEntity<Response> socialLink(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("socialNetwork") String socialNetwork,
@@ -219,7 +220,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.DELETE, path = "/social/{socialNetwork}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> socialUnlinkDelete(
+    public ResponseEntity<Response> socialUnlink(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("socialNetwork") String socialNetwork,
@@ -230,7 +231,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.POST, path = "/follow/{username}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> followUserPost(
+    public ResponseEntity<Response> followUser(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
@@ -241,7 +242,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.DELETE, path = "/follow/{username}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> unfollowUserDelete(
+    public ResponseEntity<Response> unfollowUser(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
@@ -252,7 +253,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.DELETE, path = "/following/{username}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> fetchFollowingGet(
+    public ResponseEntity<Response> fetchFollowing(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
@@ -263,7 +264,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.GET, path = "/followers/{username}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> fetchFollowersGet(
+    public ResponseEntity<Response> fetchFollowers(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
@@ -274,7 +275,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.PUT, path = "/push/enable/{os}/{token}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> enablePushNotificationPut(
+    public ResponseEntity<Response> enablePushNotification(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("os") String os,
@@ -286,7 +287,7 @@ public class RestAPI {
     @RequestMapping(method = RequestMethod.PUT, path = "/push/disable/{token}",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> disablePushNotificationPut(
+    public ResponseEntity<Response> disablePushNotification(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("token") String token,
@@ -294,6 +295,186 @@ public class RestAPI {
         return ResponseEntity.ok(null);
     }
 
-//    @POST("/push/message")
-//    public StringResponse sendPushNotification(@Header("X-BB-SESSION") String session, @Body SendPushNotificationJson json);
+
+    @RequestMapping(method = RequestMethod.POST, path = "/push/message",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> sendPushNotification(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @RequestBody SendPushNotificationRequest request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "/admin/collection/{collection}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> createCollection(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, path = "/admin/collection/{collection}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> deleteCollection(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "/document/{collection}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> createDocument(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @RequestBody CreateDocumentRequest request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/document/{collection}/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> retrieveDocumentById(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @PathVariable("id") String id,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/document/{collection}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> retrieveDocumentByQuery(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @RequestBody RetrieveDocumentByQueryRequest request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/document/{collection}/count",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> countDocument(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, path = "/document/{collection}/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> modifyDocument(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @PathVariable("id") String id,
+            @RequestBody ModifyDocumentRequest request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, path = "/document/{collection}/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> deleteDocument(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @PathVariable("id") String id,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, path = "/document/{collection}/{id}/{action}/user/{username}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> grantPermissionsDocumentUsername(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @PathVariable("id") String id,
+            @PathVariable("action") String action,
+            @PathVariable("username") String username,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, path = "/document/{collection}/{id}/{action}/role/{rolename}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> grantPermissionsDocumentRoleName(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @PathVariable("id") String id,
+            @PathVariable("action") String action,
+            @PathVariable("rolename") String rolename,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, path = "/document/{collection}/{id}/{action}/user/{username}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> revokePermissionsDocumentUsername(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @PathVariable("id") String id,
+            @PathVariable("action") String action,
+            @PathVariable("username") String username,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, path = "/document/{collection}/{id}/{action}/user/{rolename}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> revokePermissionsDocumentRoleName(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("collection") String collection,
+            @PathVariable("id") String id,
+            @PathVariable("action") String action,
+            @PathVariable("rolename") String rolename,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "/link/{sourceId}/{label}/{destinationId}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> createLink(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("sourceId") String sourceId,
+            @PathVariable("label") String label,
+            @PathVariable("destinationId") String destinationId,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/link/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> retrieveLink(
+            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("X-MBAAS-SESSION") String session,
+            @PathVariable("id") String id,
+            @RequestBody Request request) {
+        return ResponseEntity.ok(null);
+    }
+
 }
