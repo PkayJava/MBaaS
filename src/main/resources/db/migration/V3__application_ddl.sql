@@ -1,15 +1,15 @@
 CREATE TABLE application (
 
-  application_id     VARCHAR(255) NOT NULL,
+  application_id INT(11) AUTO_INCREMENT,
 
-  user_id      INT(11),
-  code         VARCHAR(255),
+  user_id        INT(11),
+  code           VARCHAR(255),
 
-  created_date DATETIME,
+  created_date   DATETIME,
 
-  extra  blob,
-  deleted      BIT(1)       NOT NULL DEFAULT 0,
-  optimistic   INT(11)      NOT NULL DEFAULT 0,
+  extra          BLOB,
+  deleted        BIT(1)  NOT NULL DEFAULT 0,
+  optimistic     INT(11) NOT NULL DEFAULT 0,
 
   UNIQUE (code),
   INDEX (user_id),

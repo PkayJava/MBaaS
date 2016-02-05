@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Created by socheat on 2/4/16.
  */
-public class SignupRequest implements Serializable {
+public class SignupRequest extends Request {
 
     @Expose
     @SerializedName("username")
@@ -55,14 +55,6 @@ public class SignupRequest implements Serializable {
         this.password = password;
     }
 
-    public String getAppCode() {
-        return appCode;
-    }
-
-    public void setAppCode(String appCode) {
-        this.appCode = appCode;
-    }
-
     public Map<String, Object> getVisibleByTheUser() {
         return visibleByTheUser;
     }
@@ -93,5 +85,13 @@ public class SignupRequest implements Serializable {
 
     public void setVisibleByAnonymousUsers(Map<String, Object> visibleByAnonymousUsers) {
         this.visibleByAnonymousUsers = visibleByAnonymousUsers;
+    }
+
+    public String getAppCode() {
+        return appCode;
+    }
+
+    public void setAppCode(String appCode) {
+        this.appCode = appCode;
     }
 }

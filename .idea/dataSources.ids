@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="dataSourceStorage">
+  <data-source name="MySQL - mbaas@pkayjava.ddns.net" uuid="d646c21e-0866-4216-a96b-64f58403ccc3">
+    <database-info product="MySQL" version="5.5.5-10.1.10-MariaDB" jdbc-version="4.0" driver-name="MySQL Connector Java" driver-version="mysql-connector-java-5.1.35 ( Revision: 5fb9c5849535c13917c2cf9baaece6ef9693ef27 )">
+      <extra-name-characters>#@</extra-name-characters>
+      <identifier-quote-string>`</identifier-quote-string>
+    </database-info>
+    <case-sensitivity plain-identifiers="lower" quoted-identifiers="lower"/>
+    <schema name="" catalog="mbaas"/>
+    <table name="schema_version" schema="" catalog="mbaas" type="TABLE">
+      <column name="version_rank" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="installed_rank" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="version" sqlType="VARCHAR" precision="50" scale="0" nullable="false" jdbcType="12"/>
+      <column name="description" sqlType="VARCHAR" precision="200" scale="0" nullable="false" jdbcType="12"/>
+      <column name="type" sqlType="VARCHAR" precision="20" scale="0" nullable="false" jdbcType="12"/>
+      <column name="script" sqlType="VARCHAR" precision="1000" scale="0" nullable="false" jdbcType="12"/>
+      <column name="checksum" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="installed_by" sqlType="VARCHAR" precision="100" scale="0" nullable="false" jdbcType="12"/>
+      <column name="installed_on" sqlType="TIMESTAMP" precision="19" scale="0" nullable="false" jdbcType="93" def="Q1VSUkVOVF9USU1FU1RBTVA="/>
+      <column name="execution_time" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="success" sqlType="TINYINT" precision="3" scale="0" nullable="false" jdbcType="-6"/>
+      <primary-key name="PRIMARY" columns="version"/>
+      <index name="schema_version_ir_idx" unique="false" columns="installed_rank"/>
+      <index name="schema_version_s_idx" unique="false" columns="success"/>
+      <index name="schema_version_vr_idx" unique="false" columns="version_rank"/>
+    </table>
+    <table name="token" schema="" catalog="mbaas" type="TABLE">
+      <column name="token_id" sqlType="VARCHAR" precision="255" scale="0" nullable="false" jdbcType="12"/>
+      <column name="user_id" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="created_date" sqlType="DATETIME" precision="19" scale="0" nullable="true" jdbcType="93"/>
+      <column name="seen_date" sqlType="DATETIME" precision="19" scale="0" nullable="true" jdbcType="93"/>
+      <column name="deleted" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7" def="YicwJw=="/>
+      <column name="optimistic" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" def="MA=="/>
+      <primary-key name="PRIMARY" columns="token_id"/>
+      <index name="deleted" unique="false" columns="deleted"/>
+      <index name="user_id" unique="false" columns="user_id"/>
+    </table>
+    <table name="user" schema="" catalog="mbaas" type="TABLE">
+      <column name="user_id" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="login" sqlType="VARCHAR" precision="255" scale="0" nullable="false" jdbcType="12"/>
+      <column name="password" sqlType="VARCHAR" precision="255" scale="0" nullable="false" jdbcType="12"/>
+      <column name="account_non_expired" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7" def="YicxJw=="/>
+      <column name="account_non_locked" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7" def="YicxJw=="/>
+      <column name="credentials_non_expired" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7" def="YicxJw=="/>
+      <column name="disabled" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7" def="YicxJw=="/>
+      <column name="deleted" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7" def="YicwJw=="/>
+      <column name="optimistic" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" def="MA=="/>
+      <primary-key name="PRIMARY" columns="user_id"/>
+      <index name="login" unique="true" columns="login"/>
+      <index name="deleted" unique="false" columns="deleted"/>
+      <index name="disabled" unique="false" columns="disabled"/>
+      <index name="password" unique="false" columns="password"/>
+    </table>
+  </data-source>
+</component>
