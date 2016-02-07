@@ -2,6 +2,7 @@ package com.angkorteam.mbaas;
 
 import com.angkorteam.mbaas.model.entity.tables.Token;
 import com.angkorteam.mbaas.model.entity.tables.User;
+import com.angkorteam.mbaas.model.entity.tables.records.TokenRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import org.jooq.DSLContext;
 import org.springframework.security.authentication.*;
@@ -21,6 +22,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * Created by Khauv Socheat on 2/4/2016.
@@ -101,8 +104,16 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             User userTable = User.USER.as("userTable");
             Token tokenTable = Token.TOKEN.as("tokenTable");
 
-            Integer userId = context.select(tokenTable.USER_ID).from(tokenTable).where(tokenTable.TOKEN_ID.eq(token)).fetchOneInto(Integer.class);
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(userId)).fetchOneInto(userTable);
+            TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(token)).fetchOneInto(tokenTable);
+            if (tokenRecord == null) {
+                throw new BadCredentialsException("token " + token + " is not valid");
+            }
+
+            Date dateSeen = new Date();
+            tokenRecord.setDateSeen(new Timestamp(dateSeen.getTime()));
+            tokenRecord.update();
+
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
 
             if (userRecord == null) {
                 throw new BadCredentialsException("token " + token + " is not valid");
