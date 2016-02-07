@@ -2,8 +2,6 @@ package com.angkorteam.mbaas.api;
 
 import com.angkorteam.baasbox.sdk.java.json.*;
 import com.angkorteam.baasbox.sdk.java.request.SendPushNotificationRequest;
-import com.angkorteam.baasbox.sdk.java.response.StringResponse;
-import com.angkorteam.baasbox.sdk.java.response.SuccessResponse;
 import com.angkorteam.mbaas.request.*;
 import com.angkorteam.mbaas.response.Response;
 import com.google.gson.Gson;
@@ -22,20 +20,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.multipart.MultipartFile;
-import retrofit.http.*;
-import retrofit.mime.TypedFile;
-
-import java.io.File;
-import java.util.Map;
 
 /**
  * Created by socheat on 2/4/16.
  */
 @Controller
-public class RestAPI {
+public class RestAPIController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestAPI.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestAPIController.class);
 
     @Autowired
     private DSLContext context;
