@@ -15,6 +15,7 @@ import com.angkorteam.mbaas.request.*;
 import com.angkorteam.mbaas.response.Response;
 import com.angkorteam.mbaas.service.RequestHeader;
 import com.google.gson.Gson;
+import javafx.scene.control.Tab;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jasypt.encryption.StringEncryptor;
 import org.jooq.Condition;
@@ -182,24 +183,58 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> logout(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody Request request
+            @RequestBody Request requestBody
     ) {
-        return ResponseEntity.ok(null);
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        Integer userId = tokenRecord.getUserId();
+        context.delete(tokenTable).where(tokenTable.USER_ID.eq(userId)).execute();
+
+        responseBody.setHttpCode(200);
+        responseBody.setResult(ResultEnum.OK.getLiteral());
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/logout/{pushToken}",
+            method = RequestMethod.POST, path = "/logout/{token}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> logout(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @PathVariable("pushToken") String pushToken,
-            @RequestBody Request request
+            @PathVariable("token") String token,
+            @RequestBody Request requestBody
     ) {
-        return ResponseEntity.ok(null);
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        context.delete(tokenTable).where(tokenTable.TOKEN_ID.eq(token)).execute();
+
+        responseBody.setResult(ResultEnum.OK.getLiteral());
+        responseBody.setHttpCode(200);
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @RequestMapping(
@@ -207,11 +242,36 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> suspendUser(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody Request request
+            @RequestBody Request requestBody
     ) {
-        return ResponseEntity.ok(null);
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        User userTable = Tables.USER.as("userTable");
+
+        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        UserRecord userRecord = null;
+
+        if (tokenRecord != null) {
+            context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+        }
+
+        if (userRecord != null) {
+            userRecord.setAccountNonLocked(false);
+            userRecord.update();
+        }
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @RequestMapping(
@@ -219,12 +279,30 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> suspendUser(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
-            @RequestBody Request request
+            @RequestBody Request requestBody
     ) {
-        return ResponseEntity.ok(null);
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        User userTable = Tables.USER.as("userTable");
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
+
+        if (userRecord != null) {
+            userRecord.setAccountNonLocked(false);
+            userRecord.update();
+        }
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @RequestMapping(
@@ -232,12 +310,30 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> activateUser(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
-            @RequestBody Request request
+            @RequestBody Request requestBody
     ) {
-        return ResponseEntity.ok(null);
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        User userTable = Tables.USER.as("userTable");
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
+
+        if (userRecord != null) {
+            userRecord.setAccountNonLocked(true);
+            userRecord.update();
+        }
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @RequestMapping(

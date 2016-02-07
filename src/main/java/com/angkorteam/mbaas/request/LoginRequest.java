@@ -22,6 +22,18 @@ public class LoginRequest implements Serializable {
     @SerializedName("appcode")
     private String appCode;
 
+    @Expose
+    @SerializedName("token")
+    private String token;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public String getUsername() {
         return username;
     }

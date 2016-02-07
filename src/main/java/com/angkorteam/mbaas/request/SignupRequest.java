@@ -24,6 +24,10 @@ public class SignupRequest extends Request {
     private String appCode;
 
     @Expose
+    @SerializedName("token")
+    private String token;
+
+    @Expose
     @SerializedName("visibleByTheUser")
     private Map<String, Object> visibleByTheUser;
 
@@ -38,6 +42,14 @@ public class SignupRequest extends Request {
     @Expose
     @SerializedName("visibleByAnonymousUsers")
     private Map<String, Object> visibleByAnonymousUsers;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public String getUsername() {
         return username;
