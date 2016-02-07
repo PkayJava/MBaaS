@@ -2,24 +2,42 @@ package com.angkorteam.mbaas.api;
 
 import com.angkorteam.baasbox.sdk.java.json.*;
 import com.angkorteam.baasbox.sdk.java.request.SendPushNotificationRequest;
+import com.angkorteam.mbaas.Constants;
+import com.angkorteam.mbaas.enums.ResultEnum;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.Application;
+import com.angkorteam.mbaas.model.entity.tables.Token;
+import com.angkorteam.mbaas.model.entity.tables.User;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.TokenRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.request.*;
 import com.angkorteam.mbaas.response.Response;
+import com.angkorteam.mbaas.service.RequestHeader;
 import com.google.gson.Gson;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jasypt.encryption.StringEncryptor;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
+import java.util.*;
 
 /**
  * Created by socheat on 2/4/16.
@@ -46,9 +64,52 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> login(
-            @RequestBody LoginRequest request
+            HttpServletRequest request,
+            @RequestBody LoginRequest requestBody
     ) {
-        return ResponseEntity.ok(null);
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        User userTable = Tables.USER.as("userTable");
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+
+        List<Condition> where = new ArrayList<>();
+        where.add(userTable.LOGIN.eq(requestBody.getUsername()));
+        where.add(userTable.PASSWORD.eq(requestBody.getPassword()));
+
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(where).fetchOneInto(userTable);
+        if (userRecord != null) {
+            responseBody.setHttpCode(HttpStatus.OK.value());
+            responseBody.setResult(ResultEnum.OK.getLiteral());
+
+            Map<String, Object> loginResponse = new HashMap<>();
+            String tokenId = UUID.randomUUID().toString();
+            Date dateCreated = new Date();
+
+
+            TokenRecord tokenRecord = context.newRecord(tokenTable);
+            tokenRecord.setTokenId(tokenId);
+            tokenRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
+            tokenRecord.setUserId(userRecord.getUserId());
+            tokenRecord.setDeleted(false);
+            tokenRecord.store();
+
+            loginResponse.put("token", tokenId);
+            loginResponse.put("dateCreated", dateCreated);
+            loginResponse.put("login", userRecord.getLogin());
+            responseBody.setData(loginResponse);
+        } else {
+            responseBody.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            responseBody.setResult(ResultEnum.ERROR.getLiteral());
+        }
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @RequestMapping(
@@ -56,9 +117,64 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> signup(
-            @RequestBody SignupRequest request
+            HttpServletRequest request,
+            @RequestBody SignupRequest requestBody
     ) {
-        return ResponseEntity.ok(null);
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        Application applicationTable = Tables.APPLICATION.as("applicationTable");
+        User userTable = Tables.USER.as("userTable");
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+
+        String appCode = requestBody.getAppCode();
+        String login = requestBody.getUsername();
+        String password = requestBody.getPassword();
+
+        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.CODE.eq(appCode)).fetchOneInto(applicationTable);
+        Integer applicationId = null;
+        if (applicationRecord != null) {
+            applicationId = applicationRecord.getApplicationId();
+        }
+
+
+        UserRecord userRecord = context.newRecord(userTable);
+        userRecord.setDeleted(false);
+        userRecord.setAccountNonExpired(true);
+        userRecord.setCredentialsNonExpired(true);
+        userRecord.setAccountNonLocked(true);
+        userRecord.setDisabled(false);
+        userRecord.setLogin(login);
+        userRecord.setPassword(password);
+        userRecord.setApplicationId(applicationId);
+        userRecord.store();
+
+        responseBody.setResult(ResultEnum.OK.getLiteral());
+        responseBody.setHttpCode(HttpStatus.OK.value());
+
+        Map<String, Object> signupResponse = new HashMap<>();
+        String tokenId = UUID.randomUUID().toString();
+        Date dateCreated = new Date();
+
+        TokenRecord tokenRecord = context.newRecord(tokenTable);
+        tokenRecord.setTokenId(tokenId);
+        tokenRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
+        tokenRecord.setUserId(userRecord.getUserId());
+        tokenRecord.setDeleted(false);
+        tokenRecord.store();
+
+        signupResponse.put("token", tokenId);
+        signupResponse.put("dateCreated", dateCreated);
+        signupResponse.put("login", userRecord.getLogin());
+        responseBody.setData(signupResponse);
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @RequestMapping(
@@ -149,7 +265,7 @@ public class RestAPIController {
     }
 
     @RequestMapping(
-            method = RequestMethod.GET, path = "/user/{username}",
+            method = RequestMethod.POST, path = "/user/{username}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> fetchUserProfile(

@@ -88,15 +88,15 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             ServletException {
         final boolean debug = logger.isDebugEnabled();
 
-        String header = request.getHeader("Authorization");
+        String header = request.getHeader("X-MBAAS-SESSION");
 
-        if (header == null || !header.startsWith("Token ")) {
+        if (header == null || "".equals(header)) {
             chain.doFilter(request, response);
             return;
         }
 
         try {
-            String token = header.substring(6);
+            String token = header;
 
             User userTable = User.USER.as("userTable");
             Token tokenTable = Token.TOKEN.as("tokenTable");

@@ -13,7 +13,9 @@
 
     <mvc:annotation-driven>
         <mvc:message-converters>
-            <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter"/>
+            <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter">
+                <property name="gson" ref="gson"/>
+            </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>
 
@@ -28,6 +30,14 @@
 
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="maxUploadSize" value="104857600"/>
+    </bean>
+
+    <bean id="gson" class="org.springframework.http.converter.json.GsonFactoryBean">
+        <property name="base64EncodeByteArrays" value="true"/>
+        <property name="disableHtmlEscaping" value="true"/>
+        <property name="prettyPrinting" value="true"/>
+        <property name="serializeNulls" value="false"/>
+        <property name="dateFormatPattern" value="yyyy-MM-dd'T'HH:mm:ssZZ"/>
     </bean>
 
     <bean id="dataSource" class="com.angkorteam.mbaas.factory.BasicDataSourceFactory"/>
@@ -51,8 +61,6 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <bean id="gson" class="com.angkorteam.mbaas.factory.GsonFactory"/>
-
     <bean id="authenticationFilter" class="com.angkorteam.mbaas.TokenAuthenticationFilter">
         <constructor-arg ref="authenticationManager"/>
         <property name="context" ref="context"/>
@@ -62,7 +70,7 @@
                    entry-point-ref="authenticationEntryPoint">
         <security:custom-filter ref="authenticationFilter" position="BASIC_AUTH_FILTER"/>
         <security:csrf disabled="true"/>
-        <security:intercept-url pattern="/api/user/signup" access="permitAll"/>
+        <security:intercept-url pattern="/api/signup" access="permitAll"/>
         <security:intercept-url pattern="/api/login" access="permitAll"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
     </security:http>

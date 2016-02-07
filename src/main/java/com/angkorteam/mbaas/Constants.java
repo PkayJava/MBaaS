@@ -27,6 +27,8 @@ public class Constants {
     public static final String ENCRYPTION_PASSWORD = "encryption.password";
     public static final String ENCRYPTION_OUTPUT = "encryption.output";
 
+    public static final String APP_VERSION = "app.version";
+
     private static XMLPropertiesConfiguration configuration;
     private static long lastModified = -1;
 

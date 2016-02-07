@@ -5,9 +5,10 @@ CREATE TABLE application (
   user_id        INT(11),
   code           VARCHAR(255),
 
-  created_date   DATETIME,
+  date_created   DATETIME,
 
   extra          BLOB,
+
   deleted        BIT(1)  NOT NULL DEFAULT 0,
   optimistic     INT(11) NOT NULL DEFAULT 0,
 
