@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -29,19 +30,19 @@ public class SignupRequest extends Request {
 
     @Expose
     @SerializedName("visibleByTheUser")
-    private Map<String, Object> visibleByTheUser;
+    private Map<String, Object> visibleByTheUser = new HashMap<>();
 
     @Expose
     @SerializedName("visibleByFriends")
-    private Map<String, Object> visibleByFriends;
+    private Map<String, Object> visibleByFriends = new HashMap<>();
 
     @Expose
     @SerializedName("visibleByRegisteredUsers")
-    private Map<String, Object> visibleByRegisteredUsers;
+    private Map<String, Object> visibleByRegisteredUsers = new HashMap<>();
 
     @Expose
     @SerializedName("visibleByAnonymousUsers")
-    private Map<String, Object> visibleByAnonymousUsers;
+    private Map<String, Object> visibleByAnonymousUsers = new HashMap<>();
 
     public String getToken() {
         return token;

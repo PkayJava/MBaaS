@@ -46,6 +46,8 @@ import java.util.Map;
  */
 public class ApplicationContext implements ServletContextListener {
 
+
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationContext.class);
 
     public static final String KEY = ApplicationContext.class.getName();
@@ -196,13 +198,6 @@ public class ApplicationContext implements ServletContextListener {
                         String indexName = resultSet.getString(IndexInfoEnum.INDEX_NAME.getLiteral());
                         if ("PRIMARY".equals(indexName)) {
                             continue;
-                        }
-
-                        if (table.getName().equals("token")) {
-                            ResultSetMetaData metaData = resultSet.getMetaData();
-                            for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                                System.out.println(metaData.getColumnName(i) + " - " + resultSet.getString(i));
-                            }
                         }
 
                         String columnName = resultSet.getString(IndexInfoEnum.COLUMN_NAME.getLiteral());
