@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 /**
  * Created by Khauv Socheat on 2/4/2016.
  */
-public class JdbcTemplateFactory implements FactoryBean<JdbcTemplate>, InitializingBean {
+public class JdbcTemplateFactoryBean implements FactoryBean<JdbcTemplate>, InitializingBean {
 
     private JdbcTemplate jdbcTemplate;
 

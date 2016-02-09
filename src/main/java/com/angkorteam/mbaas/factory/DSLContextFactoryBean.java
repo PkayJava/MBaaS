@@ -1,9 +1,7 @@
 package com.angkorteam.mbaas.factory;
 
 import com.angkorteam.mbaas.ApplicationContext;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
-import org.jasypt.encryption.StringEncryptor;
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.context.ServletConfigAware;
@@ -15,23 +13,20 @@ import javax.servlet.ServletContext;
 /**
  * Created by Khauv Socheat on 2/4/2016.
  */
-public class StringEncryptorFactory implements FactoryBean<StringEncryptor>, InitializingBean, ServletContextAware {
+public class DSLContextFactoryBean implements FactoryBean<DSLContext>, InitializingBean, ServletContextAware {
 
-    private StringEncryptor encryptor;
+    private DSLContext dslContext;
 
     private ServletContext servletContext;
 
-    public StringEncryptorFactory() {
-    }
-
     @Override
-    public StringEncryptor getObject() throws Exception {
-        return this.encryptor;
+    public DSLContext getObject() throws Exception {
+        return this.dslContext;
     }
 
     @Override
     public Class<?> getObjectType() {
-        return StringEncryptor.class;
+        return DSLContext.class;
     }
 
     @Override
@@ -42,7 +37,7 @@ public class StringEncryptorFactory implements FactoryBean<StringEncryptor>, Ini
     @Override
     public void afterPropertiesSet() throws Exception {
         ApplicationContext applicationContext = ApplicationContext.get(this.servletContext);
-        this.encryptor = applicationContext.getStringEncryptor();
+        this.dslContext = applicationContext.getDSLContext();
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.api;
 
-import com.angkorteam.baasbox.sdk.java.json.*;
+import com.angkorteam.baasbox.sdk.java.json.ChangePasswordJson;
 import com.angkorteam.baasbox.sdk.java.request.SendPushNotificationRequest;
 import com.angkorteam.mbaas.Constants;
 import com.angkorteam.mbaas.enums.ResultEnum;
@@ -15,7 +15,6 @@ import com.angkorteam.mbaas.request.*;
 import com.angkorteam.mbaas.response.Response;
 import com.angkorteam.mbaas.service.RequestHeader;
 import com.google.gson.Gson;
-import javafx.scene.control.Tab;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jasypt.encryption.StringEncryptor;
 import org.jooq.Condition;
@@ -29,7 +28,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -153,7 +151,6 @@ public class RestAPIController {
         userRecord.setDisabled(false);
         userRecord.setLogin(login);
         userRecord.setPassword(password);
-        userRecord.setApplicationId(applicationId);
         userRecord.store();
 
         responseBody.setResult(ResultEnum.OK.getLiteral());
@@ -341,11 +338,37 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> loggedUserProfile(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody Request request
+            @RequestBody Request requestBody
     ) {
-        return ResponseEntity.ok(null);
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        User userTable = Tables.USER.as("userTable");
+
+        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        UserRecord userRecord = null;
+
+        if (tokenRecord != null) {
+            context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+        }
+
+        if (userRecord != null) {
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("login", userRecord.getLogin());
+            responseBody.setData(data);
+        }
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @RequestMapping(
@@ -355,7 +378,7 @@ public class RestAPIController {
     public ResponseEntity<Response> updateUserProfile(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody UpdateUserProfileRequest request
+            @RequestBody UpdateUserProfileRequest requestBody
     ) {
         return ResponseEntity.ok(null);
     }

@@ -1,32 +1,31 @@
 package com.angkorteam.mbaas.factory;
 
 import com.angkorteam.mbaas.ApplicationContext;
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 /**
  * Created by Khauv Socheat on 2/4/2016.
  */
-public class BasicDataSourceFactory implements FactoryBean<DataSource>, InitializingBean, ServletContextAware {
+public class FlywayFactoryBean implements FactoryBean<Flyway>, InitializingBean, ServletContextAware {
 
-    private DataSource dataSource;
+    private Flyway flyway;
 
     private ServletContext servletContext;
 
     @Override
-    public DataSource getObject() throws Exception {
-        return this.dataSource;
+    public Flyway getObject() throws Exception {
+        return this.flyway;
     }
 
     @Override
     public Class<?> getObjectType() {
-        return DataSource.class;
+        return Flyway.class;
     }
 
     @Override
@@ -37,7 +36,7 @@ public class BasicDataSourceFactory implements FactoryBean<DataSource>, Initiali
     @Override
     public void afterPropertiesSet() throws Exception {
         ApplicationContext applicationContext = ApplicationContext.get(this.servletContext);
-        this.dataSource = applicationContext.getDataSource();
+        this.flyway = applicationContext.getFlyway();
     }
 
     @Override

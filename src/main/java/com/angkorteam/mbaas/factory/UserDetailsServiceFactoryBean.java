@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Created by Khauv Socheat on 2/4/2016.
  */
-public class UserDetailsServiceFactory implements FactoryBean<UserDetailsService>, UserDetailsService {
+public class UserDetailsServiceFactoryBean implements FactoryBean<UserDetailsService>, UserDetailsService {
 
     private DSLContext context;
 

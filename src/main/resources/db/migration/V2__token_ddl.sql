@@ -7,10 +7,15 @@ CREATE TABLE token (
   date_seen    DATETIME,
 
   push_token   VARCHAR(255),
+  token1       VARCHAR(255),
+  token2       VARCHAR(255),
+  token3       VARCHAR(255),
 
   deleted      BIT(1)       NOT NULL DEFAULT 0,
   optimistic   INT(11)      NOT NULL DEFAULT 0,
 
+  INDEX (token1, token2, token3),
+  UNIQUE (token1, token2, token3),
   INDEX (user_id),
   INDEX (deleted),
   PRIMARY KEY (token_id)

@@ -40,16 +40,17 @@
         <property name="dateFormatPattern" value="yyyy-MM-dd'T'HH:mm:ssZZ"/>
     </bean>
 
-    <bean id="dataSource" class="com.angkorteam.mbaas.factory.BasicDataSourceFactory"/>
+    <bean id="dataSource" class="com.angkorteam.mbaas.factory.BasicDataSourceFactoryBean"/>
 
+    <bean id="flyway" class="com.angkorteam.mbaas.factory.FlywayFactoryBean"/>
 
-    <bean id="context" class="com.angkorteam.mbaas.factory.DSLContextFactory"/>
+    <bean id="context" class="com.angkorteam.mbaas.factory.DSLContextFactoryBean"/>
 
-    <bean id="encryptor" class="com.angkorteam.mbaas.factory.StringEncryptorFactory"/>
+    <bean id="encryptor" class="com.angkorteam.mbaas.factory.StringEncryptorFactoryBean"/>
 
     <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.PlaintextPasswordEncoder"/>
 
-    <bean id="detailsService" class="com.angkorteam.mbaas.factory.UserDetailsServiceFactory">
+    <bean id="detailsService" class="com.angkorteam.mbaas.factory.UserDetailsServiceFactoryBean">
         <property name="context" ref="context"/>
     </bean>
 
@@ -57,7 +58,7 @@
         <property name="realmName" value="MBaas API"/>
     </bean>
 
-    <bean id="jdbcTemplate" class="com.angkorteam.mbaas.factory.JdbcTemplateFactory">
+    <bean id="jdbcTemplate" class="com.angkorteam.mbaas.factory.JdbcTemplateFactoryBean">
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
