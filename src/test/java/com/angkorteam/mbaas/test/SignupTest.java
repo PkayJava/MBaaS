@@ -55,11 +55,14 @@ public class SignupTest {
 
         {
             SignupRequest request = new SignupRequest();
-            request.setUsername("test211");
-            request.setPassword("test211");
-            request.setAppCode("12346579");
+            request.setUsername("a1s");
+            request.setPassword("a1s");
+            request.setAppCode("123461579");
             request.setToken("iOS Token");
             request.getVisibleByAnonymousUsers().put("test", 17);
+//            request.getVisibleByTheUser().put("test2", 17);
+//            request.getVisibleByRegisteredUsers().put("test3", 17);
+//            request.getVisibleByFriends().put("test4", 17);
             Response response = clientSDK.signup(request);
             System.out.println(gson.toJson(response));
         }

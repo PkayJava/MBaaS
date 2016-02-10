@@ -4,6 +4,7 @@ import com.angkorteam.baasbox.sdk.java.json.ChangePasswordJson;
 import com.angkorteam.baasbox.sdk.java.request.SendPushNotificationRequest;
 import com.angkorteam.mbaas.Constants;
 import com.angkorteam.mbaas.enums.ResultEnum;
+import com.angkorteam.mbaas.enums.ScopeEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
@@ -21,12 +22,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterBatchUpdateUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -120,6 +125,67 @@ public class RestAPIController {
             HttpServletRequest request,
             @RequestBody SignupRequest requestBody
     ) {
+        Application applicationTable = Tables.APPLICATION.as("applicationTable");
+        User userTable = Tables.USER.as("userTable");
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Table tableTable = Tables.TABLE.as("tableTable");
+        Field fieldTable = Tables.FIELD.as("fieldTable");
+        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+
+        // field duplication check
+        List<String> fields = new LinkedList<>();
+        boolean error = false;
+        if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
+                if (fields.contains(entry.getKey())) {
+                    error = true;
+                    break;
+                } else {
+                    fields.add(entry.getKey());
+                }
+            }
+        }
+        if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
+                if (fields.contains(entry.getKey())) {
+                    error = true;
+                    break;
+                } else {
+                    fields.add(entry.getKey());
+                }
+            }
+        }
+        if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
+                if (fields.contains(entry.getKey())) {
+                    error = true;
+                    break;
+                } else {
+                    fields.add(entry.getKey());
+                }
+            }
+        }
+        if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
+                if (fields.contains(entry.getKey())) {
+                    error = true;
+                    break;
+                } else {
+                    fields.add(entry.getKey());
+                }
+            }
+        }
+        if (error) {
+            return null;
+        }
+
+        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.USER.getName())).fetchOneInto(tableTable);
+
+        int fieldCount = context.selectCount().from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).and(fieldTable.NAME.in(fields)).fetchOneInto(Integer.class);
+        if (fields.size() > fieldCount) {
+            return null;
+        }
+
         Response responseBody = new Response();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -129,90 +195,9 @@ public class RestAPIController {
         RequestHeader.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
-        User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
-
         String appCode = requestBody.getAppCode();
         String login = requestBody.getUsername();
         String password = requestBody.getPassword();
-
-        boolean error = false;
-        if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
-            TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.VISIBLE_BY_ANONYMOUS_USER.getName())).fetchOneInto(tableTable);
-            Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-            if (tableRecord != null) {
-                for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-                    fieldRecords.put(fieldRecord.getName(), fieldRecord);
-                }
-            }
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
-                if (!fieldRecords.containsKey(entry.getKey())) {
-                    error = true;
-                    break;
-                }
-            }
-        }
-
-        if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
-            TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.VISIBLE_BY_FRIEND.getName())).fetchOneInto(tableTable);
-            Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-            if (tableRecord != null) {
-                for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-                    fieldRecords.put(fieldRecord.getName(), fieldRecord);
-                }
-            }
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
-                if (!fieldRecords.containsKey(entry.getKey())) {
-                    error = true;
-                    break;
-                }
-            }
-        }
-
-        if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
-            TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.VISIBLE_BY_REGISTERED_USER.getName())).fetchOneInto(tableTable);
-            Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-            if (tableRecord != null) {
-                for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-                    fieldRecords.put(fieldRecord.getName(), fieldRecord);
-                }
-            }
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
-                if (!fieldRecords.containsKey(entry.getKey())) {
-                    error = true;
-                    break;
-                }
-            }
-        }
-
-        if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
-            TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.VISIBLE_BY_THE_USER.getName())).fetchOneInto(tableTable);
-            Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-            if (tableRecord != null) {
-                for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-                    fieldRecords.put(fieldRecord.getName(), fieldRecord);
-                }
-            }
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
-                if (!fieldRecords.containsKey(entry.getKey())) {
-                    error = true;
-                    break;
-                }
-            }
-        }
-
-        if (error) {
-            return null;
-        }
-
-        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.CODE.eq(appCode)).fetchOneInto(applicationTable);
-        Integer applicationId = null;
-        if (applicationRecord != null) {
-            applicationId = applicationRecord.getApplicationId();
-        }
 
         UserRecord userRecord = context.newRecord(userTable);
         userRecord.setDeleted(false);
@@ -224,152 +209,113 @@ public class RestAPIController {
         userRecord.setPassword(password);
         userRecord.store();
 
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        List<String> columnNames = new LinkedList<>();
+        Map<String, Object> columnValues = new LinkedHashMap<>();
 
-        {
-
-            List<String> columnNames = new LinkedList<>();
-            List<String> columnKeys = new LinkedList<>();
-            Map<String, Object> columnValues = new LinkedHashMap<>();
-            List<String> virtual = new LinkedList<>();
-
-            columnNames.add(Tables.VISIBLE_BY_ANONYMOUS_USER.USER_ID.getName());
-            columnKeys.add(":" + Tables.VISIBLE_BY_ANONYMOUS_USER.USER_ID.getName());
-            columnNames.add(Tables.VISIBLE_BY_ANONYMOUS_USER.DELETED.getName());
-            columnKeys.add(":" + Tables.VISIBLE_BY_ANONYMOUS_USER.DELETED.getName());
-
-            columnValues.put(Tables.VISIBLE_BY_ANONYMOUS_USER.USER_ID.getName(), userRecord.getUserId());
-            columnValues.put(Tables.VISIBLE_BY_ANONYMOUS_USER.DELETED.getName(), false);
-
-            if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
-                TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.VISIBLE_BY_ANONYMOUS_USER.getName())).fetchOneInto(tableTable);
-                Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-                if (tableRecord != null) {
-                    for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-                        fieldRecords.put(fieldRecord.getName(), fieldRecord);
-                    }
-                }
-                for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
-                    FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                    if (fieldRecord.getVirtual()) {
-                        virtual.add("'" + entry.getKey() + "'");
-                        virtual.add("'" + String.valueOf(entry.getValue()) + "' as char");
-                    } else {
-                        columnNames.add(entry.getKey());
-                        columnKeys.add(":" + entry.getKey());
-                        columnValues.put(entry.getKey(), entry.getValue());
-                    }
-                }
+        Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
+        if (tableRecord != null) {
+            for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
+                fieldRecords.put(fieldRecord.getName(), fieldRecord);
             }
-            if (!virtual.isEmpty()) {
-                columnNames.add(Tables.VISIBLE_BY_ANONYMOUS_USER.EXTRA.getName());
-                columnKeys.add("COLUMN_CREATE(" + StringUtils.join(virtual, ",") + ")");
-            }
-            namedParameterJdbcTemplate.update("insert into " + Tables.VISIBLE_BY_ANONYMOUS_USER.getName() + "(" + StringUtils.join(columnNames, ",") + ") values (" + StringUtils.join(columnKeys, ",") + ")", columnValues);
+        }
+        Map<Integer, FieldRecord> blobRecords = new LinkedHashMap<>();
+        for (FieldRecord blobRecord : context.select(fieldTable.fields()).from(fieldTable)
+                .where(fieldTable.SQL_TYPE.eq("BLOB"))
+                .and(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
+                .and(fieldTable.VIRTUAL.eq(false))
+                .fetchInto(fieldTable)) {
+            blobRecords.put(blobRecord.getFieldId(), blobRecord);
         }
 
-        {
-            List<String> columnNames = new LinkedList<>();
-            List<String> columnKeys = new LinkedList<>();
-            Map<String, Object> columnValues = new LinkedHashMap<>();
-            List<String> virtual = new LinkedList<>();
-            if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
-                TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.VISIBLE_BY_FRIEND.getName())).fetchOneInto(tableTable);
-                Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-                if (tableRecord != null) {
-                    for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-                        fieldRecords.put(fieldRecord.getName(), fieldRecord);
+        Map<Integer, String> visiblity = new LinkedHashMap<>();
+        Map<String, List<String>> virtualColumns = new LinkedHashMap<>();
+
+        if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
+                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByAnonymousUser.getLiteral());
+                if (fieldRecord.getVirtual()) {
+                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
+                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
                     }
-                }
-                for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
-                    FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                    if (fieldRecord.getVirtual()) {
-                        virtual.add("'" + entry.getKey() + "'");
-                        virtual.add("'" + String.valueOf(entry.getValue()) + "'");
-                    } else {
-                        columnNames.add(entry.getKey());
-                        columnKeys.add(":" + entry.getKey());
-                        columnValues.put(entry.getKey(), entry.getValue());
-                    }
+                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
+                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                } else {
+                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
+                    columnValues.put(entry.getKey(), entry.getValue());
                 }
             }
-            if (!virtual.isEmpty()) {
-                columnNames.add(Tables.VISIBLE_BY_FRIEND.EXTRA.getName());
-                columnKeys.add("COLUMN_CREATE(" + StringUtils.join(virtual, ",") + ")");
+        }
+        if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
+                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByFriend.getLiteral());
+                if (fieldRecord.getVirtual()) {
+                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
+                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                    }
+                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
+                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                } else {
+                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
+                    columnValues.put(entry.getKey(), entry.getValue());
+                }
             }
-            namedParameterJdbcTemplate.update("insert into " + Tables.VISIBLE_BY_FRIEND.getName() + "(" + StringUtils.join(columnNames, ",") + ") values (" + StringUtils.join(columnKeys, ",") + ")", columnValues);
+        }
+        if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
+                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByRegisteredUser.getLiteral());
+                if (fieldRecord.getVirtual()) {
+                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
+                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                    }
+                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
+                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                } else {
+                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
+                    columnValues.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
+                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByTheUser.getLiteral());
+                if (fieldRecord.getVirtual()) {
+                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
+                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                    }
+                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
+                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                } else {
+                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
+                    columnValues.put(entry.getKey(), entry.getValue());
+                }
+            }
         }
 
-        {
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-            jdbcInsert.withTableName(Tables.VISIBLE_BY_THE_USER.getName());
-
-            List<String> columns = new LinkedList<>();
-            Map<String, Object> values = new LinkedHashMap<>();
-            List<String> virtual = new LinkedList<>();
-
-            if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
-                TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.VISIBLE_BY_THE_USER.getName())).fetchOneInto(tableTable);
-                Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-                if (tableRecord != null) {
-                    for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-                        fieldRecords.put(fieldRecord.getName(), fieldRecord);
-                    }
-                }
-                for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
-                    FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                    if (fieldRecord.getVirtual()) {
-                        virtual.add("'" + entry.getKey() + "'");
-                        virtual.add("'" + String.valueOf(entry.getValue()) + "'");
-                    } else {
-                        columns.add(entry.getKey());
-                        values.put(entry.getKey(), entry.getValue());
-                    }
-                }
-            }
-            if (!virtual.isEmpty()) {
-                columns.add(Tables.VISIBLE_BY_THE_USER.EXTRA.getName());
-                values.put(Tables.VISIBLE_BY_THE_USER.getName(), "COLUMN_CREATE(" + StringUtils.join(values, ",") + ")");
-            }
-            jdbcInsert.setColumnNames(columns);
-            jdbcInsert.execute(values);
+        for (Map.Entry<Integer, String> entry : visiblity.entrySet()) {
+            UserPrivacyRecord userPrivacyRecord = context.newRecord(userPrivacyTable);
+            userPrivacyRecord.setFieldId(entry.getKey());
+            userPrivacyRecord.setScope(entry.getValue());
+            userPrivacyRecord.setUserId(userRecord.getUserId());
+            userPrivacyRecord.store();
         }
 
-        {
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-            jdbcInsert.withTableName(Tables.VISIBLE_BY_REGISTERED_USER.getName());
-
-            List<String> columns = new LinkedList<>();
-            Map<String, Object> values = new LinkedHashMap<>();
-            List<String> virtual = new LinkedList<>();
-
-            if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
-                TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.VISIBLE_BY_REGISTERED_USER.getName())).fetchOneInto(tableTable);
-                Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-                if (tableRecord != null) {
-                    for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-                        fieldRecords.put(fieldRecord.getName(), fieldRecord);
-                    }
-                }
-                for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
-                    FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                    if (fieldRecord.getVirtual()) {
-                        virtual.add("'" + entry.getKey() + "'");
-                        virtual.add("'" + String.valueOf(entry.getValue()) + "'");
-                    } else {
-                        columns.add(entry.getKey());
-                        values.put(entry.getKey(), entry.getValue());
-                    }
+        if (!virtualColumns.isEmpty()) {
+            for (Map.Entry<String, List<String>> entry : virtualColumns.entrySet()) {
+                if (!entry.getValue().isEmpty()) {
+                    columnNames.add(entry.getKey() + " = " + "COLUMN_CREATE(" + StringUtils.join(entry.getValue(), ",") + ")");
                 }
             }
-            if (!virtual.isEmpty()) {
-                columns.add(Tables.VISIBLE_BY_REGISTERED_USER.EXTRA.getName());
-                values.put(Tables.VISIBLE_BY_REGISTERED_USER.getName(), "COLUMN_CREATE(" + StringUtils.join(values, ",") + ")");
-            }
-            jdbcInsert.setColumnNames(columns);
-            jdbcInsert.execute(values);
+            NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+            namedParameterJdbcTemplate.update("update " + Tables.USER.getName() + " set " + StringUtils.join(columnNames, ", ") + " where " + Tables.USER.USER_ID.getName() + " = " + userRecord.getUserId(), columnValues);
         }
-
 
         responseBody.setResult(ResultEnum.OK.getLiteral());
         responseBody.setHttpCode(HttpStatus.OK.value());
@@ -598,7 +544,7 @@ public class RestAPIController {
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody UpdateUserProfileRequest requestBody
     ) {
-        requestBody.getVisibleByAnonymousUsers();
+        
         return ResponseEntity.ok(null);
     }
 

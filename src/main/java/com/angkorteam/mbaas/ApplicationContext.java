@@ -47,7 +47,6 @@ import java.util.Map;
 public class ApplicationContext implements ServletContextListener {
 
 
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationContext.class);
 
     public static final String KEY = ApplicationContext.class.getName();
@@ -108,7 +107,7 @@ public class ApplicationContext implements ServletContextListener {
                             FieldRecord fieldRecord = context.newRecord(fieldTable);
                             fieldRecord.setTableId(tableRecord.getTableId());
                             fieldRecord.setName(columnName);
-                            fieldRecord.setNotNull(!resultSet.getBoolean(ColumnEnum.NULLABLE.getLiteral()));
+                            fieldRecord.setNullable(resultSet.getBoolean(ColumnEnum.NULLABLE.getLiteral()));
                             fieldRecord.setAutoIncrement(resultSet.getBoolean(ColumnEnum.IS_AUTOINCREMENT.getLiteral()));
                             fieldRecord.setVirtual(false);
 
@@ -151,16 +150,31 @@ public class ApplicationContext implements ServletContextListener {
                             .execute();
                 }
                 {
-                    FieldRecord extra = context.select(fieldTable.fields()).from(fieldTable)
-                            .where(fieldTable.NAME.eq("extra"))
+                    Map<Integer, FieldRecord> blobRecords = new LinkedHashMap<>();
+                    for (FieldRecord blobRecord : context.select(fieldTable.fields()).from(fieldTable)
+                            .where(fieldTable.SQL_TYPE.eq("BLOB"))
                             .and(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
                             .and(fieldTable.VIRTUAL.eq(false))
-                            .fetchOneInto(fieldTable);
-                    if (extra == null) {
+                            .fetchInto(fieldTable)) {
+                        blobRecords.put(blobRecord.getFieldId(), blobRecord);
+                    }
+                    if (blobRecords == null || blobRecords.isEmpty()) {
                         context.delete(fieldTable)
                                 .where(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
                                 .and(fieldTable.VIRTUAL.eq(true))
                                 .execute();
+                    } else {
+                        List<FieldRecord> virtualRecords = context.select(fieldTable.fields()).from(fieldTable)
+                                .where(fieldTable.VIRTUAL.eq(true))
+                                .and(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
+                                .fetchInto(fieldTable);
+                        for (FieldRecord virtualRecord : virtualRecords) {
+                            if (!blobRecords.containsKey(virtualRecord.getVirtualFieldId())) {
+                                context.delete(fieldTable)
+                                        .where(fieldTable.FIELD_ID.eq(virtualRecord.getFieldId()))
+                                        .execute();
+                            }
+                        }
                     }
                 }
                 {
