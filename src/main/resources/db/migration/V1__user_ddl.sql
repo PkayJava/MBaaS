@@ -9,6 +9,9 @@ CREATE TABLE user (
   credentials_non_expired BIT(1)       NOT NULL DEFAULT 1,
   disabled                BIT(1)       NOT NULL DEFAULT 1,
 
+  token                   VARCHAR(255),
+  token_expired_date      DATETIME,
+
   extra                   BLOB,
 
   deleted                 BIT(1)       NOT NULL DEFAULT 0,

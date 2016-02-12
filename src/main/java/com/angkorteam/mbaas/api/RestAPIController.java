@@ -7,15 +7,19 @@ import com.angkorteam.mbaas.enums.ResultEnum;
 import com.angkorteam.mbaas.enums.ScopeEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.Table;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.request.*;
 import com.angkorteam.mbaas.response.Response;
 import com.angkorteam.mbaas.service.RequestHeader;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.flywaydb.core.internal.dbsupport.*;
 import org.jasypt.encryption.StringEncryptor;
+import org.joda.time.DateTime;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
@@ -40,6 +44,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -59,6 +65,9 @@ public class RestAPIController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private DataSource dataSource;
 
     @Autowired
     private Gson gson;
@@ -540,12 +549,214 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> updateUserProfile(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody UpdateUserProfileRequest requestBody
     ) {
-        
-        return ResponseEntity.ok(null);
+        Application applicationTable = Tables.APPLICATION.as("applicationTable");
+        User userTable = Tables.USER.as("userTable");
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Table tableTable = Tables.TABLE.as("tableTable");
+        Field fieldTable = Tables.FIELD.as("fieldTable");
+        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+
+        // field duplication check
+        List<String> fields = new LinkedList<>();
+        boolean error = false;
+        if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
+                if (fields.contains(entry.getKey())) {
+                    error = true;
+                    break;
+                } else {
+                    fields.add(entry.getKey());
+                }
+            }
+        }
+        if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
+                if (fields.contains(entry.getKey())) {
+                    error = true;
+                    break;
+                } else {
+                    fields.add(entry.getKey());
+                }
+            }
+        }
+        if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
+                if (fields.contains(entry.getKey())) {
+                    error = true;
+                    break;
+                } else {
+                    fields.add(entry.getKey());
+                }
+            }
+        }
+        if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
+                if (fields.contains(entry.getKey())) {
+                    error = true;
+                    break;
+                } else {
+                    fields.add(entry.getKey());
+                }
+            }
+        }
+        if (error) {
+            return null;
+        }
+
+        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.USER.getName())).fetchOneInto(tableTable);
+
+        int fieldCount = context.selectCount().from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).and(fieldTable.NAME.in(fields)).fetchOneInto(Integer.class);
+        if (fields.size() > fieldCount) {
+            return null;
+        }
+
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        List<String> columnNames = new LinkedList<>();
+        Map<String, Object> columnValues = new LinkedHashMap<>();
+
+        Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
+        if (tableRecord != null) {
+            for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
+                fieldRecords.put(fieldRecord.getName(), fieldRecord);
+            }
+        }
+        Map<Integer, FieldRecord> blobRecords = new LinkedHashMap<>();
+        for (FieldRecord blobRecord : context.select(fieldTable.fields()).from(fieldTable)
+                .where(fieldTable.SQL_TYPE.eq("BLOB"))
+                .and(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
+                .and(fieldTable.VIRTUAL.eq(false))
+                .fetchInto(fieldTable)) {
+            blobRecords.put(blobRecord.getFieldId(), blobRecord);
+        }
+
+        Map<Integer, String> visiblity = new LinkedHashMap<>();
+        Map<String, List<String>> virtualColumns = new LinkedHashMap<>();
+
+        if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
+                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByAnonymousUser.getLiteral());
+                if (fieldRecord.getVirtual()) {
+                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
+                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                    }
+                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
+                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                } else {
+                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
+                    columnValues.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
+                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByFriend.getLiteral());
+                if (fieldRecord.getVirtual()) {
+                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
+                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                    }
+                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
+                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                } else {
+                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
+                    columnValues.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
+                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByRegisteredUser.getLiteral());
+                if (fieldRecord.getVirtual()) {
+                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
+                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                    }
+                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
+                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                } else {
+                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
+                    columnValues.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
+            for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
+                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByTheUser.getLiteral());
+                if (fieldRecord.getVirtual()) {
+                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
+                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                    }
+                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
+                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                } else {
+                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
+                    columnValues.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+
+        if (!virtualColumns.isEmpty()) {
+            for (Map.Entry<String, List<String>> entry : virtualColumns.entrySet()) {
+                if (!entry.getValue().isEmpty()) {
+                    columnNames.add(entry.getKey() + " = " + "COLUMN_CREATE(" + StringUtils.join(entry.getValue(), ",") + ")");
+                }
+            }
+            NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+            namedParameterJdbcTemplate.update("update " + Tables.USER.getName() + " set " + StringUtils.join(columnNames, ", ") + " where " + Tables.USER.USER_ID.getName() + " = " + userRecord.getUserId(), columnValues);
+        }
+
+        for (Map.Entry<Integer, String> entry : visiblity.entrySet()) {
+            Integer userId = userRecord.getUserId();
+            Integer fieldId = entry.getKey();
+            String scope = entry.getValue();
+            UserPrivacyRecord userPrivacyRecord = context.select(userPrivacyTable.fields()).from(userPrivacyTable).where(userPrivacyTable.USER_ID.eq(userId)).and(userPrivacyTable.FIELD_ID.eq(fieldId)).fetchOneInto(userPrivacyTable);
+            if (userPrivacyRecord != null) {
+                userPrivacyRecord.setScope(scope);
+                userPrivacyRecord.update();
+            } else {
+                userPrivacyRecord = context.newRecord(userPrivacyTable);
+                userPrivacyRecord.setFieldId(entry.getKey());
+                userPrivacyRecord.setUserId(userRecord.getUserId());
+                userPrivacyRecord.setScope(entry.getValue());
+                userPrivacyRecord.store();
+            }
+        }
+
+        responseBody.setResult(ResultEnum.OK.getLiteral());
+        responseBody.setHttpCode(HttpStatus.OK.value());
+
+        Map<String, Object> signupResponse = new HashMap<>();
+        String tokenId = UUID.randomUUID().toString();
+        Date dateCreated = new Date();
+
+        signupResponse.put("token", tokenId);
+        signupResponse.put("dateCreated", dateCreated);
+        signupResponse.put("login", userRecord.getLogin());
+        responseBody.setData(signupResponse);
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @RequestMapping(
@@ -553,23 +764,65 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> fetchUserProfile(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
-            @RequestBody Request request
+            @RequestBody Request requestBody
     ) {
+        Application applicationTable = Tables.APPLICATION.as("applicationTable");
+        User userTable = Tables.USER.as("userTable");
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Table tableTable = Tables.TABLE.as("tableTable");
+        Field fieldTable = Tables.FIELD.as("fieldTable");
+        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        List<String> columnNames = new LinkedList<>();
+        Map<String, Object> columnValues = new LinkedHashMap<>();
+
         return ResponseEntity.ok(null);
     }
 
     @RequestMapping(
-            method = RequestMethod.GET, path = "/users",
+            method = RequestMethod.POST, path = "/users",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> fetchUsers(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody FetchUsersRequest request
+            @RequestBody FetchUsersRequest requestBody
     ) {
+        Application applicationTable = Tables.APPLICATION.as("applicationTable");
+        User userTable = Tables.USER.as("userTable");
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Table tableTable = Tables.TABLE.as("tableTable");
+        Field fieldTable = Tables.FIELD.as("fieldTable");
+        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        List<String> columnNames = new LinkedList<>();
+        Map<String, Object> columnValues = new LinkedHashMap<>();
+
+        List<UserRecord> userRecords = context.select(userTable.fields()).from(userTable).fetchInto(userTable);
+
         return ResponseEntity.ok(null);
     }
 
@@ -578,10 +831,35 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> changePassword(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody ChangePasswordJson request
+            @RequestBody ChangePasswordJson requestBody
     ) {
+        Application applicationTable = Tables.APPLICATION.as("applicationTable");
+        User userTable = Tables.USER.as("userTable");
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Table tableTable = Tables.TABLE.as("tableTable");
+        Field fieldTable = Tables.FIELD.as("fieldTable");
+        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        List<String> columnNames = new LinkedList<>();
+        Map<String, Object> columnValues = new LinkedHashMap<>();
+
+        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+        userRecord.setPassword(requestBody.getNewPassword());
+        userRecord.update();
+
         return ResponseEntity.ok(null);
     }
 
@@ -590,23 +868,60 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> changeUsername(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody ChangeUsernameRequest request
+            @RequestBody ChangeUsernameRequest requestBody
     ) {
+        Application applicationTable = Tables.APPLICATION.as("applicationTable");
+        User userTable = Tables.USER.as("userTable");
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Table tableTable = Tables.TABLE.as("tableTable");
+        Field fieldTable = Tables.FIELD.as("fieldTable");
+        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+
+        Response responseBody = new Response();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String appVersion = configuration.getString(Constants.APP_VERSION);
+
+        responseBody.setVersion(appVersion);
+        RequestHeader.serve(responseBody, request);
+        responseBody.setMethod(request.getMethod());
+
+        List<String> columnNames = new LinkedList<>();
+        Map<String, Object> columnValues = new LinkedHashMap<>();
+
+        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+        userRecord.setLogin(requestBody.getUsername());
+        userRecord.update();
         return ResponseEntity.ok(null);
     }
 
     @RequestMapping(
-            method = RequestMethod.GET, path = "/user/{username}/password/reset",
+            method = RequestMethod.POST, path = "/user/{username}/password/reset",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> passwordReset(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
-            @RequestBody Request request
+            @RequestBody Request requestBody
     ) {
+        Application applicationTable = Tables.APPLICATION.as("applicationTable");
+        User userTable = Tables.USER.as("userTable");
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Table tableTable = Tables.TABLE.as("tableTable");
+        Field fieldTable = Tables.FIELD.as("fieldTable");
+        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
+        DateTime now = new DateTime();
+        userRecord.setToken(UUID.randomUUID().toString());
+        userRecord.setTokenExpiredDate(new Timestamp(now.plusMinutes(10).toDate().getTime()));
+
         return ResponseEntity.ok(null);
     }
 
@@ -666,10 +981,11 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> followUser(
+            HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("username") String username,
-            @RequestBody Request request
+            @RequestBody Request requestBody
     ) {
         return ResponseEntity.ok(null);
     }
@@ -762,7 +1078,10 @@ public class RestAPIController {
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("collection") String collection,
             @RequestBody Request request
-    ) {
+    ) throws SQLException {
+        // TODO :
+        DbSupport support = DbSupportFactory.createDbSupport(dataSource.getConnection(), true);
+        
         return ResponseEntity.ok(null);
     }
 
