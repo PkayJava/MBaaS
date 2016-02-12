@@ -32,9 +32,9 @@ public class JdbcFunction {
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_ADD ( ").append(blob).append(", ");
         for (Pair pair : pairs) {
-            column.append("\"").append(pair.getName()).append("\"");
+            column.append("'").append(pair.getName()).append("'");
             column.append(", ");
-            column.append("\"").append(String.valueOf(pair.getValue())).append("\"");
+            column.append("'").append(String.valueOf(pair.getValue())).append("'");
             if (pair.getValue() instanceof Date) {
                 column.append(" as DATETIME");
             } else if (pair.getValue() instanceof String) {
@@ -83,9 +83,9 @@ public class JdbcFunction {
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_CREATE ( ");
         for (Pair pair : pairs) {
-            column.append("\"").append(pair.getName()).append("\"");
+            column.append("'").append(pair.getName()).append("'");
             column.append(", ");
-            column.append("\"").append(String.valueOf(pair.getValue())).append("\"");
+            column.append("'").append(String.valueOf(pair.getValue())).append("'");
             if (pair.getValue() instanceof Date) {
                 column.append(" as DATETIME");
             } else if (pair.getValue() instanceof String) {
@@ -125,7 +125,7 @@ public class JdbcFunction {
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_DELETE ( ").append(blob);
         for (String name : names) {
-            column.append(", ").append("\"").append(name).append("\"");
+            column.append(", ").append("'").append(name).append("'");
         }
         column.append(" )");
         return column.toString();
@@ -137,7 +137,7 @@ public class JdbcFunction {
     public static String columnExists(String blob, String name) {
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_EXISTS ( ").append(blob).append(", ");
-        column.append("\"").append(name).append("\"");
+        column.append("'").append(name).append("'");
         column.append(" )");
         return column.toString();
     }
@@ -148,7 +148,7 @@ public class JdbcFunction {
     public static String columnGet(String blob, String name) {
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_GET ( ").append(blob).append(", ");
-        column.append("\"").append(name).append("\"");
+        column.append("'").append(name).append("'");
         column.append(" )");
         return column.toString();
     }
@@ -160,7 +160,7 @@ public class JdbcFunction {
 //        (dyncol_blob, column_nr as type);
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_GET ( ").append(blob).append(", ");
-        column.append("\"").append(name).append("\"");
+        column.append("'").append(name).append("'");
         if (clazz == Date.class) {
             column.append(" as DATETIME");
         } else if (clazz == String.class) {

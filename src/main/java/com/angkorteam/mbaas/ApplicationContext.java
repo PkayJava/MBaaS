@@ -89,6 +89,7 @@ public class ApplicationContext implements ServletContextListener {
                 if (tableRecord == null) {
                     tableRecord = context.newRecord(tableTable);
                     tableRecord.setName(table.getName());
+                    tableRecord.setSystem(true);
                     tableRecord.store();
                 }
                 List<FieldRecord> temporaryFieldRecords = context.select(fieldTable.fields()).from(fieldTable)
