@@ -81,6 +81,7 @@ public class CollectionController {
 
         buffer.append("CREATE TABLE `" + name + "` (");
         buffer.append("`" + primaryName + "` INT(11) AUTO_INCREMENT, ");
+        buffer.append("`optimistic` INT(11) NOT NULL DEFAULT 0, ");
         buffer.append("extra BLOB, ");
         buffer.append("PRIMARY KEY (`" + primaryName + "`)");
         buffer.append(" )");
@@ -119,6 +120,19 @@ public class CollectionController {
             fieldRecord.setExposed(false);
             fieldRecord.setJavaType(Byte.class.getName() + "[]");
             fieldRecord.setSqlType("BLOB");
+            fieldRecord.store();
+        }
+
+        {
+            FieldRecord fieldRecord = context.newRecord(fieldTable);
+            fieldRecord.setTableId(tableRecord.getTableId());
+            fieldRecord.setName("optimistic");
+            fieldRecord.setNullable(false);
+            fieldRecord.setAutoIncrement(false);
+            fieldRecord.setVirtual(false);
+            fieldRecord.setExposed(false);
+            fieldRecord.setJavaType(Integer.class.getName());
+            fieldRecord.setSqlType("INT");
             fieldRecord.store();
         }
 
