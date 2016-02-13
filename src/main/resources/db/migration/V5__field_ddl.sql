@@ -9,6 +9,7 @@ CREATE TABLE `field` (
   java_type        VARCHAR(255) NOT NULL,
   virtual          BIT(1)       NOT NULL,
   virtual_field_id INT(11),
+  system           BIT(1)       NOT NULL,
   exposed          BIT(1)       NOT NULL,
   nullable         BIT(1)       NOT NULL,
   auto_increment   BIT(1)       NOT NULL,

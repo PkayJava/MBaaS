@@ -110,6 +110,7 @@ public class ApplicationContext implements ServletContextListener {
                             fieldRecord.setName(columnName);
                             fieldRecord.setNullable(resultSet.getBoolean(ColumnEnum.NULLABLE.getLiteral()));
                             fieldRecord.setAutoIncrement(resultSet.getBoolean(ColumnEnum.IS_AUTOINCREMENT.getLiteral()));
+                            fieldRecord.setSystem(true);
                             fieldRecord.setVirtual(false);
 
                             int dataType = resultSet.getInt(ColumnEnum.DATA_TYPE.getLiteral());
@@ -243,6 +244,7 @@ public class ApplicationContext implements ServletContextListener {
         } catch (SQLException e) {
             throw new WicketRuntimeException(e);
         }
+        context.update(tableTable).set(tableTable.LOCKED, false).execute();
     }
 
     public static ApplicationContext get(ServletContext servletContext) {

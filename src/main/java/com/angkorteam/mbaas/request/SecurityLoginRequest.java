@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * Created by socheat on 2/4/16.
  */
-public class LoginRequest implements Serializable {
+public class SecurityLoginRequest implements Serializable {
 
     @Expose
     @SerializedName("username")

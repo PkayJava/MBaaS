@@ -1,11 +1,6 @@
 package com.angkorteam.mbaas.sdk;
 
-import com.angkorteam.baasbox.sdk.java.json.LoginJson;
-import com.angkorteam.baasbox.sdk.java.response.SuccessResponse;
-import com.angkorteam.mbaas.request.CreateDocumentRequest;
-import com.angkorteam.mbaas.request.LoginRequest;
-import com.angkorteam.mbaas.request.Request;
-import com.angkorteam.mbaas.request.SignupRequest;
+import com.angkorteam.mbaas.request.*;
 import com.angkorteam.mbaas.response.Response;
 import retrofit.http.Body;
 import retrofit.http.Header;
@@ -18,18 +13,18 @@ import retrofit.http.Path;
 public interface ClientSDK {
 
     @POST("/login")
-    public Response login(@Body LoginRequest request);
+    public Response login(@Body SecurityLoginRequest request);
 
     @POST("/user")
-    public Response signup(@Body SignupRequest request);
+    public Response signup(@Body SecuritySignupRequest request);
 
     @POST("/document/create/{collection}")
     public Response createDocument(@Path("collection") String collection, @Body CreateDocumentRequest request);
 
-    @POST("/admin/collection/create/{collection}")
-    public Response createCollection(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body Request request);
+    @POST("/collection/create")
+    public Response createCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionCreateRequest request);
 
-    @POST("/admin/collection/delete/{collection}")
-    public Response deleteCollection(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body Request request);
+    @POST("/collection/delete")
+    public Response deleteCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionDeleteRequest request);
 
 }

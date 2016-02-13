@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by socheat on 2/4/16.
  */
-public class SignupRequest extends Request {
+public class SecuritySignupRequest extends Request {
 
     @Expose
     @SerializedName("username")

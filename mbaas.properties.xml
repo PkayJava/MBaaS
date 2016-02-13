@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+    <entry key="app.jdbc.driver">org.mariadb.jdbc.Driver</entry>
+    <entry key="app.jdbc.url"><![CDATA[jdbc:mariadb://pkayjava.ddns.net:3306/mbaas?createDatabaseIfNotExist=true&autoReconnect=true]]></entry>
+	<entry key="app.jdbc.database">mbaas</entry>
+    <entry key="app.jdbc.username">root</entry>
+	<entry key="app.jdbc.password">ZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSX</entry>
+
+	<entry key="test.jdbc.driver">org.mariadb.jdbc.Driver</entry>
+    <entry key="test.jdbc.url"><![CDATA[jdbc:mariadb://pkayjava.ddns.net:3306/mbaas_test?createDatabaseIfNotExist=true&autoReconnect=true]]></entry>
+	<entry key="test.jdbc.database">mbaas_test</entry>
+    <entry key="test.jdbc.username">root</entry>
+	<entry key="test.jdbc.password">ZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSX</entry>
+
+	<entry key="jdbc.column.extra">extra</entry>
+	<entry key="jdbc.column.optimistic">optimistic</entry>
+	<entry key="jdbc.column.deleted">deleted</entry>
+	
+	<entry key="encryption.password"><![CDATA[7808654h4zzx05DheFMZ]]></entry>
+	<entry key="encryption.output">base64</entry>
+
+</properties>

@@ -1,11 +1,8 @@
 package com.angkorteam.mbaas.test;
 
-import com.angkorteam.baasbox.sdk.java.BaasBox;
-import com.angkorteam.baasbox.sdk.java.Client;
-import com.angkorteam.mbaas.request.LoginRequest;
+import com.angkorteam.mbaas.request.SecurityLoginRequest;
 import com.angkorteam.mbaas.request.Request;
-import com.angkorteam.mbaas.request.SignupRequest;
-import com.angkorteam.mbaas.response.Response;
+import com.angkorteam.mbaas.request.SecuritySignupRequest;
 import com.angkorteam.mbaas.sdk.ClientSDK;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,8 +11,6 @@ import retrofit.RestAdapter;
 import retrofit.client.OkClient;
 import retrofit.converter.GsonConverter;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.util.concurrent.TimeUnit;
 
@@ -47,7 +42,7 @@ public class SignupTest {
         }
 
         {
-            SignupRequest request = new SignupRequest();
+            SecuritySignupRequest request = new SecuritySignupRequest();
             request.setUsername("admin");
             request.setPassword("123123a");
             request.setAppCode("123461579");
@@ -60,7 +55,7 @@ public class SignupTest {
         }
 
         {
-            LoginRequest request = new LoginRequest();
+            SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername("admin");
             request.setPassword("123123a");
 //            System.out.println(gson.toJson(clientSDK.login(request)));

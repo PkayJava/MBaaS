@@ -24,6 +24,10 @@ public class Constants {
     public static final String TEST_JDBC_PASSWORD = "test.jdbc.password";
     public static final String TEST_JDBC_DATABASE = "test.jdbc.database";
 
+    public static final String JDBC_COLUMN_EXTRA = "jdbc.column.extra";
+    public static final String JDBC_COLUMN_OPTIMISTIC = "jdbc.column.optimistic";
+    public static final String JDBC_COLUMN_DELETED = "jdbc.column.deleted";
+
     public static final String ENCRYPTION_PASSWORD = "encryption.password";
     public static final String ENCRYPTION_OUTPUT = "encryption.output";
 
