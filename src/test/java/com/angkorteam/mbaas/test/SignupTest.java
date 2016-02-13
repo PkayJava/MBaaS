@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.test;
 import com.angkorteam.baasbox.sdk.java.BaasBox;
 import com.angkorteam.baasbox.sdk.java.Client;
 import com.angkorteam.mbaas.request.LoginRequest;
+import com.angkorteam.mbaas.request.Request;
 import com.angkorteam.mbaas.request.SignupRequest;
 import com.angkorteam.mbaas.response.Response;
 import com.angkorteam.mbaas.sdk.ClientSDK;
@@ -39,32 +40,36 @@ public class SignupTest {
         {
             RestAdapter.Builder builder = new RestAdapter.Builder();
             builder.setConverter(new GsonConverter(gson));
-            builder.setEndpoint("http://192.168.1.110:7080/api");
+            builder.setEndpoint("http://pkayjava.ddns.net:7080/api");
             builder.setClient(client);
             RestAdapter restAdapter = builder.build();
             clientSDK = restAdapter.create(ClientSDK.class);
         }
 
         {
-            LoginRequest request = new LoginRequest();
-            request.setUsername("test");
-            request.setUsername("password");
-            Response response = clientSDK.login(request);
-            System.out.println(gson.toJson(response));
-        }
-
-        {
             SignupRequest request = new SignupRequest();
-            request.setUsername("a1s");
-            request.setPassword("a1s");
+            request.setUsername("admin");
+            request.setPassword("123123a");
             request.setAppCode("123461579");
             request.setToken("iOS Token");
-            request.getVisibleByAnonymousUsers().put("test", 17);
+//            request.getVisibleByAnonymousUsers().put("test", 17);
 //            request.getVisibleByTheUser().put("test2", 17);
 //            request.getVisibleByRegisteredUsers().put("test3", 17);
 //            request.getVisibleByFriends().put("test4", 17);
-            Response response = clientSDK.signup(request);
-            System.out.println(gson.toJson(response));
+//            System.out.println(gson.toJson(clientSDK.signup(request)));
         }
+
+        {
+            LoginRequest request = new LoginRequest();
+            request.setUsername("admin");
+            request.setPassword("123123a");
+//            System.out.println(gson.toJson(clientSDK.login(request)));
+        }
+
+        String session = "4eeab6d7-db15-481e-812f-840a77486a75";
+
+        clientSDK.createCollection(session, "test11", new Request());
+
+        clientSDK.deleteCollection(session, "test11", new Request());
     }
 }
