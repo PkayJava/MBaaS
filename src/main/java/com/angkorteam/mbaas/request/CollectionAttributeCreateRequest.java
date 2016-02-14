@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by Khauv Socheat on 2/13/2016.
  */
-public class AttributeCreateRequest extends Request {
+public class CollectionAttributeCreateRequest extends Request {
 
     @Expose
     @SerializedName("collection")
@@ -15,10 +15,6 @@ public class AttributeCreateRequest extends Request {
     @Expose
     @SerializedName("name")
     private String name;
-
-    @Expose
-    @SerializedName("nullable")
-    private boolean nullable = true;
 
     @Expose
     @SerializedName("javaType")
@@ -38,14 +34,6 @@ public class AttributeCreateRequest extends Request {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isNullable() {
-        return nullable;
-    }
-
-    public void setNullable(boolean nullable) {
-        this.nullable = nullable;
     }
 
     public String getJavaType() {

@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by Khauv Socheat on 2/13/2016.
  */
-public class AttributeDeleteRequest extends Request {
+public class CollectionAttributeDeleteRequest extends Request {
 
     @Expose
     @SerializedName("collection")

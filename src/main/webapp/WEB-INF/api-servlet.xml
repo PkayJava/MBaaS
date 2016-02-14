@@ -71,8 +71,8 @@
                    entry-point-ref="authenticationEntryPoint">
         <security:custom-filter ref="authenticationFilter" position="BASIC_AUTH_FILTER"/>
         <security:csrf disabled="true"/>
-        <security:intercept-url pattern="/api/user" method="POST" access="permitAll"/>
-        <security:intercept-url pattern="/api/login" access="permitAll"/>
+        <security:intercept-url pattern="/api/security/signup" method="POST" access="permitAll"/>
+        <security:intercept-url pattern="/api/security/login" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
     </security:http>
 

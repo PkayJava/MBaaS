@@ -12,10 +12,10 @@ import retrofit.http.Path;
  */
 public interface ClientSDK {
 
-    @POST("/login")
+    @POST("/security/login")
     public Response login(@Body SecurityLoginRequest request);
 
-    @POST("/user")
+    @POST("/security/signup")
     public Response signup(@Body SecuritySignupRequest request);
 
     @POST("/document/create/{collection}")
@@ -26,5 +26,11 @@ public interface ClientSDK {
 
     @POST("/collection/delete")
     public Response deleteCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionDeleteRequest request);
+
+    @POST("/collection/attribute/create")
+    public Response createCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeCreateRequest request);
+
+    @POST("/collection/attribute/delete")
+    public Response deleteCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeDeleteRequest request);
 
 }

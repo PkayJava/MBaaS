@@ -1,8 +1,6 @@
 package com.angkorteam.mbaas.test;
 
-import com.angkorteam.mbaas.request.SecurityLoginRequest;
-import com.angkorteam.mbaas.request.Request;
-import com.angkorteam.mbaas.request.SecuritySignupRequest;
+import com.angkorteam.mbaas.request.*;
 import com.angkorteam.mbaas.sdk.ClientSDK;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -61,10 +59,31 @@ public class SignupTest {
 //            System.out.println(gson.toJson(clientSDK.login(request)));
         }
 
-        String session = "4eeab6d7-db15-481e-812f-840a77486a75";
+        String session = "c3da78c2-1c15-437b-80bc-ea0126d92183";
 
-        clientSDK.createCollection(session, "test11", new Request());
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setName("test11");
+            CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+            attribute.setJavaType(String.class.getName());
+            attribute.setNullable(true);
+            attribute.setName("testingfield");
+            request.getAttributes().add(attribute);
+            clientSDK.createCollection(session, request);
+        }
 
-        clientSDK.deleteCollection(session, "test11", new Request());
+        {
+            CollectionAttributeCreateRequest request = new CollectionAttributeCreateRequest();
+            request.setName("hello");
+            request.setCollection("test11");
+            request.setJavaType(Integer.class.getTypeName());
+            clientSDK.createCollectionAttribute(session, request);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setName("test11");
+            clientSDK.deleteCollection(session, request);
+        }
     }
 }

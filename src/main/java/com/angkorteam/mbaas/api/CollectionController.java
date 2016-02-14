@@ -7,10 +7,7 @@ import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.FieldRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.PrimaryRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.TableRecord;
-import com.angkorteam.mbaas.request.AttributeCreateRequest;
-import com.angkorteam.mbaas.request.AttributeDeleteRequest;
-import com.angkorteam.mbaas.request.CollectionCreateRequest;
-import com.angkorteam.mbaas.request.Request;
+import com.angkorteam.mbaas.request.*;
 import com.angkorteam.mbaas.response.Response;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -37,7 +34,6 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
 
 /**
  * Created by Khauv Socheat on 2/12/2016.
@@ -70,7 +66,7 @@ public class CollectionController {
     public ResponseEntity<Response> deleteAttribute(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody AttributeDeleteRequest request
+            @RequestBody CollectionAttributeDeleteRequest request
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
@@ -111,7 +107,7 @@ public class CollectionController {
     public ResponseEntity<Response> createAttribute(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody AttributeCreateRequest request
+            @RequestBody CollectionAttributeCreateRequest request
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
@@ -237,17 +233,17 @@ public class CollectionController {
                     || attribute.getJavaType().equals(Short.class.getName()) || attribute.getJavaType().equals(short.class.getName())
                     || attribute.getJavaType().equals(Long.class.getName()) || attribute.getJavaType().equals(long.class.getName())
                     ) {
-                buffer.append("`" + attribute.getName() + "` INT(11)");
+                buffer.append("`" + attribute.getName() + "` INT(11), ");
             } else if (attribute.getJavaType().equals(Double.class.getName()) || attribute.getJavaType().equals(double.class.getName())
                     || attribute.getJavaType().equals(Float.class.getName()) || attribute.getJavaType().equals(float.class.getName())) {
-                buffer.append("`" + attribute.getName() + "` DECIMAL(15,4)");
+                buffer.append("`" + attribute.getName() + "` DECIMAL(15,4), ");
             } else if (attribute.getJavaType().equals(Boolean.class.getName()) || attribute.getJavaType().equals(boolean.class.getName())) {
-                buffer.append("`" + attribute.getName() + "` BIT(1)");
+                buffer.append("`" + attribute.getName() + "` BIT(1), ");
             } else if (attribute.getJavaType().equals(Date.class.getName()) || attribute.getJavaType().equals(Time.class.getName()) || attribute.getJavaType().equals(Timestamp.class.getName())) {
-                buffer.append("`" + attribute.getName() + "` DATETIME");
+                buffer.append("`" + attribute.getName() + "` DATETIME, ");
             } else if (attribute.getJavaType().equals(Character.class.getName()) || attribute.getJavaType().equals(char.class.getName())
                     || attribute.getJavaType().equals(String.class.getName())) {
-                buffer.append("`" + attribute.getName() + "` VARCHAR(255)");
+                buffer.append("`" + attribute.getName() + "` VARCHAR(255), ");
             }
         }
         buffer.append("`delete` BIT(1) NOT NULL DEFAULT 0, ");
@@ -366,10 +362,9 @@ public class CollectionController {
     public ResponseEntity<Response> delete(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @PathVariable("collection") String collection,
-            @RequestBody Request request
+            @RequestBody CollectionDeleteRequest requestBody
     ) {
-        String name = StringUtils.lowerCase(collection);
+        String name = StringUtils.lowerCase(requestBody.getName());
 
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
