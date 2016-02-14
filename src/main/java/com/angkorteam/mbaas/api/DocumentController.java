@@ -5,7 +5,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.FieldRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.TableRecord;
-import com.angkorteam.mbaas.request.CreateDocumentRequest;
+import com.angkorteam.mbaas.request.DocumentCreateRequest;
 import com.angkorteam.mbaas.request.ModifyDocumentRequest;
 import com.angkorteam.mbaas.request.Request;
 import com.angkorteam.mbaas.request.RetrieveDocumentByQueryRequest;
@@ -107,16 +107,15 @@ public class DocumentController {
     }
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/create/{collection}",
+            method = RequestMethod.POST, path = "/create",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> create(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @PathVariable("collection") String collection,
-            @RequestBody CreateDocumentRequest request
+            @RequestBody DocumentCreateRequest requestBody
     ) {
-        String name = StringUtils.lowerCase(collection);
+        String name = StringUtils.lowerCase(requestBody.getCollection());
 
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
@@ -136,7 +135,7 @@ public class DocumentController {
             fieldRecords.put(fieldRecord.getName(), fieldRecord);
         }
 
-        for (Map.Entry<String, Object> entry : request.getDocument().entrySet()) {
+        for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
             if (!fieldRecords.containsKey(entry.getKey())) {
                 return null;
             }
@@ -157,7 +156,7 @@ public class DocumentController {
 
         Map<String, Object> columnValues = new LinkedHashMap<>();
 
-        for (Map.Entry<String, Object> entry : request.getDocument().entrySet()) {
+        for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
             FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
             if (fieldRecord.getVirtual()) {
                 FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
