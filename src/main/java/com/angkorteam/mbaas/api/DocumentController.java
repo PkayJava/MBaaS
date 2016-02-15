@@ -567,17 +567,20 @@ public class DocumentController {
             return null;
         }
 
-        DocumentUserPrivacyRecord documentUserPrivacyRecord = context.newRecord(documentUserPrivacyTable);
-        documentUserPrivacyRecord.setDocumentId(requestBody.getDocumentId());
-        documentUserPrivacyRecord.setTableId(tableRecord.getTableId());
+        DocumentUserPrivacyRecord documentUserPrivacyRecord = context.select(documentUserPrivacyTable.fields())
+                .from(documentUserPrivacyTable)
+                .where(documentUserPrivacyTable.TABLE_ID.eq(tableRecord.getTableId()))
+                .and(documentUserPrivacyTable.USER_ID.eq(userRecord.getUserId()))
+                .and(documentUserPrivacyTable.DOCUMENT_ID.eq(requestBody.getDocumentId()))
+                .fetchOneInto(documentUserPrivacyTable);
+
         int permission = 0;
         for (Integer action : requestBody.getActions()) {
             permission = permission | action;
         }
-        documentUserPrivacyRecord.setPermisson(permission);
-        documentUserPrivacyRecord.setUserId(userRecord.getUserId());
+        documentUserPrivacyRecord.setPermisson(documentUserPrivacyRecord.getPermisson() - permission);
 
-        documentUserPrivacyRecord.store();
+        documentUserPrivacyRecord.update();
 
         return ResponseEntity.ok(null);
     }
@@ -593,6 +596,35 @@ public class DocumentController {
             @RequestBody DocumentPermissionRoleNameRequest requestBody
     ) {
         LOGGER.info("/document/permission/revoke/role appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
+
+        Table tableTable = Tables.TABLE.as("tableTable");
+        Role roleTable = Tables.ROLE.as("roleTable");
+        DocumentRolePrivacy documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
+
+        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
+        if (tableRecord == null) {
+            return null;
+        }
+
+        RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(requestBody.getRoleName())).fetchOneInto(roleTable);
+        if (roleRecord == null) {
+            return null;
+        }
+
+        DocumentRolePrivacyRecord documentRolePrivacyRecord = context.select(documentRolePrivacyTable.fields())
+                .from(documentRolePrivacyTable)
+                .where(documentRolePrivacyTable.TABLE_ID.eq(tableRecord.getTableId()))
+                .and(documentRolePrivacyTable.ROLE_ID.eq(roleRecord.getRoleId()))
+                .and(documentRolePrivacyTable.DOCUMENT_ID.eq(requestBody.getDocumentId()))
+                .fetchOneInto(documentRolePrivacyTable);
+
+        int permission = 0;
+        for (Integer action : requestBody.getActions()) {
+            permission = permission | action;
+        }
+        documentRolePrivacyRecord.setPermisson(documentRolePrivacyRecord.getPermisson() - permission);
+
+        documentRolePrivacyRecord.update();
 
         return ResponseEntity.ok(null);
     }
