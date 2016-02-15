@@ -248,7 +248,9 @@ public class CollectionController {
                 buffer.append("`" + attribute.getName() + "` VARCHAR(255), ");
             }
         }
+        buffer.append("`owner_user_id` INT(11) NOT NULL, ");
         buffer.append("`delete` BIT(1) NOT NULL DEFAULT 0, ");
+        buffer.append("INDEX(owner_user_id), ");
         buffer.append("PRIMARY KEY (`" + primaryName + "`)");
         buffer.append(" )");
         jdbcTemplate.execute(buffer.toString());
@@ -317,6 +319,19 @@ public class CollectionController {
             fieldRecord.setExposed(false);
             fieldRecord.setJavaType(Boolean.class.getName());
             fieldRecord.setSqlType("BIT");
+            fieldRecord.store();
+        }
+        {
+            FieldRecord fieldRecord = context.newRecord(fieldTable);
+            fieldRecord.setTableId(tableRecord.getTableId());
+            fieldRecord.setName(configuration.getString(Constants.JDBC_OWNER_USER_ID));
+            fieldRecord.setNullable(false);
+            fieldRecord.setAutoIncrement(false);
+            fieldRecord.setVirtual(false);
+            fieldRecord.setSystem(true);
+            fieldRecord.setExposed(false);
+            fieldRecord.setJavaType(Integer.class.getName());
+            fieldRecord.setSqlType("INT");
             fieldRecord.store();
         }
 

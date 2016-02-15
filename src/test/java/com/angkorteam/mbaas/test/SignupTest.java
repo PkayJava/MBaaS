@@ -87,10 +87,9 @@ public class SignupTest {
         }
         {
             DocumentCreateRequest request = new DocumentCreateRequest();
-            request.setCollection("test11");
             request.getDocument().put("testingfield", "test1");
             request.getDocument().put("hello1", "abc");
-            clientSDK.createDocument(session, request);
+            clientSDK.createDocument(session, "test11", request);
         }
     }
 }

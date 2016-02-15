@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.response.Response;
 import retrofit.http.Body;
 import retrofit.http.Header;
 import retrofit.http.POST;
+import retrofit.http.Path;
 
 /**
  * Created by Khauv Socheat on 2/10/2016.
@@ -18,7 +19,7 @@ public interface ClientSDK {
     public Response signup(@Body SecuritySignupRequest request);
 
     @POST("/document/create")
-    public Response createDocument(@Header("X-MBAAS-SESSION") String session, @Body DocumentCreateRequest request);
+    public Response createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
 
     @POST("/collection/create")
     public Response createCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionCreateRequest request);
