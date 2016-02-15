@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.api;
 
 import com.angkorteam.mbaas.Constants;
 import com.angkorteam.mbaas.enums.ActionEnum;
+import com.angkorteam.mbaas.factory.PermissionFactoryBean;
 import com.angkorteam.mbaas.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
@@ -13,6 +14,7 @@ import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.jasypt.encryption.StringEncryptor;
 import org.jooq.DSLContext;
+import org.jooq.impl.DefaultDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,9 @@ public class DocumentController {
     private DataSource dataSource;
 
     @Autowired
+    private PermissionFactoryBean.Permission permission;
+
+    @Autowired
     private Gson gson;
 
     @RequestMapping(
@@ -69,7 +74,6 @@ public class DocumentController {
             @RequestBody DocumentQueryRequest requestBody
     ) {
         LOGGER.info("/document/query/{} appCode=>{} session=>{} body=>{}", collection, appCode, session, gson.toJson(requestBody));
-        TablePrivacy tablePrivacyTable = Tables.TABLE_PRIVACY.as("tablePrivacyTable");
         User userTable = Tables.USER.as("userTable");
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
@@ -90,12 +94,7 @@ public class DocumentController {
             return null;
         }
 
-        TablePrivacyRecord tablePrivacyRecord = context.select(tablePrivacyTable.fields()).from(tablePrivacyTable).where(tablePrivacyTable.USER_ID.eq(userRecord.getUserId())).and(tablePrivacyTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(tablePrivacyTable);
-        if (tablePrivacyRecord == null) {
-            return null;
-        }
-
-        if ((tablePrivacyRecord.getPermisson() & ActionEnum.Read.getLiteral()) != ActionEnum.Read.getLiteral()) {
+        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Read.getLiteral())) {
             return null;
         }
 
@@ -138,7 +137,6 @@ public class DocumentController {
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-        TablePrivacy tablePrivacyTable = Tables.TABLE_PRIVACY.as("tablePrivacyTable");
 
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
         if (tokenRecord == null) {
@@ -155,12 +153,7 @@ public class DocumentController {
             return null;
         }
 
-        TablePrivacyRecord tablePrivacyRecord = context.select(tablePrivacyTable.fields()).from(tablePrivacyTable).where(tablePrivacyTable.USER_ID.eq(userRecord.getUserId())).and(tablePrivacyTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(tablePrivacyTable);
-        if (tablePrivacyRecord == null) {
-            return null;
-        }
-
-        if ((tablePrivacyRecord.getPermisson() & ActionEnum.Read.getLiteral()) != ActionEnum.Read.getLiteral()) {
+        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Read.getLiteral())) {
             return null;
         }
 
@@ -205,7 +198,6 @@ public class DocumentController {
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-        TablePrivacy tablePrivacyTable = Tables.TABLE_PRIVACY.as("tablePrivacyTable");
 
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
         if (tokenRecord == null) {
@@ -222,12 +214,7 @@ public class DocumentController {
             return null;
         }
 
-        TablePrivacyRecord tablePrivacyRecord = context.select(tablePrivacyTable.fields()).from(tablePrivacyTable).where(tablePrivacyTable.USER_ID.eq(userRecord.getUserId())).and(tablePrivacyTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(tablePrivacyTable);
-        if (tablePrivacyRecord == null) {
-            return null;
-        }
-
-        if ((tablePrivacyRecord.getPermisson() & ActionEnum.Create.getLiteral()) != ActionEnum.Create.getLiteral()) {
+        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Create.getLiteral())) {
             return null;
         }
 
@@ -313,7 +300,6 @@ public class DocumentController {
         User userTable = Tables.USER.as("userTable");
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
-        TablePrivacy tablePrivacyTable = Tables.TABLE_PRIVACY.as("tablePrivacyTable");
 
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
         if (tokenRecord == null) {
@@ -330,12 +316,7 @@ public class DocumentController {
             return null;
         }
 
-        TablePrivacyRecord tablePrivacyRecord = context.select(tablePrivacyTable.fields()).from(tablePrivacyTable).where(tablePrivacyTable.USER_ID.eq(userRecord.getUserId())).and(tablePrivacyTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(tablePrivacyTable);
-        if (tablePrivacyRecord == null) {
-            return null;
-        }
-
-        if ((tablePrivacyRecord.getPermisson() & ActionEnum.Read.getLiteral()) != ActionEnum.Read.getLiteral()) {
+        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Read.getLiteral())) {
             return null;
         }
 
@@ -362,7 +343,6 @@ public class DocumentController {
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-        TablePrivacy tablePrivacyTable = Tables.TABLE_PRIVACY.as("tablePrivacyTable");
 
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
         if (tokenRecord == null) {
@@ -379,12 +359,7 @@ public class DocumentController {
             return null;
         }
 
-        TablePrivacyRecord tablePrivacyRecord = context.select(tablePrivacyTable.fields()).from(tablePrivacyTable).where(tablePrivacyTable.USER_ID.eq(userRecord.getUserId())).and(tablePrivacyTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(tablePrivacyTable);
-        if (tablePrivacyRecord == null) {
-            return null;
-        }
-
-        if ((tablePrivacyRecord.getPermisson() & ActionEnum.Modify.getLiteral()) != ActionEnum.Modify.getLiteral()) {
+        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Modify.getLiteral())) {
             return null;
         }
 
@@ -448,7 +423,6 @@ public class DocumentController {
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-        TablePrivacy tablePrivacyTable = Tables.TABLE_PRIVACY.as("tablePrivacyTable");
 
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
         if (tokenRecord == null) {
@@ -465,12 +439,7 @@ public class DocumentController {
             return null;
         }
 
-        TablePrivacyRecord tablePrivacyRecord = context.select(tablePrivacyTable.fields()).from(tablePrivacyTable).where(tablePrivacyTable.USER_ID.eq(userRecord.getUserId())).and(tablePrivacyTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(tablePrivacyTable);
-        if (tablePrivacyRecord == null) {
-            return null;
-        }
-
-        if ((tablePrivacyRecord.getPermisson() & ActionEnum.Delete.getLiteral()) != ActionEnum.Delete.getLiteral()) {
+        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Delete.getLiteral())) {
             return null;
         }
 
@@ -504,20 +473,36 @@ public class DocumentController {
         LOGGER.info("/document/permission/grant/user appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
 
         Table tableTable = Tables.TABLE.as("tableTable");
+        User userTable = Tables.USER.as("userTable");
+        DocumentUserPrivacy documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
 
-//        TableRecord tableRecord = context.select()
+        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
+        if (tableRecord == null) {
+            return null;
+        }
 
-//        DocumentPrivacyRecord documentPrivacyRecord = null;
-//        documentPrivacyRecord.setDocumentId(requestBody.getId());
-//        documentPrivacyRecord.setTableId(requestBody.getCollection());
-//        documentPrivacyRecord.setPermisson(requestBody.getAction());
-//        documentPrivacyRecord.setUserId(requestBody.getUsername());
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(userTable);
+        if (userRecord == null) {
+            return null;
+        }
+
+        DocumentUserPrivacyRecord documentUserPrivacyRecord = context.newRecord(documentUserPrivacyTable);
+        documentUserPrivacyRecord.setDocumentId(requestBody.getDocumentId());
+        documentUserPrivacyRecord.setTableId(tableRecord.getTableId());
+        int permission = 0;
+        for (Integer action : requestBody.getActions()) {
+            permission = permission | action;
+        }
+        documentUserPrivacyRecord.setPermisson(permission);
+        documentUserPrivacyRecord.setUserId(userRecord.getUserId());
+
+        documentUserPrivacyRecord.store();
 
         return ResponseEntity.ok(null);
     }
 
     @RequestMapping(
-            method = RequestMethod.PUT, path = "/permission/grant/role",
+            method = RequestMethod.POST, path = "/permission/grant/role",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> grantPermissionRoleName(
@@ -526,6 +511,32 @@ public class DocumentController {
             @RequestBody DocumentPermissionRoleNameRequest requestBody
     ) {
         LOGGER.info("/document/permission/grant/role appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
+
+        Table tableTable = Tables.TABLE.as("tableTable");
+        Role roleTable = Tables.ROLE.as("roleTable");
+        DocumentRolePrivacy documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
+
+        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
+        if (tableRecord == null) {
+            return null;
+        }
+
+        RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(requestBody.getRoleName())).fetchOneInto(roleTable);
+        if (roleRecord == null) {
+            return null;
+        }
+
+        DocumentRolePrivacyRecord documentRolePrivacyRecord = context.newRecord(documentRolePrivacyTable);
+        documentRolePrivacyRecord.setDocumentId(requestBody.getDocumentId());
+        documentRolePrivacyRecord.setTableId(tableRecord.getTableId());
+        int permission = 0;
+        for (Integer action : requestBody.getActions()) {
+            permission = permission | action;
+        }
+        documentRolePrivacyRecord.setPermisson(permission);
+        documentRolePrivacyRecord.setRoleId(roleRecord.getRoleId());
+
+        documentRolePrivacyRecord.store();
 
         return ResponseEntity.ok(null);
     }
@@ -541,6 +552,32 @@ public class DocumentController {
             @RequestBody DocumentPermissionUsernameRequest requestBody
     ) {
         LOGGER.info("/document/permission/revoke/user appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
+
+        Table tableTable = Tables.TABLE.as("tableTable");
+        User userTable = Tables.USER.as("userTable");
+        DocumentUserPrivacy documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
+
+        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
+        if (tableRecord == null) {
+            return null;
+        }
+
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(userTable);
+        if (userRecord == null) {
+            return null;
+        }
+
+        DocumentUserPrivacyRecord documentUserPrivacyRecord = context.newRecord(documentUserPrivacyTable);
+        documentUserPrivacyRecord.setDocumentId(requestBody.getDocumentId());
+        documentUserPrivacyRecord.setTableId(tableRecord.getTableId());
+        int permission = 0;
+        for (Integer action : requestBody.getActions()) {
+            permission = permission | action;
+        }
+        documentUserPrivacyRecord.setPermisson(permission);
+        documentUserPrivacyRecord.setUserId(userRecord.getUserId());
+
+        documentUserPrivacyRecord.store();
 
         return ResponseEntity.ok(null);
     }

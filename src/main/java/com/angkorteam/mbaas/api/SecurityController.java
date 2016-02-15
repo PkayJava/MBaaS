@@ -73,14 +73,15 @@ public class SecurityController {
             @RequestBody SecuritySignupRequest requestBody
     ) {
         LOGGER.info("/security/signup body=>{}", gson.toJson(requestBody));
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+
         User userTable = Tables.USER.as("userTable");
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
+        Role roleTable = Tables.ROLE.as("roleTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
-
-        List<String> tables = Arrays.asList("");
 
         // field duplication check
         List<String> fields = new LinkedList<>();
@@ -136,21 +137,22 @@ public class SecurityController {
             return null;
         }
 
+        RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_REGISTERED))).fetchOneInto(roleTable);
+
         Response responseBody = new Response();
 
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
         RequestHeader.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
-        String appCode = requestBody.getAppCode();
         String login = requestBody.getUsername();
         String password = requestBody.getPassword();
 
         UserRecord userRecord = context.newRecord(userTable);
         userRecord.setDeleted(false);
+        userRecord.setRoleId(roleRecord.getRoleId());
         userRecord.setAccountNonExpired(true);
         userRecord.setCredentialsNonExpired(true);
         userRecord.setAccountNonLocked(true);
@@ -163,11 +165,10 @@ public class SecurityController {
         Map<String, Object> columnValues = new LinkedHashMap<>();
 
         Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-        if (tableRecord != null) {
-            for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-                fieldRecords.put(fieldRecord.getName(), fieldRecord);
-            }
+        for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
+            fieldRecords.put(fieldRecord.getName(), fieldRecord);
         }
+
         Map<Integer, FieldRecord> blobRecords = new LinkedHashMap<>();
         for (FieldRecord blobRecord : context.select(fieldTable.fields()).from(fieldTable)
                 .where(fieldTable.SQL_TYPE.eq("BLOB"))

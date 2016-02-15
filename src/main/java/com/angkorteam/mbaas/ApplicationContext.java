@@ -3,14 +3,10 @@ package com.angkorteam.mbaas;
 import com.angkorteam.mbaas.enums.ColumnEnum;
 import com.angkorteam.mbaas.enums.IndexInfoEnum;
 import com.angkorteam.mbaas.enums.PrimaryKeyEnum;
+import com.angkorteam.mbaas.factory.PermissionFactoryBean;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.Field;
-import com.angkorteam.mbaas.model.entity.tables.Index;
-import com.angkorteam.mbaas.model.entity.tables.Primary;
-import com.angkorteam.mbaas.model.entity.tables.records.FieldRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.IndexRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.PrimaryRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.TableRecord;
+import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.records.*;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.wicket.WicketRuntimeException;
@@ -30,6 +26,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -55,7 +52,7 @@ public class ApplicationContext implements ServletContextListener {
 
     private Configuration configuration;
 
-    private DSLContext dslContext;
+    private DSLContext context;
 
     private StringEncryptor stringEncryptor;
 
@@ -67,13 +64,107 @@ public class ApplicationContext implements ServletContextListener {
         this.dataSource = initDataSource();
         this.flyway = initFlyway(dataSource);
         this.configuration = initConfiguration(dataSource);
-        this.dslContext = initDSLContext(configuration);
+        this.context = initDSLContext(configuration);
         this.stringEncryptor = initStringEncryptor();
-        initMeta(dslContext, dataSource);
+        initDDL(context, dataSource);
+        initRole(context);
+        initUser(context);
         servletContext.setAttribute(KEY, this);
     }
 
-    protected void initMeta(DSLContext context, DataSource dataSource) {
+    protected void initUser(DSLContext context) {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        User userTable = Tables.USER.as("userTable");
+        Role roleTable = Tables.ROLE.as("roleTable");
+
+        UserRecord adminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
+        if (adminRecord == null) {
+            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_ADMIN_ROLE)))).fetchOneInto(roleTable);
+            adminRecord = context.newRecord(userTable);
+            adminRecord.setDeleted(false);
+            adminRecord.setAccountNonExpired(true);
+            adminRecord.setAccountNonLocked(true);
+            adminRecord.setCredentialsNonExpired(true);
+            adminRecord.setDisabled(false);
+            adminRecord.setLogin(configuration.getString(Constants.USER_ADMIN));
+            adminRecord.setPassword(configuration.getString(Constants.USER_ADMIN_PASSWORD));
+            adminRecord.setRoleId(roleRecord.getRoleId());
+            adminRecord.store();
+        }
+
+        UserRecord mbaasRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_MBAAS))).fetchOneInto(userTable);
+        if (mbaasRecord == null) {
+            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_MBAAS_ROLE)))).fetchOneInto(roleTable);
+            mbaasRecord = context.newRecord(userTable);
+            mbaasRecord.setDeleted(false);
+            mbaasRecord.setAccountNonExpired(true);
+            mbaasRecord.setAccountNonLocked(true);
+            mbaasRecord.setCredentialsNonExpired(true);
+            mbaasRecord.setDisabled(false);
+            mbaasRecord.setLogin(configuration.getString(Constants.USER_MBAAS));
+            mbaasRecord.setPassword(configuration.getString(Constants.USER_MBAAS_PASSWORD));
+            mbaasRecord.setRoleId(roleRecord.getRoleId());
+            mbaasRecord.store();
+        }
+
+        UserRecord internalAdminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_INTERNAL_ADMIN))).fetchOneInto(userTable);
+        if (internalAdminRecord == null) {
+            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_INTERNAL_ADMIN_ROLE)))).fetchOneInto(roleTable);
+            internalAdminRecord = context.newRecord(userTable);
+            internalAdminRecord.setDeleted(false);
+            internalAdminRecord.setAccountNonExpired(true);
+            internalAdminRecord.setAccountNonLocked(true);
+            internalAdminRecord.setCredentialsNonExpired(true);
+            internalAdminRecord.setDisabled(false);
+            internalAdminRecord.setLogin(configuration.getString(Constants.USER_INTERNAL_ADMIN));
+            internalAdminRecord.setPassword(configuration.getString(Constants.USER_INTERNAL_ADMIN_PASSWORD));
+            internalAdminRecord.setRoleId(roleRecord.getRoleId());
+            internalAdminRecord.store();
+        }
+    }
+
+    protected void initRole(DSLContext context) {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        Role roleTable = Tables.ROLE.as("roleTable");
+
+        RoleRecord administratorRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_ADMINISTRATOR))).fetchOneInto(roleTable);
+        if (administratorRecord == null) {
+            administratorRecord = context.newRecord(roleTable);
+            administratorRecord.setName(configuration.getString(Constants.ROLE_ADMINISTRATOR));
+            administratorRecord.setDescription(configuration.getString(Constants.ROLE_ADMINISTRATOR_DESCRIPTION));
+            administratorRecord.setDeleted(false);
+            administratorRecord.store();
+        }
+
+        RoleRecord backofficeRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_BACKOFFICE))).fetchOneInto(roleTable);
+        if (backofficeRecord == null) {
+            backofficeRecord = context.newRecord(roleTable);
+            backofficeRecord.setName(configuration.getString(Constants.ROLE_BACKOFFICE));
+            backofficeRecord.setDescription(configuration.getString(Constants.ROLE_BACKOFFICE_DESCRIPTION));
+            backofficeRecord.setDeleted(false);
+            backofficeRecord.store();
+        }
+
+        RoleRecord registeredRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_REGISTERED))).fetchOneInto(roleTable);
+        if (registeredRecord == null) {
+            registeredRecord = context.newRecord(roleTable);
+            registeredRecord.setName(configuration.getString(Constants.ROLE_REGISTERED));
+            registeredRecord.setDescription(configuration.getString(Constants.ROLE_REGISTERED_DESCRIPTION));
+            registeredRecord.setDeleted(false);
+            registeredRecord.store();
+        }
+
+        RoleRecord anonymousRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_ANONYMOUS))).fetchOneInto(roleTable);
+        if (anonymousRecord == null) {
+            anonymousRecord = context.newRecord(roleTable);
+            anonymousRecord.setName(configuration.getString(Constants.ROLE_ANONYMOUS));
+            anonymousRecord.setDescription(configuration.getString(Constants.ROLE_ANONYMOUS_DESCRIPTION));
+            anonymousRecord.setDeleted(false);
+            anonymousRecord.store();
+        }
+    }
+
+    protected void initDDL(DSLContext context, DataSource dataSource) {
         com.angkorteam.mbaas.model.entity.tables.Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
@@ -346,7 +437,7 @@ public class ApplicationContext implements ServletContextListener {
     }
 
     public final DSLContext getDSLContext() {
-        return dslContext;
+        return context;
     }
 
     public final StringEncryptor getStringEncryptor() {

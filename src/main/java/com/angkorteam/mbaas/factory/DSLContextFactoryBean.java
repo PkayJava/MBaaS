@@ -4,10 +4,8 @@ import com.angkorteam.mbaas.ApplicationContext;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 /**
@@ -15,13 +13,13 @@ import javax.servlet.ServletContext;
  */
 public class DSLContextFactoryBean implements FactoryBean<DSLContext>, InitializingBean, ServletContextAware {
 
-    private DSLContext dslContext;
+    private DSLContext context;
 
     private ServletContext servletContext;
 
     @Override
     public DSLContext getObject() throws Exception {
-        return this.dslContext;
+        return this.context;
     }
 
     @Override
@@ -37,7 +35,7 @@ public class DSLContextFactoryBean implements FactoryBean<DSLContext>, Initializ
     @Override
     public void afterPropertiesSet() throws Exception {
         ApplicationContext applicationContext = ApplicationContext.get(this.servletContext);
-        this.dslContext = applicationContext.getDSLContext();
+        this.context = applicationContext.getDSLContext();
     }
 
     @Override

@@ -50,6 +50,12 @@
 
     <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.PlaintextPasswordEncoder"/>
 
+    <bean id="permission" class="com.angkorteam.mbaas.factory.PermissionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="context" ref="context"/>
+        <property name="jdbcTemplate" ref="jdbcTemplate"/>
+    </bean>
+
     <bean id="detailsService" class="com.angkorteam.mbaas.factory.UserDetailsServiceFactoryBean">
         <property name="context" ref="context"/>
     </bean>

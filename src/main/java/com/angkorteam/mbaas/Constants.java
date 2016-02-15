@@ -29,6 +29,25 @@ public class Constants {
     public static final String JDBC_COLUMN_DELETED = "jdbc.column.deleted";
     public static final String JDBC_OWNER_USER_ID = "jdbc.owner.user.id";
 
+    public static final String ROLE_ADMINISTRATOR = "role.administrator";
+    public static final String ROLE_ADMINISTRATOR_DESCRIPTION = "role.administrator.description";
+    public static final String ROLE_BACKOFFICE = "role.backoffice";
+    public static final String ROLE_BACKOFFICE_DESCRIPTION = "role.backoffice.description";
+    public static final String ROLE_REGISTERED = "role.registered";
+    public static final String ROLE_REGISTERED_DESCRIPTION = "role.registered.description";
+    public static final String ROLE_ANONYMOUS = "role.anonymous";
+    public static final String ROLE_ANONYMOUS_DESCRIPTION = "role.anonymous.description";
+
+    public static final String USER_ADMIN = "user.admin";
+    public static final String USER_ADMIN_ROLE = "user.admin.role";
+    public static final String USER_ADMIN_PASSWORD = "user.admin.password";
+    public static final String USER_MBAAS = "user.mbaas";
+    public static final String USER_MBAAS_ROLE = "user.mbaas.role";
+    public static final String USER_MBAAS_PASSWORD = "user.mbaas.password";
+    public static final String USER_INTERNAL_ADMIN = "user.internal_admin";
+    public static final String USER_INTERNAL_ADMIN_ROLE = "user.internal_admin.role";
+    public static final String USER_INTERNAL_ADMIN_PASSWORD = "user.internal_admin.password";
+
     public static final String ENCRYPTION_PASSWORD = "encryption.password";
     public static final String ENCRYPTION_OUTPUT = "encryption.output";
 

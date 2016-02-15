@@ -3,6 +3,9 @@ package com.angkorteam.mbaas.request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Created by Khauv Socheat on 2/15/2016.
  */
@@ -13,12 +16,12 @@ public class DocumentPermissionRoleNameRequest extends Request {
     private String collection;
 
     @Expose
-    @SerializedName("id")
-    private Integer id;
+    @SerializedName("documentId")
+    private Integer documentId;
 
     @Expose
-    @SerializedName("action")
-    private Integer action;
+    @SerializedName("actions")
+    private List<Integer> actions = new LinkedList<>();
 
     @Expose
     @SerializedName("roleName")
@@ -32,20 +35,20 @@ public class DocumentPermissionRoleNameRequest extends Request {
         this.collection = collection;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getDocumentId() {
+        return documentId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setDocumentId(Integer documentId) {
+        this.documentId = documentId;
     }
 
-    public Integer getAction() {
-        return action;
+    public List<Integer> getActions() {
+        return actions;
     }
 
-    public void setAction(Integer action) {
-        this.action = action;
+    public void setActions(List<Integer> actions) {
+        this.actions = actions;
     }
 
     public String getRoleName() {

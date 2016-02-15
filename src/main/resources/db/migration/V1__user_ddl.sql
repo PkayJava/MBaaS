@@ -4,6 +4,8 @@ CREATE TABLE user (
   login                   VARCHAR(255) NOT NULL,
   password                VARCHAR(255) NOT NULL,
 
+  role_id                 INT(11)      NOT NULL,
+
   account_non_expired     BIT(1)       NOT NULL DEFAULT 1,
   account_non_locked      BIT(1)       NOT NULL DEFAULT 1,
   credentials_non_expired BIT(1)       NOT NULL DEFAULT 1,
