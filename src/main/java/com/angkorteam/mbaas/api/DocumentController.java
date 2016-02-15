@@ -543,7 +543,7 @@ public class DocumentController {
 
 
     @RequestMapping(
-            method = RequestMethod.DELETE, path = "/permission/revoke/user",
+            method = RequestMethod.POST, path = "/permission/revoke/user",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> revokePermissionUsername(
@@ -587,7 +587,7 @@ public class DocumentController {
 
 
     @RequestMapping(
-            method = RequestMethod.DELETE, path = "/permission/revoke/role",
+            method = RequestMethod.POST, path = "/permission/revoke/role",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> revokePermissiontRoleName(
