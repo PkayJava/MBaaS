@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.api;
 import com.angkorteam.mbaas.Constants;
 import com.angkorteam.mbaas.enums.ResultEnum;
 import com.angkorteam.mbaas.enums.ScopeEnum;
+import com.angkorteam.mbaas.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.sql.Timestamp;
 import java.util.*;
@@ -70,6 +72,7 @@ public class SecurityController {
             HttpServletRequest request,
             @RequestBody SecuritySignupRequest requestBody
     ) {
+        LOGGER.info("/security/signup body=>{}", gson.toJson(requestBody));
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
         Token tokenTable = Tables.TOKEN.as("tokenTable");
@@ -175,7 +178,7 @@ public class SecurityController {
         }
 
         Map<Integer, String> visiblity = new LinkedHashMap<>();
-        Map<String, List<String>> virtualColumns = new LinkedHashMap<>();
+        Map<String, Map<String, Serializable>> virtualColumns = new LinkedHashMap<>();
 
         if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
@@ -184,10 +187,9 @@ public class SecurityController {
                 if (fieldRecord.getVirtual()) {
                     FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
-                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                        virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
-                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
-                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), (Serializable) entry.getValue());
                 } else {
                     columnNames.add(entry.getKey() + " = :" + entry.getKey());
                     columnValues.put(entry.getKey(), entry.getValue());
@@ -201,10 +203,9 @@ public class SecurityController {
                 if (fieldRecord.getVirtual()) {
                     FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
-                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                        virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
-                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
-                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), (Serializable) entry.getValue());
                 } else {
                     columnNames.add(entry.getKey() + " = :" + entry.getKey());
                     columnValues.put(entry.getKey(), entry.getValue());
@@ -218,10 +219,9 @@ public class SecurityController {
                 if (fieldRecord.getVirtual()) {
                     FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
-                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                        virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
-                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
-                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), (Serializable) entry.getValue());
                 } else {
                     columnNames.add(entry.getKey() + " = :" + entry.getKey());
                     columnValues.put(entry.getKey(), entry.getValue());
@@ -235,10 +235,9 @@ public class SecurityController {
                 if (fieldRecord.getVirtual()) {
                     FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
-                        virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
+                        virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
-                    virtualColumns.get(physicalRecord.getName()).add("'" + entry.getKey() + "'");
-                    virtualColumns.get(physicalRecord.getName()).add("'" + String.valueOf(entry.getValue()) + "'");
+                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), (Serializable) entry.getValue());
                 } else {
                     columnNames.add(entry.getKey() + " = :" + entry.getKey());
                     columnValues.put(entry.getKey(), entry.getValue());
@@ -255,9 +254,9 @@ public class SecurityController {
         }
 
         if (!virtualColumns.isEmpty()) {
-            for (Map.Entry<String, List<String>> entry : virtualColumns.entrySet()) {
+            for (Map.Entry<String, Map<String, Serializable>> entry : virtualColumns.entrySet()) {
                 if (!entry.getValue().isEmpty()) {
-                    columnNames.add(entry.getKey() + " = " + "COLUMN_CREATE(" + StringUtils.join(entry.getValue(), ",") + ")");
+                    columnNames.add(entry.getKey() + " = " + JdbcFunction.columnCreate(entry.getValue()));
                 }
             }
             NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
@@ -294,7 +293,7 @@ public class SecurityController {
             HttpServletRequest request,
             @RequestBody SecurityLoginRequest requestBody
     ) {
-        LOGGER.info("/login {}", gson.toJson(requestBody));
+        LOGGER.info("/security/login body=>{}", gson.toJson(requestBody));
         Response responseBody = new Response();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -350,6 +349,7 @@ public class SecurityController {
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody Request requestBody
     ) {
+        LOGGER.info("/security/logout appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
         Response responseBody = new Response();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -381,6 +381,7 @@ public class SecurityController {
             @PathVariable("token") String token,
             @RequestBody Request requestBody
     ) {
+        LOGGER.info("/security/logout/{} appCode=>{} session=> body=>{}", token, appCode, session, gson.toJson(requestBody));
         Response responseBody = new Response();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();

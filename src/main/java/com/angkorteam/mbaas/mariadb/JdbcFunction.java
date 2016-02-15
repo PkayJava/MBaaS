@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Khauv Socheat on 2/10/2016.
@@ -14,38 +15,24 @@ public class JdbcFunction {
     /**
      * Adds or updates dynamic columns
      */
-    public static String columnAdd(String blob, Pair pair) {
-        return columnAdd(blob, Arrays.asList(pair));
-    }
-
-    /**
-     * Adds or updates dynamic columns
-     */
-    public static String columnAdd(String blob, Pair... pairs) {
-        return columnAdd(blob, Arrays.asList(pairs));
-    }
-
-    /**
-     * Adds or updates dynamic columns
-     */
-    public static String columnAdd(String blob, List<Pair> pairs) {
+    public static String columnAdd(String blob, Map<String, Serializable> attributes) {
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_ADD ( ").append(blob).append(", ");
-        for (Pair pair : pairs) {
-            column.append("'").append(pair.getName()).append("'");
+        for (Map.Entry<String, Serializable> entry : attributes.entrySet()) {
+            column.append("'").append(entry.getKey()).append("'");
             column.append(", ");
-            column.append("'").append(String.valueOf(pair.getValue())).append("'");
-            if (pair.getValue() instanceof Date) {
+            column.append("'").append(String.valueOf(entry.getValue())).append("'");
+            if (entry.getValue() instanceof Date) {
                 column.append(" as DATETIME");
-            } else if (pair.getValue() instanceof String) {
+            } else if (entry.getValue() instanceof String) {
                 column.append(" as CHAR");
-            } else if (pair.getValue() instanceof Double
-                    || pair.getValue() instanceof Float) {
+            } else if (entry.getValue() instanceof Double
+                    || entry.getValue() instanceof Float) {
                 column.append(" as DOUBLE");
-            } else if (pair.getValue() instanceof Integer
-                    || pair.getValue() instanceof Long
-                    || pair.getValue() instanceof Short
-                    || pair.getValue() instanceof Byte) {
+            } else if (entry.getValue() instanceof Integer
+                    || entry.getValue() instanceof Long
+                    || entry.getValue() instanceof Short
+                    || entry.getValue() instanceof Byte) {
                 column.append(" as INTEGER");
             }
         }
@@ -65,38 +52,24 @@ public class JdbcFunction {
     /**
      * Returns a dynamic columns blob
      */
-    public static String columnCreate(String blob, Pair pair) {
-        return columnCreate(blob, Arrays.asList(pair));
-    }
-
-    /**
-     * Returns a dynamic columns blob
-     */
-    public static String columnCreate(String blob, Pair... pairs) {
-        return columnCreate(blob, Arrays.asList(pairs));
-    }
-
-    /**
-     * Returns a dynamic columns blob
-     */
-    public static String columnCreate(String blob, List<Pair> pairs) {
+    public static String columnCreate(Map<String, Serializable> attributes) {
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_CREATE ( ");
-        for (Pair pair : pairs) {
-            column.append("'").append(pair.getName()).append("'");
+        for (Map.Entry<String, Serializable> entry : attributes.entrySet()) {
+            column.append("'").append(entry.getKey()).append("'");
             column.append(", ");
-            column.append("'").append(String.valueOf(pair.getValue())).append("'");
-            if (pair.getValue() instanceof Date) {
+            column.append("'").append(String.valueOf(entry.getValue())).append("'");
+            if (entry.getValue() instanceof Date) {
                 column.append(" as DATETIME");
-            } else if (pair.getValue() instanceof String) {
+            } else if (entry.getValue() instanceof String) {
                 column.append(" as CHAR");
-            } else if (pair.getValue() instanceof Double
-                    || pair.getValue() instanceof Float) {
+            } else if (entry.getValue() instanceof Double
+                    || entry.getValue() instanceof Float) {
                 column.append(" as DOUBLE");
-            } else if (pair.getValue() instanceof Integer
-                    || pair.getValue() instanceof Long
-                    || pair.getValue() instanceof Short
-                    || pair.getValue() instanceof Byte) {
+            } else if (entry.getValue() instanceof Integer
+                    || entry.getValue() instanceof Long
+                    || entry.getValue() instanceof Short
+                    || entry.getValue() instanceof Byte) {
                 column.append(" as INTEGER");
             }
         }

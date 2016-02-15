@@ -66,8 +66,9 @@ public class CollectionController {
     public ResponseEntity<Response> deleteAttribute(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody CollectionAttributeDeleteRequest request
+            @RequestBody CollectionAttributeDeleteRequest requestBody
     ) {
+        LOGGER.info("/collection/attribute/delete appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
@@ -76,8 +77,8 @@ public class CollectionController {
         Field fieldTable = Tables.FIELD.as("fieldTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
-        String collection = StringUtils.lowerCase(request.getCollection());
-        String name = StringUtils.lowerCase(request.getName());
+        String collection = StringUtils.lowerCase(requestBody.getCollection());
+        String name = StringUtils.lowerCase(requestBody.getName());
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
@@ -107,8 +108,9 @@ public class CollectionController {
     public ResponseEntity<Response> createAttribute(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody CollectionAttributeCreateRequest request
+            @RequestBody CollectionAttributeCreateRequest requestBody
     ) {
+        LOGGER.info("/collection/attribute/create appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
@@ -119,8 +121,8 @@ public class CollectionController {
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        String collection = StringUtils.lowerCase(request.getCollection());
-        String name = StringUtils.lowerCase(request.getName());
+        String collection = StringUtils.lowerCase(requestBody.getCollection());
+        String name = StringUtils.lowerCase(requestBody.getName());
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
@@ -138,7 +140,7 @@ public class CollectionController {
         }
 
         fieldRecord = context.newRecord(fieldTable);
-        fieldRecord.setNullable(true);
+        fieldRecord.setNullable(requestBody.isNullable());
         fieldRecord.setTableId(tableRecord.getTableId());
         fieldRecord.setVirtual(true);
         fieldRecord.setSystem(false);
@@ -146,23 +148,23 @@ public class CollectionController {
         fieldRecord.setAutoIncrement(false);
         fieldRecord.setExposed(true);
         fieldRecord.setVirtualFieldId(virtualRecord.getFieldId());
-        fieldRecord.setJavaType(request.getJavaType());
-        if (request.getJavaType().equals(Integer.class.getName()) || request.getJavaType().equals(int.class.getName())
-                || request.getJavaType().equals(Byte.class.getName()) || request.getJavaType().equals(byte.class.getName())
-                || request.getJavaType().equals(Short.class.getName()) || request.getJavaType().equals(short.class.getName())
-                || request.getJavaType().equals(Long.class.getName()) || request.getJavaType().equals(long.class.getName())
+        fieldRecord.setJavaType(requestBody.getJavaType());
+        if (requestBody.getJavaType().equals(Integer.class.getName()) || requestBody.getJavaType().equals(int.class.getName())
+                || requestBody.getJavaType().equals(Byte.class.getName()) || requestBody.getJavaType().equals(byte.class.getName())
+                || requestBody.getJavaType().equals(Short.class.getName()) || requestBody.getJavaType().equals(short.class.getName())
+                || requestBody.getJavaType().equals(Long.class.getName()) || requestBody.getJavaType().equals(long.class.getName())
                 ) {
             fieldRecord.setSqlType("INT");
 
-        } else if (request.getJavaType().equals(Double.class.getName()) || request.getJavaType().equals(double.class.getName())
-                || request.getJavaType().equals(Float.class.getName()) || request.getJavaType().equals(float.class.getName())) {
+        } else if (requestBody.getJavaType().equals(Double.class.getName()) || requestBody.getJavaType().equals(double.class.getName())
+                || requestBody.getJavaType().equals(Float.class.getName()) || requestBody.getJavaType().equals(float.class.getName())) {
             fieldRecord.setSqlType("DECIMAL");
-        } else if (request.getJavaType().equals(Boolean.class.getName()) || request.getJavaType().equals(boolean.class.getName())) {
+        } else if (requestBody.getJavaType().equals(Boolean.class.getName()) || requestBody.getJavaType().equals(boolean.class.getName())) {
             fieldRecord.setSqlType("BIT");
-        } else if (request.getJavaType().equals(Date.class.getName()) || request.getJavaType().equals(Time.class.getName()) || request.getJavaType().equals(Timestamp.class.getName())) {
+        } else if (requestBody.getJavaType().equals(Date.class.getName()) || requestBody.getJavaType().equals(Time.class.getName()) || requestBody.getJavaType().equals(Timestamp.class.getName())) {
             fieldRecord.setSqlType("DATETIME");
-        } else if (request.getJavaType().equals(Character.class.getName()) || request.getJavaType().equals(char.class.getName())
-                || request.getJavaType().equals(String.class.getName())) {
+        } else if (requestBody.getJavaType().equals(Character.class.getName()) || requestBody.getJavaType().equals(char.class.getName())
+                || requestBody.getJavaType().equals(String.class.getName())) {
             fieldRecord.setSqlType("VARCHAR");
         }
         fieldRecord.store();
@@ -177,10 +179,10 @@ public class CollectionController {
     public ResponseEntity<Response> create(
             @Header("X-MBAAS-APPCODE") String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody CollectionCreateRequest request
+            @RequestBody CollectionCreateRequest requestBody
     ) throws SQLException {
+        LOGGER.info("/collection/create appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
         StringBuffer buffer = new StringBuffer();
-        String name = StringUtils.lowerCase(request.getName());
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
@@ -192,15 +194,15 @@ public class CollectionController {
         Field fieldTable = Tables.FIELD.as("fieldTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(name)).fetchOneInto(tableTable);
+        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getName())).fetchOneInto(tableTable);
         if (tableRecord != null) {
             return null;
         }
 
-        String primaryName = name + "_id";
+        String primaryName = requestBody.getName() + "_id";
 
         List<String> systemFields = Arrays.asList(primaryName, configuration.getString(Constants.JDBC_COLUMN_DELETED), configuration.getString(Constants.JDBC_COLUMN_EXTRA), configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
-        for (CollectionCreateRequest.Attribute attribute : request.getAttributes()) {
+        for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
             if (systemFields.contains(attribute.getName())) {
                 return null;
             }
@@ -223,11 +225,11 @@ public class CollectionController {
             }
         }
 
-        buffer.append("CREATE TABLE `" + name + "` (");
+        buffer.append("CREATE TABLE `" + requestBody.getName() + "` (");
         buffer.append("`" + primaryName + "` INT(11) AUTO_INCREMENT, ");
         buffer.append("`extra` BLOB, ");
         buffer.append("`optimistic` INT(11) NOT NULL DEFAULT 0, ");
-        for (CollectionCreateRequest.Attribute attribute : request.getAttributes()) {
+        for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
             if (attribute.getJavaType().equals(Integer.class.getName()) || attribute.getJavaType().equals(int.class.getName())
                     || attribute.getJavaType().equals(Byte.class.getName()) || attribute.getJavaType().equals(byte.class.getName())
                     || attribute.getJavaType().equals(Short.class.getName()) || attribute.getJavaType().equals(short.class.getName())
@@ -252,7 +254,7 @@ public class CollectionController {
         jdbcTemplate.execute(buffer.toString());
 
         tableRecord = context.newRecord(tableTable);
-        tableRecord.setName(name);
+        tableRecord.setName(requestBody.getName());
         tableRecord.setSystem(false);
         tableRecord.setLocked(true);
         tableRecord.store();
@@ -318,7 +320,7 @@ public class CollectionController {
             fieldRecord.store();
         }
 
-        for (CollectionCreateRequest.Attribute attribute : request.getAttributes()) {
+        for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
             FieldRecord fieldRecord = context.newRecord(fieldTable);
             fieldRecord.setTableId(tableRecord.getTableId());
             fieldRecord.setName(attribute.getName());
@@ -364,8 +366,7 @@ public class CollectionController {
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody CollectionDeleteRequest requestBody
     ) {
-        String name = StringUtils.lowerCase(requestBody.getName());
-
+        LOGGER.info("/collection/delete appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
@@ -374,7 +375,7 @@ public class CollectionController {
         Field fieldTable = Tables.FIELD.as("fieldTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(name)).fetchOneInto(tableTable);
+        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getName())).fetchOneInto(tableTable);
         if (tableRecord == null || tableRecord.getSystem()) {
             return null;
         }
@@ -383,7 +384,7 @@ public class CollectionController {
         context.delete(primaryTable).where(primaryTable.TABLE_ID.eq(tableRecord.getTableId())).execute();
         context.delete(tableTable).where(tableTable.TABLE_ID.eq(tableRecord.getTableId())).execute();
 
-        jdbcTemplate.execute("DROP TABLE `" + name + "`");
+        jdbcTemplate.execute("DROP TABLE `" + requestBody.getName() + "`");
 
         return ResponseEntity.ok(null);
     }

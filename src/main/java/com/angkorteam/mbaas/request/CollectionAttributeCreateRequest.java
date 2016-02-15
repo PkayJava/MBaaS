@@ -17,6 +17,10 @@ public class CollectionAttributeCreateRequest extends Request {
     private String name;
 
     @Expose
+    @SerializedName("nullable")
+    private boolean nullable = true;
+
+    @Expose
     @SerializedName("javaType")
     private String javaType;
 
@@ -42,5 +46,13 @@ public class CollectionAttributeCreateRequest extends Request {
 
     public void setJavaType(String javaType) {
         this.javaType = javaType;
+    }
+
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    public void setNullable(boolean nullable) {
+        this.nullable = nullable;
     }
 }

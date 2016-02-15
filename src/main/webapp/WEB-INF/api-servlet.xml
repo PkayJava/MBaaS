@@ -35,7 +35,7 @@
     <bean id="gson" class="org.springframework.http.converter.json.GsonFactoryBean">
         <property name="base64EncodeByteArrays" value="true"/>
         <property name="disableHtmlEscaping" value="true"/>
-        <property name="prettyPrinting" value="true"/>
+        <property name="prettyPrinting" value="false"/>
         <property name="serializeNulls" value="false"/>
         <property name="dateFormatPattern" value="yyyy-MM-dd'T'HH:mm:ssZZ"/>
     </bean>

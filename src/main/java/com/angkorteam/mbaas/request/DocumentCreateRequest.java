@@ -12,10 +12,6 @@ import java.util.Map;
 public class DocumentCreateRequest extends Request {
 
     @Expose
-    @SerializedName("collection")
-    private String collection;
-
-    @Expose
     @SerializedName("document")
     private Map<String, Object> document = new LinkedHashMap<>();
 
@@ -26,12 +22,5 @@ public class DocumentCreateRequest extends Request {
     public void setDocument(Map<String, Object> document) {
         this.document = document;
     }
-
-    public String getCollection() {
-        return collection;
-    }
-
-    public void setCollection(String collection) {
-        this.collection = collection;
-    }
+ 
 }
