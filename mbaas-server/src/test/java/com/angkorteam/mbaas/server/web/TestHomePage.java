@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.web;
+package com.angkorteam.mbaas.server.web;
 
 import org.apache.wicket.util.tester.WicketTester;
 import org.junit.Before;

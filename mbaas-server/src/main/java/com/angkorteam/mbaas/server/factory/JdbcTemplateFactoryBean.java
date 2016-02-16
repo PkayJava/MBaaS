@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.factory;
+package com.angkorteam.mbaas.server.factory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;

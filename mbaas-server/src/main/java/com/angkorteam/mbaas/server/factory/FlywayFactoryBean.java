@@ -1,6 +1,6 @@
-package com.angkorteam.mbaas.factory;
+package com.angkorteam.mbaas.server.factory;
 
-import com.angkorteam.mbaas.ApplicationContext;
+import com.angkorteam.mbaas.server.ApplicationContext;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;

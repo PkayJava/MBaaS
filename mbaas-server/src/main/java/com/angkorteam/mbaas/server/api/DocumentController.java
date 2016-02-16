@@ -1,7 +1,7 @@
-package com.angkorteam.mbaas.api;
+package com.angkorteam.mbaas.server.api;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.factory.PermissionFactoryBean;
+import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;

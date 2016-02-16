@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.api;
+package com.angkorteam.mbaas.server.api;
 
 //import com.angkorteam.baasbox.sdk.java.request.SendPushNotificationRequest;
 

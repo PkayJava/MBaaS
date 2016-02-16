@@ -1,6 +1,6 @@
-package com.angkorteam.mbaas.web;
+package com.angkorteam.mbaas.server.web;
 
-import com.angkorteam.mbaas.ApplicationContext;
+import com.angkorteam.mbaas.server.ApplicationContext;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.jooq.DSLContext;

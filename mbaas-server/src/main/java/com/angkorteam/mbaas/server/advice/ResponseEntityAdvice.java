@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.advice;
+package com.angkorteam.mbaas.server.advice;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.response.Response;

@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.web;
+package com.angkorteam.mbaas.server.web;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;

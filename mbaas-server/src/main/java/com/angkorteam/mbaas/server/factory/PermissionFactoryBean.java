@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.factory;
+package com.angkorteam.mbaas.server.factory;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;

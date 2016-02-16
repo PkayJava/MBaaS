@@ -40,35 +40,35 @@
         <property name="dateFormatPattern" value="yyyy-MM-dd'T'HH:mm:ssZZ"/>
     </bean>
 
-    <bean id="dataSource" class="com.angkorteam.mbaas.factory.BasicDataSourceFactoryBean"/>
+    <bean id="dataSource" class="com.angkorteam.mbaas.server.factory.BasicDataSourceFactoryBean"/>
 
-    <bean id="flyway" class="com.angkorteam.mbaas.factory.FlywayFactoryBean"/>
+    <bean id="flyway" class="com.angkorteam.mbaas.server.factory.FlywayFactoryBean"/>
 
-    <bean id="context" class="com.angkorteam.mbaas.factory.DSLContextFactoryBean"/>
+    <bean id="context" class="com.angkorteam.mbaas.server.factory.DSLContextFactoryBean"/>
 
-    <bean id="encryptor" class="com.angkorteam.mbaas.factory.StringEncryptorFactoryBean"/>
+    <bean id="encryptor" class="com.angkorteam.mbaas.server.factory.StringEncryptorFactoryBean"/>
 
     <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.PlaintextPasswordEncoder"/>
 
-    <bean id="permission" class="com.angkorteam.mbaas.factory.PermissionFactoryBean">
+    <bean id="permission" class="com.angkorteam.mbaas.server.factory.PermissionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="context" ref="context"/>
         <property name="jdbcTemplate" ref="jdbcTemplate"/>
     </bean>
 
-    <bean id="detailsService" class="com.angkorteam.mbaas.factory.UserDetailsServiceFactoryBean">
+    <bean id="detailsService" class="com.angkorteam.mbaas.server.factory.UserDetailsServiceFactoryBean">
         <property name="context" ref="context"/>
     </bean>
 
-    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.TokenAuthenticationEntryPoint">
+    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.TokenAuthenticationEntryPoint">
         <property name="realmName" value="MBaas API"/>
     </bean>
 
-    <bean id="jdbcTemplate" class="com.angkorteam.mbaas.factory.JdbcTemplateFactoryBean">
+    <bean id="jdbcTemplate" class="com.angkorteam.mbaas.server.factory.JdbcTemplateFactoryBean">
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <bean id="authenticationFilter" class="com.angkorteam.mbaas.TokenAuthenticationFilter">
+    <bean id="authenticationFilter" class="com.angkorteam.mbaas.server.TokenAuthenticationFilter">
         <constructor-arg ref="authenticationManager"/>
         <property name="context" ref="context"/>
     </bean>
