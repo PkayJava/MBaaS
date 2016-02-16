@@ -11,7 +11,6 @@ import com.angkorteam.mbaas.request.Request;
 import com.angkorteam.mbaas.request.SecurityLoginRequest;
 import com.angkorteam.mbaas.request.SecuritySignUpRequest;
 import com.angkorteam.mbaas.response.Response;
-import com.angkorteam.mbaas.service.*;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +28,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
@@ -124,25 +122,19 @@ public class SecurityController {
             }
         }
         if (error) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.USER.getName())).fetchOneInto(tableTable);
 
         int fieldCount = context.selectCount().from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).and(fieldTable.NAME.in(fields)).fetchOneInto(Integer.class);
         if (fields.size() > fieldCount) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_REGISTERED))).fetchOneInto(roleTable);
 
         Response responseBody = new Response();
-
-        String appVersion = configuration.getString(Constants.APP_VERSION);
-
-        responseBody.setVersion(appVersion);
-        RequestHeaderUtils.serve(responseBody, request);
-        responseBody.setMethod(request.getMethod());
 
         String login = requestBody.getUsername();
         String password = requestBody.getPassword();
@@ -294,13 +286,6 @@ public class SecurityController {
         LOGGER.info("/security/login body=>{}", gson.toJson(requestBody));
         Response responseBody = new Response();
 
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String appVersion = configuration.getString(Constants.APP_VERSION);
-
-        responseBody.setVersion(appVersion);
-        RequestHeaderUtils.serve(responseBody, request);
-        responseBody.setMethod(request.getMethod());
-
         User userTable = Tables.USER.as("userTable");
         Token tokenTable = Tables.TOKEN.as("tokenTable");
 
@@ -350,13 +335,6 @@ public class SecurityController {
         LOGGER.info("/security/logout appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
         Response responseBody = new Response();
 
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String appVersion = configuration.getString(Constants.APP_VERSION);
-
-        responseBody.setVersion(appVersion);
-        RequestHeaderUtils.serve(responseBody, request);
-        responseBody.setMethod(request.getMethod());
-
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
         Integer userId = tokenRecord.getUserId();
@@ -381,13 +359,6 @@ public class SecurityController {
     ) {
         LOGGER.info("/security/logout/{} appCode=>{} session=> body=>{}", token, appCode, session, gson.toJson(requestBody));
         Response responseBody = new Response();
-
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String appVersion = configuration.getString(Constants.APP_VERSION);
-
-        responseBody.setVersion(appVersion);
-        RequestHeaderUtils.serve(responseBody, request);
-        responseBody.setMethod(request.getMethod());
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         context.delete(tokenTable).where(tokenTable.TOKEN_ID.eq(token)).execute();

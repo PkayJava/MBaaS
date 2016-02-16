@@ -75,11 +75,11 @@ public class DocumentController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         Map<Integer, FieldRecord> fieldRecords = new LinkedHashMap<>();
@@ -123,11 +123,11 @@ public class DocumentController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         Map<Integer, FieldRecord> fieldRecords = new LinkedHashMap<>();
@@ -174,21 +174,21 @@ public class DocumentController {
 
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
         if (tokenRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
         if (userRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Create.getLiteral())) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
@@ -198,7 +198,7 @@ public class DocumentController {
 
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
             if (!fieldRecords.containsKey(entry.getKey())) {
-                return null;
+                return ResponseEntity.ok(null);
             }
         }
 
@@ -222,11 +222,11 @@ public class DocumentController {
             if (fieldRecord.getNullable()) {
                 if (fieldRecord.getJavaType().equals(String.class.getName())) {
                     if (entry.getValue() == null) {
-                        return null;
+                        return ResponseEntity.ok(null);
                     }
                 } else {
                     if (entry.getValue() == null || "".equals(entry.getValue())) {
-                        return null;
+                        return ResponseEntity.ok(null);
                     }
                 }
             }
@@ -271,7 +271,7 @@ public class DocumentController {
         LOGGER.info("/document/count/{} appCode=>{} session=>{} body=>{}", collection, appCode, session, gson.toJson(requestBody));
 
         if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(*) from `" + collection + "`", Integer.class);
@@ -298,11 +298,11 @@ public class DocumentController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Modify.getLiteral())) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
@@ -366,11 +366,11 @@ public class DocumentController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Delete.getLiteral())) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         FieldRecord fieldRecord = context.select(fieldTable.fields())
@@ -382,7 +382,7 @@ public class DocumentController {
                 .fetchOneInto(fieldTable);
 
         if (fieldRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         jdbcTemplate.update("DELETE FROM `" + collection + "` WHERE " + collection + "_id = ?", id);
@@ -408,12 +408,12 @@ public class DocumentController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(userTable);
         if (userRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         DocumentUserPrivacyRecord documentUserPrivacyRecord = context.newRecord(documentUserPrivacyTable);
@@ -448,12 +448,12 @@ public class DocumentController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(requestBody.getRoleName())).fetchOneInto(roleTable);
         if (roleRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         DocumentRolePrivacyRecord documentRolePrivacyRecord = context.newRecord(documentRolePrivacyTable);
@@ -489,12 +489,12 @@ public class DocumentController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(userTable);
         if (userRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         DocumentUserPrivacyRecord documentUserPrivacyRecord = context.select(documentUserPrivacyTable.fields())
@@ -533,12 +533,12 @@ public class DocumentController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(requestBody.getRoleName())).fetchOneInto(roleTable);
         if (roleRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         DocumentRolePrivacyRecord documentRolePrivacyRecord = context.select(documentRolePrivacyTable.fields())

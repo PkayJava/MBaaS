@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.test;
 
 import com.angkorteam.mbaas.request.*;
+import com.angkorteam.mbaas.response.Response;
 import com.angkorteam.mbaas.sdk.ClientSDK;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -75,7 +76,7 @@ public class SignupTest {
             attribute.setNullable(true);
             attribute.setName("testingfield");
             request.getAttributes().add(attribute);
-            clientSDK.createCollection(session, request);
+            System.out.println(gson.toJson(clientSDK.createCollection(session, request)));
         }
 
         {
@@ -83,7 +84,7 @@ public class SignupTest {
             request.setCollection(collectionName);
             request.setName("hello");
             request.setJavaType(Integer.class.getTypeName());
-            clientSDK.createCollectionAttribute(session, request);
+            System.out.println(gson.toJson(clientSDK.createCollectionAttribute(session, request)));
         }
 
         {
@@ -95,7 +96,7 @@ public class SignupTest {
             DocumentCreateRequest request = new DocumentCreateRequest();
             request.getDocument().put("testingfield", "test1");
             request.getDocument().put("hello", "abc");
-            clientSDK.createDocument(session, collectionName, request);
+            System.out.println(gson.toJson(clientSDK.createDocument(session, collectionName, request)));
         }
     }
 }

@@ -77,7 +77,7 @@ public class CollectionController {
         LOGGER.info("/collection/attribute/delete appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
 
         if (!permission.hasCollectionAccess(session, requestBody.getCollection(), PermissionEnum.Modify.getLiteral())) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         Table tableTable = Tables.TABLE.as("tableTable");
@@ -88,12 +88,12 @@ public class CollectionController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         FieldRecord fieldRecord = context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.NAME.eq(name)).and(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(fieldTable);
         if (fieldRecord == null || fieldRecord.getSystem()) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         if (fieldRecord.getVirtual()) {
@@ -104,7 +104,7 @@ public class CollectionController {
         }
         fieldRecord.delete();
 
-        return null;
+        return ResponseEntity.ok(null);
     }
 
     @RequestMapping(
@@ -119,7 +119,7 @@ public class CollectionController {
         LOGGER.info("/collection/attribute/create appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
 
         if (!permission.hasCollectionAccess(session, requestBody.getCollection(), PermissionEnum.Modify.getLiteral())) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         Table tableTable = Tables.TABLE.as("tableTable");
@@ -132,17 +132,17 @@ public class CollectionController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         FieldRecord fieldRecord = context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.NAME.eq(name)).and(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(fieldTable);
         if (fieldRecord != null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         FieldRecord virtualRecord = context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.NAME.eq(configuration.getString(Constants.JDBC_COLUMN_EXTRA))).and(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(fieldTable);
         if (virtualRecord == null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         fieldRecord = context.newRecord(fieldTable);
@@ -175,7 +175,7 @@ public class CollectionController {
         }
         fieldRecord.store();
 
-        return null;
+        return ResponseEntity.ok(null);
     }
 
     @RequestMapping(
@@ -205,7 +205,7 @@ public class CollectionController {
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getName())).fetchOneInto(tableTable);
         if (tableRecord != null) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         String primaryName = requestBody.getName() + "_id";
@@ -213,10 +213,10 @@ public class CollectionController {
         List<String> systemFields = Arrays.asList(primaryName, configuration.getString(Constants.JDBC_COLUMN_DELETED), configuration.getString(Constants.JDBC_COLUMN_EXTRA), configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
             if (systemFields.contains(attribute.getName())) {
-                return null;
+                return ResponseEntity.ok(null);
             }
             if (attribute.getJavaType() == null) {
-                return null;
+                return ResponseEntity.ok(null);
             }
             if (attribute.getJavaType().equals(Integer.class.getName()) || attribute.getJavaType().equals(int.class.getName())
                     || attribute.getJavaType().equals(Double.class.getName()) || attribute.getJavaType().equals(double.class.getName())
@@ -230,7 +230,7 @@ public class CollectionController {
                     || attribute.getJavaType().equals(String.class.getName())
                     ) {
             } else {
-                return null;
+                return ResponseEntity.ok(null);
             }
         }
 
@@ -399,12 +399,12 @@ public class CollectionController {
         Field fieldTable = Tables.FIELD.as("fieldTable");
 
         if (!permission.hasCollectionAccess(session, requestBody.getName(), PermissionEnum.Delete.getLiteral())) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getName())).fetchOneInto(tableTable);
         if (tableRecord == null || tableRecord.getSystem()) {
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         context.delete(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).execute();

@@ -26,7 +26,7 @@
 
     <security:global-method-security secured-annotations="enabled"/>
 
-    <context:component-scan base-package="com.angkorteam.mbaas.api"/>
+    <context:component-scan base-package="com.angkorteam.mbaas"/>
 
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="maxUploadSize" value="104857600"/>
