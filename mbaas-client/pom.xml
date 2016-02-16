@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.angkorteam.mbaas.plain</groupId>
             <artifactId>mbaas-plain</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>

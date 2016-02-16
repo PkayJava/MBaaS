@@ -1,6 +1,9 @@
 package com.angkorteam.mbaas.client;
 
+import com.angkorteam.mbaas.plain.request.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.SecuritySignUpRequest;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import javax.script.ScriptException;
 
@@ -16,32 +19,30 @@ public class MBaaSTest {
     public static final String HOST_C = "http://192.168.1.117:7080/api";
 
     public static void main(String args[]) throws ScriptException {
+
+        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ").create();
+
         MBaaSClient client = new MBaaSClient("1234567890", HOST_C);
 
-//        {
-//            SecuritySignUpRequest request = new SecuritySignUpRequest();
-//            request.setUsername("admin1");
-//            request.setPassword("123123a");
-//            request.setAppCode("123461579");
-//            request.setToken("iOS Token");
-////            request.getVisibleByAnonymousUsers().put("test", 17);
-////            request.getVisibleByTheUser().put("test2", 17);
-////            request.getVisibleByRegisteredUsers().put("test3", 17);
-////            request.getVisibleByFriends().put("test4", 17);
-////            System.out.println(gson.toJson(clientSDK.signUp(request)));
-//        }
-//
-//        {
-//            SecurityLoginRequest request = new SecurityLoginRequest();
-//            request.setUsername("admin1");
-//            request.setPassword("123123a");
-////            System.out.println(gson.toJson(clientSDK.login(request)));
-//        }
-//
-//        String session = "dd599d03-807f-4098-8816-524da59cb5cd";
-//
-//        String collectionName = "pkayjava1";
-//
+        {
+            SecuritySignUpRequest request = new SecuritySignUpRequest();
+            request.setUsername("admin11");
+            request.setPassword("123123a");
+            request.setAppCode("123461579");
+            request.setToken("iOS Token");
+//            System.out.println(gson.toJson(client.signUp(request)));
+        }
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername("admin");
+            request.setPassword("admin");
+            System.out.println(gson.toJson(client.login(request)));
+        }
+
+
+        String collectionName = "pkayjava1";
+
 //        {
 //            CollectionCreateRequest request = new CollectionCreateRequest();
 //            request.setName(collectionName);

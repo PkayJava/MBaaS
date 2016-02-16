@@ -167,13 +167,13 @@ public class SecurityController {
             blobRecords.put(blobRecord.getFieldId(), blobRecord);
         }
 
-        Map<Integer, String> visiblity = new LinkedHashMap<>();
+        Map<Integer, String> visibility = new LinkedHashMap<>();
         Map<String, Map<String, Serializable>> virtualColumns = new LinkedHashMap<>();
 
         if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
                 FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByAnonymousUser.getLiteral());
+                visibility.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByAnonymousUser.getLiteral());
                 if (fieldRecord.getVirtual()) {
                     FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
@@ -189,7 +189,7 @@ public class SecurityController {
         if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
                 FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByFriend.getLiteral());
+                visibility.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByFriend.getLiteral());
                 if (fieldRecord.getVirtual()) {
                     FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
@@ -205,7 +205,7 @@ public class SecurityController {
         if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
                 FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByRegisteredUser.getLiteral());
+                visibility.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByRegisteredUser.getLiteral());
                 if (fieldRecord.getVirtual()) {
                     FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
@@ -221,7 +221,7 @@ public class SecurityController {
         if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
                 FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByTheUser.getLiteral());
+                visibility.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByTheUser.getLiteral());
                 if (fieldRecord.getVirtual()) {
                     FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
@@ -235,7 +235,7 @@ public class SecurityController {
             }
         }
 
-        for (Map.Entry<Integer, String> entry : visiblity.entrySet()) {
+        for (Map.Entry<Integer, String> entry : visibility.entrySet()) {
             UserPrivacyRecord userPrivacyRecord = context.newRecord(userPrivacyTable);
             userPrivacyRecord.setFieldId(entry.getKey());
             userPrivacyRecord.setScope(entry.getValue());
@@ -253,10 +253,8 @@ public class SecurityController {
             namedParameterJdbcTemplate.update("update " + Tables.USER.getName() + " set " + StringUtils.join(columnNames, ", ") + " where " + Tables.USER.USER_ID.getName() + " = " + userRecord.getUserId(), columnValues);
         }
 
-        responseBody.setResult(ResultEnum.OK.getLiteral());
         responseBody.setHttpCode(HttpStatus.OK.value());
 
-        Map<String, Object> signupResponse = new HashMap<>();
         String tokenId = UUID.randomUUID().toString();
         Date dateCreated = new Date();
 
@@ -267,10 +265,9 @@ public class SecurityController {
         tokenRecord.setDeleted(false);
         tokenRecord.store();
 
-        signupResponse.put("token", tokenId);
-        signupResponse.put("dateCreated", dateCreated);
-        signupResponse.put("login", userRecord.getLogin());
-        responseBody.setData(signupResponse);
+        responseBody.getData().setSession(tokenId);
+        responseBody.getData().setDateCreated(dateCreated);
+        responseBody.getData().setLogin(userRecord.getLogin());
 
         return ResponseEntity.ok(responseBody);
     }
@@ -298,10 +295,8 @@ public class SecurityController {
             responseBody.setHttpCode(HttpStatus.OK.value());
             responseBody.setResult(ResultEnum.OK.getLiteral());
 
-            Map<String, Object> loginResponse = new HashMap<>();
             String tokenId = UUID.randomUUID().toString();
             Date dateCreated = new Date();
-
 
             TokenRecord tokenRecord = context.newRecord(tokenTable);
             tokenRecord.setTokenId(tokenId);
@@ -310,10 +305,9 @@ public class SecurityController {
             tokenRecord.setDeleted(false);
             tokenRecord.store();
 
-            loginResponse.put("token", tokenId);
-            loginResponse.put("dateCreated", dateCreated);
-            loginResponse.put("login", userRecord.getLogin());
-            responseBody.setData(loginResponse);
+            responseBody.getData().setSession(tokenId);
+            responseBody.getData().setDateCreated(dateCreated);
+            responseBody.getData().setLogin(userRecord.getLogin());
         } else {
             responseBody.setHttpCode(HttpStatus.BAD_REQUEST.value());
             responseBody.setResult(ResultEnum.ERROR.getLiteral());

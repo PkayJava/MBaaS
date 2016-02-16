@@ -2,6 +2,8 @@ package com.angkorteam.mbaas.client;
 
 import com.angkorteam.mbaas.plain.request.*;
 import com.angkorteam.mbaas.plain.response.Response;
+import com.angkorteam.mbaas.plain.response.SecurityLoginResponse;
+import com.angkorteam.mbaas.plain.response.SecuritySignUpResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -22,7 +24,7 @@ public class MBaaSClient {
 
     private String appCode;
 
-    private Object currentUser;
+    private String currentUser;
 
     private Client client;
 
@@ -51,12 +53,23 @@ public class MBaaSClient {
         }
     }
 
-    private static interface Client {
+    public SecuritySignUpResponse signUp(SecuritySignUpRequest request) {
+        return this.client.signUp(request);
+    }
+
+    public SecurityLoginResponse login(SecurityLoginRequest request) {
+        SecurityLoginResponse response = this.client.login(request);
+        this.session = response.getData().getSession();
+        this.currentUser = response.getData().getLogin();
+        return response;
+    }
+
+    private interface Client {
         @POST("/security/login")
-        public Response login(@Body SecurityLoginRequest request);
+        public SecurityLoginResponse login(@Body SecurityLoginRequest request);
 
         @POST("/security/signup")
-        public Response signUp(@Body SecuritySignUpRequest request);
+        public SecuritySignUpResponse signUp(@Body SecuritySignUpRequest request);
 
         @POST("/document/create/{collection}")
         public Response createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);

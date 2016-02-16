@@ -40,19 +40,19 @@
         <dependency>
             <groupId>com.angkorteam.mbaas.plain</groupId>
             <artifactId>mbaas-plain</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.angkorteam.mbaas.configuration</groupId>
             <artifactId>mbaas-configuration</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.angkorteam.mbaas.jooq</groupId>
             <artifactId>mbaas-jooq</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
