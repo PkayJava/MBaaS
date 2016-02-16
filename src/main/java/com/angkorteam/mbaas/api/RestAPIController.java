@@ -1,57 +1,16 @@
 package com.angkorteam.mbaas.api;
 
-import com.angkorteam.baasbox.sdk.java.json.ChangePasswordJson;
 import com.angkorteam.baasbox.sdk.java.request.SendPushNotificationRequest;
-import com.angkorteam.mbaas.Constants;
-import com.angkorteam.mbaas.enums.ColumnEnum;
-import com.angkorteam.mbaas.enums.ResultEnum;
-import com.angkorteam.mbaas.enums.ScopeEnum;
-import com.angkorteam.mbaas.mariadb.JdbcFunction;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.*;
-import com.angkorteam.mbaas.model.entity.tables.Table;
-import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.request.*;
 import com.angkorteam.mbaas.response.Response;
-import com.angkorteam.mbaas.service.RequestHeader;
-import com.google.gson.Gson;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.WicketRuntimeException;
-import org.flywaydb.core.internal.dbsupport.*;
-import org.jasypt.encryption.StringEncryptor;
-import org.joda.time.DateTime;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterBatchUpdateUtils;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.*;
 
 /**
  * Created by socheat on 2/4/16.
@@ -65,8 +24,8 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> social(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody Request request
     ) {
         return ResponseEntity.ok(null);
@@ -78,7 +37,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> socialLogin(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("socialNetwork") String socialNetwork,
             @RequestBody SocialLoginRequest request
     ) {
@@ -91,7 +50,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> socialLink(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("socialNetwork") String socialNetwork,
             @RequestBody SocialLinkRequest request
     ) {
@@ -104,7 +63,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> socialUnlink(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("socialNetwork") String socialNetwork,
             @RequestBody Request request
     ) {
@@ -118,7 +77,7 @@ public class RestAPIController {
     public ResponseEntity<Response> followUser(
             HttpServletRequest request,
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request requestBody
     ) {
@@ -131,7 +90,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> unfollowUser(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request request
     ) {
@@ -144,7 +103,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> fetchFollowing(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request request
     ) {
@@ -157,7 +116,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> fetchFollowers(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request request
     ) {
@@ -170,7 +129,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> enablePushNotification(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("os") String os,
             @PathVariable("token") String token,
             @RequestBody Request request
@@ -184,7 +143,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> disablePushNotification(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("token") String token,
             @RequestBody Request request
     ) {
@@ -198,7 +157,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> sendPushNotification(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody SendPushNotificationRequest request
     ) {
         return ResponseEntity.ok(null);
@@ -211,7 +170,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> createLink(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("sourceId") String sourceId,
             @PathVariable("label") String label,
             @PathVariable("destinationId") String destinationId,
@@ -226,7 +185,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> retrieveLink(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody Request request
     ) {
@@ -239,7 +198,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> retrieveLink(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody RetrieveLinkRequest request
     ) {
         return ResponseEntity.ok(null);
@@ -251,7 +210,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> deleteLink(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody Request request
     ) {
@@ -264,7 +223,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> uploadFile(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody UploadFileRequest request
     ) {
         return ResponseEntity.ok(null);
@@ -276,7 +235,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> deleteFile(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody Request request
     ) {
@@ -289,7 +248,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> retrieveFile(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody Request request
     ) {
@@ -302,7 +261,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> retrieveFileDetail(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody Request request
     ) {
@@ -315,7 +274,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> retrieveFilesDetail(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody RetrieveFilesDetailRequest request
     ) {
         return ResponseEntity.ok(null);
@@ -327,7 +286,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> grantFileAccessUsername(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
             @PathVariable("username") String username,
@@ -342,7 +301,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> grantFileAccessRoleName(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
             @PathVariable("rolename") String rolename,
@@ -357,7 +316,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> revokeFileAccessUsername(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
             @PathVariable("username") String username,
@@ -372,7 +331,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> revokeFileAccessRoleName(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
             @PathVariable("rolename") String rolename,
@@ -387,7 +346,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> createAsset(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody CreateAssetRequest request
     ) {
         return ResponseEntity.ok(null);
@@ -399,7 +358,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> retrieveAsset(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("name") String name,
             @RequestBody Request request
     ) {
@@ -412,7 +371,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> deleteAsset(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("name") String name,
             @RequestBody Request request
     ) {
@@ -425,7 +384,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> fetchAsset(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody FetchAssetRequest request
     ) {
         return ResponseEntity.ok(null);
@@ -437,7 +396,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> fetchCurrentSetting(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody Request request
     ) {
         return ResponseEntity.ok(null);
@@ -449,7 +408,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> fetchSectionSetting(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("section") String section,
             @RequestBody Request request
     ) {
@@ -462,7 +421,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> updateValueSetting(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("section") String section,
             @PathVariable("key") String key,
             @PathVariable("value") String value,
@@ -477,7 +436,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> listGroup(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody Request request
     ) {
         return ResponseEntity.ok(null);
@@ -489,7 +448,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> readSpecificGroup(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("name") String name,
             @RequestBody Request request
     ) {
@@ -502,7 +461,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> enableEndpointGroup(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("name") String name,
             @RequestBody Request request
     ) {
@@ -515,7 +474,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> disableEndpointGroup(
             @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("name") String name,
             @RequestBody Request request
     ) {

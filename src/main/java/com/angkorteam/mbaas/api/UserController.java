@@ -9,7 +9,7 @@ import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.request.*;
 import com.angkorteam.mbaas.response.Response;
-import com.angkorteam.mbaas.service.RequestHeader;
+import com.angkorteam.mbaas.service.RequestHeaderUtils;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -26,10 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
@@ -66,8 +63,8 @@ public class UserController {
     )
     public ResponseEntity<Response> suspendUser(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody Request requestBody
     ) {
         Response responseBody = new Response();
@@ -76,7 +73,7 @@ public class UserController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
@@ -103,8 +100,8 @@ public class UserController {
     )
     public ResponseEntity<Response> suspendUser(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request requestBody
     ) {
@@ -114,7 +111,7 @@ public class UserController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         User userTable = Tables.USER.as("userTable");
@@ -134,8 +131,8 @@ public class UserController {
     )
     public ResponseEntity<Response> activateUser(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request requestBody
     ) {
@@ -145,7 +142,7 @@ public class UserController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         User userTable = Tables.USER.as("userTable");
@@ -165,8 +162,8 @@ public class UserController {
     )
     public ResponseEntity<Response> loggedUserProfile(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody Request requestBody
     ) {
         Response responseBody = new Response();
@@ -175,7 +172,7 @@ public class UserController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
@@ -203,8 +200,8 @@ public class UserController {
     )
     public ResponseEntity<Response> updateUserProfile(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody UpdateUserProfileRequest requestBody
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
@@ -274,7 +271,7 @@ public class UserController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         List<String> columnNames = new LinkedList<>();
@@ -418,8 +415,8 @@ public class UserController {
     )
     public ResponseEntity<Response> fetchUserProfile(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request requestBody
     ) {
@@ -436,7 +433,7 @@ public class UserController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         List<String> columnNames = new LinkedList<>();
@@ -451,8 +448,8 @@ public class UserController {
     )
     public ResponseEntity<Response> fetchUsers(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody FetchUsersRequest requestBody
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
@@ -468,7 +465,7 @@ public class UserController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         List<String> columnNames = new LinkedList<>();
@@ -485,8 +482,8 @@ public class UserController {
     )
     public ResponseEntity<Response> changePassword(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody ChangePasswordJson requestBody
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
@@ -502,7 +499,7 @@ public class UserController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         List<String> columnNames = new LinkedList<>();
@@ -522,8 +519,8 @@ public class UserController {
     )
     public ResponseEntity<Response> changeUsername(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody ChangeUsernameRequest requestBody
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
@@ -539,7 +536,7 @@ public class UserController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
@@ -555,8 +552,8 @@ public class UserController {
     )
     public ResponseEntity<Response> passwordReset(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request requestBody
     ) {

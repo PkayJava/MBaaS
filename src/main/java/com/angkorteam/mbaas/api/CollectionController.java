@@ -1,13 +1,16 @@
 package com.angkorteam.mbaas.api;
 
 import com.angkorteam.mbaas.Constants;
+import com.angkorteam.mbaas.enums.PermissionEnum;
+import com.angkorteam.mbaas.factory.PermissionFactoryBean;
 import com.angkorteam.mbaas.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
-import com.angkorteam.mbaas.model.entity.tables.records.FieldRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.PrimaryRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.TableRecord;
-import com.angkorteam.mbaas.request.*;
+import com.angkorteam.mbaas.model.entity.tables.records.*;
+import com.angkorteam.mbaas.request.CollectionAttributeCreateRequest;
+import com.angkorteam.mbaas.request.CollectionAttributeDeleteRequest;
+import com.angkorteam.mbaas.request.CollectionCreateRequest;
+import com.angkorteam.mbaas.request.CollectionDeleteRequest;
 import com.angkorteam.mbaas.response.Response;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -20,13 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -57,6 +60,9 @@ public class CollectionController {
     private DataSource dataSource;
 
     @Autowired
+    private PermissionFactoryBean.Permission permission;
+
+    @Autowired
     private Gson gson;
 
     @RequestMapping(
@@ -64,18 +70,18 @@ public class CollectionController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> deleteAttribute(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody CollectionAttributeDeleteRequest requestBody
     ) {
         LOGGER.info("/collection/attribute/delete appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
-        User userTable = Tables.USER.as("userTable");
-        Primary primaryTable = Tables.PRIMARY.as("primaryTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
+
+        if (!permission.hasCollectionAccess(session, requestBody.getCollection(), PermissionEnum.Modify.getLiteral())) {
+            return null;
+        }
+
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         String collection = StringUtils.lowerCase(requestBody.getCollection());
         String name = StringUtils.lowerCase(requestBody.getName());
@@ -106,18 +112,18 @@ public class CollectionController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> createAttribute(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody CollectionAttributeCreateRequest requestBody
     ) {
         LOGGER.info("/collection/attribute/create appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
-        User userTable = Tables.USER.as("userTable");
-        Primary primaryTable = Tables.PRIMARY.as("primaryTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
+
+        if (!permission.hasCollectionAccess(session, requestBody.getCollection(), PermissionEnum.Modify.getLiteral())) {
+            return null;
+        }
+
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
@@ -177,22 +183,26 @@ public class CollectionController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> create(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            HttpServletRequest request,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody CollectionCreateRequest requestBody
     ) throws SQLException {
         LOGGER.info("/collection/create appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
+
         StringBuffer buffer = new StringBuffer();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
-        User userTable = Tables.USER.as("userTable");
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        User userTable = Tables.USER.as("userTable");
+
+        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getName())).fetchOneInto(tableTable);
         if (tableRecord != null) {
@@ -259,6 +269,7 @@ public class CollectionController {
         tableRecord.setName(requestBody.getName());
         tableRecord.setSystem(false);
         tableRecord.setLocked(true);
+        tableRecord.setOwnerUserId(userRecord.getUserId());
         tableRecord.store();
 
         {
@@ -377,8 +388,8 @@ public class CollectionController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> delete(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody CollectionDeleteRequest requestBody
     ) {
         LOGGER.info("/collection/delete appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
@@ -389,6 +400,10 @@ public class CollectionController {
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+
+        if (!permission.hasCollectionAccess(session, requestBody.getName(), PermissionEnum.Delete.getLiteral())) {
+            return null;
+        }
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getName())).fetchOneInto(tableTable);
         if (tableRecord == null || tableRecord.getSystem()) {

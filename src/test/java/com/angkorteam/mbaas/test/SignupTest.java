@@ -17,6 +17,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class SignupTest {
 
+    public static final String HOST_A = "http://pkayjava.ddns.net:7080/api";
+
+    public static final String HOST_B = "http://172.16.1.42:7080/api";
+
     public static void main(String args[]) throws ScriptException {
         ClientSDK clientSDK = null;
 
@@ -33,14 +37,14 @@ public class SignupTest {
         {
             RestAdapter.Builder builder = new RestAdapter.Builder();
             builder.setConverter(new GsonConverter(gson));
-            builder.setEndpoint("http://pkayjava.ddns.net:7080/api");
+            builder.setEndpoint(HOST_B);
             builder.setClient(client);
             RestAdapter restAdapter = builder.build();
             clientSDK = restAdapter.create(ClientSDK.class);
         }
 
         {
-            SecuritySignupRequest request = new SecuritySignupRequest();
+            SecuritySignUpRequest request = new SecuritySignUpRequest();
             request.setUsername("admin");
             request.setPassword("123123a");
             request.setAppCode("123461579");
@@ -49,17 +53,17 @@ public class SignupTest {
 //            request.getVisibleByTheUser().put("test2", 17);
 //            request.getVisibleByRegisteredUsers().put("test3", 17);
 //            request.getVisibleByFriends().put("test4", 17);
-//            System.out.println(gson.toJson(clientSDK.signup(request)));
+//            System.out.println(gson.toJson(clientSDK.signUp(request)));
         }
 
         {
             SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername("admin");
-            request.setPassword("123123a");
+            request.setPassword("admin");
 //            System.out.println(gson.toJson(clientSDK.login(request)));
         }
 
-        String session = "c3da78c2-1c15-437b-80bc-ea0126d92183";
+        String session = "7d345f06-c32e-4d6c-b1af-45dd70e11881";
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();

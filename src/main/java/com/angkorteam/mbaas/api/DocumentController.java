@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.api;
 
 import com.angkorteam.mbaas.Constants;
-import com.angkorteam.mbaas.enums.ActionEnum;
+import com.angkorteam.mbaas.enums.PermissionEnum;
 import com.angkorteam.mbaas.factory.PermissionFactoryBean;
 import com.angkorteam.mbaas.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.model.entity.Tables;
@@ -14,7 +14,6 @@ import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.jasypt.encryption.StringEncryptor;
 import org.jooq.DSLContext;
-import org.jooq.impl.DefaultDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
@@ -68,8 +64,8 @@ public class DocumentController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> query(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("collection") String collection,
             @RequestBody DocumentQueryRequest requestBody
     ) {
@@ -94,7 +90,7 @@ public class DocumentController {
             return null;
         }
 
-        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Read.getLiteral())) {
+        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
             return null;
         }
 
@@ -126,8 +122,8 @@ public class DocumentController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> queryById(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("collection") String collection,
             @PathVariable("id") String id,
             @RequestBody DocumentQueryRequestById requestBody
@@ -153,7 +149,7 @@ public class DocumentController {
             return null;
         }
 
-        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Read.getLiteral())) {
+        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
             return null;
         }
 
@@ -185,8 +181,8 @@ public class DocumentController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> create(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("collection") String collection,
             @RequestBody DocumentCreateRequest requestBody
     ) {
@@ -214,7 +210,7 @@ public class DocumentController {
             return null;
         }
 
-        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Create.getLiteral())) {
+        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Create.getLiteral())) {
             return null;
         }
 
@@ -290,8 +286,8 @@ public class DocumentController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> count(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("collection") String collection,
             @RequestBody DocumentCountRequest requestBody
     ) {
@@ -316,7 +312,7 @@ public class DocumentController {
             return null;
         }
 
-        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Read.getLiteral())) {
+        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
             return null;
         }
 
@@ -331,8 +327,8 @@ public class DocumentController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> modifyById(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("collection") String collection,
             @PathVariable("id") String id,
             @RequestBody DocumentModifyRequest requestBody
@@ -359,7 +355,7 @@ public class DocumentController {
             return null;
         }
 
-        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Modify.getLiteral())) {
+        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Modify.getLiteral())) {
             return null;
         }
 
@@ -411,8 +407,8 @@ public class DocumentController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> delete(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("collection") String collection,
             @PathVariable("id") String id,
             @RequestBody DocumentDeleteRequest requestBody
@@ -439,7 +435,7 @@ public class DocumentController {
             return null;
         }
 
-        if (!permission.hasCollectionAccess(session, collection, ActionEnum.Delete.getLiteral())) {
+        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Delete.getLiteral())) {
             return null;
         }
 
@@ -466,8 +462,8 @@ public class DocumentController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> grantPermissionUsername(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody DocumentPermissionUsernameRequest requestBody
     ) {
         LOGGER.info("/document/permission/grant/user appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
@@ -506,8 +502,8 @@ public class DocumentController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> grantPermissionRoleName(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody DocumentPermissionRoleNameRequest requestBody
     ) {
         LOGGER.info("/document/permission/grant/role appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
@@ -547,8 +543,8 @@ public class DocumentController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> revokePermissionUsername(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody DocumentPermissionUsernameRequest requestBody
     ) {
         LOGGER.info("/document/permission/revoke/user appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
@@ -590,9 +586,9 @@ public class DocumentController {
             method = RequestMethod.POST, path = "/permission/revoke/role",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> revokePermissiontRoleName(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+    public ResponseEntity<Response> revokePermissionRoleName(
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody DocumentPermissionRoleNameRequest requestBody
     ) {
         LOGGER.info("/document/permission/revoke/role appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));

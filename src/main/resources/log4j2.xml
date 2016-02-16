@@ -9,6 +9,9 @@
   	<logger name="org.apache.wicket" level="INFO" additivity="false">
   		<AppenderRef ref="CONSOLE"/>
   	</logger>
+    <logger name="com.angkorteam.mbaas" level="INFO" additivity="false">
+        <AppenderRef ref="CONSOLE"/>
+    </logger>
     <Root level="WARN">
       <AppenderRef ref="CONSOLE"/>
     </Root>

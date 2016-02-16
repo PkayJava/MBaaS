@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.enums;
 
-public enum ActionEnum {
+public enum PermissionEnum {
     Read(1),
     Modify(2),
     Delete(4),
@@ -8,7 +8,7 @@ public enum ActionEnum {
 
     private final int literal;
 
-    ActionEnum(int literal) {
+    PermissionEnum(int literal) {
         this.literal = literal;
     }
 

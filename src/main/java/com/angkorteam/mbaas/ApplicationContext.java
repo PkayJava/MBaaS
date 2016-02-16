@@ -66,9 +66,9 @@ public class ApplicationContext implements ServletContextListener {
         this.configuration = initConfiguration(dataSource);
         this.context = initDSLContext(configuration);
         this.stringEncryptor = initStringEncryptor();
-        initDDL(context, dataSource);
         initRole(context);
         initUser(context);
+        initDDL(context, dataSource);
         servletContext.setAttribute(KEY, this);
     }
 
@@ -165,10 +165,16 @@ public class ApplicationContext implements ServletContextListener {
     }
 
     protected void initDDL(DSLContext context, DataSource dataSource) {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+
         com.angkorteam.mbaas.model.entity.tables.Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
         Index indexTable = Tables.INDEX.as("indexTable");
+        User userTable = Tables.USER.as("userTable");
+
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
+
         try {
             Connection connection = dataSource.getConnection();
             DatabaseMetaData databaseMetaData = connection.getMetaData();
@@ -181,6 +187,7 @@ public class ApplicationContext implements ServletContextListener {
                     tableRecord = context.newRecord(tableTable);
                     tableRecord.setName(table.getName());
                     tableRecord.setSystem(true);
+                    tableRecord.setOwnerUserId(userRecord.getUserId());
                     tableRecord.store();
                 }
                 List<FieldRecord> temporaryFieldRecords = context.select(fieldTable.fields()).from(fieldTable)

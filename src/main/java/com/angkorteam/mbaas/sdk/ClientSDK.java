@@ -16,9 +16,9 @@ public interface ClientSDK {
     public Response login(@Body SecurityLoginRequest request);
 
     @POST("/security/signup")
-    public Response signup(@Body SecuritySignupRequest request);
+    public Response signUp(@Body SecuritySignUpRequest request);
 
-    @POST("/document/create")
+    @POST("/document/create/{collection}")
     public Response createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
 
     @POST("/collection/create")

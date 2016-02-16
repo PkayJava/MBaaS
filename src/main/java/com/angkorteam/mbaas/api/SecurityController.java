@@ -9,9 +9,9 @@ import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.request.Request;
 import com.angkorteam.mbaas.request.SecurityLoginRequest;
-import com.angkorteam.mbaas.request.SecuritySignupRequest;
+import com.angkorteam.mbaas.request.SecuritySignUpRequest;
 import com.angkorteam.mbaas.response.Response;
-import com.angkorteam.mbaas.service.RequestHeader;
+import com.angkorteam.mbaas.service.*;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -28,15 +28,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -70,7 +67,7 @@ public class SecurityController {
     )
     public ResponseEntity<Response> signup(
             HttpServletRequest request,
-            @RequestBody SecuritySignupRequest requestBody
+            @RequestBody SecuritySignUpRequest requestBody
     ) {
         LOGGER.info("/security/signup body=>{}", gson.toJson(requestBody));
 
@@ -144,7 +141,7 @@ public class SecurityController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         String login = requestBody.getUsername();
@@ -301,7 +298,7 @@ public class SecurityController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         User userTable = Tables.USER.as("userTable");
@@ -346,7 +343,7 @@ public class SecurityController {
     )
     public ResponseEntity<Response> logout(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody Request requestBody
     ) {
@@ -357,7 +354,7 @@ public class SecurityController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
@@ -377,7 +374,7 @@ public class SecurityController {
     )
     public ResponseEntity<Response> logout(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @PathVariable("token") String token,
             @RequestBody Request requestBody
@@ -389,7 +386,7 @@ public class SecurityController {
         String appVersion = configuration.getString(Constants.APP_VERSION);
 
         responseBody.setVersion(appVersion);
-        RequestHeader.serve(responseBody, request);
+        RequestHeaderUtils.serve(responseBody, request);
         responseBody.setMethod(request.getMethod());
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
