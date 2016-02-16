@@ -1,17 +1,17 @@
 package com.angkorteam.mbaas.api;
 
-import com.angkorteam.mbaas.Constants;
-import com.angkorteam.mbaas.enums.PermissionEnum;
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.factory.PermissionFactoryBean;
-import com.angkorteam.mbaas.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.request.CollectionAttributeCreateRequest;
-import com.angkorteam.mbaas.request.CollectionAttributeDeleteRequest;
-import com.angkorteam.mbaas.request.CollectionCreateRequest;
-import com.angkorteam.mbaas.request.CollectionDeleteRequest;
-import com.angkorteam.mbaas.response.Response;
+import com.angkorteam.mbaas.plain.enums.PermissionEnum;
+import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
+import com.angkorteam.mbaas.plain.request.CollectionAttributeCreateRequest;
+import com.angkorteam.mbaas.plain.request.CollectionAttributeDeleteRequest;
+import com.angkorteam.mbaas.plain.request.CollectionCreateRequest;
+import com.angkorteam.mbaas.plain.request.CollectionDeleteRequest;
+import com.angkorteam.mbaas.plain.response.Response;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;

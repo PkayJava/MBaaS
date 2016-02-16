@@ -1,11 +1,12 @@
 package com.angkorteam.mbaas;
 
-import com.angkorteam.mbaas.enums.ColumnEnum;
-import com.angkorteam.mbaas.enums.IndexInfoEnum;
-import com.angkorteam.mbaas.enums.PrimaryKeyEnum;
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
+import com.angkorteam.mbaas.plain.enums.ColumnEnum;
+import com.angkorteam.mbaas.plain.enums.IndexInfoEnum;
+import com.angkorteam.mbaas.plain.enums.PrimaryKeyEnum;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.wicket.WicketRuntimeException;

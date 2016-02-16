@@ -1,8 +1,9 @@
 package com.angkorteam.mbaas.api;
 
-import com.angkorteam.baasbox.sdk.java.request.SendPushNotificationRequest;
-import com.angkorteam.mbaas.request.*;
-import com.angkorteam.mbaas.response.Response;
+//import com.angkorteam.baasbox.sdk.java.request.SendPushNotificationRequest;
+
+import com.angkorteam.mbaas.plain.request.*;
+import com.angkorteam.mbaas.plain.response.Response;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -151,17 +152,17 @@ public class RestAPIController {
     }
 
 
-    @RequestMapping(
-            method = RequestMethod.POST, path = "/push/message",
-            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<Response> sendPushNotification(
-            @Header("X-MBAAS-APPCODE") String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @RequestBody SendPushNotificationRequest request
-    ) {
-        return ResponseEntity.ok(null);
-    }
+//    @RequestMapping(
+//            method = RequestMethod.POST, path = "/push/message",
+//            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+//    )
+//    public ResponseEntity<Response> sendPushNotification(
+//            @Header("X-MBAAS-APPCODE") String appCode,
+//            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+//            @RequestBody SendPushNotificationRequest request
+//    ) {
+//        return ResponseEntity.ok(null);
+//    }
 
 
     @RequestMapping(

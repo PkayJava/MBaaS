@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.factory;
 
-import com.angkorteam.mbaas.Constants;
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;

@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.advice;
 
-import com.angkorteam.mbaas.Constants;
-import com.angkorteam.mbaas.response.Response;
+import com.angkorteam.mbaas.configuration.Constants;
+import com.angkorteam.mbaas.plain.response.Response;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.slf4j.Logger;

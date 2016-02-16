@@ -1,16 +1,16 @@
 package com.angkorteam.mbaas.api;
 
 import com.angkorteam.baasbox.sdk.java.json.ChangePasswordJson;
-import com.angkorteam.mbaas.enums.ResultEnum;
-import com.angkorteam.mbaas.enums.ScopeEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.request.ChangeUsernameRequest;
-import com.angkorteam.mbaas.request.FetchUsersRequest;
-import com.angkorteam.mbaas.request.Request;
-import com.angkorteam.mbaas.request.UpdateUserProfileRequest;
-import com.angkorteam.mbaas.response.Response;
+import com.angkorteam.mbaas.plain.enums.ResultEnum;
+import com.angkorteam.mbaas.plain.enums.ScopeEnum;
+import com.angkorteam.mbaas.plain.request.ChangeUsernameRequest;
+import com.angkorteam.mbaas.plain.request.FetchUsersRequest;
+import com.angkorteam.mbaas.plain.request.Request;
+import com.angkorteam.mbaas.plain.request.UpdateUserProfileRequest;
+import com.angkorteam.mbaas.plain.response.Response;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.jasypt.encryption.StringEncryptor;
