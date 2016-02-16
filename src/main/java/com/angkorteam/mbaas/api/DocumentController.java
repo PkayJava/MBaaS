@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,20 +69,9 @@ public class DocumentController {
             @RequestBody DocumentQueryRequest requestBody
     ) {
         LOGGER.info("/document/query/{} appCode=>{} session=>{} body=>{}", collection, appCode, session, gson.toJson(requestBody));
-        User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
+
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
-        if (tokenRecord == null) {
-            return null;
-        }
-
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
-        if (userRecord == null) {
-            return null;
-        }
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
@@ -129,20 +117,9 @@ public class DocumentController {
             @RequestBody DocumentQueryRequestById requestBody
     ) {
         LOGGER.info("/document/query/{}/{} appCode=>{} session=>{} body=>{}", collection, id, appCode, session, gson.toJson(requestBody));
-        User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
+
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
-        if (tokenRecord == null) {
-            return null;
-        }
-
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
-        if (userRecord == null) {
-            return null;
-        }
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
@@ -273,7 +250,7 @@ public class DocumentController {
 
         columnNames.add(configuration.getString(Constants.JDBC_OWNER_USER_ID));
         columnKeys.add(":" + configuration.getString(Constants.JDBC_OWNER_USER_ID));
-        columnValues.put(":" + configuration.getString(Constants.JDBC_OWNER_USER_ID), userRecord.getUserId());
+        columnValues.put(configuration.getString(Constants.JDBC_OWNER_USER_ID), userRecord.getUserId());
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         namedParameterJdbcTemplate.update("INSERT INTO " + collection + "(" + StringUtils.join(columnNames, ", ") + ")" + " VALUES (" + StringUtils.join(columnKeys, ",") + ")", columnValues);
@@ -292,25 +269,6 @@ public class DocumentController {
             @RequestBody DocumentCountRequest requestBody
     ) {
         LOGGER.info("/document/count/{} appCode=>{} session=>{} body=>{}", collection, appCode, session, gson.toJson(requestBody));
-
-        User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
-        if (tokenRecord == null) {
-            return null;
-        }
-
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
-        if (userRecord == null) {
-            return null;
-        }
-
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
-        if (tableRecord == null) {
-            return null;
-        }
 
         if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
             return null;
@@ -335,20 +293,8 @@ public class DocumentController {
     ) {
         LOGGER.info("/document/modify/{}/{} appCode=>{} session=>{} body=>{}", collection, id, appCode, session, gson.toJson(requestBody));
 
-        User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
-        if (tokenRecord == null) {
-            return null;
-        }
-
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
-        if (userRecord == null) {
-            return null;
-        }
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {
@@ -415,20 +361,8 @@ public class DocumentController {
     ) {
         LOGGER.info("/document/delete/{}/{} appCode=>{} session=>{} body=>{}", collection, id, appCode, session, gson.toJson(requestBody));
 
-        User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
-        if (tokenRecord == null) {
-            return null;
-        }
-
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
-        if (userRecord == null) {
-            return null;
-        }
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
         if (tableRecord == null) {

@@ -39,7 +39,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by Khauv Socheat on 2/12/2016.
+ * Created by Socheat KHAUV on 2/12/2016.
  */
 @Controller
 @RequestMapping("/collection")
@@ -183,7 +183,6 @@ public class CollectionController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> create(
-            HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody CollectionCreateRequest requestBody
@@ -237,8 +236,8 @@ public class CollectionController {
 
         buffer.append("CREATE TABLE `" + requestBody.getName() + "` (");
         buffer.append("`" + primaryName + "` INT(11) AUTO_INCREMENT, ");
-        buffer.append("`extra` BLOB, ");
-        buffer.append("`optimistic` INT(11) NOT NULL DEFAULT 0, ");
+        buffer.append("`" + configuration.getString(Constants.JDBC_COLUMN_EXTRA) + "` BLOB, ");
+        buffer.append("`" + configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC) + "` INT(11) NOT NULL DEFAULT 0, ");
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
             if (attribute.getJavaType().equals(Integer.class.getName()) || attribute.getJavaType().equals(int.class.getName())
                     || attribute.getJavaType().equals(Byte.class.getName()) || attribute.getJavaType().equals(byte.class.getName())
@@ -258,9 +257,11 @@ public class CollectionController {
                 buffer.append("`" + attribute.getName() + "` VARCHAR(255), ");
             }
         }
-        buffer.append("`owner_user_id` INT(11) NOT NULL, ");
-        buffer.append("`delete` BIT(1) NOT NULL DEFAULT 0, ");
-        buffer.append("INDEX(owner_user_id), ");
+        buffer.append("`" + configuration.getString(Constants.JDBC_OWNER_USER_ID) + "` INT(11) NOT NULL, ");
+        buffer.append("`" + configuration.getString(Constants.JDBC_COLUMN_DELETED) + "` BIT(1) NOT NULL DEFAULT 0, ");
+        buffer.append("INDEX(`" + configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC) + "`), ");
+        buffer.append("INDEX(`" + configuration.getString(Constants.JDBC_COLUMN_DELETED) + "`), ");
+        buffer.append("INDEX(`" + configuration.getString(Constants.JDBC_OWNER_USER_ID) + "`), ");
         buffer.append("PRIMARY KEY (`" + primaryName + "`)");
         buffer.append(" )");
         jdbcTemplate.execute(buffer.toString());
@@ -393,13 +394,9 @@ public class CollectionController {
             @RequestBody CollectionDeleteRequest requestBody
     ) {
         LOGGER.info("/collection/delete appCode=>{} session=>{} body=>{}", appCode, session, gson.toJson(requestBody));
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
-        User userTable = Tables.USER.as("userTable");
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
         Table tableTable = Tables.TABLE.as("tableTable");
         Field fieldTable = Tables.FIELD.as("fieldTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         if (!permission.hasCollectionAccess(session, requestBody.getName(), PermissionEnum.Delete.getLiteral())) {
             return null;

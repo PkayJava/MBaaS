@@ -45,7 +45,7 @@ public class SignupTest {
 
         {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
-            request.setUsername("admin");
+            request.setUsername("admin1");
             request.setPassword("123123a");
             request.setAppCode("123461579");
             request.setToken("iOS Token");
@@ -58,16 +58,18 @@ public class SignupTest {
 
         {
             SecurityLoginRequest request = new SecurityLoginRequest();
-            request.setUsername("admin");
-            request.setPassword("admin");
+            request.setUsername("admin1");
+            request.setPassword("123123a");
 //            System.out.println(gson.toJson(clientSDK.login(request)));
         }
 
-        String session = "7d345f06-c32e-4d6c-b1af-45dd70e11881";
+        String session = "dd599d03-807f-4098-8816-524da59cb5cd";
+
+        String collectionName = "pkayjava1";
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
-            request.setName("test11");
+            request.setName(collectionName);
             CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
             attribute.setJavaType(String.class.getName());
             attribute.setNullable(true);
@@ -78,8 +80,8 @@ public class SignupTest {
 
         {
             CollectionAttributeCreateRequest request = new CollectionAttributeCreateRequest();
+            request.setCollection(collectionName);
             request.setName("hello");
-            request.setCollection("test11");
             request.setJavaType(Integer.class.getTypeName());
             clientSDK.createCollectionAttribute(session, request);
         }
@@ -92,8 +94,8 @@ public class SignupTest {
         {
             DocumentCreateRequest request = new DocumentCreateRequest();
             request.getDocument().put("testingfield", "test1");
-            request.getDocument().put("hello1", "abc");
-            clientSDK.createDocument(session, "test11", request);
+            request.getDocument().put("hello", "abc");
+            clientSDK.createDocument(session, collectionName, request);
         }
     }
 }

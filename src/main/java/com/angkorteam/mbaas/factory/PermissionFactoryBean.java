@@ -102,6 +102,8 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
 
             TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
 
+            Integer documentOwnerUserId = jdbcTemplate.queryForObject("select " + configuration.getString(Constants.JDBC_OWNER_USER_ID) + " from `" + tableRecord.getName() + "` where " + tableRecord.getName() + "_id = ?", Integer.class, documentId);
+
             DocumentUserPrivacyRecord documentUserPrivacyRecord = context.select(documentUserPrivacyTable.fields())
                     .from(documentUserPrivacyTable)
                     .where(documentUserPrivacyTable.TABLE_ID.eq(tableRecord.getTableId()))
@@ -116,6 +118,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
                     .fetchOneInto(documentRolePrivacyTable);
 
             return roleRecord.getName().equals(configuration.getString(Constants.ROLE_ADMINISTRATOR))
+                    || (userRecord.getUserId().equals(documentOwnerUserId))
                     || (documentUserPrivacyRecord != null && (documentUserPrivacyRecord.getPermisson() & action) == action)
                     || (documentRolePrivacyRecord != null && (documentRolePrivacyRecord.getPermisson() & action) == action);
         }
@@ -142,6 +145,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             TableRolePrivacyRecord tableRolePrivacyRecord = context.select(tableRolePrivacyTable.fields()).from(tableRolePrivacyTable).where(tableRolePrivacyTable.TABLE_ID.eq(tableRecord.getTableId())).and(tableRolePrivacyTable.ROLE_ID.eq(roleRecord.getRoleId())).fetchOneInto(tableRolePrivacyTable);
 
             return roleRecord.getName().equals(configuration.getString(Constants.ROLE_ADMINISTRATOR))
+                    || (userRecord.getUserId().equals(tableRecord.getOwnerUserId()))
                     || (tableUserPrivacyRecord != null && (tableUserPrivacyRecord.getPermisson() & action) == action)
                     || (tableRolePrivacyRecord != null && (tableRolePrivacyRecord.getPermisson() & action) == action);
         }
