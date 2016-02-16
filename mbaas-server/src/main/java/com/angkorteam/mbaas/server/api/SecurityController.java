@@ -10,7 +10,7 @@ import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.SecuritySignUpRequest;
-import com.angkorteam.mbaas.plain.response.Response;
+import com.angkorteam.mbaas.plain.response.*;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -63,7 +63,7 @@ public class SecurityController {
             method = RequestMethod.POST, path = "/signup",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> signup(
+    public ResponseEntity<SecuritySignUpResponse> signup(
             HttpServletRequest request,
             @RequestBody SecuritySignUpRequest requestBody
     ) {
@@ -134,7 +134,7 @@ public class SecurityController {
 
         RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_REGISTERED))).fetchOneInto(roleTable);
 
-        Response responseBody = new Response();
+        SecuritySignUpResponse responseBody = new SecuritySignUpResponse();
 
         String login = requestBody.getUsername();
         String password = requestBody.getPassword();
@@ -279,12 +279,12 @@ public class SecurityController {
             method = RequestMethod.POST, path = "/login",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> login(
+    public ResponseEntity<SecurityLoginResponse> login(
             HttpServletRequest request,
             @RequestBody SecurityLoginRequest requestBody
     ) {
         LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
-        Response responseBody = new Response();
+        SecurityLoginResponse responseBody = new SecurityLoginResponse();
 
         User userTable = Tables.USER.as("userTable");
         Token tokenTable = Tables.TOKEN.as("tokenTable");
@@ -326,14 +326,14 @@ public class SecurityController {
             method = RequestMethod.POST, path = "/logout",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> logout(
+    public ResponseEntity<SecurityLogoutResponse> logout(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @Header("X-MBAAS-SESSION") String session,
             @RequestBody Request requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
-        Response responseBody = new Response();
+        SecurityLogoutResponse responseBody = new SecurityLogoutResponse();
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
@@ -350,7 +350,7 @@ public class SecurityController {
             method = RequestMethod.POST, path = "/logout/{token}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> logout(
+    public ResponseEntity<SecurityLogoutTokenResponse> logoutToken(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @Header("X-MBAAS-SESSION") String session,
@@ -358,7 +358,7 @@ public class SecurityController {
             @RequestBody Request requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=> body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
-        Response responseBody = new Response();
+        SecurityLogoutTokenResponse responseBody = new SecurityLogoutTokenResponse();
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         context.delete(tokenTable).where(tokenTable.TOKEN_ID.eq(token)).execute();

@@ -1,5 +1,7 @@
 package com.angkorteam.mbaas.client;
 
+import com.angkorteam.mbaas.plain.request.SecuritySignUpRequest;
+
 import javax.script.ScriptException;
 
 /**
@@ -14,27 +16,8 @@ public class MBaaSTest {
     public static final String HOST_C = "http://192.168.1.117:7080/api";
 
     public static void main(String args[]) throws ScriptException {
-//        ClientSDK clientSDK = null;
-//
-//        Gson gson;
-//        {
-//            GsonBuilder builder = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
-//            gson = builder.create();
-//        }
-//        OkHttpClient http = new OkHttpClient();
-//        OkClient client = new OkClient(http);
-//        http.setReadTimeout(1, TimeUnit.MINUTES);
-//        http.setConnectTimeout(1, TimeUnit.MINUTES);
-//        http.setWriteTimeout(1, TimeUnit.MINUTES);
-//        {
-//            RestAdapter.Builder builder = new RestAdapter.Builder();
-//            builder.setConverter(new GsonConverter(gson));
-//            builder.setEndpoint(HOST_C);
-//            builder.setClient(client);
-//            RestAdapter restAdapter = builder.build();
-//            clientSDK = restAdapter.create(ClientSDK.class);
-//        }
-//
+        MBaaSClient client = new MBaaSClient("1234567890", HOST_C);
+
 //        {
 //            SecuritySignUpRequest request = new SecuritySignUpRequest();
 //            request.setUsername("admin1");

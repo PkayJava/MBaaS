@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.plain.request.FetchUsersRequest;
 import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.UpdateUserProfileRequest;
 import com.angkorteam.mbaas.plain.response.Response;
+import com.angkorteam.mbaas.plain.response.UnknownResponse;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.jasypt.encryption.StringEncryptor;
@@ -66,7 +67,7 @@ public class UserController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody Request requestBody
     ) {
-        Response responseBody = new Response();
+        UnknownResponse responseBody = new UnknownResponse();
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         User userTable = Tables.USER.as("userTable");
@@ -97,7 +98,7 @@ public class UserController {
             @PathVariable("username") String username,
             @RequestBody Request requestBody
     ) {
-        Response responseBody = new Response();
+        UnknownResponse responseBody = new UnknownResponse();
 
         User userTable = Tables.USER.as("userTable");
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
@@ -121,7 +122,7 @@ public class UserController {
             @PathVariable("username") String username,
             @RequestBody Request requestBody
     ) {
-        Response responseBody = new Response();
+        UnknownResponse responseBody = new UnknownResponse();
 
         User userTable = Tables.USER.as("userTable");
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
@@ -144,7 +145,7 @@ public class UserController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody Request requestBody
     ) {
-        Response responseBody = new Response();
+        UnknownResponse responseBody = new UnknownResponse();
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         User userTable = Tables.USER.as("userTable");
@@ -159,7 +160,7 @@ public class UserController {
         if (userRecord != null) {
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("login", userRecord.getLogin());
-            responseBody.setData(data);
+//            responseBody.setData(data);
         }
 
         return ResponseEntity.ok(responseBody);
@@ -236,7 +237,7 @@ public class UserController {
             return ResponseEntity.ok(null);
         }
 
-        Response responseBody = new Response();
+        UnknownResponse responseBody = new UnknownResponse();
 
         List<String> columnNames = new LinkedList<>();
         Map<String, Object> columnValues = new LinkedHashMap<>();
@@ -361,14 +362,14 @@ public class UserController {
         responseBody.setResult(ResultEnum.OK.getLiteral());
         responseBody.setHttpCode(HttpStatus.OK.value());
 
-        Map<String, Object> signupResponse = new HashMap<>();
+        Map<String, Object> signupUnknownResponse = new HashMap<>();
         String tokenId = UUID.randomUUID().toString();
         Date dateCreated = new Date();
 
-        signupResponse.put("token", tokenId);
-        signupResponse.put("dateCreated", dateCreated);
-        signupResponse.put("login", userRecord.getLogin());
-        responseBody.setData(signupResponse);
+//        signupResponse.put("token", tokenId);
+//        signupResponse.put("dateCreated", dateCreated);
+//        signupResponse.put("login", userRecord.getLogin());
+//        responseBody.setData(signupResponse);
 
         return ResponseEntity.ok(responseBody);
     }
@@ -391,7 +392,7 @@ public class UserController {
         Field fieldTable = Tables.FIELD.as("fieldTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
-        Response responseBody = new Response();
+        UnknownResponse responseBody = new UnknownResponse();
 
         List<String> columnNames = new LinkedList<>();
         Map<String, Object> columnValues = new LinkedHashMap<>();
@@ -416,7 +417,7 @@ public class UserController {
         Field fieldTable = Tables.FIELD.as("fieldTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
-        Response responseBody = new Response();
+        UnknownResponse responseBody = new UnknownResponse();
 
         List<String> columnNames = new LinkedList<>();
         Map<String, Object> columnValues = new LinkedHashMap<>();
@@ -443,7 +444,7 @@ public class UserController {
         Field fieldTable = Tables.FIELD.as("fieldTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
-        Response responseBody = new Response();
+        UnknownResponse responseBody = new UnknownResponse();
 
         List<String> columnNames = new LinkedList<>();
         Map<String, Object> columnValues = new LinkedHashMap<>();
@@ -473,7 +474,7 @@ public class UserController {
         Field fieldTable = Tables.FIELD.as("fieldTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
-        Response responseBody = new Response();
+        UnknownResponse responseBody = new UnknownResponse();
 
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);

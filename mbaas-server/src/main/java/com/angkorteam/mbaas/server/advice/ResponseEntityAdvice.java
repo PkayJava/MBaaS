@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.advice;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.response.Response;
+import com.angkorteam.mbaas.plain.response.UnknownResponse;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.slf4j.Logger;
@@ -45,15 +46,16 @@ public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
 
         Response responseBody = body;
         if (body == null) {
-            responseBody = new Response();
+            responseBody = new UnknownResponse();
             responseBody.setResult(HttpStatus.OK.getReasonPhrase());
             responseBody.setHttpCode(HttpStatus.OK.value());
         } else {
             responseBody.setResult(HttpStatus.valueOf(responseBody.getHttpCode()).getReasonPhrase());
         }
         HttpHeaders httpHeaders = request.getHeaders();
+        Map<String, List<String>> requestHeader = responseBody.getRequestHeader();
         for (Map.Entry<String, List<String>> entry : httpHeaders.entrySet()) {
-            responseBody.getRequestHeader().put(entry.getKey(), entry.getValue());
+            requestHeader.put(entry.getKey(), entry.getValue());
         }
 
         responseBody.setVersion(configuration.getString(Constants.APP_VERSION));

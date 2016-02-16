@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Created by socheat on 2/4/16.
  */
-public class Response implements Serializable {
+public abstract class Response<T> implements Serializable {
 
     @Expose
     @SerializedName("result")
@@ -20,10 +20,6 @@ public class Response implements Serializable {
     @Expose
     @SerializedName("http_code")
     private int httpCode;
-
-    @Expose
-    @SerializedName("data")
-    private Object data;
 
     @Expose
     @SerializedName("error_message")
@@ -44,6 +40,18 @@ public class Response implements Serializable {
     @Expose
     @SerializedName("version")
     private String version;
+
+    @Expose
+    @SerializedName("data")
+    protected T data;
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
 
     public String getErrorMessage() {
         return errorMessage;
@@ -91,14 +99,6 @@ public class Response implements Serializable {
 
     public void setHttpCode(int httpCode) {
         this.httpCode = httpCode;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
     }
 
     public String getResult() {
