@@ -1,11 +1,11 @@
-package com.angkorteam.mbaas.test;
+package com.angkorteam.mbaas.client;
 
 import javax.script.ScriptException;
 
 /**
  * Created by Khauv Socheat on 2/4/2016.
  */
-public class SignupTest {
+public class MBaaSTest {
 
     public static final String HOST_A = "http://pkayjava.ddns.net:7080/api";
 
