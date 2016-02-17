@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.client;
 
+import com.angkorteam.mbaas.plain.request.CollectionCreateRequest;
 import com.angkorteam.mbaas.plain.request.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.SecuritySignUpRequest;
 import com.google.gson.Gson;
@@ -43,16 +44,16 @@ public class MBaaSTest {
 
         String collectionName = "pkayjava1";
 
-//        {
-//            CollectionCreateRequest request = new CollectionCreateRequest();
-//            request.setName(collectionName);
-//            CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
-//            attribute.setJavaType(String.class.getName());
-//            attribute.setNullable(true);
-//            attribute.setName("testingfield");
-//            request.getAttributes().add(attribute);
-//            System.out.println(gson.toJson(clientSDK.createCollection(session, request)));
-//        }
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setName(collectionName);
+            CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+            attribute.setJavaType(String.class.getName());
+            attribute.setNullable(true);
+            attribute.setName("testingfield");
+            request.getAttributes().add(attribute);
+//            System.out.println(gson.toJson(client.createCollection(session, request)));
+        }
 //
 //        {
 //            CollectionAttributeCreateRequest request = new CollectionAttributeCreateRequest();

@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.api;
 
 import com.angkorteam.mbaas.configuration.Constants;
+import com.angkorteam.mbaas.plain.response.CollectionCreateResponse;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
@@ -184,7 +185,7 @@ public class CollectionController {
             method = RequestMethod.POST, path = "/create",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> create(
+    public ResponseEntity<CollectionCreateResponse> create(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,

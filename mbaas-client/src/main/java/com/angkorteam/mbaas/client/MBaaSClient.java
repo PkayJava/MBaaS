@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.client;
 
 import com.angkorteam.mbaas.plain.request.*;
+import com.angkorteam.mbaas.plain.response.CollectionCreateResponse;
 import com.angkorteam.mbaas.plain.response.Response;
 import com.angkorteam.mbaas.plain.response.SecurityLoginResponse;
 import com.angkorteam.mbaas.plain.response.SecuritySignUpResponse;
@@ -64,6 +65,10 @@ public class MBaaSClient {
         return response;
     }
 
+    public CollectionCreateResponse createCollection(CollectionCreateRequest request) {
+        return this.client.createCollection(this.session, request);
+    }
+
     private interface Client {
         @POST("/security/login")
         public SecurityLoginResponse login(@Body SecurityLoginRequest request);
@@ -75,7 +80,7 @@ public class MBaaSClient {
         public Response createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
 
         @POST("/collection/create")
-        public Response createCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionCreateRequest request);
+        public CollectionCreateResponse createCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionCreateRequest request);
 
         @POST("/collection/delete")
         public Response deleteCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionDeleteRequest request);
