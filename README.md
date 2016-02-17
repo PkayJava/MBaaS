@@ -1,2 +1,2 @@
-# MBaaS
-MBaaS
+# Mobile Backend as a Service
+
