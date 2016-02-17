@@ -9,12 +9,12 @@ import com.google.gson.annotations.SerializedName;
 public class CollectionAttributeCreateRequest extends Request {
 
     @Expose
-    @SerializedName("collection")
-    private String collection;
+    @SerializedName("collectionName")
+    private String collectionName;
 
     @Expose
-    @SerializedName("name")
-    private String name;
+    @SerializedName("attributeName")
+    private String attributeName;
 
     @Expose
     @SerializedName("nullable")
@@ -24,20 +24,20 @@ public class CollectionAttributeCreateRequest extends Request {
     @SerializedName("javaType")
     private String javaType;
 
-    public String getCollection() {
-        return collection;
+    public String getCollectionName() {
+        return collectionName;
     }
 
-    public void setCollection(String collection) {
-        this.collection = collection;
+    public void setCollectionName(String collectionName) {
+        this.collectionName = collectionName;
     }
 
-    public String getName() {
-        return name;
+    public String getAttributeName() {
+        return attributeName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setAttributeName(String attributeName) {
+        this.attributeName = attributeName;
     }
 
     public String getJavaType() {

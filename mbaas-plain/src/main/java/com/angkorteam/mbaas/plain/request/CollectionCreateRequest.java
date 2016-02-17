@@ -12,19 +12,19 @@ import java.util.List;
 public class CollectionCreateRequest extends Request {
 
     @Expose
-    @SerializedName("name")
-    private String name;
+    @SerializedName("collectionName")
+    private String collectionName;
 
     @Expose
     @SerializedName("attributes")
     private List<Attribute> attributes = new ArrayList<>();
 
-    public String getName() {
-        return name;
+    public String getCollectionName() {
+        return collectionName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCollectionName(String collectionName) {
+        this.collectionName = collectionName;
     }
 
     public List<Attribute> getAttributes() {

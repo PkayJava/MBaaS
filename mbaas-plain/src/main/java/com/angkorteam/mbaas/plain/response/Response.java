@@ -19,7 +19,7 @@ public abstract class Response<T> implements Serializable {
 
     @Expose
     @SerializedName("http_code")
-    private int httpCode;
+    private Integer httpCode;
 
     @Expose
     @SerializedName("error_message")
@@ -93,7 +93,7 @@ public abstract class Response<T> implements Serializable {
         this.version = version;
     }
 
-    public int getHttpCode() {
+    public Integer getHttpCode() {
         return httpCode;
     }
 

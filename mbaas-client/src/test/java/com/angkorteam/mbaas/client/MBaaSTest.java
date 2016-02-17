@@ -1,12 +1,11 @@
 package com.angkorteam.mbaas.client;
 
-import com.angkorteam.mbaas.plain.request.CollectionCreateRequest;
-import com.angkorteam.mbaas.plain.request.SecurityLoginRequest;
-import com.angkorteam.mbaas.plain.request.SecuritySignUpRequest;
+import com.angkorteam.mbaas.plain.request.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import javax.script.ScriptException;
+import java.util.Date;
 
 /**
  * Created by Khauv Socheat on 2/4/2016.
@@ -42,37 +41,37 @@ public class MBaaSTest {
         }
 
 
-        String collectionName = "pkayjava1";
+        String collectionName = "pkayjava12";
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
-            request.setName(collectionName);
+            request.setCollectionName(collectionName);
             CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
             attribute.setJavaType(String.class.getName());
             attribute.setNullable(true);
             attribute.setName("testingfield");
             request.getAttributes().add(attribute);
-//            System.out.println(gson.toJson(client.createCollection(session, request)));
+//            System.out.println(gson.toJson(client.createCollection(request)));
         }
-//
-//        {
-//            CollectionAttributeCreateRequest request = new CollectionAttributeCreateRequest();
-//            request.setCollection(collectionName);
-//            request.setName("hello");
-//            request.setJavaType(Integer.class.getTypeName());
-//            System.out.println(gson.toJson(clientSDK.createCollectionAttribute(session, request)));
-//        }
-//
-//        {
-//            CollectionDeleteRequest request = new CollectionDeleteRequest();
-//            request.setName("test11");
-////            clientSDK.deleteCollection(session, request);
-//        }
-//        {
-//            DocumentCreateRequest request = new DocumentCreateRequest();
-//            request.getDocument().put("testingfield", "test1");
-//            request.getDocument().put("hello", "abc");
-//            System.out.println(gson.toJson(clientSDK.createDocument(session, collectionName, request)));
-//        }
+
+        {
+            CollectionAttributeCreateRequest request = new CollectionAttributeCreateRequest();
+            request.setCollectionName(collectionName);
+            request.setAttributeName("bbbhellosssssssss");
+            request.setJavaType(Boolean.class.getTypeName());
+//            System.out.println(gson.toJson(client.createCollectionAttribute(request)));
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName("test11");
+//            client.deleteCollection(request);
+        }
+        {
+            DocumentCreateRequest request = new DocumentCreateRequest();
+            request.getDocument().put("testingfield", "bbbhellosssssssss");
+            request.getDocument().put("bbbhellosssssssss", 1.00000000120007561000300000000000000000300000000000000000000000000000000000000000000001000000000000000000000000000000000001d);
+            System.out.println(gson.toJson(client.createDocument(collectionName, request)));
+        }
     }
 }

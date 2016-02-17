@@ -168,7 +168,7 @@ public class SecurityController {
         }
 
         Map<Integer, String> visibility = new LinkedHashMap<>();
-        Map<String, Map<String, Serializable>> virtualColumns = new LinkedHashMap<>();
+        Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
 
         if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
@@ -244,7 +244,7 @@ public class SecurityController {
         }
 
         if (!virtualColumns.isEmpty()) {
-            for (Map.Entry<String, Map<String, Serializable>> entry : virtualColumns.entrySet()) {
+            for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
                 if (!entry.getValue().isEmpty()) {
                     columnNames.add(entry.getKey() + " = " + JdbcFunction.columnCreate(entry.getValue()));
                 }

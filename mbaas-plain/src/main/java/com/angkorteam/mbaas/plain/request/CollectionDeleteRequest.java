@@ -9,14 +9,14 @@ import com.google.gson.annotations.SerializedName;
 public class CollectionDeleteRequest extends Request {
 
     @Expose
-    @SerializedName("name")
-    private String name;
+    @SerializedName("collectionName")
+    private String collectionName;
 
-    public String getName() {
-        return name;
+    public String getCollectionName() {
+        return collectionName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCollectionName(String collectionName) {
+        this.collectionName = collectionName;
     }
 }

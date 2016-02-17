@@ -1,10 +1,7 @@
 package com.angkorteam.mbaas.client;
 
 import com.angkorteam.mbaas.plain.request.*;
-import com.angkorteam.mbaas.plain.response.CollectionCreateResponse;
-import com.angkorteam.mbaas.plain.response.Response;
-import com.angkorteam.mbaas.plain.response.SecurityLoginResponse;
-import com.angkorteam.mbaas.plain.response.SecuritySignUpResponse;
+import com.angkorteam.mbaas.plain.response.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -69,6 +66,18 @@ public class MBaaSClient {
         return this.client.createCollection(this.session, request);
     }
 
+    public CollectionAttributeCreateResponse createCollectionAttribute(CollectionAttributeCreateRequest request) {
+        return this.client.createCollectionAttribute(this.session, request);
+    }
+
+    public CollectionDeleteResponse deleteCollection(CollectionDeleteRequest request) {
+        return this.client.deleteCollection(this.session, request);
+    }
+
+    public DocumentCreateResponse createDocument(String collectionName, DocumentCreateRequest request) {
+        return client.createDocument(this.session, collectionName, request);
+    }
+
     private interface Client {
         @POST("/security/login")
         public SecurityLoginResponse login(@Body SecurityLoginRequest request);
@@ -77,16 +86,16 @@ public class MBaaSClient {
         public SecuritySignUpResponse signUp(@Body SecuritySignUpRequest request);
 
         @POST("/document/create/{collection}")
-        public Response createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
+        public DocumentCreateResponse createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
 
         @POST("/collection/create")
         public CollectionCreateResponse createCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionCreateRequest request);
 
         @POST("/collection/delete")
-        public Response deleteCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionDeleteRequest request);
+        public CollectionDeleteResponse deleteCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionDeleteRequest request);
 
         @POST("/collection/attribute/create")
-        public Response createCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeCreateRequest request);
+        public CollectionAttributeCreateResponse createCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeCreateRequest request);
 
         @POST("/collection/attribute/delete")
         public Response deleteCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeDeleteRequest request);

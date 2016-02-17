@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.api;
 
 import com.angkorteam.mbaas.configuration.Constants;
+import com.angkorteam.mbaas.plain.response.DocumentCreateResponse;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
@@ -20,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,13 +48,7 @@ public class DocumentController {
     private DSLContext context;
 
     @Autowired
-    private StringEncryptor encryptor;
-
-    @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private DataSource dataSource;
 
     @Autowired
     private PermissionFactoryBean.Permission permission;
@@ -95,7 +92,7 @@ public class DocumentController {
             if (fieldRecord.getExposed()) {
                 if (fieldRecord.getVirtual()) {
                     FieldRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualFieldId());
-                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName()) + " as " + fieldRecord.getName());
+                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
                 } else {
                     fields.add("`" + entry.getKey() + "`");
                 }
@@ -144,7 +141,7 @@ public class DocumentController {
             if (fieldRecord.getExposed()) {
                 if (fieldRecord.getVirtual()) {
                     FieldRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualFieldId());
-                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName()) + " as " + fieldRecord.getName());
+                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
                 } else {
                     fields.add("`" + entry.getKey() + "`");
                 }
@@ -160,7 +157,7 @@ public class DocumentController {
             method = RequestMethod.POST, path = "/create/{collection}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> create(
+    public ResponseEntity<DocumentCreateResponse> create(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
@@ -215,7 +212,7 @@ public class DocumentController {
             blobRecords.put(blobRecord.getFieldId(), blobRecord);
         }
 
-        Map<String, Map<String, Serializable>> virtualColumns = new LinkedHashMap<>();
+        Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
         List<String> columnNames = new LinkedList<>();
         List<String> columnKeys = new LinkedList<>();
 
@@ -247,7 +244,7 @@ public class DocumentController {
             }
         }
 
-        for (Map.Entry<String, Map<String, Serializable>> entry : virtualColumns.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
             columnNames.add(entry.getKey());
             columnKeys.add(JdbcFunction.columnCreate(entry.getValue()));
         }
@@ -257,9 +254,31 @@ public class DocumentController {
         columnValues.put(configuration.getString(Constants.JDBC_OWNER_USER_ID), userRecord.getUserId());
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        namedParameterJdbcTemplate.update("INSERT INTO " + collection + "(" + StringUtils.join(columnNames, ", ") + ")" + " VALUES (" + StringUtils.join(columnKeys, ",") + ")", columnValues);
+        GeneratedKeyHolder holder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update("INSERT INTO " + collection + "(" + StringUtils.join(columnNames, ", ") + ")" + " VALUES (" + StringUtils.join(columnKeys, ",") + ")", new MapSqlParameterSource(columnValues), holder);
 
-        return ResponseEntity.ok(null);
+        Integer id = holder.getKey().intValue();
+
+        List<String> columns = new LinkedList<>();
+        for (Map.Entry<String, FieldRecord> entry : fieldRecords.entrySet()) {
+            FieldRecord fieldRecord = entry.getValue();
+            if (fieldRecord.getExposed()) {
+                if (fieldRecord.getVirtual()) {
+                    FieldRecord virtualRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                    columns.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
+                } else {
+                    columns.add("`" + fieldRecord.getName() + "`");
+                }
+            }
+        }
+
+        Map<String, Object> values = jdbcTemplate.queryForMap("SELECT " + StringUtils.join(columns, ", ") + " FROM `" + tableRecord.getName() + "` where " + tableRecord.getName() + "_id = ?", id);
+
+        DocumentCreateResponse response = new DocumentCreateResponse();
+        response.getData().setCollectionName(collection);
+        response.getData().getAttributes().putAll(values);
+
+        return ResponseEntity.ok(response);
     }
 
     @RequestMapping(
@@ -321,7 +340,7 @@ public class DocumentController {
         }
 
         List<String> columns = new LinkedList<>();
-        Map<String, Map<String, Serializable>> virtualColumns = new LinkedHashMap<>();
+        Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
         Map<String, Object> values = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
             FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
@@ -340,7 +359,7 @@ public class DocumentController {
             }
         }
 
-        for (Map.Entry<String, Map<String, Serializable>> entry : virtualColumns.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
             if (!entry.getValue().isEmpty()) {
                 columns.add(entry.getKey() + " = " + JdbcFunction.columnAdd(entry.getKey(), entry.getValue()));
             }

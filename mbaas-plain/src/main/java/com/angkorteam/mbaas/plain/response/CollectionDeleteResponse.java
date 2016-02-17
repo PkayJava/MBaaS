@@ -4,15 +4,15 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by socheat on 2/16/16.
+ * Created by socheat on 2/17/16.
  */
-public class CollectionCreateResponse extends Response<CollectionCreateResponse.Data> {
+public class CollectionDeleteResponse extends Response<CollectionDeleteResponse.Body> {
 
-    public CollectionCreateResponse() {
-        this.data = new Data();
+    public CollectionDeleteResponse() {
+        this.data = new Body();
     }
 
-    public static class Data {
+    public static class Body {
 
         @Expose
         @SerializedName("collectionName")
@@ -26,5 +26,4 @@ public class CollectionCreateResponse extends Response<CollectionCreateResponse.
             this.collectionName = collectionName;
         }
     }
-
 }
