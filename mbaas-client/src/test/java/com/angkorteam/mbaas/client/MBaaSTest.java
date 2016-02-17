@@ -69,8 +69,8 @@ public class MBaaSTest {
         }
         {
             DocumentCreateRequest request = new DocumentCreateRequest();
-            request.getDocument().put("testingfield", "bbbhellosssssssss");
-            request.getDocument().put("bbbhellosssssssss", 1.00000000120007561000300000000000000000300000000000000000000000000000000000000000000001000000000000000000000000000000000001d);
+            request.getDocument().put("testingfield", "gggggggggggggg");
+            request.getDocument().put("bbbhellosssssssss", 1212d);
             System.out.println(gson.toJson(client.createDocument(collectionName, request)));
         }
     }

@@ -200,6 +200,11 @@ public class DocumentController {
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
             if (!fieldRecords.containsKey(entry.getKey())) {
                 return ResponseEntity.ok(null);
+            } else {
+                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+                if (!fieldRecord.getJavaType().equals(entry.getValue().getClass().getName())) {
+                    return ResponseEntity.ok(null);
+                }
             }
         }
 
