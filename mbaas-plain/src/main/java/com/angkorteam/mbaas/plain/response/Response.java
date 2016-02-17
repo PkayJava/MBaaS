@@ -22,12 +22,8 @@ public abstract class Response<T> implements Serializable {
     private Integer httpCode;
 
     @Expose
-    @SerializedName("error_message")
-    private String errorMessage;
-
-    @Expose
-    @SerializedName("error_fields")
-    private Map<String, List<String>> errorFields = new LinkedHashMap<>();
+    @SerializedName("error_messages")
+    private Map<String, String> errorMessages = new LinkedHashMap<>();
 
     @Expose
     @SerializedName("method")
@@ -53,20 +49,16 @@ public abstract class Response<T> implements Serializable {
         this.data = data;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public void setHttpCode(Integer httpCode) {
+        this.httpCode = httpCode;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public Map<String, String> getErrorMessages() {
+        return errorMessages;
     }
 
-    public Map<String, List<String>> getErrorFields() {
-        return errorFields;
-    }
-
-    public void setErrorFields(Map<String, List<String>> errorFields) {
-        this.errorFields = errorFields;
+    public void setErrorMessages(Map<String, String> errorMessages) {
+        this.errorMessages = errorMessages;
     }
 
     public String getMethod() {

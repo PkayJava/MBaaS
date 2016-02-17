@@ -68,6 +68,7 @@ public class SecurityController {
             @RequestBody SecuritySignUpRequest requestBody
     ) {
         LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
@@ -78,13 +79,25 @@ public class SecurityController {
         Role roleTable = Tables.ROLE.as("roleTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
+        if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
+            errorMessages.put("username", "is required");
+        } else {
+            int count = context.selectCount().from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(Integer.class);
+            if (count > 0) {
+                errorMessages.put("username", "is not available");
+            }
+        }
+
+        if (requestBody.getPassword() == null || "".equals(requestBody.getPassword())) {
+            errorMessages.put("password", "is required");
+        }
+
         // field duplication check
         List<String> fields = new LinkedList<>();
-        boolean error = false;
         if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
                 if (fields.contains(entry.getKey())) {
-                    error = true;
+                    errorMessages.put(entry.getKey(), "overridden other field");
                     break;
                 } else {
                     fields.add(entry.getKey());
@@ -94,7 +107,7 @@ public class SecurityController {
         if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
                 if (fields.contains(entry.getKey())) {
-                    error = true;
+                    errorMessages.put(entry.getKey(), "overridden other field");
                     break;
                 } else {
                     fields.add(entry.getKey());
@@ -104,7 +117,7 @@ public class SecurityController {
         if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
                 if (fields.contains(entry.getKey())) {
-                    error = true;
+                    errorMessages.put(entry.getKey(), "overridden other field");
                     break;
                 } else {
                     fields.add(entry.getKey());
@@ -114,22 +127,26 @@ public class SecurityController {
         if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
                 if (fields.contains(entry.getKey())) {
-                    error = true;
+                    errorMessages.put(entry.getKey(), "overridden other field");
                     break;
                 } else {
                     fields.add(entry.getKey());
                 }
             }
         }
-        if (error) {
-            return ResponseEntity.ok(null);
-        }
 
         TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.USER.getName())).fetchOneInto(tableTable);
 
         int fieldCount = context.selectCount().from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).and(fieldTable.NAME.in(fields)).fetchOneInto(Integer.class);
         if (fields.size() > fieldCount) {
-            return ResponseEntity.ok(null);
+            errorMessages.put("attribute", "some attributes are not allow");
+        }
+
+        if (!errorMessages.isEmpty()) {
+            SecuritySignUpResponse response = new SecuritySignUpResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
         }
 
         RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_REGISTERED))).fetchOneInto(roleTable);
@@ -179,7 +196,7 @@ public class SecurityController {
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
-                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), (Serializable) entry.getValue());
+                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
                 } else {
                     columnNames.add(entry.getKey() + " = :" + entry.getKey());
                     columnValues.put(entry.getKey(), entry.getValue());
@@ -195,7 +212,7 @@ public class SecurityController {
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
-                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), (Serializable) entry.getValue());
+                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
                 } else {
                     columnNames.add(entry.getKey() + " = :" + entry.getKey());
                     columnValues.put(entry.getKey(), entry.getValue());
@@ -211,7 +228,7 @@ public class SecurityController {
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
-                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), (Serializable) entry.getValue());
+                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
                 } else {
                     columnNames.add(entry.getKey() + " = :" + entry.getKey());
                     columnValues.put(entry.getKey(), entry.getValue());
@@ -227,7 +244,7 @@ public class SecurityController {
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
-                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), (Serializable) entry.getValue());
+                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
                 } else {
                     columnNames.add(entry.getKey() + " = :" + entry.getKey());
                     columnValues.put(entry.getKey(), entry.getValue());
@@ -252,8 +269,6 @@ public class SecurityController {
             NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
             namedParameterJdbcTemplate.update("update " + Tables.USER.getName() + " set " + StringUtils.join(columnNames, ", ") + " where " + Tables.USER.USER_ID.getName() + " = " + userRecord.getUserId(), columnValues);
         }
-
-        responseBody.setHttpCode(HttpStatus.OK.value());
 
         String tokenId = UUID.randomUUID().toString();
         Date dateCreated = new Date();
@@ -281,37 +296,49 @@ public class SecurityController {
             @RequestBody SecurityLoginRequest requestBody
     ) {
         LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
-        SecurityLoginResponse responseBody = new SecurityLoginResponse();
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
         User userTable = Tables.USER.as("userTable");
         Token tokenTable = Tables.TOKEN.as("tokenTable");
+
+        if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
+            errorMessages.put("username", "is required");
+        }
+        if (requestBody.getPassword() == null || "".equals(requestBody.getPassword())) {
+            errorMessages.put("password", "is required");
+        }
 
         List<Condition> where = new ArrayList<>();
         where.add(userTable.LOGIN.eq(requestBody.getUsername()));
         where.add(userTable.PASSWORD.eq(requestBody.getPassword()));
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(where).fetchOneInto(userTable);
-        if (userRecord != null) {
-            responseBody.setHttpCode(HttpStatus.OK.value());
-            responseBody.setResult(ResultEnum.OK.getLiteral());
-
-            String tokenId = UUID.randomUUID().toString();
-            Date dateCreated = new Date();
-
-            TokenRecord tokenRecord = context.newRecord(tokenTable);
-            tokenRecord.setTokenId(tokenId);
-            tokenRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
-            tokenRecord.setUserId(userRecord.getUserId());
-            tokenRecord.setDeleted(false);
-            tokenRecord.store();
-
-            responseBody.getData().setSession(tokenId);
-            responseBody.getData().setDateCreated(dateCreated);
-            responseBody.getData().setLogin(userRecord.getLogin());
-        } else {
-            responseBody.setHttpCode(HttpStatus.BAD_REQUEST.value());
-            responseBody.setResult(ResultEnum.ERROR.getLiteral());
+        if (userRecord == null) {
+            errorMessages.put("login", "bad credential");
         }
+
+        if (!errorMessages.isEmpty()) {
+            SecurityLoginResponse response = new SecurityLoginResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        SecurityLoginResponse responseBody = new SecurityLoginResponse();
+
+        String tokenId = UUID.randomUUID().toString();
+        Date dateCreated = new Date();
+
+        TokenRecord tokenRecord = context.newRecord(tokenTable);
+        tokenRecord.setTokenId(tokenId);
+        tokenRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
+        tokenRecord.setUserId(userRecord.getUserId());
+        tokenRecord.setDeleted(false);
+        tokenRecord.store();
+
+        responseBody.getData().setSession(tokenId);
+        responseBody.getData().setDateCreated(dateCreated);
+        responseBody.getData().setLogin(userRecord.getLogin());
 
         return ResponseEntity.ok(responseBody);
     }
@@ -327,15 +354,13 @@ public class SecurityController {
             @RequestBody Request requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+
         SecurityLogoutResponse responseBody = new SecurityLogoutResponse();
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
         Integer userId = tokenRecord.getUserId();
         context.delete(tokenTable).where(tokenTable.USER_ID.eq(userId)).execute();
-
-        responseBody.setHttpCode(200);
-        responseBody.setResult(ResultEnum.OK.getLiteral());
 
         return ResponseEntity.ok(responseBody);
     }
@@ -352,13 +377,11 @@ public class SecurityController {
             @RequestBody Request requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=> body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+
         SecurityLogoutTokenResponse responseBody = new SecurityLogoutTokenResponse();
 
         Token tokenTable = Tables.TOKEN.as("tokenTable");
         context.delete(tokenTable).where(tokenTable.TOKEN_ID.eq(token)).execute();
-
-        responseBody.setResult(ResultEnum.OK.getLiteral());
-        responseBody.setHttpCode(200);
 
         return ResponseEntity.ok(responseBody);
     }
