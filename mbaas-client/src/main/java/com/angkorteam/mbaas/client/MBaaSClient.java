@@ -70,6 +70,10 @@ public class MBaaSClient {
         return this.client.createCollectionAttribute(this.session, request);
     }
 
+    public CollectionAttributeDeleteResponse deleteCollectionAttribute(CollectionAttributeDeleteRequest request) {
+        return this.client.deleteCollectionAttribute(this.session, request);
+    }
+
     public CollectionDeleteResponse deleteCollection(CollectionDeleteRequest request) {
         return this.client.deleteCollection(this.session, request);
     }
@@ -118,7 +122,7 @@ public class MBaaSClient {
         public CollectionAttributeCreateResponse createCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeCreateRequest request);
 
         @POST("/collection/attribute/delete")
-        public Response deleteCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeDeleteRequest request);
+        public CollectionAttributeDeleteResponse deleteCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeDeleteRequest request);
 
         @POST("/document/create/{collection}")
         public DocumentCreateResponse createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);

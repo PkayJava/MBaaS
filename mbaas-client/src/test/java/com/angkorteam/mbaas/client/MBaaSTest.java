@@ -8,6 +8,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.script.ScriptException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -157,11 +159,88 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "hello" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
             request.setCollectionName(collectionName);
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(String.class.getName());
+                attribute.setName("first_name");
+                attribute.setNullable(false);
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(String.class.getName());
+                attribute.setName("last_name");
+                attribute.setNullable(true);
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(Byte.class.getName());
+                attribute.setName("amount1");
+                attribute.setNullable(true);
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(Short.class.getName());
+                attribute.setName("amount2");
+                attribute.setNullable(true);
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(Integer.class.getName());
+                attribute.setName("amount3");
+                attribute.setNullable(true);
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(Long.class.getName());
+                attribute.setName("amount4");
+                attribute.setNullable(true);
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(Boolean.class.getName());
+                attribute.setName("status");
+                attribute.setNullable(true);
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(Float.class.getName());
+                attribute.setName("discount1");
+                attribute.setNullable(true);
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(Double.class.getName());
+                attribute.setName("discount2");
+                attribute.setNullable(true);
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(Date.class.getName());
+                attribute.setName("age");
+                attribute.setNullable(true);
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(Character.class.getName());
+                attribute.setName("gender");
+                attribute.setNullable(true);
+                request.getAttributes().add(attribute);
+            }
             CollectionCreateResponse response = client.createCollection(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
@@ -173,6 +252,174 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
+    }
+
+    @Test
+    public void deleteCollectionTest() throws ScriptException {
+
+        String login = UUID.randomUUID().toString();
+        String password = UUID.randomUUID().toString();
+        {
+            SecuritySignUpRequest request = new SecuritySignUpRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecuritySignUpResponse response = client.signUp(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.login(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setJavaType(String.class.getName());
+                attribute.setName("first_name");
+                attribute.setNullable(false);
+                request.getAttributes().add(attribute);
+            }
+            CollectionCreateResponse response = client.createCollection(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.deleteCollection(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void createCollectionAttributeTest() throws ScriptException {
+
+        String login = UUID.randomUUID().toString();
+        String password = UUID.randomUUID().toString();
+        {
+            SecuritySignUpRequest request = new SecuritySignUpRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecuritySignUpResponse response = client.signUp(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.login(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            CollectionCreateResponse response = client.createCollection(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            List<String> javaTypes = Arrays.asList(
+                    Byte.class.getName(),
+                    Short.class.getName(),
+                    Integer.class.getName(),
+                    Long.class.getName(),
+                    Float.class.getName(),
+                    Double.class.getName(),
+                    Date.class.getName(),
+                    Boolean.class.getName(),
+                    String.class.getName(),
+                    Character.class.getName()
+            );
+            int i = 0;
+            for (String javaType : javaTypes) {
+                i++;
+                CollectionAttributeCreateRequest request = new CollectionAttributeCreateRequest();
+                request.setCollectionName(collectionName);
+                request.setJavaType(javaType);
+                request.setAttributeName("first_name" + i);
+                request.setNullable(false);
+                CollectionAttributeCreateResponse response = client.createCollectionAttribute(request);
+                Assert.assertEquals(response.getHttpCode().intValue(), 200);
+            }
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.deleteCollection(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void deleteCollectionAttributeTest() throws ScriptException {
+
+        String login = UUID.randomUUID().toString();
+        String password = UUID.randomUUID().toString();
+        {
+            SecuritySignUpRequest request = new SecuritySignUpRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecuritySignUpResponse response = client.signUp(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.login(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            CollectionCreateResponse response = client.createCollection(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String attributeName = "first_name";
+        {
+
+            CollectionAttributeCreateRequest request = new CollectionAttributeCreateRequest();
+            request.setCollectionName(collectionName);
+            request.setJavaType(String.class.getName());
+            request.setAttributeName(attributeName);
+            request.setNullable(false);
+            CollectionAttributeCreateResponse response = client.createCollectionAttribute(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+
+            CollectionAttributeDeleteRequest request = new CollectionAttributeDeleteRequest();
+            request.setCollectionName(collectionName);
+            request.setAttributeName(attributeName);
+            CollectionAttributeDeleteResponse response = client.deleteCollectionAttribute(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.deleteCollection(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
     }
 
 }

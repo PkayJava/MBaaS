@@ -113,7 +113,7 @@ public class CollectionController {
             AttributeRecord virtualRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.ATTRIBUTE_ID.eq(attributeRecord.getVirtualAttributeId())).fetchOneInto(attributeTables);
             jdbcTemplate.execute("UPDATE `" + requestBody.getCollectionName() + "`" + " SET " + virtualRecord.getName() + " = " + JdbcFunction.columnDelete(virtualRecord.getName(), requestBody.getAttributeName()));
         } else {
-            jdbcTemplate.execute("ALTER COLLECTION `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");
+            jdbcTemplate.execute("ALTER TABLE `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");
         }
         attributeRecord.delete();
 
@@ -203,6 +203,7 @@ public class CollectionController {
         }
 
         attributeRecord = context.newRecord(attributeTables);
+        attributeRecord.setAttributeId(UUID.randomUUID().toString());
         attributeRecord.setNullable(requestBody.isNullable());
         attributeRecord.setCollectionId(collectionRecord.getCollectionId());
         attributeRecord.setVirtual(true);
