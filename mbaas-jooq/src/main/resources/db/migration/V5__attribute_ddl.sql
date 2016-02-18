@@ -9,7 +9,7 @@ CREATE TABLE `attribute` (
   java_type            VARCHAR(255) NOT NULL,
   virtual              BIT(1)       NOT NULL,
 
-  virtual_attribute_id VARCHAR(100) NOT NULL,
+  virtual_attribute_id VARCHAR(100),
 
   system               BIT(1)       NOT NULL,
   exposed              BIT(1)       NOT NULL,
@@ -17,6 +17,7 @@ CREATE TABLE `attribute` (
   auto_increment       BIT(1)       NOT NULL,
 
   INDEX (name),
+  INDEX (virtual_attribute_id),
   INDEX (collection_id),
   UNIQUE KEY (name, collection_id),
   PRIMARY KEY (attribute_id)
