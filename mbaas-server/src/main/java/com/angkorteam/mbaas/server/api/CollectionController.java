@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.api;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.Collection;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
 import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
@@ -69,33 +70,33 @@ public class CollectionController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
 
-        TableRecord tableRecord = null;
+        CollectionRecord collectionRecord = null;
 
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
             errorMessages.put("collectionName", "is required");
         } else {
-            tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
-            if (tableRecord == null) {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
                 errorMessages.put("collectionName", "is not found");
             }
         }
 
-        FieldRecord fieldRecord = null;
+        AttributeRecord attributeRecord = null;
         if (requestBody.getAttributeName() == null || "".equals(requestBody.getAttributeName())) {
             errorMessages.put("attributeName", "is required");
         } else {
-            if (tableRecord != null) {
-                fieldRecord = context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.NAME.eq(requestBody.getAttributeName())).and(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(fieldTable);
-                if (fieldRecord == null) {
+            if (collectionRecord != null) {
+                attributeRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(requestBody.getAttributeName())).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
+                if (attributeRecord == null) {
                     errorMessages.put("attributeName", "is not found");
                 }
             }
         }
 
-        if (tableRecord != null) {
+        if (collectionRecord != null) {
             if (!permission.hasCollectionAccess(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())) {
                 errorMessages.put("collectionName", "you are not allow to delete its attribute");
             }
@@ -108,13 +109,13 @@ public class CollectionController {
             return ResponseEntity.ok(response);
         }
 
-        if (fieldRecord.getVirtual()) {
-            FieldRecord virtualRecord = context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.FIELD_ID.eq(fieldRecord.getVirtualFieldId())).fetchOneInto(fieldTable);
+        if (attributeRecord.getVirtual()) {
+            AttributeRecord virtualRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.ATTRIBUTE_ID.eq(attributeRecord.getVirtualAttributeId())).fetchOneInto(attributeTables);
             jdbcTemplate.execute("UPDATE `" + requestBody.getCollectionName() + "`" + " SET " + virtualRecord.getName() + " = " + JdbcFunction.columnDelete(virtualRecord.getName(), requestBody.getAttributeName()));
         } else {
-            jdbcTemplate.execute("ALTER TABLE `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");
+            jdbcTemplate.execute("ALTER COLLECTION `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");
         }
-        fieldRecord.delete();
+        attributeRecord.delete();
 
         CollectionAttributeDeleteResponse response = new CollectionAttributeDeleteResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());
@@ -136,32 +137,32 @@ public class CollectionController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
 
-        TableRecord tableRecord = null;
+        CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
             errorMessages.put("collectionName", "is required");
         } else {
-            tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
-            if (tableRecord == null) {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
                 errorMessages.put("collectionName", "is not found");
             }
         }
 
-        if (tableRecord != null) {
+        if (collectionRecord != null) {
             if (!permission.hasCollectionAccess(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())) {
                 errorMessages.put("collectionName", "you are not allow to create its attribute");
             }
         }
 
-        FieldRecord fieldRecord = null;
+        AttributeRecord attributeRecord = null;
         if (requestBody.getAttributeName() == null || "".equals(requestBody.getAttributeName())) {
             errorMessages.put("attributeName", "is required");
         } else {
-            if (tableRecord != null) {
-                fieldRecord = context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.NAME.eq(requestBody.getAttributeName())).and(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(fieldTable);
-                if (fieldRecord != null) {
+            if (collectionRecord != null) {
+                attributeRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(requestBody.getAttributeName())).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
+                if (attributeRecord != null) {
                     errorMessages.put("attributeName", "is existed");
                 }
             }
@@ -186,9 +187,9 @@ public class CollectionController {
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        FieldRecord virtualRecord = null;
-        if (tableRecord != null) {
-            virtualRecord = context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.NAME.eq(configuration.getString(Constants.JDBC_COLUMN_EXTRA))).and(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchOneInto(fieldTable);
+        AttributeRecord virtualRecord = null;
+        if (collectionRecord != null) {
+            virtualRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(configuration.getString(Constants.JDBC_COLUMN_EXTRA))).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
             if (virtualRecord == null) {
                 errorMessages.put("collectionName", "does not support dynamic column");
             }
@@ -201,35 +202,35 @@ public class CollectionController {
             return ResponseEntity.ok(response);
         }
 
-        fieldRecord = context.newRecord(fieldTable);
-        fieldRecord.setNullable(requestBody.isNullable());
-        fieldRecord.setTableId(tableRecord.getTableId());
-        fieldRecord.setVirtual(true);
-        fieldRecord.setSystem(false);
-        fieldRecord.setName(requestBody.getAttributeName());
-        fieldRecord.setAutoIncrement(false);
-        fieldRecord.setExposed(true);
-        fieldRecord.setVirtualFieldId(virtualRecord.getFieldId());
-        fieldRecord.setJavaType(requestBody.getJavaType());
+        attributeRecord = context.newRecord(attributeTables);
+        attributeRecord.setNullable(requestBody.isNullable());
+        attributeRecord.setCollectionId(collectionRecord.getCollectionId());
+        attributeRecord.setVirtual(true);
+        attributeRecord.setSystem(false);
+        attributeRecord.setName(requestBody.getAttributeName());
+        attributeRecord.setAutoIncrement(false);
+        attributeRecord.setExposed(true);
+        attributeRecord.setVirtualAttributeId(virtualRecord.getAttributeId());
+        attributeRecord.setJavaType(requestBody.getJavaType());
         if (requestBody.getJavaType().equals(Integer.class.getName()) || requestBody.getJavaType().equals(int.class.getName())
                 || requestBody.getJavaType().equals(Byte.class.getName()) || requestBody.getJavaType().equals(byte.class.getName())
                 || requestBody.getJavaType().equals(Short.class.getName()) || requestBody.getJavaType().equals(short.class.getName())
                 || requestBody.getJavaType().equals(Long.class.getName()) || requestBody.getJavaType().equals(long.class.getName())
                 ) {
-            fieldRecord.setSqlType("INT");
+            attributeRecord.setSqlType("INT");
 
         } else if (requestBody.getJavaType().equals(Double.class.getName()) || requestBody.getJavaType().equals(double.class.getName())
                 || requestBody.getJavaType().equals(Float.class.getName()) || requestBody.getJavaType().equals(float.class.getName())) {
-            fieldRecord.setSqlType("DECIMAL");
+            attributeRecord.setSqlType("DECIMAL");
         } else if (requestBody.getJavaType().equals(Boolean.class.getName()) || requestBody.getJavaType().equals(boolean.class.getName())) {
-            fieldRecord.setSqlType("BIT");
+            attributeRecord.setSqlType("BIT");
         } else if (requestBody.getJavaType().equals(Date.class.getName()) || requestBody.getJavaType().equals(Time.class.getName()) || requestBody.getJavaType().equals(Timestamp.class.getName())) {
-            fieldRecord.setSqlType("DATETIME");
+            attributeRecord.setSqlType("DATETIME");
         } else if (requestBody.getJavaType().equals(Character.class.getName()) || requestBody.getJavaType().equals(char.class.getName())
                 || requestBody.getJavaType().equals(String.class.getName())) {
-            fieldRecord.setSqlType("VARCHAR");
+            attributeRecord.setSqlType("VARCHAR");
         }
-        fieldRecord.store();
+        attributeRecord.store();
 
         CollectionAttributeCreateResponse response = new CollectionAttributeCreateResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());
@@ -252,32 +253,32 @@ public class CollectionController {
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
         User userTable = Tables.USER.as("userTable");
 
-        TableRecord tableRecord = null;
+        CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
             errorMessages.put("collectionName", "is required");
         } else {
-            tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
-            if (tableRecord != null) {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+            if (collectionRecord != null) {
                 errorMessages.put("collectionName", "is existed");
             }
         }
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
 
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
 
         String primaryName = requestBody.getCollectionName() + "_id";
-        List<String> systemFields = Arrays.asList(primaryName, configuration.getString(Constants.JDBC_COLUMN_DELETED), configuration.getString(Constants.JDBC_COLUMN_EXTRA), configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
+        List<String> systemAttributes = Arrays.asList(primaryName, configuration.getString(Constants.JDBC_COLUMN_DELETED), configuration.getString(Constants.JDBC_COLUMN_EXTRA), configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
 
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
-            if (systemFields.contains(attribute.getName())) {
+            if (systemAttributes.contains(attribute.getName())) {
                 errorMessages.put(attribute.getName(), "overridden system field");
             }
             if (attribute.getJavaType() == null || "".equals(attribute.getJavaType())) {
@@ -306,7 +307,7 @@ public class CollectionController {
 
         StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE TABLE `").append(requestBody.getCollectionName()).append("` (");
-        buffer.append("`").append(primaryName).append("` INT(11) AUTO_INCREMENT, ");
+        buffer.append("`").append(primaryName).append("` VARCHAR(100) NOT NULL, ");
         buffer.append("`").append(configuration.getString(Constants.JDBC_COLUMN_EXTRA)).append("` BLOB, ");
         buffer.append("`").append(configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC)).append("` INT(11) NOT NULL DEFAULT 0, ");
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
@@ -337,120 +338,127 @@ public class CollectionController {
         buffer.append(" )");
         jdbcTemplate.execute(buffer.toString());
 
-        tableRecord = context.newRecord(tableTable);
-        tableRecord.setName(requestBody.getCollectionName());
-        tableRecord.setSystem(false);
-        tableRecord.setLocked(true);
-        tableRecord.setOwnerUserId(userRecord.getUserId());
-        tableRecord.store();
+        collectionRecord = context.newRecord(collectionTable);
+        collectionRecord.setCollectionId(UUID.randomUUID().toString());
+        collectionRecord.setName(requestBody.getCollectionName());
+        collectionRecord.setSystem(false);
+        collectionRecord.setLocked(true);
+        collectionRecord.setOwnerUserId(userRecord.getUserId());
+        collectionRecord.store();
 
         {
-            FieldRecord fieldRecord = context.newRecord(fieldTable);
-            fieldRecord.setTableId(tableRecord.getTableId());
-            fieldRecord.setName(primaryName);
-            fieldRecord.setNullable(false);
-            fieldRecord.setAutoIncrement(true);
-            fieldRecord.setSystem(true);
-            fieldRecord.setVirtual(false);
-            fieldRecord.setExposed(true);
-            fieldRecord.setJavaType(Integer.class.getName());
-            fieldRecord.setSqlType("INT");
-            fieldRecord.store();
+            AttributeRecord attributeRecord = context.newRecord(attributeTables);
+            attributeRecord.setAttributeId(UUID.randomUUID().toString());
+            attributeRecord.setCollectionId(collectionRecord.getCollectionId());
+            attributeRecord.setName(primaryName);
+            attributeRecord.setNullable(false);
+            attributeRecord.setAutoIncrement(true);
+            attributeRecord.setSystem(true);
+            attributeRecord.setVirtual(false);
+            attributeRecord.setExposed(true);
+            attributeRecord.setJavaType(String.class.getName());
+            attributeRecord.setSqlType("VARCHAR");
+            attributeRecord.store();
 
             PrimaryRecord primaryRecord = context.newRecord(primaryTable);
-            primaryRecord.setFieldId(fieldRecord.getFieldId());
-            primaryRecord.setTableId(tableRecord.getTableId());
+            primaryRecord.setAttributeId(attributeRecord.getAttributeId());
+            primaryRecord.setCollectionId(collectionRecord.getCollectionId());
             primaryRecord.store();
         }
 
         {
-            FieldRecord fieldRecord = context.newRecord(fieldTable);
-            fieldRecord.setTableId(tableRecord.getTableId());
-            fieldRecord.setName(configuration.getString(Constants.JDBC_COLUMN_EXTRA));
-            fieldRecord.setNullable(true);
-            fieldRecord.setSystem(true);
-            fieldRecord.setAutoIncrement(false);
-            fieldRecord.setVirtual(false);
-            fieldRecord.setExposed(false);
-            fieldRecord.setJavaType(Byte.class.getName() + "[]");
-            fieldRecord.setSqlType("BLOB");
-            fieldRecord.store();
+            AttributeRecord attributeRecord = context.newRecord(attributeTables);
+            attributeRecord.setAttributeId(UUID.randomUUID().toString());
+            attributeRecord.setCollectionId(collectionRecord.getCollectionId());
+            attributeRecord.setName(configuration.getString(Constants.JDBC_COLUMN_EXTRA));
+            attributeRecord.setNullable(true);
+            attributeRecord.setSystem(true);
+            attributeRecord.setAutoIncrement(false);
+            attributeRecord.setVirtual(false);
+            attributeRecord.setExposed(false);
+            attributeRecord.setJavaType(Byte.class.getName() + "[]");
+            attributeRecord.setSqlType("BLOB");
+            attributeRecord.store();
         }
 
         {
-            FieldRecord fieldRecord = context.newRecord(fieldTable);
-            fieldRecord.setTableId(tableRecord.getTableId());
-            fieldRecord.setName(configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
-            fieldRecord.setNullable(false);
-            fieldRecord.setAutoIncrement(false);
-            fieldRecord.setVirtual(false);
-            fieldRecord.setSystem(true);
-            fieldRecord.setExposed(false);
-            fieldRecord.setJavaType(Integer.class.getName());
-            fieldRecord.setSqlType("INT");
-            fieldRecord.store();
+            AttributeRecord attributeRecord = context.newRecord(attributeTables);
+            attributeRecord.setAttributeId(UUID.randomUUID().toString());
+            attributeRecord.setCollectionId(collectionRecord.getCollectionId());
+            attributeRecord.setName(configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
+            attributeRecord.setNullable(false);
+            attributeRecord.setAutoIncrement(false);
+            attributeRecord.setVirtual(false);
+            attributeRecord.setSystem(true);
+            attributeRecord.setExposed(false);
+            attributeRecord.setJavaType(Integer.class.getName());
+            attributeRecord.setSqlType("INT");
+            attributeRecord.store();
         }
 
         {
-            FieldRecord fieldRecord = context.newRecord(fieldTable);
-            fieldRecord.setTableId(tableRecord.getTableId());
-            fieldRecord.setName(configuration.getString(Constants.JDBC_COLUMN_DELETED));
-            fieldRecord.setNullable(false);
-            fieldRecord.setAutoIncrement(false);
-            fieldRecord.setVirtual(false);
-            fieldRecord.setSystem(true);
-            fieldRecord.setExposed(false);
-            fieldRecord.setJavaType(Boolean.class.getName());
-            fieldRecord.setSqlType("BIT");
-            fieldRecord.store();
+            AttributeRecord attributeRecord = context.newRecord(attributeTables);
+            attributeRecord.setAttributeId(UUID.randomUUID().toString());
+            attributeRecord.setCollectionId(collectionRecord.getCollectionId());
+            attributeRecord.setName(configuration.getString(Constants.JDBC_COLUMN_DELETED));
+            attributeRecord.setNullable(false);
+            attributeRecord.setAutoIncrement(false);
+            attributeRecord.setVirtual(false);
+            attributeRecord.setSystem(true);
+            attributeRecord.setExposed(false);
+            attributeRecord.setJavaType(Boolean.class.getName());
+            attributeRecord.setSqlType("BIT");
+            attributeRecord.store();
         }
         {
-            FieldRecord fieldRecord = context.newRecord(fieldTable);
-            fieldRecord.setTableId(tableRecord.getTableId());
-            fieldRecord.setName(configuration.getString(Constants.JDBC_OWNER_USER_ID));
-            fieldRecord.setNullable(false);
-            fieldRecord.setAutoIncrement(false);
-            fieldRecord.setVirtual(false);
-            fieldRecord.setSystem(true);
-            fieldRecord.setExposed(false);
-            fieldRecord.setJavaType(Integer.class.getName());
-            fieldRecord.setSqlType("INT");
-            fieldRecord.store();
+            AttributeRecord attributeRecord = context.newRecord(attributeTables);
+            attributeRecord.setAttributeId(UUID.randomUUID().toString());
+            attributeRecord.setCollectionId(collectionRecord.getCollectionId());
+            attributeRecord.setName(configuration.getString(Constants.JDBC_OWNER_USER_ID));
+            attributeRecord.setNullable(false);
+            attributeRecord.setAutoIncrement(false);
+            attributeRecord.setVirtual(false);
+            attributeRecord.setSystem(true);
+            attributeRecord.setExposed(false);
+            attributeRecord.setJavaType(Integer.class.getName());
+            attributeRecord.setSqlType("INT");
+            attributeRecord.store();
         }
 
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
-            FieldRecord fieldRecord = context.newRecord(fieldTable);
-            fieldRecord.setTableId(tableRecord.getTableId());
-            fieldRecord.setName(attribute.getName());
-            fieldRecord.setNullable(true);
-            fieldRecord.setSystem(false);
-            fieldRecord.setAutoIncrement(false);
-            fieldRecord.setVirtual(false);
-            fieldRecord.setExposed(true);
-            fieldRecord.setJavaType(attribute.getJavaType());
+            AttributeRecord attributeRecord = context.newRecord(attributeTables);
+            attributeRecord.setAttributeId(UUID.randomUUID().toString());
+            attributeRecord.setCollectionId(collectionRecord.getCollectionId());
+            attributeRecord.setName(attribute.getName());
+            attributeRecord.setNullable(true);
+            attributeRecord.setSystem(false);
+            attributeRecord.setAutoIncrement(false);
+            attributeRecord.setVirtual(false);
+            attributeRecord.setExposed(true);
+            attributeRecord.setJavaType(attribute.getJavaType());
             if (attribute.getJavaType().equals(Integer.class.getName()) || attribute.getJavaType().equals(int.class.getName())
                     || attribute.getJavaType().equals(Byte.class.getName()) || attribute.getJavaType().equals(byte.class.getName())
                     || attribute.getJavaType().equals(Short.class.getName()) || attribute.getJavaType().equals(short.class.getName())
                     || attribute.getJavaType().equals(Long.class.getName()) || attribute.getJavaType().equals(long.class.getName())
                     ) {
                 buffer.append("`").append(attribute.getName()).append("` INT(11)");
-                fieldRecord.setSqlType("INT");
+                attributeRecord.setSqlType("INT");
             } else if (attribute.getJavaType().equals(Double.class.getName()) || attribute.getJavaType().equals(double.class.getName())
                     || attribute.getJavaType().equals(Float.class.getName()) || attribute.getJavaType().equals(float.class.getName())) {
-                fieldRecord.setSqlType("DECIMAL");
+                attributeRecord.setSqlType("DECIMAL");
             } else if (attribute.getJavaType().equals(Boolean.class.getName()) || attribute.getJavaType().equals(boolean.class.getName())) {
-                fieldRecord.setSqlType("BIT");
+                attributeRecord.setSqlType("BIT");
             } else if (attribute.getJavaType().equals(Date.class.getName()) || attribute.getJavaType().equals(Time.class.getName()) || attribute.getJavaType().equals(Timestamp.class.getName())) {
-                fieldRecord.setSqlType("DATETIME");
+                attributeRecord.setSqlType("DATETIME");
             } else if (attribute.getJavaType().equals(Character.class.getName()) || attribute.getJavaType().equals(char.class.getName())
                     || attribute.getJavaType().equals(String.class.getName())) {
-                fieldRecord.setSqlType("VARCHAR");
+                attributeRecord.setSqlType("VARCHAR");
             }
-            fieldRecord.store();
+            attributeRecord.store();
         }
 
-        tableRecord.setLocked(false);
-        tableRecord.update();
+        collectionRecord.setLocked(false);
+        collectionRecord.update();
 
         CollectionCreateResponse response = new CollectionCreateResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());
@@ -472,21 +480,21 @@ public class CollectionController {
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
 
-        TableRecord tableRecord = null;
+        CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
             errorMessages.put("collectionName", "is required");
         } else {
-            tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
-            if (tableRecord == null) {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
                 errorMessages.put("collectionName", "is not found");
             }
         }
 
-        if (tableRecord != null) {
-            if (tableRecord.getSystem()) {
+        if (collectionRecord != null) {
+            if (collectionRecord.getSystem()) {
                 errorMessages.put("collectionName", "you are not allow to delete system collection");
             } else {
                 if (!permission.hasCollectionAccess(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())) {
@@ -502,11 +510,11 @@ public class CollectionController {
             return ResponseEntity.ok(response);
         }
 
-        context.delete(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).execute();
-        context.delete(primaryTable).where(primaryTable.TABLE_ID.eq(tableRecord.getTableId())).execute();
-        context.delete(tableTable).where(tableTable.TABLE_ID.eq(tableRecord.getTableId())).execute();
+        context.delete(attributeTables).where(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
+        context.delete(primaryTable).where(primaryTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
+        context.delete(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
 
-        jdbcTemplate.execute("DROP TABLE `" + requestBody.getCollectionName() + "`");
+        jdbcTemplate.execute("DROP COLLECTION `" + requestBody.getCollectionName() + "`");
 
         CollectionDeleteResponse response = new CollectionDeleteResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());

@@ -1,6 +1,6 @@
 CREATE TABLE setting (
 
-  setting_id INT(11) AUTO_INCREMENT,
+  setting_id VARCHAR(100) NOT NULL,
 
   `label`    VARCHAR(255) NOT NULL,
   `key`      VARCHAR(255) NOT NULL,

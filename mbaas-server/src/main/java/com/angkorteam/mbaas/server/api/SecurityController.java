@@ -3,14 +3,17 @@ package com.angkorteam.mbaas.server.api;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.Collection;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.plain.enums.ResultEnum;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
 import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.SecuritySignUpRequest;
-import com.angkorteam.mbaas.plain.response.*;
+import com.angkorteam.mbaas.plain.response.SecurityLoginResponse;
+import com.angkorteam.mbaas.plain.response.SecurityLogoutResponse;
+import com.angkorteam.mbaas.plain.response.SecurityLogoutSessionResponse;
+import com.angkorteam.mbaas.plain.response.SecuritySignUpResponse;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +34,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
-import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -73,9 +75,9 @@ public class SecurityController {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
         User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         Role roleTable = Tables.ROLE.as("roleTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
@@ -135,9 +137,9 @@ public class SecurityController {
             }
         }
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.USER.getName())).fetchOneInto(tableTable);
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.USER.getName())).fetchOneInto(collectionTable);
 
-        int fieldCount = context.selectCount().from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).and(fieldTable.NAME.in(fields)).fetchOneInto(Integer.class);
+        int fieldCount = context.selectCount().from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).and(attributeTable.NAME.in(fields)).fetchOneInto(Integer.class);
         if (fields.size() > fieldCount) {
             errorMessages.put("attribute", "some attributes are not allow");
         }
@@ -157,6 +159,7 @@ public class SecurityController {
         String password = requestBody.getPassword();
 
         UserRecord userRecord = context.newRecord(userTable);
+        userRecord.setUserId(UUID.randomUUID().toString());
         userRecord.setDeleted(false);
         userRecord.setRoleId(roleRecord.getRoleId());
         userRecord.setAccountNonExpired(true);
@@ -170,29 +173,29 @@ public class SecurityController {
         List<String> columnNames = new LinkedList<>();
         Map<String, Object> columnValues = new LinkedHashMap<>();
 
-        Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-        for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-            fieldRecords.put(fieldRecord.getName(), fieldRecord);
+        Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
+        for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
+            attributeRecords.put(attributeRecord.getName(), attributeRecord);
         }
 
-        Map<Integer, FieldRecord> blobRecords = new LinkedHashMap<>();
-        for (FieldRecord blobRecord : context.select(fieldTable.fields()).from(fieldTable)
-                .where(fieldTable.SQL_TYPE.eq("BLOB"))
-                .and(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
-                .and(fieldTable.VIRTUAL.eq(false))
-                .fetchInto(fieldTable)) {
-            blobRecords.put(blobRecord.getFieldId(), blobRecord);
+        Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
+        for (AttributeRecord blobRecord : context.select(attributeTable.fields()).from(attributeTable)
+                .where(attributeTable.SQL_TYPE.eq("BLOB"))
+                .and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                .and(attributeTable.VIRTUAL.eq(false))
+                .fetchInto(attributeTable)) {
+            blobRecords.put(blobRecord.getAttributeId(), blobRecord);
         }
 
-        Map<Integer, String> visibility = new LinkedHashMap<>();
+        Map<String, String> visibility = new LinkedHashMap<>();
         Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
 
         if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
-                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visibility.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByAnonymousUser.getLiteral());
-                if (fieldRecord.getVirtual()) {
-                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
+                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByAnonymousUser.getLiteral());
+                if (attributeRecord.getVirtual()) {
+                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
@@ -205,10 +208,10 @@ public class SecurityController {
         }
         if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
-                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visibility.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByFriend.getLiteral());
-                if (fieldRecord.getVirtual()) {
-                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
+                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByFriend.getLiteral());
+                if (attributeRecord.getVirtual()) {
+                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
@@ -221,10 +224,10 @@ public class SecurityController {
         }
         if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
-                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visibility.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByRegisteredUser.getLiteral());
-                if (fieldRecord.getVirtual()) {
-                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
+                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByRegisteredUser.getLiteral());
+                if (attributeRecord.getVirtual()) {
+                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
@@ -237,10 +240,10 @@ public class SecurityController {
         }
         if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
-                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visibility.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByTheUser.getLiteral());
-                if (fieldRecord.getVirtual()) {
-                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
+                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByTheUser.getLiteral());
+                if (attributeRecord.getVirtual()) {
+                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                     }
@@ -252,9 +255,10 @@ public class SecurityController {
             }
         }
 
-        for (Map.Entry<Integer, String> entry : visibility.entrySet()) {
+        for (Map.Entry<String, String> entry : visibility.entrySet()) {
             UserPrivacyRecord userPrivacyRecord = context.newRecord(userPrivacyTable);
-            userPrivacyRecord.setFieldId(entry.getKey());
+            userPrivacyRecord.setUserPrivacyId(UUID.randomUUID().toString());
+            userPrivacyRecord.setAttributeId(entry.getKey());
             userPrivacyRecord.setScope(entry.getValue());
             userPrivacyRecord.setUserId(userRecord.getUserId());
             userPrivacyRecord.store();
@@ -273,12 +277,12 @@ public class SecurityController {
         String tokenId = UUID.randomUUID().toString();
         Date dateCreated = new Date();
 
-        TokenRecord tokenRecord = context.newRecord(tokenTable);
-        tokenRecord.setTokenId(tokenId);
-        tokenRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
-        tokenRecord.setUserId(userRecord.getUserId());
-        tokenRecord.setDeleted(false);
-        tokenRecord.store();
+        SessionRecord sessionRecord = context.newRecord(sessionTable);
+        sessionRecord.setSessionId(tokenId);
+        sessionRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
+        sessionRecord.setUserId(userRecord.getUserId());
+        sessionRecord.setDeleted(false);
+        sessionRecord.store();
 
         responseBody.getData().setSession(tokenId);
         responseBody.getData().setDateCreated(dateCreated);
@@ -299,7 +303,7 @@ public class SecurityController {
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
 
         if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
             errorMessages.put("username", "is required");
@@ -329,12 +333,12 @@ public class SecurityController {
         String tokenId = UUID.randomUUID().toString();
         Date dateCreated = new Date();
 
-        TokenRecord tokenRecord = context.newRecord(tokenTable);
-        tokenRecord.setTokenId(tokenId);
-        tokenRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
-        tokenRecord.setUserId(userRecord.getUserId());
-        tokenRecord.setDeleted(false);
-        tokenRecord.store();
+        SessionRecord sessionRecord = context.newRecord(sessionTable);
+        sessionRecord.setSessionId(tokenId);
+        sessionRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
+        sessionRecord.setUserId(userRecord.getUserId());
+        sessionRecord.setDeleted(false);
+        sessionRecord.store();
 
         responseBody.getData().setSession(tokenId);
         responseBody.getData().setDateCreated(dateCreated);
@@ -357,10 +361,10 @@ public class SecurityController {
 
         SecurityLogoutResponse responseBody = new SecurityLogoutResponse();
 
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
-        Integer userId = tokenRecord.getUserId();
-        context.delete(tokenTable).where(tokenTable.USER_ID.eq(userId)).execute();
+        Session sessionTable = Tables.SESSION.as("sessionTable");
+        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
+        String userId = sessionRecord.getUserId();
+        context.delete(sessionTable).where(sessionTable.USER_ID.eq(userId)).execute();
 
         return ResponseEntity.ok(responseBody);
     }
@@ -369,7 +373,7 @@ public class SecurityController {
             method = RequestMethod.POST, path = "/logout/{token}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<SecurityLogoutTokenResponse> logoutToken(
+    public ResponseEntity<SecurityLogoutSessionResponse> logoutSession(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @Header("X-MBAAS-SESSION") String session,
@@ -378,10 +382,10 @@ public class SecurityController {
     ) {
         LOGGER.info("{} appCode=>{} session=> body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        SecurityLogoutTokenResponse responseBody = new SecurityLogoutTokenResponse();
+        SecurityLogoutSessionResponse responseBody = new SecurityLogoutSessionResponse();
 
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        context.delete(tokenTable).where(tokenTable.TOKEN_ID.eq(token)).execute();
+        Session sessionTable = Tables.SESSION.as("sessionTable");
+        context.delete(sessionTable).where(sessionTable.SESSION_ID.eq(token)).execute();
 
         return ResponseEntity.ok(responseBody);
     }

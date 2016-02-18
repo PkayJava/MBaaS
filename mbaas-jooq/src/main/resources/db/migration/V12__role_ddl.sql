@@ -1,6 +1,6 @@
 CREATE TABLE role (
 
-  role_id     INT(11)               AUTO_INCREMENT,
+  role_id     VARCHAR(100) NOT NULL,
 
   name        VARCHAR(255) NOT NULL,
   description VARCHAR(255),

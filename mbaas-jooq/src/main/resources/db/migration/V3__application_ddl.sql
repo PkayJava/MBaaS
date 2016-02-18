@@ -1,8 +1,8 @@
 CREATE TABLE application (
 
-  application_id INT(11) AUTO_INCREMENT,
+  application_id VARCHAR(100) NOT NULL,
 
-  user_id        INT(11),
+  user_id        VARCHAR(100) NOT NULL,
   code           VARCHAR(255),
 
   date_created   DATETIME,

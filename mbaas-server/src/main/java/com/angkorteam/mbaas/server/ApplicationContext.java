@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.Collection;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.ColumnEnum;
 import com.angkorteam.mbaas.plain.enums.IndexInfoEnum;
@@ -32,10 +33,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Khauv Socheat on 2/3/2016.
@@ -80,6 +79,7 @@ public class ApplicationContext implements ServletContextListener {
         if (adminRecord == null) {
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_ADMIN_ROLE)))).fetchOneInto(roleTable);
             adminRecord = context.newRecord(userTable);
+            adminRecord.setUserId(UUID.randomUUID().toString());
             adminRecord.setDeleted(false);
             adminRecord.setAccountNonExpired(true);
             adminRecord.setAccountNonLocked(true);
@@ -95,6 +95,7 @@ public class ApplicationContext implements ServletContextListener {
         if (mbaasRecord == null) {
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_MBAAS_ROLE)))).fetchOneInto(roleTable);
             mbaasRecord = context.newRecord(userTable);
+            mbaasRecord.setUserId(UUID.randomUUID().toString());
             mbaasRecord.setDeleted(false);
             mbaasRecord.setAccountNonExpired(true);
             mbaasRecord.setAccountNonLocked(true);
@@ -110,6 +111,7 @@ public class ApplicationContext implements ServletContextListener {
         if (internalAdminRecord == null) {
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_INTERNAL_ADMIN_ROLE)))).fetchOneInto(roleTable);
             internalAdminRecord = context.newRecord(userTable);
+            internalAdminRecord.setUserId(UUID.randomUUID().toString());
             internalAdminRecord.setDeleted(false);
             internalAdminRecord.setAccountNonExpired(true);
             internalAdminRecord.setAccountNonLocked(true);
@@ -129,6 +131,7 @@ public class ApplicationContext implements ServletContextListener {
         RoleRecord administratorRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_ADMINISTRATOR))).fetchOneInto(roleTable);
         if (administratorRecord == null) {
             administratorRecord = context.newRecord(roleTable);
+            administratorRecord.setRoleId(UUID.randomUUID().toString());
             administratorRecord.setName(configuration.getString(Constants.ROLE_ADMINISTRATOR));
             administratorRecord.setDescription(configuration.getString(Constants.ROLE_ADMINISTRATOR_DESCRIPTION));
             administratorRecord.setDeleted(false);
@@ -138,6 +141,7 @@ public class ApplicationContext implements ServletContextListener {
         RoleRecord backofficeRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_BACKOFFICE))).fetchOneInto(roleTable);
         if (backofficeRecord == null) {
             backofficeRecord = context.newRecord(roleTable);
+            backofficeRecord.setRoleId(UUID.randomUUID().toString());
             backofficeRecord.setName(configuration.getString(Constants.ROLE_BACKOFFICE));
             backofficeRecord.setDescription(configuration.getString(Constants.ROLE_BACKOFFICE_DESCRIPTION));
             backofficeRecord.setDeleted(false);
@@ -147,6 +151,7 @@ public class ApplicationContext implements ServletContextListener {
         RoleRecord registeredRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_REGISTERED))).fetchOneInto(roleTable);
         if (registeredRecord == null) {
             registeredRecord = context.newRecord(roleTable);
+            registeredRecord.setRoleId(UUID.randomUUID().toString());
             registeredRecord.setName(configuration.getString(Constants.ROLE_REGISTERED));
             registeredRecord.setDescription(configuration.getString(Constants.ROLE_REGISTERED_DESCRIPTION));
             registeredRecord.setDeleted(false);
@@ -156,6 +161,7 @@ public class ApplicationContext implements ServletContextListener {
         RoleRecord anonymousRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_ANONYMOUS))).fetchOneInto(roleTable);
         if (anonymousRecord == null) {
             anonymousRecord = context.newRecord(roleTable);
+            anonymousRecord.setRoleId(UUID.randomUUID().toString());
             anonymousRecord.setName(configuration.getString(Constants.ROLE_ANONYMOUS));
             anonymousRecord.setDescription(configuration.getString(Constants.ROLE_ANONYMOUS_DESCRIPTION));
             anonymousRecord.setDeleted(false);
@@ -166,8 +172,8 @@ public class ApplicationContext implements ServletContextListener {
     protected void initDDL(DSLContext context, DataSource dataSource) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        com.angkorteam.mbaas.model.entity.tables.Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
         Index indexTable = Tables.INDEX.as("indexTable");
         User userTable = Tables.USER.as("userTable");
@@ -179,98 +185,102 @@ public class ApplicationContext implements ServletContextListener {
             DatabaseMetaData databaseMetaData = connection.getMetaData();
             DbSupport databaseSupport = DbSupportFactory.createDbSupport(connection, true);
             for (Table table : databaseSupport.getCurrentSchema().allTables()) {
-                TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable)
-                        .where(tableTable.NAME.eq(table.getName()))
-                        .fetchOneInto(tableTable);
-                if (tableRecord == null) {
-                    tableRecord = context.newRecord(tableTable);
-                    tableRecord.setName(table.getName());
-                    tableRecord.setSystem(true);
-                    tableRecord.setOwnerUserId(userRecord.getUserId());
-                    tableRecord.store();
+                CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable)
+                        .where(collectionTable.NAME.eq(table.getName()))
+                        .fetchOneInto(collectionTable);
+                if (collectionRecord == null) {
+                    collectionRecord = context.newRecord(collectionTable);
+                    collectionRecord.setCollectionId(UUID.randomUUID().toString());
+                    collectionRecord.setName(table.getName());
+                    collectionRecord.setSystem(true);
+                    collectionRecord.setOwnerUserId(userRecord.getUserId());
+                    collectionRecord.store();
                 }
-                List<FieldRecord> temporaryFieldRecords = context.select(fieldTable.fields()).from(fieldTable)
-                        .where(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
-                        .and(fieldTable.VIRTUAL.eq(false))
-                        .fetchInto(fieldTable);
-                Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-                for (FieldRecord fieldRecord : temporaryFieldRecords) {
-                    fieldRecords.put(fieldRecord.getName(), fieldRecord);
+                List<AttributeRecord> temporaryAttributeRecords = context.select(attributeTable.fields()).from(attributeTable)
+                        .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                        .and(attributeTable.VIRTUAL.eq(false))
+                        .fetchInto(attributeTable);
+                Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
+                for (AttributeRecord attributeRecord : temporaryAttributeRecords) {
+                    attributeRecords.put(attributeRecord.getName(), attributeRecord);
                 }
                 {
                     ResultSet resultSet = databaseMetaData.getColumns(null, null, table.getName(), null);
                     while (resultSet.next()) {
                         String columnName = resultSet.getString(ColumnEnum.COLUMN_NAME.getLiteral());
-                        if (!fieldRecords.containsKey(columnName)) {
-                            FieldRecord fieldRecord = context.newRecord(fieldTable);
-                            fieldRecord.setTableId(tableRecord.getTableId());
-                            fieldRecord.setName(columnName);
-                            fieldRecord.setNullable(resultSet.getBoolean(ColumnEnum.NULLABLE.getLiteral()));
-                            fieldRecord.setAutoIncrement(resultSet.getBoolean(ColumnEnum.IS_AUTOINCREMENT.getLiteral()));
-                            fieldRecord.setSystem(true);
-                            fieldRecord.setVirtual(false);
+                        if (!attributeRecords.containsKey(columnName)) {
+                            AttributeRecord attributeRecord = context.newRecord(attributeTable);
+                            attributeRecord.setAttributeId(UUID.randomUUID().toString());
+                            attributeRecord.setCollectionId(collectionRecord.getCollectionId());
+                            attributeRecord.setName(columnName);
+                            attributeRecord.setNullable(resultSet.getBoolean(ColumnEnum.NULLABLE.getLiteral()));
+                            if (columnName.equals(collectionRecord.getName() + "_id")) {
+                                attributeRecord.setAutoIncrement(true);
+                            }
+                            attributeRecord.setSystem(true);
+                            attributeRecord.setVirtual(false);
 
                             int dataType = resultSet.getInt(ColumnEnum.DATA_TYPE.getLiteral());
                             String typeName = resultSet.getString(ColumnEnum.TYPE_NAME.getLiteral());
 
                             if (dataType == Types.LONGVARBINARY) {
-                                fieldRecord.setExposed(false);
+                                attributeRecord.setExposed(false);
                             } else {
-                                fieldRecord.setExposed(true);
+                                attributeRecord.setExposed(true);
                             }
 
                             if (dataType == Types.INTEGER) {
-                                fieldRecord.setJavaType(Integer.class.getName());
-                                fieldRecord.setSqlType(typeName);
+                                attributeRecord.setJavaType(Integer.class.getName());
+                                attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.VARCHAR) {
-                                fieldRecord.setJavaType(String.class.getName());
-                                fieldRecord.setSqlType(typeName);
+                                attributeRecord.setJavaType(String.class.getName());
+                                attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.TIMESTAMP) {
-                                fieldRecord.setJavaType(Date.class.getName());
-                                fieldRecord.setSqlType(typeName);
+                                attributeRecord.setJavaType(Date.class.getName());
+                                attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.LONGVARBINARY) {
-                                fieldRecord.setJavaType(Byte.class.getName() + "[]");
-                                fieldRecord.setSqlType(typeName);
+                                attributeRecord.setJavaType(Byte.class.getName() + "[]");
+                                attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.BIT) {
-                                fieldRecord.setJavaType(Boolean.class.getName());
-                                fieldRecord.setSqlType(typeName);
+                                attributeRecord.setJavaType(Boolean.class.getName());
+                                attributeRecord.setSqlType(typeName);
                             } else {
                                 throw new WicketRuntimeException("field type unknown " + dataType + " => " + typeName);
                             }
-                            fieldRecord.store();
+                            attributeRecord.store();
                         } else {
-                            fieldRecords.remove(columnName);
+                            attributeRecords.remove(columnName);
                         }
                     }
                 }
-                for (Map.Entry<String, FieldRecord> entry : fieldRecords.entrySet()) {
-                    context.delete(fieldTable)
-                            .where(fieldTable.FIELD_ID.eq(entry.getValue().getFieldId()))
+                for (Map.Entry<String, AttributeRecord> entry : attributeRecords.entrySet()) {
+                    context.delete(attributeTable)
+                            .where(attributeTable.ATTRIBUTE_ID.eq(entry.getValue().getAttributeId()))
                             .execute();
                 }
                 {
-                    Map<Integer, FieldRecord> blobRecords = new LinkedHashMap<>();
-                    for (FieldRecord blobRecord : context.select(fieldTable.fields()).from(fieldTable)
-                            .where(fieldTable.SQL_TYPE.eq("BLOB"))
-                            .and(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
-                            .and(fieldTable.VIRTUAL.eq(false))
-                            .fetchInto(fieldTable)) {
-                        blobRecords.put(blobRecord.getFieldId(), blobRecord);
+                    Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
+                    for (AttributeRecord blobRecord : context.select(attributeTable.fields()).from(attributeTable)
+                            .where(attributeTable.SQL_TYPE.eq("BLOB"))
+                            .and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                            .and(attributeTable.VIRTUAL.eq(false))
+                            .fetchInto(attributeTable)) {
+                        blobRecords.put(blobRecord.getAttributeId(), blobRecord);
                     }
                     if (blobRecords == null || blobRecords.isEmpty()) {
-                        context.delete(fieldTable)
-                                .where(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
-                                .and(fieldTable.VIRTUAL.eq(true))
+                        context.delete(attributeTable)
+                                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                                .and(attributeTable.VIRTUAL.eq(true))
                                 .execute();
                     } else {
-                        List<FieldRecord> virtualRecords = context.select(fieldTable.fields()).from(fieldTable)
-                                .where(fieldTable.VIRTUAL.eq(true))
-                                .and(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
-                                .fetchInto(fieldTable);
-                        for (FieldRecord virtualRecord : virtualRecords) {
-                            if (!blobRecords.containsKey(virtualRecord.getVirtualFieldId())) {
-                                context.delete(fieldTable)
-                                        .where(fieldTable.FIELD_ID.eq(virtualRecord.getFieldId()))
+                        List<AttributeRecord> virtualRecords = context.select(attributeTable.fields()).from(attributeTable)
+                                .where(attributeTable.VIRTUAL.eq(true))
+                                .and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                                .fetchInto(attributeTable);
+                        for (AttributeRecord virtualRecord : virtualRecords) {
+                            if (!blobRecords.containsKey(virtualRecord.getVirtualAttributeId())) {
+                                context.delete(attributeTable)
+                                        .where(attributeTable.ATTRIBUTE_ID.eq(virtualRecord.getAttributeId()))
                                         .execute();
                             }
                         }
@@ -280,29 +290,29 @@ public class ApplicationContext implements ServletContextListener {
                     ResultSet resultSet = databaseMetaData.getPrimaryKeys(null, null, table.getName());
                     while (resultSet.next()) {
                         String columnName = resultSet.getString(PrimaryKeyEnum.COLUMN_NAME.getLiteral());
-                        FieldRecord fieldRecord = context.select(fieldTable.fields()).from(fieldTable)
-                                .where(fieldTable.NAME.eq(columnName))
-                                .and(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
-                                .and(fieldTable.VIRTUAL.eq(false))
-                                .fetchOneInto(fieldTable);
+                        AttributeRecord attributeRecord = context.select(attributeTable.fields()).from(attributeTable)
+                                .where(attributeTable.NAME.eq(columnName))
+                                .and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                                .and(attributeTable.VIRTUAL.eq(false))
+                                .fetchOneInto(attributeTable);
                         PrimaryRecord primaryRecord = context.select(primaryTable.fields()).from(primaryTable)
-                                .where(primaryTable.FIELD_ID.eq(fieldRecord.getFieldId()))
-                                .and(primaryTable.TABLE_ID.eq(tableRecord.getTableId()))
+                                .where(primaryTable.ATTRIBUTE_ID.eq(attributeRecord.getAttributeId()))
+                                .and(primaryTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
                                 .fetchOneInto(primaryTable);
                         if (primaryRecord == null) {
                             primaryRecord = context.newRecord(primaryTable);
-                            primaryRecord.setFieldId(fieldRecord.getFieldId());
-                            primaryRecord.setTableId(tableRecord.getTableId());
+                            primaryRecord.setAttributeId(attributeRecord.getAttributeId());
+                            primaryRecord.setCollectionId(collectionRecord.getCollectionId());
                             primaryRecord.store();
                         }
                     }
                 }
                 List<IndexRecord> temporaryIndexRecords = context.select(indexTable.fields()).from(indexTable)
-                        .where(indexTable.TABLE_ID.eq(tableRecord.getTableId()))
+                        .where(indexTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
                         .fetchInto(indexTable);
                 Map<String, IndexRecord> indexRecords = new LinkedHashMap<>();
                 for (IndexRecord indexRecord : temporaryIndexRecords) {
-                    String key = tableRecord.getTableId() + indexRecord.getName() + indexRecord.getFieldId();
+                    String key = collectionRecord.getCollectionId() + indexRecord.getName() + indexRecord.getAttributeId();
                     indexRecords.put(key, indexRecord);
                 }
                 {
@@ -314,15 +324,16 @@ public class ApplicationContext implements ServletContextListener {
                         }
 
                         String columnName = resultSet.getString(IndexInfoEnum.COLUMN_NAME.getLiteral());
-                        FieldRecord fieldRecord = context.select(fieldTable.fields()).from(fieldTable)
-                                .where(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
-                                .and(fieldTable.NAME.eq(columnName))
-                                .fetchOneInto(fieldTable);
-                        String key = tableRecord.getTableId() + indexName + fieldRecord.getFieldId();
+                        AttributeRecord attributeRecord = context.select(attributeTable.fields()).from(attributeTable)
+                                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                                .and(attributeTable.NAME.eq(columnName))
+                                .fetchOneInto(attributeTable);
+                        String key = collectionRecord.getCollectionId() + indexName + attributeRecord.getAttributeId();
                         if (!indexRecords.containsKey(key)) {
                             IndexRecord indexRecord = context.newRecord(indexTable);
-                            indexRecord.setTableId(tableRecord.getTableId());
-                            indexRecord.setFieldId(fieldRecord.getFieldId());
+                            indexRecord.setIndexId(UUID.randomUUID().toString());
+                            indexRecord.setCollectionId(collectionRecord.getCollectionId());
+                            indexRecord.setAttributeId(attributeRecord.getAttributeId());
                             indexRecord.setName(indexName);
                             indexRecord.setType(resultSet.getInt(IndexInfoEnum.TYPE.getLiteral()));
                             indexRecord.setUnique(!resultSet.getBoolean(IndexInfoEnum.NON_UNIQUE.getLiteral()));
@@ -341,7 +352,7 @@ public class ApplicationContext implements ServletContextListener {
         } catch (SQLException e) {
             throw new WicketRuntimeException(e);
         }
-        context.update(tableTable).set(tableTable.LOCKED, false).execute();
+        context.update(collectionTable).set(collectionTable.LOCKED, false).execute();
     }
 
     public static ApplicationContext get(ServletContext servletContext) {

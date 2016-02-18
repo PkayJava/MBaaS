@@ -69,11 +69,11 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Collection tableTable = Tables.COLLECTION.as("tableTable");
+        Attribute fieldTable = Tables.ATTRIBUTE.as("fieldTable");
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
-        if (tableRecord == null) {
+        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
+        if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
 
@@ -81,17 +81,17 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        Map<Integer, FieldRecord> fieldRecords = new LinkedHashMap<>();
-        for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-            fieldRecords.put(fieldRecord.getFieldId(), fieldRecord);
+        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
+        for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
+            fieldRecords.put(fieldRecord.getAttributeId(), fieldRecord);
         }
 
         List<String> fields = new LinkedList<>();
-        for (Map.Entry<Integer, FieldRecord> entry : fieldRecords.entrySet()) {
-            FieldRecord fieldRecord = entry.getValue();
+        for (Map.Entry<String, AttributeRecord> entry : fieldRecords.entrySet()) {
+            AttributeRecord fieldRecord = entry.getValue();
             if (fieldRecord.getExposed()) {
                 if (fieldRecord.getVirtual()) {
-                    FieldRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualFieldId());
+                    AttributeRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualAttributeId());
                     fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
                 } else {
                     fields.add("`" + entry.getKey() + "`");
@@ -118,11 +118,11 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Collection tableTable = Tables.COLLECTION.as("tableTable");
+        Attribute fieldTable = Tables.ATTRIBUTE.as("fieldTable");
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
-        if (tableRecord == null) {
+        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
+        if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
 
@@ -130,17 +130,17 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        Map<Integer, FieldRecord> fieldRecords = new LinkedHashMap<>();
-        for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-            fieldRecords.put(fieldRecord.getFieldId(), fieldRecord);
+        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
+        for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
+            fieldRecords.put(fieldRecord.getAttributeId(), fieldRecord);
         }
 
         List<String> fields = new LinkedList<>();
-        for (Map.Entry<Integer, FieldRecord> entry : fieldRecords.entrySet()) {
-            FieldRecord fieldRecord = entry.getValue();
+        for (Map.Entry<String, AttributeRecord> entry : fieldRecords.entrySet()) {
+            AttributeRecord fieldRecord = entry.getValue();
             if (fieldRecord.getExposed()) {
                 if (fieldRecord.getVirtual()) {
-                    FieldRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualFieldId());
+                    AttributeRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualAttributeId());
                     fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
                 } else {
                     fields.add("`" + entry.getKey() + "`");
@@ -169,11 +169,11 @@ public class DocumentController {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
         User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
+        Collection tableTable = Tables.COLLECTION.as("tableTable");
+        Attribute fieldTable = Tables.ATTRIBUTE.as("fieldTable");
 
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         if (tokenRecord == null) {
             return ResponseEntity.ok(null);
         }
@@ -183,8 +183,8 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
-        if (tableRecord == null) {
+        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
+        if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
 
@@ -192,8 +192,8 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-        for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
+        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
+        for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
             fieldRecords.put(fieldRecord.getName(), fieldRecord);
         }
 
@@ -201,20 +201,20 @@ public class DocumentController {
             if (!fieldRecords.containsKey(entry.getKey())) {
                 return ResponseEntity.ok(null);
             } else {
-                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+                AttributeRecord fieldRecord = fieldRecords.get(entry.getKey());
                 if (!fieldRecord.getJavaType().equals(entry.getValue().getClass().getName())) {
                     return ResponseEntity.ok(null);
                 }
             }
         }
 
-        Map<Integer, FieldRecord> blobRecords = new LinkedHashMap<>();
-        for (FieldRecord blobRecord : context.select(fieldTable.fields()).from(fieldTable)
+        Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
+        for (AttributeRecord blobRecord : context.select(fieldTable.fields()).from(fieldTable)
                 .where(fieldTable.SQL_TYPE.eq("BLOB"))
-                .and(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
+                .and(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
                 .and(fieldTable.VIRTUAL.eq(false))
                 .fetchInto(fieldTable)) {
-            blobRecords.put(blobRecord.getFieldId(), blobRecord);
+            blobRecords.put(blobRecord.getAttributeId(), blobRecord);
         }
 
         Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
@@ -224,7 +224,7 @@ public class DocumentController {
         Map<String, Object> columnValues = new LinkedHashMap<>();
 
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+            AttributeRecord fieldRecord = fieldRecords.get(entry.getKey());
             if (fieldRecord.getNullable()) {
                 if (fieldRecord.getJavaType().equals(String.class.getName())) {
                     if (entry.getValue() == null) {
@@ -237,7 +237,7 @@ public class DocumentController {
                 }
             }
             if (fieldRecord.getVirtual()) {
-                FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                AttributeRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualAttributeId());
                 if (!virtualColumns.containsKey(physicalRecord.getName())) {
                     virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                 }
@@ -265,11 +265,11 @@ public class DocumentController {
         Integer id = holder.getKey().intValue();
 
         List<String> columns = new LinkedList<>();
-        for (Map.Entry<String, FieldRecord> entry : fieldRecords.entrySet()) {
-            FieldRecord fieldRecord = entry.getValue();
+        for (Map.Entry<String, AttributeRecord> entry : fieldRecords.entrySet()) {
+            AttributeRecord fieldRecord = entry.getValue();
             if (fieldRecord.getExposed()) {
                 if (fieldRecord.getVirtual()) {
-                    FieldRecord virtualRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                    AttributeRecord virtualRecord = blobRecords.get(fieldRecord.getVirtualAttributeId());
                     columns.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
                 } else {
                     columns.add("`" + fieldRecord.getName() + "`");
@@ -277,7 +277,7 @@ public class DocumentController {
             }
         }
 
-        Map<String, Object> values = jdbcTemplate.queryForMap("SELECT " + StringUtils.join(columns, ", ") + " FROM `" + tableRecord.getName() + "` where " + tableRecord.getName() + "_id = ?", id);
+        Map<String, Object> values = jdbcTemplate.queryForMap("SELECT " + StringUtils.join(columns, ", ") + " FROM `" + collectionRecord.getName() + "` where " + collectionRecord.getName() + "_id = ?", id);
 
         DocumentCreateResponse response = new DocumentCreateResponse();
         response.getData().setCollectionName(collection);
@@ -323,11 +323,11 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Collection tableTable = Tables.COLLECTION.as("tableTable");
+        Attribute fieldTable = Tables.ATTRIBUTE.as("fieldTable");
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
-        if (tableRecord == null) {
+        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
+        if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
 
@@ -335,12 +335,12 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-        Map<Integer, FieldRecord> blobRecords = new LinkedHashMap<>();
-        for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
+        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
+        Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
+        for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
             fieldRecords.put(fieldRecord.getName(), fieldRecord);
             if (fieldRecord.getSqlType().equals("BLOB")) {
-                blobRecords.put(fieldRecord.getFieldId(), fieldRecord);
+                blobRecords.put(fieldRecord.getAttributeId(), fieldRecord);
             }
         }
 
@@ -348,12 +348,12 @@ public class DocumentController {
         Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
         Map<String, Object> values = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
+            AttributeRecord fieldRecord = fieldRecords.get(entry.getKey());
             if (fieldRecord == null) {
                 continue;
             }
             if (fieldRecord.getVirtual()) {
-                FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                AttributeRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualAttributeId());
                 if (!virtualColumns.containsKey(physicalRecord.getName())) {
                     virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                 }
@@ -392,11 +392,11 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Collection tableTable = Tables.COLLECTION.as("tableTable");
+        Attribute fieldTable = Tables.ATTRIBUTE.as("fieldTable");
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
-        if (tableRecord == null) {
+        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
+        if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
 
@@ -404,10 +404,10 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        FieldRecord fieldRecord = context.select(fieldTable.fields())
+        AttributeRecord fieldRecord = context.select(fieldTable.fields())
                 .from(fieldTable)
-                .where(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
-                .and(fieldTable.NAME.eq(tableRecord.getName() + "_id"))
+                .where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                .and(fieldTable.NAME.eq(collectionRecord.getName() + "_id"))
                 .and(fieldTable.AUTO_INCREMENT.eq(true))
                 .and(fieldTable.SYSTEM.eq(true))
                 .fetchOneInto(fieldTable);
@@ -434,12 +434,12 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Table tableTable = Tables.TABLE.as("tableTable");
+        Collection tableTable = Tables.COLLECTION.as("tableTable");
         User userTable = Tables.USER.as("userTable");
         DocumentUserPrivacy documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
-        if (tableRecord == null) {
+        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
+        if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
 
@@ -450,7 +450,7 @@ public class DocumentController {
 
         DocumentUserPrivacyRecord documentUserPrivacyRecord = context.newRecord(documentUserPrivacyTable);
         documentUserPrivacyRecord.setDocumentId(requestBody.getDocumentId());
-        documentUserPrivacyRecord.setTableId(tableRecord.getTableId());
+        documentUserPrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
         int permission = 0;
         for (Integer action : requestBody.getActions()) {
             permission = permission | action;
@@ -475,12 +475,12 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Table tableTable = Tables.TABLE.as("tableTable");
+        Collection tableTable = Tables.COLLECTION.as("tableTable");
         Role roleTable = Tables.ROLE.as("roleTable");
         DocumentRolePrivacy documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
-        if (tableRecord == null) {
+        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
+        if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
 
@@ -491,7 +491,7 @@ public class DocumentController {
 
         DocumentRolePrivacyRecord documentRolePrivacyRecord = context.newRecord(documentRolePrivacyTable);
         documentRolePrivacyRecord.setDocumentId(requestBody.getDocumentId());
-        documentRolePrivacyRecord.setTableId(tableRecord.getTableId());
+        documentRolePrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
         int permission = 0;
         for (Integer action : requestBody.getActions()) {
             permission = permission | action;
@@ -517,12 +517,12 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Table tableTable = Tables.TABLE.as("tableTable");
+        Collection tableTable = Tables.COLLECTION.as("tableTable");
         User userTable = Tables.USER.as("userTable");
         DocumentUserPrivacy documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
-        if (tableRecord == null) {
+        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
+        if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
 
@@ -533,7 +533,7 @@ public class DocumentController {
 
         DocumentUserPrivacyRecord documentUserPrivacyRecord = context.select(documentUserPrivacyTable.fields())
                 .from(documentUserPrivacyTable)
-                .where(documentUserPrivacyTable.TABLE_ID.eq(tableRecord.getTableId()))
+                .where(documentUserPrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
                 .and(documentUserPrivacyTable.USER_ID.eq(userRecord.getUserId()))
                 .and(documentUserPrivacyTable.DOCUMENT_ID.eq(requestBody.getDocumentId()))
                 .fetchOneInto(documentUserPrivacyTable);
@@ -562,12 +562,12 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Table tableTable = Tables.TABLE.as("tableTable");
+        Collection tableTable = Tables.COLLECTION.as("tableTable");
         Role roleTable = Tables.ROLE.as("roleTable");
         DocumentRolePrivacy documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollection())).fetchOneInto(tableTable);
-        if (tableRecord == null) {
+        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
+        if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
 
@@ -578,7 +578,7 @@ public class DocumentController {
 
         DocumentRolePrivacyRecord documentRolePrivacyRecord = context.select(documentRolePrivacyTable.fields())
                 .from(documentRolePrivacyTable)
-                .where(documentRolePrivacyTable.TABLE_ID.eq(tableRecord.getTableId()))
+                .where(documentRolePrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
                 .and(documentRolePrivacyTable.ROLE_ID.eq(roleRecord.getRoleId()))
                 .and(documentRolePrivacyTable.DOCUMENT_ID.eq(requestBody.getDocumentId()))
                 .fetchOneInto(documentRolePrivacyTable);

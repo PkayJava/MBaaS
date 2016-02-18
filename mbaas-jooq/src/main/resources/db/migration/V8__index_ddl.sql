@@ -1,15 +1,15 @@
 CREATE TABLE `index` (
 
-  index_id INT(11) AUTO_INCREMENT,
+  index_id      VARCHAR(100) NOT NULL,
 
-  table_id INT(11)      NOT NULL,
-  name     VARCHAR(255) NOT NULL,
-  field_id INT(11)      NOT NULL,
+  collection_id VARCHAR(100) NOT NULL,
+  name          VARCHAR(255) NOT NULL,
+  attribute_id  VARCHAR(100) NOT NULL,
 
-  `unique` BIT(1)       NOT NULL,
-  type     INT(11),
+  `unique`      BIT(1)       NOT NULL,
+  type          INT(11),
 
-  UNIQUE (table_id, name, field_id),
+  UNIQUE (collection_id, name, attribute_id),
   PRIMARY KEY (index_id)
 
 );

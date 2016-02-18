@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.api;
 import com.angkorteam.baasbox.sdk.java.json.ChangePasswordJson;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.Collection;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.ResultEnum;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
@@ -69,10 +70,10 @@ public class UserController {
     ) {
         UnknownResponse responseBody = new UnknownResponse();
 
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
         User userTable = Tables.USER.as("userTable");
 
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         UserRecord userRecord = null;
 
         if (tokenRecord != null) {
@@ -147,10 +148,10 @@ public class UserController {
     ) {
         UnknownResponse responseBody = new UnknownResponse();
 
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
         User userTable = Tables.USER.as("userTable");
 
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         UserRecord userRecord = null;
 
         if (tokenRecord != null) {
@@ -176,11 +177,10 @@ public class UserController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody UpdateUserProfileRequest requestBody
     ) {
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         // field duplication check
@@ -230,9 +230,9 @@ public class UserController {
             return ResponseEntity.ok(null);
         }
 
-        TableRecord tableRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(Tables.USER.getName())).fetchOneInto(tableTable);
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.USER.getName())).fetchOneInto(collectionTable);
 
-        int fieldCount = context.selectCount().from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).and(fieldTable.NAME.in(fields)).fetchOneInto(Integer.class);
+        int fieldCount = context.selectCount().from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).and(attributeTable.NAME.in(fields)).fetchOneInto(Integer.class);
         if (fields.size() > fieldCount) {
             return ResponseEntity.ok(null);
         }
@@ -242,30 +242,30 @@ public class UserController {
         List<String> columnNames = new LinkedList<>();
         Map<String, Object> columnValues = new LinkedHashMap<>();
 
-        Map<String, FieldRecord> fieldRecords = new LinkedHashMap<>();
-        if (tableRecord != null) {
-            for (FieldRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.TABLE_ID.eq(tableRecord.getTableId())).fetchInto(fieldTable)) {
-                fieldRecords.put(fieldRecord.getName(), fieldRecord);
+        Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
+        if (collectionRecord != null) {
+            for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
+                attributeRecords.put(attributeRecord.getName(), attributeRecord);
             }
         }
-        Map<Integer, FieldRecord> blobRecords = new LinkedHashMap<>();
-        for (FieldRecord blobRecord : context.select(fieldTable.fields()).from(fieldTable)
-                .where(fieldTable.SQL_TYPE.eq("BLOB"))
-                .and(fieldTable.TABLE_ID.eq(tableRecord.getTableId()))
-                .and(fieldTable.VIRTUAL.eq(false))
-                .fetchInto(fieldTable)) {
-            blobRecords.put(blobRecord.getFieldId(), blobRecord);
+        Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
+        for (AttributeRecord blobRecord : context.select(attributeTable.fields()).from(attributeTable)
+                .where(attributeTable.SQL_TYPE.eq("BLOB"))
+                .and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                .and(attributeTable.VIRTUAL.eq(false))
+                .fetchInto(attributeTable)) {
+            blobRecords.put(blobRecord.getAttributeId(), blobRecord);
         }
 
-        Map<Integer, String> visiblity = new LinkedHashMap<>();
+        Map<String, String> visiblity = new LinkedHashMap<>();
         Map<String, List<String>> virtualColumns = new LinkedHashMap<>();
 
         if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
-                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByAnonymousUser.getLiteral());
-                if (fieldRecord.getVirtual()) {
-                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
+                visiblity.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByAnonymousUser.getLiteral());
+                if (attributeRecord.getVirtual()) {
+                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
                     }
@@ -279,10 +279,10 @@ public class UserController {
         }
         if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
-                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByFriend.getLiteral());
-                if (fieldRecord.getVirtual()) {
-                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
+                visiblity.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByFriend.getLiteral());
+                if (attributeRecord.getVirtual()) {
+                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
                     }
@@ -296,10 +296,10 @@ public class UserController {
         }
         if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
-                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByRegisteredUser.getLiteral());
-                if (fieldRecord.getVirtual()) {
-                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
+                visiblity.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByRegisteredUser.getLiteral());
+                if (attributeRecord.getVirtual()) {
+                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
                     }
@@ -313,10 +313,10 @@ public class UserController {
         }
         if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
-                FieldRecord fieldRecord = fieldRecords.get(entry.getKey());
-                visiblity.put(fieldRecord.getFieldId(), ScopeEnum.VisibleByTheUser.getLiteral());
-                if (fieldRecord.getVirtual()) {
-                    FieldRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualFieldId());
+                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
+                visiblity.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByTheUser.getLiteral());
+                if (attributeRecord.getVirtual()) {
+                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
                         virtualColumns.put(physicalRecord.getName(), new LinkedList<>());
                     }
@@ -329,7 +329,7 @@ public class UserController {
             }
         }
 
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
 
         if (!virtualColumns.isEmpty()) {
@@ -342,17 +342,18 @@ public class UserController {
             namedParameterJdbcTemplate.update("update " + Tables.USER.getName() + " set " + StringUtils.join(columnNames, ", ") + " where " + Tables.USER.USER_ID.getName() + " = " + userRecord.getUserId(), columnValues);
         }
 
-        for (Map.Entry<Integer, String> entry : visiblity.entrySet()) {
-            Integer userId = userRecord.getUserId();
-            Integer fieldId = entry.getKey();
+        for (Map.Entry<String, String> entry : visiblity.entrySet()) {
+            String userId = userRecord.getUserId();
+            String fieldId = entry.getKey();
             String scope = entry.getValue();
-            UserPrivacyRecord userPrivacyRecord = context.select(userPrivacyTable.fields()).from(userPrivacyTable).where(userPrivacyTable.USER_ID.eq(userId)).and(userPrivacyTable.FIELD_ID.eq(fieldId)).fetchOneInto(userPrivacyTable);
+            UserPrivacyRecord userPrivacyRecord = context.select(userPrivacyTable.fields()).from(userPrivacyTable).where(userPrivacyTable.USER_ID.eq(userId)).and(userPrivacyTable.ATTRIBUTE_ID.eq(fieldId)).fetchOneInto(userPrivacyTable);
             if (userPrivacyRecord != null) {
                 userPrivacyRecord.setScope(scope);
                 userPrivacyRecord.update();
             } else {
                 userPrivacyRecord = context.newRecord(userPrivacyTable);
-                userPrivacyRecord.setFieldId(entry.getKey());
+                userPrivacyRecord.setUserPrivacyId(UUID.randomUUID().toString());
+                userPrivacyRecord.setAttributeId(entry.getKey());
                 userPrivacyRecord.setUserId(userRecord.getUserId());
                 userPrivacyRecord.setScope(entry.getValue());
                 userPrivacyRecord.store();
@@ -387,9 +388,9 @@ public class UserController {
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         UnknownResponse responseBody = new UnknownResponse();
@@ -412,9 +413,9 @@ public class UserController {
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         UnknownResponse responseBody = new UnknownResponse();
@@ -439,9 +440,9 @@ public class UserController {
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         UnknownResponse responseBody = new UnknownResponse();
@@ -449,7 +450,7 @@ public class UserController {
         List<String> columnNames = new LinkedList<>();
         Map<String, Object> columnValues = new LinkedHashMap<>();
 
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
         userRecord.setPassword(requestBody.getNewPassword());
         userRecord.update();
@@ -469,14 +470,14 @@ public class UserController {
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         UnknownResponse responseBody = new UnknownResponse();
 
-        TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(session)).fetchOneInto(tokenTable);
+        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
         userRecord.setLogin(requestBody.getUsername());
         userRecord.update();
@@ -496,15 +497,15 @@ public class UserController {
     ) {
         Application applicationTable = Tables.APPLICATION.as("applicationTable");
         User userTable = Tables.USER.as("userTable");
-        Token tokenTable = Tables.TOKEN.as("tokenTable");
-        Table tableTable = Tables.TABLE.as("tableTable");
-        Field fieldTable = Tables.FIELD.as("fieldTable");
+        Session sessionTable = Tables.SESSION.as("sessionTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
         DateTime now = new DateTime();
-        userRecord.setToken(UUID.randomUUID().toString());
-        userRecord.setTokenExpiredDate(new Timestamp(now.plusMinutes(10).toDate().getTime()));
+        userRecord.setPasswordResetToken(UUID.randomUUID().toString());
+        userRecord.setPasswordResetTokenExpiredDate(new Timestamp(now.plusMinutes(10).toDate().getTime()));
         // TODO : send mail link
         userRecord.update();
 

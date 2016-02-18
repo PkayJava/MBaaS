@@ -1,8 +1,8 @@
-CREATE TABLE token (
+CREATE TABLE session (
 
-  token_id     VARCHAR(255) NOT NULL,
+  session_id   VARCHAR(100) NOT NULL,
 
-  user_id      INT(11),
+  user_id      VARCHAR(100) NOT NULL,
   date_created DATETIME,
   date_seen    DATETIME,
 
@@ -13,6 +13,6 @@ CREATE TABLE token (
 
   INDEX (user_id),
   INDEX (deleted),
-  PRIMARY KEY (token_id)
+  PRIMARY KEY (session_id)
 
 );

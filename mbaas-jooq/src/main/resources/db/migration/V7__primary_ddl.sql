@@ -1,10 +1,7 @@
 CREATE TABLE `primary` (
 
-  primary_id INT(11) AUTO_INCREMENT,
-  table_id   INT(11) NOT NULL,
-  field_id   INT(11) NOT NULL,
+  collection_id VARCHAR(100) NOT NULL,
+  attribute_id  VARCHAR(100) NOT NULL,
 
-  UNIQUE KEY (table_id, field_id),
-  PRIMARY KEY (primary_id)
-
+  PRIMARY KEY (collection_id, attribute_id)
 );

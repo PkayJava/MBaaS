@@ -12,12 +12,12 @@ import java.util.List;
 public class DocumentPermissionRoleNameRequest extends Request {
 
     @Expose
-    @SerializedName("collection")
-    private String collection;
+    @SerializedName("collectionName")
+    private String collectionName;
 
     @Expose
     @SerializedName("documentId")
-    private Integer documentId;
+    private String documentId;
 
     @Expose
     @SerializedName("actions")
@@ -27,19 +27,19 @@ public class DocumentPermissionRoleNameRequest extends Request {
     @SerializedName("roleName")
     private String roleName;
 
-    public String getCollection() {
-        return collection;
+    public String getCollectionName() {
+        return collectionName;
     }
 
-    public void setCollection(String collection) {
-        this.collection = collection;
+    public void setCollectionName(String collectionName) {
+        this.collectionName = collectionName;
     }
 
-    public Integer getDocumentId() {
+    public String getDocumentId() {
         return documentId;
     }
 
-    public void setDocumentId(Integer documentId) {
+    public void setDocumentId(String documentId) {
         this.documentId = documentId;
     }
 

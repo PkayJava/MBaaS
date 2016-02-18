@@ -1,8 +1,9 @@
 package com.angkorteam.mbaas.server;
 
-import com.angkorteam.mbaas.model.entity.tables.Token;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.Session;
 import com.angkorteam.mbaas.model.entity.tables.User;
-import com.angkorteam.mbaas.model.entity.tables.records.TokenRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.SessionRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import org.jooq.DSLContext;
 import org.springframework.security.authentication.*;
@@ -99,14 +100,14 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            String token = header;
+            String session = header;
 
-            User userTable = User.USER.as("userTable");
-            Token tokenTable = Token.TOKEN.as("tokenTable");
+            User userTable = Tables.USER.as("userTable");
+            Session sessionTable = Tables.SESSION.as("sessionTable");
 
-            TokenRecord tokenRecord = context.select(tokenTable.fields()).from(tokenTable).where(tokenTable.TOKEN_ID.eq(token)).fetchOneInto(tokenTable);
+            SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
             if (tokenRecord == null) {
-                throw new BadCredentialsException("token " + token + " is not valid");
+                throw new BadCredentialsException("session " + session + " is not valid");
             }
 
             Date dateSeen = new Date();
@@ -116,7 +117,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
 
             if (userRecord == null) {
-                throw new BadCredentialsException("token " + token + " is not valid");
+                throw new BadCredentialsException("session " + session + " is not valid");
             }
 
             String username = userRecord.getLogin();
