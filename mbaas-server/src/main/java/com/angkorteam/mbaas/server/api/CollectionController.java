@@ -514,7 +514,7 @@ public class CollectionController {
         context.delete(primaryTable).where(primaryTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
         context.delete(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
 
-        jdbcTemplate.execute("DROP COLLECTION `" + requestBody.getCollectionName() + "`");
+        jdbcTemplate.execute("DROP TABLE `" + requestBody.getCollectionName() + "`");
 
         CollectionDeleteResponse response = new CollectionDeleteResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());
