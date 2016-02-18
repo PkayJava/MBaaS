@@ -64,9 +64,9 @@ public class Start {
             https.setIdleTimeout(500000);
 
             server.addConnector(https);
-            System.out.println("SSL access to the examples has been enabled on port 8443");
+            System.out.println("SSL access to the examples has been enabled on port 7443");
             System.out
-                    .println("You can access the application using SSL on https://localhost:8443");
+                    .println("You can access the application using SSL on http://localhost:7080");
             System.out.println();
         }
 

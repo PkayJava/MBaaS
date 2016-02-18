@@ -216,6 +216,8 @@ public class ApplicationContext implements ServletContextListener {
                             attributeRecord.setNullable(resultSet.getBoolean(ColumnEnum.NULLABLE.getLiteral()));
                             if (columnName.equals(collectionRecord.getName() + "_id")) {
                                 attributeRecord.setAutoIncrement(true);
+                            } else {
+                                attributeRecord.setAutoIncrement(false);
                             }
                             attributeRecord.setSystem(true);
                             attributeRecord.setVirtual(false);
