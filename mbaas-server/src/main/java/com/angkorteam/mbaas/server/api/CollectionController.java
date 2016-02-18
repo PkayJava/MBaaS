@@ -329,7 +329,7 @@ public class CollectionController {
                 buffer.append("`").append(attribute.getName()).append("` VARCHAR(255), ");
             }
         }
-        buffer.append("`").append(configuration.getString(Constants.JDBC_OWNER_USER_ID)).append("` INT(11) NOT NULL, ");
+        buffer.append("`").append(configuration.getString(Constants.JDBC_OWNER_USER_ID)).append("` VARCHAR(100) NOT NULL, ");
         buffer.append("`").append(configuration.getString(Constants.JDBC_COLUMN_DELETED)).append("` BIT(1) NOT NULL DEFAULT 0, ");
         buffer.append("INDEX(`").append(configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC)).append("`), ");
         buffer.append("INDEX(`").append(configuration.getString(Constants.JDBC_COLUMN_DELETED)).append("`), ");
@@ -420,8 +420,8 @@ public class CollectionController {
             attributeRecord.setVirtual(false);
             attributeRecord.setSystem(true);
             attributeRecord.setExposed(false);
-            attributeRecord.setJavaType(Integer.class.getName());
-            attributeRecord.setSqlType("INT");
+            attributeRecord.setJavaType(String.class.getName());
+            attributeRecord.setSqlType("VARCHAR");
             attributeRecord.store();
         }
 
