@@ -7,10 +7,7 @@ import com.angkorteam.mbaas.model.entity.tables.Collection;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
 import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
-import com.angkorteam.mbaas.plain.request.CollectionAttributeCreateRequest;
-import com.angkorteam.mbaas.plain.request.CollectionAttributeDeleteRequest;
-import com.angkorteam.mbaas.plain.request.CollectionCreateRequest;
-import com.angkorteam.mbaas.plain.request.CollectionDeleteRequest;
+import com.angkorteam.mbaas.plain.request.*;
 import com.angkorteam.mbaas.plain.response.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
 import com.google.gson.Gson;
@@ -58,189 +55,6 @@ public class CollectionController {
     private Gson gson;
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/attribute/delete",
-            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<CollectionAttributeDeleteResponse> deleteAttribute(
-            HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @RequestBody CollectionAttributeDeleteRequest requestBody
-    ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
-        Map<String, String> errorMessages = new LinkedHashMap<>();
-
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
-
-        CollectionRecord collectionRecord = null;
-
-        if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
-            errorMessages.put("collectionName", "is required");
-        } else {
-            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
-            if (collectionRecord == null) {
-                errorMessages.put("collectionName", "is not found");
-            }
-        }
-
-        AttributeRecord attributeRecord = null;
-        if (requestBody.getAttributeName() == null || "".equals(requestBody.getAttributeName())) {
-            errorMessages.put("attributeName", "is required");
-        } else {
-            if (collectionRecord != null) {
-                attributeRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(requestBody.getAttributeName())).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
-                if (attributeRecord == null) {
-                    errorMessages.put("attributeName", "is not found");
-                }
-            }
-        }
-
-        if (collectionRecord != null) {
-            if (!permission.hasCollectionAccess(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())) {
-                errorMessages.put("collectionName", "you are not allow to delete its attribute");
-            }
-        }
-
-        if (!errorMessages.isEmpty()) {
-            CollectionAttributeDeleteResponse response = new CollectionAttributeDeleteResponse();
-            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
-            response.getErrorMessages().putAll(errorMessages);
-            return ResponseEntity.ok(response);
-        }
-
-        if (attributeRecord.getVirtual()) {
-            AttributeRecord virtualRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.ATTRIBUTE_ID.eq(attributeRecord.getVirtualAttributeId())).fetchOneInto(attributeTables);
-            jdbcTemplate.execute("UPDATE `" + requestBody.getCollectionName() + "`" + " SET " + virtualRecord.getName() + " = " + JdbcFunction.columnDelete(virtualRecord.getName(), requestBody.getAttributeName()));
-        } else {
-            jdbcTemplate.execute("ALTER TABLE `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");
-        }
-        attributeRecord.delete();
-
-        CollectionAttributeDeleteResponse response = new CollectionAttributeDeleteResponse();
-        response.getData().setCollectionName(requestBody.getCollectionName());
-        response.getData().setAttributeName(requestBody.getAttributeName());
-
-        return ResponseEntity.ok(response);
-    }
-
-    @RequestMapping(
-            method = RequestMethod.POST, path = "/attribute/create",
-            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<CollectionAttributeCreateResponse> createAttribute(
-            HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @RequestBody CollectionAttributeCreateRequest requestBody
-    ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
-        Map<String, String> errorMessages = new LinkedHashMap<>();
-
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
-
-        CollectionRecord collectionRecord = null;
-        if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
-            errorMessages.put("collectionName", "is required");
-        } else {
-            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
-            if (collectionRecord == null) {
-                errorMessages.put("collectionName", "is not found");
-            }
-        }
-
-        if (collectionRecord != null) {
-            if (!permission.hasCollectionAccess(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())) {
-                errorMessages.put("collectionName", "you are not allow to create its attribute");
-            }
-        }
-
-        AttributeRecord attributeRecord = null;
-        if (requestBody.getAttributeName() == null || "".equals(requestBody.getAttributeName())) {
-            errorMessages.put("attributeName", "is required");
-        } else {
-            if (collectionRecord != null) {
-                attributeRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(requestBody.getAttributeName())).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
-                if (attributeRecord != null) {
-                    errorMessages.put("attributeName", "is existed");
-                }
-            }
-        }
-
-        if (requestBody.getJavaType() == null || "".equals(requestBody.getJavaType())) {
-            errorMessages.put("javaType", "is required");
-        } else {
-            if (!requestBody.getJavaType().equals(Integer.class.getName()) && !requestBody.getJavaType().equals(int.class.getName())
-                    && !requestBody.getJavaType().equals(Double.class.getName()) && !requestBody.getJavaType().equals(double.class.getName())
-                    && !requestBody.getJavaType().equals(Float.class.getName()) && !requestBody.getJavaType().equals(float.class.getName())
-                    && !requestBody.getJavaType().equals(Byte.class.getName()) && !requestBody.getJavaType().equals(byte.class.getName())
-                    && !requestBody.getJavaType().equals(Short.class.getName()) && !requestBody.getJavaType().equals(short.class.getName())
-                    && !requestBody.getJavaType().equals(Long.class.getName()) && !requestBody.getJavaType().equals(long.class.getName())
-                    && !requestBody.getJavaType().equals(Boolean.class.getName()) && !requestBody.getJavaType().equals(boolean.class.getName())
-                    && !requestBody.getJavaType().equals(Character.class.getName()) && !requestBody.getJavaType().equals(char.class.getName())
-                    && !requestBody.getJavaType().equals(Date.class.getName()) && !requestBody.getJavaType().equals(Time.class.getName()) && !requestBody.getJavaType().equals(Timestamp.class.getName())
-                    && !requestBody.getJavaType().equals(String.class.getName())) {
-                errorMessages.put("javaType", "is not allow");
-            }
-        }
-
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-
-        AttributeRecord virtualRecord = null;
-        if (collectionRecord != null) {
-            virtualRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(configuration.getString(Constants.JDBC_COLUMN_EXTRA))).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
-            if (virtualRecord == null) {
-                errorMessages.put("collectionName", "does not support dynamic column");
-            }
-        }
-
-        if (!errorMessages.isEmpty()) {
-            CollectionAttributeCreateResponse response = new CollectionAttributeCreateResponse();
-            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
-            response.getErrorMessages().putAll(errorMessages);
-            return ResponseEntity.ok(response);
-        }
-
-        attributeRecord = context.newRecord(attributeTables);
-        attributeRecord.setAttributeId(UUID.randomUUID().toString());
-        attributeRecord.setNullable(requestBody.isNullable());
-        attributeRecord.setCollectionId(collectionRecord.getCollectionId());
-        attributeRecord.setVirtual(true);
-        attributeRecord.setSystem(false);
-        attributeRecord.setName(requestBody.getAttributeName());
-        attributeRecord.setAutoIncrement(false);
-        attributeRecord.setExposed(true);
-        attributeRecord.setVirtualAttributeId(virtualRecord.getAttributeId());
-        attributeRecord.setJavaType(requestBody.getJavaType());
-        if (requestBody.getJavaType().equals(Integer.class.getName()) || requestBody.getJavaType().equals(int.class.getName())
-                || requestBody.getJavaType().equals(Byte.class.getName()) || requestBody.getJavaType().equals(byte.class.getName())
-                || requestBody.getJavaType().equals(Short.class.getName()) || requestBody.getJavaType().equals(short.class.getName())
-                || requestBody.getJavaType().equals(Long.class.getName()) || requestBody.getJavaType().equals(long.class.getName())
-                ) {
-            attributeRecord.setSqlType("INT");
-
-        } else if (requestBody.getJavaType().equals(Double.class.getName()) || requestBody.getJavaType().equals(double.class.getName())
-                || requestBody.getJavaType().equals(Float.class.getName()) || requestBody.getJavaType().equals(float.class.getName())) {
-            attributeRecord.setSqlType("DECIMAL");
-        } else if (requestBody.getJavaType().equals(Boolean.class.getName()) || requestBody.getJavaType().equals(boolean.class.getName())) {
-            attributeRecord.setSqlType("BIT");
-        } else if (requestBody.getJavaType().equals(Date.class.getName()) || requestBody.getJavaType().equals(Time.class.getName()) || requestBody.getJavaType().equals(Timestamp.class.getName())) {
-            attributeRecord.setSqlType("DATETIME");
-        } else if (requestBody.getJavaType().equals(Character.class.getName()) || requestBody.getJavaType().equals(char.class.getName())
-                || requestBody.getJavaType().equals(String.class.getName())) {
-            attributeRecord.setSqlType("VARCHAR");
-        }
-        attributeRecord.store();
-
-        CollectionAttributeCreateResponse response = new CollectionAttributeCreateResponse();
-        response.getData().setCollectionName(requestBody.getCollectionName());
-        response.getData().setAttributeName(requestBody.getAttributeName());
-
-        return ResponseEntity.ok(response);
-    }
-
-    @RequestMapping(
             method = RequestMethod.POST, path = "/create",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -267,6 +81,12 @@ public class CollectionController {
             if (collectionRecord != null) {
                 errorMessages.put("collectionName", "is existed");
             }
+        }
+
+        if (permission.isAdministratorRole(session)
+                || permission.isBackOfficeRole(session)) {
+        } else {
+            errorMessages.put("collectionName", "you are not allow to create new collection");
         }
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -468,6 +288,127 @@ public class CollectionController {
     }
 
     @RequestMapping(
+            method = RequestMethod.POST, path = "/attribute/create",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CollectionAttributeCreateResponse> createAttribute(
+            HttpServletRequest request,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestBody CollectionAttributeCreateRequest requestBody
+    ) {
+        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
+
+        CollectionRecord collectionRecord = null;
+        if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collectionName", "is not found");
+            }
+        }
+
+        if (collectionRecord != null) {
+            if (permission.isAdministratorRole(session)
+                    || permission.isBackOfficeRole(session)
+                    || permission.isCollectionOwner(session, requestBody.getCollectionName())
+                    || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())
+                    ) {
+            } else {
+                errorMessages.put("collectionName", "you are not allow to create its attribute");
+            }
+        }
+
+        AttributeRecord attributeRecord = null;
+        if (requestBody.getAttributeName() == null || "".equals(requestBody.getAttributeName())) {
+            errorMessages.put("attributeName", "is required");
+        } else {
+            if (collectionRecord != null) {
+                attributeRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(requestBody.getAttributeName())).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
+                if (attributeRecord != null) {
+                    errorMessages.put("attributeName", "is existed");
+                }
+            }
+        }
+
+        if (requestBody.getJavaType() == null || "".equals(requestBody.getJavaType())) {
+            errorMessages.put("javaType", "is required");
+        } else {
+            if (!requestBody.getJavaType().equals(Integer.class.getName()) && !requestBody.getJavaType().equals(int.class.getName())
+                    && !requestBody.getJavaType().equals(Double.class.getName()) && !requestBody.getJavaType().equals(double.class.getName())
+                    && !requestBody.getJavaType().equals(Float.class.getName()) && !requestBody.getJavaType().equals(float.class.getName())
+                    && !requestBody.getJavaType().equals(Byte.class.getName()) && !requestBody.getJavaType().equals(byte.class.getName())
+                    && !requestBody.getJavaType().equals(Short.class.getName()) && !requestBody.getJavaType().equals(short.class.getName())
+                    && !requestBody.getJavaType().equals(Long.class.getName()) && !requestBody.getJavaType().equals(long.class.getName())
+                    && !requestBody.getJavaType().equals(Boolean.class.getName()) && !requestBody.getJavaType().equals(boolean.class.getName())
+                    && !requestBody.getJavaType().equals(Character.class.getName()) && !requestBody.getJavaType().equals(char.class.getName())
+                    && !requestBody.getJavaType().equals(Date.class.getName()) && !requestBody.getJavaType().equals(Time.class.getName()) && !requestBody.getJavaType().equals(Timestamp.class.getName())
+                    && !requestBody.getJavaType().equals(String.class.getName())) {
+                errorMessages.put("javaType", "is not allow");
+            }
+        }
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+
+        AttributeRecord virtualRecord = null;
+        if (collectionRecord != null) {
+            virtualRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(configuration.getString(Constants.JDBC_COLUMN_EXTRA))).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
+            if (virtualRecord == null) {
+                errorMessages.put("collectionName", "does not support dynamic column");
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            CollectionAttributeCreateResponse response = new CollectionAttributeCreateResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        attributeRecord = context.newRecord(attributeTables);
+        attributeRecord.setAttributeId(UUID.randomUUID().toString());
+        attributeRecord.setNullable(requestBody.isNullable());
+        attributeRecord.setCollectionId(collectionRecord.getCollectionId());
+        attributeRecord.setVirtual(true);
+        attributeRecord.setSystem(false);
+        attributeRecord.setName(requestBody.getAttributeName());
+        attributeRecord.setAutoIncrement(false);
+        attributeRecord.setExposed(true);
+        attributeRecord.setVirtualAttributeId(virtualRecord.getAttributeId());
+        attributeRecord.setJavaType(requestBody.getJavaType());
+        if (requestBody.getJavaType().equals(Integer.class.getName()) || requestBody.getJavaType().equals(int.class.getName())
+                || requestBody.getJavaType().equals(Byte.class.getName()) || requestBody.getJavaType().equals(byte.class.getName())
+                || requestBody.getJavaType().equals(Short.class.getName()) || requestBody.getJavaType().equals(short.class.getName())
+                || requestBody.getJavaType().equals(Long.class.getName()) || requestBody.getJavaType().equals(long.class.getName())
+                ) {
+            attributeRecord.setSqlType("INT");
+
+        } else if (requestBody.getJavaType().equals(Double.class.getName()) || requestBody.getJavaType().equals(double.class.getName())
+                || requestBody.getJavaType().equals(Float.class.getName()) || requestBody.getJavaType().equals(float.class.getName())) {
+            attributeRecord.setSqlType("DECIMAL");
+        } else if (requestBody.getJavaType().equals(Boolean.class.getName()) || requestBody.getJavaType().equals(boolean.class.getName())) {
+            attributeRecord.setSqlType("BIT");
+        } else if (requestBody.getJavaType().equals(Date.class.getName()) || requestBody.getJavaType().equals(Time.class.getName()) || requestBody.getJavaType().equals(Timestamp.class.getName())) {
+            attributeRecord.setSqlType("DATETIME");
+        } else if (requestBody.getJavaType().equals(Character.class.getName()) || requestBody.getJavaType().equals(char.class.getName())
+                || requestBody.getJavaType().equals(String.class.getName())) {
+            attributeRecord.setSqlType("VARCHAR");
+        }
+        attributeRecord.store();
+
+        CollectionAttributeCreateResponse response = new CollectionAttributeCreateResponse();
+        response.getData().setCollectionName(requestBody.getCollectionName());
+        response.getData().setAttributeName(requestBody.getAttributeName());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @RequestMapping(
             method = RequestMethod.POST, path = "/delete",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -495,12 +436,13 @@ public class CollectionController {
         }
 
         if (collectionRecord != null) {
-            if (collectionRecord.getSystem()) {
-                errorMessages.put("collectionName", "you are not allow to delete system collection");
+            if (permission.isAdministratorRole(session)
+                    || permission.isBackOfficeRole(session)
+                    || permission.isCollectionOwner(session, requestBody.getCollectionName())
+                    || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Delete.getLiteral())
+                    ) {
             } else {
-                if (!permission.hasCollectionAccess(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())) {
-                    errorMessages.put("collectionName", "you are not allow to delete it");
-                }
+                errorMessages.put("collectionName", "you are not allow to delete it");
             }
         }
 
@@ -522,4 +464,426 @@ public class CollectionController {
 
         return ResponseEntity.ok(response);
     }
+
+    @RequestMapping(
+            method = RequestMethod.POST, path = "/attribute/delete",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CollectionAttributeDeleteResponse> deleteAttribute(
+            HttpServletRequest request,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestBody CollectionAttributeDeleteRequest requestBody
+    ) {
+        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
+
+        CollectionRecord collectionRecord = null;
+
+        if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collectionName", "is not found");
+            }
+        }
+
+        AttributeRecord attributeRecord = null;
+        if (requestBody.getAttributeName() == null || "".equals(requestBody.getAttributeName())) {
+            errorMessages.put("attributeName", "is required");
+        } else {
+            if (collectionRecord != null) {
+                attributeRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(requestBody.getAttributeName())).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
+                if (attributeRecord == null) {
+                    errorMessages.put("attributeName", "is not found");
+                } else {
+                    if (attributeRecord.getSystem()) {
+                        errorMessages.put("attributeName", "you are not allow to delete this attribute");
+                    }
+                }
+            }
+        }
+
+        if (collectionRecord != null) {
+            if (permission.isAdministratorRole(session)
+                    || permission.isBackOfficeRole(session)
+                    || permission.isCollectionOwner(session, requestBody.getCollectionName())
+                    || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())
+                    ) {
+            } else {
+                errorMessages.put("collectionName", "you are not allow to delete its attribute");
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            CollectionAttributeDeleteResponse response = new CollectionAttributeDeleteResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        if (attributeRecord.getVirtual()) {
+            AttributeRecord virtualRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.ATTRIBUTE_ID.eq(attributeRecord.getVirtualAttributeId())).fetchOneInto(attributeTables);
+            jdbcTemplate.execute("UPDATE `" + requestBody.getCollectionName() + "`" + " SET " + virtualRecord.getName() + " = " + JdbcFunction.columnDelete(virtualRecord.getName(), requestBody.getAttributeName()));
+        } else {
+            jdbcTemplate.execute("ALTER TABLE `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");
+        }
+        attributeRecord.delete();
+
+        CollectionAttributeDeleteResponse response = new CollectionAttributeDeleteResponse();
+        response.getData().setCollectionName(requestBody.getCollectionName());
+        response.getData().setAttributeName(requestBody.getAttributeName());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @RequestMapping(
+            method = RequestMethod.POST, path = "/permission/grant/user",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CollectionPermissionUsernameResponse> grantPermissionUsername(
+            HttpServletRequest request,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestBody CollectionPermissionUsernameRequest requestBody
+    ) {
+        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        User userTable = Tables.USER.as("userTable");
+        CollectionUserPrivacy collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("collectionUserPrivacyTable");
+
+        CollectionRecord collectionRecord = null;
+        if (requestBody.getCollectionName() == null || "".equals(requestBody)) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collectionName", "is not found");
+            }
+        }
+
+        UserRecord userRecord = null;
+        if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
+            errorMessages.put("username", "is required");
+        } else {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                errorMessages.put("username", "is not found");
+            }
+        }
+
+        if (requestBody.getActions() == null || requestBody.getActions().isEmpty()) {
+            errorMessages.put("actions", "is required");
+        } else {
+            for (Integer action : requestBody.getActions()) {
+                if (action != PermissionEnum.Delete.getLiteral()
+                        && action != PermissionEnum.Read.getLiteral()
+                        && action != PermissionEnum.Create.getLiteral()
+                        && action != PermissionEnum.Modify.getLiteral()) {
+                    errorMessages.put("actions", "is bad");
+                    break;
+                }
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            CollectionPermissionUsernameResponse response = new CollectionPermissionUsernameResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        context.delete(collectionUserPrivacyTable)
+                .where(collectionUserPrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                .and(collectionUserPrivacyTable.USER_ID.eq(userRecord.getUserId()))
+                .execute();
+
+        int permission = 0;
+        for (Integer action : requestBody.getActions()) {
+            permission = permission | action;
+        }
+
+        CollectionUserPrivacyRecord collectionUserPrivacyRecord = context.newRecord(collectionUserPrivacyTable);
+        collectionUserPrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
+        collectionUserPrivacyRecord.setUserId(userRecord.getUserId());
+        collectionUserPrivacyRecord.setPermisson(permission);
+        collectionUserPrivacyRecord.store();
+
+        CollectionPermissionUsernameResponse response = new CollectionPermissionUsernameResponse();
+        response.getData().setPermission(permission);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @RequestMapping(
+            method = RequestMethod.POST, path = "/permission/grant/role",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CollectionPermissionRoleNameResponse> grantPermissionRoleName(
+            HttpServletRequest request,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestBody CollectionPermissionRoleNameRequest requestBody
+    ) {
+        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Role roleTable = Tables.ROLE.as("roleTable");
+        CollectionRolePrivacy collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
+
+        CollectionRecord collectionRecord = null;
+        if (requestBody.getCollectionName() == null || "".equals(requestBody)) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collectionName", "is not found");
+            }
+        }
+
+        RoleRecord roleRecord = null;
+        if (requestBody.getRoleName() == null || "".equals(requestBody.getRoleName())) {
+            errorMessages.put("roleName", "is required");
+        } else {
+            roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(requestBody.getRoleName())).fetchOneInto(roleTable);
+            if (roleRecord == null) {
+                errorMessages.put("roleName", "is not found");
+            }
+        }
+
+        if (requestBody.getActions() == null || requestBody.getActions().isEmpty()) {
+            errorMessages.put("actions", "is required");
+        } else {
+            for (Integer action : requestBody.getActions()) {
+                if (action != PermissionEnum.Delete.getLiteral()
+                        && action != PermissionEnum.Read.getLiteral()
+                        && action != PermissionEnum.Create.getLiteral()
+                        && action != PermissionEnum.Modify.getLiteral()) {
+                    errorMessages.put("actions", "is bad");
+                    break;
+                }
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            CollectionPermissionRoleNameResponse response = new CollectionPermissionRoleNameResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        context.delete(collectionRolePrivacyTable)
+                .where(collectionRolePrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                .and(collectionRolePrivacyTable.ROLE_ID.eq(roleRecord.getRoleId()))
+                .execute();
+
+        int permission = 0;
+        for (Integer action : requestBody.getActions()) {
+            permission = permission | action;
+        }
+
+        CollectionRolePrivacyRecord collectionRolePrivacyRecord = context.newRecord(collectionRolePrivacyTable);
+        collectionRolePrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
+        collectionRolePrivacyRecord.setRoleId(roleRecord.getRoleId());
+        collectionRolePrivacyRecord.setPermisson(permission);
+        collectionRolePrivacyRecord.store();
+
+        CollectionPermissionRoleNameResponse response = new CollectionPermissionRoleNameResponse();
+        response.getData().setPermission(permission);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @RequestMapping(
+            method = RequestMethod.POST, path = "/permission/revoke/user",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CollectionPermissionUsernameResponse> revokePermissionUsername(
+            HttpServletRequest request,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestBody CollectionPermissionUsernameRequest requestBody
+    ) {
+        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        User userTable = Tables.USER.as("userTable");
+        CollectionUserPrivacy collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("collectionUserPrivacyTable");
+
+        CollectionRecord collectionRecord = null;
+        if (requestBody.getCollectionName() == null || "".equals(requestBody)) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collectionName", "is not found");
+            }
+        }
+
+        UserRecord userRecord = null;
+        if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
+            errorMessages.put("username", "is required");
+        } else {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                errorMessages.put("username", "is not found");
+            }
+        }
+
+        if (requestBody.getActions() == null || requestBody.getActions().isEmpty()) {
+            errorMessages.put("actions", "is required");
+        } else {
+            for (Integer action : requestBody.getActions()) {
+                if (action != PermissionEnum.Delete.getLiteral()
+                        && action != PermissionEnum.Read.getLiteral()
+                        && action != PermissionEnum.Create.getLiteral()
+                        && action != PermissionEnum.Modify.getLiteral()) {
+                    errorMessages.put("actions", "is bad");
+                    break;
+                }
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            CollectionPermissionUsernameResponse response = new CollectionPermissionUsernameResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        CollectionUserPrivacyRecord collectionUserPrivacyRecord = context.select(collectionUserPrivacyTable.fields())
+                .from(collectionUserPrivacyTable)
+                .where(collectionUserPrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                .and(collectionUserPrivacyTable.USER_ID.eq(userRecord.getUserId()))
+                .fetchOneInto(collectionUserPrivacyTable);
+
+        int revokePermission = 0;
+        for (Integer action : requestBody.getActions()) {
+            revokePermission = revokePermission | action;
+        }
+
+        if (collectionUserPrivacyRecord != null) {
+            int permission = collectionUserPrivacyRecord.getPermisson();
+            if (revokePermission - permission <= 0) {
+                collectionUserPrivacyRecord.setPermisson(0);
+            } else {
+                collectionUserPrivacyRecord.setPermisson(revokePermission - permission);
+            }
+            collectionUserPrivacyRecord.update();
+        } else {
+            collectionUserPrivacyRecord = context.newRecord(collectionUserPrivacyTable);
+            collectionUserPrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
+            collectionUserPrivacyRecord.setUserId(userRecord.getUserId());
+            collectionUserPrivacyRecord.setPermisson(0);
+            collectionUserPrivacyRecord.store();
+        }
+
+
+        CollectionPermissionUsernameResponse response = new CollectionPermissionUsernameResponse();
+        response.getData().setPermission(collectionUserPrivacyRecord.getPermisson());
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @RequestMapping(
+            method = RequestMethod.POST, path = "/permission/revoke/role",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CollectionPermissionRoleNameResponse> revokePermissionRoleName(
+            HttpServletRequest request,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestBody CollectionPermissionRoleNameRequest requestBody
+    ) {
+        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Role roleTable = Tables.ROLE.as("roleTable");
+        CollectionRolePrivacy collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
+
+        CollectionRecord collectionRecord = null;
+        if (requestBody.getCollectionName() == null || "".equals(requestBody)) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collectionName", "is not found");
+            }
+        }
+
+        RoleRecord roleRecord = null;
+        if (requestBody.getRoleName() == null || "".equals(requestBody.getRoleName())) {
+            errorMessages.put("roleName", "is required");
+        } else {
+            roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(requestBody.getRoleName())).fetchOneInto(roleTable);
+            if (roleRecord == null) {
+                errorMessages.put("roleName", "is not found");
+            }
+        }
+
+        if (requestBody.getActions() == null || requestBody.getActions().isEmpty()) {
+            errorMessages.put("actions", "is required");
+        } else {
+            for (Integer action : requestBody.getActions()) {
+                if (action != PermissionEnum.Delete.getLiteral()
+                        && action != PermissionEnum.Read.getLiteral()
+                        && action != PermissionEnum.Create.getLiteral()
+                        && action != PermissionEnum.Modify.getLiteral()) {
+                    errorMessages.put("actions", "is bad");
+                    break;
+                }
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            CollectionPermissionRoleNameResponse response = new CollectionPermissionRoleNameResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        CollectionRolePrivacyRecord collectionRolePrivacyRecord = context.select(collectionRolePrivacyTable.fields())
+                .from(collectionRolePrivacyTable)
+                .where(collectionRolePrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                .and(collectionRolePrivacyTable.ROLE_ID.eq(roleRecord.getRoleId()))
+                .fetchOneInto(collectionRolePrivacyTable);
+
+        int revokePermission = 0;
+        for (Integer action : requestBody.getActions()) {
+            revokePermission = revokePermission | action;
+        }
+
+        if (collectionRolePrivacyRecord != null) {
+            int permission = collectionRolePrivacyRecord.getPermisson();
+            if (revokePermission - permission <= 0) {
+                collectionRolePrivacyRecord.setPermisson(0);
+            } else {
+                collectionRolePrivacyRecord.setPermisson(revokePermission - permission);
+            }
+            collectionRolePrivacyRecord.update();
+        } else {
+            collectionRolePrivacyRecord = context.newRecord(collectionRolePrivacyTable);
+            collectionRolePrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
+            collectionRolePrivacyRecord.setRoleId(roleRecord.getRoleId());
+            collectionRolePrivacyRecord.setPermisson(0);
+            collectionRolePrivacyRecord.store();
+        }
+
+        CollectionPermissionRoleNameResponse response = new CollectionPermissionRoleNameResponse();
+        response.getData().setPermission(collectionRolePrivacyRecord.getPermisson());
+
+        return ResponseEntity.ok(response);
+    }
+
 }

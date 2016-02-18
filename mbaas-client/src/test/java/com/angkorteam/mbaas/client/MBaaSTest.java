@@ -28,7 +28,7 @@ public class MBaaSTest {
 
     private Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ").create();
 
-    private MBaaSClient client = new MBaaSClient("1234567890", HOST_B);
+    private MBaaSClient client = new MBaaSClient("1234567890", HOST_C);
 
     @Test
     public void signUpTest() throws ScriptException {
@@ -141,15 +141,8 @@ public class MBaaSTest {
     @Test
     public void createCollectionTest() throws ScriptException {
 
-        String login = UUID.randomUUID().toString();
-        String password = UUID.randomUUID().toString();
-        {
-            SecuritySignUpRequest request = new SecuritySignUpRequest();
-            request.setUsername(login);
-            request.setPassword(password);
-            SecuritySignUpResponse response = client.signUp(request);
-            Assert.assertEquals(response.getHttpCode().intValue(), 200);
-        }
+        String login = "admin";
+        String password = "admin";
 
         {
             SecurityLoginRequest request = new SecurityLoginRequest();

@@ -77,9 +77,9 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
-            return ResponseEntity.ok(null);
-        }
+//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
+//            return ResponseEntity.ok(null);
+//        }
 
         Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
         for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
@@ -126,9 +126,9 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
-            return ResponseEntity.ok(null);
-        }
+//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
+//            return ResponseEntity.ok(null);
+//        }
 
         Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
         for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
@@ -188,9 +188,9 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Create.getLiteral())) {
-            return ResponseEntity.ok(null);
-        }
+//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Create.getLiteral())) {
+//            return ResponseEntity.ok(null);
+//        }
 
         Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
         for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
@@ -299,9 +299,9 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
-            return ResponseEntity.ok(null);
-        }
+//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
+//            return ResponseEntity.ok(null);
+//        }
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(*) from `" + collection + "`", Integer.class);
 
@@ -331,9 +331,9 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Modify.getLiteral())) {
-            return ResponseEntity.ok(null);
-        }
+//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Modify.getLiteral())) {
+//            return ResponseEntity.ok(null);
+//        }
 
         Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
         Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
@@ -400,9 +400,9 @@ public class DocumentController {
             return ResponseEntity.ok(null);
         }
 
-        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Delete.getLiteral())) {
-            return ResponseEntity.ok(null);
-        }
+//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Delete.getLiteral())) {
+//            return ResponseEntity.ok(null);
+//        }
 
         AttributeRecord fieldRecord = context.select(fieldTable.fields())
                 .from(fieldTable)
