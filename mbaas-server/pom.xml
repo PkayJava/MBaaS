@@ -60,6 +60,11 @@
             <artifactId>framework-extension</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>sigar</groupId>
+            <artifactId>sigar</artifactId>
+        </dependency>
+
         <!--  WICKET DEPENDENCIES -->
         <dependency>
             <groupId>org.apache.wicket</groupId>

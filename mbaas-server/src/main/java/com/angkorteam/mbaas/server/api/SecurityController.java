@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.plain.enums.ScopeEnum;
 import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.SecurityLoginRequest;
+import com.angkorteam.mbaas.plain.request.SecurityLogoutRequest;
 import com.angkorteam.mbaas.plain.request.SecuritySignUpRequest;
 import com.angkorteam.mbaas.plain.response.SecurityLoginResponse;
 import com.angkorteam.mbaas.plain.response.SecurityLogoutResponse;
@@ -50,13 +51,7 @@ public class SecurityController {
     private DSLContext context;
 
     @Autowired
-    private StringEncryptor encryptor;
-
-    @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private DataSource dataSource;
 
     @Autowired
     private Gson gson;
@@ -330,17 +325,17 @@ public class SecurityController {
 
         SecurityLoginResponse responseBody = new SecurityLoginResponse();
 
-        String tokenId = UUID.randomUUID().toString();
+        String sessionId = UUID.randomUUID().toString();
         Date dateCreated = new Date();
 
         SessionRecord sessionRecord = context.newRecord(sessionTable);
-        sessionRecord.setSessionId(tokenId);
+        sessionRecord.setSessionId(sessionId);
         sessionRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
         sessionRecord.setUserId(userRecord.getUserId());
         sessionRecord.setDeleted(false);
         sessionRecord.store();
 
-        responseBody.getData().setSession(tokenId);
+        responseBody.getData().setSession(sessionId);
         responseBody.getData().setDateCreated(dateCreated);
         responseBody.getData().setLogin(userRecord.getLogin());
 
@@ -355,7 +350,7 @@ public class SecurityController {
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @Header("X-MBAAS-SESSION") String session,
-            @RequestBody Request requestBody
+            @RequestBody SecurityLogoutRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
@@ -364,28 +359,28 @@ public class SecurityController {
         Session sessionTable = Tables.SESSION.as("sessionTable");
         SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         String userId = sessionRecord.getUserId();
+
         context.delete(sessionTable).where(sessionTable.USER_ID.eq(userId)).execute();
 
         return ResponseEntity.ok(responseBody);
     }
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/logout/{token}",
+            method = RequestMethod.POST, path = "/logout/{session}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<SecurityLogoutSessionResponse> logoutSession(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @Header("X-MBAAS-SESSION") String session,
-            @PathVariable("token") String token,
+            @PathVariable("session") String session,
             @RequestBody Request requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=> body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} appCode=>{} session=> body=>{}", request.getRequestURL(), appCode, request.getHeader("X-MBAAS-SESSION"), gson.toJson(requestBody));
 
         SecurityLogoutSessionResponse responseBody = new SecurityLogoutSessionResponse();
 
         Session sessionTable = Tables.SESSION.as("sessionTable");
-        context.delete(sessionTable).where(sessionTable.SESSION_ID.eq(token)).execute();
+        context.delete(sessionTable).where(sessionTable.SESSION_ID.eq(session)).execute();
 
         return ResponseEntity.ok(responseBody);
     }

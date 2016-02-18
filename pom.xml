@@ -65,6 +65,9 @@
         <commons-io.version>2.4</commons-io.version>
         <commons-compress.version>1.10</commons-compress.version>
 
+        <!-- Hardware -->
+        <sigar.version>1.7.0.1</sigar.version>
+
         <!-- Maven Plugin -->
         <maven-compiler-plugin>3.1</maven-compiler-plugin>
         <maven-eclipse-plugin>2.9</maven-eclipse-plugin>
@@ -94,6 +97,12 @@
                 <groupId>com.angkorteam.framework.extension</groupId>
                 <artifactId>framework-extension</artifactId>
                 <version>${framework-extension.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>sigar</groupId>
+                <artifactId>sigar</artifactId>
+                <version>${sigar.version}</version>
             </dependency>
 
             <!--  WICKET DEPENDENCIES -->

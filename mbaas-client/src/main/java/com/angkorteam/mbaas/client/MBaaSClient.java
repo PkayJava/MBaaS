@@ -78,15 +78,34 @@ public class MBaaSClient {
         return client.createDocument(this.session, collectionName, request);
     }
 
+    public MonitorCpuResponse cpu(MonitorCpuRequest request) {
+        return client.cpu(this.session, request);
+    }
+
+    public SecurityLogoutResponse logout(SecurityLogoutRequest request) {
+        return client.logout(this.session, request);
+    }
+
+    public SecurityLogoutSessionResponse logoutSession(String session, SecurityLogoutSessionRequest request) {
+        return this.client.logoutSession(this.session, session, request);
+    }
+
     private interface Client {
+
+        @POST("/monitor/cpu")
+        public MonitorCpuResponse cpu(@Header("X-MBAAS-SESSION") String session, @Body MonitorCpuRequest request);
+
         @POST("/security/login")
         public SecurityLoginResponse login(@Body SecurityLoginRequest request);
 
         @POST("/security/signup")
         public SecuritySignUpResponse signUp(@Body SecuritySignUpRequest request);
 
-        @POST("/document/create/{collection}")
-        public DocumentCreateResponse createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
+        @POST("/security/logout")
+        public SecurityLogoutResponse logout(@Header("X-MBAAS-SESSION") String session, @Body SecurityLogoutRequest request);
+
+        @POST("/security/logout/{session}")
+        public SecurityLogoutSessionResponse logoutSession(@Header("X-MBAAS-SESSION") String currentSession, @Path("session") String logoutSession, @Body SecurityLogoutSessionRequest request);
 
         @POST("/collection/create")
         public CollectionCreateResponse createCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionCreateRequest request);
@@ -99,5 +118,8 @@ public class MBaaSClient {
 
         @POST("/collection/attribute/delete")
         public Response deleteCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeDeleteRequest request);
+
+        @POST("/document/create/{collection}")
+        public DocumentCreateResponse createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
     }
 }

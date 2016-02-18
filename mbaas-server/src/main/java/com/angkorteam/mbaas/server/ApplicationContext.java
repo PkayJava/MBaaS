@@ -41,7 +41,6 @@ import java.util.Date;
  */
 public class ApplicationContext implements ServletContextListener {
 
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationContext.class);
 
     public static final String KEY = ApplicationContext.class.getName();
@@ -59,14 +58,22 @@ public class ApplicationContext implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
+        LOGGER.info("initializing database connection");
         this.dataSource = initDataSource();
+        LOGGER.info("initializing database structure");
         this.flyway = initFlyway(dataSource);
+        LOGGER.info("initializing data access object layer");
         this.configuration = initConfiguration(dataSource);
         this.context = initDSLContext(configuration);
+        LOGGER.info("initializing string encryptor");
         this.stringEncryptor = initStringEncryptor();
+        LOGGER.info("initializing default role");
         initRole(context);
+        LOGGER.info("initializing default user");
         initUser(context);
+        LOGGER.info("initializing system collections, attributes, indexes");
         initDDL(context, dataSource);
+        LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
     }
 
@@ -180,14 +187,17 @@ public class ApplicationContext implements ServletContextListener {
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
 
+        Map<String, CollectionRecord> collectionRecords = new LinkedHashMap<>();
+        for (CollectionRecord collectionRecord : context.select(collectionTable.fields()).from(collectionTable).fetchInto(collectionTable)) {
+            collectionRecords.put(collectionRecord.getName(), collectionRecord);
+        }
+
         try {
             Connection connection = dataSource.getConnection();
             DatabaseMetaData databaseMetaData = connection.getMetaData();
             DbSupport databaseSupport = DbSupportFactory.createDbSupport(connection, true);
             for (Table table : databaseSupport.getCurrentSchema().allTables()) {
-                CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable)
-                        .where(collectionTable.NAME.eq(table.getName()))
-                        .fetchOneInto(collectionTable);
+                CollectionRecord collectionRecord = collectionRecords.get(table.getName());
                 if (collectionRecord == null) {
                     collectionRecord = context.newRecord(collectionTable);
                     collectionRecord.setCollectionId(UUID.randomUUID().toString());
