@@ -349,7 +349,7 @@ public class SecurityController {
     public ResponseEntity<SecurityLogoutResponse> logout(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @Header("X-MBAAS-SESSION") String session,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody SecurityLogoutRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));

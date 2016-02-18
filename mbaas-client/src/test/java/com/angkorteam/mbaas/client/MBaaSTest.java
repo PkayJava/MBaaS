@@ -44,39 +44,55 @@ public class MBaaSTest {
 
     @Test
     public void loginTest() throws ScriptException {
-        String login = UUID.randomUUID().toString();
-        String password = UUID.randomUUID().toString();
+        String login = "admin";
+        String password = "admin";
+
         {
-            SecuritySignUpRequest request = new SecuritySignUpRequest();
+            SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecuritySignUpResponse response = client.signUp(request);
+            SecurityLoginResponse response = client.login(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        SecurityLoginRequest request = new SecurityLoginRequest();
-        request.setUsername(login);
-        request.setPassword(password);
-        SecurityLoginResponse response = client.login(request);
+        MonitorCpuRequest request = new MonitorCpuRequest();
+        MonitorCpuResponse response = client.cpu(request);
         Assert.assertEquals(response.getHttpCode().intValue(), 200);
     }
 
     @Test
     public void logoutTest() throws ScriptException {
-        String login = UUID.randomUUID().toString();
-        String password = UUID.randomUUID().toString();
+        String login = "admin";
+        String password = "admin";
         {
-            SecuritySignUpRequest request = new SecuritySignUpRequest();
+            SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecuritySignUpResponse response = client.signUp(request);
+            SecurityLoginResponse response = client.login(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        SecurityLoginRequest request = new SecurityLoginRequest();
-        request.setUsername(login);
-        request.setPassword(password);
-        SecurityLoginResponse response = client.login(request);
+        SecurityLogoutRequest request = new SecurityLogoutRequest();
+        SecurityLogoutResponse response = client.logout(request);
+        Assert.assertEquals(response.getHttpCode().intValue(), 200);
+    }
+
+    @Test
+    public void logoutSessionTest() throws ScriptException {
+        String login = "admin";
+        String password = "admin";
+        String session = null;
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.login(request);
+            session = response.getData().getSession();
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        SecurityLogoutSessionRequest request = new SecurityLogoutSessionRequest();
+        SecurityLogoutSessionResponse response = client.logoutSession(session, request);
         Assert.assertEquals(response.getHttpCode().intValue(), 200);
     }
 
