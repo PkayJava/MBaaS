@@ -78,10 +78,6 @@ public class MBaaSClient {
         return client.createDocument(this.session, collectionName, request);
     }
 
-    public MonitorCpuResponse cpu(MonitorCpuRequest request) {
-        return client.cpu(this.session, request);
-    }
-
     public SecurityLogoutResponse logout(SecurityLogoutRequest request) {
         return client.logout(this.session, request);
     }
@@ -90,10 +86,15 @@ public class MBaaSClient {
         return this.client.logoutSession(this.session, session, request);
     }
 
-    private interface Client {
+    public MonitorCpuResponse cpu(MonitorCpuRequest request) {
+        return client.cpu(this.session, request);
+    }
 
-        @POST("/monitor/cpu")
-        public MonitorCpuResponse cpu(@Header("X-MBAAS-SESSION") String session, @Body MonitorCpuRequest request);
+    public MonitorMemResponse mem(MonitorMemRequest request) {
+        return client.mem(this.session, request);
+    }
+
+    private interface Client {
 
         @POST("/security/login")
         public SecurityLoginResponse login(@Body SecurityLoginRequest request);
@@ -121,5 +122,11 @@ public class MBaaSClient {
 
         @POST("/document/create/{collection}")
         public DocumentCreateResponse createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
+
+        @POST("/monitor/cpu")
+        public MonitorCpuResponse cpu(@Header("X-MBAAS-SESSION") String session, @Body MonitorCpuRequest request);
+
+        @POST("/monitor/mem")
+        public MonitorMemResponse mem(@Header("X-MBAAS-SESSION") String session, @Body MonitorMemRequest request);
     }
 }

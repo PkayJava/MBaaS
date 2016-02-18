@@ -101,6 +101,26 @@ public class MBaaSTest {
     }
 
     @Test
+    public void memTest() throws ScriptException {
+
+        String login = "admin";
+        String password = "admin";
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.login(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        MonitorMemRequest request = new MonitorMemRequest();
+        MonitorMemResponse response = client.mem(request);
+        Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        System.out.println(gson.toJson(response));
+    }
+
+    @Test
     public void createCollectionTest() throws ScriptException {
 
         String login = UUID.randomUUID().toString();
