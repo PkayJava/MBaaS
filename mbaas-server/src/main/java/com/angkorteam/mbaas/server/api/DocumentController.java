@@ -39,7 +39,7 @@ import java.util.Map;
  * Created by Khauv Socheat on 2/12/2016.
  */
 @Controller
-@RequestMapping("/document")
+@RequestMapping(path = "/document")
 public class DocumentController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);

@@ -30,7 +30,7 @@ import java.text.DecimalFormat;
  * Created by socheat on 2/18/16.
  */
 @Controller
-@RequestMapping("/monitor")
+@RequestMapping(path = "/monitor")
 public class MonitorController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MonitorController.class);

@@ -37,7 +37,7 @@ import java.util.*;
  * Created by Socheat KHAUV on 2/12/2016.
  */
 @Controller
-@RequestMapping("/collection")
+@RequestMapping(path = "/collection")
 public class CollectionController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectionController.class);

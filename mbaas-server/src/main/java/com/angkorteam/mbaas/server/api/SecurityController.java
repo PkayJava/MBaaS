@@ -42,7 +42,7 @@ import java.util.*;
  * Created by Khauv Socheat on 2/14/2016.
  */
 @Controller
-@RequestMapping("/security")
+@RequestMapping(path = "/security")
 public class SecurityController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityController.class);
