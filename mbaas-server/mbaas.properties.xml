@@ -38,6 +38,8 @@
     <entry key="user.internal_admin.role">role.administrator</entry>
     <entry key="user.internal_admin.password">internal_admin</entry>
 
+    <entry key="resource.repo">/home/socheat/Desktop/</entry>
+
     <entry key="encryption.password"><![CDATA[7808654h4zzx05DheFMZ]]></entry>
     <entry key="encryption.output">base64</entry>
 

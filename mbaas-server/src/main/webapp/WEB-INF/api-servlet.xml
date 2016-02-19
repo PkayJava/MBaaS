@@ -11,6 +11,8 @@
        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd
        ">
 
+    <context:property-placeholder location="file:${user.home}/.xml/mbaas.properties.xml" file-encoding="UTF-8"/>
+
     <mvc:annotation-driven>
         <mvc:message-converters>
             <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter">
@@ -19,12 +21,13 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
 
-    <mvc:cors>
-        <mvc:mapping path="/**" allowed-origins="*" allowed-headers="*"
-                     allowed-methods="HEAD,PUT,POST,PATCH,TRACE,DELETE,GET"/>
-    </mvc:cors>
-
     <security:global-method-security secured-annotations="enabled"/>
+
+    <mvc:resources mapping="/resource/**" location="file:${resource.repo}" cache-period="604800">
+        <mvc:cache-control cache-private="true" cache-public="true" max-age="604800" no-store="true" no-cache="true"
+                           must-revalidate="true" no-transform="true" proxy-revalidate="true" s-maxage="604800"/>
+        <mvc:resource-chain resource-cache="true" cache-name="MBaaS" auto-registration="true"/>
+    </mvc:resources>
 
     <context:component-scan base-package="com.angkorteam.mbaas.server"/>
 
@@ -79,6 +82,7 @@
         <security:csrf disabled="true"/>
         <security:intercept-url pattern="/api/security/signup" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/security/login" method="POST" access="permitAll"/>
+        <security:intercept-url pattern="/api/resource/**" access="permitAll"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
     </security:http>
 
