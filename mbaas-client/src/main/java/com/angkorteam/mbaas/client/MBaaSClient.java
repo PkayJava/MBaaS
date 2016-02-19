@@ -51,44 +51,74 @@ public class MBaaSClient {
         }
     }
 
-    public SecuritySignUpResponse signUp(SecuritySignUpRequest request) {
-        return this.client.signUp(request);
+    //region Security Controller
+
+    public SecuritySignUpResponse securitySignUp(SecuritySignUpRequest request) {
+        return this.client.securitySignUp(request);
     }
 
-    public SecurityLoginResponse login(SecurityLoginRequest request) {
-        SecurityLoginResponse response = this.client.login(request);
+    public SecurityLoginResponse securityLogin(SecurityLoginRequest request) {
+        SecurityLoginResponse response = this.client.securityLogin(request);
         this.session = response.getData().getSession();
         this.currentUser = response.getData().getLogin();
         return response;
     }
 
-    public CollectionCreateResponse createCollection(CollectionCreateRequest request) {
-        return this.client.createCollection(this.session, request);
+    public SecurityLogoutResponse securityLogout(SecurityLogoutRequest request) {
+        return client.securityLogout(this.session, request);
     }
 
-    public CollectionAttributeCreateResponse createCollectionAttribute(CollectionAttributeCreateRequest request) {
-        return this.client.createCollectionAttribute(this.session, request);
+    public SecurityLogoutSessionResponse securityLogoutSession(String session, SecurityLogoutSessionRequest request) {
+        return this.client.securityLogoutSession(this.session, session, request);
     }
 
-    public CollectionAttributeDeleteResponse deleteCollectionAttribute(CollectionAttributeDeleteRequest request) {
-        return this.client.deleteCollectionAttribute(this.session, request);
+    //endregion
+
+    //region Collection Controller
+
+    public CollectionCreateResponse collectionCreate(CollectionCreateRequest request) {
+        return this.client.collectionCreate(this.session, request);
     }
 
-    public CollectionDeleteResponse deleteCollection(CollectionDeleteRequest request) {
-        return this.client.deleteCollection(this.session, request);
+    public CollectionAttributeCreateResponse collectionAttributeCreate(CollectionAttributeCreateRequest request) {
+        return this.client.collectionAttributeCreate(this.session, request);
     }
+
+    public CollectionAttributeDeleteResponse collectionAttributeDelete(CollectionAttributeDeleteRequest request) {
+        return this.client.collectionAttributeDelete(this.session, request);
+    }
+
+    public CollectionDeleteResponse collectionDelete(CollectionDeleteRequest request) {
+        return this.client.collectionDelete(this.session, request);
+    }
+
+    public CollectionPermissionUsernameResponse collectionPermissionGrantUsername(CollectionPermissionUsernameRequest request) {
+        return this.client.collectionPermissionGrantUsername(this.session, request);
+    }
+
+    public CollectionPermissionRoleNameResponse collectionPermissionGrantRoleName(CollectionPermissionRoleNameRequest request) {
+        return this.client.collectionPermissionGrantRoleName(this.session, request);
+    }
+
+    public CollectionPermissionUsernameResponse collectionPermissionRevokeUsername(CollectionPermissionUsernameRequest request) {
+        return this.client.collectionPermissionRevokeUsername(this.session, request);
+    }
+
+    public CollectionPermissionRoleNameResponse collectionPermissionRevokeRoleName(CollectionPermissionRoleNameRequest request) {
+        return this.client.collectionPermissionRevokeRoleName(this.session, request);
+    }
+
+    //endregion
+
+    //region Document Controller
 
     public DocumentCreateResponse createDocument(String collectionName, DocumentCreateRequest request) {
         return client.createDocument(this.session, collectionName, request);
     }
 
-    public SecurityLogoutResponse logout(SecurityLogoutRequest request) {
-        return client.logout(this.session, request);
-    }
+    //endregion
 
-    public SecurityLogoutSessionResponse logoutSession(String session, SecurityLogoutSessionRequest request) {
-        return this.client.logoutSession(this.session, session, request);
-    }
+    //region Monitor Controller
 
     public MonitorCpuResponse cpu(MonitorCpuRequest request) {
         return client.cpu(this.session, request);
@@ -98,39 +128,69 @@ public class MBaaSClient {
         return client.mem(this.session, request);
     }
 
+    //endregion
+
     private interface Client {
 
+        //region Security Controller Interface
+
         @POST("/security/login")
-        public SecurityLoginResponse login(@Body SecurityLoginRequest request);
+        public SecurityLoginResponse securityLogin(@Body SecurityLoginRequest request);
 
         @POST("/security/signup")
-        public SecuritySignUpResponse signUp(@Body SecuritySignUpRequest request);
+        public SecuritySignUpResponse securitySignUp(@Body SecuritySignUpRequest request);
 
         @POST("/security/logout")
-        public SecurityLogoutResponse logout(@Header("X-MBAAS-SESSION") String session, @Body SecurityLogoutRequest request);
+        public SecurityLogoutResponse securityLogout(@Header("X-MBAAS-SESSION") String session, @Body SecurityLogoutRequest request);
 
         @POST("/security/logout/{session}")
-        public SecurityLogoutSessionResponse logoutSession(@Header("X-MBAAS-SESSION") String currentSession, @Path("session") String logoutSession, @Body SecurityLogoutSessionRequest request);
+        public SecurityLogoutSessionResponse securityLogoutSession(@Header("X-MBAAS-SESSION") String currentSession, @Path("session") String logoutSession, @Body SecurityLogoutSessionRequest request);
+
+        //endregion
+
+        //region Collection Controller Interface
 
         @POST("/collection/create")
-        public CollectionCreateResponse createCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionCreateRequest request);
+        public CollectionCreateResponse collectionCreate(@Header("X-MBAAS-SESSION") String session, @Body CollectionCreateRequest request);
 
         @POST("/collection/delete")
-        public CollectionDeleteResponse deleteCollection(@Header("X-MBAAS-SESSION") String session, @Body CollectionDeleteRequest request);
+        public CollectionDeleteResponse collectionDelete(@Header("X-MBAAS-SESSION") String session, @Body CollectionDeleteRequest request);
 
         @POST("/collection/attribute/create")
-        public CollectionAttributeCreateResponse createCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeCreateRequest request);
+        public CollectionAttributeCreateResponse collectionAttributeCreate(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeCreateRequest request);
 
         @POST("/collection/attribute/delete")
-        public CollectionAttributeDeleteResponse deleteCollectionAttribute(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeDeleteRequest request);
+        public CollectionAttributeDeleteResponse collectionAttributeDelete(@Header("X-MBAAS-SESSION") String session, @Body CollectionAttributeDeleteRequest request);
+
+        @POST("/collection/permission/grant/username")
+        public CollectionPermissionUsernameResponse collectionPermissionGrantUsername(@Header("X-MBAAS-SESSION") String session, @Body CollectionPermissionUsernameRequest request);
+
+        @POST("/collection/permission/grant/rolename")
+        public CollectionPermissionRoleNameResponse collectionPermissionGrantRoleName(@Header("X-MBAAS-SESSION") String session, @Body CollectionPermissionRoleNameRequest request);
+
+        @POST("/collection/permission/revoke/username")
+        public CollectionPermissionUsernameResponse collectionPermissionRevokeUsername(@Header("X-MBAAS-SESSION") String session, @Body CollectionPermissionUsernameRequest request);
+
+        @POST("/collection/permission/revoke/rolename")
+        public CollectionPermissionRoleNameResponse collectionPermissionRevokeRoleName(@Header("X-MBAAS-SESSION") String session, @Body CollectionPermissionRoleNameRequest request);
+
+        //endregion
+
+        //region Document Controller Interface
 
         @POST("/document/create/{collection}")
         public DocumentCreateResponse createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
+
+        //endregion
+
+        //region Monitor Controller Interface
 
         @POST("/monitor/cpu")
         public MonitorCpuResponse cpu(@Header("X-MBAAS-SESSION") String session, @Body MonitorCpuRequest request);
 
         @POST("/monitor/mem")
         public MonitorMemResponse mem(@Header("X-MBAAS-SESSION") String session, @Body MonitorMemRequest request);
+
+        //endregion
     }
 }

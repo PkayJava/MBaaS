@@ -54,6 +54,8 @@ public class CollectionController {
     @Autowired
     private Gson gson;
 
+    //region /collection/create
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/create",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -287,6 +289,10 @@ public class CollectionController {
         return ResponseEntity.ok(response);
     }
 
+    //endregion
+
+    //region /collection/attribute/create
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/attribute/create",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -408,6 +414,10 @@ public class CollectionController {
         return ResponseEntity.ok(response);
     }
 
+    //endregion
+
+    //region /collection/delete
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/delete",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -464,6 +474,10 @@ public class CollectionController {
 
         return ResponseEntity.ok(response);
     }
+
+    //endregion
+
+    //region /collection/attribute/delete
 
     @RequestMapping(
             method = RequestMethod.POST, path = "/attribute/delete",
@@ -541,8 +555,12 @@ public class CollectionController {
         return ResponseEntity.ok(response);
     }
 
+    //endregion
+
+    //region /collection/permission/grant/username
+
     @RequestMapping(
-            method = RequestMethod.POST, path = "/permission/grant/user",
+            method = RequestMethod.POST, path = "/permission/grant/username",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CollectionPermissionUsernameResponse> grantPermissionUsername(
@@ -621,8 +639,12 @@ public class CollectionController {
         return ResponseEntity.ok(response);
     }
 
+    //endregion
+
+    //region /collection/permission/grant/rolename
+
     @RequestMapping(
-            method = RequestMethod.POST, path = "/permission/grant/role",
+            method = RequestMethod.POST, path = "/permission/grant/rolename",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CollectionPermissionRoleNameResponse> grantPermissionRoleName(
@@ -701,9 +723,12 @@ public class CollectionController {
         return ResponseEntity.ok(response);
     }
 
+    //endregion
+
+    //region /collection/permission/revoke/username
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/permission/revoke/user",
+            method = RequestMethod.POST, path = "/permission/revoke/username",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CollectionPermissionUsernameResponse> revokePermissionUsername(
@@ -794,9 +819,12 @@ public class CollectionController {
         return ResponseEntity.ok(response);
     }
 
+    //endregion
+
+    //region /collection/permission/revoke/rolename
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/permission/revoke/role",
+            method = RequestMethod.POST, path = "/permission/revoke/rolename",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CollectionPermissionRoleNameResponse> revokePermissionRoleName(
@@ -885,5 +913,7 @@ public class CollectionController {
 
         return ResponseEntity.ok(response);
     }
+
+    //endregion
 
 }

@@ -56,6 +56,8 @@ public class SecurityController {
     @Autowired
     private Gson gson;
 
+    //region /security/signup
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/signup",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -286,6 +288,10 @@ public class SecurityController {
         return ResponseEntity.ok(responseBody);
     }
 
+    //endregion
+
+    //region /security/login
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/login",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -342,6 +348,10 @@ public class SecurityController {
         return ResponseEntity.ok(responseBody);
     }
 
+    //endregion
+
+    //region /security/logout
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/logout",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -365,6 +375,10 @@ public class SecurityController {
         return ResponseEntity.ok(responseBody);
     }
 
+    //endregion
+
+    //region /security/logout/{session}
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/logout/{session}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -384,5 +398,7 @@ public class SecurityController {
 
         return ResponseEntity.ok(responseBody);
     }
+
+    //endregion
 
 }

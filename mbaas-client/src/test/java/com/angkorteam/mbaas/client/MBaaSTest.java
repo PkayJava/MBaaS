@@ -8,8 +8,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.script.ScriptException;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -39,7 +37,7 @@ public class MBaaSTest {
         request.setUsername(login);
         request.setPassword(password);
 
-        SecuritySignUpResponse response = client.signUp(request);
+        SecuritySignUpResponse response = client.securitySignUp(request);
         Assert.assertEquals(response.getHttpCode().intValue(), 200);
 
     }
@@ -53,7 +51,7 @@ public class MBaaSTest {
             SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecurityLoginResponse response = client.login(request);
+            SecurityLoginResponse response = client.securityLogin(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -70,12 +68,12 @@ public class MBaaSTest {
             SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecurityLoginResponse response = client.login(request);
+            SecurityLoginResponse response = client.securityLogin(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
         SecurityLogoutRequest request = new SecurityLogoutRequest();
-        SecurityLogoutResponse response = client.logout(request);
+        SecurityLogoutResponse response = client.securityLogout(request);
         Assert.assertEquals(response.getHttpCode().intValue(), 200);
     }
 
@@ -88,13 +86,13 @@ public class MBaaSTest {
             SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecurityLoginResponse response = client.login(request);
+            SecurityLoginResponse response = client.securityLogin(request);
             session = response.getData().getSession();
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
         SecurityLogoutSessionRequest request = new SecurityLogoutSessionRequest();
-        SecurityLogoutSessionResponse response = client.logoutSession(session, request);
+        SecurityLogoutSessionResponse response = client.securityLogoutSession(session, request);
         Assert.assertEquals(response.getHttpCode().intValue(), 200);
     }
 
@@ -108,7 +106,7 @@ public class MBaaSTest {
             SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecurityLoginResponse response = client.login(request);
+            SecurityLoginResponse response = client.securityLogin(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -128,7 +126,7 @@ public class MBaaSTest {
             SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecurityLoginResponse response = client.login(request);
+            SecurityLoginResponse response = client.securityLogin(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -148,7 +146,7 @@ public class MBaaSTest {
             SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecurityLoginResponse response = client.login(request);
+            SecurityLoginResponse response = client.securityLogin(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -234,14 +232,14 @@ public class MBaaSTest {
                 attribute.setNullable(true);
                 request.getAttributes().add(attribute);
             }
-            CollectionCreateResponse response = client.createCollection(request);
+            CollectionCreateResponse response = client.collectionCreate(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
         {
             CollectionDeleteRequest request = new CollectionDeleteRequest();
             request.setCollectionName(collectionName);
-            CollectionDeleteResponse response = client.deleteCollection(request);
+            CollectionDeleteResponse response = client.collectionDelete(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -256,7 +254,7 @@ public class MBaaSTest {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecuritySignUpResponse response = client.signUp(request);
+            SecuritySignUpResponse response = client.securitySignUp(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -264,7 +262,7 @@ public class MBaaSTest {
             SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecurityLoginResponse response = client.login(request);
+            SecurityLoginResponse response = client.securityLogin(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -280,14 +278,14 @@ public class MBaaSTest {
                 attribute.setNullable(false);
                 request.getAttributes().add(attribute);
             }
-            CollectionCreateResponse response = client.createCollection(request);
+            CollectionCreateResponse response = client.collectionCreate(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
         {
             CollectionDeleteRequest request = new CollectionDeleteRequest();
             request.setCollectionName(collectionName);
-            CollectionDeleteResponse response = client.deleteCollection(request);
+            CollectionDeleteResponse response = client.collectionDelete(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
     }
@@ -301,7 +299,7 @@ public class MBaaSTest {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecuritySignUpResponse response = client.signUp(request);
+            SecuritySignUpResponse response = client.securitySignUp(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -309,7 +307,7 @@ public class MBaaSTest {
             SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecurityLoginResponse response = client.login(request);
+            SecurityLoginResponse response = client.securityLogin(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -318,7 +316,7 @@ public class MBaaSTest {
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
             request.setCollectionName(collectionName);
-            CollectionCreateResponse response = client.createCollection(request);
+            CollectionCreateResponse response = client.collectionCreate(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -343,7 +341,7 @@ public class MBaaSTest {
                 request.setJavaType(javaType);
                 request.setAttributeName("first_name" + i);
                 request.setNullable(false);
-                CollectionAttributeCreateResponse response = client.createCollectionAttribute(request);
+                CollectionAttributeCreateResponse response = client.collectionAttributeCreate(request);
                 Assert.assertEquals(response.getHttpCode().intValue(), 200);
             }
         }
@@ -351,7 +349,7 @@ public class MBaaSTest {
         {
             CollectionDeleteRequest request = new CollectionDeleteRequest();
             request.setCollectionName(collectionName);
-            CollectionDeleteResponse response = client.deleteCollection(request);
+            CollectionDeleteResponse response = client.collectionDelete(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
     }
@@ -365,7 +363,7 @@ public class MBaaSTest {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecuritySignUpResponse response = client.signUp(request);
+            SecuritySignUpResponse response = client.securitySignUp(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -373,7 +371,7 @@ public class MBaaSTest {
             SecurityLoginRequest request = new SecurityLoginRequest();
             request.setUsername(login);
             request.setPassword(password);
-            SecurityLoginResponse response = client.login(request);
+            SecurityLoginResponse response = client.securityLogin(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -382,7 +380,7 @@ public class MBaaSTest {
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
             request.setCollectionName(collectionName);
-            CollectionCreateResponse response = client.createCollection(request);
+            CollectionCreateResponse response = client.collectionCreate(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -394,7 +392,7 @@ public class MBaaSTest {
             request.setJavaType(String.class.getName());
             request.setAttributeName(attributeName);
             request.setNullable(false);
-            CollectionAttributeCreateResponse response = client.createCollectionAttribute(request);
+            CollectionAttributeCreateResponse response = client.collectionAttributeCreate(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
@@ -403,14 +401,14 @@ public class MBaaSTest {
             CollectionAttributeDeleteRequest request = new CollectionAttributeDeleteRequest();
             request.setCollectionName(collectionName);
             request.setAttributeName(attributeName);
-            CollectionAttributeDeleteResponse response = client.deleteCollectionAttribute(request);
+            CollectionAttributeDeleteResponse response = client.collectionAttributeDelete(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
         {
             CollectionDeleteRequest request = new CollectionDeleteRequest();
             request.setCollectionName(collectionName);
-            CollectionDeleteResponse response = client.deleteCollection(request);
+            CollectionDeleteResponse response = client.collectionDelete(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
     }
