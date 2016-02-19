@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.client;
 
+import com.angkorteam.mbaas.plain.enums.PermissionEnum;
 import com.angkorteam.mbaas.plain.request.*;
 import com.angkorteam.mbaas.plain.response.*;
 import com.google.gson.Gson;
@@ -26,10 +27,10 @@ public class MBaaSTest {
 
     private Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ").create();
 
-    private MBaaSClient client = new MBaaSClient("1234567890", HOST_C);
+    private MBaaSClient client = new MBaaSClient("1234567890", HOST_B);
 
     @Test
-    public void signUpTest() throws ScriptException {
+    public void securitySignUpTest() throws ScriptException {
 
         String login = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
@@ -43,7 +44,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void loginTest() throws ScriptException {
+    public void securityLoginTest() throws ScriptException {
         String login = "admin";
         String password = "admin";
 
@@ -61,7 +62,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void logoutTest() throws ScriptException {
+    public void securityLogoutTest() throws ScriptException {
         String login = "admin";
         String password = "admin";
         {
@@ -78,7 +79,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void logoutSessionTest() throws ScriptException {
+    public void securityLogoutSessionTest() throws ScriptException {
         String login = "admin";
         String password = "admin";
         String session = null;
@@ -97,7 +98,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void cpuTest() throws ScriptException {
+    public void monitorCpuTest() throws ScriptException {
 
         String login = "admin";
         String password = "admin";
@@ -117,7 +118,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void memTest() throws ScriptException {
+    public void monitorMemTest() throws ScriptException {
 
         String login = "admin";
         String password = "admin";
@@ -137,7 +138,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void createCollectionTest() throws ScriptException {
+    public void collectionCreateTest() throws ScriptException {
 
         String login = "admin";
         String password = "admin";
@@ -246,17 +247,10 @@ public class MBaaSTest {
     }
 
     @Test
-    public void deleteCollectionTest() throws ScriptException {
+    public void collectionDeleteTest() throws ScriptException {
 
-        String login = UUID.randomUUID().toString();
-        String password = UUID.randomUUID().toString();
-        {
-            SecuritySignUpRequest request = new SecuritySignUpRequest();
-            request.setUsername(login);
-            request.setPassword(password);
-            SecuritySignUpResponse response = client.securitySignUp(request);
-            Assert.assertEquals(response.getHttpCode().intValue(), 200);
-        }
+        String login = "admin";
+        String password = "admin";
 
         {
             SecurityLoginRequest request = new SecurityLoginRequest();
@@ -291,17 +285,10 @@ public class MBaaSTest {
     }
 
     @Test
-    public void createCollectionAttributeTest() throws ScriptException {
+    public void collectionAttributeCreateTest() throws ScriptException {
 
-        String login = UUID.randomUUID().toString();
-        String password = UUID.randomUUID().toString();
-        {
-            SecuritySignUpRequest request = new SecuritySignUpRequest();
-            request.setUsername(login);
-            request.setPassword(password);
-            SecuritySignUpResponse response = client.securitySignUp(request);
-            Assert.assertEquals(response.getHttpCode().intValue(), 200);
-        }
+        String login = "admin";
+        String password = "admin";
 
         {
             SecurityLoginRequest request = new SecurityLoginRequest();
@@ -355,17 +342,10 @@ public class MBaaSTest {
     }
 
     @Test
-    public void deleteCollectionAttributeTest() throws ScriptException {
+    public void collectionAttributeDeleteTest() throws ScriptException {
 
-        String login = UUID.randomUUID().toString();
-        String password = UUID.randomUUID().toString();
-        {
-            SecuritySignUpRequest request = new SecuritySignUpRequest();
-            request.setUsername(login);
-            request.setPassword(password);
-            SecuritySignUpResponse response = client.securitySignUp(request);
-            Assert.assertEquals(response.getHttpCode().intValue(), 200);
-        }
+        String login = "admin";
+        String password = "admin";
 
         {
             SecurityLoginRequest request = new SecurityLoginRequest();
@@ -402,6 +382,101 @@ public class MBaaSTest {
             request.setCollectionName(collectionName);
             request.setAttributeName(attributeName);
             CollectionAttributeDeleteResponse response = client.collectionAttributeDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void collectionPermissionGrantUsernameTest() {
+        String login = "admin";
+        String password = "admin";
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String userALogin = "us" + UUID.randomUUID().toString();
+        String userAPassword = "us" + UUID.randomUUID().toString();
+        {
+            SecuritySignUpRequest request = new SecuritySignUpRequest();
+            request.setUsername(userALogin);
+            request.setPassword(userAPassword);
+            SecuritySignUpResponse response = client.securitySignUp(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionPermissionUsernameRequest request = new CollectionPermissionUsernameRequest();
+            request.setCollectionName(collectionName);
+            request.setUsername(userALogin);
+            request.getActions().add(PermissionEnum.Create.getLiteral());
+            request.getActions().add(PermissionEnum.Delete.getLiteral());
+            request.getActions().add(PermissionEnum.Modify.getLiteral());
+            request.getActions().add(PermissionEnum.Read.getLiteral());
+            CollectionPermissionUsernameResponse response = client.collectionPermissionGrantUsername(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void collectionPermissionGrantRoleNameTest() {
+        String login = "admin";
+        String password = "admin";
+        String rolename = "backoffice";
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionPermissionRoleNameRequest request = new CollectionPermissionRoleNameRequest();
+            request.setCollectionName(collectionName);
+            request.setRoleName(rolename);
+            request.getActions().add(PermissionEnum.Create.getLiteral());
+            request.getActions().add(PermissionEnum.Delete.getLiteral());
+            request.getActions().add(PermissionEnum.Modify.getLiteral());
+            request.getActions().add(PermissionEnum.Read.getLiteral());
+            CollectionPermissionRoleNameResponse response = client.collectionPermissionGrantRoleName(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
