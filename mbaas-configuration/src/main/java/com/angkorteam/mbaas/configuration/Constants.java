@@ -48,6 +48,8 @@ public class Constants {
     public static final String USER_INTERNAL_ADMIN_ROLE = "user.internal_admin.role";
     public static final String USER_INTERNAL_ADMIN_PASSWORD = "user.internal_admin.password";
 
+    public static final String PATTERN_DATETIME = "pattern.datetime";
+
     public static final String ENCRYPTION_PASSWORD = "encryption.password";
     public static final String ENCRYPTION_OUTPUT = "encryption.output";
 

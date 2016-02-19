@@ -136,7 +136,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean isAdministratorRole(String session) {
+        public boolean isAdministratorUser(String session) {
             Session sessionTable = Tables.SESSION.as("sessionTable");
             Role roleTable = Tables.ROLE.as("roleTable");
             User userTable = Tables.USER.as("userTable");
@@ -159,7 +159,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean isBackOfficeRole(String session) {
+        public boolean isBackOfficeUser(String session) {
             Session sessionTable = Tables.SESSION.as("sessionTable");
             Role roleTable = Tables.ROLE.as("roleTable");
             User userTable = Tables.USER.as("userTable");
@@ -182,7 +182,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean isRegisteredRole(String session) {
+        public boolean isRegisteredUser(String session) {
             Session sessionTable = Tables.SESSION.as("sessionTable");
             Role roleTable = Tables.ROLE.as("roleTable");
             User userTable = Tables.USER.as("userTable");
@@ -206,7 +206,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean isRole(String session, String roleName) {
+        public boolean isUser(String session, String roleName) {
             Session sessionTable = Tables.SESSION.as("sessionTable");
             Role roleTable = Tables.ROLE.as("roleTable");
             User userTable = Tables.USER.as("userTable");
@@ -265,7 +265,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
                     .and(documentUserPrivacyTable.DOCUMENT_ID.eq(documentId))
                     .fetchOneInto(documentUserPrivacyTable);
 
-            if ((documentUserPrivacyRecord.getPermisson() & action) == action) {
+            if (documentUserPrivacyRecord != null && (documentUserPrivacyRecord.getPermisson() & action) == action) {
                 return true;
             }
 
@@ -314,7 +314,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
                     .and(tableUserPrivacyTable.USER_ID.eq(userRecord.getUserId()))
                     .fetchOneInto(tableUserPrivacyTable);
 
-            if ((collectionUserPrivacyRecord.getPermisson() & action) == action) {
+            if (collectionUserPrivacyRecord != null && (collectionUserPrivacyRecord.getPermisson() & action) == action) {
                 return true;
             }
 

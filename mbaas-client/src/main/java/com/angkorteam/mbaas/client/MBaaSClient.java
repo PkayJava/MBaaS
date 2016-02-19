@@ -112,8 +112,24 @@ public class MBaaSClient {
 
     //region Document Controller
 
-    public DocumentCreateResponse createDocument(String collectionName, DocumentCreateRequest request) {
-        return client.createDocument(this.session, collectionName, request);
+    public DocumentCreateResponse documentCreate(String collectionName, DocumentCreateRequest request) {
+        return client.documentCreate(this.session, collectionName, request);
+    }
+
+    public DocumentPermissionUsernameResponse documentPermissionGrantUsername(DocumentPermissionUsernameRequest request) {
+        return client.documentPermissionGrantUsername(this.session, request);
+    }
+
+    public DocumentPermissionRoleNameResponse documentPermissionGrantRoleName(DocumentPermissionRoleNameRequest request) {
+        return client.documentPermissionGrantRoleName(this.session, request);
+    }
+
+    public DocumentPermissionUsernameResponse documentPermissionRevokeUsername(DocumentPermissionUsernameRequest request) {
+        return client.documentPermissionRevokeUsername(this.session, request);
+    }
+
+    public DocumentPermissionRoleNameResponse documentPermissionRevokeRoleName(DocumentPermissionRoleNameRequest request) {
+        return client.documentPermissionRevokeRoleName(this.session, request);
     }
 
     //endregion
@@ -129,6 +145,8 @@ public class MBaaSClient {
     }
 
     //endregion
+
+    //region Client Interface
 
     private interface Client {
 
@@ -179,7 +197,19 @@ public class MBaaSClient {
         //region Document Controller Interface
 
         @POST("/document/create/{collection}")
-        public DocumentCreateResponse createDocument(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
+        public DocumentCreateResponse documentCreate(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCreateRequest request);
+
+        @POST("/document/permission/grant/username")
+        public DocumentPermissionUsernameResponse documentPermissionGrantUsername(@Header("X-MBAAS-SESSION") String session, @Body DocumentPermissionUsernameRequest request);
+
+        @POST("/document/permission/grant/rolename")
+        public DocumentPermissionRoleNameResponse documentPermissionGrantRoleName(@Header("X-MBAAS-SESSION") String session, @Body DocumentPermissionRoleNameRequest request);
+
+        @POST("/document/permission/revoke/username")
+        public DocumentPermissionUsernameResponse documentPermissionRevokeUsername(@Header("X-MBAAS-SESSION") String session, @Body DocumentPermissionUsernameRequest request);
+
+        @POST("/document/permission/revoke/rolename")
+        public DocumentPermissionRoleNameResponse documentPermissionRevokeRoleName(@Header("X-MBAAS-SESSION") String session, @Body DocumentPermissionRoleNameRequest request);
 
         //endregion
 
@@ -193,4 +223,7 @@ public class MBaaSClient {
 
         //endregion
     }
+
+    //endregion
+
 }

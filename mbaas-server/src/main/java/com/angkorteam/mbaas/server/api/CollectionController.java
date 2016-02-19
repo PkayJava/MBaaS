@@ -12,7 +12,6 @@ import com.angkorteam.mbaas.plain.response.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
-import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,8 +84,8 @@ public class CollectionController {
             }
         }
 
-        if (permission.isAdministratorRole(session)
-                || permission.isBackOfficeRole(session)) {
+        if (permission.isAdministratorUser(session)
+                || permission.isBackOfficeUser(session)) {
         } else {
             errorMessages.put("collectionName", "you are not allow to create new collection");
         }
@@ -253,7 +252,7 @@ public class CollectionController {
             attributeRecord.setAttributeId(UUID.randomUUID().toString());
             attributeRecord.setCollectionId(collectionRecord.getCollectionId());
             attributeRecord.setName(attribute.getName());
-            attributeRecord.setNullable(true);
+            attributeRecord.setNullable(attribute.isNullable());
             attributeRecord.setSystem(false);
             attributeRecord.setAutoIncrement(false);
             attributeRecord.setVirtual(false);
@@ -320,13 +319,17 @@ public class CollectionController {
         }
 
         if (collectionRecord != null) {
-            if (permission.isAdministratorRole(session)
-                    || permission.isBackOfficeRole(session)
-                    || permission.isCollectionOwner(session, requestBody.getCollectionName())
-                    || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())
-                    ) {
-            } else {
+            if (collectionRecord.getLocked() || collectionRecord.getSystem()) {
                 errorMessages.put("collectionName", "you are not allow to create its attribute");
+            } else {
+                if (permission.isAdministratorUser(session)
+                        || permission.isBackOfficeUser(session)
+                        || permission.isCollectionOwner(session, requestBody.getCollectionName())
+                        || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())
+                        ) {
+                } else {
+                    errorMessages.put("collectionName", "you are not allow to create its attribute");
+                }
             }
         }
 
@@ -451,13 +454,17 @@ public class CollectionController {
         }
 
         if (collectionRecord != null) {
-            if (permission.isAdministratorRole(session)
-                    || permission.isBackOfficeRole(session)
-                    || permission.isCollectionOwner(session, requestBody.getCollectionName())
-                    || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Delete.getLiteral())
-                    ) {
+            if (collectionRecord.getLocked() || collectionRecord.getSystem()) {
+                errorMessages.put("collectionName", "you are not allow to create its attribute");
             } else {
-                errorMessages.put("collectionName", "you are not allow to delete it");
+                if (permission.isAdministratorUser(session)
+                        || permission.isBackOfficeUser(session)
+                        || permission.isCollectionOwner(session, requestBody.getCollectionName())
+                        || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Delete.getLiteral())
+                        ) {
+                } else {
+                    errorMessages.put("collectionName", "you are not allow to delete it");
+                }
             }
         }
 
@@ -533,13 +540,17 @@ public class CollectionController {
         }
 
         if (collectionRecord != null) {
-            if (permission.isAdministratorRole(session)
-                    || permission.isBackOfficeRole(session)
-                    || permission.isCollectionOwner(session, requestBody.getCollectionName())
-                    || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())
-                    ) {
+            if (collectionRecord.getLocked() || collectionRecord.getSystem()) {
+                errorMessages.put("collectionName", "you are not allow to create its attribute");
             } else {
-                errorMessages.put("collectionName", "you are not allow to delete its attribute");
+                if (permission.isAdministratorUser(session)
+                        || permission.isBackOfficeUser(session)
+                        || permission.isCollectionOwner(session, requestBody.getCollectionName())
+                        || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())
+                        ) {
+                } else {
+                    errorMessages.put("collectionName", "you are not allow to delete its attribute");
+                }
             }
         }
 

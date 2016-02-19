@@ -27,7 +27,7 @@ public class MBaaSTest {
 
     private Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ").create();
 
-    private MBaaSClient client = new MBaaSClient("1234567890", HOST_B);
+    private MBaaSClient client = new MBaaSClient("1234567890", HOST_C);
 
     @Test
     public void securitySignUpTest() throws ScriptException {
@@ -597,6 +597,141 @@ public class MBaaSTest {
             CollectionPermissionRoleNameResponse response = client.collectionPermissionRevokeRoleName(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
             Assert.assertEquals(response.getData().getPermission().intValue(), PermissionEnum.Create.getLiteral() | PermissionEnum.Delete.getLiteral());
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void documentCreateTestA() {
+        String login = "admin";
+        String password = "admin";
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("first_name");
+                attribute.setNullable(false);
+                attribute.setJavaType(String.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("join_date");
+                attribute.setNullable(true);
+                attribute.setJavaType(Date.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            DocumentCreateRequest request = new DocumentCreateRequest();
+            request.getDocument().put("first_name", "Socheat KHAUV");
+            request.getDocument().put("join_date", new Date());
+            DocumentCreateResponse response = client.documentCreate(collectionName, request);
+            System.out.println(gson.toJson(response));
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void documentCreateTestB() {
+        String login = "admin";
+        String password = "admin";
+
+        String userALogin = "userA" + UUID.randomUUID().toString();
+        String userAPassword = "userA" + UUID.randomUUID().toString();
+
+        {
+            SecuritySignUpRequest request = new SecuritySignUpRequest();
+            request.setUsername(userALogin);
+            request.setPassword(userAPassword);
+            SecuritySignUpResponse response = client.securitySignUp(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("first_name");
+                attribute.setNullable(false);
+                attribute.setJavaType(String.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("join_date");
+                attribute.setNullable(true);
+                attribute.setJavaType(Date.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionPermissionUsernameRequest request = new CollectionPermissionUsernameRequest();
+            request.setCollectionName(collectionName);
+            request.setUsername(userALogin);
+            request.getActions().add(PermissionEnum.Create.getLiteral());
+            request.getActions().add(PermissionEnum.Delete.getLiteral());
+            CollectionPermissionUsernameResponse response = client.collectionPermissionGrantUsername(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(userALogin);
+            request.setPassword(userAPassword);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            DocumentCreateRequest request = new DocumentCreateRequest();
+            request.getDocument().put("first_name", "Socheat KHAUV");
+            request.getDocument().put("join_date", new Date());
+            DocumentCreateResponse response = client.documentCreate(collectionName, request);
+            System.out.println(gson.toJson(response));
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
         {

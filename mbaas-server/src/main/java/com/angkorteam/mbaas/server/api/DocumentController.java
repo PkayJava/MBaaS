@@ -1,7 +1,8 @@
 package com.angkorteam.mbaas.server.api;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.plain.response.DocumentCreateResponse;
+import com.angkorteam.mbaas.model.entity.tables.Collection;
+import com.angkorteam.mbaas.plain.response.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
@@ -9,15 +10,16 @@ import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
 import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.*;
-import com.angkorteam.mbaas.plain.response.Response;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
-import org.jasypt.encryption.StringEncryptor;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,12 +30,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.sql.DataSource;
 import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * Created by Khauv Socheat on 2/12/2016.
@@ -56,6 +57,8 @@ public class DocumentController {
     @Autowired
     private Gson gson;
 
+    //region /document/query/{collection}
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/query/{collection}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -69,10 +72,10 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Collection tableTable = Tables.COLLECTION.as("tableTable");
-        Attribute fieldTable = Tables.ATTRIBUTE.as("fieldTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
         if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
@@ -82,7 +85,7 @@ public class DocumentController {
 //        }
 
         Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
-        for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
+        for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
             fieldRecords.put(fieldRecord.getAttributeId(), fieldRecord);
         }
 
@@ -104,6 +107,10 @@ public class DocumentController {
         return ResponseEntity.ok(null);
     }
 
+    //endregion
+
+    //region /document/query/{collection}/{id}
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/query/{collection}/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -118,10 +125,10 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Collection tableTable = Tables.COLLECTION.as("tableTable");
-        Attribute fieldTable = Tables.ATTRIBUTE.as("fieldTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
         if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
@@ -131,7 +138,7 @@ public class DocumentController {
 //        }
 
         Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
-        for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
+        for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
             fieldRecords.put(fieldRecord.getAttributeId(), fieldRecord);
         }
 
@@ -153,6 +160,10 @@ public class DocumentController {
         return ResponseEntity.ok(null);
     }
 
+    //endregion
+
+    //region /document/create/{collection}
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/create/{collection}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -165,56 +176,200 @@ public class DocumentController {
             @RequestBody DocumentCreateRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
         User userTable = Tables.USER.as("userTable");
         Session sessionTable = Tables.SESSION.as("sessionTable");
-        Collection tableTable = Tables.COLLECTION.as("tableTable");
-        Attribute fieldTable = Tables.ATTRIBUTE.as("fieldTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-        if (tokenRecord == null) {
-            return ResponseEntity.ok(null);
+        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
+        if (sessionRecord == null) {
+            errorMessages.put("session", "session invalid");
         }
 
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
-        if (userRecord == null) {
-            return ResponseEntity.ok(null);
+        UserRecord userRecord = null;
+        if (sessionRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                errorMessages.put("session", "session invalid");
+            }
         }
 
-        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
         if (collectionRecord == null) {
-            return ResponseEntity.ok(null);
+            errorMessages.put("collection", "collection is not found");
         }
 
-//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Create.getLiteral())) {
-//            return ResponseEntity.ok(null);
-//        }
+        Map<String, AttributeRecord> attributeIdRecords = new LinkedHashMap<>();
+        Map<String, AttributeRecord> attributeNameRecords = new LinkedHashMap<>();
+        if (collectionRecord != null) {
+            for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
+                attributeIdRecords.put(attributeRecord.getAttributeId(), attributeRecord);
+                attributeNameRecords.put(attributeRecord.getName(), attributeRecord);
 
-        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
-        for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
-            fieldRecords.put(fieldRecord.getName(), fieldRecord);
-        }
-
-        for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            if (!fieldRecords.containsKey(entry.getKey())) {
-                return ResponseEntity.ok(null);
-            } else {
-                AttributeRecord fieldRecord = fieldRecords.get(entry.getKey());
-                if (!fieldRecord.getJavaType().equals(entry.getValue().getClass().getName())) {
-                    return ResponseEntity.ok(null);
+                if (!attributeRecord.getSystem() && !attributeRecord.getNullable() && !requestBody.getDocument().containsKey(attributeRecord.getName())) {
+                    errorMessages.put(attributeRecord.getName(), "is required");
                 }
             }
         }
 
-        Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
-        for (AttributeRecord blobRecord : context.select(fieldTable.fields()).from(fieldTable)
-                .where(fieldTable.SQL_TYPE.eq("BLOB"))
-                .and(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                .and(fieldTable.VIRTUAL.eq(false))
-                .fetchInto(fieldTable)) {
-            blobRecords.put(blobRecord.getAttributeId(), blobRecord);
+
+        String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
+
+        for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
+            if (!attributeNameRecords.containsKey(entry.getKey())) {
+                errorMessages.put(entry.getKey(), "is not allow");
+            } else {
+                AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
+                if (attributeRecord.getJavaType().equals(Date.class.getName())
+                        || attributeRecord.getJavaType().equals(Time.class.getName())
+                        || attributeRecord.getJavaType().equals(Timestamp.class.getName())) {
+                    if (attributeRecord.getNullable()) {
+                        if (entry.getValue() != null) {
+                            if (entry.getValue().getClass().getName().equals(String.class.getName())) {
+                                try {
+                                    FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
+                                } catch (ParseException e) {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is bad value");
+                            }
+                        }
+                    } else {
+                        if (entry.getValue() != null) {
+                            if (entry.getValue().getClass().getName().equals(String.class.getName())) {
+                                try {
+                                    FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
+                                } catch (ParseException e) {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is bad value");
+                            }
+                        } else {
+                            errorMessages.put(entry.getKey(), "is required");
+                        }
+                    }
+                } else if (attributeRecord.getJavaType().equals(Byte.class.getName()) || attributeRecord.getJavaType().equals(byte.class.getName())
+                        || attributeRecord.getJavaType().equals(Short.class.getName()) || attributeRecord.getJavaType().equals(short.class.getName())
+                        || attributeRecord.getJavaType().equals(Integer.class.getName()) || attributeRecord.getJavaType().equals(int.class.getName())
+                        || attributeRecord.getJavaType().equals(Long.class.getName()) || attributeRecord.getJavaType().equals(long.class.getName())) {
+                    if (attributeRecord.getNullable()) {
+                        if (entry.getValue() != null) {
+                            String clazzName = entry.getValue().getClass().getName();
+                            if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
+                                    || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
+                                    || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
+                                    || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
+                            } else {
+                                errorMessages.put(entry.getKey(), "is bad value");
+                            }
+                        }
+                    } else {
+                        if (entry.getValue() != null) {
+                            String clazzName = entry.getValue().getClass().getName();
+                            if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
+                                    || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
+                                    || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
+                                    || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
+                            } else {
+                                errorMessages.put(entry.getKey(), "is bad value");
+                            }
+                        } else {
+                            errorMessages.put(entry.getKey(), "is required");
+                        }
+                    }
+                } else if (attributeRecord.getJavaType().equals(Float.class.getName()) || attributeRecord.getJavaType().equals(float.class.getName())
+                        || attributeRecord.getJavaType().equals(Double.class.getName()) || attributeRecord.getJavaType().equals(double.class.getName())) {
+                    if (attributeRecord.getNullable()) {
+                        if (entry.getValue() != null) {
+                            String clazzName = entry.getValue().getClass().getName();
+                            if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
+                                    || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
+                            } else {
+                                errorMessages.put(entry.getKey(), "is bad value");
+                            }
+                        }
+                    } else {
+                        if (entry.getValue() != null) {
+                            String clazzName = entry.getValue().getClass().getName();
+                            if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
+                                    || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
+                            } else {
+                                errorMessages.put(entry.getKey(), "is bad value");
+                            }
+                        } else {
+                            errorMessages.put(entry.getKey(), "is required");
+                        }
+                    }
+                } else if (attributeRecord.getJavaType().equals(Boolean.class.getName()) || attributeRecord.getJavaType().equals(boolean.class.getName())) {
+                    if (attributeRecord.getNullable()) {
+                        if (entry.getValue() != null) {
+                            String clazzName = entry.getValue().getClass().getName();
+                            if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
+                            } else {
+                                errorMessages.put(entry.getKey(), "is bad value");
+                            }
+                        }
+                    } else {
+                        if (entry.getValue() != null) {
+                            String clazzName = entry.getValue().getClass().getName();
+                            if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
+                            } else {
+                                errorMessages.put(entry.getKey(), "is bad value");
+                            }
+                        } else {
+                            errorMessages.put(entry.getKey(), "is required");
+                        }
+                    }
+                } else if (attributeRecord.getJavaType().equals(String.class.getName())
+                        || attributeRecord.getJavaType().equals(Character.class.getName()) || attributeRecord.getJavaType().equals(char.class.getName())) {
+                    if (attributeRecord.getNullable()) {
+                        if (entry.getValue() != null) {
+                            String clazzName = entry.getValue().getClass().getName();
+                            if (clazzName.equals(String.class.getName())
+                                    || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
+                            } else {
+                                errorMessages.put(entry.getKey(), "is bad value");
+                            }
+                        }
+                    } else {
+                        if (entry.getValue() != null) {
+                            String clazzName = entry.getValue().getClass().getName();
+                            if (clazzName.equals(String.class.getName())
+                                    || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
+                            } else {
+                                errorMessages.put(entry.getKey(), "is bad value");
+                            }
+                        } else {
+                            errorMessages.put(entry.getKey(), "is required");
+                        }
+                    }
+                } else {
+                    errorMessages.put(entry.getKey(), "is bad value");
+                }
+            }
+        }
+
+        if (collectionRecord != null) {
+            if (permission.isAdministratorUser(session)
+                    || permission.isBackOfficeUser(session)
+                    || permission.isCollectionOwner(session, collection)
+                    || permission.hasCollectionPermission(session, collection, PermissionEnum.Create.getLiteral())) {
+            } else {
+                errorMessages.put("permission", "don't have write permission to this collection");
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            DocumentCreateResponse response = new DocumentCreateResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
         }
 
         Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
@@ -224,28 +379,38 @@ public class DocumentController {
         Map<String, Object> columnValues = new LinkedHashMap<>();
 
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            AttributeRecord fieldRecord = fieldRecords.get(entry.getKey());
-            if (fieldRecord.getNullable()) {
-                if (fieldRecord.getJavaType().equals(String.class.getName())) {
-                    if (entry.getValue() == null) {
-                        return ResponseEntity.ok(null);
-                    }
-                } else {
-                    if (entry.getValue() == null || "".equals(entry.getValue())) {
-                        return ResponseEntity.ok(null);
-                    }
-                }
+            if (entry.getValue() == null) {
+                continue;
             }
-            if (fieldRecord.getVirtual()) {
-                AttributeRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualAttributeId());
+            AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
+            if (attributeRecord.getVirtual()) {
+                AttributeRecord physicalRecord = attributeIdRecords.get(attributeRecord.getVirtualAttributeId());
                 if (!virtualColumns.containsKey(physicalRecord.getName())) {
                     virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                 }
-                virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), (Serializable) entry.getValue());
+                if (attributeRecord.getJavaType().equals(Date.class.getName())
+                        || attributeRecord.getJavaType().equals(Timestamp.class.getName())
+                        || attributeRecord.getJavaType().equals(Time.class.getName())) {
+                    try {
+                        virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue()));
+                    } catch (ParseException e) {
+                    }
+                } else {
+                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
+                }
             } else {
                 columnNames.add(entry.getKey());
                 columnKeys.add(":" + entry.getKey());
-                columnValues.put(entry.getKey(), entry.getValue());
+                if (attributeRecord.getJavaType().equals(Date.class.getName())
+                        || attributeRecord.getJavaType().equals(Timestamp.class.getName())
+                        || attributeRecord.getJavaType().equals(Time.class.getName())) {
+                    try {
+                        columnValues.put(entry.getKey(), FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue()));
+                    } catch (ParseException e) {
+                    }
+                } else {
+                    columnValues.put(entry.getKey(), entry.getValue());
+                }
             }
         }
 
@@ -254,37 +419,33 @@ public class DocumentController {
             columnKeys.add(JdbcFunction.columnCreate(entry.getValue()));
         }
 
-        columnNames.add(configuration.getString(Constants.JDBC_OWNER_USER_ID));
-        columnKeys.add(":" + configuration.getString(Constants.JDBC_OWNER_USER_ID));
-        columnValues.put(configuration.getString(Constants.JDBC_OWNER_USER_ID), userRecord.getUserId());
-
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        GeneratedKeyHolder holder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update("INSERT INTO " + collection + "(" + StringUtils.join(columnNames, ", ") + ")" + " VALUES (" + StringUtils.join(columnKeys, ",") + ")", new MapSqlParameterSource(columnValues), holder);
-
-        Integer id = holder.getKey().intValue();
-
-        List<String> columns = new LinkedList<>();
-        for (Map.Entry<String, AttributeRecord> entry : fieldRecords.entrySet()) {
-            AttributeRecord fieldRecord = entry.getValue();
-            if (fieldRecord.getExposed()) {
-                if (fieldRecord.getVirtual()) {
-                    AttributeRecord virtualRecord = blobRecords.get(fieldRecord.getVirtualAttributeId());
-                    columns.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
-                } else {
-                    columns.add("`" + fieldRecord.getName() + "`");
-                }
-            }
+        {
+            // ownerUserId column
+            columnNames.add(configuration.getString(Constants.JDBC_OWNER_USER_ID));
+            columnKeys.add(":" + configuration.getString(Constants.JDBC_OWNER_USER_ID));
+            columnValues.put(configuration.getString(Constants.JDBC_OWNER_USER_ID), userRecord.getUserId());
         }
 
-        Map<String, Object> values = jdbcTemplate.queryForMap("SELECT " + StringUtils.join(columns, ", ") + " FROM `" + collectionRecord.getName() + "` where " + collectionRecord.getName() + "_id = ?", id);
+        String id = UUID.randomUUID().toString();
+        {
+            // primary column
+            columnNames.add("`" + collection + "_id" + "`");
+            columnKeys.add("'" + id + "'");
+        }
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        namedParameterJdbcTemplate.update("INSERT INTO `" + collection + "` (" + StringUtils.join(columnNames, ", ") + ")" + " VALUES (" + StringUtils.join(columnKeys, ",") + ")", columnValues);
 
         DocumentCreateResponse response = new DocumentCreateResponse();
         response.getData().setCollectionName(collection);
-        response.getData().getAttributes().putAll(values);
+        response.getData().getAttributes().put(collection + "_id", id);
 
         return ResponseEntity.ok(response);
     }
+
+    //endregion
+
+    //region /document/count/{collection}
 
     @RequestMapping(
             method = RequestMethod.POST, path = "/count/{collection}",
@@ -308,6 +469,9 @@ public class DocumentController {
         return ResponseEntity.ok(null);
     }
 
+    //endregion
+
+    //region /document/modify/{collection}/{id}
 
     @RequestMapping(
             method = RequestMethod.POST, path = "/modify/{collection}/{id}",
@@ -323,10 +487,10 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Collection tableTable = Tables.COLLECTION.as("tableTable");
-        Attribute fieldTable = Tables.ATTRIBUTE.as("fieldTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
         if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
@@ -337,7 +501,7 @@ public class DocumentController {
 
         Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
         Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
-        for (AttributeRecord fieldRecord : context.select(fieldTable.fields()).from(fieldTable).where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(fieldTable)) {
+        for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
             fieldRecords.put(fieldRecord.getName(), fieldRecord);
             if (fieldRecord.getSqlType().equals("BLOB")) {
                 blobRecords.put(fieldRecord.getAttributeId(), fieldRecord);
@@ -378,6 +542,10 @@ public class DocumentController {
         return ResponseEntity.ok(null);
     }
 
+    //endregion
+
+    //region /document/delete/{collection}/{id}
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/delete/{collection}/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -392,10 +560,10 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Collection tableTable = Tables.COLLECTION.as("tableTable");
-        Attribute fieldTable = Tables.ATTRIBUTE.as("fieldTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
+        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(collection)).fetchOneInto(tableTable);
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
         if (collectionRecord == null) {
             return ResponseEntity.ok(null);
         }
@@ -404,13 +572,13 @@ public class DocumentController {
 //            return ResponseEntity.ok(null);
 //        }
 
-        AttributeRecord fieldRecord = context.select(fieldTable.fields())
-                .from(fieldTable)
-                .where(fieldTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                .and(fieldTable.NAME.eq(collectionRecord.getName() + "_id"))
-                .and(fieldTable.AUTO_INCREMENT.eq(true))
-                .and(fieldTable.SYSTEM.eq(true))
-                .fetchOneInto(fieldTable);
+        AttributeRecord fieldRecord = context.select(attributeTable.fields())
+                .from(attributeTable)
+                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                .and(attributeTable.NAME.eq(collectionRecord.getName() + "_id"))
+                .and(attributeTable.AUTO_INCREMENT.eq(true))
+                .and(attributeTable.SYSTEM.eq(true))
+                .fetchOneInto(attributeTable);
 
         if (fieldRecord == null) {
             return ResponseEntity.ok(null);
@@ -421,114 +589,268 @@ public class DocumentController {
         return ResponseEntity.ok(null);
     }
 
+    //endregion
+
+    //region /document/permission/grant/username
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/permission/grant/user",
+            method = RequestMethod.POST, path = "/permission/grant/username",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> grantPermissionUsername(
+    public ResponseEntity<DocumentPermissionUsernameResponse> grantPermissionUsername(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody DocumentPermissionUsernameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection tableTable = Tables.COLLECTION.as("tableTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
         User userTable = Tables.USER.as("userTable");
         DocumentUserPrivacy documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
 
-        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
-        if (collectionRecord == null) {
-            return ResponseEntity.ok(null);
+        CollectionRecord collectionRecord = null;
+        if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            collectionRecord = context.select(collectionTable.fields())
+                    .from(collectionTable)
+                    .where(collectionTable.NAME.eq(requestBody.getCollectionName()))
+                    .fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collectionName", "is not found");
+            }
         }
 
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(userTable);
-        if (userRecord == null) {
-            return ResponseEntity.ok(null);
+        UserRecord userRecord = null;
+        if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                errorMessages.put("username", "is not found");
+            }
+        }
+
+        if (requestBody.getDocumentId() == null || "".equals(requestBody.getDocumentId())) {
+            errorMessages.put("documentId", "is required");
+        } else {
+            if (collectionRecord != null) {
+                int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collectionRecord.getName() + "` WHERE " + collectionRecord.getName() + "_id = ?", Integer.class, requestBody.getDocumentId());
+                if (count == 0) {
+                    errorMessages.put("documentId", "is not found");
+                }
+            }
+        }
+
+        if (requestBody.getActions() == null || requestBody.getActions().isEmpty()) {
+            errorMessages.put("actions", "is required");
+        } else {
+            for (Integer action : requestBody.getActions()) {
+                if (action != PermissionEnum.Delete.getLiteral()
+                        && action != PermissionEnum.Read.getLiteral()
+                        && action != PermissionEnum.Create.getLiteral()
+                        && action != PermissionEnum.Modify.getLiteral()) {
+                    errorMessages.put("actions", "is bad");
+                    break;
+                }
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            DocumentPermissionUsernameResponse response = new DocumentPermissionUsernameResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        int permission = 0;
+        for (Integer action : requestBody.getActions()) {
+            permission = permission | action;
         }
 
         DocumentUserPrivacyRecord documentUserPrivacyRecord = context.newRecord(documentUserPrivacyTable);
         documentUserPrivacyRecord.setDocumentId(requestBody.getDocumentId());
         documentUserPrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
-        int permission = 0;
-        for (Integer action : requestBody.getActions()) {
-            permission = permission | action;
-        }
         documentUserPrivacyRecord.setPermisson(permission);
         documentUserPrivacyRecord.setUserId(userRecord.getUserId());
-
         documentUserPrivacyRecord.store();
 
-        return ResponseEntity.ok(null);
+        DocumentPermissionUsernameResponse response = new DocumentPermissionUsernameResponse();
+        response.getData().setPermission(permission);
+
+        return ResponseEntity.ok(response);
     }
 
+    //endregion
+
+    //region /document/permission/grant/rolename
+
     @RequestMapping(
-            method = RequestMethod.POST, path = "/permission/grant/role",
+            method = RequestMethod.POST, path = "/permission/grant/rolename",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> grantPermissionRoleName(
+    public ResponseEntity<DocumentPermissionRoleNameResponse> grantPermissionRoleName(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody DocumentPermissionRoleNameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection tableTable = Tables.COLLECTION.as("tableTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
         Role roleTable = Tables.ROLE.as("roleTable");
         DocumentRolePrivacy documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
 
-        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
-        if (collectionRecord == null) {
-            return ResponseEntity.ok(null);
+        CollectionRecord collectionRecord = null;
+        if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            collectionRecord = context.select(collectionTable.fields())
+                    .from(collectionTable)
+                    .where(collectionTable.NAME.eq(requestBody.getCollectionName()))
+                    .fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collectionName", "is not found");
+            }
         }
 
-        RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(requestBody.getRoleName())).fetchOneInto(roleTable);
-        if (roleRecord == null) {
-            return ResponseEntity.ok(null);
+        RoleRecord roleRecord = null;
+        if (requestBody.getRoleName() == null || "".equals(requestBody.getRoleName())) {
+            errorMessages.put("roleName", "is required");
+        } else {
+            roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(requestBody.getRoleName())).fetchOneInto(roleTable);
+            if (roleRecord == null) {
+                errorMessages.put("roleName", "is not found");
+            }
         }
 
-        DocumentRolePrivacyRecord documentRolePrivacyRecord = context.newRecord(documentRolePrivacyTable);
-        documentRolePrivacyRecord.setDocumentId(requestBody.getDocumentId());
-        documentRolePrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
+        if (requestBody.getDocumentId() == null || "".equals(requestBody.getDocumentId())) {
+            errorMessages.put("documentId", "is required");
+        } else {
+            if (collectionRecord != null) {
+                int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collectionRecord.getName() + "` WHERE " + collectionRecord.getName() + "_id = ?", Integer.class, requestBody.getDocumentId());
+                if (count == 0) {
+                    errorMessages.put("documentId", "is not found");
+                }
+            }
+        }
+
+        if (requestBody.getActions() == null || requestBody.getActions().isEmpty()) {
+            errorMessages.put("actions", "is required");
+        } else {
+            for (Integer action : requestBody.getActions()) {
+                if (action != PermissionEnum.Delete.getLiteral()
+                        && action != PermissionEnum.Read.getLiteral()
+                        && action != PermissionEnum.Create.getLiteral()
+                        && action != PermissionEnum.Modify.getLiteral()) {
+                    errorMessages.put("actions", "is bad");
+                    break;
+                }
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            DocumentPermissionRoleNameResponse response = new DocumentPermissionRoleNameResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
         int permission = 0;
         for (Integer action : requestBody.getActions()) {
             permission = permission | action;
         }
-        documentRolePrivacyRecord.setPermisson(permission);
-        documentRolePrivacyRecord.setRoleId(roleRecord.getRoleId());
 
+        DocumentRolePrivacyRecord documentRolePrivacyRecord = context.newRecord(documentRolePrivacyTable);
+        documentRolePrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
+        documentRolePrivacyRecord.setDocumentId(requestBody.getDocumentId());
+        documentRolePrivacyRecord.setRoleId(roleRecord.getRoleId());
+        documentRolePrivacyRecord.setPermisson(permission);
         documentRolePrivacyRecord.store();
 
-        return ResponseEntity.ok(null);
+        DocumentPermissionRoleNameResponse response = new DocumentPermissionRoleNameResponse();
+        response.getData().setPermission(permission);
+
+        return ResponseEntity.ok(response);
     }
 
+    //endregion
+
+    //region /document/permission/revoke/username
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/permission/revoke/user",
+            method = RequestMethod.POST, path = "/permission/revoke/username",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> revokePermissionUsername(
+    public ResponseEntity<DocumentPermissionUsernameResponse> revokePermissionUsername(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody DocumentPermissionUsernameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection tableTable = Tables.COLLECTION.as("tableTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
         User userTable = Tables.USER.as("userTable");
         DocumentUserPrivacy documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
 
-        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
-        if (collectionRecord == null) {
-            return ResponseEntity.ok(null);
+        CollectionRecord collectionRecord = null;
+        if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            collectionRecord = context.select(collectionTable.fields())
+                    .from(collectionTable)
+                    .where(collectionTable.NAME.eq(requestBody.getCollectionName()))
+                    .fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collectionName", "is not found");
+            }
         }
 
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(userTable);
-        if (userRecord == null) {
-            return ResponseEntity.ok(null);
+        UserRecord userRecord = null;
+        if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                errorMessages.put("username", "is not found");
+            }
+        }
+
+        if (requestBody.getDocumentId() == null || "".equals(requestBody.getDocumentId())) {
+            errorMessages.put("documentId", "is required");
+        } else {
+            if (collectionRecord != null) {
+                int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collectionRecord.getName() + "` WHERE " + collectionRecord.getName() + "_id = ?", Integer.class, requestBody.getDocumentId());
+                if (count == 0) {
+                    errorMessages.put("documentId", "is not found");
+                }
+            }
+        }
+
+        if (requestBody.getActions() == null || requestBody.getActions().isEmpty()) {
+            errorMessages.put("actions", "is required");
+        } else {
+            for (Integer action : requestBody.getActions()) {
+                if (action != PermissionEnum.Delete.getLiteral()
+                        && action != PermissionEnum.Read.getLiteral()
+                        && action != PermissionEnum.Create.getLiteral()
+                        && action != PermissionEnum.Modify.getLiteral()) {
+                    errorMessages.put("actions", "is bad");
+                    break;
+                }
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            DocumentPermissionUsernameResponse response = new DocumentPermissionUsernameResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
         }
 
         DocumentUserPrivacyRecord documentUserPrivacyRecord = context.select(documentUserPrivacyTable.fields())
@@ -538,42 +860,106 @@ public class DocumentController {
                 .and(documentUserPrivacyTable.DOCUMENT_ID.eq(requestBody.getDocumentId()))
                 .fetchOneInto(documentUserPrivacyTable);
 
-        int permission = 0;
+        int revokePermission = 0;
         for (Integer action : requestBody.getActions()) {
-            permission = permission | action;
+            revokePermission = revokePermission | action;
         }
-        documentUserPrivacyRecord.setPermisson(documentUserPrivacyRecord.getPermisson() - permission);
 
-        documentUserPrivacyRecord.update();
+        if (documentUserPrivacyRecord != null) {
+            int permission = documentUserPrivacyRecord.getPermisson();
+            if ((permission & revokePermission) == revokePermission) {
+                documentUserPrivacyRecord.setPermisson(permission - revokePermission);
+            }
+            documentUserPrivacyRecord.update();
+        } else {
+            documentUserPrivacyRecord = context.newRecord(documentUserPrivacyTable);
+            documentUserPrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
+            documentUserPrivacyRecord.setUserId(userRecord.getUserId());
+            documentUserPrivacyRecord.setDocumentId(requestBody.getDocumentId());
+            documentUserPrivacyRecord.setPermisson(0);
+            documentUserPrivacyRecord.store();
+        }
 
-        return ResponseEntity.ok(null);
+        DocumentPermissionUsernameResponse response = new DocumentPermissionUsernameResponse();
+        response.getData().setPermission(documentUserPrivacyRecord.getPermisson());
+
+        return ResponseEntity.ok(response);
     }
 
+    //endregion
+
+    //region /document/permission/revoke/rolename
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/permission/revoke/role",
+            method = RequestMethod.POST, path = "/permission/revoke/rolename",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> revokePermissionRoleName(
+    public ResponseEntity<DocumentPermissionRoleNameResponse> revokePermissionRoleName(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody DocumentPermissionRoleNameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection tableTable = Tables.COLLECTION.as("tableTable");
+        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
         Role roleTable = Tables.ROLE.as("roleTable");
         DocumentRolePrivacy documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
 
-        CollectionRecord collectionRecord = context.select(tableTable.fields()).from(tableTable).where(tableTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(tableTable);
-        if (collectionRecord == null) {
-            return ResponseEntity.ok(null);
+        CollectionRecord collectionRecord = null;
+        if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
+            errorMessages.put("collectionName", "is required");
+        } else {
+            collectionRecord = context.select(collectionTable.fields())
+                    .from(collectionTable)
+                    .where(collectionTable.NAME.eq(requestBody.getCollectionName()))
+                    .fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collectionName", "is not found");
+            }
         }
 
-        RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(requestBody.getRoleName())).fetchOneInto(roleTable);
-        if (roleRecord == null) {
-            return ResponseEntity.ok(null);
+        RoleRecord roleRecord = null;
+        if (requestBody.getRoleName() == null || "".equals(requestBody.getRoleName())) {
+            errorMessages.put("roleName", "is required");
+        } else {
+            roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(requestBody.getRoleName())).fetchOneInto(roleTable);
+            if (roleRecord == null) {
+                errorMessages.put("roleName", "is not found");
+            }
+        }
+
+        if (requestBody.getDocumentId() == null || "".equals(requestBody.getDocumentId())) {
+            errorMessages.put("documentId", "is required");
+        } else {
+            if (collectionRecord != null) {
+                int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collectionRecord.getName() + "` WHERE " + collectionRecord.getName() + "_id = ?", Integer.class, requestBody.getDocumentId());
+                if (count == 0) {
+                    errorMessages.put("documentId", "is not found");
+                }
+            }
+        }
+
+        if (requestBody.getActions() == null || requestBody.getActions().isEmpty()) {
+            errorMessages.put("actions", "is required");
+        } else {
+            for (Integer action : requestBody.getActions()) {
+                if (action != PermissionEnum.Delete.getLiteral()
+                        && action != PermissionEnum.Read.getLiteral()
+                        && action != PermissionEnum.Create.getLiteral()
+                        && action != PermissionEnum.Modify.getLiteral()) {
+                    errorMessages.put("actions", "is bad");
+                    break;
+                }
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            DocumentPermissionRoleNameResponse response = new DocumentPermissionRoleNameResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
         }
 
         DocumentRolePrivacyRecord documentRolePrivacyRecord = context.select(documentRolePrivacyTable.fields())
@@ -583,15 +969,32 @@ public class DocumentController {
                 .and(documentRolePrivacyTable.DOCUMENT_ID.eq(requestBody.getDocumentId()))
                 .fetchOneInto(documentRolePrivacyTable);
 
-        int permission = 0;
+        int revokePermission = 0;
         for (Integer action : requestBody.getActions()) {
-            permission = permission | action;
+            revokePermission = revokePermission | action;
         }
-        documentRolePrivacyRecord.setPermisson(documentRolePrivacyRecord.getPermisson() - permission);
 
-        documentRolePrivacyRecord.update();
+        if (documentRolePrivacyRecord != null) {
+            int permission = documentRolePrivacyRecord.getPermisson();
+            if ((permission & revokePermission) == revokePermission) {
+                documentRolePrivacyRecord.setPermisson(permission - revokePermission);
+            }
+            documentRolePrivacyRecord.update();
+        } else {
+            documentRolePrivacyRecord = context.newRecord(documentRolePrivacyTable);
+            documentRolePrivacyRecord.setCollectionId(collectionRecord.getCollectionId());
+            documentRolePrivacyRecord.setRoleId(roleRecord.getRoleId());
+            documentRolePrivacyRecord.setDocumentId(requestBody.getDocumentId());
+            documentRolePrivacyRecord.setPermisson(0);
+            documentRolePrivacyRecord.store();
+        }
 
-        return ResponseEntity.ok(null);
+        DocumentPermissionRoleNameResponse response = new DocumentPermissionRoleNameResponse();
+        response.getData().setPermission(documentRolePrivacyRecord.getPermisson());
+
+        return ResponseEntity.ok(response);
     }
+
+    //endregion
 
 }
