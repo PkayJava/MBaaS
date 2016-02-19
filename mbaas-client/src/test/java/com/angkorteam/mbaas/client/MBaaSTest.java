@@ -435,6 +435,69 @@ public class MBaaSTest {
             request.getActions().add(PermissionEnum.Read.getLiteral());
             CollectionPermissionUsernameResponse response = client.collectionPermissionGrantUsername(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
+            Assert.assertEquals(response.getData().getPermission().intValue(), PermissionEnum.Create.getLiteral() | PermissionEnum.Delete.getLiteral() | PermissionEnum.Modify.getLiteral() | PermissionEnum.Read.getLiteral());
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void collectionPermissionRevokeUsernameTest() {
+        String login = "admin";
+        String password = "admin";
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String userALogin = "us" + UUID.randomUUID().toString();
+        String userAPassword = "us" + UUID.randomUUID().toString();
+        {
+            SecuritySignUpRequest request = new SecuritySignUpRequest();
+            request.setUsername(userALogin);
+            request.setPassword(userAPassword);
+            SecuritySignUpResponse response = client.securitySignUp(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionPermissionUsernameRequest request = new CollectionPermissionUsernameRequest();
+            request.setCollectionName(collectionName);
+            request.setUsername(userALogin);
+            request.getActions().add(PermissionEnum.Create.getLiteral());
+            request.getActions().add(PermissionEnum.Delete.getLiteral());
+            request.getActions().add(PermissionEnum.Modify.getLiteral());
+            request.getActions().add(PermissionEnum.Read.getLiteral());
+            CollectionPermissionUsernameResponse response = client.collectionPermissionGrantUsername(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+            Assert.assertEquals(response.getData().getPermission().intValue(), PermissionEnum.Create.getLiteral() | PermissionEnum.Delete.getLiteral() | PermissionEnum.Modify.getLiteral() | PermissionEnum.Read.getLiteral());
+        }
+
+        {
+            CollectionPermissionUsernameRequest request = new CollectionPermissionUsernameRequest();
+            request.setCollectionName(collectionName);
+            request.setUsername(userALogin);
+            request.getActions().add(PermissionEnum.Create.getLiteral());
+            CollectionPermissionUsernameResponse response = client.collectionPermissionRevokeUsername(request);
+            Assert.assertEquals(response.getData().getPermission().intValue(), PermissionEnum.Delete.getLiteral() | PermissionEnum.Modify.getLiteral() | PermissionEnum.Read.getLiteral());
         }
 
         {
@@ -478,6 +541,62 @@ public class MBaaSTest {
             request.getActions().add(PermissionEnum.Read.getLiteral());
             CollectionPermissionRoleNameResponse response = client.collectionPermissionGrantRoleName(request);
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
+            Assert.assertEquals(response.getData().getPermission().intValue(), PermissionEnum.Create.getLiteral() | PermissionEnum.Delete.getLiteral() | PermissionEnum.Modify.getLiteral() | PermissionEnum.Read.getLiteral());
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void collectionPermissionRevokeRoleNameTest() {
+        String login = "admin";
+        String password = "admin";
+        String rolename = "backoffice";
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionPermissionRoleNameRequest request = new CollectionPermissionRoleNameRequest();
+            request.setCollectionName(collectionName);
+            request.setRoleName(rolename);
+            request.getActions().add(PermissionEnum.Create.getLiteral());
+            request.getActions().add(PermissionEnum.Delete.getLiteral());
+            request.getActions().add(PermissionEnum.Modify.getLiteral());
+            request.getActions().add(PermissionEnum.Read.getLiteral());
+            CollectionPermissionRoleNameResponse response = client.collectionPermissionGrantRoleName(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+            Assert.assertEquals(response.getData().getPermission().intValue(), PermissionEnum.Create.getLiteral() | PermissionEnum.Delete.getLiteral() | PermissionEnum.Modify.getLiteral() | PermissionEnum.Read.getLiteral());
+        }
+
+        {
+            CollectionPermissionRoleNameRequest request = new CollectionPermissionRoleNameRequest();
+            request.setCollectionName(collectionName);
+            request.setRoleName(rolename);
+            request.getActions().add(PermissionEnum.Modify.getLiteral());
+            request.getActions().add(PermissionEnum.Read.getLiteral());
+            CollectionPermissionRoleNameResponse response = client.collectionPermissionRevokeRoleName(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+            Assert.assertEquals(response.getData().getPermission().intValue(), PermissionEnum.Create.getLiteral() | PermissionEnum.Delete.getLiteral());
         }
 
         {

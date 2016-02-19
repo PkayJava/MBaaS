@@ -434,6 +434,11 @@ public class CollectionController {
         Primary primaryTable = Tables.PRIMARY.as("primaryTable");
         Collection collectionTable = Tables.COLLECTION.as("collectionTable");
         Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
+        CollectionUserPrivacy collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("CollectionROlePrivacyTable");
+        CollectionRolePrivacy collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
+        DocumentUserPrivacy documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
+        DocumentRolePrivacy documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
+        Index indexTable = Tables.INDEX.as("indexTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
@@ -465,6 +470,11 @@ public class CollectionController {
 
         context.delete(attributeTables).where(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
         context.delete(primaryTable).where(primaryTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
+        context.delete(indexTable).where(indexTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
+        context.delete(collectionUserPrivacyTable).where(collectionUserPrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
+        context.delete(collectionRolePrivacyTable).where(collectionRolePrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
+        context.delete(documentUserPrivacyTable).where(documentUserPrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
+        context.delete(documentRolePrivacyTable).where(documentRolePrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
         context.delete(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
 
         jdbcTemplate.execute("DROP TABLE `" + requestBody.getCollectionName() + "`");
@@ -798,10 +808,8 @@ public class CollectionController {
 
         if (collectionUserPrivacyRecord != null) {
             int permission = collectionUserPrivacyRecord.getPermisson();
-            if (revokePermission - permission <= 0) {
-                collectionUserPrivacyRecord.setPermisson(0);
-            } else {
-                collectionUserPrivacyRecord.setPermisson(revokePermission - permission);
+            if ((permission & revokePermission) == revokePermission) {
+                collectionUserPrivacyRecord.setPermisson(permission - revokePermission);
             }
             collectionUserPrivacyRecord.update();
         } else {
@@ -894,10 +902,8 @@ public class CollectionController {
 
         if (collectionRolePrivacyRecord != null) {
             int permission = collectionRolePrivacyRecord.getPermisson();
-            if (revokePermission - permission <= 0) {
-                collectionRolePrivacyRecord.setPermisson(0);
-            } else {
-                collectionRolePrivacyRecord.setPermisson(revokePermission - permission);
+            if ((permission & revokePermission) == revokePermission) {
+                collectionRolePrivacyRecord.setPermisson(permission - revokePermission);
             }
             collectionRolePrivacyRecord.update();
         } else {
