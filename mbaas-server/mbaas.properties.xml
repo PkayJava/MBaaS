@@ -39,6 +39,7 @@
     <entry key="user.internal_admin.password">internal_admin</entry>
 
     <entry key="pattern.datetime">yyyy-MM-dd'T'HH:mm:ssZZ</entry>
+    <entry key="pattern.naming"><![CDATA[^[a-zA-Z]{1}[a-zA-Z0-9\\_]*$]]></entry>
 
     <entry key="resource.repo">/home/socheat/Desktop/</entry>
 

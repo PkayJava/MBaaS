@@ -40,6 +40,8 @@ public class MonitorController {
     @Autowired
     private Gson gson;
 
+    //region /monitor/cpu
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/cpu",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -71,6 +73,10 @@ public class MonitorController {
         return ResponseEntity.ok(response);
     }
 
+    //endregion
+
+    //region /monitor/mem
+
     @RequestMapping(
             method = RequestMethod.POST, path = "/mem",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
@@ -98,4 +104,6 @@ public class MonitorController {
         sigar.close();
         return ResponseEntity.ok(response);
     }
+
+    //endregion
 }

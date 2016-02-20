@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by Socheat KHAUV on 2/12/2016.
@@ -39,6 +40,8 @@ import java.util.*;
 public class CollectionController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectionController.class);
+
+    private static final Pattern PATTERN_NAMING = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
 
     @Autowired
     private DSLContext context;
@@ -99,23 +102,27 @@ public class CollectionController {
         List<String> systemAttributes = Arrays.asList(primaryName, configuration.getString(Constants.JDBC_COLUMN_DELETED), configuration.getString(Constants.JDBC_COLUMN_EXTRA), configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
 
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
-            if (systemAttributes.contains(attribute.getName())) {
-                errorMessages.put(attribute.getName(), "overridden system field");
-            }
-            if (attribute.getJavaType() == null || "".equals(attribute.getJavaType())) {
-                errorMessages.put(attribute.getName(), "javaType is required");
-            }
-            if (!attribute.getJavaType().equals(Integer.class.getName()) && !attribute.getJavaType().equals(int.class.getName())
-                    && !attribute.getJavaType().equals(Double.class.getName()) && !attribute.getJavaType().equals(double.class.getName())
-                    && !attribute.getJavaType().equals(Float.class.getName()) && !attribute.getJavaType().equals(float.class.getName())
-                    && !attribute.getJavaType().equals(Byte.class.getName()) && !attribute.getJavaType().equals(byte.class.getName())
-                    && !attribute.getJavaType().equals(Short.class.getName()) && !attribute.getJavaType().equals(short.class.getName())
-                    && !attribute.getJavaType().equals(Long.class.getName()) && !attribute.getJavaType().equals(long.class.getName())
-                    && !attribute.getJavaType().equals(Boolean.class.getName()) && !attribute.getJavaType().equals(boolean.class.getName())
-                    && !attribute.getJavaType().equals(Character.class.getName()) && !attribute.getJavaType().equals(char.class.getName())
-                    && !attribute.getJavaType().equals(Date.class.getName()) && !attribute.getJavaType().equals(Time.class.getName()) && !attribute.getJavaType().equals(Timestamp.class.getName())
-                    && !attribute.getJavaType().equals(String.class.getName())) {
-                errorMessages.put(attribute.getName(), "javaType is not support");
+            if (!PATTERN_NAMING.matcher(attribute.getName()).matches()) {
+                errorMessages.put(attribute.getName(), "bad name");
+            } else {
+                if (systemAttributes.contains(attribute.getName())) {
+                    errorMessages.put(attribute.getName(), "overridden system field");
+                }
+                if (attribute.getJavaType() == null || "".equals(attribute.getJavaType())) {
+                    errorMessages.put(attribute.getName(), "javaType is required");
+                }
+                if (!attribute.getJavaType().equals(Integer.class.getName()) && !attribute.getJavaType().equals(int.class.getName())
+                        && !attribute.getJavaType().equals(Double.class.getName()) && !attribute.getJavaType().equals(double.class.getName())
+                        && !attribute.getJavaType().equals(Float.class.getName()) && !attribute.getJavaType().equals(float.class.getName())
+                        && !attribute.getJavaType().equals(Byte.class.getName()) && !attribute.getJavaType().equals(byte.class.getName())
+                        && !attribute.getJavaType().equals(Short.class.getName()) && !attribute.getJavaType().equals(short.class.getName())
+                        && !attribute.getJavaType().equals(Long.class.getName()) && !attribute.getJavaType().equals(long.class.getName())
+                        && !attribute.getJavaType().equals(Boolean.class.getName()) && !attribute.getJavaType().equals(boolean.class.getName())
+                        && !attribute.getJavaType().equals(Character.class.getName()) && !attribute.getJavaType().equals(char.class.getName())
+                        && !attribute.getJavaType().equals(Date.class.getName()) && !attribute.getJavaType().equals(Time.class.getName()) && !attribute.getJavaType().equals(Timestamp.class.getName())
+                        && !attribute.getJavaType().equals(String.class.getName())) {
+                    errorMessages.put(attribute.getName(), "javaType is not support");
+                }
             }
         }
 
@@ -305,7 +312,7 @@ public class CollectionController {
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        AttributeTable attributeTables = Tables.ATTRIBUTE.as("attributeTables");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
@@ -335,9 +342,11 @@ public class CollectionController {
         AttributeRecord attributeRecord = null;
         if (requestBody.getAttributeName() == null || "".equals(requestBody.getAttributeName())) {
             errorMessages.put("attributeName", "is required");
+        } else if (!PATTERN_NAMING.matcher(requestBody.getAttributeName()).matches()) {
+            errorMessages.put(requestBody.getAttributeName(), "bad name");
         } else {
             if (collectionRecord != null) {
-                attributeRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(requestBody.getAttributeName())).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
+                attributeRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.NAME.eq(requestBody.getAttributeName())).and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTable);
                 if (attributeRecord != null) {
                     errorMessages.put("attributeName", "is existed");
                 }
@@ -365,7 +374,7 @@ public class CollectionController {
 
         AttributeRecord virtualRecord = null;
         if (collectionRecord != null) {
-            virtualRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(configuration.getString(Constants.JDBC_COLUMN_EXTRA))).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
+            virtualRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.NAME.eq(configuration.getString(Constants.JDBC_COLUMN_EXTRA))).and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTable);
             if (virtualRecord == null) {
                 errorMessages.put("collectionName", "does not support dynamic column");
             }
@@ -378,7 +387,7 @@ public class CollectionController {
             return ResponseEntity.ok(response);
         }
 
-        attributeRecord = context.newRecord(attributeTables);
+        attributeRecord = context.newRecord(attributeTable);
         attributeRecord.setAttributeId(UUID.randomUUID().toString());
         attributeRecord.setNullable(requestBody.isNullable());
         attributeRecord.setCollectionId(collectionRecord.getCollectionId());
@@ -509,7 +518,7 @@ public class CollectionController {
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        AttributeTable attributeTables = Tables.ATTRIBUTE.as("attributeTables");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
         CollectionRecord collectionRecord = null;
 
@@ -525,9 +534,11 @@ public class CollectionController {
         AttributeRecord attributeRecord = null;
         if (requestBody.getAttributeName() == null || "".equals(requestBody.getAttributeName())) {
             errorMessages.put("attributeName", "is required");
+        } else if (!PATTERN_NAMING.matcher(requestBody.getAttributeName()).matches()) {
+            errorMessages.put(requestBody.getAttributeName(), "bad name");
         } else {
             if (collectionRecord != null) {
-                attributeRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.NAME.eq(requestBody.getAttributeName())).and(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTables);
+                attributeRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.NAME.eq(requestBody.getAttributeName())).and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTable);
                 if (attributeRecord == null) {
                     errorMessages.put("attributeName", "is not found");
                 } else {
@@ -561,7 +572,7 @@ public class CollectionController {
         }
 
         if (attributeRecord.getVirtual()) {
-            AttributeRecord virtualRecord = context.select(attributeTables.fields()).from(attributeTables).where(attributeTables.ATTRIBUTE_ID.eq(attributeRecord.getVirtualAttributeId())).fetchOneInto(attributeTables);
+            AttributeRecord virtualRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.ATTRIBUTE_ID.eq(attributeRecord.getVirtualAttributeId())).fetchOneInto(attributeTable);
             jdbcTemplate.execute("UPDATE `" + requestBody.getCollectionName() + "`" + " SET " + virtualRecord.getName() + " = " + JdbcFunction.columnDelete(virtualRecord.getName(), requestBody.getAttributeName()));
         } else {
             jdbcTemplate.execute("ALTER TABLE `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");

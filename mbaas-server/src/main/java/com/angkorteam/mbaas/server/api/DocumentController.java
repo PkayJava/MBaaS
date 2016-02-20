@@ -1,18 +1,17 @@
 package com.angkorteam.mbaas.server.api;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.plain.response.*;
-import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
 import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.*;
+import com.angkorteam.mbaas.plain.response.*;
+import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
@@ -22,9 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +31,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by Khauv Socheat on 2/12/2016.
@@ -43,6 +41,8 @@ import java.util.*;
 public class DocumentController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);
+
+    private static final Pattern PATTERN_NAMING = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
 
     @Autowired
     private DSLContext context;
@@ -92,9 +92,14 @@ public class DocumentController {
             }
         }
 
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
-        if (collectionRecord == null) {
-            errorMessages.put("collection", "collection is not found");
+        CollectionRecord collectionRecord = null;
+        if (!PATTERN_NAMING.matcher(collection).matches()) {
+            errorMessages.put(collection, "bad name");
+        } else {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collection", "collection is not found");
+            }
         }
 
         Map<String, AttributeRecord> attributeIdRecords = new LinkedHashMap<>();
@@ -113,137 +118,141 @@ public class DocumentController {
         String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
 
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            if (!attributeNameRecords.containsKey(entry.getKey())) {
-                errorMessages.put(entry.getKey(), "is not allow");
+            if (!PATTERN_NAMING.matcher(entry.getKey()).matches()) {
+                errorMessages.put(entry.getKey(), "bad name");
             } else {
-                AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
-                if (attributeRecord.getJavaType().equals(Date.class.getName())
-                        || attributeRecord.getJavaType().equals(Time.class.getName())
-                        || attributeRecord.getJavaType().equals(Timestamp.class.getName())) {
-                    if (attributeRecord.getNullable()) {
-                        if (entry.getValue() != null) {
-                            if (entry.getValue().getClass().getName().equals(String.class.getName())) {
-                                try {
-                                    FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
-                                } catch (ParseException e) {
-                                    errorMessages.put(entry.getKey(), "is bad value");
-                                }
-                            } else {
-                                errorMessages.put(entry.getKey(), "is bad value");
-                            }
-                        }
-                    } else {
-                        if (entry.getValue() != null) {
-                            if (entry.getValue().getClass().getName().equals(String.class.getName())) {
-                                try {
-                                    FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
-                                } catch (ParseException e) {
-                                    errorMessages.put(entry.getKey(), "is bad value");
-                                }
-                            } else {
-                                errorMessages.put(entry.getKey(), "is bad value");
-                            }
-                        } else {
-                            errorMessages.put(entry.getKey(), "is required");
-                        }
-                    }
-                } else if (attributeRecord.getJavaType().equals(Byte.class.getName()) || attributeRecord.getJavaType().equals(byte.class.getName())
-                        || attributeRecord.getJavaType().equals(Short.class.getName()) || attributeRecord.getJavaType().equals(short.class.getName())
-                        || attributeRecord.getJavaType().equals(Integer.class.getName()) || attributeRecord.getJavaType().equals(int.class.getName())
-                        || attributeRecord.getJavaType().equals(Long.class.getName()) || attributeRecord.getJavaType().equals(long.class.getName())) {
-                    if (attributeRecord.getNullable()) {
-                        if (entry.getValue() != null) {
-                            String clazzName = entry.getValue().getClass().getName();
-                            if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
-                                    || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
-                                    || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
-                                    || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
-                            } else {
-                                errorMessages.put(entry.getKey(), "is bad value");
-                            }
-                        }
-                    } else {
-                        if (entry.getValue() != null) {
-                            String clazzName = entry.getValue().getClass().getName();
-                            if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
-                                    || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
-                                    || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
-                                    || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
-                            } else {
-                                errorMessages.put(entry.getKey(), "is bad value");
-                            }
-                        } else {
-                            errorMessages.put(entry.getKey(), "is required");
-                        }
-                    }
-                } else if (attributeRecord.getJavaType().equals(Float.class.getName()) || attributeRecord.getJavaType().equals(float.class.getName())
-                        || attributeRecord.getJavaType().equals(Double.class.getName()) || attributeRecord.getJavaType().equals(double.class.getName())) {
-                    if (attributeRecord.getNullable()) {
-                        if (entry.getValue() != null) {
-                            String clazzName = entry.getValue().getClass().getName();
-                            if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
-                                    || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
-                            } else {
-                                errorMessages.put(entry.getKey(), "is bad value");
-                            }
-                        }
-                    } else {
-                        if (entry.getValue() != null) {
-                            String clazzName = entry.getValue().getClass().getName();
-                            if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
-                                    || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
-                            } else {
-                                errorMessages.put(entry.getKey(), "is bad value");
-                            }
-                        } else {
-                            errorMessages.put(entry.getKey(), "is required");
-                        }
-                    }
-                } else if (attributeRecord.getJavaType().equals(Boolean.class.getName()) || attributeRecord.getJavaType().equals(boolean.class.getName())) {
-                    if (attributeRecord.getNullable()) {
-                        if (entry.getValue() != null) {
-                            String clazzName = entry.getValue().getClass().getName();
-                            if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
-                            } else {
-                                errorMessages.put(entry.getKey(), "is bad value");
-                            }
-                        }
-                    } else {
-                        if (entry.getValue() != null) {
-                            String clazzName = entry.getValue().getClass().getName();
-                            if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
-                            } else {
-                                errorMessages.put(entry.getKey(), "is bad value");
-                            }
-                        } else {
-                            errorMessages.put(entry.getKey(), "is required");
-                        }
-                    }
-                } else if (attributeRecord.getJavaType().equals(String.class.getName())
-                        || attributeRecord.getJavaType().equals(Character.class.getName()) || attributeRecord.getJavaType().equals(char.class.getName())) {
-                    if (attributeRecord.getNullable()) {
-                        if (entry.getValue() != null) {
-                            String clazzName = entry.getValue().getClass().getName();
-                            if (clazzName.equals(String.class.getName())
-                                    || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
-                            } else {
-                                errorMessages.put(entry.getKey(), "is bad value");
-                            }
-                        }
-                    } else {
-                        if (entry.getValue() != null) {
-                            String clazzName = entry.getValue().getClass().getName();
-                            if (clazzName.equals(String.class.getName())
-                                    || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
-                            } else {
-                                errorMessages.put(entry.getKey(), "is bad value");
-                            }
-                        } else {
-                            errorMessages.put(entry.getKey(), "is required");
-                        }
-                    }
+                if (!attributeNameRecords.containsKey(entry.getKey())) {
+                    errorMessages.put(entry.getKey(), "is not allow");
                 } else {
-                    errorMessages.put(entry.getKey(), "is bad value");
+                    AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
+                    if (attributeRecord.getJavaType().equals(Date.class.getName())
+                            || attributeRecord.getJavaType().equals(Time.class.getName())
+                            || attributeRecord.getJavaType().equals(Timestamp.class.getName())) {
+                        if (attributeRecord.getNullable()) {
+                            if (entry.getValue() != null) {
+                                if (entry.getValue().getClass().getName().equals(String.class.getName())) {
+                                    try {
+                                        FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
+                                    } catch (ParseException e) {
+                                        errorMessages.put(entry.getKey(), "is bad value");
+                                    }
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            }
+                        } else {
+                            if (entry.getValue() != null) {
+                                if (entry.getValue().getClass().getName().equals(String.class.getName())) {
+                                    try {
+                                        FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
+                                    } catch (ParseException e) {
+                                        errorMessages.put(entry.getKey(), "is bad value");
+                                    }
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is required");
+                            }
+                        }
+                    } else if (attributeRecord.getJavaType().equals(Byte.class.getName()) || attributeRecord.getJavaType().equals(byte.class.getName())
+                            || attributeRecord.getJavaType().equals(Short.class.getName()) || attributeRecord.getJavaType().equals(short.class.getName())
+                            || attributeRecord.getJavaType().equals(Integer.class.getName()) || attributeRecord.getJavaType().equals(int.class.getName())
+                            || attributeRecord.getJavaType().equals(Long.class.getName()) || attributeRecord.getJavaType().equals(long.class.getName())) {
+                        if (attributeRecord.getNullable()) {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
+                                        || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
+                                        || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
+                                        || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            }
+                        } else {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
+                                        || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
+                                        || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
+                                        || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is required");
+                            }
+                        }
+                    } else if (attributeRecord.getJavaType().equals(Float.class.getName()) || attributeRecord.getJavaType().equals(float.class.getName())
+                            || attributeRecord.getJavaType().equals(Double.class.getName()) || attributeRecord.getJavaType().equals(double.class.getName())) {
+                        if (attributeRecord.getNullable()) {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
+                                        || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            }
+                        } else {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
+                                        || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is required");
+                            }
+                        }
+                    } else if (attributeRecord.getJavaType().equals(Boolean.class.getName()) || attributeRecord.getJavaType().equals(boolean.class.getName())) {
+                        if (attributeRecord.getNullable()) {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            }
+                        } else {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is required");
+                            }
+                        }
+                    } else if (attributeRecord.getJavaType().equals(String.class.getName())
+                            || attributeRecord.getJavaType().equals(Character.class.getName()) || attributeRecord.getJavaType().equals(char.class.getName())) {
+                        if (attributeRecord.getNullable()) {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(String.class.getName())
+                                        || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            }
+                        } else {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(String.class.getName())
+                                        || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is required");
+                            }
+                        }
+                    } else {
+                        errorMessages.put(entry.getKey(), "is bad value");
+                    }
                 }
             }
         }
@@ -372,9 +381,14 @@ public class DocumentController {
             }
         }
 
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
-        if (collectionRecord == null) {
-            errorMessages.put("collection", "collection is not found");
+        CollectionRecord collectionRecord = null;
+        if (!PATTERN_NAMING.matcher(collection).matches()) {
+            errorMessages.put("collection", "bad name");
+        } else {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collection", "collection is not found");
+            }
         }
 
         if (collectionRecord != null) {
