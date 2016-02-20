@@ -272,7 +272,7 @@ public class SecurityController {
 
         SessionRecord sessionRecord = context.newRecord(sessionTable);
         sessionRecord.setSessionId(tokenId);
-        sessionRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
+        sessionRecord.setDateCreated(dateCreated);
         sessionRecord.setUserId(userRecord.getUserId());
         sessionRecord.setDeleted(false);
         sessionRecord.store();
@@ -332,7 +332,7 @@ public class SecurityController {
 
         SessionRecord sessionRecord = context.newRecord(sessionTable);
         sessionRecord.setSessionId(sessionId);
-        sessionRecord.setDateCreated(new Timestamp(dateCreated.getTime()));
+        sessionRecord.setDateCreated(dateCreated);
         sessionRecord.setUserId(userRecord.getUserId());
         sessionRecord.setDeleted(false);
         sessionRecord.store();

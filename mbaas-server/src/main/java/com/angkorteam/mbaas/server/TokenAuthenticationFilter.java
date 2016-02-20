@@ -23,9 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.Date;
-
 /**
  * Created by Khauv Socheat on 2/4/2016.
  */
@@ -111,7 +109,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             }
 
             Date dateSeen = new Date();
-            tokenRecord.setDateSeen(new Timestamp(dateSeen.getTime()));
+            tokenRecord.setDateSeen(dateSeen);
             tokenRecord.update();
 
             UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);

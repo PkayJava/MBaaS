@@ -21,10 +21,17 @@
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -159,6 +166,35 @@
                             <includes>.*</includes>
                             <excludes/>
                             <inputSchema>${jdbc.database}</inputSchema>
+                            <!-- First, register your custom types here -->
+                            <customTypes>
+                                <customType>
+                                    <name>DateConverter</name>
+                                    <type>java.util.Date</type>
+                                    <converter>com.angkorteam.mbaas.jooq.DateConverter</converter>
+                                </customType>
+                                <!--
+                                <customType>
+                                    <name>UUIDConverter</name>
+                                    <type>java.util.UUID</type>
+                                    <converter>com.angkorteam.mbaas.jooq.UUIDConverter</converter>
+                                </customType>
+                                -->
+                            </customTypes>
+                            <forcedTypes>
+                                <forcedType>
+                                    <name>DateConverter</name>
+                                    <expression>.*</expression>
+                                    <types>^(datetime)|(timestamp)|(time)|(date)$</types>
+                                </forcedType>
+                                <!--
+                                <forcedType>
+                                    <name>UUIDConverter</name>
+                                    <expression>^[a-zA-Z0-9\\-]*_id$</expression>
+                                    <types>^varchar$</types>
+                                </forcedType>
+                                -->
+                            </forcedTypes>
                         </database>
                         <strategy>
                             <name>com.angkorteam.mbaas.maven.DefaultGeneratorStrategy</name>

@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
-import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -504,7 +503,7 @@ public class UserController {
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
         DateTime now = new DateTime();
         userRecord.setPasswordResetToken(UUID.randomUUID().toString());
-        userRecord.setPasswordResetTokenExpiredDate(new Timestamp(now.plusMinutes(10).toDate().getTime()));
+        userRecord.setPasswordResetTokenExpiredDate(now.plusMinutes(10).toDate());
         // TODO : send mail link
         userRecord.update();
 
