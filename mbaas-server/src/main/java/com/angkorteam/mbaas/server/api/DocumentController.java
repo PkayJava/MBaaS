@@ -408,7 +408,7 @@ public class DocumentController {
             return ResponseEntity.ok(response);
         }
 
-        Long total = jdbcTemplate.queryForObject("SELECT count(*) from `" + collection + "` where ", Long.class);
+        Long total = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collection + "`", Long.class);
         DocumentCountResponse response = new DocumentCountResponse();
         response.getData().setTotal(total);
 
