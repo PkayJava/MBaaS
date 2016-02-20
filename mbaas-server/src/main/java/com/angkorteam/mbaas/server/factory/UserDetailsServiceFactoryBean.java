@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.factory;
 
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.User;
+import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.FactoryBean;
@@ -47,7 +47,7 @@ public class UserDetailsServiceFactoryBean implements FactoryBean<UserDetailsSer
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User userTable = Tables.USER.as("userTable");
+        UserTable userTable = Tables.USER.as("userTable");
         UserRecord userRecord = this.context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
         if (userRecord == null) {
             throw new UsernameNotFoundException(username + " is not found");

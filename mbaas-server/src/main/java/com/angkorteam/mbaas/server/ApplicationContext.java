@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
-import com.angkorteam.mbaas.model.entity.tables.Collection;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.ColumnEnum;
 import com.angkorteam.mbaas.plain.enums.IndexInfoEnum;
@@ -33,8 +32,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 /**
  * Created by Khauv Socheat on 2/3/2016.
@@ -79,8 +78,8 @@ public class ApplicationContext implements ServletContextListener {
 
     protected void initUser(DSLContext context) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        User userTable = Tables.USER.as("userTable");
-        Role roleTable = Tables.ROLE.as("roleTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
 
         UserRecord adminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
         if (adminRecord == null) {
@@ -133,7 +132,7 @@ public class ApplicationContext implements ServletContextListener {
 
     protected void initRole(DSLContext context) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        Role roleTable = Tables.ROLE.as("roleTable");
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
 
         RoleRecord administratorRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_ADMINISTRATOR))).fetchOneInto(roleTable);
         if (administratorRecord == null) {
@@ -179,11 +178,11 @@ public class ApplicationContext implements ServletContextListener {
     protected void initDDL(DSLContext context, DataSource dataSource) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        Primary primaryTable = Tables.PRIMARY.as("primaryTable");
-        Index indexTable = Tables.INDEX.as("indexTable");
-        User userTable = Tables.USER.as("userTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        PrimaryTable primaryTable = Tables.PRIMARY.as("primaryTable");
+        IndexTable indexTable = Tables.INDEX.as("indexTable");
+        UserTable userTable = Tables.USER.as("userTable");
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
 
@@ -440,7 +439,7 @@ public class ApplicationContext implements ServletContextListener {
 
         DefaultConfiguration configuration = new DefaultConfiguration();
         configuration.setSettings(settings);
-        configuration.setDataSource(this.dataSource);
+        configuration.setDataSource(dataSource);
 
         if ("com.mysql.jdbc.Driver".equals(dataSource.getDriverClassName())) {
             configuration.set(SQLDialect.MYSQL);

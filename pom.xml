@@ -51,6 +51,7 @@
         <activemq.version>5.13.0</activemq.version>
 
         <!-- Apache Commons -->
+        <ddlutils.version>1.0</ddlutils.version>
         <commons-email.version>1.4</commons-email.version>
         <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-dbcp2.version>2.1.1</commons-dbcp2.version>
@@ -58,6 +59,7 @@
         <commons-daemon.version>1.0.15</commons-daemon.version>
         <commons-validator.version>1.5.0</commons-validator.version>
         <commons-lang3.version>3.4</commons-lang3.version>
+        <commons-lang.version>2.6</commons-lang.version>
         <commons-cli.version>1.3.1</commons-cli.version>
         <commons-codec.version>1.10</commons-codec.version>
         <commons-csv.version>1.2</commons-csv.version>
@@ -79,6 +81,7 @@
     <modules>
         <module>mbaas-client</module>
         <module>mbaas-plain</module>
+        <module>mbaas-maven</module>
         <module>mbaas-jooq</module>
         <module>mbaas-configuration</module>
         <module>mbaas-server</module>
@@ -97,6 +100,18 @@
                 <groupId>com.angkorteam.framework.extension</groupId>
                 <artifactId>framework-extension</artifactId>
                 <version>${framework-extension.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.ddlutils</groupId>
+                <artifactId>ddlutils</artifactId>
+                <version>${ddlutils.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.version}</version>
             </dependency>
 
             <dependency>

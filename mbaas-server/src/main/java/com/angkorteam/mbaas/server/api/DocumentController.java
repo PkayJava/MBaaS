@@ -1,7 +1,6 @@
 package com.angkorteam.mbaas.server.api;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.tables.Collection;
 import com.angkorteam.mbaas.plain.response.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
 import com.angkorteam.mbaas.model.entity.Tables;
@@ -57,111 +56,6 @@ public class DocumentController {
     @Autowired
     private Gson gson;
 
-    //region /document/query/{collection}
-
-    @RequestMapping(
-            method = RequestMethod.POST, path = "/query/{collection}",
-            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<Response> query(
-            HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("collection") String collection,
-            @RequestBody DocumentQueryRequest requestBody
-    ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
-
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
-        if (collectionRecord == null) {
-            return ResponseEntity.ok(null);
-        }
-
-//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
-//            return ResponseEntity.ok(null);
-//        }
-
-        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
-        for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
-            fieldRecords.put(fieldRecord.getAttributeId(), fieldRecord);
-        }
-
-        List<String> fields = new LinkedList<>();
-        for (Map.Entry<String, AttributeRecord> entry : fieldRecords.entrySet()) {
-            AttributeRecord fieldRecord = entry.getValue();
-            if (fieldRecord.getExposed()) {
-                if (fieldRecord.getVirtual()) {
-                    AttributeRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualAttributeId());
-                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
-                } else {
-                    fields.add("`" + entry.getKey() + "`");
-                }
-            }
-        }
-
-        Map<String, Object> result = jdbcTemplate.queryForMap("SELECT " + StringUtils.join(fields, ", ") + " from " + collection + " limit 0,10");
-
-        return ResponseEntity.ok(null);
-    }
-
-    //endregion
-
-    //region /document/query/{collection}/{id}
-
-    @RequestMapping(
-            method = RequestMethod.POST, path = "/query/{collection}/{id}",
-            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<Response> queryById(
-            HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("collection") String collection,
-            @PathVariable("id") String id,
-            @RequestBody DocumentQueryRequestById requestBody
-    ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
-
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
-        if (collectionRecord == null) {
-            return ResponseEntity.ok(null);
-        }
-
-//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
-//            return ResponseEntity.ok(null);
-//        }
-
-        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
-        for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
-            fieldRecords.put(fieldRecord.getAttributeId(), fieldRecord);
-        }
-
-        List<String> fields = new LinkedList<>();
-        for (Map.Entry<String, AttributeRecord> entry : fieldRecords.entrySet()) {
-            AttributeRecord fieldRecord = entry.getValue();
-            if (fieldRecord.getExposed()) {
-                if (fieldRecord.getVirtual()) {
-                    AttributeRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualAttributeId());
-                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
-                } else {
-                    fields.add("`" + entry.getKey() + "`");
-                }
-            }
-        }
-
-        Map<String, Object> result = jdbcTemplate.queryForMap("SELECT " + StringUtils.join(fields, ", ") + " from " + collection + " where " + collection + "_id = ?", id);
-
-        return ResponseEntity.ok(null);
-    }
-
-    //endregion
-
     //region /document/create/{collection}
 
     @RequestMapping(
@@ -180,10 +74,10 @@ public class DocumentController {
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        User userTable = Tables.USER.as("userTable");
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
         SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         if (sessionRecord == null) {
@@ -215,7 +109,6 @@ public class DocumentController {
                 }
             }
         }
-
 
         String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
 
@@ -438,6 +331,7 @@ public class DocumentController {
 
         DocumentCreateResponse response = new DocumentCreateResponse();
         response.getData().setCollectionName(collection);
+        response.getData().setDocumentId(id);
         response.getData().getAttributes().put(collection + "_id", id);
 
         return ResponseEntity.ok(response);
@@ -451,7 +345,7 @@ public class DocumentController {
             method = RequestMethod.POST, path = "/count/{collection}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> count(
+    public ResponseEntity<DocumentCountResponse> count(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
@@ -459,14 +353,52 @@ public class DocumentController {
             @RequestBody DocumentCountRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
-//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
-//            return ResponseEntity.ok(null);
-//        }
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(*) from `" + collection + "`", Integer.class);
+        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
+        if (sessionRecord == null) {
+            errorMessages.put("session", "session invalid");
+        }
 
-        return ResponseEntity.ok(null);
+        UserRecord userRecord = null;
+        if (sessionRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                errorMessages.put("session", "session invalid");
+            }
+        }
+
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
+        if (collectionRecord == null) {
+            errorMessages.put("collection", "collection is not found");
+        }
+
+        if (collectionRecord != null) {
+            if (permission.isAdministratorUser(session)
+                    || permission.isBackOfficeUser(session)
+                    || permission.isCollectionOwner(session, collection)
+                    || permission.hasCollectionPermission(session, collection, PermissionEnum.Read.getLiteral())) {
+            } else {
+                errorMessages.put("permission", "don't have write permission to this collection");
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            DocumentCountResponse response = new DocumentCountResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        Long total = jdbcTemplate.queryForObject("SELECT count(*) from `" + collection + "` where ", Long.class);
+        DocumentCountResponse response = new DocumentCountResponse();
+        response.getData().setTotal(total);
+
+        return ResponseEntity.ok(response);
     }
 
     //endregion
@@ -485,39 +417,65 @@ public class DocumentController {
             @PathVariable("id") String id,
             @RequestBody DocumentModifyRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+
+        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
+        if (sessionRecord == null) {
+            errorMessages.put("session", "session invalid");
+        }
+
+        UserRecord userRecord = null;
+        if (sessionRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                errorMessages.put("session", "session invalid");
+            }
+        }
 
         CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
         if (collectionRecord == null) {
-            return ResponseEntity.ok(null);
+            errorMessages.put("collection", "collection is not found");
         }
 
-//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Modify.getLiteral())) {
-//            return ResponseEntity.ok(null);
-//        }
+        Map<String, AttributeRecord> attributeIdRecords = new LinkedHashMap<>();
+        Map<String, AttributeRecord> attributeNameRecords = new LinkedHashMap<>();
+        if (collectionRecord != null) {
+            for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
+                attributeIdRecords.put(attributeRecord.getAttributeId(), attributeRecord);
+                attributeNameRecords.put(attributeRecord.getName(), attributeRecord);
 
-        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
-        Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
-        for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
-            fieldRecords.put(fieldRecord.getName(), fieldRecord);
-            if (fieldRecord.getSqlType().equals("BLOB")) {
-                blobRecords.put(fieldRecord.getAttributeId(), fieldRecord);
+                if (!attributeRecord.getSystem() && !attributeRecord.getNullable() && !requestBody.getDocument().containsKey(attributeRecord.getName())) {
+                    errorMessages.put(attributeRecord.getName(), "is required");
+                }
             }
         }
+
+        if (collectionRecord != null) {
+            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collection + "` WHERE `" + collection + "_id` = ?", Integer.class, id);
+            if (count == 0) {
+                errorMessages.put(id, "is not found");
+            }
+        }
+
+        String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
 
         List<String> columns = new LinkedList<>();
         Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
         Map<String, Object> values = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            AttributeRecord fieldRecord = fieldRecords.get(entry.getKey());
+            AttributeRecord fieldRecord = attributeNameRecords.get(entry.getKey());
             if (fieldRecord == null) {
                 continue;
             }
             if (fieldRecord.getVirtual()) {
-                AttributeRecord physicalRecord = blobRecords.get(fieldRecord.getVirtualAttributeId());
+                AttributeRecord physicalRecord = attributeIdRecords.get(fieldRecord.getVirtualAttributeId());
                 if (!virtualColumns.containsKey(physicalRecord.getName())) {
                     virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                 }
@@ -560,8 +518,8 @@ public class DocumentController {
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
         CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
         if (collectionRecord == null) {
@@ -606,9 +564,9 @@ public class DocumentController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        User userTable = Tables.USER.as("userTable");
-        DocumentUserPrivacy documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        DocumentUserPrivacyTable documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
@@ -700,9 +658,9 @@ public class DocumentController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Role roleTable = Tables.ROLE.as("roleTable");
-        DocumentRolePrivacy documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        DocumentRolePrivacyTable documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
@@ -794,9 +752,9 @@ public class DocumentController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        User userTable = Tables.USER.as("userTable");
-        DocumentUserPrivacy documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        DocumentUserPrivacyTable documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
@@ -903,9 +861,9 @@ public class DocumentController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Role roleTable = Tables.ROLE.as("roleTable");
-        DocumentRolePrivacy documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        DocumentRolePrivacyTable documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
@@ -993,6 +951,111 @@ public class DocumentController {
         response.getData().setPermission(documentRolePrivacyRecord.getPermisson());
 
         return ResponseEntity.ok(response);
+    }
+
+    //endregion
+
+    //region /document/query/{collection}
+
+    @RequestMapping(
+            method = RequestMethod.POST, path = "/query/{collection}",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> query(
+            HttpServletRequest request,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @PathVariable("collection") String collection,
+            @RequestBody DocumentQueryRequest requestBody
+    ) {
+        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
+        if (collectionRecord == null) {
+            return ResponseEntity.ok(null);
+        }
+
+//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
+//            return ResponseEntity.ok(null);
+//        }
+
+        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
+        for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
+            fieldRecords.put(fieldRecord.getAttributeId(), fieldRecord);
+        }
+
+        List<String> fields = new LinkedList<>();
+        for (Map.Entry<String, AttributeRecord> entry : fieldRecords.entrySet()) {
+            AttributeRecord fieldRecord = entry.getValue();
+            if (fieldRecord.getExposed()) {
+                if (fieldRecord.getVirtual()) {
+                    AttributeRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualAttributeId());
+                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
+                } else {
+                    fields.add("`" + entry.getKey() + "`");
+                }
+            }
+        }
+
+        Map<String, Object> result = jdbcTemplate.queryForMap("SELECT " + StringUtils.join(fields, ", ") + " from " + collection + " limit 0,10");
+
+        return ResponseEntity.ok(null);
+    }
+
+    //endregion
+
+    //region /document/query/{collection}/{id}
+
+    @RequestMapping(
+            method = RequestMethod.POST, path = "/query/{collection}/{id}",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Response> queryById(
+            HttpServletRequest request,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @PathVariable("collection") String collection,
+            @PathVariable("id") String id,
+            @RequestBody DocumentQueryRequestById requestBody
+    ) {
+        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
+        if (collectionRecord == null) {
+            return ResponseEntity.ok(null);
+        }
+
+//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
+//            return ResponseEntity.ok(null);
+//        }
+
+        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
+        for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
+            fieldRecords.put(fieldRecord.getAttributeId(), fieldRecord);
+        }
+
+        List<String> fields = new LinkedList<>();
+        for (Map.Entry<String, AttributeRecord> entry : fieldRecords.entrySet()) {
+            AttributeRecord fieldRecord = entry.getValue();
+            if (fieldRecord.getExposed()) {
+                if (fieldRecord.getVirtual()) {
+                    AttributeRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualAttributeId());
+                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
+                } else {
+                    fields.add("`" + entry.getKey() + "`");
+                }
+            }
+        }
+
+        Map<String, Object> result = jdbcTemplate.queryForMap("SELECT " + StringUtils.join(fields, ", ") + " from " + collection + " where " + collection + "_id = ?", id);
+
+        return ResponseEntity.ok(null);
     }
 
     //endregion

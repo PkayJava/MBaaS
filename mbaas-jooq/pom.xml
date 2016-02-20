@@ -135,6 +135,11 @@
                         <artifactId>mariadb-java-client</artifactId>
                         <version>${mariadb.version}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>com.angkorteam.mbaas.maven</groupId>
+                        <artifactId>mbaas-maven</artifactId>
+                        <version>${project.parent.version}</version>
+                    </dependency>
                 </dependencies>
 
                 <!-- Specify the plugin configuration. The configuration format is the
@@ -147,7 +152,7 @@
                         <password>${jdbc.password}</password>
                     </jdbc>
                     <generator>
-                        <name>org.jooq.util.JavaGenerator</name>
+                        <name>com.angkorteam.mbaas.maven.JavaGenerator</name>
                         <database>
                             <name>${jdbc.dialect}</name>
                             <recordVersionFields>optimistic</recordVersionFields>
@@ -155,15 +160,20 @@
                             <excludes/>
                             <inputSchema>${jdbc.database}</inputSchema>
                         </database>
+                        <strategy>
+                            <name>com.angkorteam.mbaas.maven.DefaultGeneratorStrategy</name>
+                        </strategy>
                         <generate>
                             <deprecated>false</deprecated>
                             <relations>true</relations>
                             <instanceFields>true</instanceFields>
                             <globalObjectReferences>true</globalObjectReferences>
+                            <pojosToString>true</pojosToString>
+                            <immutablePojos>true</immutablePojos>
                             <daos>true</daos>
                             <pojos>true</pojos>
+                            <pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>
                             <records>true</records>
-                            <immutablePojos>false</immutablePojos>
                             <interfaces>true</interfaces>
                         </generate>
                         <target>

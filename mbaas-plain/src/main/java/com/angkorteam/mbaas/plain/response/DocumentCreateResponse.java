@@ -22,6 +22,10 @@ public class DocumentCreateResponse extends Response<DocumentCreateResponse.Body
         private String collectionName;
 
         @Expose
+        @SerializedName("documentId")
+        private String documentId;
+
+        @Expose
         @SerializedName("attributes")
         private Map<String, Object> attributes = new LinkedHashMap<>();
 
@@ -39,6 +43,14 @@ public class DocumentCreateResponse extends Response<DocumentCreateResponse.Body
 
         public void setAttributes(Map<String, Object> attributes) {
             this.attributes = attributes;
+        }
+
+        public String getDocumentId() {
+            return documentId;
+        }
+
+        public void setDocumentId(String documentId) {
+            this.documentId = documentId;
         }
     }
 }

@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server.api;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
-import com.angkorteam.mbaas.model.entity.tables.Collection;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
 import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
@@ -68,11 +67,11 @@ public class CollectionController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Primary primaryTable = Tables.PRIMARY.as("primaryTable");
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        User userTable = Tables.USER.as("userTable");
+        PrimaryTable primaryTable = Tables.PRIMARY.as("primaryTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTables = Tables.ATTRIBUTE.as("attributeTables");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        UserTable userTable = Tables.USER.as("userTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
@@ -305,8 +304,8 @@ public class CollectionController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTables = Tables.ATTRIBUTE.as("attributeTables");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
@@ -434,14 +433,14 @@ public class CollectionController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Primary primaryTable = Tables.PRIMARY.as("primaryTable");
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
-        CollectionUserPrivacy collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("CollectionROlePrivacyTable");
-        CollectionRolePrivacy collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
-        DocumentUserPrivacy documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
-        DocumentRolePrivacy documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
-        Index indexTable = Tables.INDEX.as("indexTable");
+        PrimaryTable primaryTable = Tables.PRIMARY.as("primaryTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTables = Tables.ATTRIBUTE.as("attributeTables");
+        CollectionUserPrivacyTable collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("CollectionROlePrivacyTable");
+        CollectionRolePrivacyTable collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
+        DocumentUserPrivacyTable documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
+        DocumentRolePrivacyTable documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
+        IndexTable indexTable = Tables.INDEX.as("indexTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {
@@ -509,8 +508,8 @@ public class CollectionController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTables = Tables.ATTRIBUTE.as("attributeTables");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTables = Tables.ATTRIBUTE.as("attributeTables");
 
         CollectionRecord collectionRecord = null;
 
@@ -593,9 +592,9 @@ public class CollectionController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        User userTable = Tables.USER.as("userTable");
-        CollectionUserPrivacy collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("collectionUserPrivacyTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        CollectionUserPrivacyTable collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("collectionUserPrivacyTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody)) {
@@ -677,9 +676,9 @@ public class CollectionController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Role roleTable = Tables.ROLE.as("roleTable");
-        CollectionRolePrivacy collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        CollectionRolePrivacyTable collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody)) {
@@ -761,9 +760,9 @@ public class CollectionController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        User userTable = Tables.USER.as("userTable");
-        CollectionUserPrivacy collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("collectionUserPrivacyTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        CollectionUserPrivacyTable collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("collectionUserPrivacyTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody)) {
@@ -855,9 +854,9 @@ public class CollectionController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Role roleTable = Tables.ROLE.as("roleTable");
-        CollectionRolePrivacy collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        CollectionRolePrivacyTable collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody)) {

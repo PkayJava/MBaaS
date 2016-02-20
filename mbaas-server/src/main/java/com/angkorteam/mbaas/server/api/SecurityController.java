@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server.api;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
-import com.angkorteam.mbaas.model.entity.tables.Collection;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
 import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
@@ -18,7 +17,6 @@ import com.angkorteam.mbaas.plain.response.SecuritySignUpResponse;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
-import org.jasypt.encryption.StringEncryptor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
@@ -29,12 +27,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -71,12 +67,12 @@ public class SecurityController {
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        User userTable = Tables.USER.as("userTable");
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        Role roleTable = Tables.ROLE.as("roleTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
             errorMessages.put("username", "is required");
@@ -303,8 +299,8 @@ public class SecurityController {
         LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        User userTable = Tables.USER.as("userTable");
-        Session sessionTable = Tables.SESSION.as("sessionTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
 
         if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
             errorMessages.put("username", "is required");
@@ -366,7 +362,7 @@ public class SecurityController {
 
         SecurityLogoutResponse responseBody = new SecurityLogoutResponse();
 
-        Session sessionTable = Tables.SESSION.as("sessionTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
         SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         String userId = sessionRecord.getUserId();
 
@@ -393,7 +389,7 @@ public class SecurityController {
 
         SecurityLogoutSessionResponse responseBody = new SecurityLogoutSessionResponse();
 
-        Session sessionTable = Tables.SESSION.as("sessionTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
         context.delete(sessionTable).where(sessionTable.SESSION_ID.eq(session)).execute();
 
         return ResponseEntity.ok(responseBody);

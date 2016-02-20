@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server.api;
 import com.angkorteam.baasbox.sdk.java.json.ChangePasswordJson;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
-import com.angkorteam.mbaas.model.entity.tables.Collection;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.ResultEnum;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
@@ -70,8 +69,8 @@ public class UserController {
     ) {
         UnknownResponse responseBody = new UnknownResponse();
 
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        User userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        UserTable userTable = Tables.USER.as("userTable");
 
         SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         UserRecord userRecord = null;
@@ -101,7 +100,7 @@ public class UserController {
     ) {
         UnknownResponse responseBody = new UnknownResponse();
 
-        User userTable = Tables.USER.as("userTable");
+        UserTable userTable = Tables.USER.as("userTable");
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
 
         if (userRecord != null) {
@@ -125,7 +124,7 @@ public class UserController {
     ) {
         UnknownResponse responseBody = new UnknownResponse();
 
-        User userTable = Tables.USER.as("userTable");
+        UserTable userTable = Tables.USER.as("userTable");
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
 
         if (userRecord != null) {
@@ -148,8 +147,8 @@ public class UserController {
     ) {
         UnknownResponse responseBody = new UnknownResponse();
 
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        User userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        UserTable userTable = Tables.USER.as("userTable");
 
         SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
         UserRecord userRecord = null;
@@ -177,11 +176,11 @@ public class UserController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody UpdateUserProfileRequest requestBody
     ) {
-        User userTable = Tables.USER.as("userTable");
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         // field duplication check
         List<String> fields = new LinkedList<>();
@@ -386,12 +385,12 @@ public class UserController {
             @PathVariable("username") String username,
             @RequestBody Request requestBody
     ) {
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
-        User userTable = Tables.USER.as("userTable");
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         UnknownResponse responseBody = new UnknownResponse();
 
@@ -411,12 +410,12 @@ public class UserController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody FetchUsersRequest requestBody
     ) {
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
-        User userTable = Tables.USER.as("userTable");
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         UnknownResponse responseBody = new UnknownResponse();
 
@@ -438,12 +437,12 @@ public class UserController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody ChangePasswordJson requestBody
     ) {
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
-        User userTable = Tables.USER.as("userTable");
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         UnknownResponse responseBody = new UnknownResponse();
 
@@ -468,12 +467,12 @@ public class UserController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody ChangeUsernameRequest requestBody
     ) {
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
-        User userTable = Tables.USER.as("userTable");
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         UnknownResponse responseBody = new UnknownResponse();
 
@@ -495,12 +494,12 @@ public class UserController {
             @PathVariable("username") String username,
             @RequestBody Request requestBody
     ) {
-        Application applicationTable = Tables.APPLICATION.as("applicationTable");
-        User userTable = Tables.USER.as("userTable");
-        Session sessionTable = Tables.SESSION.as("sessionTable");
-        Collection collectionTable = Tables.COLLECTION.as("collectionTable");
-        Attribute attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        UserPrivacy userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
         DateTime now = new DateTime();

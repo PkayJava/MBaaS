@@ -1,8 +1,8 @@
 package com.angkorteam.mbaas.server;
 
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.Session;
-import com.angkorteam.mbaas.model.entity.tables.User;
+import com.angkorteam.mbaas.model.entity.tables.SessionTable;
+import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.SessionRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import org.jooq.DSLContext;
@@ -102,8 +102,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         try {
             String session = header;
 
-            User userTable = Tables.USER.as("userTable");
-            Session sessionTable = Tables.SESSION.as("sessionTable");
+            UserTable userTable = Tables.USER.as("userTable");
+            SessionTable sessionTable = Tables.SESSION.as("sessionTable");
 
             SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
             if (tokenRecord == null) {
