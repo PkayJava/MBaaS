@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.plain.request.*;
 import com.angkorteam.mbaas.plain.response.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,10 +31,10 @@ public class MBaaSTest {
     private MBaaSClient client = new MBaaSClient("1234567890", HOST_C);
 
     @Test
-    public void securitySignUpTest() throws ScriptException {
+    public void securitySignUpTest() {
 
-        String login = "temp_" + UUID.randomUUID().toString().replaceAll("-", "");
-        String password = "temp_" + UUID.randomUUID().toString().replaceAll("-", "");
+        String login = "temp_" + RandomStringUtils.randomAlphabetic(5);
+        String password = "temp_" + RandomStringUtils.randomAlphabetic(5);
         SecuritySignUpRequest request = new SecuritySignUpRequest();
         request.setUsername(login);
         request.setPassword(password);
@@ -44,7 +45,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void securityLoginTest() throws ScriptException {
+    public void securityLoginTest() {
         String login = "admin";
         String password = "admin";
 
@@ -62,7 +63,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void securityLogoutTest() throws ScriptException {
+    public void securityLogoutTest() {
         String login = "admin";
         String password = "admin";
         {
@@ -79,7 +80,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void securityLogoutSessionTest() throws ScriptException {
+    public void securityLogoutSessionTest() {
         String login = "admin";
         String password = "admin";
         String session = null;
@@ -98,7 +99,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void monitorCpuTest() throws ScriptException {
+    public void monitorCpuTest() {
 
         String login = "admin";
         String password = "admin";
@@ -118,7 +119,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void monitorMemTest() throws ScriptException {
+    public void monitorMemTest() {
 
         String login = "admin";
         String password = "admin";
@@ -138,7 +139,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void collectionCreateTest() throws ScriptException {
+    public void collectionCreateTest() {
 
         String login = "admin";
         String password = "admin";
@@ -151,7 +152,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -247,7 +248,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void collectionDeleteTest() throws ScriptException {
+    public void collectionDeleteTest() {
 
         String login = "admin";
         String password = "admin";
@@ -260,7 +261,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -285,7 +286,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void collectionAttributeCreateTest() throws ScriptException {
+    public void collectionAttributeCreateTest() {
 
         String login = "admin";
         String password = "admin";
@@ -298,7 +299,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -342,7 +343,7 @@ public class MBaaSTest {
     }
 
     @Test
-    public void collectionAttributeDeleteTest() throws ScriptException {
+    public void collectionAttributeDeleteTest() {
 
         String login = "admin";
         String password = "admin";
@@ -355,7 +356,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -406,7 +407,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -415,8 +416,8 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String userALogin = "us" + UUID.randomUUID().toString().replaceAll("-", "");
-        String userAPassword = "us" + UUID.randomUUID().toString().replaceAll("-", "");
+        String userALogin = "us" + RandomStringUtils.randomAlphabetic(5);
+        String userAPassword = "us" + RandomStringUtils.randomAlphabetic(5);
         {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
             request.setUsername(userALogin);
@@ -459,7 +460,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -468,8 +469,8 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String userALogin = "us" + UUID.randomUUID().toString().replaceAll("-", "");
-        String userAPassword = "us" + UUID.randomUUID().toString().replaceAll("-", "");
+        String userALogin = "us" + RandomStringUtils.randomAlphabetic(5);
+        String userAPassword = "us" + RandomStringUtils.randomAlphabetic(5);
         {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
             request.setUsername(userALogin);
@@ -522,7 +523,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -566,7 +567,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -620,7 +621,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -665,8 +666,8 @@ public class MBaaSTest {
         String login = "admin";
         String password = "admin";
 
-        String userALogin = "userA" + UUID.randomUUID().toString().replaceAll("-", "");
-        String userAPassword = "userA" + UUID.randomUUID().toString().replaceAll("-", "");
+        String userALogin = "userA" + RandomStringUtils.randomAlphabetic(5);
+        String userAPassword = "userA" + RandomStringUtils.randomAlphabetic(5);
 
         {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
@@ -684,7 +685,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -730,6 +731,66 @@ public class MBaaSTest {
             request.getDocument().put("first_name", "Socheat KHAUV");
             request.getDocument().put("join_date", new Date());
             DocumentCreateResponse response = client.documentCreate(collectionName, request);
+            System.out.println(gson.toJson(response));
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void documentCountTestA() {
+        String login = "admin";
+        String password = "admin";
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("first_name");
+                attribute.setNullable(false);
+                attribute.setJavaType(String.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("join_date");
+                attribute.setNullable(true);
+                attribute.setJavaType(Date.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            DocumentCreateRequest request = new DocumentCreateRequest();
+            request.getDocument().put("first_name", "Socheat KHAUV");
+            request.getDocument().put("join_date", new Date());
+            DocumentCreateResponse response = client.documentCreate(collectionName, request);
+            System.out.println(gson.toJson(response));
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            DocumentCountRequest request = new DocumentCountRequest();
+            DocumentCountResponse response = client.documentCount(collectionName, request);
             System.out.println(gson.toJson(response));
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
