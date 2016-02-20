@@ -32,8 +32,8 @@ public class MBaaSTest {
     @Test
     public void securitySignUpTest() throws ScriptException {
 
-        String login = UUID.randomUUID().toString();
-        String password = UUID.randomUUID().toString();
+        String login = "temp_" + UUID.randomUUID().toString().replaceAll("-", "");
+        String password = "temp_" + UUID.randomUUID().toString().replaceAll("-", "");
         SecuritySignUpRequest request = new SecuritySignUpRequest();
         request.setUsername(login);
         request.setPassword(password);
@@ -151,7 +151,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -260,7 +260,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -298,7 +298,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -355,7 +355,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -406,7 +406,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -415,8 +415,8 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String userALogin = "us" + UUID.randomUUID().toString();
-        String userAPassword = "us" + UUID.randomUUID().toString();
+        String userALogin = "us" + UUID.randomUUID().toString().replaceAll("-", "");
+        String userAPassword = "us" + UUID.randomUUID().toString().replaceAll("-", "");
         {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
             request.setUsername(userALogin);
@@ -459,7 +459,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -468,8 +468,8 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String userALogin = "us" + UUID.randomUUID().toString();
-        String userAPassword = "us" + UUID.randomUUID().toString();
+        String userALogin = "us" + UUID.randomUUID().toString().replaceAll("-", "");
+        String userAPassword = "us" + UUID.randomUUID().toString().replaceAll("-", "");
         {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
             request.setUsername(userALogin);
@@ -522,7 +522,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -566,7 +566,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -620,7 +620,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -665,8 +665,8 @@ public class MBaaSTest {
         String login = "admin";
         String password = "admin";
 
-        String userALogin = "userA" + UUID.randomUUID().toString();
-        String userAPassword = "userA" + UUID.randomUUID().toString();
+        String userALogin = "userA" + UUID.randomUUID().toString().replaceAll("-", "");
+        String userAPassword = "userA" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
@@ -684,7 +684,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + UUID.randomUUID().toString();
+        String collectionName = "tmp_user" + UUID.randomUUID().toString().replaceAll("-", "");
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
