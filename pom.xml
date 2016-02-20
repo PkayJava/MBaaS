@@ -103,18 +103,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.apache.ddlutils</groupId>
-                <artifactId>ddlutils</artifactId>
-                <version>${ddlutils.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>sigar</groupId>
                 <artifactId>sigar</artifactId>
                 <version>${sigar.version}</version>
