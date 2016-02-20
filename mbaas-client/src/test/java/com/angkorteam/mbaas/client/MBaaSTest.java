@@ -33,8 +33,8 @@ public class MBaaSTest {
     @Test
     public void securitySignUpTest() {
 
-        String login = "temp_" + RandomStringUtils.randomAlphabetic(5);
-        String password = "temp_" + RandomStringUtils.randomAlphabetic(5);
+        String login = "temp_" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
+        String password = "temp_" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
         SecuritySignUpRequest request = new SecuritySignUpRequest();
         request.setUsername(login);
         request.setPassword(password);
@@ -152,7 +152,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -261,7 +261,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -299,7 +299,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -356,7 +356,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -407,7 +407,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -416,8 +416,8 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String userALogin = "us" + RandomStringUtils.randomAlphabetic(5);
-        String userAPassword = "us" + RandomStringUtils.randomAlphabetic(5);
+        String userALogin = "us" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
+        String userAPassword = "us" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
         {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
             request.setUsername(userALogin);
@@ -460,7 +460,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -469,8 +469,8 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String userALogin = "us" + RandomStringUtils.randomAlphabetic(5);
-        String userAPassword = "us" + RandomStringUtils.randomAlphabetic(5);
+        String userALogin = "us" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
+        String userAPassword = "us" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
         {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
             request.setUsername(userALogin);
@@ -523,7 +523,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -567,7 +567,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -621,7 +621,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -666,8 +666,8 @@ public class MBaaSTest {
         String login = "admin";
         String password = "admin";
 
-        String userALogin = "userA" + RandomStringUtils.randomAlphabetic(5);
-        String userAPassword = "userA" + RandomStringUtils.randomAlphabetic(5);
+        String userALogin = "userA" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
+        String userAPassword = "userA" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             SecuritySignUpRequest request = new SecuritySignUpRequest();
@@ -685,7 +685,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
@@ -756,7 +756,7 @@ public class MBaaSTest {
             Assert.assertEquals(response.getHttpCode().intValue(), 200);
         }
 
-        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5);
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
 
         {
             CollectionCreateRequest request = new CollectionCreateRequest();
