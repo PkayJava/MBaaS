@@ -64,7 +64,7 @@ public class ApplicationContext implements ServletContextListener {
         LOGGER.info("initializing data access object layer");
         this.configuration = initConfiguration(dataSource);
         this.context = initDSLContext(configuration);
-        LOGGER.info("initializing string encryptor");
+        LOGGER.info("initializing string encryptors");
         this.stringEncryptor = initStringEncryptor();
         LOGGER.info("initializing default role");
         initRole(context);

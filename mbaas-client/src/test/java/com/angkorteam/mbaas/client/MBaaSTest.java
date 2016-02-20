@@ -23,7 +23,7 @@ public class MBaaSTest {
 
     public final String HOST_B = "http://172.16.1.42:7080/api";
 
-    public final String HOST_C = "http://192.168.1.117:7080/api";
+    public final String HOST_C = "http://192.168.1.106:7080/api";
 
     private Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ").create();
 
