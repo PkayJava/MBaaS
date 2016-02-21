@@ -341,7 +341,6 @@ public class DocumentController {
         DocumentCreateResponse response = new DocumentCreateResponse();
         response.getData().setCollectionName(collection);
         response.getData().setDocumentId(id);
-        response.getData().getAttributes().put(collection + "_id", id);
 
         return ResponseEntity.ok(response);
     }
@@ -417,20 +416,21 @@ public class DocumentController {
 
     //endregion
 
-    //region /document/modify/{collection}/{id}
+    //region /document/modify/{collection}/{documentId}
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/modify/{collection}/{id}",
+            method = RequestMethod.POST, path = "/modify/{collection}/{documentId}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> modifyById(
+    public ResponseEntity<DocumentModifyResponse> modify(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("collection") String collection,
-            @PathVariable("id") String id,
+            @PathVariable("documentId") String documentId,
             @RequestBody DocumentModifyRequest requestBody
     ) {
+        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -453,9 +453,14 @@ public class DocumentController {
             }
         }
 
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
-        if (collectionRecord == null) {
-            errorMessages.put("collection", "collection is not found");
+        CollectionRecord collectionRecord = null;
+        if (!PATTERN_NAMING.matcher(collection).matches()) {
+            errorMessages.put("collection", "collection is bad name");
+        } else {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collection", "collection is not found");
+            }
         }
 
         Map<String, AttributeRecord> attributeIdRecords = new LinkedHashMap<>();
@@ -464,54 +469,226 @@ public class DocumentController {
             for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
                 attributeIdRecords.put(attributeRecord.getAttributeId(), attributeRecord);
                 attributeNameRecords.put(attributeRecord.getName(), attributeRecord);
-
-                if (!attributeRecord.getSystem() && !attributeRecord.getNullable() && !requestBody.getDocument().containsKey(attributeRecord.getName())) {
-                    errorMessages.put(attributeRecord.getName(), "is required");
-                }
-            }
-        }
-
-        if (collectionRecord != null) {
-            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collection + "` WHERE `" + collection + "_id` = ?", Integer.class, id);
-            if (count == 0) {
-                errorMessages.put(id, "is not found");
             }
         }
 
         String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
 
+        for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
+            if (!PATTERN_NAMING.matcher(entry.getKey()).matches()) {
+                errorMessages.put(entry.getKey(), "bad name");
+            } else {
+                if (!attributeNameRecords.containsKey(entry.getKey())) {
+                    errorMessages.put(entry.getKey(), "is not allow");
+                } else {
+                    AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
+                    if (attributeRecord.getJavaType().equals(Date.class.getName())
+                            || attributeRecord.getJavaType().equals(Time.class.getName())
+                            || attributeRecord.getJavaType().equals(Timestamp.class.getName())) {
+                        if (attributeRecord.getNullable()) {
+                            if (entry.getValue() != null) {
+                                if (entry.getValue().getClass().getName().equals(String.class.getName())) {
+                                    try {
+                                        FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
+                                    } catch (ParseException e) {
+                                        errorMessages.put(entry.getKey(), "is bad value");
+                                    }
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            }
+                        } else {
+                            if (entry.getValue() != null) {
+                                if (entry.getValue().getClass().getName().equals(String.class.getName())) {
+                                    try {
+                                        FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
+                                    } catch (ParseException e) {
+                                        errorMessages.put(entry.getKey(), "is bad value");
+                                    }
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is required");
+                            }
+                        }
+                    } else if (attributeRecord.getJavaType().equals(Byte.class.getName()) || attributeRecord.getJavaType().equals(byte.class.getName())
+                            || attributeRecord.getJavaType().equals(Short.class.getName()) || attributeRecord.getJavaType().equals(short.class.getName())
+                            || attributeRecord.getJavaType().equals(Integer.class.getName()) || attributeRecord.getJavaType().equals(int.class.getName())
+                            || attributeRecord.getJavaType().equals(Long.class.getName()) || attributeRecord.getJavaType().equals(long.class.getName())) {
+                        if (attributeRecord.getNullable()) {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
+                                        || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
+                                        || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
+                                        || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            }
+                        } else {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
+                                        || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
+                                        || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
+                                        || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is required");
+                            }
+                        }
+                    } else if (attributeRecord.getJavaType().equals(Float.class.getName()) || attributeRecord.getJavaType().equals(float.class.getName())
+                            || attributeRecord.getJavaType().equals(Double.class.getName()) || attributeRecord.getJavaType().equals(double.class.getName())) {
+                        if (attributeRecord.getNullable()) {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
+                                        || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            }
+                        } else {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
+                                        || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is required");
+                            }
+                        }
+                    } else if (attributeRecord.getJavaType().equals(Boolean.class.getName()) || attributeRecord.getJavaType().equals(boolean.class.getName())) {
+                        if (attributeRecord.getNullable()) {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            }
+                        } else {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is required");
+                            }
+                        }
+                    } else if (attributeRecord.getJavaType().equals(String.class.getName())
+                            || attributeRecord.getJavaType().equals(Character.class.getName()) || attributeRecord.getJavaType().equals(char.class.getName())) {
+                        if (attributeRecord.getNullable()) {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(String.class.getName())
+                                        || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            }
+                        } else {
+                            if (entry.getValue() != null) {
+                                String clazzName = entry.getValue().getClass().getName();
+                                if (clazzName.equals(String.class.getName())
+                                        || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
+                                } else {
+                                    errorMessages.put(entry.getKey(), "is bad value");
+                                }
+                            } else {
+                                errorMessages.put(entry.getKey(), "is required");
+                            }
+                        }
+                    } else {
+                        errorMessages.put(entry.getKey(), "is bad value");
+                    }
+                }
+            }
+        }
+
+        if (collectionRecord != null) {
+            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collection + "` WHERE `" + collection + "_id` = ?", Integer.class, documentId);
+            if (count == 0) {
+                errorMessages.put("documentId", "is not found");
+            }
+        }
+
+        if (collectionRecord != null) {
+            if (permission.isAdministratorUser(session)
+                    || permission.isBackOfficeUser(session)
+                    || permission.isCollectionOwner(session, collection)
+                    || permission.isDocumentOwner(session, collection, documentId)
+                    || permission.hasDocumentPermission(session, collection, documentId, PermissionEnum.Modify.getLiteral())) {
+            } else {
+                errorMessages.put("permission", "don't have modify permission to this document");
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            DocumentModifyResponse response = new DocumentModifyResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
         List<String> columns = new LinkedList<>();
         Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
         Map<String, Object> values = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            AttributeRecord fieldRecord = attributeNameRecords.get(entry.getKey());
-            if (fieldRecord == null) {
+            if (entry.getValue() == null) {
                 continue;
             }
-            if (fieldRecord.getVirtual()) {
-                AttributeRecord physicalRecord = attributeIdRecords.get(fieldRecord.getVirtualAttributeId());
+            AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
+            if (attributeRecord.getVirtual()) {
+                AttributeRecord physicalRecord = attributeIdRecords.get(attributeRecord.getVirtualAttributeId());
                 if (!virtualColumns.containsKey(physicalRecord.getName())) {
                     virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
                 }
-                virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), (Serializable) entry.getValue());
+                if (attributeRecord.getJavaType().equals(Date.class.getName())
+                        || attributeRecord.getJavaType().equals(Timestamp.class.getName())
+                        || attributeRecord.getJavaType().equals(Time.class.getName())) {
+                    try {
+                        virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue()));
+                    } catch (ParseException e) {
+                    }
+                } else {
+                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
+                }
             } else {
                 columns.add(entry.getKey() + " = :" + entry.getKey());
-                values.put(entry.getKey(), entry.getValue());
+                if (attributeRecord.getJavaType().equals(Date.class.getName())
+                        || attributeRecord.getJavaType().equals(Timestamp.class.getName())
+                        || attributeRecord.getJavaType().equals(Time.class.getName())) {
+                    try {
+                        values.put(entry.getKey(), FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue()));
+                    } catch (ParseException e) {
+                    }
+                } else {
+                    values.put(entry.getKey(), entry.getValue());
+                }
             }
         }
-
         for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
             if (!entry.getValue().isEmpty()) {
                 columns.add(entry.getKey() + " = " + JdbcFunction.columnAdd(entry.getKey(), entry.getValue()));
             }
         }
-
-        values.put(collection + "_id", id);
-
+        values.put(collection + "_id", documentId);
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        namedParameterJdbcTemplate.update("UPDATE TABLE SET " + StringUtils.join(columns, ", ") + " WHERE " + collection + "_id = :" + collection + "_id", values);
+        namedParameterJdbcTemplate.update("UPDATE `" + collectionRecord.getName() + "` SET " + StringUtils.join(columns, ", ") + " WHERE " + collection + "_id = :" + collection + "_id", values);
 
-        return ResponseEntity.ok(null);
+        DocumentModifyResponse response = new DocumentModifyResponse();
+        response.getData().setDocumentId(documentId);
+
+        return ResponseEntity.ok(response);
     }
 
     //endregion

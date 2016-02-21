@@ -120,6 +120,10 @@ public class MBaaSClient {
         return client.documentCount(this.session, collectionName, request);
     }
 
+    public DocumentModifyResponse documentModify(String collectionName, String documentId, DocumentModifyRequest request) {
+        return client.documentModify(this.session, collectionName, documentId, request);
+    }
+
     public DocumentPermissionUsernameResponse documentPermissionGrantUsername(DocumentPermissionUsernameRequest request) {
         return client.documentPermissionGrantUsername(this.session, request);
     }
@@ -205,6 +209,9 @@ public class MBaaSClient {
 
         @POST("/document/count/{collection}")
         public DocumentCountResponse documentCount(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Body DocumentCountRequest request);
+
+        @POST("/document/modify/{collection}/{documentId}")
+        public DocumentModifyResponse documentModify(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Path("documentId") String documentId, @Body DocumentModifyRequest request);
 
         @POST("/document/permission/grant/username")
         public DocumentPermissionUsernameResponse documentPermissionGrantUsername(@Header("X-MBAAS-SESSION") String session, @Body DocumentPermissionUsernameRequest request);

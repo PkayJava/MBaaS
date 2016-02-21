@@ -1,0 +1,278 @@
+package com.angkorteam.mbaas.client;
+
+import com.angkorteam.mbaas.plain.enums.PermissionEnum;
+import com.angkorteam.mbaas.plain.request.*;
+import com.angkorteam.mbaas.plain.response.*;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * Created by Khauv Socheat on 2/4/2016.
+ */
+public class DocumentControllerTest extends BaseTest {
+
+    @Test
+    public void documentCreateTestA() {
+        String login = "admin";
+        String password = "admin";
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("first_name");
+                attribute.setNullable(false);
+                attribute.setJavaType(String.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("join_date");
+                attribute.setNullable(true);
+                attribute.setJavaType(Date.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            DocumentCreateRequest request = new DocumentCreateRequest();
+            request.getDocument().put("first_name", "Socheat KHAUV");
+            request.getDocument().put("join_date", new Date());
+            DocumentCreateResponse response = client.documentCreate(collectionName, request);
+            System.out.println(gson.toJson(response));
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void documentCreateTestB() {
+        String login = "admin";
+        String password = "admin";
+
+        String userALogin = "userA" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
+        String userAPassword = "userA" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
+
+        {
+            SecuritySignUpRequest request = new SecuritySignUpRequest();
+            request.setUsername(userALogin);
+            request.setPassword(userAPassword);
+            SecuritySignUpResponse response = client.securitySignUp(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("first_name");
+                attribute.setNullable(false);
+                attribute.setJavaType(String.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("join_date");
+                attribute.setNullable(true);
+                attribute.setJavaType(Date.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionPermissionUsernameRequest request = new CollectionPermissionUsernameRequest();
+            request.setCollectionName(collectionName);
+            request.setUsername(userALogin);
+            request.getActions().add(PermissionEnum.Create.getLiteral());
+            request.getActions().add(PermissionEnum.Delete.getLiteral());
+            CollectionPermissionUsernameResponse response = client.collectionPermissionGrantUsername(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(userALogin);
+            request.setPassword(userAPassword);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            DocumentCreateRequest request = new DocumentCreateRequest();
+            request.getDocument().put("first_name", "Socheat KHAUV");
+            request.getDocument().put("join_date", new Date());
+            DocumentCreateResponse response = client.documentCreate(collectionName, request);
+            System.out.println(gson.toJson(response));
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void documentCountTestA() {
+        String login = "admin";
+        String password = "admin";
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("first_name");
+                attribute.setNullable(false);
+                attribute.setJavaType(String.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("join_date");
+                attribute.setNullable(true);
+                attribute.setJavaType(Date.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            DocumentCreateRequest request = new DocumentCreateRequest();
+            request.getDocument().put("first_name", "Socheat KHAUV");
+            request.getDocument().put("join_date", new Date());
+            DocumentCreateResponse response = client.documentCreate(collectionName, request);
+            System.out.println(gson.toJson(response));
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            DocumentCountRequest request = new DocumentCountRequest();
+            DocumentCountResponse response = client.documentCount(collectionName, request);
+            System.out.println(gson.toJson(response));
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+    @Test
+    public void documentModifyTestA() {
+        String login = "admin";
+        String password = "admin";
+
+        {
+            SecurityLoginRequest request = new SecurityLoginRequest();
+            request.setUsername(login);
+            request.setPassword(password);
+            SecurityLoginResponse response = client.securityLogin(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String collectionName = "tmp_user" + RandomStringUtils.randomAlphabetic(5).toLowerCase();
+
+        {
+            CollectionCreateRequest request = new CollectionCreateRequest();
+            request.setCollectionName(collectionName);
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("first_name");
+                attribute.setNullable(false);
+                attribute.setJavaType(String.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            {
+                CollectionCreateRequest.Attribute attribute = new CollectionCreateRequest.Attribute();
+                attribute.setName("join_date");
+                attribute.setNullable(true);
+                attribute.setJavaType(Date.class.getName());
+                request.getAttributes().add(attribute);
+            }
+            CollectionCreateResponse response = client.collectionCreate(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        String documentId = null;
+
+        {
+            DocumentCreateRequest request = new DocumentCreateRequest();
+            request.getDocument().put("first_name", "Socheat KHAUV");
+            request.getDocument().put("join_date", new Date());
+            DocumentCreateResponse response = client.documentCreate(collectionName, request);
+            System.out.println(gson.toJson(response));
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+            documentId = response.getData().getDocumentId();
+        }
+
+        {
+            DocumentModifyRequest request = new DocumentModifyRequest();
+            request.getDocument().put("first_name", "PkayJava");
+            DocumentModifyResponse response = client.documentModify(collectionName, documentId, request);
+            System.out.println(gson.toJson(response));
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+
+        {
+            CollectionDeleteRequest request = new CollectionDeleteRequest();
+            request.setCollectionName(collectionName);
+            CollectionDeleteResponse response = client.collectionDelete(request);
+            Assert.assertEquals(response.getHttpCode().intValue(), 200);
+        }
+    }
+
+}

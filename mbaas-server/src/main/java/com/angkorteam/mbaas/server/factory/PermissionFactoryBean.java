@@ -140,7 +140,6 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             SessionTable sessionTable = Tables.SESSION.as("sessionTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");
-            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
             if (sessionRecord == null) {
                 return false;
@@ -153,6 +152,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             if (roleRecord == null) {
                 return false;
             }
+            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             if (roleRecord.getName().equals(configuration.getString(Constants.ROLE_ADMINISTRATOR))) {
                 return true;
             }
@@ -163,7 +163,6 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             SessionTable sessionTable = Tables.SESSION.as("sessionTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");
-            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
             if (sessionRecord == null) {
                 return false;
@@ -176,6 +175,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             if (roleRecord == null) {
                 return false;
             }
+            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             if (roleRecord.getName().equals(configuration.getString(Constants.ROLE_BACKOFFICE))) {
                 return true;
             }
@@ -186,7 +186,6 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             SessionTable sessionTable = Tables.SESSION.as("sessionTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");
-            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
             if (sessionRecord == null) {
                 return false;
@@ -199,7 +198,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             if (roleRecord == null) {
                 return false;
             }
-
+            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             if (roleRecord.getName().equals(configuration.getString(Constants.ROLE_REGISTERED))) {
                 return true;
             }
@@ -229,8 +228,6 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
         }
 
         public boolean hasDocumentPermission(String session, String collectionName, String documentId, int action) {
-            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-
             SessionTable sessionTable = Tables.SESSION.as("sessionTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");
@@ -253,7 +250,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
                 return false;
             }
 
-            Integer count = jdbcTemplate.queryForObject("select count(*) from `" + collectionRecord.getName() + "` where " + collectionRecord.getName() + "_id = ?", Integer.class, documentId);
+            Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collectionRecord.getName() + "` WHERE " + collectionRecord.getName() + "_id = ?", Integer.class, documentId);
             if (count <= 0) {
                 return false;
             }
