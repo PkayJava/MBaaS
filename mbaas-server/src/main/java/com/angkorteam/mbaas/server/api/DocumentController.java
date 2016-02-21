@@ -693,49 +693,82 @@ public class DocumentController {
 
     //endregion
 
-    //region /document/delete/{collection}/{id}
+    //region /document/delete/{collection}/{documentId}
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/delete/{collection}/{id}",
+            method = RequestMethod.POST, path = "/delete/{collection}/{documentId}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> delete(
+    public ResponseEntity<DocumentDeleteResponse> delete(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("collection") String collection,
-            @PathVariable("id") String id,
+            @PathVariable("documentId") String documentId,
             @RequestBody DocumentDeleteRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
+        UserTable userTable = Tables.USER.as("userTable");
+        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
-        if (collectionRecord == null) {
-            return ResponseEntity.ok(null);
+        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
+        if (sessionRecord == null) {
+            errorMessages.put("session", "session invalid");
         }
 
-//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Delete.getLiteral())) {
-//            return ResponseEntity.ok(null);
-//        }
-
-        AttributeRecord fieldRecord = context.select(attributeTable.fields())
-                .from(attributeTable)
-                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                .and(attributeTable.NAME.eq(collectionRecord.getName() + "_id"))
-                .and(attributeTable.AUTO_INCREMENT.eq(true))
-                .and(attributeTable.SYSTEM.eq(true))
-                .fetchOneInto(attributeTable);
-
-        if (fieldRecord == null) {
-            return ResponseEntity.ok(null);
+        UserRecord userRecord = null;
+        if (sessionRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                errorMessages.put("session", "session invalid");
+            }
         }
 
-        jdbcTemplate.update("DELETE FROM `" + collection + "` WHERE " + collection + "_id = ?", id);
+        CollectionRecord collectionRecord = null;
+        if (!PATTERN_NAMING.matcher(collection).matches()) {
+            errorMessages.put("collection", "collection is bad name");
+        } else {
+            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                errorMessages.put("collection", "collection is not found");
+            }
+        }
 
-        return ResponseEntity.ok(null);
+        if (collectionRecord != null) {
+            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collection + "` WHERE `" + collection + "_id` = ?", Integer.class, documentId);
+            if (count == 0) {
+                errorMessages.put("documentId", "is not found");
+            }
+        }
+
+        if (collectionRecord != null) {
+            if (permission.isAdministratorUser(session)
+                    || permission.isBackOfficeUser(session)
+                    || permission.isCollectionOwner(session, collection)
+                    || permission.isDocumentOwner(session, collection, documentId)
+                    || permission.hasDocumentPermission(session, collection, documentId, PermissionEnum.Delete.getLiteral())) {
+            } else {
+                errorMessages.put("permission", "don't have delete permission to this document");
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            DocumentDeleteResponse response = new DocumentDeleteResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        jdbcTemplate.update("DELETE FROM `" + collection + "` WHERE " + collection + "_id = ?", documentId);
+
+        DocumentDeleteResponse response = new DocumentDeleteResponse();
+        response.getData().setDocumentId(documentId);
+
+        return ResponseEntity.ok(response);
     }
 
     //endregion

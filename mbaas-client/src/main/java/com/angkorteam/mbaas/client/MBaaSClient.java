@@ -124,6 +124,10 @@ public class MBaaSClient {
         return client.documentModify(this.session, collectionName, documentId, request);
     }
 
+    public DocumentDeleteResponse documentDelete(String collectionName, String documentId, DocumentDeleteRequest request) {
+        return client.documentDelete(this.session, collectionName, documentId, request);
+    }
+
     public DocumentPermissionUsernameResponse documentPermissionGrantUsername(DocumentPermissionUsernameRequest request) {
         return client.documentPermissionGrantUsername(this.session, request);
     }
@@ -212,6 +216,9 @@ public class MBaaSClient {
 
         @POST("/document/modify/{collection}/{documentId}")
         public DocumentModifyResponse documentModify(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Path("documentId") String documentId, @Body DocumentModifyRequest request);
+
+        @POST("/document/delete/{collection}/{documentId}")
+        public DocumentDeleteResponse documentDelete(@Header("X-MBAAS-SESSION") String session, @Path("collection") String collection, @Path("documentId") String documentId, @Body DocumentDeleteRequest request);
 
         @POST("/document/permission/grant/username")
         public DocumentPermissionUsernameResponse documentPermissionGrantUsername(@Header("X-MBAAS-SESSION") String session, @Body DocumentPermissionUsernameRequest request);
