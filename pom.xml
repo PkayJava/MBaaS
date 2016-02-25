@@ -67,6 +67,14 @@
         <commons-io.version>2.4</commons-io.version>
         <commons-compress.version>1.10</commons-compress.version>
 
+        <!-- Magento 2-->
+        <magento.version>1.0</magento.version>
+
+        <!-- SOAP -->
+        <axis2.version>1.7.0</axis2.version>
+        <xmlbeans.version>2.6.0</xmlbeans.version>
+        <axiom.version>1.2.17</axiom.version>
+
         <!-- Hardware -->
         <sigar.version>1.7.0.1</sigar.version>
 
@@ -85,6 +93,7 @@
         <module>mbaas-jooq</module>
         <module>mbaas-configuration</module>
         <module>mbaas-server</module>
+        <module>mbaas-magento2</module>
     </modules>
 
     <dependencyManagement>
@@ -106,6 +115,110 @@
                 <groupId>sigar</groupId>
                 <artifactId>sigar</artifactId>
                 <version>${sigar.version}</version>
+            </dependency>
+
+            <!-- Magento 2 -->
+            <dependency>
+                <groupId>com.angkorteam.magento2.backend</groupId>
+                <artifactId>magento2-backend</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.bundle</groupId>
+                <artifactId>magento2-bundle</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.catalog</groupId>
+                <artifactId>magento2-catalog</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.checkout</groupId>
+                <artifactId>magento2-checkout</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.configurable</groupId>
+                <artifactId>magento2-configurable</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.customer</groupId>
+                <artifactId>magento2-customer</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.downloadable</groupId>
+                <artifactId>magento2-downloadable</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.eav</groupId>
+                <artifactId>magento2-eav</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.gift</groupId>
+                <artifactId>magento2-gift</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.integration</groupId>
+                <artifactId>magento2-integration</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.quote</groupId>
+                <artifactId>magento2-quote</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.sales</groupId>
+                <artifactId>magento2-sales</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.angkorteam.magento2.tax</groupId>
+                <artifactId>magento2-tax</artifactId>
+                <version>${magento.version}</version>
+            </dependency>
+
+            <!-- SOAP -->
+            <dependency>
+                <groupId>org.apache.xmlbeans</groupId>
+                <artifactId>xmlbeans</artifactId>
+                <version>${xmlbeans.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-xmlbeans</artifactId>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-kernel</artifactId>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2</artifactId>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-java2wsdl</artifactId>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-api</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-impl</artifactId>
+                <version>${axiom.version}</version>
             </dependency>
 
             <!--  WICKET DEPENDENCIES -->

@@ -1300,7 +1300,7 @@ public class DocumentController {
             method = RequestMethod.POST, path = "/query/{collection}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> query(
+    public ResponseEntity<DocumentQueryResponse> query(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
