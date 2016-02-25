@@ -1,11 +1,9 @@
 package com.angkorteam.mbaas.server.api;
 
-import com.angkorteam.mbaas.plain.request.MonitorCpuRequest;
-import com.angkorteam.mbaas.plain.request.MonitorMemRequest;
-import com.angkorteam.mbaas.plain.request.UpdateUserProfileRequest;
-import com.angkorteam.mbaas.plain.response.MonitorCpuResponse;
-import com.angkorteam.mbaas.plain.response.MonitorMemResponse;
-import com.angkorteam.mbaas.plain.response.Response;
+import com.angkorteam.mbaas.plain.request.monitor.MonitorCpuRequest;
+import com.angkorteam.mbaas.plain.request.monitor.MonitorMemRequest;
+import com.angkorteam.mbaas.plain.response.monitor.MonitorCpuResponse;
+import com.angkorteam.mbaas.plain.response.monitor.MonitorMemResponse;
 import com.google.gson.Gson;
 import org.apache.wicket.util.lang.Bytes;
 import org.hyperic.sigar.CpuInfo;

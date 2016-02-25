@@ -1,15 +1,23 @@
 package com.angkorteam.mbaas.client;
 
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
-import com.angkorteam.mbaas.plain.request.*;
-import com.angkorteam.mbaas.plain.response.*;
+import com.angkorteam.mbaas.plain.request.collection.CollectionCreateRequest;
+import com.angkorteam.mbaas.plain.request.collection.CollectionDeleteRequest;
+import com.angkorteam.mbaas.plain.request.collection.CollectionPermissionUsernameRequest;
+import com.angkorteam.mbaas.plain.request.document.*;
+import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
+import com.angkorteam.mbaas.plain.request.security.SecuritySignUpRequest;
+import com.angkorteam.mbaas.plain.response.collection.CollectionCreateResponse;
+import com.angkorteam.mbaas.plain.response.collection.CollectionDeleteResponse;
+import com.angkorteam.mbaas.plain.response.collection.CollectionPermissionUsernameResponse;
+import com.angkorteam.mbaas.plain.response.document.*;
+import com.angkorteam.mbaas.plain.response.security.SecurityLoginResponse;
+import com.angkorteam.mbaas.plain.response.security.SecuritySignUpResponse;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by Khauv Socheat on 2/4/2016.

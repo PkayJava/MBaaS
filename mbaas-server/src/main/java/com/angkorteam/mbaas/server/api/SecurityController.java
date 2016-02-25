@@ -7,13 +7,13 @@ import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
 import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.Request;
-import com.angkorteam.mbaas.plain.request.SecurityLoginRequest;
-import com.angkorteam.mbaas.plain.request.SecurityLogoutRequest;
-import com.angkorteam.mbaas.plain.request.SecuritySignUpRequest;
-import com.angkorteam.mbaas.plain.response.SecurityLoginResponse;
-import com.angkorteam.mbaas.plain.response.SecurityLogoutResponse;
-import com.angkorteam.mbaas.plain.response.SecurityLogoutSessionResponse;
-import com.angkorteam.mbaas.plain.response.SecuritySignUpResponse;
+import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
+import com.angkorteam.mbaas.plain.request.security.SecurityLogoutRequest;
+import com.angkorteam.mbaas.plain.request.security.SecuritySignUpRequest;
+import com.angkorteam.mbaas.plain.response.security.SecurityLoginResponse;
+import com.angkorteam.mbaas.plain.response.security.SecurityLogoutResponse;
+import com.angkorteam.mbaas.plain.response.security.SecurityLogoutSessionResponse;
+import com.angkorteam.mbaas.plain.response.security.SecuritySignUpResponse;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -31,9 +31,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Created by Khauv Socheat on 2/14/2016.

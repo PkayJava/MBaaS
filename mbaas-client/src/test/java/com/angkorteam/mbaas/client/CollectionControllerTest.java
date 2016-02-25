@@ -1,8 +1,12 @@
 package com.angkorteam.mbaas.client;
 
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
-import com.angkorteam.mbaas.plain.request.*;
-import com.angkorteam.mbaas.plain.response.*;
+import com.angkorteam.mbaas.plain.request.collection.*;
+import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
+import com.angkorteam.mbaas.plain.request.security.SecuritySignUpRequest;
+import com.angkorteam.mbaas.plain.response.collection.*;
+import com.angkorteam.mbaas.plain.response.security.SecurityLoginResponse;
+import com.angkorteam.mbaas.plain.response.security.SecuritySignUpResponse;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
