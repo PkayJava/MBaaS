@@ -16,6 +16,6 @@ public class BaseTest {
 
     public Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ").create();
 
-    public MBaaSClient client = new MBaaSClient("1234567890", HOST_C);
+    public MBaaSClient client = new MBaaSClient("1234567890", HOST_B);
 
 }

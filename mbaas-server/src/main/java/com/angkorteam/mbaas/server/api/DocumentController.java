@@ -1308,40 +1308,102 @@ public class DocumentController {
             @RequestBody DocumentQueryRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
         CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
         if (collectionRecord == null) {
-            return ResponseEntity.ok(null);
+            errorMessages.put(collection, "is not found");
         }
 
-//        if (!permission.hasCollectionAccess(session, collection, PermissionEnum.Read.getLiteral())) {
-//            return ResponseEntity.ok(null);
-//        }
+        DocumentQueryRequest.Query query = requestBody.getQuery();
 
-        Map<String, AttributeRecord> fieldRecords = new LinkedHashMap<>();
-        for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
-            fieldRecords.put(fieldRecord.getAttributeId(), fieldRecord);
-        }
-
-        List<String> fields = new LinkedList<>();
-        for (Map.Entry<String, AttributeRecord> entry : fieldRecords.entrySet()) {
-            AttributeRecord fieldRecord = entry.getValue();
-            if (fieldRecord.getExposed()) {
-                if (fieldRecord.getVirtual()) {
-                    AttributeRecord virtualRecord = fieldRecords.get(fieldRecord.getVirtualAttributeId());
-                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
-                } else {
-                    fields.add("`" + entry.getKey() + "`");
+        Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
+        if (query.getFields() == null || query.getFields().isEmpty()) {
+            errorMessages.put("fields", "there is no field to select");
+        } else {
+            if (collectionRecord != null) {
+                for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
+                    attributeRecords.put(fieldRecord.getName(), fieldRecord);
+                }
+                for (String field : query.getFields()) {
+                    if (!attributeRecords.containsKey(field)) {
+                        errorMessages.put(field, "is not found");
+                    }
                 }
             }
         }
 
-        Map<String, Object> result = jdbcTemplate.queryForMap("SELECT " + StringUtils.join(fields, ", ") + " from " + collection + " limit 0,10");
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        return ResponseEntity.ok(null);
+        String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
+
+        Map<String, Object> params = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : query.getParams().entrySet()) {
+            AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
+            if (attributeRecord.getJavaType().equals(Date.class.getName())
+                    || attributeRecord.getJavaType().equals(Time.class.getName())
+                    || attributeRecord.getJavaType().equals(Timestamp.class.getName())) {
+                try {
+                    Date date = FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
+                    params.put(entry.getKey(), date);
+                } catch (ParseException e) {
+                    errorMessages.put(entry.getKey(), "bad value");
+                }
+            } else {
+                params.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (query.getLimit() != null && query.getLimit() <= 0) {
+            errorMessages.put("limit", "limit must be grater then 0");
+        }
+        if (query.getOffset() != null && query.getOffset() < 0) {
+            errorMessages.put("limit", "limit must be grater or equal 0");
+        }
+
+        if (!errorMessages.isEmpty()) {
+            DocumentQueryResponse response = new DocumentQueryResponse();
+            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
+            response.getErrorMessages().putAll(errorMessages);
+            return ResponseEntity.ok(response);
+        }
+
+        List<String> fields = new LinkedList<>();
+        for (String attribute : query.getFields()) {
+            AttributeRecord attributeRecord = attributeRecords.get(attribute);
+            if (attributeRecord.getExposed()) {
+                if (attributeRecord.getVirtual()) {
+                    AttributeRecord virtualRecord = attributeRecords.get(attributeRecord.getVirtualAttributeId());
+                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()));
+                } else {
+                    fields.add("`" + attribute + "`");
+                }
+            }
+        }
+
+        String where = "";
+        if (query.getWhere() != null && !query.getWhere().isEmpty()) {
+            where = " WHERE " + StringUtils.join(query.getWhere(), " ") + " ";
+        }
+
+        String limit = "";
+        if (query.getLimit() != null && query.getLimit() > 0 && query.getOffset() != null && query.getOffset() >= 0) {
+            limit = " LIMIT " + query.getOffset() + "," + query.getLimit();
+        }
+
+        String field = StringUtils.join(fields, ", ");
+
+        NamedParameterJdbcTemplate parameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        List<Map<String, Object>> doucments = parameterJdbcTemplate.queryForList("SELECT " + field + " FROM `" + collection + "` " + where + limit, params);
+
+        DocumentQueryResponse response = new DocumentQueryResponse();
+        response.getData().setCollectionName(collection);
+        response.getData().setTotal(doucments.size());
+        response.getData().setDocuments(doucments);
+        return ResponseEntity.ok(response);
     }
 
     //endregion
