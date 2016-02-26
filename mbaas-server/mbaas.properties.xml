@@ -38,6 +38,13 @@
     <entry key="user.internal_admin.role">role.administrator</entry>
     <entry key="user.internal_admin.password">internal_admin</entry>
 
+    <entry key="mail.server">mail.home.com.kh</entry>
+    <entry key="mail.port">25</entry>
+    <entry key="mail.protocol">smtp</entry>
+    <entry key="mail.login">m1@home.com.kh</entry>
+    <entry key="mail.password">123123a</entry>
+    <entry key="mail.from">m1@home.com.kh</entry>
+
     <entry key="pattern.datetime">yyyy-MM-dd'T'HH:mm:ssZZ</entry>
     <entry key="pattern.naming"><![CDATA[^[a-z]{1}[a-z0-9\\_]*$]]></entry>
 

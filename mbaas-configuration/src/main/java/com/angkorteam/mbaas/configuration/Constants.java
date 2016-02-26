@@ -54,6 +54,13 @@ public class Constants {
     public static final String ENCRYPTION_PASSWORD = "encryption.password";
     public static final String ENCRYPTION_OUTPUT = "encryption.output";
 
+    public static final String MAIL_SERVER = "mail.server";
+    public static final String MAIL_PORT = "mail.port";
+    public static final String MAIL_LOGIN = "mail.login";
+    public static final String MAIL_PASSWORD = "mail.password";
+    public static final String MAIL_PROTOCOL = "mail.protocol";
+    public static final String MAIL_FROM = "mail.from";
+
     public static final String APP_VERSION = "app.version";
 
     private static XMLPropertiesConfiguration configuration;

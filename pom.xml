@@ -29,8 +29,9 @@
         <log4j.version>2.5</log4j.version>
 
         <!-- Framework -->
-        <spring.version>4.2.4.RELEASE</spring.version>
+        <spring.version>4.2.5.RELEASE</spring.version>
         <spring-security.version>4.0.3.RELEASE</spring-security.version>
+        <spring-integration.version>4.2.5.RELEASE</spring-integration.version>
         <servlet.version>3.1.0</servlet.version>
         <wicket.version>7.2.0</wicket.version>
         <framework-extension.version>1.0</framework-extension.version>
@@ -278,6 +279,18 @@
                 <scope>provided</scope>
             </dependency>
 
+            <!-- Spring Framework Integration-->
+            <dependency>
+                <groupId>org.springframework.integration</groupId>
+                <artifactId>spring-integration-core</artifactId>
+                <version>${spring-integration.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.integration</groupId>
+                <artifactId>spring-integration-mail</artifactId>
+                <version>${spring-integration.version}</version>
+            </dependency>
+
             <!-- Spring Framework-->
             <dependency>
                 <groupId>org.springframework.security</groupId>
@@ -312,6 +325,11 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-beans</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-aop</artifactId>
                 <version>${spring.version}</version>
             </dependency>
             <dependency>

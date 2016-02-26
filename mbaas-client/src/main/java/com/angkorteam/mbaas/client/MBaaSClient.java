@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.security.SecurityLogoutRequest;
 import com.angkorteam.mbaas.plain.request.security.SecurityLogoutSessionRequest;
 import com.angkorteam.mbaas.plain.request.security.SecuritySignUpRequest;
+import com.angkorteam.mbaas.plain.request.user.UserPasswordResetRequest;
 import com.angkorteam.mbaas.plain.response.collection.*;
 import com.angkorteam.mbaas.plain.response.document.*;
 import com.angkorteam.mbaas.plain.response.monitor.MonitorCpuResponse;
@@ -16,6 +17,7 @@ import com.angkorteam.mbaas.plain.response.security.SecurityLoginResponse;
 import com.angkorteam.mbaas.plain.response.security.SecurityLogoutResponse;
 import com.angkorteam.mbaas.plain.response.security.SecurityLogoutSessionResponse;
 import com.angkorteam.mbaas.plain.response.security.SecuritySignUpResponse;
+import com.angkorteam.mbaas.plain.response.user.UserPasswordResetResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -180,9 +182,24 @@ public class MBaaSClient {
 
     //endregion
 
+    //region User Controller
+
+    public UserPasswordResetResponse userPasswordReset(String username, UserPasswordResetRequest request) {
+        return this.client.userPasswordReset(this.session, username, request);
+    }
+
+    //endregion
+
     //region Client Interface
 
     private interface Client {
+
+        //region Me Controller Interface
+
+        @POST("/user/password/reset/{username}")
+        public UserPasswordResetResponse userPasswordReset(@Header("X-MBAAS-SESSION") String session, @Path("username") String username, @Body UserPasswordResetRequest request);
+
+        //endregion
 
         //region Security Controller Interface
 

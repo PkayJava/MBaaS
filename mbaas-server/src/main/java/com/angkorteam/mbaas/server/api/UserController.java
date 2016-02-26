@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.api;
 
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
@@ -10,6 +11,7 @@ import com.angkorteam.mbaas.plain.response.Response;
 import com.angkorteam.mbaas.plain.response.UnknownResponse;
 import com.angkorteam.mbaas.plain.response.user.*;
 import com.google.gson.Gson;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.jasypt.encryption.StringEncryptor;
 import org.joda.time.DateTime;
@@ -17,11 +19,15 @@ import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,7 +57,16 @@ public class UserController {
     private DataSource dataSource;
 
     @Autowired
+    private MailSender mailSender;
+
+    @Autowired
     private Gson gson;
+
+    @Autowired
+    private TaskExecutor executor;
+
+    @Autowired
+    private TaskScheduler scheduler;
 
     @RequestMapping(
             method = RequestMethod.POST, path = "/admin/suspend/{username}",
@@ -186,13 +201,17 @@ public class UserController {
             method = RequestMethod.POST, path = "/password/reset/{username}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Response> passwordReset(
+    public ResponseEntity<UserPasswordResetResponse> passwordReset(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
-            @RequestBody Request requestBody
+            @RequestBody UserPasswordResetRequest requestBody
     ) {
+//        request.getRequestURL();
+//        request.getRequestURI();
+//        request.getServletPath();
+//        request.getContextPath()
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
         UserTable userTable = Tables.USER.as("userTable");
         SessionTable sessionTable = Tables.SESSION.as("sessionTable");
@@ -204,9 +223,17 @@ public class UserController {
         DateTime now = new DateTime();
         userRecord.setPasswordResetToken(UUID.randomUUID().toString());
         userRecord.setPasswordResetTokenExpiredDate(now.plusMinutes(10).toDate());
-        // TODO : send mail link
         userRecord.update();
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(configuration.getString(Constants.MAIL_FROM));
+        message.setSubject("Reset Password");
+        message.setText("Dear Sir/Madam");
+        message.setTo(userRecord.getLogin());
+        executor.execute(() -> mailSender.send(message));
 
-        return ResponseEntity.ok(null);
+        UserPasswordResetResponse response = new UserPasswordResetResponse();
+
+        return ResponseEntity.ok(response);
     }
 }

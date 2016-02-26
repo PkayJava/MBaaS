@@ -330,7 +330,7 @@ public class MeController {
     }
 
     @RequestMapping(
-            method = RequestMethod.POST, path = "/me/password",
+            method = RequestMethod.POST, path = "/password",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<MePasswordResponse> changePassword(
