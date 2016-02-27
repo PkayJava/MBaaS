@@ -49,6 +49,7 @@
         <security:intercept-url pattern="/api/security/signup" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/security/login" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/resource/**" access="permitAll"/>
+        <security:intercept-url pattern="/api/script/**" access="permitAll"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
     </security:http>
 
@@ -65,13 +66,13 @@
             channel="channel"
             auto-startup="true"
             store-uri="imap://m1%40home.com.kh:123123a@mail.home.com.kh:143/Inbox"/>
-    <integration:service-activator input-channel="channel" auto-startup="true" ref="hello" method="say"/>
+    <integration:service-activator input-channel="channel" auto-startup="true" ref="serviceActivator" method="activation"/>
 
     <bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
         <property name="caseSensitive" value="false"/>
     </bean>
 
-    <bean id="hello" class="com.angkorteam.mbaas.server.Hello"/>
+    <bean id="serviceActivator" class="com.angkorteam.mbaas.server.service.IMAPServiceActivator"/>
 
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
         <property name="host" value="${mail.server}"/>

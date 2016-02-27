@@ -208,27 +208,20 @@ public class UserController {
             @PathVariable("username") String username,
             @RequestBody UserPasswordResetRequest requestBody
     ) {
-//        request.getRequestURL();
-//        request.getRequestURI();
-//        request.getServletPath();
-//        request.getContextPath()
-        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
+
+        String uuid = UUID.randomUUID().toString();
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).fetchOneInto(userTable);
         DateTime now = new DateTime();
-        userRecord.setPasswordResetToken(UUID.randomUUID().toString());
+        userRecord.setPasswordResetToken(uuid);
         userRecord.setPasswordResetTokenExpiredDate(now.plusMinutes(10).toDate());
         userRecord.update();
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(configuration.getString(Constants.MAIL_FROM));
-        message.setSubject("Reset Password");
-        message.setText("Dear Sir/Madam");
+        message.setSubject("Transaction ID => " + uuid);
+        message.setText("Dear Sir/Madam just reply to this email, password will be reset to first line of the email");
         message.setTo(userRecord.getLogin());
         executor.execute(() -> mailSender.send(message));
 
