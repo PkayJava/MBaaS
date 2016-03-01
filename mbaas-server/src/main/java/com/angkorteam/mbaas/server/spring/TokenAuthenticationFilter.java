@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server;
+package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.SessionTable;

@@ -117,7 +117,7 @@
         <property name="context" ref="context"/>
     </bean>
 
-    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.TokenAuthenticationEntryPoint">
+    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.TokenAuthenticationEntryPoint">
         <property name="realmName" value="MBaas API"/>
     </bean>
 
@@ -125,7 +125,7 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <bean id="authenticationFilter" class="com.angkorteam.mbaas.server.TokenAuthenticationFilter">
+    <bean id="authenticationFilter" class="com.angkorteam.mbaas.server.spring.TokenAuthenticationFilter">
         <constructor-arg ref="authenticationManager"/>
         <property name="context" ref="context"/>
     </bean>

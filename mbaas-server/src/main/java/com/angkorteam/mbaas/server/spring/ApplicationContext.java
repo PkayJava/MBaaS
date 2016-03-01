@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server;
+package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
@@ -88,6 +88,7 @@ public class ApplicationContext implements ServletContextListener {
             adminRecord.setUserId(UUID.randomUUID().toString());
             adminRecord.setDeleted(false);
             adminRecord.setAccountNonExpired(true);
+            adminRecord.setSystem(true);
             adminRecord.setAccountNonLocked(true);
             adminRecord.setCredentialsNonExpired(true);
             adminRecord.setDisabled(false);
@@ -103,6 +104,7 @@ public class ApplicationContext implements ServletContextListener {
             mbaasRecord = context.newRecord(userTable);
             mbaasRecord.setUserId(UUID.randomUUID().toString());
             mbaasRecord.setDeleted(false);
+            mbaasRecord.setSystem(true);
             mbaasRecord.setAccountNonExpired(true);
             mbaasRecord.setAccountNonLocked(true);
             mbaasRecord.setCredentialsNonExpired(true);
@@ -119,6 +121,7 @@ public class ApplicationContext implements ServletContextListener {
             internalAdminRecord = context.newRecord(userTable);
             internalAdminRecord.setUserId(UUID.randomUUID().toString());
             internalAdminRecord.setDeleted(false);
+            internalAdminRecord.setSystem(true);
             internalAdminRecord.setAccountNonExpired(true);
             internalAdminRecord.setAccountNonLocked(true);
             internalAdminRecord.setCredentialsNonExpired(true);
@@ -138,6 +141,7 @@ public class ApplicationContext implements ServletContextListener {
         if (administratorRecord == null) {
             administratorRecord = context.newRecord(roleTable);
             administratorRecord.setRoleId(UUID.randomUUID().toString());
+            administratorRecord.setSystem(true);
             administratorRecord.setName(configuration.getString(Constants.ROLE_ADMINISTRATOR));
             administratorRecord.setDescription(configuration.getString(Constants.ROLE_ADMINISTRATOR_DESCRIPTION));
             administratorRecord.setDeleted(false);
@@ -148,6 +152,7 @@ public class ApplicationContext implements ServletContextListener {
         if (backofficeRecord == null) {
             backofficeRecord = context.newRecord(roleTable);
             backofficeRecord.setRoleId(UUID.randomUUID().toString());
+            backofficeRecord.setSystem(true);
             backofficeRecord.setName(configuration.getString(Constants.ROLE_BACKOFFICE));
             backofficeRecord.setDescription(configuration.getString(Constants.ROLE_BACKOFFICE_DESCRIPTION));
             backofficeRecord.setDeleted(false);
@@ -158,6 +163,7 @@ public class ApplicationContext implements ServletContextListener {
         if (registeredRecord == null) {
             registeredRecord = context.newRecord(roleTable);
             registeredRecord.setRoleId(UUID.randomUUID().toString());
+            registeredRecord.setSystem(true);
             registeredRecord.setName(configuration.getString(Constants.ROLE_REGISTERED));
             registeredRecord.setDescription(configuration.getString(Constants.ROLE_REGISTERED_DESCRIPTION));
             registeredRecord.setDeleted(false);
@@ -168,6 +174,7 @@ public class ApplicationContext implements ServletContextListener {
         if (anonymousRecord == null) {
             anonymousRecord = context.newRecord(roleTable);
             anonymousRecord.setRoleId(UUID.randomUUID().toString());
+            anonymousRecord.setSystem(true);
             anonymousRecord.setName(configuration.getString(Constants.ROLE_ANONYMOUS));
             anonymousRecord.setDescription(configuration.getString(Constants.ROLE_ANONYMOUS_DESCRIPTION));
             anonymousRecord.setDeleted(false);

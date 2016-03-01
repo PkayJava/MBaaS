@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.web;
+package com.angkorteam.mbaas.server.wicket;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;

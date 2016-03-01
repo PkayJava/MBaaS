@@ -6,6 +6,8 @@ CREATE TABLE user (
 
   role_id                           VARCHAR(255) NOT NULL,
 
+  system                            BIT(1)       NOT NULL DEFAULT 0,
+
   account_non_expired               BIT(1)       NOT NULL DEFAULT 1,
   account_non_locked                BIT(1)       NOT NULL DEFAULT 1,
   credentials_non_expired           BIT(1)       NOT NULL DEFAULT 1,

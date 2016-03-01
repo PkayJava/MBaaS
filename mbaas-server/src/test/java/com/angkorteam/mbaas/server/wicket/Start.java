@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.web;
+package com.angkorteam.mbaas.server.wicket;
 
 import java.lang.management.ManagementFactory;
 
@@ -65,8 +65,7 @@ public class Start {
 
             server.addConnector(https);
             System.out.println("SSL access to the examples has been enabled on port 7443");
-            System.out
-                    .println("You can access the application using SSL on http://localhost:7080");
+            System.out.println("You can access the application using on http://localhost:7080");
             System.out.println();
         }
 

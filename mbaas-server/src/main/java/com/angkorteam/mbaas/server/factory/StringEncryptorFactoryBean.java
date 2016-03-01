@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.factory;
 
-import com.angkorteam.mbaas.server.ApplicationContext;
+import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;

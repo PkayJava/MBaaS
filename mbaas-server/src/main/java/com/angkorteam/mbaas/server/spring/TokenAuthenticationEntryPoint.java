@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server;
+package com.angkorteam.mbaas.server.spring;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.AuthenticationException;

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<form wicket:id="form">
+    <table border="0">
+        <tr>
+            <td>Name</td>
+            <td><input wicket:id="nameField" type="text"/></td>
+            <td wicket:id="nameFeedback"/>
+        </tr>
+        <tr>
+            <td>Description</td>
+            <td><input wicket:id="descriptionField" type="text"/></td>
+            <td wicket:id="descriptionFeedback"/>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <wicket:link>
+                    <a href="RoleManagementPage.html">Close</a>
+                </wicket:link>
+                <input wicket:id="saveButton" type="submit" value="Save"/>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

@@ -31,9 +31,11 @@
     <entry key="user.admin">admin</entry>
     <entry key="user.admin.role">role.administrator</entry>
     <entry key="user.admin.password">admin</entry>
+
     <entry key="user.mbaas">mbaas</entry>
     <entry key="user.mbaas.role">role.anonymous</entry>
     <entry key="user.mbaas.password">mbaas</entry>
+
     <entry key="user.internal_admin">internal_admin</entry>
     <entry key="user.internal_admin.role">role.administrator</entry>
     <entry key="user.internal_admin.password">internal_admin</entry>
