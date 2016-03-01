@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.api;
+package com.angkorteam.mbaas.server.controller;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;

@@ -59,6 +59,7 @@
         </security:authentication-provider>
     </security:authentication-manager>
 
+    <!--
     <integration:poller id="poller" default="true" fixed-delay="1000"/>
     <integration:channel id="channel"/>
     <integration-mail:imap-idle-channel-adapter
@@ -67,6 +68,7 @@
             auto-startup="true"
             store-uri="imap://m1%40home.com.kh:123123a@mail.home.com.kh:143/Inbox"/>
     <integration:service-activator input-channel="channel" auto-startup="true" ref="serviceActivator" method="activation"/>
+    -->
 
     <bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
         <property name="caseSensitive" value="false"/>

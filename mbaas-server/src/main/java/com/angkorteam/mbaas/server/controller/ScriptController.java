@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.api;
+package com.angkorteam.mbaas.server.controller;
 
 import com.angkorteam.mbaas.plain.request.script.ScriptExecuteRequest;
 import com.angkorteam.mbaas.plain.response.script.ScriptExecuteResponse;
