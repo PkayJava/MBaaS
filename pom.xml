@@ -50,6 +50,7 @@
         <okhttp.version>2.7.4</okhttp.version>
         <retrofit.version>1.9.0</retrofit.version>
         <activemq.version>5.13.0</activemq.version>
+        <netty.version>4.0.34.Final</netty.version>
 
         <!-- Apache Commons -->
         <ddlutils.version>1.0</ddlutils.version>
@@ -475,6 +476,11 @@
             </dependency>
 
             <!-- Network -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
