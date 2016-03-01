@@ -209,6 +209,11 @@ public class ApplicationContext implements ServletContextListener {
                     collectionRecord.setCollectionId(UUID.randomUUID().toString());
                     collectionRecord.setName(table.getName());
                     collectionRecord.setSystem(true);
+                    if (table.getName().equals("user")) {
+                        collectionRecord.setReference(false);
+                    } else {
+                        collectionRecord.setReference(true);
+                    }
                     collectionRecord.setOwnerUserId(userRecord.getUserId());
                     collectionRecord.store();
                 }

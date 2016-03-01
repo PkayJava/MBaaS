@@ -26,17 +26,6 @@ import java.util.List;
 @Mount("/role/management")
 public class RoleManagementPage extends Page implements ActionFilteredJooqColumn.Event<RoleItemModel> {
 
-    public RoleManagementPage() {
-    }
-
-    public RoleManagementPage(IModel<?> model) {
-        super(model);
-    }
-
-    public RoleManagementPage(PageParameters parameters) {
-        super(parameters);
-    }
-
     @Override
     protected void onInitialize() {
         super.onInitialize();

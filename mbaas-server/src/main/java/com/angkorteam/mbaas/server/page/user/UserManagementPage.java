@@ -27,17 +27,6 @@ import java.util.List;
 @Mount("/user/management")
 public class UserManagementPage extends Page {
 
-    public UserManagementPage() {
-    }
-
-    public UserManagementPage(IModel<?> model) {
-        super(model);
-    }
-
-    public UserManagementPage(PageParameters parameters) {
-        super(parameters);
-    }
-
     @Override
     protected void onInitialize() {
         super.onInitialize();

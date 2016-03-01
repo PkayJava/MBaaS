@@ -5,7 +5,9 @@ CREATE TABLE `collection` (
   name          VARCHAR(255) NOT NULL,
 
   locked        BIT(1)       NOT NULL DEFAULT 0,
-  system        BIT(1)       NOT NULL,
+  system        BIT(1)       NOT NULL DEFAULT 0,
+  reference     BIT(1)       NOT NULL DEFAULT 0,
+
   owner_user_id VARCHAR(100) NOT NULL,
 
   UNIQUE KEY (name),
