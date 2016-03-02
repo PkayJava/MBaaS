@@ -12,14 +12,13 @@ import java.util.List;
 /**
  * Created by socheat on 3/1/16.
  */
-public class RoleProvider extends JooqProvider<RoleItemModel, RoleFilterModel> {
+public class RoleProvider extends JooqProvider {
 
     private RoleTable roleTable;
 
     private TableLike<?> from;
 
     public RoleProvider() {
-        super(RoleItemModel.class, RoleFilterModel.class);
         this.roleTable = Tables.ROLE.as("roleTable");
         this.from = this.roleTable;
     }

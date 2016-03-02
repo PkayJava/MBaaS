@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.controller;
 
 import com.angkorteam.mbaas.configuration.Constants;
+import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
@@ -157,7 +158,7 @@ public class SecurityController {
         userRecord.setAccountNonExpired(true);
         userRecord.setCredentialsNonExpired(true);
         userRecord.setAccountNonLocked(true);
-        userRecord.setDisabled(false);
+        userRecord.setStatus(UserStatusEnum.Active.getLiteral());
         userRecord.setLogin(login);
         userRecord.setPassword(password);
         userRecord.store();

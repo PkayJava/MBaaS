@@ -4,18 +4,19 @@ import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.server.provider.*;
+import com.angkorteam.mbaas.server.provider.CollectionProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
-import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
+import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.model.util.MapModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 3/1/16.
@@ -28,18 +29,27 @@ public class CollectionManagementPage extends Page {
         super.onInitialize();
 
         CollectionProvider provider = new CollectionProvider();
-        provider.selectField("collectionId", provider.getCollectionId());
+        provider.selectField(String.class, "collectionId");
 
-        FilterForm<CollectionFilterModel> filterForm = new FilterForm<>("filter-form", provider);
+        FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
 
-        List<IColumn<CollectionItemModel, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredJooqColumn<>(String.class, JooqUtils.lookup("name", this), CollectionFilterModel.class, "name", provider, provider.getName()));
-        columns.add(new TextFilteredJooqColumn<>(Integer.class, JooqUtils.lookup("count", this), CollectionFilterModel.class, "count", provider, provider.getCount()));
+        List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", provider));
+        columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("count", this), "count", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("owner", this), "login", provider));
 
-        DataTable<CollectionItemModel, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
+        DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
+    }
+
+    public static void main(String[] arga) {
+        Map<String, String> pp = new HashMap<>();
+        pp.put("test", "111");
+        MapModel<String, String> pps = new MapModel<>(pp);
+        PropertyModel<String> stringPropertyModel = new PropertyModel<>(pps, "test");
+        System.out.println(stringPropertyModel.getObject());
     }
 }

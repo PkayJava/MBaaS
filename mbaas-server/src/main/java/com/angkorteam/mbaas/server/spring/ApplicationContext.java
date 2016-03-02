@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.configuration.Constants;
+import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
@@ -91,7 +92,7 @@ public class ApplicationContext implements ServletContextListener {
             adminRecord.setSystem(true);
             adminRecord.setAccountNonLocked(true);
             adminRecord.setCredentialsNonExpired(true);
-            adminRecord.setDisabled(false);
+            adminRecord.setStatus(UserStatusEnum.Active.getLiteral());
             adminRecord.setLogin(configuration.getString(Constants.USER_ADMIN));
             adminRecord.setPassword(configuration.getString(Constants.USER_ADMIN_PASSWORD));
             adminRecord.setRoleId(roleRecord.getRoleId());
@@ -108,7 +109,7 @@ public class ApplicationContext implements ServletContextListener {
             mbaasRecord.setAccountNonExpired(true);
             mbaasRecord.setAccountNonLocked(true);
             mbaasRecord.setCredentialsNonExpired(true);
-            mbaasRecord.setDisabled(false);
+            mbaasRecord.setStatus(UserStatusEnum.Active.getLiteral());
             mbaasRecord.setLogin(configuration.getString(Constants.USER_MBAAS));
             mbaasRecord.setPassword(configuration.getString(Constants.USER_MBAAS_PASSWORD));
             mbaasRecord.setRoleId(roleRecord.getRoleId());
@@ -125,7 +126,7 @@ public class ApplicationContext implements ServletContextListener {
             internalAdminRecord.setAccountNonExpired(true);
             internalAdminRecord.setAccountNonLocked(true);
             internalAdminRecord.setCredentialsNonExpired(true);
-            internalAdminRecord.setDisabled(false);
+            internalAdminRecord.setStatus(UserStatusEnum.Active.getLiteral());
             internalAdminRecord.setLogin(configuration.getString(Constants.USER_INTERNAL_ADMIN));
             internalAdminRecord.setPassword(configuration.getString(Constants.USER_INTERNAL_ADMIN_PASSWORD));
             internalAdminRecord.setRoleId(roleRecord.getRoleId());

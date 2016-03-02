@@ -4,6 +4,7 @@ import java.lang.management.ManagementFactory;
 
 import javax.management.MBeanServer;
 
+import com.angkorteam.mbaas.model.entity.tables.IndexTable;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;

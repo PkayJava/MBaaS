@@ -11,7 +11,7 @@ CREATE TABLE user (
   account_non_expired               BIT(1)       NOT NULL DEFAULT 1,
   account_non_locked                BIT(1)       NOT NULL DEFAULT 1,
   credentials_non_expired           BIT(1)       NOT NULL DEFAULT 1,
-  disabled                          BIT(1)       NOT NULL DEFAULT 1,
+  status                            VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE',
 
   password_reset_token              VARCHAR(255),
   password_reset_token_expired_date DATETIME,
@@ -24,6 +24,6 @@ CREATE TABLE user (
   UNIQUE KEY (login),
   INDEX (password),
   INDEX (deleted),
-  INDEX (disabled),
+  INDEX (status),
   PRIMARY KEY (user_id)
 );

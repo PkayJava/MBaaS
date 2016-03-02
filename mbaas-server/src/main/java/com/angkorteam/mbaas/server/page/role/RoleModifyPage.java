@@ -22,7 +22,6 @@ import org.jooq.DSLContext;
 public class RoleModifyPage extends Page {
 
     private String roleId;
-
     private Integer optimistic;
 
     private String name;

@@ -2,22 +2,19 @@ package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import org.jooq.Condition;
-import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.TableLike;
-import org.jooq.impl.DSL;
 
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Created by socheat on 3/1/16.
  */
-public class UserProvider extends JooqProvider<UserItemModel, UserFilterModel> {
+public class UserProvider extends JooqProvider {
 
     private TableLike<?> from;
 
@@ -26,7 +23,6 @@ public class UserProvider extends JooqProvider<UserItemModel, UserFilterModel> {
     private RoleTable roleTable;
 
     public UserProvider() {
-        super(UserItemModel.class, UserFilterModel.class);
         this.userTable = Tables.USER.as("userTable");
         this.roleTable = Tables.ROLE.as("roleTable");
         this.from = userTable.join(roleTable).on(userTable.ROLE_ID.eq(roleTable.ROLE_ID));
@@ -46,6 +42,14 @@ public class UserProvider extends JooqProvider<UserItemModel, UserFilterModel> {
 
     public Field<String> getRoleId() {
         return this.roleTable.ROLE_ID;
+    }
+
+    public Field<String> getStatus() {
+        return this.userTable.STATUS;
+    }
+
+    public Field<Boolean> getSystem() {
+        return this.userTable.SYSTEM;
     }
 
     @Override

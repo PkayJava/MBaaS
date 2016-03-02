@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.factory;
 
+import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
@@ -61,7 +62,7 @@ public class UserDetailsServiceFactoryBean implements FactoryBean<UserDetailsSer
         }
         org.springframework.security.core.userdetails.User userDetails = new org.springframework.security.core.userdetails.User(
                 username, userRecord.getPassword(),
-                !userRecord.getDisabled(),
+                UserStatusEnum.Active.getLiteral().equals(userRecord.getStatus()),
                 userRecord.getAccountNonExpired(),
                 userRecord.getCredentialsNonExpired(),
                 userRecord.getAccountNonLocked(), authorities
