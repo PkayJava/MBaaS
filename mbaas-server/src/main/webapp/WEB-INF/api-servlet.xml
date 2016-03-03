@@ -105,7 +105,7 @@
 
     <bean id="encryptor" class="com.angkorteam.mbaas.server.factory.StringEncryptorFactoryBean"/>
 
-    <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.PlaintextPasswordEncoder"/>
+    <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"/>
 
     <bean id="permission" class="com.angkorteam.mbaas.server.factory.PermissionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
@@ -121,9 +121,7 @@
         <property name="realmName" value="MBaas API"/>
     </bean>
 
-    <bean id="jdbcTemplate" class="com.angkorteam.mbaas.server.factory.JdbcTemplateFactoryBean">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
+    <bean id="jdbcTemplate" class="com.angkorteam.mbaas.server.factory.JdbcTemplateFactoryBean"/>
 
     <bean id="authenticationFilter" class="com.angkorteam.mbaas.server.spring.TokenAuthenticationFilter">
         <constructor-arg ref="authenticationManager"/>

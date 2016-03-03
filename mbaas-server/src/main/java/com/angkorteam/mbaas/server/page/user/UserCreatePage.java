@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.page.user;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
@@ -20,6 +21,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.validation.EqualPasswordInputValidator;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 
 import java.util.List;
 import java.util.UUID;
@@ -97,10 +99,11 @@ public class UserCreatePage extends Page {
     }
 
     private void saveButtonOnSubmit(Button button) {
+        String uuid = UUID.randomUUID().toString();
         DSLContext context = getDSLContext();
         UserTable userTable = Tables.USER.as("userTable");
         UserRecord userRecord = context.newRecord(userTable);
-        userRecord.setUserId(UUID.randomUUID().toString());
+        userRecord.setUserId(uuid);
         userRecord.setDeleted(false);
         userRecord.setSystem(false);
         userRecord.setStatus(UserStatusEnum.Active.getLiteral());
@@ -111,6 +114,9 @@ public class UserCreatePage extends Page {
         userRecord.setPassword(this.password);
         userRecord.setRoleId(this.role.getRoleId());
         userRecord.store();
+
+        context.update(userTable).set(userTable.PASSWORD, DSL.md5(password)).where(userTable.USER_ID.eq(uuid)).execute();
+
         setResponsePage(UserManagementPage.class);
     }
 

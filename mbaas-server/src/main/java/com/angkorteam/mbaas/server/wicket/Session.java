@@ -33,7 +33,7 @@ public class Session extends AuthenticatedWebSession {
     protected boolean authenticate(String username, String password) {
         DSLContext context = getDSLContext();
         UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).and(DSL.md5(userTable.PASSWORD).eq(password)).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).and(userTable.PASSWORD.eq(DSL.md5(password))).fetchOneInto(userTable);
         if (userRecord != null) {
             String sessionId = getId();
             this.roles = new Roles();
@@ -42,6 +42,7 @@ public class Session extends AuthenticatedWebSession {
             this.roles.add(roleRecord.getName());
 
             WicketTable wicketTable = Tables.WICKET.as("wicketTable");
+            context.delete(wicketTable).where(wicketTable.SESSION_ID.eq(sessionId)).execute();
 
             WicketRecord wicketRecord = context.newRecord(wicketTable);
             wicketRecord.setWicketId(UUID.randomUUID().toString());

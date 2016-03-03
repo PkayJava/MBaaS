@@ -1,19 +1,22 @@
 package com.angkorteam.mbaas.server.factory;
 
+import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.web.context.ServletContextAware;
 
+import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 /**
  * Created by Khauv Socheat on 2/4/2016.
  */
-public class JdbcTemplateFactoryBean implements FactoryBean<JdbcTemplate>, InitializingBean {
+public class JdbcTemplateFactoryBean implements FactoryBean<JdbcTemplate>, InitializingBean, ServletContextAware {
 
     private JdbcTemplate jdbcTemplate;
 
-    private DataSource dataSource;
+    private ServletContext servletContext;
 
     @Override
     public JdbcTemplate getObject() throws Exception {
@@ -32,14 +35,12 @@ public class JdbcTemplateFactoryBean implements FactoryBean<JdbcTemplate>, Initi
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        ApplicationContext applicationContext = ApplicationContext.get(this.servletContext);
+        this.jdbcTemplate = applicationContext.getJdbcTemplate();
     }
 
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+    @Override
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
     }
 }

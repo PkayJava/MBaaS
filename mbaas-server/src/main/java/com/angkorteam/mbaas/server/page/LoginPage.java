@@ -60,7 +60,7 @@ public class LoginPage extends Page {
     private void okayButtonOnSubmit(Button components) {
         boolean signin = getSession().signIn(this.login, this.password);
         if (signin) {
-            continueToOriginalDestination();
+            setResponsePage(getApplication().getHomePage());
         } else {
             this.loginField.error("incorrect");
             this.passwordField.error("incorrect");

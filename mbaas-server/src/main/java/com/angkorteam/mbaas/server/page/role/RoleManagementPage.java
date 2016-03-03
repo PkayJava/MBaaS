@@ -24,7 +24,9 @@ import java.util.Map;
  * Created by socheat on 3/1/16.
  */
 @Mount("/role/management")
-public class RoleManagementPage extends Page implements ActionFilteredJooqColumn.Event<Map<String, Object>> {
+public class RoleManagementPage extends Page implements ActionFilteredJooqColumn.Event {
+
+    private DataTable<Map<String, Object>, String> dataTable;
 
     @Override
     protected void onInitialize() {
@@ -44,9 +46,11 @@ public class RoleManagementPage extends Page implements ActionFilteredJooqColumn
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", provider));
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Delete"));
 
-        DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
+        dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
+
+        System.out.println("onInitialize");
     }
 
     @Override
@@ -70,5 +74,16 @@ public class RoleManagementPage extends Page implements ActionFilteredJooqColumn
         } else {
             return true;
         }
+    }
+
+    @Override
+    public boolean isClickableEventLink(String link, Map<String, Object> object) {
+        return true;
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        System.out.println("onBeforeRender");
     }
 }

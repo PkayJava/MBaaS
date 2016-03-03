@@ -27,7 +27,7 @@ import java.util.Map;
  * Created by socheat on 3/1/16.
  */
 @Mount("/user/management")
-public class UserManagementPage extends Page implements ActionFilteredJooqColumn.Event<Map<String, Object>> {
+public class UserManagementPage extends Page implements ActionFilteredJooqColumn.Event {
 
     @Override
     protected void onInitialize() {
@@ -41,7 +41,7 @@ public class UserManagementPage extends Page implements ActionFilteredJooqColumn
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("login", this), "login", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("login", this), "login", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("roleName", this), "roleName", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("status", this), "status", provider));
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Change PWD", "Suspend", "Activate"));
@@ -77,22 +77,57 @@ public class UserManagementPage extends Page implements ActionFilteredJooqColumn
             setResponsePage(UserPasswordModifyPage.class, parameters);
             return;
         }
+        if ("login".equals(link)) {
+            PageParameters parameters = new PageParameters();
+            parameters.add("userId", userId);
+            setResponsePage(UserPasswordModifyPage.class, parameters);
+            return;
+        }
+    }
+
+    @Override
+    public boolean isClickableEventLink(String link, Map<String, Object> object) {
+        Boolean system = (Boolean) object.get("system");
+        if ("login".equals(link)) {
+            return !system;
+        }
+        if ("Edit".equals(link)) {
+            return !system;
+        }
+        if ("Change PWD".equals(link)) {
+            return true;
+        }
+        if ("Suspend".equals(link)) {
+            return !system;
+        }
+        if ("Activate".equals(link)) {
+            return !system;
+        }
+        return false;
     }
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
         String status = (String) object.get("status");
         Boolean system = (Boolean) object.get("system");
-        if (system) {
-            return false;
-        }
         if ("Suspend".equals(link)) {
+            if (system) {
+                return false;
+            }
             if (UserStatusEnum.Suspended.getLiteral().equals(status)) {
                 return false;
             }
         }
         if ("Activate".equals(link)) {
+            if (system) {
+                return false;
+            }
             if (UserStatusEnum.Active.getLiteral().equals(status)) {
+                return false;
+            }
+        }
+        if ("Edit".equals(link)) {
+            if (system) {
                 return false;
             }
         }

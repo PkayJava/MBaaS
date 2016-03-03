@@ -27,6 +27,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -55,6 +56,8 @@ public class ApplicationContext implements ServletContextListener {
 
     private Flyway flyway;
 
+    private JdbcTemplate jdbcTemplate;
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
@@ -64,6 +67,7 @@ public class ApplicationContext implements ServletContextListener {
         this.flyway = initFlyway(dataSource);
         LOGGER.info("initializing data access object layer");
         this.configuration = initConfiguration(dataSource);
+        this.jdbcTemplate = initJdbcTemplate(dataSource);
         this.context = initDSLContext(configuration);
         LOGGER.info("initializing string encryptors");
         this.stringEncryptor = initStringEncryptor();
@@ -84,9 +88,10 @@ public class ApplicationContext implements ServletContextListener {
 
         UserRecord adminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
         if (adminRecord == null) {
+            String uuid = UUID.randomUUID().toString();
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_ADMIN_ROLE)))).fetchOneInto(roleTable);
             adminRecord = context.newRecord(userTable);
-            adminRecord.setUserId(UUID.randomUUID().toString());
+            adminRecord.setUserId(uuid);
             adminRecord.setDeleted(false);
             adminRecord.setAccountNonExpired(true);
             adminRecord.setSystem(true);
@@ -97,13 +102,15 @@ public class ApplicationContext implements ServletContextListener {
             adminRecord.setPassword(configuration.getString(Constants.USER_ADMIN_PASSWORD));
             adminRecord.setRoleId(roleRecord.getRoleId());
             adminRecord.store();
+            context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
         }
 
         UserRecord mbaasRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_MBAAS))).fetchOneInto(userTable);
         if (mbaasRecord == null) {
+            String uuid = UUID.randomUUID().toString();
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_MBAAS_ROLE)))).fetchOneInto(roleTable);
             mbaasRecord = context.newRecord(userTable);
-            mbaasRecord.setUserId(UUID.randomUUID().toString());
+            mbaasRecord.setUserId(uuid);
             mbaasRecord.setDeleted(false);
             mbaasRecord.setSystem(true);
             mbaasRecord.setAccountNonExpired(true);
@@ -114,13 +121,15 @@ public class ApplicationContext implements ServletContextListener {
             mbaasRecord.setPassword(configuration.getString(Constants.USER_MBAAS_PASSWORD));
             mbaasRecord.setRoleId(roleRecord.getRoleId());
             mbaasRecord.store();
+            context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_MBAAS_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
         }
 
         UserRecord internalAdminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_INTERNAL_ADMIN))).fetchOneInto(userTable);
         if (internalAdminRecord == null) {
+            String uuid = UUID.randomUUID().toString();
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_INTERNAL_ADMIN_ROLE)))).fetchOneInto(roleTable);
             internalAdminRecord = context.newRecord(userTable);
-            internalAdminRecord.setUserId(UUID.randomUUID().toString());
+            internalAdminRecord.setUserId(uuid);
             internalAdminRecord.setDeleted(false);
             internalAdminRecord.setSystem(true);
             internalAdminRecord.setAccountNonExpired(true);
@@ -131,6 +140,7 @@ public class ApplicationContext implements ServletContextListener {
             internalAdminRecord.setPassword(configuration.getString(Constants.USER_INTERNAL_ADMIN_PASSWORD));
             internalAdminRecord.setRoleId(roleRecord.getRoleId());
             internalAdminRecord.store();
+            context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_INTERNAL_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
         }
     }
 
@@ -430,6 +440,10 @@ public class ApplicationContext implements ServletContextListener {
         return DSL.using(configuration);
     }
 
+    protected JdbcTemplate initJdbcTemplate(DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+
     protected Configuration initConfiguration(BasicDataSource dataSource) {
         if (dataSource == null) {
             return null;
@@ -483,5 +497,9 @@ public class ApplicationContext implements ServletContextListener {
 
     public final StringEncryptor getStringEncryptor() {
         return stringEncryptor;
+    }
+
+    public final JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
     }
 }

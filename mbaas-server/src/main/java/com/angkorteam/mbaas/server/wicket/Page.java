@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Date;
 
@@ -55,6 +56,11 @@ public class Page extends WebPage {
 
     public final String getNavigatorLanguage() {
         return getSession().getClientInfo().getProperties().getNavigatorLanguage();
+    }
+
+    public final JdbcTemplate getJdbcTemplate() {
+        Application application = (Application) getApplication();
+        return application.getJdbcTemplate();
     }
 
 }

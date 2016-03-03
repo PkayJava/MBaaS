@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.resource.loader.IStringResourceLoader;
 import org.jooq.DSLContext;
 import org.reflections.Reflections;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.*;
 
@@ -73,6 +74,11 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     public final DSLContext getDSLContext() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
         return applicationContext.getDSLContext();
+    }
+
+    public final JdbcTemplate getJdbcTemplate() {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        return applicationContext.getJdbcTemplate();
     }
 
     @Override

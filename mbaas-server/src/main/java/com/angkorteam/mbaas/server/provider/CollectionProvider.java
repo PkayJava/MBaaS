@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class CollectionProvider extends JooqProvider {
 
-    private Field<Integer> count;
+    private Field<Integer> document;
 
     private TableLike<?> from;
 
@@ -35,17 +35,21 @@ public class CollectionProvider extends JooqProvider {
             for (String name : names) {
                 when = when.when(name, context.selectCount().from(DSL.table("`" + name + "`")).asField());
             }
-            count = when;
+            document = when;
         }
         this.from = collectionTable.join(userTable).on(collectionTable.OWNER_USER_ID.eq(userTable.USER_ID));
     }
 
-    public Field<String> getLogin() {
+    public Field<String> getOwner() {
         return this.userTable.LOGIN;
     }
 
-    public Field<Integer> getCount() {
-        return this.count;
+    public Field<Integer> getDocument() {
+        return this.document;
+    }
+
+    public Field<Boolean> getSystem() {
+        return this.collectionTable.SYSTEM;
     }
 
     public Field<String> getName() {
