@@ -8,11 +8,22 @@
     <table border="0">
         <tr>
             <td>Collection</td>
-            <td><select wicket:id="collectionField"/></td>
-            <td wicket:id="collectionFeedback"/>
+            <td>
+                <select wicket:id="collectionField"/>
+                <span wicket:id="collectionFeedback"/>
+            </td>
         </tr>
-
+        <tr>
+            <td></td>
+            <td>
+                <input wicket:id="browseButton" type="submit" value="Browse"/>
+            </td>
+        </tr>
     </table>
+</form>
+<hr/>
+<form wicket:id="filter-form">
+    <table wicket:id="table"/>
 </form>
 </body>
 </html>
