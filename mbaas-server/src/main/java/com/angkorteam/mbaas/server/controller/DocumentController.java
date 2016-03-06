@@ -322,9 +322,9 @@ public class DocumentController {
 
         {
             // ownerUserId column
-            columnNames.add(configuration.getString(Constants.JDBC_OWNER_USER_ID));
-            columnKeys.add(":" + configuration.getString(Constants.JDBC_OWNER_USER_ID));
-            columnValues.put(configuration.getString(Constants.JDBC_OWNER_USER_ID), userRecord.getUserId());
+            columnNames.add(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID));
+            columnKeys.add(":" + configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID));
+            columnValues.put(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID), userRecord.getUserId());
         }
 
         String id = UUID.randomUUID().toString();
@@ -1277,7 +1277,7 @@ public class DocumentController {
         response.getData().setCollectionName(collection);
         response.getData().setDocumentId(documentId);
         response.getData().setOptimistic((Integer) data.remove(configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC)));
-        response.getData().setOwnerUserId((String) data.remove(configuration.getString(Constants.JDBC_OWNER_USER_ID)));
+        response.getData().setOwnerUserId((String) data.remove(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID)));
         response.getData().setDeleted((Boolean) data.remove(configuration.getString(Constants.JDBC_COLUMN_DELETED)));
 
         for (Map.Entry<String, AttributeRecord> entry : attributeNameRecords.entrySet()) {

@@ -329,16 +329,7 @@ public class CollectionController {
             return ResponseEntity.ok(response);
         }
 
-        context.delete(attributeTables).where(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-        context.delete(primaryTable).where(primaryTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-        context.delete(indexTable).where(indexTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-        context.delete(collectionUserPrivacyTable).where(collectionUserPrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-        context.delete(collectionRolePrivacyTable).where(collectionRolePrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-        context.delete(documentUserPrivacyTable).where(documentUserPrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-        context.delete(documentRolePrivacyTable).where(documentRolePrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-        context.delete(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-
-        jdbcTemplate.execute("DROP TABLE `" + requestBody.getCollectionName() + "`");
+        CollectionFunction.deleteCollection(context, jdbcTemplate, requestBody);
 
         CollectionDeleteResponse response = new CollectionDeleteResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());

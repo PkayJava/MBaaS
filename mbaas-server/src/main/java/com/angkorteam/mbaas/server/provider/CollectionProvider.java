@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,7 +68,9 @@ public class CollectionProvider extends JooqProvider {
 
     @Override
     protected List<Condition> where() {
-        return null;
+        List<Condition> where = new ArrayList<>();
+        where.add(this.collectionTable.SYSTEM.eq(false));
+        return where;
     }
 
     @Override

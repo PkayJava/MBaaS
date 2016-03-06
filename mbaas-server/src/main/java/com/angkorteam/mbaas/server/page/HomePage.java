@@ -7,15 +7,4 @@ import com.angkorteam.mbaas.server.wicket.Page;
  */
 public class HomePage extends Page {
 
-    @Override
-    protected void onInitialize() {
-        super.onInitialize();
-        System.out.println("onInitialize");
-    }
-
-    @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        System.out.println("onBeforeRender");
-    }
 }

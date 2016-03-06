@@ -12,6 +12,8 @@ public class Constants {
 
     public static final String KEY = "mbaas.properties.xml";
 
+    public static final String WICKET = "wicket";
+
     public static final String APP_JDBC_DRIVER = "app.jdbc.driver";
     public static final String APP_JDBC_URL = "app.jdbc.url";
     public static final String APP_JDBC_USERNAME = "app.jdbc.username";
@@ -27,7 +29,8 @@ public class Constants {
     public static final String JDBC_COLUMN_EXTRA = "jdbc.column.extra";
     public static final String JDBC_COLUMN_OPTIMISTIC = "jdbc.column.optimistic";
     public static final String JDBC_COLUMN_DELETED = "jdbc.column.deleted";
-    public static final String JDBC_OWNER_USER_ID = "jdbc.owner.user.id";
+    public static final String JDBC_COLUMN_OWNER_USER_ID = "jdbc.column.owner.user.id";
+    public static final String JDBC_COLUMN_DATE_CREATED = "jdbc.column.date.created";
 
     public static final String ROLE_ADMINISTRATOR = "role.administrator";
     public static final String ROLE_ADMINISTRATOR_DESCRIPTION = "role.administrator.description";

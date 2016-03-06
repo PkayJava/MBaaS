@@ -2,6 +2,8 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
 
+    <entry key="wicket">DEPLOYMENT</entry>
+
     <entry key="app.jdbc.driver">org.mariadb.jdbc.Driver</entry>
     <entry key="app.jdbc.url"><![CDATA[jdbc:mariadb://pkayjava.ddns.net:3306/mbaas?createDatabaseIfNotExist=true&autoReconnect=true]]></entry>
     <entry key="app.jdbc.database">mbaas</entry>
@@ -16,6 +18,7 @@
 
     <entry key="jdbc.column.extra">extra</entry>
     <entry key="jdbc.column.optimistic">optimistic</entry>
+    <entry key="jdbc.date.created">date_created</entry>
     <entry key="jdbc.column.deleted">deleted</entry>
     <entry key="jdbc.owner.user.id">owner_user_id</entry>
 

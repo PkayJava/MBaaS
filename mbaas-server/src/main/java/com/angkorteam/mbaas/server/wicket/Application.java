@@ -1,14 +1,18 @@
 package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.framework.extension.jooq.IDSLContext;
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.WicketTable;
 import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.page.HomePage;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.Component;
 import org.apache.wicket.Localizer;
+import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
@@ -27,6 +31,12 @@ import java.util.*;
 public class Application extends AuthenticatedWebApplication implements IDSLContext {
 
     private transient Map<String, Session> sessions;
+
+    @Override
+    public RuntimeConfigurationType getConfigurationType() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        return RuntimeConfigurationType.valueOf(configuration.getString(Constants.WICKET));
+    }
 
     /**
      * @see org.apache.wicket.Application#getHomePage()
@@ -104,4 +114,6 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
             session.invalidateNow();
         }
     }
+
+
 }

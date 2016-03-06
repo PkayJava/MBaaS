@@ -4,7 +4,6 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.plain.enums.PermissionEnum;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.FactoryBean;
@@ -125,7 +124,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             }
             XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-            String ownerUserId = jdbcTemplate.queryForObject("SELECT " + configuration.getString(Constants.JDBC_OWNER_USER_ID) + " FROM `" + collectionName + "` WHERE " + collectionName + "_id = ?", String.class, documentId);
+            String ownerUserId = jdbcTemplate.queryForObject("SELECT " + configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID) + " FROM `" + collectionName + "` WHERE " + collectionName + "_id = ?", String.class, documentId);
             if (ownerUserId == null) {
                 return false;
             }
