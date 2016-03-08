@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<form wicket:id="form">
+    <table border="0">
+        <tr>
+            <td>Name</td>
+            <td>
+                <input wicket:id="nameField" type="text"/>
+                <span wicket:id="nameFeedback"/>
+            </td>
+        </tr>
+        <tr>
+            <td>Java Type</td>
+            <td>
+                <select wicket:id="javaTypeField"/>
+                <span wicket:id="javaTypeFeedback"/>
+            </td>
+        </tr>
+        <tr>
+            <td>Nullable</td>
+            <td>
+                <select wicket:id="nullableField"/>
+                <span wicket:id="nullableFeedback"/>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <wicket:link>
+                    <a href="UserAttributeManagementPage.html">Close</a>
+                </wicket:link>
+                <input wicket:id="saveButton" type="submit" value="Save"/>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
