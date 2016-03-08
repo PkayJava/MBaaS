@@ -19,6 +19,8 @@
 <properties>
     <entry key="RoleNameValidator.duplicated">is taken</entry>
     <entry key="UserLoginValidator.duplicated">is taken</entry>
+    <entry key="AttributeNameValidator.duplicated">is taken</entry>
+    <entry key="CollectionNameValidator.duplicated">is taken</entry>
 
     <entry key="Required"> is required.</entry>
     <entry key="IConverter">The value of '${label}' is not a valid ${type}.</entry>
