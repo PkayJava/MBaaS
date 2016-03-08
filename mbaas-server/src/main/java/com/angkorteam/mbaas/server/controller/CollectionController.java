@@ -5,7 +5,6 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
-import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.collection.*;
 import com.angkorteam.mbaas.plain.response.collection.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;

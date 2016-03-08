@@ -6,7 +6,6 @@ import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -32,7 +31,7 @@ public class AttributeFunction {
 
         if (attributeRecord.getVirtual()) {
             AttributeRecord virtualRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.ATTRIBUTE_ID.eq(attributeRecord.getVirtualAttributeId())).fetchOneInto(attributeTable);
-            jdbcTemplate.execute("UPDATE `" + requestBody.getCollectionName() + "`" + " SET " + virtualRecord.getName() + " = " + JdbcFunction.columnDelete(virtualRecord.getName(), requestBody.getAttributeName()));
+            jdbcTemplate.execute("UPDATE `" + requestBody.getCollectionName() + "`" + " SET " + virtualRecord.getName() + " = " + MariaDBFunction.columnDelete(virtualRecord.getName(), requestBody.getAttributeName()));
         } else {
             jdbcTemplate.execute("ALTER TABLE `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");
         }

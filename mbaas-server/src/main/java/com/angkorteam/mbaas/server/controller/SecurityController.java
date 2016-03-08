@@ -6,7 +6,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
-import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
+import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.security.SecurityLogoutRequest;
@@ -260,7 +260,7 @@ public class SecurityController {
         if (!virtualColumns.isEmpty()) {
             for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
                 if (!entry.getValue().isEmpty()) {
-                    columnNames.add(entry.getKey() + " = " + JdbcFunction.columnCreate(entry.getValue()));
+                    columnNames.add(entry.getKey() + " = " + MariaDBFunction.columnCreate(entry.getValue()));
                 }
             }
             NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);

@@ -4,11 +4,8 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.SessionTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -90,7 +87,7 @@ public class DocumentFunction {
 
         for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
             columnNames.add(entry.getKey());
-            columnKeys.add(JdbcFunction.columnCreate(entry.getValue()));
+            columnKeys.add(MariaDBFunction.columnCreate(entry.getValue()));
         }
 
         {

@@ -8,6 +8,7 @@ import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
 import com.angkorteam.framework.extension.wicket.table.filter.DateFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
@@ -18,6 +19,7 @@ import com.angkorteam.mbaas.server.renderer.CollectionChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Page;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -73,6 +75,7 @@ public class DocumentManagementPage extends Page {
         List<CollectionPojo> collections = context.select(collectionTable.fields())
                 .from(collectionTable).where(collectionTable.SYSTEM.eq(false))
                 .fetchInto(CollectionPojo.class);
+
         this.collectionField = new DropDownChoice<>("collectionField", new PropertyModel<>(this, "collection"), collections, new CollectionChoiceRenderer());
         this.collectionField.setRequired(true);
         this.collectionFeedback = new TextFeedbackPanel("collectionFeedback", collectionField);
@@ -89,15 +92,21 @@ public class DocumentManagementPage extends Page {
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
 
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String jdbcColumnOwnerUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID);
         for (AttributeRecord attributeRecord : attributeRecords) {
-            if (!attributeRecord.getVirtual()) {
-                if (String.class.getName().equals(attributeRecord.getJavaType())) {
-                    String column = attributeRecord.getName();
-                    columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(column, this), column, provider));
-                } else if (Date.class.getName().equals(attributeRecord.getJavaType())) {
-                    String column = attributeRecord.getName();
-                    columns.add(new DateFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
-                }
+            if (attributeRecord.getName().equals(jdbcColumnOwnerUserId)) {
+                continue;
+            }
+            if (String.class.getName().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (Date.class.getName().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new DateFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
+            } else if (Integer.class.getName().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup(column, this), column, provider));
             }
         }
 

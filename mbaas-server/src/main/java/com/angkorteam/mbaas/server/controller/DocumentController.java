@@ -5,7 +5,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
-import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
+import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import com.angkorteam.mbaas.plain.request.document.*;
 import com.angkorteam.mbaas.plain.response.document.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
@@ -616,7 +616,7 @@ public class DocumentController {
         }
         for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
             if (!entry.getValue().isEmpty()) {
-                columns.add(entry.getKey() + " = " + JdbcFunction.columnAdd(entry.getKey(), entry.getValue()));
+                columns.add(entry.getKey() + " = " + MariaDBFunction.columnAdd(entry.getKey(), entry.getValue()));
             }
         }
         values.put(collection + "_id", documentId);
@@ -1204,7 +1204,7 @@ public class DocumentController {
             AttributeRecord fieldRecord = entry.getValue();
             if (fieldRecord.getVirtual()) {
                 AttributeRecord virtualRecord = attributeIdRecords.get(fieldRecord.getVirtualAttributeId());
-                fields.add(JdbcFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
+                fields.add(MariaDBFunction.columnGet(virtualRecord.getName(), fieldRecord.getName(), fieldRecord.getJavaType()));
             } else {
                 fields.add("`" + entry.getKey() + "`");
             }
@@ -1316,7 +1316,7 @@ public class DocumentController {
             if (attributeRecord.getExposed()) {
                 if (attributeRecord.getVirtual()) {
                     AttributeRecord virtualRecord = attributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    fields.add(JdbcFunction.columnGet(virtualRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()));
+                    fields.add(MariaDBFunction.columnGet(virtualRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()));
                 } else {
                     fields.add("`" + attribute + "`");
                 }
