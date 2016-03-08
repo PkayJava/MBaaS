@@ -274,7 +274,7 @@ public class DocumentController {
             return ResponseEntity.ok(response);
         }
 
-        String documentId = DocumentFunction.insert(context, jdbcTemplate, userRecord.getUserId(), collection, requestBody);
+        String documentId = DocumentFunction.insertDocument(context, jdbcTemplate, userRecord.getUserId(), collection, requestBody);
 
         DocumentCreateResponse response = new DocumentCreateResponse();
         response.getData().setCollectionName(collection);

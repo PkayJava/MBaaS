@@ -16,6 +16,7 @@ import java.util.List;
 public class AttributeProvider extends JooqProvider {
 
     private AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+    private AttributeTable masterAttributeTable = Tables.ATTRIBUTE.as("masterAttributeTable");
 
     private TableLike<?> from;
 
@@ -23,7 +24,7 @@ public class AttributeProvider extends JooqProvider {
 
     public AttributeProvider(String collectionId) {
         this.collectionId = collectionId;
-        this.from = attributeTable;
+        this.from = attributeTable.leftJoin(masterAttributeTable).on(attributeTable.VIRTUAL_ATTRIBUTE_ID.eq(masterAttributeTable.ATTRIBUTE_ID));
     }
 
     public Field<String> getName() {
@@ -46,8 +47,8 @@ public class AttributeProvider extends JooqProvider {
         return this.attributeTable.VIRTUAL;
     }
 
-    public Field<String> getVirtualAttributeId() {
-        return this.attributeTable.VIRTUAL_ATTRIBUTE_ID;
+    public Field<String> getVirtualAttribute() {
+        return this.masterAttributeTable.NAME.as("masterAttributeName");
     }
 
     public Field<Boolean> getSystem() {

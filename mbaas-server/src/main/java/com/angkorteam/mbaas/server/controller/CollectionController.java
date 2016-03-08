@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.collection.*;
 import com.angkorteam.mbaas.plain.response.collection.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
+import com.angkorteam.mbaas.server.function.AttributeFunction;
 import com.angkorteam.mbaas.server.function.CollectionFunction;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -233,36 +234,7 @@ public class CollectionController {
             return ResponseEntity.ok(response);
         }
 
-        attributeRecord = context.newRecord(attributeTable);
-        attributeRecord.setAttributeId(UUID.randomUUID().toString());
-        attributeRecord.setNullable(requestBody.isNullable());
-        attributeRecord.setCollectionId(collectionRecord.getCollectionId());
-        attributeRecord.setVirtual(true);
-        attributeRecord.setSystem(false);
-        attributeRecord.setName(requestBody.getAttributeName());
-        attributeRecord.setAutoIncrement(false);
-        attributeRecord.setExposed(true);
-        attributeRecord.setVirtualAttributeId(virtualRecord.getAttributeId());
-        attributeRecord.setJavaType(requestBody.getJavaType());
-        if (requestBody.getJavaType().equals(Integer.class.getName()) || requestBody.getJavaType().equals(int.class.getName())
-                || requestBody.getJavaType().equals(Byte.class.getName()) || requestBody.getJavaType().equals(byte.class.getName())
-                || requestBody.getJavaType().equals(Short.class.getName()) || requestBody.getJavaType().equals(short.class.getName())
-                || requestBody.getJavaType().equals(Long.class.getName()) || requestBody.getJavaType().equals(long.class.getName())
-                ) {
-            attributeRecord.setSqlType("INT");
-
-        } else if (requestBody.getJavaType().equals(Double.class.getName()) || requestBody.getJavaType().equals(double.class.getName())
-                || requestBody.getJavaType().equals(Float.class.getName()) || requestBody.getJavaType().equals(float.class.getName())) {
-            attributeRecord.setSqlType("DECIMAL");
-        } else if (requestBody.getJavaType().equals(Boolean.class.getName()) || requestBody.getJavaType().equals(boolean.class.getName())) {
-            attributeRecord.setSqlType("BIT");
-        } else if (requestBody.getJavaType().equals(Date.class.getName()) || requestBody.getJavaType().equals(Time.class.getName()) || requestBody.getJavaType().equals(Timestamp.class.getName())) {
-            attributeRecord.setSqlType("DATETIME");
-        } else if (requestBody.getJavaType().equals(Character.class.getName()) || requestBody.getJavaType().equals(char.class.getName())
-                || requestBody.getJavaType().equals(String.class.getName())) {
-            attributeRecord.setSqlType("VARCHAR");
-        }
-        attributeRecord.store();
+        AttributeFunction.createAttribute(context, requestBody);
 
         CollectionAttributeCreateResponse response = new CollectionAttributeCreateResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());
@@ -408,13 +380,7 @@ public class CollectionController {
             return ResponseEntity.ok(response);
         }
 
-        if (attributeRecord.getVirtual()) {
-            AttributeRecord virtualRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.ATTRIBUTE_ID.eq(attributeRecord.getVirtualAttributeId())).fetchOneInto(attributeTable);
-            jdbcTemplate.execute("UPDATE `" + requestBody.getCollectionName() + "`" + " SET " + virtualRecord.getName() + " = " + JdbcFunction.columnDelete(virtualRecord.getName(), requestBody.getAttributeName()));
-        } else {
-            jdbcTemplate.execute("ALTER TABLE `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");
-        }
-        attributeRecord.delete();
+        AttributeFunction.deleteAttribute(context, jdbcTemplate, requestBody);
 
         CollectionAttributeDeleteResponse response = new CollectionAttributeDeleteResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());

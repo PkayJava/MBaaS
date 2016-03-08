@@ -27,10 +27,8 @@ import java.util.*;
  */
 public class DocumentFunction {
 
-    public static String insert(DSLContext context, JdbcTemplate jdbcTemplate, String userId, String collection, DocumentCreateRequest requestBody) {
+    public static String insertDocument(DSLContext context, JdbcTemplate jdbcTemplate, String userId, String collection, DocumentCreateRequest requestBody) {
 
-        UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 

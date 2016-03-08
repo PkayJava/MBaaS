@@ -78,7 +78,7 @@ public class DocumentCreatePage extends Page {
         CollectionRecord collectionRecord = getDSLContext().select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
         DocumentCreateRequest requestBody = new DocumentCreateRequest();
         requestBody.setDocument(fields);
-        DocumentFunction.insert(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), collectionRecord.getName(), requestBody);
+        DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), collectionRecord.getName(), requestBody);
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", collectionId);
         setResponsePage(DocumentManagementPage.class, parameters);
