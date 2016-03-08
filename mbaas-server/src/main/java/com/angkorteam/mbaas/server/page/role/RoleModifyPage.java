@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.server.validator.RoleNameValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Page;
+import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
@@ -18,6 +19,7 @@ import org.jooq.DSLContext;
 /**
  * Created by socheat on 3/1/16.
  */
+@AuthorizeInstantiation("administrator")
 @Mount("/role/modify")
 public class RoleModifyPage extends Page {
 

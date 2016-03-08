@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.plain.mariadb.JdbcFunction;
 import com.angkorteam.mbaas.plain.request.document.*;
 import com.angkorteam.mbaas.plain.response.document.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
+import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -273,73 +274,11 @@ public class DocumentController {
             return ResponseEntity.ok(response);
         }
 
-        Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
-        List<String> columnNames = new LinkedList<>();
-        List<String> columnKeys = new LinkedList<>();
-
-        Map<String, Object> columnValues = new LinkedHashMap<>();
-
-        for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            if (entry.getValue() == null) {
-                continue;
-            }
-            AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
-            if (attributeRecord.getVirtual()) {
-                AttributeRecord physicalRecord = attributeIdRecords.get(attributeRecord.getVirtualAttributeId());
-                if (!virtualColumns.containsKey(physicalRecord.getName())) {
-                    virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
-                }
-                if (attributeRecord.getJavaType().equals(Date.class.getName())
-                        || attributeRecord.getJavaType().equals(Timestamp.class.getName())
-                        || attributeRecord.getJavaType().equals(Time.class.getName())) {
-                    try {
-                        virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue()));
-                    } catch (ParseException e) {
-                    }
-                } else {
-                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
-                }
-            } else {
-                columnNames.add(entry.getKey());
-                columnKeys.add(":" + entry.getKey());
-                if (attributeRecord.getJavaType().equals(Date.class.getName())
-                        || attributeRecord.getJavaType().equals(Timestamp.class.getName())
-                        || attributeRecord.getJavaType().equals(Time.class.getName())) {
-                    try {
-                        columnValues.put(entry.getKey(), FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue()));
-                    } catch (ParseException e) {
-                    }
-                } else {
-                    columnValues.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
-            columnNames.add(entry.getKey());
-            columnKeys.add(JdbcFunction.columnCreate(entry.getValue()));
-        }
-
-        {
-            // ownerUserId column
-            columnNames.add(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID));
-            columnKeys.add(":" + configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID));
-            columnValues.put(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID), userRecord.getUserId());
-        }
-
-        String id = UUID.randomUUID().toString();
-        {
-            // primary column
-            columnNames.add("`" + collection + "_id" + "`");
-            columnKeys.add("'" + id + "'");
-        }
-
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        namedParameterJdbcTemplate.update("INSERT INTO `" + collection + "` (" + StringUtils.join(columnNames, ", ") + ")" + " VALUES (" + StringUtils.join(columnKeys, ",") + ")", columnValues);
+        String documentId = DocumentFunction.insert(context, jdbcTemplate, userRecord.getUserId(), collection, requestBody);
 
         DocumentCreateResponse response = new DocumentCreateResponse();
         response.getData().setCollectionName(collection);
-        response.getData().setDocumentId(id);
+        response.getData().setDocumentId(documentId);
 
         return ResponseEntity.ok(response);
     }

@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.server.provider.*;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Page;
+import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -23,6 +24,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/1/16.
  */
+@AuthorizeInstantiation("administrator")
 @Mount("/role/management")
 public class RoleManagementPage extends Page implements ActionFilteredJooqColumn.Event {
 

@@ -14,6 +14,7 @@ import com.angkorteam.mbaas.server.validator.UserLoginValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Page;
+import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
@@ -29,6 +30,7 @@ import java.util.UUID;
 /**
  * Created by socheat on 3/1/16.
  */
+@AuthorizeInstantiation("administrator")
 @Mount("/user/create")
 public class UserCreatePage extends Page {
 

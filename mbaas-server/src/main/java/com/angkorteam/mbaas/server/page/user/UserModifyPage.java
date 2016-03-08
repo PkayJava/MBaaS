@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Page;
+import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
@@ -23,6 +24,7 @@ import java.util.List;
 /**
  * Created by socheat on 3/1/16.
  */
+@AuthorizeInstantiation("administrator")
 @Mount("/user/modify")
 public class UserModifyPage extends Page {
 

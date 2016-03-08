@@ -5,6 +5,7 @@ import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
+import com.angkorteam.framework.extension.wicket.table.filter.DateFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
@@ -17,20 +18,24 @@ import com.angkorteam.mbaas.server.renderer.CollectionChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Page;
+import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Created by socheat on 3/3/16.
  */
+@AuthorizeInstantiation("administrator")
 @Mount("/document/management")
 public class DocumentManagementPage extends Page {
 
@@ -50,22 +55,25 @@ public class DocumentManagementPage extends Page {
         DSLContext context = getDSLContext();
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
 
-        PageParameters parameters = getPageParameters();
-
-        String collectionId = parameters.get("collectionId").toString();
+        String collectionId = getPageParameters().get("collectionId").toString();
 
         this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
 
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        List<AttributeRecord> attributeRecords = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collection.getCollectionId())).fetchInto(attributeTable);
+        List<AttributeRecord> attributeRecords = context.select(attributeTable.fields())
+                .from(attributeTable)
+                .where(attributeTable.COLLECTION_ID.eq(collection.getCollectionId()))
+                .fetchInto(attributeTable);
 
-        this.provider = new DocumentProvider(this.collection.getName());
+        this.provider = new DocumentProvider(this.collection.getCollectionId());
 
         this.form = new Form<>("form");
         add(this.form);
 
-        List<CollectionPojo> collections = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.SYSTEM.eq(false)).fetchInto(CollectionPojo.class);
-        this.collectionField = new DropDownChoice<CollectionPojo>("collectionField", new PropertyModel<>(this, "collection"), collections, new CollectionChoiceRenderer());
+        List<CollectionPojo> collections = context.select(collectionTable.fields())
+                .from(collectionTable).where(collectionTable.SYSTEM.eq(false))
+                .fetchInto(CollectionPojo.class);
+        this.collectionField = new DropDownChoice<>("collectionField", new PropertyModel<>(this, "collection"), collections, new CollectionChoiceRenderer());
         this.collectionField.setRequired(true);
         this.collectionFeedback = new TextFeedbackPanel("collectionFeedback", collectionField);
 
@@ -86,13 +94,23 @@ public class DocumentManagementPage extends Page {
                 if (String.class.getName().equals(attributeRecord.getJavaType())) {
                     String column = attributeRecord.getName();
                     columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(column, this), column, provider));
+                } else if (Date.class.getName().equals(attributeRecord.getJavaType())) {
+                    String column = attributeRecord.getName();
+                    columns.add(new DateFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
                 }
             }
         }
 
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("owner", this), "owner", provider));
+
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
+
+        PageParameters parameters = new PageParameters();
+        parameters.add("collectionId", collection.getCollectionId());
+        BookmarkablePageLink<Void> newDocumentLink = new BookmarkablePageLink<Void>("newDocumentLink", DocumentCreatePage.class, parameters);
+        add(newDocumentLink);
     }
 
     private void browseButtonOnSubmit(Button button) {

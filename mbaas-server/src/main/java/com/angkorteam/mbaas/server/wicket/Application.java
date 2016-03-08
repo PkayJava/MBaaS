@@ -8,7 +8,6 @@ import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.page.HomePage;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.Component;
 import org.apache.wicket.Localizer;
