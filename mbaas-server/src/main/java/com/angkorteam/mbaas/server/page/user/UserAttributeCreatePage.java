@@ -6,8 +6,11 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
+import com.angkorteam.mbaas.plain.enums.ScopeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
+import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
+import com.angkorteam.mbaas.server.function.UserAttributeFunction;
 import com.angkorteam.mbaas.server.validator.AttributeNameValidator;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Page;
@@ -42,6 +45,10 @@ public class UserAttributeCreatePage extends Page {
     private DropDownChoice<String> nullableField;
     private TextFeedbackPanel nullableFeedback;
 
+    private String scope;
+    private DropDownChoice<String> scopeField;
+    private TextFeedbackPanel scopeFeedback;
+
     private Form<Void> form;
     private Button saveButton;
 
@@ -74,18 +81,32 @@ public class UserAttributeCreatePage extends Page {
                 Double.class.getName(),
                 Date.class.getName(),
                 Character.class.getName(),
-                String.class.getName());
+                String.class.getName()
+        );
         this.javaTypeField = new DropDownChoice<>("javaTypeField", new PropertyModel<>(this, "javaType"), javaTypes);
         this.javaTypeField.setRequired(true);
         this.form.add(this.javaTypeField);
         this.javaTypeFeedback = new TextFeedbackPanel("javaTypeFeedback", this.javaTypeField);
         this.form.add(javaTypeFeedback);
 
-        this.nullableField = new DropDownChoice<>("nullableField", new PropertyModel<>(this, "nullable"), Arrays.asList("Yes", "No"));
+        List<String> nullables = Arrays.asList("Yes", "No");
+        this.nullableField = new DropDownChoice<>("nullableField", new PropertyModel<>(this, "nullable"), nullables);
         this.nullableField.setRequired(true);
         this.form.add(this.nullableField);
         this.nullableFeedback = new TextFeedbackPanel("nullableFeedback", this.nullableField);
         this.form.add(this.nullableFeedback);
+
+        List<String> scopes = Arrays.asList(
+                ScopeEnum.VisibleByAnonymousUser.getLiteral(),
+                ScopeEnum.VisibleByFriend.getLiteral(),
+                ScopeEnum.VisibleByRegisteredUser.getLiteral(),
+                ScopeEnum.VisibleByTheUser.getLiteral()
+        );
+        this.scopeField = new DropDownChoice<>("scopeField", new PropertyModel<>(this, "scope"), scopes);
+        this.scopeField.setRequired(true);
+        this.form.add(this.scopeField);
+        this.scopeFeedback = new TextFeedbackPanel("scopeFeedback", this.scopeField);
+        this.form.add(this.scopeFeedback);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
@@ -104,7 +125,14 @@ public class UserAttributeCreatePage extends Page {
         requestBody.setJavaType(this.javaType);
         requestBody.setCollectionName(collectionRecord.getName());
 
-        AttributeFunction.createAttribute(context, requestBody);
+        ScopeEnum scope = null;
+        for (ScopeEnum temp : ScopeEnum.values()) {
+            if (temp.getLiteral().equals(this.scope)) {
+                scope = temp;
+                break;
+            }
+        }
+        UserAttributeFunction.createAttribute(context, requestBody, getSession().getUserId(), scope);
 
         setResponsePage(UserAttributeManagementPage.class);
     }
