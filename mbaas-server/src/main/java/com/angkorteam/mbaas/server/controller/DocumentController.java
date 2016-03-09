@@ -371,8 +371,6 @@ public class DocumentController {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-
         UserTable userTable = Tables.USER.as("userTable");
         SessionTable sessionTable = Tables.SESSION.as("sessionTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -410,6 +408,7 @@ public class DocumentController {
             }
         }
 
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
 
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
@@ -577,51 +576,7 @@ public class DocumentController {
             return ResponseEntity.ok(response);
         }
 
-        List<String> columns = new LinkedList<>();
-        Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
-        Map<String, Object> values = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            if (entry.getValue() == null) {
-                continue;
-            }
-            AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
-            if (attributeRecord.getVirtual()) {
-                AttributeRecord physicalRecord = attributeIdRecords.get(attributeRecord.getVirtualAttributeId());
-                if (!virtualColumns.containsKey(physicalRecord.getName())) {
-                    virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
-                }
-                if (attributeRecord.getJavaType().equals(Date.class.getName())
-                        || attributeRecord.getJavaType().equals(Timestamp.class.getName())
-                        || attributeRecord.getJavaType().equals(Time.class.getName())) {
-                    try {
-                        virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue()));
-                    } catch (ParseException e) {
-                    }
-                } else {
-                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
-                }
-            } else {
-                columns.add(entry.getKey() + " = :" + entry.getKey());
-                if (attributeRecord.getJavaType().equals(Date.class.getName())
-                        || attributeRecord.getJavaType().equals(Timestamp.class.getName())
-                        || attributeRecord.getJavaType().equals(Time.class.getName())) {
-                    try {
-                        values.put(entry.getKey(), FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue()));
-                    } catch (ParseException e) {
-                    }
-                } else {
-                    values.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
-            if (!entry.getValue().isEmpty()) {
-                columns.add(entry.getKey() + " = " + MariaDBFunction.columnAdd(entry.getKey(), entry.getValue()));
-            }
-        }
-        values.put(collection + "_id", documentId);
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        namedParameterJdbcTemplate.update("UPDATE `" + collectionRecord.getName() + "` SET " + StringUtils.join(columns, ", ") + " WHERE " + collection + "_id = :" + collection + "_id", values);
+        DocumentFunction.modifyDocument(context, jdbcTemplate, collection, documentId, requestBody);
 
         DocumentModifyResponse response = new DocumentModifyResponse();
         response.getData().setDocumentId(documentId);
@@ -701,7 +656,7 @@ public class DocumentController {
             return ResponseEntity.ok(response);
         }
 
-        jdbcTemplate.update("DELETE FROM `" + collection + "` WHERE " + collection + "_id = ?", documentId);
+        DocumentFunction.deleteDocument(context, jdbcTemplate, collection, documentId);
 
         DocumentDeleteResponse response = new DocumentDeleteResponse();
         response.getData().setDocumentId(documentId);

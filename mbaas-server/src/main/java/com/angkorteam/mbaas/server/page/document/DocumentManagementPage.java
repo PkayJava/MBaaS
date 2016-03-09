@@ -5,6 +5,7 @@ import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
+import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.DateFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
@@ -14,6 +15,7 @@ import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
+import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.provider.DocumentProvider;
 import com.angkorteam.mbaas.server.renderer.CollectionChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
@@ -39,7 +41,7 @@ import java.util.Map;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/document/management")
-public class DocumentManagementPage extends Page {
+public class DocumentManagementPage extends Page implements ActionFilteredJooqColumn.Event {
 
     private CollectionPojo collection;
     private DropDownChoice<CollectionPojo> collectionField;
@@ -111,6 +113,7 @@ public class DocumentManagementPage extends Page {
         }
 
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("owner", this), "owner", provider));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -118,7 +121,7 @@ public class DocumentManagementPage extends Page {
 
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", collection.getCollectionId());
-        BookmarkablePageLink<Void> newDocumentLink = new BookmarkablePageLink<Void>("newDocumentLink", DocumentCreatePage.class, parameters);
+        BookmarkablePageLink<Void> newDocumentLink = new BookmarkablePageLink<>("newDocumentLink", DocumentCreatePage.class, parameters);
         add(newDocumentLink);
     }
 
@@ -126,5 +129,43 @@ public class DocumentManagementPage extends Page {
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collection.getCollectionId());
         setResponsePage(DocumentManagementPage.class, parameters);
+    }
+
+    @Override
+    public void onClickEventLink(String link, Map<String, Object> object) {
+        if ("Delete".equals(link)) {
+            String documentId = (String) object.get(this.collection.getName() + "_id");
+            DocumentFunction.deleteDocument(getDSLContext(), getJdbcTemplate(), this.collection.getName(), documentId);
+        }
+        if ("Edit".equals(link)) {
+            String collectionId = this.collection.getCollectionId();
+            String documentId = (String) object.get(this.collection.getName() + "_id");
+            PageParameters parameters = new PageParameters();
+            parameters.add("collectionId", collectionId);
+            parameters.add("documentId", documentId);
+            setResponsePage(DocumentModifyPage.class, parameters);
+        }
+    }
+
+    @Override
+    public boolean isClickableEventLink(String link, Map<String, Object> object) {
+        if ("Edit".equals(link)) {
+            return true;
+        }
+        if ("Delete".equals(link)) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isVisibleEventLink(String link, Map<String, Object> object) {
+        if ("Edit".equals(link)) {
+            return true;
+        }
+        if ("Delete".equals(link)) {
+            return true;
+        }
+        return false;
     }
 }
