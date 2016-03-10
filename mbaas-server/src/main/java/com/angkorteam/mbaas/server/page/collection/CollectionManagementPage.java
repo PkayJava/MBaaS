@@ -16,6 +16,7 @@ import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,6 +58,8 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", CollectionManagementPage.class, getPageParameters());
+        add(refreshLink);
     }
 
     @Override

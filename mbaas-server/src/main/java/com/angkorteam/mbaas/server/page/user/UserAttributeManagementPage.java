@@ -19,6 +19,7 @@ import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -75,6 +76,9 @@ public class UserAttributeManagementPage extends MasterPage implements ActionFil
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
+
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", UserAttributeManagementPage.class, getPageParameters());
+        add(refreshLink);
     }
 
     @Override

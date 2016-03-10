@@ -14,6 +14,7 @@ import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
@@ -57,7 +58,8 @@ public class RoleManagementPage extends MasterPage implements ActionFilteredJooq
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        System.out.println("onInitialize");
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", RoleManagementPage.class, getPageParameters());
+        add(refreshLink);
     }
 
     @Override

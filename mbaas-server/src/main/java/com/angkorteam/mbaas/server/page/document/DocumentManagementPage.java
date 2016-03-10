@@ -73,11 +73,11 @@ public class DocumentManagementPage extends MasterPage implements ActionFiltered
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(collection.getName() + "_id", this), collection.getName() + "_id", provider));
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         String jdbcColumnOwnerUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID);
         for (AttributeRecord attributeRecord : attributeRecords) {
-            if (attributeRecord.getName().equals(jdbcColumnOwnerUserId)) {
+            if (attributeRecord.getName().equals(jdbcColumnOwnerUserId) || attributeRecord.getName().equals(collection.getName() + "_id")) {
                 continue;
             }
             if (String.class.getName().equals(attributeRecord.getJavaType())) {
@@ -103,12 +103,9 @@ public class DocumentManagementPage extends MasterPage implements ActionFiltered
         parameters.add("collectionId", collection.getCollectionId());
         BookmarkablePageLink<Void> newDocumentLink = new BookmarkablePageLink<>("newDocumentLink", DocumentCreatePage.class, parameters);
         add(newDocumentLink);
-    }
 
-    private void browseButtonOnSubmit(Button button) {
-        PageParameters parameters = new PageParameters();
-        parameters.add("collectionId", this.collection.getCollectionId());
-        setResponsePage(DocumentManagementPage.class, parameters);
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", DocumentManagementPage.class, getPageParameters());
+        add(refreshLink);
     }
 
     @Override

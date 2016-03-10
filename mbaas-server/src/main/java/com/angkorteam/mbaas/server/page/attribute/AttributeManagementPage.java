@@ -84,6 +84,9 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
         parameters.add("collectionId", this.collectionId);
         BookmarkablePageLink<Void> newAttributeLink = new BookmarkablePageLink<Void>("newAttributeLink", AttributeCreatePage.class, parameters);
         add(newAttributeLink);
+
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", AttributeManagementPage.class, getPageParameters());
+        add(refreshLink);
     }
 
     @Override
