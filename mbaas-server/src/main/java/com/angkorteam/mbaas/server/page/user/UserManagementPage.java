@@ -2,12 +2,15 @@ package com.angkorteam.mbaas.server.page.user;
 
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
-import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
-import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.table.filter.*;
 import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
+import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.provider.UserProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -20,6 +23,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +38,24 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
     protected void onInitialize() {
         super.onInitialize();
 
+        DSLContext context = getDSLContext();
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        CollectionRecord collectionRecord = context.select(collectionTable.fields())
+                .from(collectionTable)
+                .where(collectionTable.NAME.eq(Tables.USER.getName()))
+                .fetchOneInto(collectionTable);
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+
+        List<AttributeRecord> attributeRecords = context.select(attributeTable.fields())
+                .from(attributeTable)
+                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                .fetchInto(attributeTable);
+
+        Map<String, AttributeRecord> virtualAttributeRecords = new HashMap<>();
+        for (AttributeRecord attributeRecord : attributeRecords) {
+            virtualAttributeRecords.put(attributeRecord.getAttributeId(), attributeRecord);
+        }
+
         UserProvider provider = new UserProvider();
         provider.selectField(String.class, "userId");
         provider.selectField(Boolean.class, "system");
@@ -45,6 +67,48 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("login", this), "login", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("roleName", this), "roleName", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("status", this), "status", provider));
+        for (AttributeRecord attributeRecord : attributeRecords) {
+            if (attributeRecord.getSystem()) {
+                continue;
+            }
+            if (TypeEnum.Boolean.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Byte.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Byte.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Short.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Short.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Integer.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Long.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Long.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Float.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Float.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Double.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Double.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Character.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Character.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.String.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Time.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TimeFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Date.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new DateFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.DateTime.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
+            }
+        }
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Change PWD", "Suspend", "Activate"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);

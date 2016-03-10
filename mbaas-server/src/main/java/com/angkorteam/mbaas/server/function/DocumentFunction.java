@@ -106,12 +106,10 @@ public class DocumentFunction {
         Map<String, AttributeRecord> attributeIdRecords = new LinkedHashMap<>();
         Map<String, AttributeRecord> attributeNameRecords = new LinkedHashMap<>();
         Map<String, TypeEnum> typeEnums = new LinkedHashMap<>();
-        if (collectionRecord != null) {
-            for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
-                attributeIdRecords.put(attributeRecord.getAttributeId(), attributeRecord);
-                attributeNameRecords.put(attributeRecord.getName(), attributeRecord);
-                typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
-            }
+        for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
+            attributeIdRecords.put(attributeRecord.getAttributeId(), attributeRecord);
+            attributeNameRecords.put(attributeRecord.getName(), attributeRecord);
+            typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
         }
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -128,7 +126,8 @@ public class DocumentFunction {
                 continue;
             }
             AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
-            if (attributeRecord.getVirtual()) {
+            boolean virtual = attributeRecord.getVirtual();
+            if (virtual) {
                 AttributeRecord physicalRecord = attributeIdRecords.get(attributeRecord.getVirtualAttributeId());
                 if (!virtualColumns.containsKey(physicalRecord.getName())) {
                     virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
@@ -177,9 +176,12 @@ public class DocumentFunction {
 
         {
             // ownerUserId column
-            columnNames.add(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID));
-            columnKeys.add(":" + configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID));
-            columnValues.put(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID), userId);
+            String jdbcColumnOwnerUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID);
+            if (attributeNameRecords.containsKey(jdbcColumnOwnerUserId)) {
+                columnNames.add(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID));
+                columnKeys.add(":" + configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID));
+                columnValues.put(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID), userId);
+            }
         }
 
         String documentId = UUID.randomUUID().toString();

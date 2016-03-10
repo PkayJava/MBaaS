@@ -104,7 +104,6 @@ public class DocumentModifyPage extends MasterPage {
             }
         }
 
-
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collectionId);
         BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", DocumentManagementPage.class, parameters);
