@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.*;
 import com.angkorteam.mbaas.plain.response.collection.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
@@ -28,9 +29,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -110,16 +112,18 @@ public class CollectionController {
                 if (attribute.getJavaType() == null || "".equals(attribute.getJavaType())) {
                     errorMessages.put(attribute.getName(), "javaType is required");
                 }
-                if (!attribute.getJavaType().equals(Integer.class.getName()) && !attribute.getJavaType().equals(int.class.getName())
-                        && !attribute.getJavaType().equals(Double.class.getName()) && !attribute.getJavaType().equals(double.class.getName())
-                        && !attribute.getJavaType().equals(Float.class.getName()) && !attribute.getJavaType().equals(float.class.getName())
-                        && !attribute.getJavaType().equals(Byte.class.getName()) && !attribute.getJavaType().equals(byte.class.getName())
-                        && !attribute.getJavaType().equals(Short.class.getName()) && !attribute.getJavaType().equals(short.class.getName())
-                        && !attribute.getJavaType().equals(Long.class.getName()) && !attribute.getJavaType().equals(long.class.getName())
-                        && !attribute.getJavaType().equals(Boolean.class.getName()) && !attribute.getJavaType().equals(boolean.class.getName())
-                        && !attribute.getJavaType().equals(Character.class.getName()) && !attribute.getJavaType().equals(char.class.getName())
-                        && !attribute.getJavaType().equals(Date.class.getName()) && !attribute.getJavaType().equals(Time.class.getName()) && !attribute.getJavaType().equals(Timestamp.class.getName())
-                        && !attribute.getJavaType().equals(String.class.getName())) {
+                if (!attribute.getJavaType().equals(TypeEnum.Boolean.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.Byte.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.Short.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.Integer.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.Long.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.Float.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.Double.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.Character.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.String.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.Time.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.Date.getLiteral())
+                        && !attribute.getJavaType().equals(TypeEnum.DateTime.getLiteral())) {
                     errorMessages.put(attribute.getName(), "javaType is not support");
                 }
             }
@@ -202,16 +206,18 @@ public class CollectionController {
         if (requestBody.getJavaType() == null || "".equals(requestBody.getJavaType())) {
             errorMessages.put("javaType", "is required");
         } else {
-            if (!requestBody.getJavaType().equals(Integer.class.getName()) && !requestBody.getJavaType().equals(int.class.getName())
-                    && !requestBody.getJavaType().equals(Double.class.getName()) && !requestBody.getJavaType().equals(double.class.getName())
-                    && !requestBody.getJavaType().equals(Float.class.getName()) && !requestBody.getJavaType().equals(float.class.getName())
-                    && !requestBody.getJavaType().equals(Byte.class.getName()) && !requestBody.getJavaType().equals(byte.class.getName())
-                    && !requestBody.getJavaType().equals(Short.class.getName()) && !requestBody.getJavaType().equals(short.class.getName())
-                    && !requestBody.getJavaType().equals(Long.class.getName()) && !requestBody.getJavaType().equals(long.class.getName())
-                    && !requestBody.getJavaType().equals(Boolean.class.getName()) && !requestBody.getJavaType().equals(boolean.class.getName())
-                    && !requestBody.getJavaType().equals(Character.class.getName()) && !requestBody.getJavaType().equals(char.class.getName())
-                    && !requestBody.getJavaType().equals(Date.class.getName()) && !requestBody.getJavaType().equals(Time.class.getName()) && !requestBody.getJavaType().equals(Timestamp.class.getName())
-                    && !requestBody.getJavaType().equals(String.class.getName())) {
+            if (!requestBody.getJavaType().equals(TypeEnum.Integer.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.Double.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.Float.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.Byte.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.Short.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.Long.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.Boolean.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.Character.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.Date.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.Time.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.DateTime.getLiteral())
+                    && !requestBody.getJavaType().equals(TypeEnum.String.getLiteral())) {
                 errorMessages.put("javaType", "is not allow");
             }
         }

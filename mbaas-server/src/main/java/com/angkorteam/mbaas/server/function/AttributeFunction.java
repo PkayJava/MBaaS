@@ -6,15 +6,13 @@ import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -61,23 +59,26 @@ public class AttributeFunction {
         attributeRecord.setExposed(true);
         attributeRecord.setVirtualAttributeId(virtualRecord.getAttributeId());
         attributeRecord.setJavaType(requestBody.getJavaType());
-        if (requestBody.getJavaType().equals(Integer.class.getName()) || requestBody.getJavaType().equals(int.class.getName())
-                || requestBody.getJavaType().equals(Byte.class.getName()) || requestBody.getJavaType().equals(byte.class.getName())
-                || requestBody.getJavaType().equals(Short.class.getName()) || requestBody.getJavaType().equals(short.class.getName())
-                || requestBody.getJavaType().equals(Long.class.getName()) || requestBody.getJavaType().equals(long.class.getName())
+        if (requestBody.getJavaType().equals(TypeEnum.Boolean.getLiteral())) {
+            attributeRecord.setSqlType("BIT");
+        } else if (requestBody.getJavaType().equals(TypeEnum.Byte.getLiteral())
+                || requestBody.getJavaType().equals(TypeEnum.Short.getLiteral())
+                || requestBody.getJavaType().equals(TypeEnum.Integer.getLiteral())
+                || requestBody.getJavaType().equals(TypeEnum.Long.getLiteral())
                 ) {
             attributeRecord.setSqlType("INT");
-
-        } else if (requestBody.getJavaType().equals(Double.class.getName()) || requestBody.getJavaType().equals(double.class.getName())
-                || requestBody.getJavaType().equals(Float.class.getName()) || requestBody.getJavaType().equals(float.class.getName())) {
+        } else if (requestBody.getJavaType().equals(TypeEnum.Float.getLiteral())
+                || requestBody.getJavaType().equals(TypeEnum.Double.getLiteral())) {
             attributeRecord.setSqlType("DECIMAL");
-        } else if (requestBody.getJavaType().equals(Boolean.class.getName()) || requestBody.getJavaType().equals(boolean.class.getName())) {
-            attributeRecord.setSqlType("BIT");
-        } else if (requestBody.getJavaType().equals(Date.class.getName()) || requestBody.getJavaType().equals(Time.class.getName()) || requestBody.getJavaType().equals(Timestamp.class.getName())) {
-            attributeRecord.setSqlType("DATETIME");
-        } else if (requestBody.getJavaType().equals(Character.class.getName()) || requestBody.getJavaType().equals(char.class.getName())
-                || requestBody.getJavaType().equals(String.class.getName())) {
+        } else if (requestBody.getJavaType().equals(TypeEnum.Character.getLiteral())
+                || requestBody.getJavaType().equals(TypeEnum.String.getLiteral())) {
             attributeRecord.setSqlType("VARCHAR");
+        } else if (requestBody.getJavaType().equals(TypeEnum.Time.getLiteral())) {
+            attributeRecord.setSqlType("TIME");
+        } else if (requestBody.getJavaType().equals(TypeEnum.Date.getLiteral())) {
+            attributeRecord.setSqlType("DATE");
+        } else if (requestBody.getJavaType().equals(TypeEnum.DateTime.getLiteral())) {
+            attributeRecord.setSqlType("DATETIME");
         }
         attributeRecord.store();
         return attributeId;

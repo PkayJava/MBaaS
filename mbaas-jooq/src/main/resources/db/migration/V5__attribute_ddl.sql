@@ -5,8 +5,8 @@ CREATE TABLE `attribute` (
   collection_id        VARCHAR(100) NOT NULL,
   name                 VARCHAR(255) NOT NULL,
 
-  sql_type             VARCHAR(255) NOT NULL,
-  java_type            VARCHAR(255) NOT NULL,
+  sql_type             VARCHAR(50)  NOT NULL,
+  java_type            VARCHAR(50)  NOT NULL,
   virtual              BIT(1)       NOT NULL,
 
   virtual_attribute_id VARCHAR(100),

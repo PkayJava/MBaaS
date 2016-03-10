@@ -4,17 +4,16 @@ import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
-import com.angkorteam.framework.extension.wicket.table.filter.DateFilteredJooqColumn;
-import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
-import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.table.filter.*;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
+import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
 import com.angkorteam.mbaas.server.provider.DocumentProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -80,15 +79,42 @@ public class DocumentManagementPage extends MasterPage implements ActionFiltered
             if (attributeRecord.getName().equals(jdbcColumnOwnerUserId) || attributeRecord.getName().equals(collection.getName() + "_id")) {
                 continue;
             }
-            if (String.class.getName().equals(attributeRecord.getJavaType())) {
+            if (TypeEnum.Boolean.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
-                columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(column, this), column, provider));
-            } else if (Date.class.getName().equals(attributeRecord.getJavaType())) {
+                columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Byte.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
-                columns.add(new DateFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
-            } else if (Integer.class.getName().equals(attributeRecord.getJavaType())) {
+                columns.add(new TextFilteredJooqColumn(Byte.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Short.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Short.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Integer.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Long.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Long.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Float.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Float.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Double.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Double.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Character.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(Character.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.String.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Time.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new TimeFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.Date.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new DateFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
+            } else if (TypeEnum.DateTime.getLiteral().equals(attributeRecord.getJavaType())) {
+                String column = attributeRecord.getName();
+                columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
             }
         }
 
@@ -104,8 +130,13 @@ public class DocumentManagementPage extends MasterPage implements ActionFiltered
         BookmarkablePageLink<Void> newDocumentLink = new BookmarkablePageLink<>("newDocumentLink", DocumentCreatePage.class, parameters);
         add(newDocumentLink);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", DocumentManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", DocumentManagementPage.class, getPageParameters());
         add(refreshLink);
+
+        BookmarkablePageLink<Void> attributeLink = new BookmarkablePageLink<>("attributeLink", AttributeManagementPage.class, getPageParameters());
+        add(attributeLink);
+
+
     }
 
     @Override

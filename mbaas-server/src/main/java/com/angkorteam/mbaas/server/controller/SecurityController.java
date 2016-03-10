@@ -6,7 +6,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
-import com.angkorteam.mbaas.server.function.MariaDBFunction;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.security.SecurityLogoutRequest;
@@ -15,6 +15,7 @@ import com.angkorteam.mbaas.plain.response.security.SecurityLoginResponse;
 import com.angkorteam.mbaas.plain.response.security.SecurityLogoutResponse;
 import com.angkorteam.mbaas.plain.response.security.SecurityLogoutSessionResponse;
 import com.angkorteam.mbaas.plain.response.security.SecuritySignUpResponse;
+import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -167,8 +168,10 @@ public class SecurityController {
         Map<String, Object> columnValues = new LinkedHashMap<>();
 
         Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
+        Map<String, TypeEnum> typeEnums = new LinkedHashMap<>();
         for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
             attributeRecords.put(attributeRecord.getName(), attributeRecord);
+            typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
         }
 
         Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
@@ -260,7 +263,7 @@ public class SecurityController {
         if (!virtualColumns.isEmpty()) {
             for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
                 if (!entry.getValue().isEmpty()) {
-                    columnNames.add(entry.getKey() + " = " + MariaDBFunction.columnCreate(entry.getValue()));
+                    columnNames.add(entry.getKey() + " = " + MariaDBFunction.columnCreate(entry.getValue(), typeEnums));
                 }
             }
             NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);

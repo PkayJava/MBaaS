@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
 import com.angkorteam.mbaas.server.validator.AttributeNameValidator;
@@ -20,8 +21,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -76,17 +77,10 @@ public class AttributeCreatePage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        List<String> javaTypes = Arrays.asList(
-                Boolean.class.getName(),
-                Byte.class.getName(),
-                Short.class.getName(),
-                Integer.class.getName(),
-                Long.class.getName(),
-                Float.class.getName(),
-                Double.class.getName(),
-                Date.class.getName(),
-                Character.class.getName(),
-                String.class.getName());
+        List<String> javaTypes = new ArrayList<>();
+        for (TypeEnum typeEnum : TypeEnum.values()) {
+            javaTypes.add(typeEnum.getLiteral());
+        }
         this.javaTypeField = new DropDownChoice<>("javaTypeField", new PropertyModel<>(this, "javaType"), javaTypes);
         this.javaTypeField.setRequired(true);
         this.form.add(this.javaTypeField);

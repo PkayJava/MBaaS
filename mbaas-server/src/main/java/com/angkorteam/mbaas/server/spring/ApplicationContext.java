@@ -8,6 +8,8 @@ import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.ColumnEnum;
 import com.angkorteam.mbaas.plain.enums.IndexInfoEnum;
 import com.angkorteam.mbaas.plain.enums.PrimaryKeyEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.wicket.WicketRuntimeException;
@@ -74,17 +76,21 @@ public class ApplicationContext implements ServletContextListener {
         LOGGER.info("initializing default role");
         initRole(context);
         LOGGER.info("initializing default user");
-        initUser(context);
+        initUser(context, jdbcTemplate);
         LOGGER.info("initializing system collections, attributes, indexes");
         initDDL(context, dataSource);
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
     }
 
-    protected void initUser(DSLContext context) {
+    protected void initUser(DSLContext context, JdbcTemplate jdbcTemplate) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         UserTable userTable = Tables.USER.as("userTable");
         RoleTable roleTable = Tables.ROLE.as("roleTable");
+        Map<String, TypeEnum> typeEnums = new HashMap<>();
+        typeEnums.put("_temp", TypeEnum.String);
+        Map<String, Object> temp = new LinkedHashMap<>();
+        temp.put("_temp", "_temp");
 
         UserRecord adminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
         if (adminRecord == null) {
@@ -103,6 +109,7 @@ public class ApplicationContext implements ServletContextListener {
             adminRecord.setRoleId(roleRecord.getRoleId());
             adminRecord.store();
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
+            jdbcTemplate.update("UPDATE " + Tables.USER.getName() + " SET " + userTable.EXTRA.getName() + " = " + MariaDBFunction.columnCreate(temp, typeEnums) + " WHERE " + userTable.USER_ID.getName() + " = ?", uuid);
         }
 
         UserRecord mbaasRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_MBAAS))).fetchOneInto(userTable);
@@ -122,6 +129,7 @@ public class ApplicationContext implements ServletContextListener {
             mbaasRecord.setRoleId(roleRecord.getRoleId());
             mbaasRecord.store();
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_MBAAS_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
+            jdbcTemplate.update("UPDATE " + Tables.USER.getName() + " SET " + userTable.EXTRA.getName() + " = " + MariaDBFunction.columnCreate(temp, typeEnums) + " WHERE " + userTable.USER_ID.getName() + " = ?", uuid);
         }
 
         UserRecord internalAdminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_INTERNAL_ADMIN))).fetchOneInto(userTable);
@@ -141,6 +149,7 @@ public class ApplicationContext implements ServletContextListener {
             internalAdminRecord.setRoleId(roleRecord.getRoleId());
             internalAdminRecord.store();
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_INTERNAL_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
+            jdbcTemplate.update("UPDATE " + Tables.USER.getName() + " SET " + userTable.EXTRA.getName() + " = " + MariaDBFunction.columnCreate(temp, typeEnums) + " WHERE " + userTable.USER_ID.getName() + " = ?", uuid);
         }
     }
 
@@ -263,20 +272,32 @@ public class ApplicationContext implements ServletContextListener {
                                 attributeRecord.setExposed(true);
                             }
 
-                            if (dataType == Types.INTEGER) {
-                                attributeRecord.setJavaType(Integer.class.getName());
+                            if (dataType == Types.BIT || dataType == Types.BOOLEAN) {
+                                attributeRecord.setJavaType(TypeEnum.Boolean.getLiteral());
+                                attributeRecord.setSqlType(typeName);
+                            } else if (dataType == Types.INTEGER) {
+                                attributeRecord.setJavaType(TypeEnum.Integer.getLiteral());
+                                attributeRecord.setSqlType(typeName);
+                            } else if (dataType == Types.DOUBLE || dataType == Types.DECIMAL) {
+                                attributeRecord.setJavaType(TypeEnum.Double.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.VARCHAR) {
-                                attributeRecord.setJavaType(String.class.getName());
+                                attributeRecord.setJavaType(TypeEnum.String.getLiteral());
+                                attributeRecord.setSqlType(typeName);
+                            } else if (dataType == Types.CHAR) {
+                                attributeRecord.setJavaType(TypeEnum.Character.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.TIMESTAMP) {
-                                attributeRecord.setJavaType(Date.class.getName());
+                                attributeRecord.setJavaType(TypeEnum.DateTime.getLiteral());
+                                attributeRecord.setSqlType(typeName);
+                            } else if (dataType == Types.DATE) {
+                                attributeRecord.setJavaType(TypeEnum.Date.getLiteral());
+                                attributeRecord.setSqlType(typeName);
+                            } else if (dataType == Types.TIME) {
+                                attributeRecord.setJavaType(TypeEnum.Time.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.LONGVARBINARY) {
-                                attributeRecord.setJavaType(Byte.class.getName() + "[]");
-                                attributeRecord.setSqlType(typeName);
-                            } else if (dataType == Types.BIT) {
-                                attributeRecord.setJavaType(Boolean.class.getName());
+                                attributeRecord.setJavaType(TypeEnum.Blob.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else {
                                 throw new WicketRuntimeException("field type unknown " + dataType + " => " + typeName);

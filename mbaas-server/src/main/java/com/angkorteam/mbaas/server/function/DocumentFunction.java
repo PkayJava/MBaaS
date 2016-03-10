@@ -4,10 +4,9 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.SessionTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -39,10 +38,12 @@ public class DocumentFunction {
 
         Map<String, AttributeRecord> attributeIdRecords = new LinkedHashMap<>();
         Map<String, AttributeRecord> attributeNameRecords = new LinkedHashMap<>();
+        Map<String, TypeEnum> typeEnums = new LinkedHashMap<>();
 
         for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
             attributeIdRecords.put(attributeRecord.getAttributeId(), attributeRecord);
             attributeNameRecords.put(attributeRecord.getName(), attributeRecord);
+            typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
         }
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -87,7 +88,7 @@ public class DocumentFunction {
         }
         for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
             if (!entry.getValue().isEmpty()) {
-                columns.add(entry.getKey() + " = " + MariaDBFunction.columnAdd(entry.getKey(), entry.getValue()));
+                columns.add(entry.getKey() + " = " + MariaDBFunction.columnAdd(entry.getKey(), entry.getValue(), typeEnums));
             }
         }
         values.put(collection + "_id", documentId);
@@ -104,10 +105,12 @@ public class DocumentFunction {
 
         Map<String, AttributeRecord> attributeIdRecords = new LinkedHashMap<>();
         Map<String, AttributeRecord> attributeNameRecords = new LinkedHashMap<>();
+        Map<String, TypeEnum> typeEnums = new LinkedHashMap<>();
         if (collectionRecord != null) {
             for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
                 attributeIdRecords.put(attributeRecord.getAttributeId(), attributeRecord);
                 attributeNameRecords.put(attributeRecord.getName(), attributeRecord);
+                typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
             }
         }
 
@@ -169,7 +172,7 @@ public class DocumentFunction {
 
         for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
             columnNames.add(entry.getKey());
-            columnKeys.add(MariaDBFunction.columnCreate(entry.getValue()));
+            columnKeys.add(MariaDBFunction.columnCreate(entry.getValue(), typeEnums));
         }
 
         {

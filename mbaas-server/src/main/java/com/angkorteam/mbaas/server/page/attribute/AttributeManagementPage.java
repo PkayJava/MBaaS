@@ -13,6 +13,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
+import com.angkorteam.mbaas.server.page.document.DocumentManagementPage;
 import com.angkorteam.mbaas.server.provider.AttributeProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -82,11 +83,14 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
 
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collectionId);
-        BookmarkablePageLink<Void> newAttributeLink = new BookmarkablePageLink<Void>("newAttributeLink", AttributeCreatePage.class, parameters);
+        BookmarkablePageLink<Void> newAttributeLink = new BookmarkablePageLink<>("newAttributeLink", AttributeCreatePage.class, parameters);
         add(newAttributeLink);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", AttributeManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", AttributeManagementPage.class, getPageParameters());
         add(refreshLink);
+
+        BookmarkablePageLink<Void> documentLink = new BookmarkablePageLink<>("documentLink", DocumentManagementPage.class, getPageParameters());
+        add(documentLink);
     }
 
     @Override

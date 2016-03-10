@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -57,9 +58,18 @@ public class DocumentCreatePage extends MasterPage {
         List<AttributePojo> attributePojos = context.select(attributeTable.fields())
                 .from(attributeTable)
                 .where(attributeTable.COLLECTION_ID.eq(collectionId))
-                .and(attributeTable.JAVA_TYPE.eq(String.class.getName())
-                        .or(attributeTable.JAVA_TYPE.eq(Date.class.getName()))
-                        .or(attributeTable.JAVA_TYPE.eq(Integer.class.getName())))
+                .and(attributeTable.JAVA_TYPE.eq(TypeEnum.Boolean.getLiteral())
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.Byte.getLiteral()))
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.Short.getLiteral()))
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.Integer.getLiteral()))
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.Long.getLiteral()))
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.Float.getLiteral()))
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.Double.getLiteral()))
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.Character.getLiteral()))
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.String.getLiteral()))
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.Time.getLiteral()))
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.Date.getLiteral()))
+                        .or(attributeTable.JAVA_TYPE.eq(TypeEnum.DateTime.getLiteral())))
                 .and(attributeTable.SYSTEM.eq(false))
                 .fetchInto(AttributePojo.class);
 

@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.PermissionEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import com.angkorteam.mbaas.plain.request.document.*;
 import com.angkorteam.mbaas.plain.response.document.*;
@@ -125,12 +126,12 @@ public class DocumentController {
                     errorMessages.put(entry.getKey(), "is not allow");
                 } else {
                     AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
-                    if (attributeRecord.getJavaType().equals(Date.class.getName())
-                            || attributeRecord.getJavaType().equals(Time.class.getName())
-                            || attributeRecord.getJavaType().equals(Timestamp.class.getName())) {
+                    if (attributeRecord.getJavaType().equals(TypeEnum.Date.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Time.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.DateTime.getLiteral())) {
                         if (attributeRecord.getNullable()) {
                             if (entry.getValue() != null) {
-                                if (entry.getValue().getClass().getName().equals(String.class.getName())) {
+                                if (entry.getValue().getClass().getName().equals(TypeEnum.String.getLiteral())) {
                                     try {
                                         FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
                                     } catch (ParseException e) {
@@ -155,17 +156,17 @@ public class DocumentController {
                                 errorMessages.put(entry.getKey(), "is required");
                             }
                         }
-                    } else if (attributeRecord.getJavaType().equals(Byte.class.getName()) || attributeRecord.getJavaType().equals(byte.class.getName())
-                            || attributeRecord.getJavaType().equals(Short.class.getName()) || attributeRecord.getJavaType().equals(short.class.getName())
-                            || attributeRecord.getJavaType().equals(Integer.class.getName()) || attributeRecord.getJavaType().equals(int.class.getName())
-                            || attributeRecord.getJavaType().equals(Long.class.getName()) || attributeRecord.getJavaType().equals(long.class.getName())) {
+                    } else if (attributeRecord.getJavaType().equals(TypeEnum.Byte.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Short.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Integer.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Long.getLiteral())) {
                         if (attributeRecord.getNullable()) {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
-                                        || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
-                                        || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
-                                        || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Byte.getLiteral())
+                                        || clazzName.equals(TypeEnum.Short.getLiteral())
+                                        || clazzName.equals(TypeEnum.Integer.getLiteral())
+                                        || clazzName.equals(TypeEnum.Long.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -173,10 +174,10 @@ public class DocumentController {
                         } else {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
-                                        || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
-                                        || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
-                                        || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Byte.getLiteral())
+                                        || clazzName.equals(TypeEnum.Short.getLiteral())
+                                        || clazzName.equals(TypeEnum.Integer.getLiteral())
+                                        || clazzName.equals(TypeEnum.Long.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -184,13 +185,13 @@ public class DocumentController {
                                 errorMessages.put(entry.getKey(), "is required");
                             }
                         }
-                    } else if (attributeRecord.getJavaType().equals(Float.class.getName()) || attributeRecord.getJavaType().equals(float.class.getName())
-                            || attributeRecord.getJavaType().equals(Double.class.getName()) || attributeRecord.getJavaType().equals(double.class.getName())) {
+                    } else if (attributeRecord.getJavaType().equals(TypeEnum.Float.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Double.getLiteral())) {
                         if (attributeRecord.getNullable()) {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
-                                        || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Float.getLiteral())
+                                        || clazzName.equals(TypeEnum.Double.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -198,8 +199,8 @@ public class DocumentController {
                         } else {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
-                                        || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Float.getLiteral())
+                                        || clazzName.equals(TypeEnum.Double.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -207,11 +208,11 @@ public class DocumentController {
                                 errorMessages.put(entry.getKey(), "is required");
                             }
                         }
-                    } else if (attributeRecord.getJavaType().equals(Boolean.class.getName()) || attributeRecord.getJavaType().equals(boolean.class.getName())) {
+                    } else if (attributeRecord.getJavaType().equals(TypeEnum.Boolean.getLiteral())) {
                         if (attributeRecord.getNullable()) {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Boolean.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -219,7 +220,7 @@ public class DocumentController {
                         } else {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Boolean.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -227,13 +228,13 @@ public class DocumentController {
                                 errorMessages.put(entry.getKey(), "is required");
                             }
                         }
-                    } else if (attributeRecord.getJavaType().equals(String.class.getName())
-                            || attributeRecord.getJavaType().equals(Character.class.getName()) || attributeRecord.getJavaType().equals(char.class.getName())) {
+                    } else if (attributeRecord.getJavaType().equals(TypeEnum.String.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Character.getLiteral())) {
                         if (attributeRecord.getNullable()) {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(String.class.getName())
-                                        || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
+                                if (clazzName.equals(TypeEnum.String.getLiteral())
+                                        || clazzName.equals(TypeEnum.Character.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -241,8 +242,8 @@ public class DocumentController {
                         } else {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(String.class.getName())
-                                        || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
+                                if (clazzName.equals(TypeEnum.String.getLiteral())
+                                        || clazzName.equals(TypeEnum.Character.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -419,12 +420,12 @@ public class DocumentController {
                     errorMessages.put(entry.getKey(), "is not allow");
                 } else {
                     AttributeRecord attributeRecord = attributeNameRecords.get(entry.getKey());
-                    if (attributeRecord.getJavaType().equals(Date.class.getName())
-                            || attributeRecord.getJavaType().equals(Time.class.getName())
-                            || attributeRecord.getJavaType().equals(Timestamp.class.getName())) {
+                    if (attributeRecord.getJavaType().equals(TypeEnum.Date.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Time.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.DateTime.getLiteral())) {
                         if (attributeRecord.getNullable()) {
                             if (entry.getValue() != null) {
-                                if (entry.getValue().getClass().getName().equals(String.class.getName())) {
+                                if (entry.getValue().getClass().getName().equals(TypeEnum.String.getLiteral())) {
                                     try {
                                         FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
                                     } catch (ParseException e) {
@@ -436,7 +437,7 @@ public class DocumentController {
                             }
                         } else {
                             if (entry.getValue() != null) {
-                                if (entry.getValue().getClass().getName().equals(String.class.getName())) {
+                                if (entry.getValue().getClass().getName().equals(TypeEnum.String.getLiteral())) {
                                     try {
                                         FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
                                     } catch (ParseException e) {
@@ -449,17 +450,17 @@ public class DocumentController {
                                 errorMessages.put(entry.getKey(), "is required");
                             }
                         }
-                    } else if (attributeRecord.getJavaType().equals(Byte.class.getName()) || attributeRecord.getJavaType().equals(byte.class.getName())
-                            || attributeRecord.getJavaType().equals(Short.class.getName()) || attributeRecord.getJavaType().equals(short.class.getName())
-                            || attributeRecord.getJavaType().equals(Integer.class.getName()) || attributeRecord.getJavaType().equals(int.class.getName())
-                            || attributeRecord.getJavaType().equals(Long.class.getName()) || attributeRecord.getJavaType().equals(long.class.getName())) {
+                    } else if (attributeRecord.getJavaType().equals(TypeEnum.Byte.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Short.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Integer.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Long.getLiteral())) {
                         if (attributeRecord.getNullable()) {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
-                                        || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
-                                        || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
-                                        || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Byte.getLiteral())
+                                        || clazzName.equals(TypeEnum.Short.getLiteral())
+                                        || clazzName.equals(TypeEnum.Integer.getLiteral())
+                                        || clazzName.equals(TypeEnum.Long.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -467,10 +468,10 @@ public class DocumentController {
                         } else {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Byte.class.getName()) || clazzName.equals(byte.class.getName())
-                                        || clazzName.equals(Short.class.getName()) || clazzName.equals(short.class.getName())
-                                        || clazzName.equals(Integer.class.getName()) || clazzName.equals(int.class.getName())
-                                        || clazzName.equals(Long.class.getName()) || clazzName.equals(long.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Byte.getLiteral())
+                                        || clazzName.equals(TypeEnum.Short.getLiteral())
+                                        || clazzName.equals(TypeEnum.Integer.getLiteral())
+                                        || clazzName.equals(TypeEnum.Long.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -478,13 +479,13 @@ public class DocumentController {
                                 errorMessages.put(entry.getKey(), "is required");
                             }
                         }
-                    } else if (attributeRecord.getJavaType().equals(Float.class.getName()) || attributeRecord.getJavaType().equals(float.class.getName())
-                            || attributeRecord.getJavaType().equals(Double.class.getName()) || attributeRecord.getJavaType().equals(double.class.getName())) {
+                    } else if (attributeRecord.getJavaType().equals(TypeEnum.Float.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Double.getLiteral())) {
                         if (attributeRecord.getNullable()) {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
-                                        || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Float.getLiteral())
+                                        || clazzName.equals(TypeEnum.Double.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -492,8 +493,8 @@ public class DocumentController {
                         } else {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Float.class.getName()) || clazzName.equals(float.class.getName())
-                                        || clazzName.equals(Double.class.getName()) || clazzName.equals(double.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Float.getLiteral())
+                                        || clazzName.equals(TypeEnum.Double.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -501,11 +502,11 @@ public class DocumentController {
                                 errorMessages.put(entry.getKey(), "is required");
                             }
                         }
-                    } else if (attributeRecord.getJavaType().equals(Boolean.class.getName()) || attributeRecord.getJavaType().equals(boolean.class.getName())) {
+                    } else if (attributeRecord.getJavaType().equals(TypeEnum.Boolean.getLiteral())) {
                         if (attributeRecord.getNullable()) {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Boolean.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -513,7 +514,7 @@ public class DocumentController {
                         } else {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(Boolean.class.getName()) || clazzName.equals(boolean.class.getName())) {
+                                if (clazzName.equals(TypeEnum.Boolean.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -521,13 +522,13 @@ public class DocumentController {
                                 errorMessages.put(entry.getKey(), "is required");
                             }
                         }
-                    } else if (attributeRecord.getJavaType().equals(String.class.getName())
-                            || attributeRecord.getJavaType().equals(Character.class.getName()) || attributeRecord.getJavaType().equals(char.class.getName())) {
+                    } else if (attributeRecord.getJavaType().equals(TypeEnum.String.getLiteral())
+                            || attributeRecord.getJavaType().equals(TypeEnum.Character.getLiteral())) {
                         if (attributeRecord.getNullable()) {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(String.class.getName())
-                                        || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
+                                if (clazzName.equals(TypeEnum.String.getLiteral())
+                                        || clazzName.equals(TypeEnum.Character.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
@@ -535,8 +536,8 @@ public class DocumentController {
                         } else {
                             if (entry.getValue() != null) {
                                 String clazzName = entry.getValue().getClass().getName();
-                                if (clazzName.equals(String.class.getName())
-                                        || clazzName.equals(Character.class.getName()) || clazzName.equals(char.class.getName())) {
+                                if (clazzName.equals(TypeEnum.String.getLiteral())
+                                        || clazzName.equals(TypeEnum.Character.getLiteral())) {
                                 } else {
                                     errorMessages.put(entry.getKey(), "is bad value");
                                 }
