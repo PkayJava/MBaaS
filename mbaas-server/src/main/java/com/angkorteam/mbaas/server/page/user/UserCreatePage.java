@@ -154,8 +154,6 @@ public class UserCreatePage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         CollectionRecord collectionRecord = getDSLContext().select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
         DocumentCreateRequest requestBody = new DocumentCreateRequest();

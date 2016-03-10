@@ -158,13 +158,27 @@ public class DocumentFunction {
             }
         }
 
+        boolean found = false;
         for (Map.Entry<String, AttributeRecord> entry : attributeNameRecords.entrySet()) {
             if (entry.getValue().getVirtual()) {
+                found = true;
                 AttributeRecord physicalRecord = attributeIdRecords.get(entry.getValue().getVirtualAttributeId());
                 if (virtualColumns.get(physicalRecord.getName()) == null || virtualColumns.get(physicalRecord.getName()).isEmpty()) {
                     Map<String, Object> temp = new LinkedHashMap<>();
                     temp.put("_temp", "_temp");
+                    typeEnums.put("_temp", TypeEnum.String);
                     virtualColumns.put(physicalRecord.getName(), temp);
+                }
+            }
+        }
+        if (!found) {
+            for (Map.Entry<String, AttributeRecord> entry : attributeNameRecords.entrySet()) {
+                AttributeRecord attributeRecord = entry.getValue();
+                if (attributeRecord.getJavaType().equals(TypeEnum.Blob.getLiteral()) && attributeRecord.getSystem()) {
+                    Map<String, Object> temp = new LinkedHashMap<>();
+                    temp.put("_temp", "_temp");
+                    typeEnums.put("_temp", TypeEnum.String);
+                    virtualColumns.put(attributeRecord.getName(), temp);
                 }
             }
         }
