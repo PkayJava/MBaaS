@@ -1,13 +1,11 @@
 CREATE TABLE setting (
 
-  setting_id VARCHAR(100) NOT NULL,
+  `setting_id`  VARCHAR(255) NOT NULL,
+  `description` VARCHAR(255) NOT NULL,
+  `value`       VARCHAR(255) NOT NULL,
+  system        BIT(1)       NOT NULL DEFAULT 0,
+  optimistic    INT(11)      NOT NULL DEFAULT 0,
 
-  `label`    VARCHAR(255) NOT NULL,
-  `key`      VARCHAR(255) NOT NULL,
-  `value`    VARCHAR(255) NOT NULL,
-  java_type  VARCHAR(255) NOT NULL,
-
-  UNIQUE KEY (`key`),
-  PRIMARY KEY (setting_id)
+  PRIMARY KEY (`setting_id`)
 
 );
