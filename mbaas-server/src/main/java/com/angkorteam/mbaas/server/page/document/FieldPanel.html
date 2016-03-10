@@ -2,11 +2,9 @@
 <html xmlns:wicket="http://wicket.apache.org">
 <body>
 <wicket:panel>
-    <td><span wicket:id="label"/></td>
-    <td>
-        <input wicket:id="field" type="text"/>
-        <span wicket:id="feedback"/>
-    </td>
+    <label wicket:id="label"/>
+    <input wicket:id="field" type="text" class="form-control"/>
+    <span wicket:id="feedback" class="help-block"/>
 </wicket:panel>
 </body>
 </html>

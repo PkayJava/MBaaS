@@ -3,8 +3,11 @@ package com.angkorteam.mbaas.server.wicket;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ResourceTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ResourceRecord;
+import org.apache.wicket.*;
+import org.apache.wicket.core.request.ClientInfo;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.protocol.http.request.WebClientInfo;
 import org.jooq.DSLContext;
 
 import java.util.UUID;
@@ -22,8 +25,13 @@ public abstract class JooqUtils extends AbstractReadOnlyModel<String> {
         return new Model(key, language, null);
     }
 
-    public static IModel<String> lookup(String key, Page page) {
-        return new Model(key, page.getNavigatorLanguage(), page.getClass().getSimpleName());
+    public static IModel<String> lookup(String key, org.apache.wicket.Page page) {
+        ClientInfo clientInfo = page.getSession().getClientInfo();
+        if (clientInfo instanceof WebClientInfo) {
+            return new Model(key, ((WebClientInfo) clientInfo).getProperties().getNavigatorLanguage(), page.getClass().getSimpleName());
+        } else {
+            return new Model(key, "en", page.getClass().getSimpleName());
+        }
     }
 
     private static class Model extends AbstractReadOnlyModel<String> {

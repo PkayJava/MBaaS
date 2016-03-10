@@ -8,12 +8,10 @@ import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
-import com.angkorteam.mbaas.server.Scope;
-import com.angkorteam.mbaas.server.function.AttributeFunction;
 import com.angkorteam.mbaas.server.function.UserAttributeFunction;
 import com.angkorteam.mbaas.server.validator.AttributeNameValidator;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
@@ -29,7 +27,7 @@ import java.util.List;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/user/attribute/create")
-public class UserAttributeCreatePage extends Page {
+public class UserAttributeCreatePage extends MasterPage {
 
     private String collectionId;
 
@@ -51,6 +49,11 @@ public class UserAttributeCreatePage extends Page {
 
     private Form<Void> form;
     private Button saveButton;
+
+    @Override
+    public String getPageHeader() {
+        return "Create New User Attribute ";
+    }
 
     @Override
     protected void onInitialize() {

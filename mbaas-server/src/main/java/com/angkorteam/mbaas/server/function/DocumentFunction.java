@@ -156,6 +156,17 @@ public class DocumentFunction {
             }
         }
 
+        for (Map.Entry<String, AttributeRecord> entry : attributeNameRecords.entrySet()) {
+            if (entry.getValue().getVirtual()) {
+                AttributeRecord physicalRecord = attributeIdRecords.get(entry.getValue().getVirtualAttributeId());
+                if (virtualColumns.get(physicalRecord.getName()) == null || virtualColumns.get(physicalRecord.getName()).isEmpty()) {
+                    Map<String, Object> temp = new LinkedHashMap<>();
+                    temp.put("_temp", "_temp");
+                    virtualColumns.put(physicalRecord.getName(), temp);
+                }
+            }
+        }
+
         for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
             columnNames.add(entry.getKey());
             columnKeys.add(MariaDBFunction.columnCreate(entry.getValue()));

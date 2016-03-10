@@ -5,12 +5,13 @@ import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
 import com.angkorteam.mbaas.server.validator.AttributeNameValidator;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
@@ -28,9 +29,10 @@ import java.util.List;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/attribute/create")
-public class AttributeCreatePage extends Page {
+public class AttributeCreatePage extends MasterPage {
 
     private String collectionId;
+    private CollectionPojo collection;
 
     private String name;
     private TextField<String> nameField;
@@ -48,10 +50,21 @@ public class AttributeCreatePage extends Page {
     private Button saveButton;
 
     @Override
+    public String getPageHeader() {
+        return "Create New Collection Attribute :: " + this.collection.getName();
+    }
+
+    @Override
     protected void onInitialize() {
         super.onInitialize();
 
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+
+        DSLContext context = getDSLContext();
+
         this.collectionId = getPageParameters().get("collectionId").toString();
+
+        this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
 
         this.form = new Form<>("form");
         add(this.form);

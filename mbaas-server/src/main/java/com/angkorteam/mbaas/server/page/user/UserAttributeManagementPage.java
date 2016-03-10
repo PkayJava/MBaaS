@@ -14,8 +14,8 @@ import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRe
 import com.angkorteam.mbaas.server.function.UserAttributeFunction;
 import com.angkorteam.mbaas.server.provider.UserAttributeProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -32,9 +32,14 @@ import java.util.Map;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/user/attribute/management")
-public class UserAttributeManagementPage extends Page implements ActionFilteredJooqColumn.Event {
+public class UserAttributeManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     private String collectionId;
+
+    @Override
+    public String getPageHeader() {
+        return "User Attribute Management";
+    }
 
     @Override
     protected void onInitialize() {
@@ -133,4 +138,14 @@ public class UserAttributeManagementPage extends Page implements ActionFilteredJ
         return false;
     }
 
+    @Override
+    public String onCSSLink(String link, Map<String, Object> object) {
+        if ("Delete".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        if ("Permission".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        return "";
+    }
 }

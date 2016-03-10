@@ -6,20 +6,19 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.function.MariaDBFunction;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.*;
 
@@ -28,9 +27,10 @@ import java.util.*;
  */
 @Mount("/document/modify")
 @AuthorizeInstantiation("administrator")
-public class DocumentModifyPage extends Page {
+public class DocumentModifyPage extends MasterPage {
 
     private String collectionId;
+    private CollectionPojo collection;
 
     private String documentId;
 
@@ -39,16 +39,23 @@ public class DocumentModifyPage extends Page {
     private Form<Void> form;
 
     @Override
+    public String getPageHeader() {
+        return "Modify Document :: " + collection.getName();
+    }
+
+    @Override
     protected void onInitialize() {
         super.onInitialize();
 
         this.documentId = getPageParameters().get("documentId").toString();
         this.collectionId = getPageParameters().get("collectionId").toString();
 
-        this.fields = new HashMap<>();
-        DSLContext context = getDSLContext();
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        DSLContext context = getDSLContext();
+        this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
+
+        this.fields = new HashMap<>();
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
         List<AttributePojo> attributes = context.select(attributeTable.fields())
                 .from(attributeTable)

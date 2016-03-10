@@ -7,8 +7,8 @@ import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
 import com.angkorteam.mbaas.server.validator.RoleNameValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -21,7 +21,7 @@ import org.jooq.DSLContext;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/role/modify")
-public class RoleModifyPage extends Page {
+public class RoleModifyPage extends MasterPage {
 
     private String roleId;
     private Integer optimistic;
@@ -37,6 +37,11 @@ public class RoleModifyPage extends Page {
     private Button saveButton;
 
     private Form<Void> form;
+
+    @Override
+    public String getPageHeader() {
+        return "Modify Role";
+    }
 
     @Override
     protected void onInitialize() {

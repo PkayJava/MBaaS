@@ -5,8 +5,8 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.plain.request.collection.CollectionCreateRequest;
 import com.angkorteam.mbaas.server.function.CollectionFunction;
 import com.angkorteam.mbaas.server.validator.CollectionNameValidator;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -17,7 +17,7 @@ import org.apache.wicket.model.PropertyModel;
  */
 @Mount("/collection/create")
 @AuthorizeInstantiation("administrator")
-public class CollectionCreatePage extends Page {
+public class CollectionCreatePage extends MasterPage {
 
     private String name;
     private TextField<String> nameField;
@@ -26,6 +26,11 @@ public class CollectionCreatePage extends Page {
     private Form<Void> form;
 
     private Button saveButton;
+
+    @Override
+    public String getPageHeader() {
+        return "Create New Collection";
+    }
 
     @Override
     protected void onInitialize() {

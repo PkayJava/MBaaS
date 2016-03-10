@@ -6,11 +6,12 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -27,20 +28,30 @@ import java.util.Map;
  */
 @Mount("/document/create")
 @AuthorizeInstantiation("administrator")
-public class DocumentCreatePage extends Page {
+public class DocumentCreatePage extends MasterPage {
 
     private String collectionId;
+    private CollectionPojo collection;
 
     private Map<String, Object> fields;
 
     private Form<Void> form;
 
     @Override
+    public String getPageHeader() {
+        return "Create New Document :: " + this.collection.getName();
+    }
+
+    @Override
     protected void onInitialize() {
         super.onInitialize();
         this.fields = new HashMap<>();
         this.collectionId = getPageParameters().get("collectionId").toString();
+
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         DSLContext context = getDSLContext();
+        this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
+
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
         List<AttributePojo> attributePojos = context.select(attributeTable.fields())

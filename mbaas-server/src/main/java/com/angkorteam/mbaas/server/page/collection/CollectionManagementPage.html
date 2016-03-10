@@ -4,12 +4,19 @@
     <meta charset="utf-8"/>
 </head>
 <body>
-<form wicket:id="filter-form">
-    <table wicket:id="table"/>
-</form>
-<hr/>
-<wicket:link>
-    <a href="CollectionCreatePage.html">New Collection</a>
-</wicket:link>
+<wicket:extend>
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <wicket:link>
+                <a href="CollectionCreatePage.html">New Collection</a>
+            </wicket:link>
+        </div>
+        <div class="box-body">
+            <form wicket:id="filter-form">
+                <table wicket:id="table"/>
+            </form>
+        </div>
+    </div>
+</wicket:extend>
 </body>
 </html>

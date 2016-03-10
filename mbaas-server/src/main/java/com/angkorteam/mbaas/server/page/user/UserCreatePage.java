@@ -2,7 +2,6 @@ package com.angkorteam.mbaas.server.page.user;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
@@ -12,8 +11,8 @@ import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
 import com.angkorteam.mbaas.server.validator.UserLoginValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
@@ -32,7 +31,7 @@ import java.util.UUID;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/user/create")
-public class UserCreatePage extends Page {
+public class UserCreatePage extends MasterPage {
 
     private String login;
     private TextField<String> loginField;
@@ -53,6 +52,11 @@ public class UserCreatePage extends Page {
     private Button saveButton;
 
     private Form<Void> form;
+
+    @Override
+    public String getPageHeader() {
+        return "Create New User";
+    }
 
     @Override
     protected void onInitialize() {

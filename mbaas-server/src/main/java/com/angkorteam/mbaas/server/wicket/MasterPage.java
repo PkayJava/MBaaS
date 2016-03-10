@@ -1,30 +1,44 @@
 package com.angkorteam.mbaas.server.wicket;
 
+import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.WicketTable;
 import com.angkorteam.mbaas.model.entity.tables.records.WicketRecord;
-import org.apache.wicket.markup.html.WebPage;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Date;
+import java.util.List;
 
 /**
- * Created by socheat on 3/1/16.
+ * Created by socheat on 3/10/16.
  */
-public class Page extends WebPage {
+public abstract class MasterPage extends AdminLTEPage {
 
-    public Page() {
+    private Label pageHeaderLabel;
+    private Label pageDescriptionLabel;
+
+    public MasterPage() {
     }
 
-    public Page(IModel<?> model) {
+    public MasterPage(IModel<?> model) {
         super(model);
     }
 
-    public Page(PageParameters parameters) {
+    public MasterPage(PageParameters parameters) {
         super(parameters);
+    }
+
+    public String getPageHeader() {
+        return null;
+    }
+
+    public String getPageDescription() {
+        return null;
     }
 
     @Override
@@ -42,6 +56,11 @@ public class Page extends WebPage {
         }
 
         super.onInitialize();
+
+        this.pageHeaderLabel = new Label("pageHeaderLabel", new PropertyModel<>(this, "pageHeader"));
+        add(this.pageHeaderLabel);
+        this.pageDescriptionLabel = new Label("pageDescriptionLabel", new PropertyModel<>(this, "pageDescription"));
+        add(this.pageDescriptionLabel);
     }
 
     @Override
@@ -62,5 +81,4 @@ public class Page extends WebPage {
         Application application = (Application) getApplication();
         return application.getJdbcTemplate();
     }
-
 }

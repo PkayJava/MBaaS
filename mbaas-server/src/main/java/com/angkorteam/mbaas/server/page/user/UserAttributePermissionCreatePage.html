@@ -4,31 +4,29 @@
     <meta charset="utf-8"/>
 </head>
 <body>
-<form wicket:id="form">
-    <table border="0">
-        <tr>
-            <td>Name</td>
-            <td>
-                <span wicket:id="nameField"/>
-            </td>
-        </tr>
-        <tr>
-            <td>Scope</td>
-            <td>
-                <select wicket:id="scopeField"/>
-                <span wicket:id="scopeFeedback"/>
-            </td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>
+<wicket:extend>
+    <div class="box box-primary">
+        <form role="form" wicket:id="form">
+            <div class="box-body">
+                <div class="form-group">
+                    <label>Name</label>
+                    <span wicket:id="nameField" class="form-control" disabled="true"/>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="scopeField">Scope</label>
+                    <select wicket:id="scopeField" class="form-control"/>
+                    <span wicket:id="scopeFeedback" class="help-block"/>
+                </div>
+            </div>
+
+            <div class="box-footer">
                 <wicket:link>
-                    <a href="UserAttributeManagementPage.html">Close</a>
+                    <a class="btn btn-primary" href="UserAttributeManagementPage.html">Close</a>
                 </wicket:link>
-                <input wicket:id="saveButton" type="submit" value="Save"/>
-            </td>
-        </tr>
-    </table>
-</form>
+                <button wicket:id="saveButton" type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</wicket:extend>
 </body>
 </html>

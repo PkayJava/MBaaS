@@ -4,32 +4,30 @@
     <meta charset="utf-8"/>
 </head>
 <body>
-<form wicket:id="form">
-    <table border="0">
-        <tr>
-            <td>Name</td>
-            <td>
-                <input wicket:id="nameField" type="text"/>
-                <span wicket:id="nameFeedback"/>
-            </td>
-        </tr>
-        <tr>
-            <td>Description</td>
-            <td>
-                <input wicket:id="descriptionField" type="text"/>
-                <span wicket:id="descriptionFeedback"/>
-            </td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>
+<wicket:extend>
+    <div class="box box-primary">
+        <form role="form" wicket:id="form">
+            <div class="box-body">
+                <div class="form-group">
+                    <label wicket:for="nameField">Name</label>
+                    <input wicket:id="nameField" type="text" class="form-control"/>
+                    <span wicket:id="nameFeedback" class="help-block"/>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="descriptionField">Description</label>
+                    <input wicket:id="descriptionField" type="text" class="form-control"/>
+                    <span wicket:id="descriptionFeedback" class="help-block"/>
+                </div>
+            </div>
+
+            <div class="box-footer">
                 <wicket:link>
-                    <a href="RoleManagementPage.html">Close</a>
+                    <a class="btn btn-primary" href="RoleManagementPage.html">Close</a>
                 </wicket:link>
-                <input wicket:id="saveButton" type="submit" value="Save"/>
-            </td>
-        </tr>
-    </table>
-</form>
+                <button wicket:id="saveButton" type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</wicket:extend>
 </body>
 </html>

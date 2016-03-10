@@ -5,18 +5,18 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.WicketTable;
 import com.angkorteam.mbaas.server.Scope;
-import com.angkorteam.mbaas.server.page.HomePage;
+import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
-import org.apache.wicket.Component;
-import org.apache.wicket.Localizer;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.resource.loader.IStringResourceLoader;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.resource.DynamicJQueryResourceReference;
+import org.apache.wicket.resource.JQueryResourceReference;
 import org.jooq.DSLContext;
 import org.reflections.Reflections;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -42,7 +42,7 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
      */
     @Override
     public Class<? extends WebPage> getHomePage() {
-        return HomePage.class;
+        return DashboardPage.class;
     }
 
     /**
@@ -55,6 +55,7 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
         getRequestCycleSettings().setBufferResponse(true);
         getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
         initPageMount();
+        getJavaScriptLibrarySettings().setJQueryReference(new DynamicJQueryResourceReference());
     }
 
     protected void initPageMount() {

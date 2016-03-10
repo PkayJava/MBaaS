@@ -3,17 +3,13 @@ package com.angkorteam.mbaas.server.page.user;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
-import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
@@ -22,14 +18,12 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
-import java.util.List;
-
 /**
  * Created by socheat on 3/1/16.
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/user/password/modify")
-public class UserPasswordModifyPage extends Page {
+public class UserPasswordModifyPage extends MasterPage {
 
     private String userId;
     private Integer optimistic;
@@ -88,6 +82,16 @@ public class UserPasswordModifyPage extends Page {
         this.form.add(this.retypePasswordField);
         this.form.add(this.retypePasswordFeedback);
         this.form.add(this.saveButton);
+    }
+
+    @Override
+    public String getPageHeader() {
+        return "Modify User Password";
+    }
+
+    @Override
+    public String getPageDescription() {
+        return "reset a user password credential";
     }
 
     private void saveButtonOnSubmit(Button button) {

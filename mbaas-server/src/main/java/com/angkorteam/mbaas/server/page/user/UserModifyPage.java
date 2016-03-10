@@ -9,8 +9,8 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -26,7 +26,7 @@ import java.util.List;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/user/modify")
-public class UserModifyPage extends Page {
+public class UserModifyPage extends MasterPage {
 
     private String userId;
     private Integer optimistic;
@@ -41,6 +41,11 @@ public class UserModifyPage extends Page {
     private Button saveButton;
 
     private Form<Void> form;
+
+    @Override
+    public String getPageHeader() {
+        return "Modify User Role";
+    }
 
     @Override
     protected void onInitialize() {

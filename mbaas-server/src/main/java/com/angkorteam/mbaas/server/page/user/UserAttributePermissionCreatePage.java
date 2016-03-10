@@ -9,8 +9,8 @@ import com.angkorteam.mbaas.model.entity.tables.UserPrivacyTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserPrivacyRecord;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -26,7 +26,7 @@ import java.util.UUID;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/user/attribute/permission/create")
-public class UserAttributePermissionCreatePage extends Page {
+public class UserAttributePermissionCreatePage extends MasterPage {
 
     private String attributeId;
 
@@ -40,6 +40,11 @@ public class UserAttributePermissionCreatePage extends Page {
 
     private Form<Void> form;
     private Button saveButton;
+
+    @Override
+    public String getPageHeader() {
+        return "Modify User Attribute Scope";
+    }
 
     @Override
     protected void onInitialize() {

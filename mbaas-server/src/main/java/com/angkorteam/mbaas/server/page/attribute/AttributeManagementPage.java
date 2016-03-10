@@ -8,14 +8,15 @@ import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqCo
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
 import com.angkorteam.mbaas.server.provider.AttributeProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -33,15 +34,26 @@ import java.util.Map;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/attribute/management")
-public class AttributeManagementPage extends Page implements ActionFilteredJooqColumn.Event {
+public class AttributeManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     private String collectionId;
+
+    private CollectionPojo collection;
+
+    @Override
+    public String getPageHeader() {
+        return "Collection Attribute Management :: " + this.collection.getName();
+    }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
 
         this.collectionId = getPageParameters().get("collectionId").toString();
+
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        DSLContext context = getDSLContext();
+        this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
 
         AttributeProvider provider = new AttributeProvider(this.collectionId);
 
@@ -114,5 +126,13 @@ public class AttributeManagementPage extends Page implements ActionFilteredJooqC
             }
         }
         return false;
+    }
+
+    @Override
+    public String onCSSLink(String link, Map<String, Object> object) {
+        if ("Delete".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        return "";
     }
 }

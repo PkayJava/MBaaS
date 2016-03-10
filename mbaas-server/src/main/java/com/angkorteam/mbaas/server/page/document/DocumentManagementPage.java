@@ -1,7 +1,6 @@
 package com.angkorteam.mbaas.server.page.document;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
-import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
@@ -17,17 +16,15 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.provider.DocumentProvider;
-import com.angkorteam.mbaas.server.renderer.CollectionChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
@@ -41,17 +38,18 @@ import java.util.Map;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/document/management")
-public class DocumentManagementPage extends Page implements ActionFilteredJooqColumn.Event {
+public class DocumentManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     private CollectionPojo collection;
     private DropDownChoice<CollectionPojo> collectionField;
     private TextFeedbackPanel collectionFeedback;
 
-    private Form<Void> form;
-
     private DocumentProvider provider;
 
-    private Button browseButton;
+    @Override
+    public String getPageHeader() {
+        return "Document Management :: " + collection.getName();
+    }
 
     @Override
     protected void onInitialize() {
@@ -70,24 +68,6 @@ public class DocumentManagementPage extends Page implements ActionFilteredJooqCo
                 .fetchInto(attributeTable);
 
         this.provider = new DocumentProvider(this.collection.getCollectionId());
-
-        this.form = new Form<>("form");
-        add(this.form);
-
-        List<CollectionPojo> collections = context.select(collectionTable.fields())
-                .from(collectionTable).where(collectionTable.SYSTEM.eq(false))
-                .fetchInto(CollectionPojo.class);
-
-        this.collectionField = new DropDownChoice<>("collectionField", new PropertyModel<>(this, "collection"), collections, new CollectionChoiceRenderer());
-        this.collectionField.setRequired(true);
-        this.collectionFeedback = new TextFeedbackPanel("collectionFeedback", collectionField);
-
-        this.form.add(collectionField);
-        this.form.add(collectionFeedback);
-
-        this.browseButton = new Button("browseButton");
-        this.browseButton.setOnSubmit(this::browseButtonOnSubmit);
-        this.form.add(browseButton);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -167,5 +147,16 @@ public class DocumentManagementPage extends Page implements ActionFilteredJooqCo
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String onCSSLink(String link, Map<String, Object> object) {
+        if ("Delete".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        if ("Edit".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        return "";
     }
 }

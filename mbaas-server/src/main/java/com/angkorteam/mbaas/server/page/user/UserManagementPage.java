@@ -3,17 +3,15 @@ package com.angkorteam.mbaas.server.page.user;
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
 import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
-import com.angkorteam.framework.extension.wicket.table.filter.DateFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.server.provider.UserProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -29,7 +27,7 @@ import java.util.Map;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/user/management")
-public class UserManagementPage extends Page implements ActionFilteredJooqColumn.Event {
+public class UserManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     @Override
     protected void onInitialize() {
@@ -52,6 +50,11 @@ public class UserManagementPage extends Page implements ActionFilteredJooqColumn
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
+    }
+
+    @Override
+    public String getPageHeader() {
+        return "User Management";
     }
 
     @Override
@@ -82,7 +85,7 @@ public class UserManagementPage extends Page implements ActionFilteredJooqColumn
         if ("login".equals(link)) {
             PageParameters parameters = new PageParameters();
             parameters.add("userId", userId);
-            setResponsePage(UserPasswordModifyPage.class, parameters);
+            setResponsePage(UserModifyPage.class, parameters);
             return;
         }
     }
@@ -134,5 +137,22 @@ public class UserManagementPage extends Page implements ActionFilteredJooqColumn
             }
         }
         return true;
+    }
+
+    @Override
+    public String onCSSLink(String link, Map<String, Object> object) {
+        if ("Suspend".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        if ("Activate".equals(link)) {
+            return "btn-xs btn-warning";
+        }
+        if ("Change PWD".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Edit".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        return "";
     }
 }

@@ -11,8 +11,8 @@ import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
 import com.angkorteam.mbaas.server.page.document.DocumentManagementPage;
 import com.angkorteam.mbaas.server.provider.CollectionProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -29,7 +29,12 @@ import java.util.Map;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/collection/management")
-public class CollectionManagementPage extends Page implements ActionFilteredJooqColumn.Event {
+public class CollectionManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
+
+    @Override
+    public String getPageHeader() {
+        return "Collection Management";
+    }
 
     @Override
     protected void onInitialize() {
@@ -105,5 +110,16 @@ public class CollectionManagementPage extends Page implements ActionFilteredJooq
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String onCSSLink(String link, Map<String, Object> object) {
+        if ("Delete".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        if ("Attribute".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        return "";
     }
 }

@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server.page.document;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.datetime.markup.html.form.DateTextField;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -36,7 +35,7 @@ public class FieldPanel extends Panel {
             this.add(label);
             TextField<String> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
             field.setType(String.class);
-            field.setLabel(JooqUtils.lookup(attribute.getName(), (Page) getPage()));
+            field.setLabel(JooqUtils.lookup(attribute.getName(), getPage()));
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
@@ -45,7 +44,7 @@ public class FieldPanel extends Panel {
             this.add(label);
             TextField<Integer> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
             field.setType(Integer.class);
-            field.setLabel(JooqUtils.lookup(attribute.getName(), (Page) getPage()));
+            field.setLabel(JooqUtils.lookup(attribute.getName(), getPage()));
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
@@ -54,7 +53,7 @@ public class FieldPanel extends Panel {
             this.add(label);
             DateTextField field = DateTextField.forDatePattern("field", new PropertyModel<>(this.fields, attribute.getName()), "yyyy-MM-dd");
             field.setType(Date.class);
-            field.setLabel(JooqUtils.lookup(attribute.getName(), (Page) getPage()));
+            field.setLabel(JooqUtils.lookup(attribute.getName(), getPage()));
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);

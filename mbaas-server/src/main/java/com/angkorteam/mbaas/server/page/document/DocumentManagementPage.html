@@ -4,28 +4,21 @@
     <meta charset="utf-8"/>
 </head>
 <body>
-<form wicket:id="form">
-    <table border="0">
-        <tr>
-            <td>Collection</td>
-            <td>
-                <select wicket:id="collectionField"/>
-                <span wicket:id="collectionFeedback"/>
-            </td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>
-                <input wicket:id="browseButton" type="submit" value="Browse"/>
-            </td>
-        </tr>
-    </table>
-</form>
-<hr/>
-    <a wicket:id="newDocumentLink">New Document</a>
-<hr/>
-<form wicket:id="filter-form">
-    <table wicket:id="table"/>
-</form>
+<wicket:extend>
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <wicket:link>
+                <a href="../collection/CollectionManagementPage.html">Collection Management</a> |
+            </wicket:link>
+            <a wicket:id="newDocumentLink">New Document</a>
+        </div>
+        <div class="box-body">
+            <form wicket:id="filter-form">
+                <table wicket:id="table"/>
+            </form>
+        </div>
+    </div>
+</wicket:extend>
 </body>
 </html>
+

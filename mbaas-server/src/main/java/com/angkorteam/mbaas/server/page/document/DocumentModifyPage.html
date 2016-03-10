@@ -4,17 +4,21 @@
     <meta charset="utf-8"/>
 </head>
 <body>
-<form wicket:id="form">
-    <table border="0">
-        <tr wicket:id="fields"/>
-        <tr>
-            <td></td>
-            <td>
-                <a wicket:id="closeLink">Close</a>
-                <input wicket:id="saveButton" type="submit" value="Save"/>
-            </td>
-        </tr>
-    </table>
-</form>
+<wicket:extend>
+    <div class="box box-primary">
+        <form role="form" wicket:id="form">
+            <div class="box-body">
+
+                <div wicket:id="fields" class="form-group"/>
+
+            </div>
+
+            <div class="box-footer">
+                <a class="btn btn-primary" wicket:id="closeLink">Close</a>
+                <button wicket:id="saveButton" type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</wicket:extend>
 </body>
 </html>

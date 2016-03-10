@@ -7,8 +7,8 @@ import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
 import com.angkorteam.mbaas.server.validator.RoleNameValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -22,7 +22,7 @@ import java.util.UUID;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/role/create")
-public class RoleCreatePage extends Page {
+public class RoleCreatePage extends MasterPage {
 
     private String name;
     private TextField<String> nameField;
@@ -35,6 +35,11 @@ public class RoleCreatePage extends Page {
     private Button saveButton;
 
     private Form<Void> form;
+
+    @Override
+    public String getPageHeader() {
+        return "Create New Role";
+    }
 
     @Override
     protected void onInitialize() {

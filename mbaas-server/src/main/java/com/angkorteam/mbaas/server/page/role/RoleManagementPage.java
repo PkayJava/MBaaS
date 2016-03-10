@@ -9,8 +9,8 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.server.provider.*;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.Page;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -26,9 +26,14 @@ import java.util.Map;
  */
 @AuthorizeInstantiation("administrator")
 @Mount("/role/management")
-public class RoleManagementPage extends Page implements ActionFilteredJooqColumn.Event {
+public class RoleManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     private DataTable<Map<String, Object>, String> dataTable;
+
+    @Override
+    public String getPageHeader() {
+        return "Role Management";
+    }
 
     @Override
     protected void onInitialize() {
@@ -48,7 +53,7 @@ public class RoleManagementPage extends Page implements ActionFilteredJooqColumn
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", provider));
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Delete"));
 
-        dataTable = new DefaultDataTable<>("table", columns, provider, 20);
+        dataTable = new DefaultDataTable<>("table", columns, provider, 16);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
@@ -79,13 +84,18 @@ public class RoleManagementPage extends Page implements ActionFilteredJooqColumn
     }
 
     @Override
-    public boolean isClickableEventLink(String link, Map<String, Object> object) {
-        return true;
+    public String onCSSLink(String link, Map<String, Object> object) {
+        if ("Delete".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        if ("Edit".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        return "";
     }
 
     @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        System.out.println("onBeforeRender");
+    public boolean isClickableEventLink(String link, Map<String, Object> object) {
+        return true;
     }
 }
