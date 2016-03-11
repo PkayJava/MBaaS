@@ -2,7 +2,6 @@ package com.angkorteam.mbaas.server.validator;
 
 import com.angkorteam.framework.extension.share.validation.JooqValidator;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.ValidationError;

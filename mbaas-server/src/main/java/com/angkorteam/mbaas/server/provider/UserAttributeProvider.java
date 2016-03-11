@@ -5,7 +5,6 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.UserPrivacyTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;

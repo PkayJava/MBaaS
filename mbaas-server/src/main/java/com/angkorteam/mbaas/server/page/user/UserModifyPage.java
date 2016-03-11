@@ -16,7 +16,6 @@ import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.function.MariaDBFunction;
-import com.angkorteam.mbaas.server.page.document.DocumentManagementPage;
 import com.angkorteam.mbaas.server.page.document.FieldPanel;
 import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;

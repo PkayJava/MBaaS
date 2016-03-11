@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.context.ServletContextAware;
 
 import javax.servlet.ServletContext;
-import javax.sql.DataSource;
 
 /**
  * Created by Khauv Socheat on 2/4/2016.

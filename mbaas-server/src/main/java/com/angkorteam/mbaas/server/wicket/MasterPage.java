@@ -12,7 +12,6 @@ import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by socheat on 3/10/16.

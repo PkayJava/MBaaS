@@ -14,14 +14,15 @@ import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.resource.DynamicJQueryResourceReference;
-import org.apache.wicket.resource.JQueryResourceReference;
 import org.jooq.DSLContext;
 import org.reflections.Reflections;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * Application object for your web application.

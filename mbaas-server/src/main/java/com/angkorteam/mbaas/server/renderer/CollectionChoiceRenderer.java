@@ -1,7 +1,6 @@
 package com.angkorteam.mbaas.server.renderer;
 
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 

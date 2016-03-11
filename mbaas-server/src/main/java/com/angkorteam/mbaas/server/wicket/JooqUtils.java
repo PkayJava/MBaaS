@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server.wicket;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ResourceTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ResourceRecord;
-import org.apache.wicket.*;
 import org.apache.wicket.core.request.ClientInfo;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;

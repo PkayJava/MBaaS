@@ -4,7 +4,6 @@ import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.wicket.datetime.markup.html.form.DateTextField;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;

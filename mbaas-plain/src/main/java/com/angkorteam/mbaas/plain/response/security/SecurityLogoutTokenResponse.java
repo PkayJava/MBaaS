@@ -1,8 +1,6 @@
 package com.angkorteam.mbaas.plain.response.security;
 
 import com.angkorteam.mbaas.plain.response.Response;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

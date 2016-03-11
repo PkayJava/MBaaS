@@ -1,19 +1,9 @@
 package com.angkorteam.mbaas.server.function;
 
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.UserPrivacyTable;
-import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.UserPrivacyRecord;
-import com.angkorteam.mbaas.plain.enums.ScopeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.util.UUID;
 
 /**
  * Created by socheat on 3/9/16.

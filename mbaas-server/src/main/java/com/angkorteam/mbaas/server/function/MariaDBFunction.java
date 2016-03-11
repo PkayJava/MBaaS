@@ -1,12 +1,9 @@
 package com.angkorteam.mbaas.server.function;
 
-import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.WicketRuntimeException;
 
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;

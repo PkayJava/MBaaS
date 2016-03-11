@@ -2,8 +2,6 @@ package com.angkorteam.mbaas.jooq;
 
 import org.jooq.impl.AbstractConverter;
 
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.UUID;
 
 /**

@@ -4,12 +4,9 @@ import com.angkorteam.magento2.integration.GenericFaultException;
 import com.angkorteam.magento2.integration.IntegrationAdminTokenServiceV1ServiceStub;
 import com.angkorteam.magento2.integration.IntegrationCustomerTokenServiceV1ServiceStub;
 import net.ddns.pkayjava.magento2.soap._default.*;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.NamedValue;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.junit.Assert;
-import org.junit.Test;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;

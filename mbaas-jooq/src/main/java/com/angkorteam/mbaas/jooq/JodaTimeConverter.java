@@ -4,7 +4,6 @@ import org.joda.time.DateTime;
 import org.jooq.impl.AbstractConverter;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
 /**
  * Created by socheat on 2/20/16.

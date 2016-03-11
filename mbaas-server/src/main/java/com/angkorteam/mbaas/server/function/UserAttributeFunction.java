@@ -4,18 +4,15 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.UserPrivacyTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserPrivacyRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.List;
 import java.util.UUID;
 
 /**

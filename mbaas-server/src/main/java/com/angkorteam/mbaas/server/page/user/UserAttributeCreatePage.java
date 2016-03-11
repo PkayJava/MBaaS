@@ -20,7 +20,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 

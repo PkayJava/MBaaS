@@ -7,7 +7,6 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.FileTable;
-import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
@@ -17,7 +16,6 @@ import com.angkorteam.mbaas.server.page.document.FieldPanel;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import org.apache.commons.compress.compressors.FileNameUtil;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +30,10 @@ import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 
 import java.io.File;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 3/11/16.

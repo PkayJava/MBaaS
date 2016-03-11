@@ -2,18 +2,14 @@ package com.angkorteam.mbaas.server.page.user;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
@@ -23,7 +19,6 @@ import com.angkorteam.mbaas.server.validator.UserLoginValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
@@ -38,7 +33,6 @@ import org.jooq.impl.DSL;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Created by socheat on 3/1/16.
