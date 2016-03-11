@@ -11,6 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import javax.servlet.ServletContext;
 import java.util.Date;
 
 /**
@@ -79,5 +80,10 @@ public abstract class MasterPage extends AdminLTEPage {
     public final JdbcTemplate getJdbcTemplate() {
         Application application = (Application) getApplication();
         return application.getJdbcTemplate();
+    }
+
+    public ServletContext getServletContext() {
+        Application application = (Application) getApplication();
+        return application.getServletContext();
     }
 }

@@ -22,9 +22,12 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,7 +116,7 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
                 columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
             }
         }
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Delete"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "View", "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 17);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -148,6 +151,28 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
             setResponsePage(FileModifyPage.class, parameters);
             return;
         }
+        if ("View".equals(link)) {
+            FileRecord fileRecord = context.select(fileTable.fields()).from(fileTable).where(fileTable.FILE_ID.eq(fileId)).fetchOneInto(fileTable);
+            ServletContext servletContext = getServletContext();
+            HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
+            StringBuffer address = new StringBuffer();
+            if (request.isSecure() && request.getServerPort() == 443) {
+                address.append("https://").append(request.getServerName()).append(servletContext.getContextPath());
+            } else if (!request.isSecure() && request.getServerPort() == 80) {
+                address.append("http://").append(request.getServerName()).append(servletContext.getContextPath());
+            } else {
+                if (request.isSecure()) {
+                    address.append("https://");
+                } else {
+                    address.append("http://");
+                }
+                address.append(request.getServerName()).append(":").append(request.getServerPort()).append(servletContext.getContextPath());
+            }
+            address.append("/api/resource/file").append(fileRecord.getPath()).append("/").append(fileRecord.getName());
+            RedirectPage page = new RedirectPage(address);
+            setResponsePage(page);
+            return;
+        }
     }
 
     @Override
@@ -156,6 +181,9 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
             return true;
         }
         if ("Delete".equals(link)) {
+            return true;
+        }
+        if ("View".equals(link)) {
             return true;
         }
         return false;
@@ -169,6 +197,9 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
         if ("Edit".equals(link)) {
             return true;
         }
+        if ("View".equals(link)) {
+            return true;
+        }
         return false;
     }
 
@@ -178,6 +209,9 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
             return "btn-xs btn-danger";
         }
         if ("Edit".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("View".equals(link)) {
             return "btn-xs btn-info";
         }
         return "";

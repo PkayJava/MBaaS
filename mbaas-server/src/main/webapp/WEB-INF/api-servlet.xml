@@ -30,7 +30,7 @@
         <mvc:path-matching path-matcher="pathMatcher" suffix-pattern="false"/>
     </mvc:annotation-driven>
 
-    <mvc:resources mapping="/resource/**" location="file:${resource.repo}" cache-period="604800">
+    <mvc:resources mapping="/resource/**" location="file:${resource.repo}/" cache-period="604800">
         <mvc:cache-control cache-private="true" cache-public="true" max-age="604800" no-store="true" no-cache="true"
                            must-revalidate="true" no-transform="true" proxy-revalidate="true" s-maxage="604800"/>
         <mvc:resource-chain resource-cache="true" cache-name="MBaaS" auto-registration="true"/>
