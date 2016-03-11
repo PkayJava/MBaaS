@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
 /**
@@ -24,6 +25,9 @@ public class JavascriptModifyPage extends MasterPage {
 
     private String javascriptId;
     private Integer optimistic;
+
+    private String endpoint;
+    private String endpointLabel;
 
     private String name;
     private TextField<String> nameField;
@@ -38,6 +42,7 @@ public class JavascriptModifyPage extends MasterPage {
     private TextFeedbackPanel scriptFeedback;
 
     private Button saveButton;
+    private Button saveAndContinueButton;
 
     private Form<Void> form;
 
@@ -85,6 +90,10 @@ public class JavascriptModifyPage extends MasterPage {
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
+
+        this.saveAndContinueButton = new Button("saveAndContinueButton");
+        this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
+        this.saveAndContinueButton.setOnSubmit(this::saveAndContinueButtonOnSubmit);
         this.form.add(this.saveButton);
     }
 
@@ -101,6 +110,24 @@ public class JavascriptModifyPage extends MasterPage {
         javascriptRecord.update();
 
         setResponsePage(JavascriptManagementPage.class);
+    }
+
+    private void saveAndContinueButtonOnSubmit(Button button) {
+        DSLContext context = getDSLContext();
+        JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
+
+        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
+
+        javascriptRecord.setName(this.name);
+        javascriptRecord.setScript(this.script);
+        javascriptRecord.setDescription(this.description);
+        javascriptRecord.setOptimistic(this.optimistic);
+        javascriptRecord.update();
+
+        PageParameters parameters = new PageParameters();
+        parameters.add("javascriptId", this.javascriptId);
+
+        setResponsePage(JavascriptModifyPage.class, parameters);
     }
 
 }
