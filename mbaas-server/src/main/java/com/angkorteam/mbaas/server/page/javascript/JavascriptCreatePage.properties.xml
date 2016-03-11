@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="javascript.script"><![CDATA[/*
+Java Signature
+{Method} : Get, Head, Post, Put, Patch, Delete, Options, Trace
+Map<String, Object> http{Method}(HttpServletRequest request, HttpServletResponse response);
+*/
+
+/*
+Here is sample method of http get.
+*/
+function httpGet (request, response) {
+        // body
+}]]></entry>
+</properties>

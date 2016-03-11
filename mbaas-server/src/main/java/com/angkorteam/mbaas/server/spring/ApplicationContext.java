@@ -308,6 +308,9 @@ public class ApplicationContext implements ServletContextListener {
                             } else if (dataType == Types.LONGVARBINARY) {
                                 attributeRecord.setJavaType(TypeEnum.Blob.getLiteral());
                                 attributeRecord.setSqlType(typeName);
+                            } else if (typeName.equals("TEXT")) {
+                                attributeRecord.setJavaType(TypeEnum.String.getLiteral());
+                                attributeRecord.setSqlType(typeName);
                             } else {
                                 throw new WicketRuntimeException("field type unknown " + dataType + " => " + typeName);
                             }

@@ -7,10 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -29,7 +26,55 @@ public class ScriptController {
 
     @RequestMapping(
             path = "/execute/{script}",
-            consumes = {MediaType.ALL_VALUE, MediaType.APPLICATION_JSON_VALUE,}, produces = MediaType.APPLICATION_JSON_VALUE
+            method = {RequestMethod.POST, RequestMethod.PUT},
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<ScriptExecuteResponse> executeJson(
+            HttpServletRequest req,
+            HttpServletResponse resp,
+            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @PathVariable("script") String script,
+            @RequestBody(required = false) ScriptExecuteRequest requestBody
+    ) throws ScriptException {
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("nashorn");
+        StringBuilder javascript = new StringBuilder("");
+        engine.eval(javascript.toString());
+        Invocable invocable = (Invocable) engine;
+        HttpMethod method = HttpMethod.valueOf(req.getMethod());
+        Http ihttp = null;
+        Map<String, Object> responseBody = null;
+        if (method == HttpMethod.POST) {
+            HttpPost http = invocable.getInterface(HttpPost.class);
+            if (http != null) {
+                ihttp = http;
+                responseBody = http.httpPost(req, resp);
+            }
+        } else if (method == HttpMethod.PUT) {
+            HttpPut http = invocable.getInterface(HttpPut.class);
+            if (http != null) {
+                ihttp = http;
+                responseBody = http.httpPut(req, resp);
+            }
+        }
+
+        if (ihttp == null) {
+            ScriptExecuteResponse response = new ScriptExecuteResponse();
+            response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
+            return ResponseEntity.ok(response);
+        } else {
+            ScriptExecuteResponse response = new ScriptExecuteResponse();
+            response.getData().setScript(script);
+            response.getData().getBody().putAll(responseBody);
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    @RequestMapping(
+            path = "/execute/{script}",
+            method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.OPTIONS, RequestMethod.TRACE},
+            consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<ScriptExecuteResponse> execute(
             HttpServletRequest req,
@@ -58,18 +103,6 @@ public class ScriptController {
             if (http != null) {
                 ihttp = http;
                 responseBody = http.httpHead(req, resp);
-            }
-        } else if (method == HttpMethod.POST) {
-            HttpPost http = invocable.getInterface(HttpPost.class);
-            if (http != null) {
-                ihttp = http;
-                responseBody = http.httpPost(req, resp);
-            }
-        } else if (method == HttpMethod.PUT) {
-            HttpPut http = invocable.getInterface(HttpPut.class);
-            if (http != null) {
-                ihttp = http;
-                responseBody = http.httpPut(req, resp);
             }
         } else if (method == HttpMethod.PATCH) {
             HttpPatch http = invocable.getInterface(HttpPatch.class);
