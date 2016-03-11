@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.file;
+package com.angkorteam.mbaas.server.page.asset;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
@@ -8,7 +8,8 @@ import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
-import com.angkorteam.mbaas.server.function.FileAttributeFunction;
+import com.angkorteam.mbaas.server.function.AssetAttributeFunction;
+import com.angkorteam.mbaas.server.page.asset.AssetAttributeManagementPage;
 import com.angkorteam.mbaas.server.validator.AttributeNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -26,8 +27,8 @@ import java.util.List;
  * Created by socheat on 3/11/16.
  */
 @AuthorizeInstantiation("administrator")
-@Mount("/file/attribute/create")
-public class FileAttributeCreatePage extends MasterPage {
+@Mount("/asset/attribute/create")
+public class AssetAttributeCreatePage extends MasterPage {
 
     private String collectionId;
 
@@ -48,7 +49,7 @@ public class FileAttributeCreatePage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Create New File Attribute ";
+        return "Create New Asset Attribute ";
     }
 
     @Override
@@ -58,7 +59,7 @@ public class FileAttributeCreatePage extends MasterPage {
         DSLContext context = getDSLContext();
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
 
-        this.collectionId = context.select(collectionTable.COLLECTION_ID).from(collectionTable).where(collectionTable.NAME.eq(Tables.FILE.getName())).fetchOneInto(String.class);
+        this.collectionId = context.select(collectionTable.COLLECTION_ID).from(collectionTable).where(collectionTable.NAME.eq(Tables.ASSET.getName())).fetchOneInto(String.class);
 
         this.form = new Form<>("form");
         add(this.form);
@@ -104,8 +105,8 @@ public class FileAttributeCreatePage extends MasterPage {
         requestBody.setJavaType(this.javaType);
         requestBody.setCollectionName(collectionRecord.getName());
 
-        FileAttributeFunction.createAttribute(context, requestBody);
+        AssetAttributeFunction.createAttribute(context, requestBody);
 
-        setResponsePage(FileAttributeManagementPage.class);
+        setResponsePage(AssetAttributeManagementPage.class);
     }
 }

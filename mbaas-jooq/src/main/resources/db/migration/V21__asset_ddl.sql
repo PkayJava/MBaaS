@@ -1,6 +1,6 @@
-CREATE TABLE file (
+CREATE TABLE asset (
 
-  file_id       VARCHAR(100) NOT NULL,
+  asset_id      VARCHAR(100) NOT NULL,
 
   `name`        VARCHAR(255),
   `label`       VARCHAR(255),
@@ -25,6 +25,6 @@ CREATE TABLE file (
   INDEX (`mime`),
   INDEX (`extension`),
   INDEX (`length`),
-  PRIMARY KEY (file_id)
+  PRIMARY KEY (asset_id)
 
 );
