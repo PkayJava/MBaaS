@@ -1,7 +1,12 @@
 package com.angkorteam.mbaas.server.controller;
 
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
+import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
 import com.angkorteam.mbaas.plain.request.script.ScriptExecuteRequest;
 import com.angkorteam.mbaas.plain.response.script.ScriptExecuteResponse;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,6 +29,9 @@ import java.util.Map;
 @RequestMapping(path = "/javascript")
 public class JavascriptController {
 
+    @Autowired
+    private DSLContext context;
+
     @RequestMapping(
             path = "/execute/{script}",
             method = {RequestMethod.POST, RequestMethod.PUT},
@@ -37,10 +45,18 @@ public class JavascriptController {
             @PathVariable("script") String script,
             @RequestBody(required = false) ScriptExecuteRequest requestBody
     ) throws ScriptException {
+        JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
+        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.NAME.eq(script)).fetchOneInto(javascriptTable);
+
+        if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript())) {
+            ScriptExecuteResponse response = new ScriptExecuteResponse();
+            response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
+            return ResponseEntity.ok(response);
+        }
+
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("nashorn");
-        StringBuilder javascript = new StringBuilder("");
-        engine.eval(javascript.toString());
+        engine.eval(javascriptRecord.getScript());
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
         Http ihttp = null;
@@ -49,13 +65,25 @@ public class JavascriptController {
             HttpPost http = invocable.getInterface(HttpPost.class);
             if (http != null) {
                 ihttp = http;
-                responseBody = http.httpPost(req, resp);
+                try {
+                    responseBody = http.httpPost(req, resp);
+                } catch (ClassCastException e) {
+                    if (!e.getMessage().equals("Cannot cast jdk.nashorn.internal.runtime.Undefined to java.util.Map")) {
+                        throw e;
+                    }
+                }
             }
         } else if (method == HttpMethod.PUT) {
             HttpPut http = invocable.getInterface(HttpPut.class);
             if (http != null) {
                 ihttp = http;
-                responseBody = http.httpPut(req, resp);
+                try {
+                    responseBody = http.httpPut(req, resp);
+                } catch (ClassCastException e) {
+                    if (!e.getMessage().equals("Cannot cast jdk.nashorn.internal.runtime.Undefined to java.util.Map")) {
+                        throw e;
+                    }
+                }
             }
         }
 
@@ -66,7 +94,9 @@ public class JavascriptController {
         } else {
             ScriptExecuteResponse response = new ScriptExecuteResponse();
             response.getData().setScript(script);
-            response.getData().getBody().putAll(responseBody);
+            if (responseBody != null) {
+                response.getData().getBody().putAll(responseBody);
+            }
             return ResponseEntity.ok(response);
         }
     }
@@ -84,10 +114,18 @@ public class JavascriptController {
             @PathVariable("script") String script,
             @RequestBody(required = false) ScriptExecuteRequest requestBody
     ) throws ScriptException {
+        JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
+        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.NAME.eq(script)).fetchOneInto(javascriptTable);
+
+        if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript())) {
+            ScriptExecuteResponse response = new ScriptExecuteResponse();
+            response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
+            return ResponseEntity.ok(response);
+        }
+
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("nashorn");
-        StringBuilder javascript = new StringBuilder("");
-        engine.eval(javascript.toString());
+        engine.eval(javascriptRecord.getScript());
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
         Http ihttp = null;
@@ -96,37 +134,73 @@ public class JavascriptController {
             HttpGet http = invocable.getInterface(HttpGet.class);
             if (http != null) {
                 ihttp = http;
-                responseBody = http.httpGet(req, resp);
+                try {
+                    responseBody = http.httpGet(req, resp);
+                } catch (ClassCastException e) {
+                    if (!e.getMessage().equals("Cannot cast jdk.nashorn.internal.runtime.Undefined to java.util.Map")) {
+                        throw e;
+                    }
+                }
             }
         } else if (method == HttpMethod.HEAD) {
             HttpHead http = invocable.getInterface(HttpHead.class);
             if (http != null) {
                 ihttp = http;
-                responseBody = http.httpHead(req, resp);
+                try {
+                    responseBody = http.httpHead(req, resp);
+                } catch (ClassCastException e) {
+                    if (!e.getMessage().equals("Cannot cast jdk.nashorn.internal.runtime.Undefined to java.util.Map")) {
+                        throw e;
+                    }
+                }
             }
         } else if (method == HttpMethod.PATCH) {
             HttpPatch http = invocable.getInterface(HttpPatch.class);
             if (http != null) {
                 ihttp = http;
-                responseBody = http.httpPatch(req, resp);
+                try {
+                    responseBody = http.httpPatch(req, resp);
+                } catch (ClassCastException e) {
+                    if (!e.getMessage().equals("Cannot cast jdk.nashorn.internal.runtime.Undefined to java.util.Map")) {
+                        throw e;
+                    }
+                }
             }
         } else if (method == HttpMethod.DELETE) {
             HttpDelete http = invocable.getInterface(HttpDelete.class);
             if (http != null) {
                 ihttp = http;
-                responseBody = http.httpDelete(req, resp);
+                try {
+                    responseBody = http.httpDelete(req, resp);
+                } catch (ClassCastException e) {
+                    if (!e.getMessage().equals("Cannot cast jdk.nashorn.internal.runtime.Undefined to java.util.Map")) {
+                        throw e;
+                    }
+                }
             }
         } else if (method == HttpMethod.OPTIONS) {
             HttpOptions http = invocable.getInterface(HttpOptions.class);
             if (http != null) {
                 ihttp = http;
-                responseBody = http.httpOptions(req, resp);
+                try {
+                    responseBody = http.httpOptions(req, resp);
+                } catch (ClassCastException e) {
+                    if (!e.getMessage().equals("Cannot cast jdk.nashorn.internal.runtime.Undefined to java.util.Map")) {
+                        throw e;
+                    }
+                }
             }
         } else if (method == HttpMethod.TRACE) {
             HttpTrace http = invocable.getInterface(HttpTrace.class);
             if (http != null) {
                 ihttp = http;
-                responseBody = http.httpTrace(req, resp);
+                try {
+                    responseBody = http.httpTrace(req, resp);
+                } catch (ClassCastException e) {
+                    if (!e.getMessage().equals("Cannot cast jdk.nashorn.internal.runtime.Undefined to java.util.Map")) {
+                        throw e;
+                    }
+                }
             }
         }
 
@@ -137,7 +211,9 @@ public class JavascriptController {
         } else {
             ScriptExecuteResponse response = new ScriptExecuteResponse();
             response.getData().setScript(script);
-            response.getData().getBody().putAll(responseBody);
+            if (responseBody != null) {
+                response.getData().getBody().putAll(responseBody);
+            }
             return ResponseEntity.ok(response);
         }
     }
