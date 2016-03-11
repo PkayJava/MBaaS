@@ -58,7 +58,7 @@ public class FileModifyPage extends MasterPage {
     private String extension;
     private Label extensionLabel;
 
-    private String path;
+    private String pathText;
     private Label pathLabel;
 
     private Map<String, Object> fields;
@@ -69,7 +69,7 @@ public class FileModifyPage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Modify User Role";
+        return "Modify File";
     }
 
     @Override
@@ -164,13 +164,12 @@ public class FileModifyPage extends MasterPage {
         this.extensionLabel = new Label("extensionLabel", new PropertyModel<>(this, "extension"));
         this.form.add(extensionLabel);
 
-        this.path = fileRecord.getExtension();
-        this.pathLabel = new Label("pathLabel", new PropertyModel<>(this, "path"));
+        this.pathText = fileRecord.getPath();
+        this.pathLabel = new Label("pathLabel", new PropertyModel<>(this, "pathText"));
         this.form.add(pathLabel);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
-
 
         this.form.add(fields);
         this.form.add(this.saveButton);
