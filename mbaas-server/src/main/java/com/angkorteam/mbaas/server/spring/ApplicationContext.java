@@ -12,6 +12,7 @@ import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.io.FileUtils;
 import org.apache.wicket.WicketRuntimeException;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
@@ -35,6 +36,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
@@ -79,6 +82,13 @@ public class ApplicationContext implements ServletContextListener {
         initUser(context, jdbcTemplate);
         LOGGER.info("initializing system collections, attributes, indexes");
         initDDL(context, dataSource);
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String resourceRepo = configuration.getString(Constants.RESOURCE_REPO);
+        try {
+            FileUtils.forceMkdir(new File(resourceRepo));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
     }

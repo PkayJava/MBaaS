@@ -52,10 +52,13 @@ public class Constants {
     public static final String USER_INTERNAL_ADMIN_PASSWORD = "user.internal_admin.password";
 
     public static final String PATTERN_DATETIME = "pattern.datetime";
+    public static final String PATTERN_FOLDER = "pattern.folder";
     public static final String PATTERN_NAMING = "pattern.naming";
 
     public static final String ENCRYPTION_PASSWORD = "encryption.password";
     public static final String ENCRYPTION_OUTPUT = "encryption.output";
+
+    public static final String RESOURCE_REPO = "resource.repo";
 
     public static final String MAIL_SERVER = "mail.server";
     public static final String MAIL_PORT = "mail.port";

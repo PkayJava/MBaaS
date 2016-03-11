@@ -96,11 +96,13 @@ public class DocumentModifyPage extends MasterPage {
             }
         }
 
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
-        Map<String, Object> document = getJdbcTemplate().queryForMap("select " + StringUtils.join(selectFields, ", ") + " from `" + collectionRecord.getName() + "` where " + collectionRecord.getName() + "_id = ?", this.documentId);
-        if (document != null && !document.isEmpty()) {
-            for (Map.Entry<String, Object> entry : document.entrySet()) {
-                this.fields.put(entry.getKey(), entry.getValue());
+        if (!selectFields.isEmpty()) {
+            CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
+            Map<String, Object> document = getJdbcTemplate().queryForMap("select " + StringUtils.join(selectFields, ", ") + " from `" + collectionRecord.getName() + "` where " + collectionRecord.getName() + "_id = ?", this.documentId);
+            if (document != null && !document.isEmpty()) {
+                for (Map.Entry<String, Object> entry : document.entrySet()) {
+                    this.fields.put(entry.getKey(), entry.getValue());
+                }
             }
         }
 
