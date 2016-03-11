@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.TableLike;
+import org.jooq.impl.DSL;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,14 +16,17 @@ import java.util.List;
 /**
  * Created by socheat on 3/11/16.
  */
-public class JavascriptPrivder extends JooqProvider {
+public class JavascriptProvider extends JooqProvider {
+
+    private String address;
 
     private JavascriptTable javascriptTable;
     private UserTable userTable;
 
     private TableLike<?> from;
 
-    public JavascriptPrivder() {
+    public JavascriptProvider(String address) {
+        this.address = address;
         this.javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
         this.userTable = Tables.USER.as("userTable");
         this.from = this.javascriptTable.join(this.userTable).on(this.javascriptTable.OWNER_USER_ID.eq(this.userTable.USER_ID));
@@ -34,6 +38,10 @@ public class JavascriptPrivder extends JooqProvider {
 
     public Field<Date> getDateCreated() {
         return this.javascriptTable.DATE_CREATED;
+    }
+
+    public Field<String> getEndpoint() {
+        return DSL.concat(this.address, this.javascriptTable.NAME);
     }
 
     public Field<String> getDescription() {

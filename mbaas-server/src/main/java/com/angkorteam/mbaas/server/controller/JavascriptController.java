@@ -21,8 +21,8 @@ import java.util.Map;
  * Created by socheat on 2/27/16.
  */
 @Controller
-@RequestMapping(path = "/script")
-public class ScriptController {
+@RequestMapping(path = "/javascript")
+public class JavascriptController {
 
     @RequestMapping(
             path = "/execute/{script}",

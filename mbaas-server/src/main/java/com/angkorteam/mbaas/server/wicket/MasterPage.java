@@ -12,6 +12,7 @@ import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
@@ -85,5 +86,24 @@ public abstract class MasterPage extends AdminLTEPage {
     public ServletContext getServletContext() {
         Application application = (Application) getApplication();
         return application.getServletContext();
+    }
+
+    public String getHttpAddress() {
+        ServletContext servletContext = getServletContext();
+        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
+        StringBuffer address = new StringBuffer();
+        if (request.isSecure() && request.getServerPort() == 443) {
+            address.append("https://").append(request.getServerName()).append(servletContext.getContextPath());
+        } else if (!request.isSecure() && request.getServerPort() == 80) {
+            address.append("http://").append(request.getServerName()).append(servletContext.getContextPath());
+        } else {
+            if (request.isSecure()) {
+                address.append("https://");
+            } else {
+                address.append("http://");
+            }
+            address.append(request.getServerName()).append(":").append(request.getServerPort()).append(servletContext.getContextPath());
+        }
+        return address.toString();
     }
 }

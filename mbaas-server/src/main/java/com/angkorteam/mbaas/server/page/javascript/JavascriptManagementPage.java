@@ -7,7 +7,7 @@ import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJo
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.server.provider.JavascriptPrivder;
+import com.angkorteam.mbaas.server.provider.JavascriptProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -15,6 +15,7 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
@@ -38,7 +39,10 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
     protected void onInitialize() {
         super.onInitialize();
 
-        JavascriptPrivder provider = new JavascriptPrivder();
+        StringBuffer address = new StringBuffer();
+        address.append(getHttpAddress()).append("/api/javascript/execute/");
+
+        JavascriptProvider provider = new JavascriptProvider(address.toString());
         provider.selectField(Boolean.class, "javascriptId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
@@ -48,6 +52,7 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("endpoint", this), "endpoint", this, provider));
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
@@ -84,6 +89,12 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             context.delete(Tables.JAVASCRIPT).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
             return;
         }
+        if ("endpoint".equals(link)) {
+            String endpoint = (String) object.get("endpoint");
+            RedirectPage page = new RedirectPage(endpoint);
+            setResponsePage(page);
+            return;
+        }
     }
 
     @Override
@@ -92,6 +103,9 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             return true;
         }
         if ("Delete".equals(link)) {
+            return true;
+        }
+        if ("endpoint".equals(link)) {
             return true;
         }
         return false;
@@ -103,6 +117,9 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             return true;
         }
         if ("Delete".equals(link)) {
+            return true;
+        }
+        if ("endpoint".equals(link)) {
             return true;
         }
         return false;

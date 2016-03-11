@@ -26,8 +26,6 @@ import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -153,22 +151,8 @@ public class AssetManagementPage extends MasterPage implements ActionFilteredJoo
         }
         if ("View".equals(link)) {
             AssetRecord assetRecord = context.select(assetTable.fields()).from(assetTable).where(assetTable.ASSET_ID.eq(assetId)).fetchOneInto(assetTable);
-            ServletContext servletContext = getServletContext();
-            HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
             StringBuffer address = new StringBuffer();
-            if (request.isSecure() && request.getServerPort() == 443) {
-                address.append("https://").append(request.getServerName()).append(servletContext.getContextPath());
-            } else if (!request.isSecure() && request.getServerPort() == 80) {
-                address.append("http://").append(request.getServerName()).append(servletContext.getContextPath());
-            } else {
-                if (request.isSecure()) {
-                    address.append("https://");
-                } else {
-                    address.append("http://");
-                }
-                address.append(request.getServerName()).append(":").append(request.getServerPort()).append(servletContext.getContextPath());
-            }
-            address.append("/api/resource/asset").append(assetRecord.getPath()).append("/").append(assetRecord.getName());
+            address.append(getHttpAddress()).append("/api/resource/asset").append(assetRecord.getPath()).append("/").append(assetRecord.getName());
             RedirectPage page = new RedirectPage(address);
             setResponsePage(page);
             return;

@@ -49,7 +49,7 @@
         <security:intercept-url pattern="/api/security/signup" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/security/login" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/resource/**" access="permitAll"/>
-        <security:intercept-url pattern="/api/script/**" access="permitAll"/>
+        <security:intercept-url pattern="/api/javascript/**" access="permitAll"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
     </security:http>
 
