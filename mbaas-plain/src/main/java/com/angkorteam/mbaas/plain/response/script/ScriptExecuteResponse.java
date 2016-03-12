@@ -4,9 +4,6 @@ import com.angkorteam.mbaas.plain.response.Response;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * Created by socheat on 2/27/16.
  */
@@ -24,13 +21,13 @@ public class ScriptExecuteResponse extends Response<ScriptExecuteResponse.Body> 
 
         @Expose
         @SerializedName("body")
-        private Map<String, Object> body = new LinkedHashMap<>();
+        private Object body;
 
-        public Map<String, Object> getBody() {
+        public Object getBody() {
             return body;
         }
 
-        public void setBody(Map<String, Object> body) {
+        public void setBody(Object body) {
             this.body = body;
         }
 

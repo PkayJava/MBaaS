@@ -5,10 +5,7 @@ import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.plain.enums.ColumnEnum;
-import com.angkorteam.mbaas.plain.enums.IndexInfoEnum;
-import com.angkorteam.mbaas.plain.enums.PrimaryKeyEnum;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.*;
 import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -40,6 +37,8 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
+import java.util.concurrent.*;
 
 /**
  * Created by Khauv Socheat on 2/3/2016.
@@ -81,6 +80,8 @@ public class ApplicationContext implements ServletContextListener {
         initUser(context, jdbcTemplate);
         LOGGER.info("initializing system collections, attributes, indexes");
         initDDL(context, dataSource);
+        LOGGER.info("initializing nashorn security");
+        initNashorn(context);
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         String resourceRepo = configuration.getString(Constants.RESOURCE_REPO);
         try {
@@ -90,6 +91,53 @@ public class ApplicationContext implements ServletContextListener {
         }
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
+    }
+
+    protected void initNashorn(DSLContext context) {
+        List<String> granted = new ArrayList<>();
+
+        granted.add(Boolean.class.getName());
+        granted.add(Byte.class.getName());
+        granted.add(Short.class.getName());
+        granted.add(Integer.class.getName());
+        granted.add(Long.class.getName());
+        granted.add(Float.class.getName());
+        granted.add(Double.class.getName());
+        granted.add(Character.class.getName());
+        granted.add(String.class.getName());
+        granted.add(Date.class.getName());
+
+        granted.add(Arrays.class.getName());
+        granted.add(Collections.class.getName());
+
+        granted.add(LinkedHashMap.class.getName());
+        granted.add(LinkedHashSet.class.getName());
+        granted.add(Hashtable.class.getName());
+        granted.add(Vector.class.getName());
+        granted.add(LinkedList.class.getName());
+        granted.add(ArrayList.class.getName());
+        granted.add(HashMap.class.getName());
+        granted.add(ArrayBlockingQueue.class.getName());
+        granted.add(SynchronousQueue.class.getName());
+        granted.add(LinkedBlockingDeque.class.getName());
+        granted.add(DelayQueue.class.getName());
+        granted.add(LinkedTransferQueue.class.getName());
+        granted.add(ArrayDeque.class.getName());
+        granted.add(ConcurrentLinkedDeque.class.getName());
+        granted.add(Stack.class.getName());
+
+        NashornTable nashornTable = Tables.NASHORN.as("nashornTable");
+
+        for (String name : granted) {
+            int count = context.selectCount().from(nashornTable).where(nashornTable.NASHORN_ID.eq(name)).fetchOneInto(int.class);
+            if (count == 0) {
+                NashornRecord nashornRecord = context.newRecord(nashornTable);
+                nashornRecord.setNashornId(name);
+                nashornRecord.setDateCreated(new Date());
+                nashornRecord.setSecurity(SecurityEnum.Granted.getLiteral());
+                nashornRecord.store();
+            }
+        }
     }
 
     protected void initUser(DSLContext context, JdbcTemplate jdbcTemplate) {

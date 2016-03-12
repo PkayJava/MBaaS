@@ -26,9 +26,6 @@ public class JavascriptModifyPage extends MasterPage {
     private String javascriptId;
     private Integer optimistic;
 
-    private String endpoint;
-    private String endpointLabel;
-
     private String name;
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
@@ -90,11 +87,11 @@ public class JavascriptModifyPage extends MasterPage {
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
+        this.form.add(this.saveButton);
 
         this.saveAndContinueButton = new Button("saveAndContinueButton");
-        this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.saveAndContinueButton.setOnSubmit(this::saveAndContinueButtonOnSubmit);
-        this.form.add(this.saveButton);
+        this.form.add(this.saveAndContinueButton);
     }
 
     private void saveButtonOnSubmit(Button button) {

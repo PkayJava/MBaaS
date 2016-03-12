@@ -48,12 +48,16 @@ public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
         if (body == null) {
             responseBody = new UnknownResponse();
             responseBody.setHttpCode(HttpStatus.OK.value());
-            responseBody.setResult(HttpStatus.OK.getReasonPhrase());
+            if (responseBody.getResult() == null) {
+                responseBody.setResult(HttpStatus.OK.getReasonPhrase());
+            }
         } else {
             if (responseBody.getHttpCode() == null) {
                 responseBody.setHttpCode(HttpStatus.OK.value());
             }
-            responseBody.setResult(HttpStatus.valueOf(responseBody.getHttpCode()).getReasonPhrase());
+            if (responseBody.getResult() == null) {
+                responseBody.setResult(HttpStatus.valueOf(responseBody.getHttpCode()).getReasonPhrase());
+            }
         }
         HttpHeaders httpHeaders = request.getHeaders();
         Map<String, List<String>> requestHeader = responseBody.getRequestHeader();
