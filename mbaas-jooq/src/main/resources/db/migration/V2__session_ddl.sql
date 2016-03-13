@@ -6,13 +6,19 @@ CREATE TABLE session (
   date_created DATETIME,
   date_seen    DATETIME,
 
-  push_token   VARCHAR(255),
+  user_agent   VARCHAR(255),
 
-  deleted      BIT(1)       NOT NULL DEFAULT 0,
+  push_token   VARCHAR(255),
+  client_ip    VARCHAR(30),
+
   optimistic   INT(11)      NOT NULL DEFAULT 0,
 
+  INDEX (date_created),
+  INDEX (client_ip),
+  INDEX (date_seen),
+  INDEX (user_agent),
+  INDEX (push_token),
   INDEX (user_id),
-  INDEX (deleted),
   PRIMARY KEY (session_id)
 
 );

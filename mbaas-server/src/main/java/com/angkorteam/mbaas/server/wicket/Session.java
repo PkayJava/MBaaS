@@ -50,6 +50,8 @@ public class Session extends AuthenticatedWebSession {
             wicketRecord.setDateSeen(new Date());
             wicketRecord.setDateCreated(new Date());
             wicketRecord.setSessionId(sessionId);
+            wicketRecord.setUserAgent(getClientInfo().getUserAgent());
+            wicketRecord.setClientIp(getClientInfo().getProperties().getRemoteAddress());
             wicketRecord.store();
 
             this.userId = userRecord.getUserId();

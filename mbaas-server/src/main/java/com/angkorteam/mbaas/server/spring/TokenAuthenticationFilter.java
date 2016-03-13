@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.SessionRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import org.jooq.DSLContext;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -24,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
+
 /**
  * Created by Khauv Socheat on 2/4/2016.
  */
@@ -103,16 +105,18 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             UserTable userTable = Tables.USER.as("userTable");
             SessionTable sessionTable = Tables.SESSION.as("sessionTable");
 
-            SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-            if (tokenRecord == null) {
+            SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
+            if (sessionRecord == null) {
                 throw new BadCredentialsException("session " + session + " is not valid");
             }
 
             Date dateSeen = new Date();
-            tokenRecord.setDateSeen(dateSeen);
-            tokenRecord.update();
+            sessionRecord.setDateSeen(dateSeen);
+            sessionRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+            sessionRecord.setClientIp(request.getRemoteAddr());
+            sessionRecord.update();
 
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
 
             if (userRecord == null) {
                 throw new BadCredentialsException("session " + session + " is not valid");

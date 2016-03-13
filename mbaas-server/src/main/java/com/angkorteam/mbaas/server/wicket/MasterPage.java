@@ -53,6 +53,8 @@ public abstract class MasterPage extends AdminLTEPage {
         if (wicketRecord != null) {
             wicketRecord.setUserId(session.getUserId());
             wicketRecord.setDateSeen(new Date());
+            wicketRecord.setClientIp(getSession().getClientInfo().getProperties().getRemoteAddress());
+            wicketRecord.setUserAgent(getSession().getClientInfo().getUserAgent());
             wicketRecord.update();
         }
 
