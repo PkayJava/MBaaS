@@ -75,6 +75,8 @@ public abstract class JooqUtils extends AbstractReadOnlyModel<String> {
             resourceRecord.setResourceId(UUID.randomUUID().toString());
             resourceRecord.setKey(key);
             resourceRecord.setLabel(key);
+            resourceRecord.setLanguage(language);
+            resourceRecord.setPage(page);
             resourceRecord.store();
 
             return key;
