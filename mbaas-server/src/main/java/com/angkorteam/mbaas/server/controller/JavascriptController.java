@@ -15,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +34,9 @@ public class JavascriptController {
 
     @Autowired
     private DSLContext context;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @RequestMapping(
             path = "/execute/{script}",
@@ -229,7 +233,7 @@ public class JavascriptController {
         ScriptEngine engine = factory.getScriptEngine(new JavaFilter(context));
         Bindings bindings = engine.createBindings();
         engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
-        bindings.put("MBaaS", new MBaaS());
+        bindings.put("MBaaS", new MBaaS(jdbcTemplate));
         return engine;
     }
 

@@ -2,7 +2,7 @@ package com.angkorteam.mbaas.server.nashorn;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Created by socheat on 3/12/16.
@@ -13,11 +13,11 @@ public class MBaaS {
 
     public final Console Console;
 
-    public final JdbcTemplate JdbcTemplate;
+    public final Database Database;
 
-    public MBaaS(org.springframework.jdbc.core.JdbcTemplate jdbcTemplate) {
+    public MBaaS(JdbcTemplate jdbcTemplate) {
         Console = new Console(LOGGER);
-        JdbcTemplate = new JdbcTemplate(new NamedParameterJdbcTemplate(jdbcTemplate));
+        Database = new Database(jdbcTemplate);
     }
 
 }
