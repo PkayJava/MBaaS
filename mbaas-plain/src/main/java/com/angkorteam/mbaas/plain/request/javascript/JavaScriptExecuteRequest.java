@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.plain.request.script;
+package com.angkorteam.mbaas.plain.request.javascript;
 
 import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by socheat on 2/27/16.
  */
-public class ScriptExecuteRequest extends Request {
+public class JavaScriptExecuteRequest extends Request {
 
     @Expose
     @SerializedName("body")

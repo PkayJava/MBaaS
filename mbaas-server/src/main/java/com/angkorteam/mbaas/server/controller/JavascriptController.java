@@ -3,9 +3,10 @@ package com.angkorteam.mbaas.server.controller;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
-import com.angkorteam.mbaas.plain.request.script.ScriptExecuteRequest;
-import com.angkorteam.mbaas.plain.response.script.ScriptExecuteResponse;
-import com.angkorteam.mbaas.server.nashorn.NoJavaFilter;
+import com.angkorteam.mbaas.plain.request.javascript.JavaScriptExecuteRequest;
+import com.angkorteam.mbaas.plain.response.javascript.JavaScriptExecuteResponse;
+import com.angkorteam.mbaas.server.nashorn.JavaFilter;
+import com.angkorteam.mbaas.server.nashorn.MBaaS;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.jooq.DSLContext;
@@ -17,9 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
+import javax.script.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.LinkedHashMap;
@@ -40,25 +39,24 @@ public class JavascriptController {
             method = {RequestMethod.POST, RequestMethod.PUT},
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<ScriptExecuteResponse> executeJson(
+    public ResponseEntity<JavaScriptExecuteResponse> executeJson(
             HttpServletRequest req,
             HttpServletResponse resp,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("script") String script,
-            @RequestBody(required = false) ScriptExecuteRequest requestBody
+            @RequestBody(required = false) JavaScriptExecuteRequest requestBody
     ) throws ScriptException {
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.NAME.eq(script)).fetchOneInto(javascriptTable);
 
         if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript())) {
-            ScriptExecuteResponse response = new ScriptExecuteResponse();
+            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
             response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
             return ResponseEntity.ok(response);
         }
 
-        NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-        ScriptEngine engine = factory.getScriptEngine(new NoJavaFilter(context));
+        ScriptEngine engine = getScriptEngine();
         engine.eval(javascriptRecord.getScript());
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -71,7 +69,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpPost(req, resp);
+                    responseBody = http.httpPost(req, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -82,7 +80,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpPut(req, resp);
+                    responseBody = http.httpPut(req, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -91,17 +89,17 @@ public class JavascriptController {
         }
 
         if (!found) {
-            ScriptExecuteResponse response = new ScriptExecuteResponse();
+            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
             response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
             return ResponseEntity.ok(response);
         } else {
             if (error) {
-                ScriptExecuteResponse response = new ScriptExecuteResponse();
+                JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
                 response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
                 response.setResult(exception.getMessage());
                 return ResponseEntity.ok(response);
             } else {
-                ScriptExecuteResponse response = new ScriptExecuteResponse();
+                JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
                 response.getData().setScript(script);
                 response.getData().setBody(parseBody(responseBody));
                 return ResponseEntity.ok(response);
@@ -114,25 +112,24 @@ public class JavascriptController {
             method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.OPTIONS, RequestMethod.TRACE},
             consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<ScriptExecuteResponse> execute(
+    public ResponseEntity<JavaScriptExecuteResponse> execute(
             HttpServletRequest req,
             HttpServletResponse resp,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("script") String script,
-            @RequestBody(required = false) ScriptExecuteRequest requestBody
+            @RequestBody(required = false) JavaScriptExecuteRequest requestBody
     ) throws ScriptException {
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.NAME.eq(script)).fetchOneInto(javascriptTable);
 
         if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript())) {
-            ScriptExecuteResponse response = new ScriptExecuteResponse();
+            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
             response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
             return ResponseEntity.ok(response);
         }
 
-        NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-        ScriptEngine engine = factory.getScriptEngine(new NoJavaFilter(context));
+        ScriptEngine engine = getScriptEngine();
         engine.eval(javascriptRecord.getScript());
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -145,7 +142,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpGet(req, resp);
+                    responseBody = http.httpGet(req, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -156,7 +153,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpHead(req, resp);
+                    responseBody = http.httpHead(req, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -167,7 +164,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpPatch(req, resp);
+                    responseBody = http.httpPatch(req, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -178,7 +175,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpDelete(req, resp);
+                    responseBody = http.httpDelete(req, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -189,7 +186,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpOptions(req, resp);
+                    responseBody = http.httpOptions(req, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -200,7 +197,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpTrace(req, resp);
+                    responseBody = http.httpTrace(req, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -209,22 +206,31 @@ public class JavascriptController {
         }
 
         if (!found) {
-            ScriptExecuteResponse response = new ScriptExecuteResponse();
+            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
             response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
             return ResponseEntity.ok(response);
         } else {
             if (error) {
-                ScriptExecuteResponse response = new ScriptExecuteResponse();
+                JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
                 response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
                 response.setResult(exception.getMessage());
                 return ResponseEntity.ok(response);
             } else {
-                ScriptExecuteResponse response = new ScriptExecuteResponse();
+                JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
                 response.getData().setScript(script);
                 response.getData().setBody(parseBody(responseBody));
                 return ResponseEntity.ok(response);
             }
         }
+    }
+
+    private ScriptEngine getScriptEngine() {
+        NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
+        ScriptEngine engine = factory.getScriptEngine(new JavaFilter(context));
+        Bindings bindings = engine.createBindings();
+        engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
+        bindings.put("MBaaS", new MBaaS());
+        return engine;
     }
 
     private Object parseBody(Object body) {
@@ -258,34 +264,34 @@ public class JavascriptController {
     }
 
     public interface HttpGet extends Http {
-        Object httpGet(HttpServletRequest request, HttpServletResponse response);
+        Object httpGet(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpHead extends Http {
-        Object httpHead(HttpServletRequest request, HttpServletResponse response);
+        Object httpHead(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpPost extends Http {
-        Object httpPost(HttpServletRequest request, HttpServletResponse response);
+        Object httpPost(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpPut extends Http {
-        Object httpPut(HttpServletRequest request, HttpServletResponse response);
+        Object httpPut(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpPatch extends Http {
-        Object httpPatch(HttpServletRequest request, HttpServletResponse response);
+        Object httpPatch(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpDelete extends Http {
-        Object httpDelete(HttpServletRequest request, HttpServletResponse response);
+        Object httpDelete(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpOptions extends Http {
-        Object httpOptions(HttpServletRequest request, HttpServletResponse response);
+        Object httpOptions(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpTrace extends Http {
-        Object httpTrace(HttpServletRequest request, HttpServletResponse response);
+        Object httpTrace(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
     }
 }

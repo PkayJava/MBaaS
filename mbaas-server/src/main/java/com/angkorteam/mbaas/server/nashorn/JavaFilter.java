@@ -12,12 +12,12 @@ import java.util.Date;
 /**
  * Created by socheat on 3/12/16.
  */
-public class NoJavaFilter implements ClassFilter {
+public class JavaFilter implements ClassFilter {
 
     private final DSLContext context;
     private NashornTable nashornTable = Tables.NASHORN.as("nashornTable");
 
-    public NoJavaFilter(DSLContext context) {
+    public JavaFilter(DSLContext context) {
         this.context = context;
     }
 

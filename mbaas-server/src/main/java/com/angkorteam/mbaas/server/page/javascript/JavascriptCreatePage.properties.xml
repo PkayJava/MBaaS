@@ -4,13 +4,13 @@
     <entry key="javascript.script"><![CDATA[/*
 Java Signature
 {Method} : Get, Head, Post, Put, Patch, Delete, Options, Trace
-Map<String, Object> http{Method}(HttpServletRequest request, HttpServletResponse response);
+(Map || Array || String || Number || Boolean || Date) http{Method}(javax.servlet.http.HttpServletRequest request, com.angkorteam.mbaas.plain.request.javascript.JavaScriptExecuteRequest requestBody);
 */
 
 /*
 Here is sample method of http get.
 */
-function httpGet (request, response) {
+function httpGet (request, requestBody) {
         // body
 }]]></entry>
 </properties>
