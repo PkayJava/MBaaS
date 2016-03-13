@@ -40,6 +40,11 @@ import java.util.Map;
 public class FileManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     @Override
+    public String getPageHeader() {
+        return "File Management";
+    }
+
+    @Override
     protected void onInitialize() {
         super.onInitialize();
 
@@ -122,11 +127,6 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", FileManagementPage.class, getPageParameters());
         add(refreshLink);
-    }
-
-    @Override
-    public String getPageHeader() {
-        return "File Management";
     }
 
     @Override

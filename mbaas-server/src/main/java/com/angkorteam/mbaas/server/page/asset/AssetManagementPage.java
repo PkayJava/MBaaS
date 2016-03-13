@@ -40,6 +40,11 @@ import java.util.Map;
 public class AssetManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     @Override
+    public String getPageHeader() {
+        return "Asset Management";
+    }
+
+    @Override
     protected void onInitialize() {
         super.onInitialize();
 
@@ -122,11 +127,6 @@ public class AssetManagementPage extends MasterPage implements ActionFilteredJoo
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", AssetManagementPage.class, getPageParameters());
         add(refreshLink);
-    }
-
-    @Override
-    public String getPageHeader() {
-        return "Asset Management";
     }
 
     @Override
