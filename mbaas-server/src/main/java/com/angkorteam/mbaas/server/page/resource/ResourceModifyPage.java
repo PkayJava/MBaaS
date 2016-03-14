@@ -90,7 +90,7 @@ public class ResourceModifyPage extends MasterPage {
         this.form.add(this.saveButton);
 
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
-        this.form.add(new ResourceValidator(pageField, keyField, languageField));
+        this.form.add(new ResourceValidator(this.resourceId, pageField, keyField, languageField));
     }
 
     private void saveButtonOnSubmit(Button button) {
