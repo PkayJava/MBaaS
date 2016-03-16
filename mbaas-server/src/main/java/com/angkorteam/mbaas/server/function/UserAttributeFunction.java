@@ -22,6 +22,7 @@ public class UserAttributeFunction {
 
     public static String createAttribute(DSLContext context, CollectionAttributeCreateRequest requestBody, String userId, ScopeEnum scope) {
         UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("UserPrivacyTable");
+        requestBody.setCollectionName(Tables.USER.getName());
         String attributeId = AttributeFunction.createAttribute(context, requestBody);
         UserPrivacyRecord userPrivacyRecord = context.newRecord(userPrivacyTable);
         String uuid = UUID.randomUUID().toString();

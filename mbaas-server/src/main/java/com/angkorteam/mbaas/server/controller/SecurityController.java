@@ -1,11 +1,15 @@
 package com.angkorteam.mbaas.server.controller;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.*;
-import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.plain.enums.ScopeEnum;
+import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
+import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
+import com.angkorteam.mbaas.model.entity.tables.SessionTable;
+import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.SessionRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
@@ -15,10 +19,9 @@ import com.angkorteam.mbaas.plain.response.security.SecurityLoginResponse;
 import com.angkorteam.mbaas.plain.response.security.SecurityLogoutResponse;
 import com.angkorteam.mbaas.plain.response.security.SecurityLogoutSessionResponse;
 import com.angkorteam.mbaas.plain.response.security.SecuritySignUpResponse;
-import com.angkorteam.mbaas.server.function.MariaDBFunction;
+import com.angkorteam.mbaas.server.function.UserFunction;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
-import org.apache.commons.lang3.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
@@ -29,11 +32,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -70,11 +75,8 @@ public class SecurityController {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        RoleTable roleTable = Tables.ROLE.as("roleTable");
-        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
         if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
             errorMessages.put("username", "is required");
@@ -89,55 +91,151 @@ public class SecurityController {
             errorMessages.put("password", "is required");
         }
 
-        // field duplication check
-        List<String> fields = new LinkedList<>();
+        // begin field duplication check
+        Map<String, Object> fields = new LinkedHashMap<>();
         if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
-                if (fields.contains(entry.getKey())) {
+            requestBody.getVisibleByAnonymousUsers().entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {
+                if (fields.containsKey(entry.getKey())) {
                     errorMessages.put(entry.getKey(), "overridden other field");
-                    break;
                 } else {
-                    fields.add(entry.getKey());
+                    fields.put(entry.getKey(), entry.getValue());
                 }
-            }
+            });
         }
         if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
-                if (fields.contains(entry.getKey())) {
+            requestBody.getVisibleByFriends().entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {
+                if (fields.containsKey(entry.getKey())) {
                     errorMessages.put(entry.getKey(), "overridden other field");
-                    break;
                 } else {
-                    fields.add(entry.getKey());
+                    fields.put(entry.getKey(), entry.getValue());
                 }
-            }
+            });
         }
         if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
-                if (fields.contains(entry.getKey())) {
+            requestBody.getVisibleByRegisteredUsers().entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {
+                if (fields.containsKey(entry.getKey())) {
                     errorMessages.put(entry.getKey(), "overridden other field");
-                    break;
                 } else {
-                    fields.add(entry.getKey());
+                    fields.put(entry.getKey(), entry.getValue());
                 }
-            }
+            });
         }
         if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
-                if (fields.contains(entry.getKey())) {
+            requestBody.getVisibleByTheUser().entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {
+                if (fields.containsKey(entry.getKey())) {
                     errorMessages.put(entry.getKey(), "overridden other field");
-                    break;
                 } else {
-                    fields.add(entry.getKey());
+                    fields.put(entry.getKey(), entry.getValue());
+                }
+            });
+        }
+        // finish field duplication check
+
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.USER.getName())).fetchOneInto(collectionTable);
+        List<AttributeRecord> attributeRecords = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable);
+
+        // begin field type validation
+        for (AttributeRecord attributeRecord : attributeRecords) {
+            Object object = fields.get(attributeRecord.getName());
+            if (object != null) {
+                TypeEnum typeEnum = TypeEnum.valueOf(attributeRecord.getJavaType());
+                if (typeEnum == TypeEnum.Boolean) {
+                    if (object instanceof Boolean) {
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be boolean");
+                    }
+                } else if (typeEnum == TypeEnum.Byte) {
+                    if (object instanceof Byte) {
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be byte");
+                    }
+                } else if (typeEnum == TypeEnum.Short) {
+                    if (object instanceof Short) {
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be short");
+                    }
+                } else if (typeEnum == TypeEnum.Integer) {
+                    if (object instanceof Integer) {
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be integer");
+                    }
+                } else if (typeEnum == TypeEnum.Long) {
+                    if (object instanceof Long) {
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be long");
+                    }
+                } else if (typeEnum == TypeEnum.Float) {
+                    if (object instanceof Float) {
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be float");
+                    }
+                } else if (typeEnum == TypeEnum.Double) {
+                    if (object instanceof Double) {
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be double");
+                    }
+                } else if (typeEnum == TypeEnum.Character) {
+                    if (object instanceof Character) {
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be char or character");
+                    }
+                } else if (typeEnum == TypeEnum.String) {
+                    if (object instanceof String) {
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be string");
+                    }
+                } else if (typeEnum == TypeEnum.Time) {
+                    if (object instanceof Date) {
+                    } else if (object instanceof String) {
+                        DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_TIME));
+                        try {
+                            dateFormat.parse((String) object);
+                        } catch (ParseException e) {
+                        }
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be date or string format " + configuration.getString(Constants.PATTERN_TIME));
+                    }
+                } else if (typeEnum == TypeEnum.Date) {
+                    if (object instanceof Date) {
+                    } else if (object instanceof String) {
+                        DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATE));
+                        try {
+                            dateFormat.parse((String) object);
+                        } catch (ParseException e) {
+                        }
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be date or string format " + configuration.getString(Constants.PATTERN_DATE));
+                    }
+                } else if (typeEnum == TypeEnum.DateTime) {
+                    if (object instanceof Date) {
+                    } else if (object instanceof String) {
+                        DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
+                        try {
+                            dateFormat.parse((String) object);
+                        } catch (ParseException e) {
+                        }
+                    } else {
+                        errorMessages.put(attributeRecord.getName(), "data type must be date or string format " + configuration.getString(Constants.PATTERN_DATETIME));
+                    }
                 }
             }
         }
-
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.USER.getName())).fetchOneInto(collectionTable);
-
-        int fieldCount = context.selectCount().from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).and(attributeTable.NAME.in(fields)).fetchOneInto(Integer.class);
-        if (fields.size() > fieldCount) {
-            errorMessages.put("attribute", "some attributes are not allow");
-        }
+        fields.entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {
+            if (entry.getValue() instanceof Boolean) {
+            } else if (entry.getValue() instanceof Byte) {
+            } else if (entry.getValue() instanceof Short) {
+            } else if (entry.getValue() instanceof Integer) {
+            } else if (entry.getValue() instanceof Long) {
+            } else if (entry.getValue() instanceof Float) {
+            } else if (entry.getValue() instanceof Double) {
+            } else if (entry.getValue() instanceof Character) {
+            } else if (entry.getValue() instanceof String) {
+            } else if (entry.getValue() instanceof Date) {
+            } else {
+                errorMessages.put(entry.getKey(), "data type must be boolean, byte, short, integer, long, float, double, character, string, date ");
+            }
+        });
+        // finish type validation
 
         if (!errorMessages.isEmpty()) {
             SecuritySignUpResponse response = new SecuritySignUpResponse();
@@ -146,145 +244,12 @@ public class SecurityController {
             return ResponseEntity.ok(response);
         }
 
-        RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_REGISTERED))).fetchOneInto(roleTable);
+        String userId = UserFunction.createUser(context, jdbcTemplate, request, requestBody);
 
         SecuritySignUpResponse responseBody = new SecuritySignUpResponse();
 
-        String login = requestBody.getUsername();
-        String password = requestBody.getPassword();
-
-        UserRecord userRecord = context.newRecord(userTable);
-        userRecord.setUserId(UUID.randomUUID().toString());
-        userRecord.setDeleted(false);
-        userRecord.setRoleId(roleRecord.getRoleId());
-        userRecord.setAccountNonExpired(true);
-        userRecord.setCredentialsNonExpired(true);
-        userRecord.setAccountNonLocked(true);
-        userRecord.setStatus(UserStatusEnum.Active.getLiteral());
-        userRecord.setLogin(login);
-        userRecord.setPassword(password);
-        userRecord.store();
-
-        List<String> columnNames = new LinkedList<>();
-        Map<String, Object> columnValues = new LinkedHashMap<>();
-
-        Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
-        Map<String, TypeEnum> typeEnums = new LinkedHashMap<>();
-        for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
-            attributeRecords.put(attributeRecord.getName(), attributeRecord);
-            typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
-        }
-
-        Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
-        for (AttributeRecord blobRecord : context.select(attributeTable.fields()).from(attributeTable)
-                .where(attributeTable.SQL_TYPE.eq("BLOB"))
-                .and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                .and(attributeTable.VIRTUAL.eq(false))
-                .fetchInto(attributeTable)) {
-            blobRecords.put(blobRecord.getAttributeId(), blobRecord);
-        }
-
-        Map<String, String> visibility = new LinkedHashMap<>();
-        Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
-
-        if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
-                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
-                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByAnonymousUser.getLiteral());
-                if (attributeRecord.getVirtual()) {
-                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
-                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
-                        virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
-                    }
-                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
-                } else {
-                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
-                    columnValues.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
-                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
-                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByFriend.getLiteral());
-                if (attributeRecord.getVirtual()) {
-                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
-                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
-                        virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
-                    }
-                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
-                } else {
-                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
-                    columnValues.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
-                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
-                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByRegisteredUser.getLiteral());
-                if (attributeRecord.getVirtual()) {
-                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
-                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
-                        virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
-                    }
-                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
-                } else {
-                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
-                    columnValues.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
-            for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
-                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
-                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByTheUser.getLiteral());
-                if (attributeRecord.getVirtual()) {
-                    AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
-                    if (!virtualColumns.containsKey(physicalRecord.getName())) {
-                        virtualColumns.put(physicalRecord.getName(), new LinkedHashMap<>());
-                    }
-                    virtualColumns.get(physicalRecord.getName()).put(entry.getKey(), entry.getValue());
-                } else {
-                    columnNames.add(entry.getKey() + " = :" + entry.getKey());
-                    columnValues.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        for (Map.Entry<String, String> entry : visibility.entrySet()) {
-            UserPrivacyRecord userPrivacyRecord = context.newRecord(userPrivacyTable);
-            userPrivacyRecord.setUserPrivacyId(UUID.randomUUID().toString());
-            userPrivacyRecord.setAttributeId(entry.getKey());
-            userPrivacyRecord.setScope(entry.getValue());
-            userPrivacyRecord.setUserId(userRecord.getUserId());
-            userPrivacyRecord.store();
-        }
-
-        if (!virtualColumns.isEmpty()) {
-            for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
-                if (!entry.getValue().isEmpty()) {
-                    columnNames.add(entry.getKey() + " = " + MariaDBFunction.columnCreate(entry.getValue(), typeEnums));
-                }
-            }
-            NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-            namedParameterJdbcTemplate.update("update " + Tables.USER.getName() + " set " + StringUtils.join(columnNames, ", ") + " where " + Tables.USER.USER_ID.getName() + " = " + userRecord.getUserId(), columnValues);
-        }
-
-        String tokenId = UUID.randomUUID().toString();
-        Date dateCreated = new Date();
-
-        SessionRecord sessionRecord = context.newRecord(sessionTable);
-        sessionRecord.setSessionId(tokenId);
-        sessionRecord.setDateCreated(dateCreated);
-        sessionRecord.setUserId(userRecord.getUserId());
-        sessionRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
-        sessionRecord.setClientIp(request.getRemoteAddr());
-        sessionRecord.store();
-
-        responseBody.getData().setSession(tokenId);
-        responseBody.getData().setDateCreated(dateCreated);
-        responseBody.getData().setLogin(userRecord.getLogin());
+        responseBody.getData().setUserId(userId);
+        responseBody.getData().setLogin(requestBody.getUsername());
 
         return ResponseEntity.ok(responseBody);
     }

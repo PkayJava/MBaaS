@@ -52,6 +52,8 @@ public class Constants {
     public static final String USER_INTERNAL_ADMIN_PASSWORD = "user.internal_admin.password";
 
     public static final String PATTERN_DATETIME = "pattern.datetime";
+    public static final String PATTERN_TIME = "pattern.time";
+    public static final String PATTERN_DATE = "pattern.date";
     public static final String PATTERN_FOLDER = "pattern.folder";
     public static final String PATTERN_NAMING = "pattern.naming";
 

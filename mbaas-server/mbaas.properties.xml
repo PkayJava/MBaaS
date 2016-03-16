@@ -51,6 +51,8 @@
     <entry key="mail.from">m1@home.com.kh</entry>
 
     <entry key="pattern.datetime">yyyy-MM-dd'T'HH:mm:ssZZ</entry>
+    <entry key="pattern.date">yyyy-MM-dd</entry>
+    <entry key="pattern.time">HH:mm:ss</entry>
     <entry key="pattern.folder">/yyyy/MM/dd/HH/mm/ss</entry>
     <entry key="pattern.naming"><![CDATA[^[a-z]{1}[a-z0-9\\_]*$]]></entry>
 

@@ -4,8 +4,6 @@ import com.angkorteam.mbaas.plain.response.Response;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Date;
-
 /**
  * Created by socheat on 2/16/16.
  */
@@ -18,31 +16,19 @@ public class SecuritySignUpResponse extends Response<SecuritySignUpResponse.Body
     public static class Body {
 
         @Expose
-        @SerializedName("session")
-        private String session;
-
-        @Expose
-        @SerializedName("dateCreated")
-        private Date dateCreated;
+        @SerializedName("userId")
+        private String userId;
 
         @Expose
         @SerializedName("login")
         private String login;
 
-        public String getSession() {
-            return session;
+        public String getUserId() {
+            return userId;
         }
 
-        public void setSession(String session) {
-            this.session = session;
-        }
-
-        public Date getDateCreated() {
-            return dateCreated;
-        }
-
-        public void setDateCreated(Date dateCreated) {
-            this.dateCreated = dateCreated;
+        public void setUserId(String userId) {
+            this.userId = userId;
         }
 
         public String getLogin() {
