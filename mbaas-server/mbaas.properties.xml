@@ -31,7 +31,7 @@
     <entry key="role.registered">registered</entry>
     <entry key="role.registered.description">Default role for new registered users</entry>
     <entry key="role.anonymous">anonymous</entry>
-    <entry key="role.anonymous.description">this anonymous role has a very limitted access</entry>
+    <entry key="role.anonymous.description">this anonymous role has a very limited access</entry>
 
     <entry key="user.admin">admin</entry>
     <entry key="user.admin.role">role.administrator</entry>
