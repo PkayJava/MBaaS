@@ -56,7 +56,7 @@
     <entry key="pattern.date">yyyy-MM-dd</entry>
     <entry key="pattern.time">HH:mm:ss</entry>
     <entry key="pattern.folder">/yyyy/MM/dd/HH/mm/ss</entry>
-    <entry key="pattern.naming"><![CDATA[^[a-z]{1}[a-z0-9\\_]*$]]></entry>
+    <entry key="pattern.naming"><![CDATA[^[a-z]{1}[a-z0-9\\_]*[a-z0-9]{1}$]]></entry>
 
     <entry key="resource.repo">/opt/sandbox/mbaas</entry>
 
