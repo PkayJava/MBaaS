@@ -66,26 +66,44 @@ public class UserFunction {
         fields.putAll(requestBody.getVisibleByRegisteredUsers());
         fields.putAll(requestBody.getVisibleByTheUser());
 
+        boolean dirtyAttribute = false;
+
         // Create The Attribute Which Are Not Yet Have.
         if (!fields.isEmpty()) {
-            fields.entrySet().stream().filter(entry -> attributeRecords.get(entry.getKey()) == null).forEach(entry -> {
-                CollectionAttributeCreateRequest req = new CollectionAttributeCreateRequest();
-                req.setAttributeName(entry.getKey());
-                req.setJavaType(TypeEnum.parse(entry.getValue()).getJavaType());
-                req.setNullable(true);
-                if (requestBody.getVisibleByAnonymousUsers().containsKey(entry.getKey())) {
-                    UserAttributeFunction.createAttribute(context, req, userRecord.getUserId(), ScopeEnum.VisibleByAnonymousUser);
+            for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                if (attributeRecords.get(entry.getKey()) == null) {
+                    CollectionAttributeCreateRequest req = new CollectionAttributeCreateRequest();
+                    req.setAttributeName(entry.getKey());
+                    req.setJavaType(TypeEnum.parse(entry.getValue()).getLiteral());
+                    req.setNullable(true);
+                    if (requestBody.getVisibleByAnonymousUsers().containsKey(entry.getKey())) {
+                        UserAttributeFunction.createAttribute(context, req, userRecord.getUserId(), ScopeEnum.VisibleByAnonymousUser);
+                        dirtyAttribute = true;
+                    }
+                    if (requestBody.getVisibleByFriends().containsKey(entry.getKey())) {
+                        UserAttributeFunction.createAttribute(context, req, userRecord.getUserId(), ScopeEnum.VisibleByFriend);
+                        dirtyAttribute = true;
+                    }
+                    if (requestBody.getVisibleByRegisteredUsers().containsKey(entry.getKey())) {
+                        UserAttributeFunction.createAttribute(context, req, userRecord.getUserId(), ScopeEnum.VisibleByRegisteredUser);
+                        dirtyAttribute = true;
+                    }
+                    if (requestBody.getVisibleByTheUser().containsKey(entry.getKey())) {
+                        UserAttributeFunction.createAttribute(context, req, userRecord.getUserId(), ScopeEnum.VisibleByTheUser);
+                        dirtyAttribute = true;
+                    }
                 }
-                if (requestBody.getVisibleByFriends().containsKey(entry.getKey())) {
-                    UserAttributeFunction.createAttribute(context, req, userRecord.getUserId(), ScopeEnum.VisibleByFriend);
-                }
-                if (requestBody.getVisibleByRegisteredUsers().containsKey(entry.getKey())) {
-                    UserAttributeFunction.createAttribute(context, req, userRecord.getUserId(), ScopeEnum.VisibleByRegisteredUser);
-                }
-                if (requestBody.getVisibleByTheUser().containsKey(entry.getKey())) {
-                    UserAttributeFunction.createAttribute(context, req, userRecord.getUserId(), ScopeEnum.VisibleByTheUser);
-                }
-            });
+            }
+        }
+
+        if (dirtyAttribute) {
+            // select all attribute put into map and type enum into map
+            attributeRecords = new LinkedHashMap<>();
+            typeEnums = new LinkedHashMap<>();
+            for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
+                attributeRecords.put(attributeRecord.getName(), attributeRecord);
+                typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
+            }
         }
 
         Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
@@ -99,13 +117,11 @@ public class UserFunction {
 
         List<String> columnNames = new LinkedList<>();
         Map<String, Object> columnValues = new LinkedHashMap<>();
-        Map<String, String> visibility = new LinkedHashMap<>();
         Map<String, Map<String, Object>> virtualColumns = new LinkedHashMap<>();
 
         if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByAnonymousUsers().entrySet()) {
                 AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
-                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByAnonymousUser.getLiteral());
                 if (attributeRecord.getVirtual()) {
                     AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
@@ -121,7 +137,6 @@ public class UserFunction {
         if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByFriends().entrySet()) {
                 AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
-                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByFriend.getLiteral());
                 if (attributeRecord.getVirtual()) {
                     AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
@@ -137,7 +152,6 @@ public class UserFunction {
         if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByRegisteredUsers().entrySet()) {
                 AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
-                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByRegisteredUser.getLiteral());
                 if (attributeRecord.getVirtual()) {
                     AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
@@ -153,7 +167,6 @@ public class UserFunction {
         if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
             for (Map.Entry<String, Object> entry : requestBody.getVisibleByTheUser().entrySet()) {
                 AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
-                visibility.put(attributeRecord.getAttributeId(), ScopeEnum.VisibleByTheUser.getLiteral());
                 if (attributeRecord.getVirtual()) {
                     AttributeRecord physicalRecord = blobRecords.get(attributeRecord.getVirtualAttributeId());
                     if (!virtualColumns.containsKey(physicalRecord.getName())) {
@@ -167,25 +180,15 @@ public class UserFunction {
             }
         }
 
-        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
-
-        for (Map.Entry<String, String> entry : visibility.entrySet()) {
-            UserPrivacyRecord userPrivacyRecord = context.newRecord(userPrivacyTable);
-            userPrivacyRecord.setUserPrivacyId(UUID.randomUUID().toString());
-            userPrivacyRecord.setAttributeId(entry.getKey());
-            userPrivacyRecord.setScope(entry.getValue());
-            userPrivacyRecord.setUserId(userRecord.getUserId());
-            userPrivacyRecord.store();
-        }
-
         if (!virtualColumns.isEmpty()) {
             for (Map.Entry<String, Map<String, Object>> entry : virtualColumns.entrySet()) {
                 if (!entry.getValue().isEmpty()) {
                     columnNames.add(entry.getKey() + " = " + MariaDBFunction.columnCreate(entry.getValue(), typeEnums));
                 }
             }
+            columnValues.put(Tables.USER.USER_ID.getName(), userRecord.getUserId());
             NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-            namedParameterJdbcTemplate.update("update " + Tables.USER.getName() + " set " + StringUtils.join(columnNames, ", ") + " where " + Tables.USER.USER_ID.getName() + " = " + userRecord.getUserId(), columnValues);
+            namedParameterJdbcTemplate.update("update " + Tables.USER.getName() + " set " + StringUtils.join(columnNames, ", ") + " where " + Tables.USER.USER_ID.getName() + " = :" + Tables.USER.USER_ID.getName(), columnValues);
         }
 
         MobileTable mobileTable = Tables.MOBILE.as("desktopTable");
