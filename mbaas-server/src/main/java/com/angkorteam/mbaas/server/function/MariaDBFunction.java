@@ -1,10 +1,13 @@
 package com.angkorteam.mbaas.server.function;
 
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.WicketRuntimeException;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -13,7 +16,9 @@ import java.util.*;
  */
 public class MariaDBFunction {
 
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateFormat DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
     /**
      * Adds or updates dynamic columns
@@ -80,21 +85,21 @@ public class MariaDBFunction {
                 }
             } else if (typeEnum == TypeEnum.Time) {
                 if (entry.getValue() instanceof Date) {
-                    String field = "'" + entry.getKey() + "', '" + DATE_FORMAT.format((Date) entry.getValue()) + "' AS TIME";
+                    String field = "'" + entry.getKey() + "', '" + DATETIME_FORMAT.format((Date) entry.getValue()) + "' AS TIME";
                     fields.add(field);
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not date");
                 }
             } else if (typeEnum == TypeEnum.Date) {
                 if (entry.getValue() instanceof Date) {
-                    String field = "'" + entry.getKey() + "', '" + DATE_FORMAT.format((Date) entry.getValue()) + "' AS DATE";
+                    String field = "'" + entry.getKey() + "', '" + DATETIME_FORMAT.format((Date) entry.getValue()) + "' AS DATE";
                     fields.add(field);
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not date");
                 }
             } else if (typeEnum == TypeEnum.DateTime) {
                 if (entry.getValue() instanceof Date) {
-                    String field = "'" + entry.getKey() + "', '" + DATE_FORMAT.format((Date) entry.getValue()) + "' AS DATETIME";
+                    String field = "'" + entry.getKey() + "', '" + DATETIME_FORMAT.format((Date) entry.getValue()) + "' AS DATETIME";
                     fields.add(field);
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not date");
@@ -180,22 +185,68 @@ public class MariaDBFunction {
                 }
             } else if (typeEnum == TypeEnum.Time) {
                 if (entry.getValue() instanceof Date) {
-                    String field = "'" + entry.getKey() + "', '" + DATE_FORMAT.format((Date) entry.getValue()) + "' AS TIME";
+                    String field = "'" + entry.getKey() + "', '" + TIME_FORMAT.format((Date) entry.getValue()) + "' AS TIME";
                     fields.add(field);
+                } else if (entry.getValue() instanceof String) {
+                    XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+                    DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_TIME));
+                    Date value = null;
+                    try {
+                        value = dateFormat.parse((String) entry.getValue());
+                    } catch (ParseException e) {
+                        dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
+                        try {
+                            value = dateFormat.parse((String) entry.getValue());
+                        } catch (ParseException e1) {
+                        }
+                    }
+                    if (value != null) {
+                        String field = "'" + entry.getKey() + "', '" + TIME_FORMAT.format(value) + "' AS TIME";
+                        fields.add(field);
+                    }
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not date");
                 }
             } else if (typeEnum == TypeEnum.Date) {
                 if (entry.getValue() instanceof Date) {
-                    String field = "'" + entry.getKey() + "', '" + DATE_FORMAT.format((Date) entry.getValue()) + "' AS DATE";
+                    String field = "'" + entry.getKey() + "', '" + DATETIME_FORMAT.format((Date) entry.getValue()) + "' AS DATE";
                     fields.add(field);
+                } else if (entry.getValue() instanceof String) {
+                    XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+                    DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATE));
+                    Date value = null;
+                    try {
+                        value = dateFormat.parse((String) entry.getValue());
+                    } catch (ParseException e) {
+                        dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
+                        try {
+                            value = dateFormat.parse((String) entry.getValue());
+                        } catch (ParseException e1) {
+                        }
+                    }
+                    if (value != null) {
+                        String field = "'" + entry.getKey() + "', '" + DATE_FORMAT.format(value) + "' AS DATE";
+                        fields.add(field);
+                    }
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not date");
                 }
             } else if (typeEnum == TypeEnum.DateTime) {
                 if (entry.getValue() instanceof Date) {
-                    String field = "'" + entry.getKey() + "', '" + DATE_FORMAT.format((Date) entry.getValue()) + "' AS DATETIME";
+                    String field = "'" + entry.getKey() + "', '" + DATETIME_FORMAT.format((Date) entry.getValue()) + "' AS DATETIME";
                     fields.add(field);
+                } else if (entry.getValue() instanceof String) {
+                    XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+                    DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
+                    Date value = null;
+                    try {
+                        value = dateFormat.parse((String) entry.getValue());
+                    } catch (ParseException e) {
+                    }
+                    if (value != null) {
+                        String field = "'" + entry.getKey() + "', '" + DATE_FORMAT.format(value) + "' AS DATETIME";
+                        fields.add(field);
+                    }
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not date");
                 }

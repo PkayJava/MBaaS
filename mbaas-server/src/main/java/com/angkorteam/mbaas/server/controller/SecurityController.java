@@ -196,9 +196,15 @@ public class SecurityController {
                     if (object instanceof Date) {
                     } else if (object instanceof String) {
                         DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_TIME));
+                        Date value = null;
                         try {
-                            dateFormat.parse((String) object);
+                            value = dateFormat.parse((String) object);
                         } catch (ParseException e) {
+                            dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
+                            try {
+                                value = dateFormat.parse((String) object);
+                            } catch (ParseException e1) {
+                            }
                         }
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be date or string format " + configuration.getString(Constants.PATTERN_TIME));
@@ -207,9 +213,15 @@ public class SecurityController {
                     if (object instanceof Date) {
                     } else if (object instanceof String) {
                         DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATE));
+                        Date value = null;
                         try {
-                            dateFormat.parse((String) object);
+                            value = dateFormat.parse((String) object);
                         } catch (ParseException e) {
+                            dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
+                            try {
+                                value = dateFormat.parse((String) object);
+                            } catch (ParseException e1) {
+                            }
                         }
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be date or string format " + configuration.getString(Constants.PATTERN_DATE));
@@ -218,8 +230,9 @@ public class SecurityController {
                     if (object instanceof Date) {
                     } else if (object instanceof String) {
                         DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
+                        Date value = null;
                         try {
-                            dateFormat.parse((String) object);
+                            value = dateFormat.parse((String) object);
                         } catch (ParseException e) {
                         }
                     } else {
