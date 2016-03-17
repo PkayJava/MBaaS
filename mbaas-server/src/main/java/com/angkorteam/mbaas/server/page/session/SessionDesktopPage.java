@@ -7,9 +7,9 @@ import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJo
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.WicketTable;
-import com.angkorteam.mbaas.model.entity.tables.records.WicketRecord;
-import com.angkorteam.mbaas.server.provider.WicketProvider;
+import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
+import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
+import com.angkorteam.mbaas.server.provider.DesktopProvider;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -40,8 +40,8 @@ public class SessionDesktopPage extends MasterPage implements ActionFilteredJooq
     protected void onInitialize() {
         super.onInitialize();
 
-        WicketProvider provider = new WicketProvider();
-        provider.selectField(Boolean.class, "wicketId");
+        DesktopProvider provider = new DesktopProvider();
+        provider.selectField(Boolean.class, "desktopId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -74,12 +74,12 @@ public class SessionDesktopPage extends MasterPage implements ActionFilteredJooq
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
         if ("Delete".equals(link)) {
-            String wicketId = (String) object.get("wicketId");
+            String desktopId = (String) object.get("desktopId");
             DSLContext context = getDSLContext();
-            WicketTable wicketTable = Tables.WICKET.as("wicketTable");
-            WicketRecord wicketRecord = context.select(wicketTable.fields()).from(wicketTable).where(wicketTable.WICKET_ID.eq(wicketId)).fetchOneInto(wicketTable);
+            DesktopTable desktopTable = Tables.DESKTOP.as("desktopTable");
+            DesktopRecord desktopRecord = context.select(desktopTable.fields()).from(desktopTable).where(desktopTable.DESKTOP_ID.eq(desktopId)).fetchOneInto(desktopTable);
             Application application = (Application) getApplication();
-            application.invalidate(wicketRecord.getSessionId());
+            application.invalidate(desktopRecord.getSessionId());
             return;
         }
     }

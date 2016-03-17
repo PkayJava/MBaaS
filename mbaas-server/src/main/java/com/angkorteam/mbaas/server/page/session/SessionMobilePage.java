@@ -7,7 +7,7 @@ import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJo
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.server.provider.SessionProvider;
+import com.angkorteam.mbaas.server.provider.MobileProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -37,14 +37,14 @@ public class SessionMobilePage extends MasterPage implements ActionFilteredJooqC
     protected void onInitialize() {
         super.onInitialize();
 
-        SessionProvider provider = new SessionProvider();
-        provider.selectField(Boolean.class, "sessionId");
+        MobileProvider provider = new MobileProvider();
+        provider.selectField(Boolean.class, "mobileId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("sessionId", this), "sessionId", this, provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("mobileId", this), "mobileId", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("login", this), "login", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateSeen", this), "dateSeen", provider));
@@ -71,9 +71,9 @@ public class SessionMobilePage extends MasterPage implements ActionFilteredJooqC
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
         if ("Delete".equals(link)) {
-            String sessionId = (String) object.get("sessionId");
+            String mobileId = (String) object.get("mobileId");
             DSLContext context = getDSLContext();
-            context.delete(Tables.SESSION).where(Tables.SESSION.SESSION_ID.eq(sessionId)).execute();
+            context.delete(Tables.MOBILE).where(Tables.MOBILE.MOBILE_ID.eq(mobileId)).execute();
             return;
         }
     }

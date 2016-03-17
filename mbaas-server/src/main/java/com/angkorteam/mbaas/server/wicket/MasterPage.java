@@ -2,8 +2,8 @@ package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.WicketTable;
-import com.angkorteam.mbaas.model.entity.tables.records.WicketRecord;
+import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
+import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
@@ -47,15 +47,15 @@ public abstract class MasterPage extends AdminLTEPage {
         Session session = getSession();
 
         DSLContext context = getDSLContext();
-        WicketTable wicketTable = Tables.WICKET.as("wicketTable");
+        DesktopTable desktopTable = Tables.DESKTOP.as("desktopTable");
 
-        WicketRecord wicketRecord = context.select(wicketTable.fields()).from(wicketTable).where(wicketTable.SESSION_ID.eq(session.getId())).fetchOneInto(wicketTable);
-        if (wicketRecord != null) {
-            wicketRecord.setUserId(session.getUserId());
-            wicketRecord.setDateSeen(new Date());
-            wicketRecord.setClientIp(getSession().getClientInfo().getProperties().getRemoteAddress());
-            wicketRecord.setUserAgent(getSession().getClientInfo().getUserAgent());
-            wicketRecord.update();
+        DesktopRecord desktopRecord = context.select(desktopTable.fields()).from(desktopTable).where(desktopTable.SESSION_ID.eq(session.getId())).fetchOneInto(desktopTable);
+        if (desktopRecord != null) {
+            desktopRecord.setUserId(session.getUserId());
+            desktopRecord.setDateSeen(new Date());
+            desktopRecord.setClientIp(getSession().getClientInfo().getProperties().getRemoteAddress());
+            desktopRecord.setUserAgent(getSession().getClientInfo().getUserAgent());
+            desktopRecord.update();
         }
 
         super.onInitialize();

@@ -66,7 +66,7 @@ public class DocumentController {
     public ResponseEntity<DocumentCreateResponse> create(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("collection") String collection,
             @RequestBody DocumentCreateRequest requestBody
     ) {
@@ -76,18 +76,18 @@ public class DocumentController {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-        if (sessionRecord == null) {
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        if (mobileRecord == null) {
             errorMessages.put("session", "session invalid");
         }
 
         UserRecord userRecord = null;
-        if (sessionRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+        if (mobileRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 errorMessages.put("session", "session invalid");
             }
@@ -295,7 +295,7 @@ public class DocumentController {
     public ResponseEntity<DocumentCountResponse> count(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("collection") String collection,
             @RequestBody DocumentCountRequest requestBody
     ) {
@@ -304,16 +304,16 @@ public class DocumentController {
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
-        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-        if (sessionRecord == null) {
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        if (mobileRecord == null) {
             errorMessages.put("session", "session invalid");
         }
 
         UserRecord userRecord = null;
-        if (sessionRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+        if (mobileRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 errorMessages.put("session", "session invalid");
             }
@@ -364,7 +364,7 @@ public class DocumentController {
     public ResponseEntity<DocumentModifyResponse> modify(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("collection") String collection,
             @PathVariable("documentId") String documentId,
             @RequestBody DocumentModifyRequest requestBody
@@ -373,18 +373,18 @@ public class DocumentController {
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-        if (sessionRecord == null) {
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        if (mobileRecord == null) {
             errorMessages.put("session", "session invalid");
         }
 
         UserRecord userRecord = null;
-        if (sessionRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+        if (mobileRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 errorMessages.put("session", "session invalid");
             }
@@ -596,7 +596,7 @@ public class DocumentController {
     public ResponseEntity<DocumentDeleteResponse> delete(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("collection") String collection,
             @PathVariable("documentId") String documentId,
             @RequestBody DocumentDeleteRequest requestBody
@@ -605,18 +605,18 @@ public class DocumentController {
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-        if (sessionRecord == null) {
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        if (mobileRecord == null) {
             errorMessages.put("session", "session invalid");
         }
 
         UserRecord userRecord = null;
-        if (sessionRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+        if (mobileRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 errorMessages.put("session", "session invalid");
             }
@@ -676,7 +676,7 @@ public class DocumentController {
     public ResponseEntity<DocumentPermissionUsernameResponse> grantPermissionUsername(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody DocumentPermissionUsernameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
@@ -770,7 +770,7 @@ public class DocumentController {
     public ResponseEntity<DocumentPermissionRoleNameResponse> grantPermissionRoleName(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody DocumentPermissionRoleNameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
@@ -864,7 +864,7 @@ public class DocumentController {
     public ResponseEntity<DocumentPermissionUsernameResponse> revokePermissionUsername(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody DocumentPermissionUsernameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
@@ -973,7 +973,7 @@ public class DocumentController {
     public ResponseEntity<DocumentPermissionRoleNameResponse> revokePermissionRoleName(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody DocumentPermissionRoleNameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
@@ -1082,7 +1082,7 @@ public class DocumentController {
     public ResponseEntity<DocumentRetrieveResponse> retrieve(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("collection") String collection,
             @PathVariable("documentId") String documentId,
             @RequestBody DocumentRetrieveRequest requestBody
@@ -1093,18 +1093,18 @@ public class DocumentController {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-        if (sessionRecord == null) {
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        if (mobileRecord == null) {
             errorMessages.put("session", "session invalid");
         }
 
         UserRecord userRecord = null;
-        if (sessionRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+        if (mobileRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 errorMessages.put("session", "session invalid");
             }
@@ -1198,7 +1198,7 @@ public class DocumentController {
     public ResponseEntity<DocumentQueryResponse> query(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("collection") String collection,
             @RequestBody DocumentQueryRequest requestBody
     ) {

@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server.wicket;
 import com.angkorteam.framework.extension.jooq.IDSLContext;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.WicketTable;
 import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
@@ -108,8 +107,7 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
 
     public void invalidate(String sessionId) {
         DSLContext context = getDSLContext();
-        WicketTable wicketTable = Tables.WICKET.as("wicketTable");
-        context.delete(wicketTable).where(wicketTable.SESSION_ID.eq(sessionId)).execute();
+        context.delete(Tables.DESKTOP).where(Tables.DESKTOP.SESSION_ID.eq(sessionId)).execute();
         Session session = this.sessions.remove(sessionId);
         if (session != null) {
             session.invalidateNow();

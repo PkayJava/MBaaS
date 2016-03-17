@@ -4,11 +4,11 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.SessionTable;
+import com.angkorteam.mbaas.model.entity.tables.MobileTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.SessionRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.Request;
@@ -270,7 +270,7 @@ public class SecurityController {
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
         if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
             errorMessages.put("username", "is required");
@@ -297,18 +297,18 @@ public class SecurityController {
 
         SecurityLoginResponse responseBody = new SecurityLoginResponse();
 
-        String sessionId = UUID.randomUUID().toString();
+        String mobileId = UUID.randomUUID().toString();
         Date dateCreated = new Date();
 
-        SessionRecord sessionRecord = context.newRecord(sessionTable);
-        sessionRecord.setSessionId(sessionId);
-        sessionRecord.setDateCreated(dateCreated);
-        sessionRecord.setUserId(userRecord.getUserId());
-        sessionRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
-        sessionRecord.setClientIp(request.getRemoteAddr());
-        sessionRecord.store();
+        MobileRecord mobileRecord = context.newRecord(mobileTable);
+        mobileRecord.setMobileId(mobileId);
+        mobileRecord.setDateCreated(dateCreated);
+        mobileRecord.setUserId(userRecord.getUserId());
+        mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+        mobileRecord.setClientIp(request.getRemoteAddr());
+        mobileRecord.store();
 
-        responseBody.getData().setSession(sessionId);
+        responseBody.getData().setSession(mobileId);
         responseBody.getData().setDateCreated(dateCreated);
         responseBody.getData().setLogin(userRecord.getLogin());
 
@@ -326,18 +326,18 @@ public class SecurityController {
     public ResponseEntity<SecurityLogoutResponse> logout(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody SecurityLogoutRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
 
         SecurityLogoutResponse responseBody = new SecurityLogoutResponse();
 
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
-        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-        String userId = sessionRecord.getUserId();
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        String userId = mobileRecord.getUserId();
 
-        context.delete(sessionTable).where(sessionTable.USER_ID.eq(userId)).execute();
+        context.delete(mobileTable).where(mobileTable.USER_ID.eq(userId)).execute();
 
         return ResponseEntity.ok(responseBody);
     }
@@ -356,12 +356,12 @@ public class SecurityController {
             @PathVariable("session") String session,
             @RequestBody Request requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=> body=>{}", request.getRequestURL(), appCode, request.getHeader("X-MBAAS-SESSION"), gson.toJson(requestBody));
+        LOGGER.info("{} appCode=>{} session=> body=>{}", request.getRequestURL(), appCode, request.getHeader("X-MBAAS-MOBILE"), gson.toJson(requestBody));
 
         SecurityLogoutSessionResponse responseBody = new SecurityLogoutSessionResponse();
 
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
-        context.delete(sessionTable).where(sessionTable.SESSION_ID.eq(session)).execute();
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+        context.delete(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).execute();
 
         return ResponseEntity.ok(responseBody);
     }

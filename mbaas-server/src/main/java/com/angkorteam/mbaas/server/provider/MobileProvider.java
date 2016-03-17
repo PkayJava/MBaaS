@@ -2,8 +2,8 @@ package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.MobileTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.WicketTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -15,16 +15,16 @@ import java.util.List;
 /**
  * Created by socheat on 3/13/16.
  */
-public class WicketProvider extends JooqProvider {
+public class MobileProvider extends JooqProvider {
 
-    private WicketTable wicketTable = Tables.WICKET.as("wicketTable");
+    private MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
     private UserTable userTable = Tables.USER.as("userTable");
 
     private TableLike<?> from;
 
-    public WicketProvider() {
-        this.from = wicketTable.join(userTable).on(wicketTable.USER_ID.eq(userTable.USER_ID));
+    public MobileProvider() {
+        this.from = mobileTable.join(userTable).on(mobileTable.USER_ID.eq(userTable.USER_ID));
         setSort("dateSeen", SortOrder.DESCENDING);
     }
 
@@ -32,28 +32,28 @@ public class WicketProvider extends JooqProvider {
         return this.userTable.LOGIN;
     }
 
-    public Field<String> getWicketId() {
-        return this.wicketTable.WICKET_ID;
+    public Field<String> getMobileId() {
+        return this.mobileTable.MOBILE_ID;
     }
 
     public Field<String> getClientIp() {
-        return this.wicketTable.CLIENT_IP;
+        return this.mobileTable.CLIENT_IP;
     }
 
-    public Field<String> getSessionId() {
-        return this.wicketTable.SESSION_ID;
+    public Field<String> getPushToken() {
+        return this.mobileTable.PUSH_TOKEN;
     }
 
     public Field<String> getUserAgent() {
-        return this.wicketTable.USER_AGENT;
+        return this.mobileTable.USER_AGENT;
     }
 
     public Field<Date> getDateCreated() {
-        return this.wicketTable.DATE_CREATED;
+        return this.mobileTable.DATE_CREATED;
     }
 
     public Field<Date> getDateSeen() {
-        return this.wicketTable.DATE_SEEN;
+        return this.mobileTable.DATE_SEEN;
     }
 
     @Override

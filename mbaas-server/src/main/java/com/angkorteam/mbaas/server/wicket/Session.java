@@ -1,12 +1,12 @@
 package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.WicketTable;
+import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.WicketRecord;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebSession;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
@@ -41,18 +41,18 @@ public class Session extends AuthenticatedWebSession {
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
             this.roles.add(roleRecord.getName());
 
-            WicketTable wicketTable = Tables.WICKET.as("wicketTable");
-            context.delete(wicketTable).where(wicketTable.SESSION_ID.eq(sessionId)).execute();
+            DesktopTable desktopTable = Tables.DESKTOP.as("desktopTable");
+            context.delete(desktopTable).where(desktopTable.SESSION_ID.eq(sessionId)).execute();
 
-            WicketRecord wicketRecord = context.newRecord(wicketTable);
-            wicketRecord.setWicketId(UUID.randomUUID().toString());
-            wicketRecord.setUserId(userRecord.getUserId());
-            wicketRecord.setDateSeen(new Date());
-            wicketRecord.setDateCreated(new Date());
-            wicketRecord.setSessionId(sessionId);
-            wicketRecord.setUserAgent(getClientInfo().getUserAgent());
-            wicketRecord.setClientIp(getClientInfo().getProperties().getRemoteAddress());
-            wicketRecord.store();
+            DesktopRecord desktopRecord = context.newRecord(desktopTable);
+            desktopRecord.setDesktopId(UUID.randomUUID().toString());
+            desktopRecord.setUserId(userRecord.getUserId());
+            desktopRecord.setDateSeen(new Date());
+            desktopRecord.setDateCreated(new Date());
+            desktopRecord.setSessionId(sessionId);
+            desktopRecord.setUserAgent(getClientInfo().getUserAgent());
+            desktopRecord.setClientIp(getClientInfo().getProperties().getRemoteAddress());
+            desktopRecord.store();
 
             this.userId = userRecord.getUserId();
 

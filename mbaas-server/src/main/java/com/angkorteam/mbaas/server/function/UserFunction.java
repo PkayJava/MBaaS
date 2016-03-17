@@ -188,18 +188,18 @@ public class UserFunction {
             namedParameterJdbcTemplate.update("update " + Tables.USER.getName() + " set " + StringUtils.join(columnNames, ", ") + " where " + Tables.USER.USER_ID.getName() + " = " + userRecord.getUserId(), columnValues);
         }
 
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("desktopTable");
 
-        String tokenId = UUID.randomUUID().toString();
+        String mobileId = UUID.randomUUID().toString();
         Date dateCreated = new Date();
 
-        SessionRecord sessionRecord = context.newRecord(sessionTable);
-        sessionRecord.setSessionId(tokenId);
-        sessionRecord.setDateCreated(dateCreated);
-        sessionRecord.setUserId(userRecord.getUserId());
-        sessionRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
-        sessionRecord.setClientIp(request.getRemoteAddr());
-        sessionRecord.store();
+        MobileRecord mobileRecord = context.newRecord(mobileTable);
+        mobileRecord.setMobileId(mobileId);
+        mobileRecord.setDateCreated(dateCreated);
+        mobileRecord.setUserId(userRecord.getUserId());
+        mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+        mobileRecord.setClientIp(request.getRemoteAddr());
+        mobileRecord.store();
 
         return userId;
     }

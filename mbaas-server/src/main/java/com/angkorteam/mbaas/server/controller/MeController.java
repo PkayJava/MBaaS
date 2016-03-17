@@ -59,20 +59,20 @@ public class MeController {
     public ResponseEntity<MeSuspendResponse> suspend(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody MeSuspendRequest requestBody
     ) {
         LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         UserTable userTable = Tables.USER.as("userTable");
 
-        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
         UserRecord userRecord = null;
 
-        if (tokenRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+        if (mobileRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
         }
 
         if (userRecord != null) {
@@ -93,20 +93,20 @@ public class MeController {
     public ResponseEntity<MeRetrieveResponse> loggedUserProfile(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody MeRetrieveRequest requestBody
     ) {
         LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         UserTable userTable = Tables.USER.as("userTable");
 
-        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
 
         UserRecord userRecord = null;
-        if (sessionRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+        if (mobileRecord != null) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
         }
 
         if (userRecord == null) {
@@ -133,14 +133,14 @@ public class MeController {
     public ResponseEntity<MeModifyResponse> updateUserProfile(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody MeModifyRequest requestBody
     ) {
         LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
@@ -288,8 +288,8 @@ public class MeController {
             }
         }
 
-        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
 
         if (!virtualColumns.isEmpty()) {
             for (Map.Entry<String, List<String>> entry : virtualColumns.entrySet()) {
@@ -333,17 +333,17 @@ public class MeController {
     public ResponseEntity<MePasswordResponse> changePassword(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody MePasswordRequest requestBody
     ) {
         LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
-        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
         userRecord.setPassword(requestBody.getNewPassword());
         userRecord.update();
 
@@ -360,17 +360,17 @@ public class MeController {
     public ResponseEntity<MeUsernameResponse> changeUsername(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody MeUsernameRequest requestBody
     ) {
         LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         UserTable userTable = Tables.USER.as("userTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
-        SessionRecord tokenRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(tokenRecord.getUserId())).fetchOneInto(userTable);
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
         userRecord.setLogin(requestBody.getUsername());
         userRecord.update();
 

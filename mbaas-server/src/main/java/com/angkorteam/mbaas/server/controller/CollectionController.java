@@ -67,14 +67,14 @@ public class CollectionController {
     public ResponseEntity<CollectionCreateResponse> create(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionCreateRequest requestBody
     ) throws SQLException {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         UserTable userTable = Tables.USER.as("userTable");
 
         CollectionRecord collectionRecord = null;
@@ -95,9 +95,9 @@ public class CollectionController {
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
 
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
 
         String primaryName = requestBody.getCollectionName() + "_id";
         List<String> systemAttributes = Arrays.asList(primaryName, configuration.getString(Constants.JDBC_COLUMN_DELETED), configuration.getString(Constants.JDBC_COLUMN_EXTRA), configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
@@ -155,7 +155,7 @@ public class CollectionController {
     public ResponseEntity<CollectionAttributeCreateResponse> createAttribute(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionAttributeCreateRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
@@ -259,7 +259,7 @@ public class CollectionController {
     public ResponseEntity<CollectionDeleteResponse> delete(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionDeleteRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
@@ -325,7 +325,7 @@ public class CollectionController {
     public ResponseEntity<CollectionAttributeDeleteResponse> deleteAttribute(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionAttributeDeleteRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
@@ -405,7 +405,7 @@ public class CollectionController {
     public ResponseEntity<CollectionPermissionUsernameResponse> grantPermissionUsername(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionPermissionUsernameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
@@ -489,7 +489,7 @@ public class CollectionController {
     public ResponseEntity<CollectionPermissionRoleNameResponse> grantPermissionRoleName(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionPermissionRoleNameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
@@ -573,7 +573,7 @@ public class CollectionController {
     public ResponseEntity<CollectionPermissionUsernameResponse> revokePermissionUsername(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionPermissionUsernameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
@@ -667,7 +667,7 @@ public class CollectionController {
     public ResponseEntity<CollectionPermissionRoleNameResponse> revokePermissionRoleName(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionPermissionRoleNameRequest requestBody
     ) {
         LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));

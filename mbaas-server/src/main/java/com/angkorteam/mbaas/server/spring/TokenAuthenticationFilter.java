@@ -1,9 +1,9 @@
 package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.SessionTable;
+import com.angkorteam.mbaas.model.entity.tables.MobileTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.records.SessionRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import org.jooq.DSLContext;
 import org.springframework.http.HttpHeaders;
@@ -103,20 +103,20 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             String session = header;
 
             UserTable userTable = Tables.USER.as("userTable");
-            SessionTable sessionTable = Tables.SESSION.as("sessionTable");
+            MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
-            SessionRecord sessionRecord = context.select(sessionTable.fields()).from(sessionTable).where(sessionTable.SESSION_ID.eq(session)).fetchOneInto(sessionTable);
-            if (sessionRecord == null) {
-                throw new BadCredentialsException("session " + session + " is not valid");
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+            if (mobileRecord == null) {
+                throw new BadCredentialsException("mobile session " + session + " is not valid");
             }
 
             Date dateSeen = new Date();
-            sessionRecord.setDateSeen(dateSeen);
-            sessionRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
-            sessionRecord.setClientIp(request.getRemoteAddr());
-            sessionRecord.update();
+            mobileRecord.setDateSeen(dateSeen);
+            mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+            mobileRecord.setClientIp(request.getRemoteAddr());
+            mobileRecord.update();
 
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(sessionRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
 
             if (userRecord == null) {
                 throw new BadCredentialsException("session " + session + " is not valid");
