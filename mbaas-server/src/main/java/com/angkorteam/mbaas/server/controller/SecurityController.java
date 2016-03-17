@@ -40,6 +40,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by Khauv Socheat on 2/14/2016.
@@ -130,6 +131,13 @@ public class SecurityController {
             });
         }
         // finish field duplication check
+        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+        for (Map.Entry<String, Object> field : fields.entrySet()) {
+            String name = field.getKey();
+            if (!patternNaming.matcher(name).matches()) {
+                errorMessages.put(name, "bad name");
+            }
+        }
 
         CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.USER.getName())).fetchOneInto(collectionTable);
         List<AttributeRecord> attributeRecords = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable);

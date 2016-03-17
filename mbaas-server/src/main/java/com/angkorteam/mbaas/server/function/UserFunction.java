@@ -71,7 +71,7 @@ public class UserFunction {
             fields.entrySet().stream().filter(entry -> attributeRecords.get(entry.getKey()) == null).forEach(entry -> {
                 CollectionAttributeCreateRequest req = new CollectionAttributeCreateRequest();
                 req.setAttributeName(entry.getKey());
-                req.setJavaType(TypeEnum.parse(entry.getKey()).getJavaType());
+                req.setJavaType(TypeEnum.parse(entry.getValue()).getJavaType());
                 req.setNullable(true);
                 if (requestBody.getVisibleByAnonymousUsers().containsKey(entry.getKey())) {
                     UserAttributeFunction.createAttribute(context, req, userRecord.getUserId(), ScopeEnum.VisibleByAnonymousUser);

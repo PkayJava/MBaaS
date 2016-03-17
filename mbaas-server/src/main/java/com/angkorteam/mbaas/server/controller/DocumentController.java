@@ -43,8 +43,6 @@ public class DocumentController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);
 
-    private static final Pattern PATTERN_NAMING = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
-
     @Autowired
     private DSLContext context;
 
@@ -93,8 +91,10 @@ public class DocumentController {
             }
         }
 
+        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+
         CollectionRecord collectionRecord = null;
-        if (!PATTERN_NAMING.matcher(collection).matches()) {
+        if (!patternNaming.matcher(collection).matches()) {
             errorMessages.put(collection, "bad name");
         } else {
             collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
@@ -119,7 +119,7 @@ public class DocumentController {
         String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
 
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            if (!PATTERN_NAMING.matcher(entry.getKey()).matches()) {
+            if (!patternNaming.matcher(entry.getKey()).matches()) {
                 errorMessages.put(entry.getKey(), "bad name");
             } else {
                 if (!attributeNameRecords.containsKey(entry.getKey())) {
@@ -319,8 +319,10 @@ public class DocumentController {
             }
         }
 
+        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+
         CollectionRecord collectionRecord = null;
-        if (!PATTERN_NAMING.matcher(collection).matches()) {
+        if (!patternNaming.matcher(collection).matches()) {
             errorMessages.put("collection", "bad name");
         } else {
             collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
@@ -390,8 +392,10 @@ public class DocumentController {
             }
         }
 
+        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+
         CollectionRecord collectionRecord = null;
-        if (!PATTERN_NAMING.matcher(collection).matches()) {
+        if (!patternNaming.matcher(collection).matches()) {
             errorMessages.put("collection", "collection is bad name");
         } else {
             collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
@@ -413,7 +417,7 @@ public class DocumentController {
         String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
 
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            if (!PATTERN_NAMING.matcher(entry.getKey()).matches()) {
+            if (!patternNaming.matcher(entry.getKey()).matches()) {
                 errorMessages.put(entry.getKey(), "bad name");
             } else {
                 if (!attributeNameRecords.containsKey(entry.getKey())) {
@@ -622,8 +626,10 @@ public class DocumentController {
             }
         }
 
+        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+
         CollectionRecord collectionRecord = null;
-        if (!PATTERN_NAMING.matcher(collection).matches()) {
+        if (!patternNaming.matcher(collection).matches()) {
             errorMessages.put("collection", "collection is bad name");
         } else {
             collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
@@ -1110,8 +1116,10 @@ public class DocumentController {
             }
         }
 
+        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+
         CollectionRecord collectionRecord = null;
-        if (!PATTERN_NAMING.matcher(collection).matches()) {
+        if (!patternNaming.matcher(collection).matches()) {
             errorMessages.put("collection", "collection is bad name");
         } else {
             collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
