@@ -531,7 +531,7 @@ public class ApplicationContext implements ServletContextListener {
         }
         XMLPropertiesConfiguration xml = Constants.getXmlPropertiesConfiguration();
         MappedSchema mappedSchema = new MappedSchema();
-        mappedSchema.withInput("mbaas_temp");
+        mappedSchema.withInput(xml.getString(Constants.TEMP_JDBC_DATABASE));
         String itest = System.getProperty("itest");
         if (itest == null || "".equals(itest)) {
             mappedSchema.withOutput(xml.getString(Constants.APP_JDBC_DATABASE));

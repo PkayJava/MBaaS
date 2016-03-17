@@ -14,6 +14,8 @@ public class Constants {
 
     public static final String WICKET = "wicket";
 
+    public static final String TEMP_JDBC_DATABASE = "temp.jdbc.database";
+
     public static final String APP_JDBC_DRIVER = "app.jdbc.driver";
     public static final String APP_JDBC_URL = "app.jdbc.url";
     public static final String APP_JDBC_USERNAME = "app.jdbc.username";
