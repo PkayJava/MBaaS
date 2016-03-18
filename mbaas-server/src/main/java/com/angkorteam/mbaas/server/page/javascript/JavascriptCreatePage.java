@@ -69,7 +69,7 @@ public class JavascriptCreatePage extends MasterPage {
         this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "path"));
         this.pathField.setRequired(true);
         this.pathField.add(new JavascriptNameValidator());
-        this.form.add(this.nameField);
+        this.form.add(this.pathField);
         this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
         this.form.add(this.pathFeedback);
 
