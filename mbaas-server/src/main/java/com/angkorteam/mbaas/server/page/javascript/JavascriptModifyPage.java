@@ -30,7 +30,7 @@ public class JavascriptModifyPage extends MasterPage {
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
 
-    private String path;
+    private String pathText;
     private TextField<String> pathField;
     private TextFeedbackPanel pathFeedback;
 
@@ -68,7 +68,7 @@ public class JavascriptModifyPage extends MasterPage {
         this.optimistic = javascriptRecord.getOptimistic();
 
         this.name = javascriptRecord.getName();
-        this.path = javascriptRecord.getPath();
+        this.pathText = javascriptRecord.getPath();
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
         this.nameField.add(new JavascriptNameValidator(this.javascriptId));
@@ -76,7 +76,7 @@ public class JavascriptModifyPage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "path"));
+        this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "pathText"));
         this.pathField.setRequired(true);
         this.pathField.add(new JavascriptNameValidator());
         this.form.add(this.nameField);
@@ -113,7 +113,7 @@ public class JavascriptModifyPage extends MasterPage {
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
 
         javascriptRecord.setName(this.name);
-        javascriptRecord.setPath(this.path);
+        javascriptRecord.setPath(this.pathText);
         javascriptRecord.setScript(this.script);
         javascriptRecord.setDescription(this.description);
         javascriptRecord.setOptimistic(this.optimistic);
@@ -129,7 +129,7 @@ public class JavascriptModifyPage extends MasterPage {
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
 
         javascriptRecord.setName(this.name);
-        javascriptRecord.setPath(this.path);
+        javascriptRecord.setPath(this.pathText);
         javascriptRecord.setScript(this.script);
         javascriptRecord.setDescription(this.description);
         javascriptRecord.setOptimistic(this.optimistic);
