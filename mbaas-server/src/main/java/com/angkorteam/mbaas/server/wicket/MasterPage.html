@@ -12,12 +12,14 @@
     <header class="main-header">
 
         <!-- Logo -->
-        <a href="index2.html" class="logo">
+        <wicket:link>
+        <a href="../page/DashboardPage.html" class="logo">
             <!-- mini logo for sidebar mini 50x50 pixels -->
             <span class="logo-mini">BaaS</span>
             <!-- logo for regular state and mobile devices -->
             <span class="logo-lg">Backend as a Service</span>
         </a>
+        </wicket:link>
 
         <!-- Header Navbar -->
         <nav class="navbar navbar-static-top" role="navigation">
@@ -26,13 +28,15 @@
                 <span class="sr-only">Toggle navigation</span>
             </a>
             <!-- Navbar Right Menu -->
+            <wicket:enclosure child="logoutLink">
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
                     <li>
-                        <a href="#">Logout</a>
+                        <a wicket:id="logoutLink">Logout</a>
                     </li>
                 </ul>
             </div>
+            </wicket:enclosure>
         </nav>
     </header>
 
@@ -106,15 +110,6 @@
                         <a href="../page/javascript/JavascriptManagementPage.html">Javascript</a>
                     </wicket:link>
                 </li>
-                <li><a href="#"><i class="fa fa-link"></i> <span>Another Link</span></a></li>
-                <li class="treeview">
-                    <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span> <i
-                            class="fa fa-angle-left pull-right"></i></a>
-                    <ul class="treeview-menu">
-                        <li><a href="#">Link in level 2</a></li>
-                        <li><a href="#">Link in level 2</a></li>
-                    </ul>
-                </li>
             </ul>
             <!-- /.sidebar-menu -->
         </section>
@@ -141,12 +136,8 @@
 
     <!-- Main Footer -->
     <footer class="main-footer">
-        <!-- To the right -->
-        <div class="pull-right hidden-xs">
-            Anything you want
-        </div>
         <!-- Default to the left -->
-        <strong>Copyright &copy; 2015 <a href="#">Company</a>.</strong> All rights reserved.
+        <strong>Copyright &copy; 2015 <a href="#">Angkor Team</a>.</strong> All rights reserved.
     </footer>
 </div>
 </body>

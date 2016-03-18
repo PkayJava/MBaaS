@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
+import com.angkorteam.framework.extension.wicket.markup.html.link.Link;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
@@ -64,6 +65,15 @@ public abstract class MasterPage extends AdminLTEPage {
         add(this.pageHeaderLabel);
         this.pageDescriptionLabel = new Label("pageDescriptionLabel", new PropertyModel<>(this, "pageDescription"));
         add(this.pageDescriptionLabel);
+
+        Link<Void> logoutLink = new Link<>("logoutLink");
+        add(logoutLink);
+        logoutLink.setOnClick(this::logoutLinkOnClick);
+        logoutLink.setVisible(getSession().isSignedIn());
+    }
+
+    private void logoutLinkOnClick(Link link) {
+        getSession().invalidateNow();
     }
 
     @Override
