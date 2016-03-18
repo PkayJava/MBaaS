@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
 import com.angkorteam.mbaas.server.validator.JavascriptNameValidator;
+import com.angkorteam.mbaas.server.validator.JavascriptPathValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
@@ -78,7 +79,7 @@ public class JavascriptModifyPage extends MasterPage {
 
         this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "pathText"));
         this.pathField.setRequired(true);
-        this.pathField.add(new JavascriptNameValidator());
+        this.pathField.add(new JavascriptPathValidator(this.javascriptId));
         this.form.add(this.pathField);
         this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
         this.form.add(this.pathFeedback);
