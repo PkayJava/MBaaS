@@ -72,14 +72,14 @@ public class JavascriptModifyPage extends MasterPage {
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
         this.nameField.add(new JavascriptNameValidator(this.javascriptId));
-        this.form.add(this.pathField);
+        this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
         this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "pathText"));
         this.pathField.setRequired(true);
         this.pathField.add(new JavascriptNameValidator());
-        this.form.add(this.nameField);
+        this.form.add(this.pathField);
         this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
         this.form.add(this.pathFeedback);
 
