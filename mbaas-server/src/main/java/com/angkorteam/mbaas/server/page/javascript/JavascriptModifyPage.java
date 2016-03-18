@@ -30,6 +30,10 @@ public class JavascriptModifyPage extends MasterPage {
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
 
+    private String path;
+    private TextField<String> pathField;
+    private TextFeedbackPanel pathFeedback;
+
     private String description;
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
@@ -64,12 +68,20 @@ public class JavascriptModifyPage extends MasterPage {
         this.optimistic = javascriptRecord.getOptimistic();
 
         this.name = javascriptRecord.getName();
+        this.path = javascriptRecord.getPath();
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
         this.nameField.add(new JavascriptNameValidator(this.javascriptId));
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
+
+        this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "path"));
+        this.pathField.setRequired(true);
+        this.pathField.add(new JavascriptNameValidator());
+        this.form.add(this.nameField);
+        this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
+        this.form.add(this.pathFeedback);
 
         this.description = javascriptRecord.getDescription();
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
@@ -101,6 +113,7 @@ public class JavascriptModifyPage extends MasterPage {
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
 
         javascriptRecord.setName(this.name);
+        javascriptRecord.setPath(this.path);
         javascriptRecord.setScript(this.script);
         javascriptRecord.setDescription(this.description);
         javascriptRecord.setOptimistic(this.optimistic);
@@ -116,6 +129,7 @@ public class JavascriptModifyPage extends MasterPage {
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
 
         javascriptRecord.setName(this.name);
+        javascriptRecord.setPath(this.path);
         javascriptRecord.setScript(this.script);
         javascriptRecord.setDescription(this.description);
         javascriptRecord.setOptimistic(this.optimistic);

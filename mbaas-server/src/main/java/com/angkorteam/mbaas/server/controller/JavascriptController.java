@@ -52,7 +52,7 @@ public class JavascriptController {
             @RequestBody(required = false) JavaScriptExecuteRequest requestBody
     ) throws ScriptException {
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
-        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.NAME.eq(script)).fetchOneInto(javascriptTable);
+        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.PATH.eq(script)).fetchOneInto(javascriptTable);
 
         if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript())) {
             JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
@@ -125,7 +125,7 @@ public class JavascriptController {
             @RequestBody(required = false) JavaScriptExecuteRequest requestBody
     ) throws ScriptException {
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
-        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.NAME.eq(script)).fetchOneInto(javascriptTable);
+        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.PATH.eq(script)).fetchOneInto(javascriptTable);
 
         if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript())) {
             JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();

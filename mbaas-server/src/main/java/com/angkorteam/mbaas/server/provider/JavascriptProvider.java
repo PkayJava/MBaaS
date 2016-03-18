@@ -41,7 +41,7 @@ public class JavascriptProvider extends JooqProvider {
     }
 
     public Field<String> getEndpoint() {
-        return DSL.concat(this.address, this.javascriptTable.NAME);
+        return DSL.concat(this.address, this.javascriptTable.PATH);
     }
 
     public Field<String> getDescription() {

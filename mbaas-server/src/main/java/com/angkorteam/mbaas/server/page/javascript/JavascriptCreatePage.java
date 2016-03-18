@@ -29,6 +29,10 @@ public class JavascriptCreatePage extends MasterPage {
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
 
+    private String path;
+    private TextField<String> pathField;
+    private TextFeedbackPanel pathFeedback;
+
     private String description;
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
@@ -62,6 +66,13 @@ public class JavascriptCreatePage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
+        this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "path"));
+        this.pathField.setRequired(true);
+        this.pathField.add(new JavascriptNameValidator());
+        this.form.add(this.nameField);
+        this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
+        this.form.add(this.pathFeedback);
+
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
         this.form.add(this.descriptionField);
@@ -89,6 +100,7 @@ public class JavascriptCreatePage extends MasterPage {
 
         javascriptRecord.setJavascriptId(uuid);
         javascriptRecord.setName(this.name);
+        javascriptRecord.setPath(this.path);
         javascriptRecord.setScript(this.script);
         javascriptRecord.setDeleted(false);
         javascriptRecord.setOwnerUserId(getSession().getUserId());
