@@ -16,8 +16,8 @@ public enum QueryInputParamTypeEnum {
     String("String"),
     Time("Time"),
     Date("Date"),
-    List("List"),
-    DateTime("DateTime");
+    DateTime("DateTime"),
+    List("List");
 
     private final String literal;
 
