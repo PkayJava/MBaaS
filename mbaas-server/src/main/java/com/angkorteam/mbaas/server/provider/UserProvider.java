@@ -8,7 +8,7 @@ import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -58,7 +58,7 @@ public class UserProvider extends JooqProvider {
             if (attributeRecord.getSystem()) {
                 continue;
             }
-            if (TypeEnum.Boolean.getLiteral().equals(attributeRecord.getJavaType())) {
+            if (AttributeTypeEnum.Boolean.getLiteral().equals(attributeRecord.getJavaType())) {
                 if (!attributeRecord.getVirtual()) {
                     boardField(attributeRecord.getName(), DSL.field(userTable.getName() + "." + attributeRecord.getName(), Boolean.class));
                 } else {
@@ -66,7 +66,7 @@ public class UserProvider extends JooqProvider {
                     Field<Boolean> field = DSL.field(MariaDBFunction.columnGet(userTable.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Boolean.class);
                     boardField(attributeRecord.getName(), field);
                 }
-            } else if (TypeEnum.Byte.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Byte.getLiteral().equals(attributeRecord.getJavaType())) {
                 if (!attributeRecord.getVirtual()) {
                     boardField(attributeRecord.getName(), DSL.field(userTable.getName() + "." + attributeRecord.getName(), Byte.class));
                 } else {
@@ -74,7 +74,7 @@ public class UserProvider extends JooqProvider {
                     Field<Byte> field = DSL.field(MariaDBFunction.columnGet(userTable.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Byte.class);
                     boardField(attributeRecord.getName(), field);
                 }
-            } else if (TypeEnum.Short.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Short.getLiteral().equals(attributeRecord.getJavaType())) {
                 if (!attributeRecord.getVirtual()) {
                     boardField(attributeRecord.getName(), DSL.field(userTable.getName() + "." + attributeRecord.getName(), Short.class));
                 } else {
@@ -82,7 +82,7 @@ public class UserProvider extends JooqProvider {
                     Field<Short> field = DSL.field(MariaDBFunction.columnGet(userTable.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Short.class);
                     boardField(attributeRecord.getName(), field);
                 }
-            } else if (TypeEnum.Integer.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Integer.getLiteral().equals(attributeRecord.getJavaType())) {
                 if (!attributeRecord.getVirtual()) {
                     boardField(attributeRecord.getName(), DSL.field(userTable.getName() + "." + attributeRecord.getName(), Integer.class));
                 } else {
@@ -90,7 +90,7 @@ public class UserProvider extends JooqProvider {
                     Field<Integer> field = DSL.field(MariaDBFunction.columnGet(userTable.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Integer.class);
                     boardField(attributeRecord.getName(), field);
                 }
-            } else if (TypeEnum.Long.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Long.getLiteral().equals(attributeRecord.getJavaType())) {
                 if (!attributeRecord.getVirtual()) {
                     boardField(attributeRecord.getName(), DSL.field(userTable.getName() + "." + attributeRecord.getName(), Long.class));
                 } else {
@@ -98,7 +98,7 @@ public class UserProvider extends JooqProvider {
                     Field<Long> field = DSL.field(MariaDBFunction.columnGet(userTable.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Long.class);
                     boardField(attributeRecord.getName(), field);
                 }
-            } else if (TypeEnum.Float.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Float.getLiteral().equals(attributeRecord.getJavaType())) {
                 if (!attributeRecord.getVirtual()) {
                     boardField(attributeRecord.getName(), DSL.field(userTable.getName() + "." + attributeRecord.getName(), Float.class));
                 } else {
@@ -106,7 +106,7 @@ public class UserProvider extends JooqProvider {
                     Field<Float> field = DSL.field(MariaDBFunction.columnGet(userTable.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Float.class);
                     boardField(attributeRecord.getName(), field);
                 }
-            } else if (TypeEnum.Double.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Double.getLiteral().equals(attributeRecord.getJavaType())) {
                 if (!attributeRecord.getVirtual()) {
                     boardField(attributeRecord.getName(), DSL.field(userTable.getName() + "." + attributeRecord.getName(), Double.class));
                 } else {
@@ -114,7 +114,7 @@ public class UserProvider extends JooqProvider {
                     Field<Double> field = DSL.field(MariaDBFunction.columnGet(userTable.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Double.class);
                     boardField(attributeRecord.getName(), field);
                 }
-            } else if (TypeEnum.Character.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Character.getLiteral().equals(attributeRecord.getJavaType())) {
                 if (!attributeRecord.getVirtual()) {
                     boardField(attributeRecord.getName(), DSL.field(userTable.getName() + "." + attributeRecord.getName(), Character.class));
                 } else {
@@ -122,7 +122,7 @@ public class UserProvider extends JooqProvider {
                     Field<Character> field = DSL.field(MariaDBFunction.columnGet(userTable.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Character.class);
                     boardField(attributeRecord.getName(), field);
                 }
-            } else if (TypeEnum.String.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.String.getLiteral().equals(attributeRecord.getJavaType())) {
                 if (!attributeRecord.getVirtual()) {
                     boardField(attributeRecord.getName(), DSL.field(userTable.getName() + "." + attributeRecord.getName(), String.class));
                 } else {
@@ -130,9 +130,9 @@ public class UserProvider extends JooqProvider {
                     Field<String> field = DSL.field(MariaDBFunction.columnGet(userTable.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), String.class);
                     boardField(attributeRecord.getName(), field);
                 }
-            } else if (TypeEnum.Time.getLiteral().equals(attributeRecord.getJavaType())
-                    || TypeEnum.Date.getLiteral().equals(attributeRecord.getJavaType())
-                    || TypeEnum.DateTime.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Time.getLiteral().equals(attributeRecord.getJavaType())
+                    || AttributeTypeEnum.Date.getLiteral().equals(attributeRecord.getJavaType())
+                    || AttributeTypeEnum.DateTime.getLiteral().equals(attributeRecord.getJavaType())) {
                 if (!attributeRecord.getVirtual()) {
                     boardField(attributeRecord.getName(), DSL.field(userTable.getName() + "." + attributeRecord.getName(), Date.class));
                 } else {

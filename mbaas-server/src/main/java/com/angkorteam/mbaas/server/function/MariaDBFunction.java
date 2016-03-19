@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.function;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.WicketRuntimeException;
@@ -23,23 +23,23 @@ public class MariaDBFunction {
     /**
      * Adds or updates dynamic columns
      */
-    public static String columnAdd(String blob, Map<String, Object> attributes, Map<String, TypeEnum> typeEnums) {
+    public static String columnAdd(String blob, Map<String, Object> attributes, Map<String, AttributeTypeEnum> attributeTypeEnums) {
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_ADD ( ").append(blob).append(", ");
         List<String> fields = new ArrayList<>();
         for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-            TypeEnum typeEnum = typeEnums.get(entry.getKey());
-            if (typeEnum == TypeEnum.Boolean) {
+            AttributeTypeEnum attributeTypeEnum = attributeTypeEnums.get(entry.getKey());
+            if (attributeTypeEnum == AttributeTypeEnum.Boolean) {
                 if (entry.getValue() instanceof Boolean) {
                     String field = "'" + entry.getKey() + "', " + entry.getValue() + " AS INTEGER";
                     fields.add(field);
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not Boolean");
                 }
-            } else if (typeEnum == TypeEnum.Byte
-                    || typeEnum == TypeEnum.Short
-                    || typeEnum == TypeEnum.Integer
-                    || typeEnum == TypeEnum.Long) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.Byte
+                    || attributeTypeEnum == AttributeTypeEnum.Short
+                    || attributeTypeEnum == AttributeTypeEnum.Integer
+                    || attributeTypeEnum == AttributeTypeEnum.Long) {
                 if (entry.getValue() instanceof Boolean
                         || entry.getValue() instanceof Byte
                         || entry.getValue() instanceof Short
@@ -51,8 +51,8 @@ public class MariaDBFunction {
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not boolean, byte, short, integer, long");
                 }
-            } else if (typeEnum == TypeEnum.Float
-                    || typeEnum == TypeEnum.Double) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.Float
+                    || attributeTypeEnum == AttributeTypeEnum.Double) {
                 if (entry.getValue() instanceof Boolean
                         || entry.getValue() instanceof Byte
                         || entry.getValue() instanceof Short
@@ -66,8 +66,8 @@ public class MariaDBFunction {
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not boolean, byte, short, integer, long, float, double");
                 }
-            } else if (typeEnum == TypeEnum.Character
-                    || typeEnum == TypeEnum.String) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.Character
+                    || attributeTypeEnum == AttributeTypeEnum.String) {
                 if (entry.getValue() instanceof Boolean
                         || entry.getValue() instanceof Byte
                         || entry.getValue() instanceof Short
@@ -83,21 +83,21 @@ public class MariaDBFunction {
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not boolean, byte, short, integer, long, float, double");
                 }
-            } else if (typeEnum == TypeEnum.Time) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.Time) {
                 if (entry.getValue() instanceof Date) {
                     String field = "'" + entry.getKey() + "', '" + DATETIME_FORMAT.format((Date) entry.getValue()) + "' AS TIME";
                     fields.add(field);
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not date");
                 }
-            } else if (typeEnum == TypeEnum.Date) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.Date) {
                 if (entry.getValue() instanceof Date) {
                     String field = "'" + entry.getKey() + "', '" + DATETIME_FORMAT.format((Date) entry.getValue()) + "' AS DATE";
                     fields.add(field);
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not date");
                 }
-            } else if (typeEnum == TypeEnum.DateTime) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.DateTime) {
                 if (entry.getValue() instanceof Date) {
                     String field = "'" + entry.getKey() + "', '" + DATETIME_FORMAT.format((Date) entry.getValue()) + "' AS DATETIME";
                     fields.add(field);
@@ -123,23 +123,23 @@ public class MariaDBFunction {
     /**
      * Returns a dynamic columns blob
      */
-    public static String columnCreate(Map<String, Object> attributes, Map<String, TypeEnum> typeEnums) {
+    public static String columnCreate(Map<String, Object> attributes, Map<String, AttributeTypeEnum> attributeTypeEnums) {
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_CREATE ( ");
         List<String> fields = new ArrayList<>();
         for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-            TypeEnum typeEnum = typeEnums.get(entry.getKey());
-            if (typeEnum == TypeEnum.Boolean) {
+            AttributeTypeEnum attributeTypeEnum = attributeTypeEnums.get(entry.getKey());
+            if (attributeTypeEnum == AttributeTypeEnum.Boolean) {
                 if (entry.getValue() instanceof Boolean) {
                     String field = "'" + entry.getKey() + "', " + entry.getValue() + " AS INTEGER";
                     fields.add(field);
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not Boolean");
                 }
-            } else if (typeEnum == TypeEnum.Byte
-                    || typeEnum == TypeEnum.Short
-                    || typeEnum == TypeEnum.Integer
-                    || typeEnum == TypeEnum.Long) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.Byte
+                    || attributeTypeEnum == AttributeTypeEnum.Short
+                    || attributeTypeEnum == AttributeTypeEnum.Integer
+                    || attributeTypeEnum == AttributeTypeEnum.Long) {
                 if (entry.getValue() instanceof Boolean
                         || entry.getValue() instanceof Byte
                         || entry.getValue() instanceof Short
@@ -151,8 +151,8 @@ public class MariaDBFunction {
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not boolean, byte, short, integer, long");
                 }
-            } else if (typeEnum == TypeEnum.Float
-                    || typeEnum == TypeEnum.Double) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.Float
+                    || attributeTypeEnum == AttributeTypeEnum.Double) {
                 if (entry.getValue() instanceof Boolean
                         || entry.getValue() instanceof Byte
                         || entry.getValue() instanceof Short
@@ -166,8 +166,8 @@ public class MariaDBFunction {
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not boolean, byte, short, integer, long, float, double");
                 }
-            } else if (typeEnum == TypeEnum.Character
-                    || typeEnum == TypeEnum.String) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.Character
+                    || attributeTypeEnum == AttributeTypeEnum.String) {
                 if (entry.getValue() instanceof Boolean
                         || entry.getValue() instanceof Byte
                         || entry.getValue() instanceof Short
@@ -183,7 +183,7 @@ public class MariaDBFunction {
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not boolean, byte, short, integer, long, float, double");
                 }
-            } else if (typeEnum == TypeEnum.Time) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.Time) {
                 if (entry.getValue() instanceof Date) {
                     String field = "'" + entry.getKey() + "', '" + TIME_FORMAT.format((Date) entry.getValue()) + "' AS TIME";
                     fields.add(field);
@@ -207,7 +207,7 @@ public class MariaDBFunction {
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not date");
                 }
-            } else if (typeEnum == TypeEnum.Date) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.Date) {
                 if (entry.getValue() instanceof Date) {
                     String field = "'" + entry.getKey() + "', '" + DATETIME_FORMAT.format((Date) entry.getValue()) + "' AS DATE";
                     fields.add(field);
@@ -231,7 +231,7 @@ public class MariaDBFunction {
                 } else {
                     throw new WicketRuntimeException(entry.getKey() + " is not date");
                 }
-            } else if (typeEnum == TypeEnum.DateTime) {
+            } else if (attributeTypeEnum == AttributeTypeEnum.DateTime) {
                 if (entry.getValue() instanceof Date) {
                     String field = "'" + entry.getKey() + "', '" + DATETIME_FORMAT.format((Date) entry.getValue()) + "' AS DATETIME";
                     fields.add(field);
@@ -301,24 +301,24 @@ public class MariaDBFunction {
     public static String columnGet(String blob, String name, String javaType) {
         StringBuffer column = new StringBuffer();
         column.append("COLUMN_GET ( ").append(blob).append(", ");
-        if (javaType.equals(TypeEnum.Boolean.getLiteral())) {
+        if (javaType.equals(AttributeTypeEnum.Boolean.getLiteral())) {
             column.append("'").append(name).append("'").append(" AS INTEGER");
-        } else if (javaType.equals(TypeEnum.Byte.getLiteral())
-                || javaType.equals(TypeEnum.Short.getLiteral())
-                || javaType.equals(TypeEnum.Integer.getLiteral())
-                || javaType.equals(TypeEnum.Long.getLiteral())) {
+        } else if (javaType.equals(AttributeTypeEnum.Byte.getLiteral())
+                || javaType.equals(AttributeTypeEnum.Short.getLiteral())
+                || javaType.equals(AttributeTypeEnum.Integer.getLiteral())
+                || javaType.equals(AttributeTypeEnum.Long.getLiteral())) {
             column.append("'").append(name).append("'").append(" AS INTEGER");
-        } else if (javaType.equals(TypeEnum.Float.getLiteral())
-                || javaType.equals(TypeEnum.Double.getLiteral())) {
+        } else if (javaType.equals(AttributeTypeEnum.Float.getLiteral())
+                || javaType.equals(AttributeTypeEnum.Double.getLiteral())) {
             column.append("'").append(name).append("'").append(" AS DOUBLE(15,4)");
-        } else if (javaType.equals(TypeEnum.Character.getLiteral())
-                || javaType.equals(TypeEnum.String.getLiteral())) {
+        } else if (javaType.equals(AttributeTypeEnum.Character.getLiteral())
+                || javaType.equals(AttributeTypeEnum.String.getLiteral())) {
             column.append("'").append(name).append("'").append(" AS CHAR");
-        } else if (javaType.equals(TypeEnum.Time.getLiteral())) {
+        } else if (javaType.equals(AttributeTypeEnum.Time.getLiteral())) {
             column.append("'").append(name).append("'").append(" AS TIME");
-        } else if (javaType.equals(TypeEnum.Date.getLiteral())) {
+        } else if (javaType.equals(AttributeTypeEnum.Date.getLiteral())) {
             column.append("'").append(name).append("'").append(" AS DATE");
-        } else if (javaType.equals(TypeEnum.DateTime.getLiteral())) {
+        } else if (javaType.equals(AttributeTypeEnum.DateTime.getLiteral())) {
             column.append("'").append(name).append("'").append(" AS DATETIME");
         }
         column.append(" )");

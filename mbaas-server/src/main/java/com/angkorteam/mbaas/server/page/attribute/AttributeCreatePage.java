@@ -7,7 +7,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
 import com.angkorteam.mbaas.server.validator.AttributeNameValidator;
@@ -78,8 +78,10 @@ public class AttributeCreatePage extends MasterPage {
         this.form.add(this.nameFeedback);
 
         List<String> javaTypes = new ArrayList<>();
-        for (TypeEnum typeEnum : TypeEnum.values()) {
-            javaTypes.add(typeEnum.getLiteral());
+        for (AttributeTypeEnum attributeTypeEnum : AttributeTypeEnum.values()) {
+            if (attributeTypeEnum.isExposed()) {
+                javaTypes.add(attributeTypeEnum.getLiteral());
+            }
         }
         this.javaTypeField = new DropDownChoice<>("javaTypeField", new PropertyModel<>(this, "javaType"), javaTypes);
         this.javaTypeField.setRequired(true);

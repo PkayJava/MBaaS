@@ -10,7 +10,7 @@ import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.server.provider.UserProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -71,40 +71,40 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
             if (attributeRecord.getSystem()) {
                 continue;
             }
-            if (TypeEnum.Boolean.getLiteral().equals(attributeRecord.getJavaType())) {
+            if (AttributeTypeEnum.Boolean.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.Byte.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Byte.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TextFilteredJooqColumn(Byte.class, JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.Short.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Short.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TextFilteredJooqColumn(Short.class, JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.Integer.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Integer.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.Long.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Long.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TextFilteredJooqColumn(Long.class, JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.Float.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Float.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TextFilteredJooqColumn(Float.class, JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.Double.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Double.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TextFilteredJooqColumn(Double.class, JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.Character.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Character.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TextFilteredJooqColumn(Character.class, JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.String.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.String.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.Time.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Time.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new TimeFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.Date.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.Date.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new DateFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
-            } else if (TypeEnum.DateTime.getLiteral().equals(attributeRecord.getJavaType())) {
+            } else if (AttributeTypeEnum.DateTime.getLiteral().equals(attributeRecord.getJavaType())) {
                 String column = attributeRecord.getName();
                 columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup(column, this), column, provider));
             }

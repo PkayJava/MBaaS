@@ -2,7 +2,7 @@ package com.angkorteam.mbaas.server.page.document;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import org.apache.wicket.datetime.markup.html.form.DateTextField;
 import org.apache.wicket.markup.html.basic.Label;
@@ -31,7 +31,7 @@ public class FieldPanel extends Panel {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        if (attribute.getJavaType().equals(TypeEnum.Boolean.getLiteral())) {
+        if (attribute.getJavaType().equals(AttributeTypeEnum.Boolean.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             TextField<Boolean> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
@@ -40,7 +40,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.Byte.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.Byte.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             TextField<Byte> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
@@ -49,7 +49,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.Short.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.Short.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             TextField<Short> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
@@ -58,7 +58,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.Integer.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.Integer.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             TextField<Integer> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
@@ -67,7 +67,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.Long.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.Long.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             TextField<Long> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
@@ -76,7 +76,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.Float.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.Float.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             TextField<Long> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
@@ -85,7 +85,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.Double.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.Double.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             TextField<Long> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
@@ -94,7 +94,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.Character.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.Character.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             TextField<Character> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
@@ -103,7 +103,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.String.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.String.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             TextField<String> field = new TextField<>("field", new PropertyModel<>(this.fields, attribute.getName()));
@@ -112,7 +112,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.Time.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.Time.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             DateTextField field = DateTextField.forDatePattern("field", new PropertyModel<>(this.fields, attribute.getName()), "hh:mm:ss");
@@ -120,7 +120,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.Date.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.Date.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             DateTextField field = DateTextField.forDatePattern("field", new PropertyModel<>(this.fields, attribute.getName()), "yyyy-MM-dd");
@@ -129,7 +129,7 @@ public class FieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
-        } else if (attribute.getJavaType().equals(TypeEnum.DateTime.getLiteral())) {
+        } else if (attribute.getJavaType().equals(AttributeTypeEnum.DateTime.getLiteral())) {
             Label label = new Label("label", attribute.getName());
             this.add(label);
             DateTextField field = DateTextField.forDatePattern("field", new PropertyModel<>(this.fields, attribute.getName()), "yyyy-MM-dd hh:mm:ss");

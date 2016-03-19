@@ -7,6 +7,7 @@ CREATE TABLE javascript (
 
   script        TEXT,
   date_created  DATETIME     NOT NULL DEFAULT NOW(),
+  security      VARCHAR(15)  NOT NULL,
 
   owner_user_id VARCHAR(100) NOT NULL,
 

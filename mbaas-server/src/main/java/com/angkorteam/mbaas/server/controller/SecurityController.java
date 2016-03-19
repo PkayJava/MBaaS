@@ -10,7 +10,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.security.SecurityLogoutRequest;
@@ -146,53 +146,53 @@ public class SecurityController {
         for (AttributeRecord attributeRecord : attributeRecords) {
             Object object = fields.get(attributeRecord.getName());
             if (object != null) {
-                TypeEnum typeEnum = TypeEnum.valueOf(attributeRecord.getJavaType());
-                if (typeEnum == TypeEnum.Boolean) {
+                AttributeTypeEnum attributeTypeEnum = AttributeTypeEnum.valueOf(attributeRecord.getJavaType());
+                if (attributeTypeEnum == AttributeTypeEnum.Boolean) {
                     if (object instanceof Boolean) {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be boolean");
                     }
-                } else if (typeEnum == TypeEnum.Byte) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.Byte) {
                     if (object instanceof Byte) {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be byte");
                     }
-                } else if (typeEnum == TypeEnum.Short) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.Short) {
                     if (object instanceof Short) {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be short");
                     }
-                } else if (typeEnum == TypeEnum.Integer) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.Integer) {
                     if (object instanceof Integer) {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be integer");
                     }
-                } else if (typeEnum == TypeEnum.Long) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.Long) {
                     if (object instanceof Long) {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be long");
                     }
-                } else if (typeEnum == TypeEnum.Float) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.Float) {
                     if (object instanceof Float) {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be float");
                     }
-                } else if (typeEnum == TypeEnum.Double) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.Double) {
                     if (object instanceof Double) {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be double");
                     }
-                } else if (typeEnum == TypeEnum.Character) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.Character) {
                     if (object instanceof Character) {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be char or character");
                     }
-                } else if (typeEnum == TypeEnum.String) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.String) {
                     if (object instanceof String) {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be string");
                     }
-                } else if (typeEnum == TypeEnum.Time) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.Time) {
                     if (object instanceof Date) {
                     } else if (object instanceof String) {
                         DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_TIME));
@@ -209,7 +209,7 @@ public class SecurityController {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be date or string format " + configuration.getString(Constants.PATTERN_TIME));
                     }
-                } else if (typeEnum == TypeEnum.Date) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.Date) {
                     if (object instanceof Date) {
                     } else if (object instanceof String) {
                         DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATE));
@@ -226,7 +226,7 @@ public class SecurityController {
                     } else {
                         errorMessages.put(attributeRecord.getName(), "data type must be date or string format " + configuration.getString(Constants.PATTERN_DATE));
                     }
-                } else if (typeEnum == TypeEnum.DateTime) {
+                } else if (attributeTypeEnum == AttributeTypeEnum.DateTime) {
                     if (object instanceof Date) {
                     } else if (object instanceof String) {
                         DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));

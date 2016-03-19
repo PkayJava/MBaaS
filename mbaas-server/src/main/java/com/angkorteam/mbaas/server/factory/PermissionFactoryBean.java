@@ -84,11 +84,11 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             this.jdbcTemplate = jdbcTemplate;
         }
 
-        public boolean isCollectionOwner(String session, String collectionName) {
+        public boolean isCollectionOwner(String mobileId, String collectionName) {
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
             UserTable userTable = Tables.USER.as("userTable");
             CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
             if (mobileRecord == null) {
                 return false;
             }
@@ -106,11 +106,11 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean isDocumentOwner(String session, String collectionName, String documentId) {
+        public boolean isDocumentOwner(String mobileId, String collectionName, String documentId) {
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
             UserTable userTable = Tables.USER.as("userTable");
             CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
             if (mobileRecord == null) {
                 return false;
             }
@@ -135,11 +135,11 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean isAdministratorUser(String session) {
+        public boolean isAdministratorUser(String mobileId) {
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");
-            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
             if (mobileRecord == null) {
                 return false;
             }
@@ -158,11 +158,11 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean isBackOfficeUser(String session) {
+        public boolean isBackOfficeUser(String mobileId) {
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");
-            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
             if (mobileRecord == null) {
                 return false;
             }
@@ -181,11 +181,11 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean isRegisteredUser(String session) {
+        public boolean isRegisteredUser(String mobileId) {
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");
-            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
             if (mobileRecord == null) {
                 return false;
             }
@@ -204,11 +204,11 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean isUser(String session, String roleName) {
+        public boolean userHasRole(String mobileId, String roleName) {
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");
-            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
             if (mobileRecord == null) {
                 return false;
             }
@@ -226,7 +226,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean hasDocumentPermission(String session, String collectionName, String documentId, int action) {
+        public boolean hasDocumentPermission(String mobileId, String collectionName, String documentId, int action) {
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");
@@ -234,7 +234,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             DocumentUserPrivacyTable documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
             DocumentRolePrivacyTable documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
 
-            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
             if (mobileRecord == null) {
                 return false;
             }
@@ -281,7 +281,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
-        public boolean hasCollectionPermission(String session, String collection, int action) {
+        public boolean hasCollectionPermission(String mobileId, String collection, int action) {
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");
@@ -289,7 +289,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             CollectionUserPrivacyTable tableUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("tableUserPrivacyTable");
             CollectionRolePrivacyTable tableRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("tableRolePrivacyTable");
 
-            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
             if (mobileRecord == null) {
                 return false;
             }

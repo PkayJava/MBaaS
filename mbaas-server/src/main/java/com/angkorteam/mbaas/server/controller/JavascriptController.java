@@ -60,7 +60,7 @@ public class JavascriptController {
             return ResponseEntity.ok(response);
         }
 
-        ScriptEngine engine = getScriptEngine();
+        ScriptEngine engine = getScriptEngine(req);
         engine.eval(javascriptRecord.getScript());
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -133,7 +133,7 @@ public class JavascriptController {
             return ResponseEntity.ok(response);
         }
 
-        ScriptEngine engine = getScriptEngine();
+        ScriptEngine engine = getScriptEngine(req);
         engine.eval(javascriptRecord.getScript());
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -228,12 +228,12 @@ public class JavascriptController {
         }
     }
 
-    private ScriptEngine getScriptEngine() {
+    private ScriptEngine getScriptEngine(HttpServletRequest request) {
         NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
         ScriptEngine engine = factory.getScriptEngine(new JavaFilter(context));
         Bindings bindings = engine.createBindings();
         engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
-        bindings.put("MBaaS", new MBaaS(jdbcTemplate));
+        bindings.put("MBaaS", new MBaaS(jdbcTemplate, request));
         return engine;
     }
 

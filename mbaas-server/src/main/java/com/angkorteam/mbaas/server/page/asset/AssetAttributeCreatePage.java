@@ -6,10 +6,9 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.server.function.AssetAttributeFunction;
-import com.angkorteam.mbaas.server.page.asset.AssetAttributeManagementPage;
 import com.angkorteam.mbaas.server.validator.AttributeNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -72,8 +71,10 @@ public class AssetAttributeCreatePage extends MasterPage {
         this.form.add(this.nameFeedback);
 
         List<String> javaTypes = new LinkedList<>();
-        for (TypeEnum typeEnum : TypeEnum.values()) {
-            javaTypes.add(typeEnum.getLiteral());
+        for (AttributeTypeEnum attributeTypeEnum : AttributeTypeEnum.values()) {
+            if (attributeTypeEnum.isExposed()) {
+                javaTypes.add(attributeTypeEnum.getLiteral());
+            }
         }
         this.javaTypeField = new DropDownChoice<>("javaTypeField", new PropertyModel<>(this, "javaType"), javaTypes);
         this.javaTypeField.setRequired(true);

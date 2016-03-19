@@ -6,7 +6,7 @@ import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -59,25 +59,25 @@ public class AttributeFunction {
         attributeRecord.setExposed(true);
         attributeRecord.setVirtualAttributeId(virtualRecord.getAttributeId());
         attributeRecord.setJavaType(requestBody.getJavaType());
-        if (requestBody.getJavaType().equals(TypeEnum.Boolean.getLiteral())) {
+        if (requestBody.getJavaType().equals(AttributeTypeEnum.Boolean.getLiteral())) {
             attributeRecord.setSqlType("BIT");
-        } else if (requestBody.getJavaType().equals(TypeEnum.Byte.getLiteral())
-                || requestBody.getJavaType().equals(TypeEnum.Short.getLiteral())
-                || requestBody.getJavaType().equals(TypeEnum.Integer.getLiteral())
-                || requestBody.getJavaType().equals(TypeEnum.Long.getLiteral())
+        } else if (requestBody.getJavaType().equals(AttributeTypeEnum.Byte.getLiteral())
+                || requestBody.getJavaType().equals(AttributeTypeEnum.Short.getLiteral())
+                || requestBody.getJavaType().equals(AttributeTypeEnum.Integer.getLiteral())
+                || requestBody.getJavaType().equals(AttributeTypeEnum.Long.getLiteral())
                 ) {
             attributeRecord.setSqlType("INT");
-        } else if (requestBody.getJavaType().equals(TypeEnum.Float.getLiteral())
-                || requestBody.getJavaType().equals(TypeEnum.Double.getLiteral())) {
+        } else if (requestBody.getJavaType().equals(AttributeTypeEnum.Float.getLiteral())
+                || requestBody.getJavaType().equals(AttributeTypeEnum.Double.getLiteral())) {
             attributeRecord.setSqlType("DECIMAL");
-        } else if (requestBody.getJavaType().equals(TypeEnum.Character.getLiteral())
-                || requestBody.getJavaType().equals(TypeEnum.String.getLiteral())) {
+        } else if (requestBody.getJavaType().equals(AttributeTypeEnum.Character.getLiteral())
+                || requestBody.getJavaType().equals(AttributeTypeEnum.String.getLiteral())) {
             attributeRecord.setSqlType("VARCHAR");
-        } else if (requestBody.getJavaType().equals(TypeEnum.Time.getLiteral())) {
+        } else if (requestBody.getJavaType().equals(AttributeTypeEnum.Time.getLiteral())) {
             attributeRecord.setSqlType("TIME");
-        } else if (requestBody.getJavaType().equals(TypeEnum.Date.getLiteral())) {
+        } else if (requestBody.getJavaType().equals(AttributeTypeEnum.Date.getLiteral())) {
             attributeRecord.setSqlType("DATE");
-        } else if (requestBody.getJavaType().equals(TypeEnum.DateTime.getLiteral())) {
+        } else if (requestBody.getJavaType().equals(AttributeTypeEnum.DateTime.getLiteral())) {
             attributeRecord.setSqlType("DATETIME");
         }
         attributeRecord.store();

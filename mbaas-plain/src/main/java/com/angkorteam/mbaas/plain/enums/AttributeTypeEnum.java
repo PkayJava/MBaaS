@@ -3,7 +3,7 @@ package com.angkorteam.mbaas.plain.enums;
 /**
  * Created by socheat on 3/10/16.
  */
-public enum TypeEnum {
+public enum AttributeTypeEnum {
 
     Boolean("Boolean", java.lang.Boolean.class.getName(), "BIT"),
     Byte("Byte", java.lang.Byte.class.getName(), "INT"),
@@ -17,7 +17,7 @@ public enum TypeEnum {
     Time("Time", java.sql.Time.class.getName(), "DATETIME"),
     Date("Date", java.sql.Date.class.getName(), "DATETIME"),
     DateTime("DateTime", java.sql.Timestamp.class.getName(), "DATETIME"),
-    Blob("Blob", java.lang.Byte[].class.getName(), "BLOB");
+    Blob("Blob", java.lang.Byte[].class.getName(), "BLOB", false);
 
     private final String literal;
 
@@ -25,10 +25,17 @@ public enum TypeEnum {
 
     private final String sqlType;
 
-    TypeEnum(String literal, String javaType, String sqlType) {
+    private final boolean exposed;
+
+    AttributeTypeEnum(String literal, String javaType, String sqlType) {
+        this(literal, javaType, sqlType, true);
+    }
+
+    AttributeTypeEnum(String literal, String javaType, String sqlType, boolean exposed) {
         this.literal = literal;
         this.javaType = javaType;
         this.sqlType = sqlType;
+        this.exposed = exposed;
     }
 
     public final String getLiteral() {
@@ -43,53 +50,57 @@ public enum TypeEnum {
         return sqlType;
     }
 
-    public static final TypeEnum parse(Class<?> clazz) {
+    public final boolean isExposed() {
+        return exposed;
+    }
+
+    public static final AttributeTypeEnum parse(Class<?> clazz) {
         if (clazz == Boolean.class || clazz == boolean.class) {
-            return TypeEnum.Boolean;
+            return AttributeTypeEnum.Boolean;
         } else if (clazz == Byte.class || clazz == byte.class) {
-            return TypeEnum.Byte;
+            return AttributeTypeEnum.Byte;
         } else if (clazz == Short.class || clazz == Short.class) {
-            return TypeEnum.Short;
+            return AttributeTypeEnum.Short;
         } else if (clazz == Integer.class || clazz == int.class) {
-            return TypeEnum.Integer;
+            return AttributeTypeEnum.Integer;
         } else if (clazz == Long.class || clazz == long.class) {
-            return TypeEnum.Long;
+            return AttributeTypeEnum.Long;
         } else if (clazz == Float.class || clazz == float.class) {
-            return TypeEnum.Float;
+            return AttributeTypeEnum.Float;
         } else if (clazz == Double.class || clazz == double.class) {
-            return TypeEnum.Double;
+            return AttributeTypeEnum.Double;
         } else if (clazz == Character.class || clazz == char.class) {
-            return TypeEnum.Character;
+            return AttributeTypeEnum.Character;
         } else if (clazz == String.class) {
-            return TypeEnum.String;
+            return AttributeTypeEnum.String;
         } else if (clazz == java.util.Date.class) {
-            return TypeEnum.DateTime;
+            return AttributeTypeEnum.DateTime;
         } else {
             throw new IllegalArgumentException("clazz must be byte, short, integer, long, float, double, character, string, date");
         }
     }
 
-    public static final TypeEnum parse(Object object) {
+    public static final AttributeTypeEnum parse(Object object) {
         if (object instanceof Boolean) {
-            return TypeEnum.Boolean;
+            return AttributeTypeEnum.Boolean;
         } else if (object instanceof Byte) {
-            return TypeEnum.Byte;
+            return AttributeTypeEnum.Byte;
         } else if (object instanceof Short) {
-            return TypeEnum.Short;
+            return AttributeTypeEnum.Short;
         } else if (object instanceof Integer) {
-            return TypeEnum.Integer;
+            return AttributeTypeEnum.Integer;
         } else if (object instanceof Long) {
-            return TypeEnum.Long;
+            return AttributeTypeEnum.Long;
         } else if (object instanceof Float) {
-            return TypeEnum.Float;
+            return AttributeTypeEnum.Float;
         } else if (object instanceof Double) {
-            return TypeEnum.Double;
+            return AttributeTypeEnum.Double;
         } else if (object instanceof Character) {
-            return TypeEnum.Character;
+            return AttributeTypeEnum.Character;
         } else if (object instanceof String) {
-            return TypeEnum.String;
+            return AttributeTypeEnum.String;
         } else if (object instanceof java.util.Date) {
-            return TypeEnum.DateTime;
+            return AttributeTypeEnum.DateTime;
         } else {
             throw new IllegalArgumentException("clazz must be byte, short, integer, long, float, double, character, string, date");
         }

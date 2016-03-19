@@ -6,7 +6,7 @@ import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -38,12 +38,12 @@ public class DocumentFunction {
 
         Map<String, AttributeRecord> attributeIdRecords = new LinkedHashMap<>();
         Map<String, AttributeRecord> attributeNameRecords = new LinkedHashMap<>();
-        Map<String, TypeEnum> typeEnums = new LinkedHashMap<>();
+        Map<String, AttributeTypeEnum> typeEnums = new LinkedHashMap<>();
 
         for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
             attributeIdRecords.put(attributeRecord.getAttributeId(), attributeRecord);
             attributeNameRecords.put(attributeRecord.getName(), attributeRecord);
-            typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
+            typeEnums.put(attributeRecord.getName(), AttributeTypeEnum.valueOf(attributeRecord.getJavaType()));
         }
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -105,11 +105,11 @@ public class DocumentFunction {
 
         Map<String, AttributeRecord> attributeIdRecords = new LinkedHashMap<>();
         Map<String, AttributeRecord> attributeNameRecords = new LinkedHashMap<>();
-        Map<String, TypeEnum> typeEnums = new LinkedHashMap<>();
+        Map<String, AttributeTypeEnum> typeEnums = new LinkedHashMap<>();
         for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
             attributeIdRecords.put(attributeRecord.getAttributeId(), attributeRecord);
             attributeNameRecords.put(attributeRecord.getName(), attributeRecord);
-            typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
+            typeEnums.put(attributeRecord.getName(), AttributeTypeEnum.valueOf(attributeRecord.getJavaType()));
         }
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -166,7 +166,7 @@ public class DocumentFunction {
                 if (virtualColumns.get(physicalRecord.getName()) == null || virtualColumns.get(physicalRecord.getName()).isEmpty()) {
                     Map<String, Object> temp = new LinkedHashMap<>();
                     temp.put("_temp", "_temp");
-                    typeEnums.put("_temp", TypeEnum.String);
+                    typeEnums.put("_temp", AttributeTypeEnum.String);
                     virtualColumns.put(physicalRecord.getName(), temp);
                 }
             }
@@ -174,10 +174,10 @@ public class DocumentFunction {
         if (!found) {
             for (Map.Entry<String, AttributeRecord> entry : attributeNameRecords.entrySet()) {
                 AttributeRecord attributeRecord = entry.getValue();
-                if (attributeRecord.getJavaType().equals(TypeEnum.Blob.getLiteral()) && attributeRecord.getSystem()) {
+                if (attributeRecord.getJavaType().equals(AttributeTypeEnum.Blob.getLiteral()) && attributeRecord.getSystem()) {
                     Map<String, Object> temp = new LinkedHashMap<>();
                     temp.put("_temp", "_temp");
-                    typeEnums.put("_temp", TypeEnum.String);
+                    typeEnums.put("_temp", AttributeTypeEnum.String);
                     virtualColumns.put(attributeRecord.getName(), temp);
                 }
             }

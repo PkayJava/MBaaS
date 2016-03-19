@@ -100,14 +100,14 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            String session = header;
+            String mobileId = header;
 
             UserTable userTable = Tables.USER.as("userTable");
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
-            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
             if (mobileRecord == null) {
-                throw new BadCredentialsException("mobile session " + session + " is not valid");
+                throw new BadCredentialsException("mobile session " + mobileId + " is not valid");
             }
 
             Date dateSeen = new Date();
@@ -119,7 +119,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
 
             if (userRecord == null) {
-                throw new BadCredentialsException("session " + session + " is not valid");
+                throw new BadCredentialsException("session " + mobileId + " is not valid");
             }
 
             String username = userRecord.getLogin();

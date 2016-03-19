@@ -6,7 +6,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.ScopeEnum;
-import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.security.SecuritySignUpRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -54,10 +54,10 @@ public class UserFunction {
 
         // select all attribute put into map and type enum into map
         Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
-        Map<String, TypeEnum> typeEnums = new LinkedHashMap<>();
+        Map<String, AttributeTypeEnum> typeEnums = new LinkedHashMap<>();
         for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
             attributeRecords.put(attributeRecord.getName(), attributeRecord);
-            typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
+            typeEnums.put(attributeRecord.getName(), AttributeTypeEnum.valueOf(attributeRecord.getJavaType()));
         }
 
         Map<String, Object> fields = new LinkedHashMap<>();
@@ -74,7 +74,7 @@ public class UserFunction {
                 if (attributeRecords.get(entry.getKey()) == null) {
                     CollectionAttributeCreateRequest req = new CollectionAttributeCreateRequest();
                     req.setAttributeName(entry.getKey());
-                    req.setJavaType(TypeEnum.parse(entry.getValue()).getLiteral());
+                    req.setJavaType(AttributeTypeEnum.parse(entry.getValue()).getLiteral());
                     req.setNullable(true);
                     if (requestBody.getVisibleByAnonymousUsers().containsKey(entry.getKey())) {
                         UserAttributeFunction.createAttribute(context, req, userRecord.getUserId(), ScopeEnum.VisibleByAnonymousUser);
@@ -102,7 +102,7 @@ public class UserFunction {
             typeEnums = new LinkedHashMap<>();
             for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
                 attributeRecords.put(attributeRecord.getName(), attributeRecord);
-                typeEnums.put(attributeRecord.getName(), TypeEnum.valueOf(attributeRecord.getJavaType()));
+                typeEnums.put(attributeRecord.getName(), AttributeTypeEnum.valueOf(attributeRecord.getJavaType()));
             }
         }
 

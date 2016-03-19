@@ -144,8 +144,8 @@ public class ApplicationContext implements ServletContextListener {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         UserTable userTable = Tables.USER.as("userTable");
         RoleTable roleTable = Tables.ROLE.as("roleTable");
-        Map<String, TypeEnum> typeEnums = new HashMap<>();
-        typeEnums.put("_temp", TypeEnum.String);
+        Map<String, AttributeTypeEnum> typeEnums = new HashMap<>();
+        typeEnums.put("_temp", AttributeTypeEnum.String);
         Map<String, Object> temp = new LinkedHashMap<>();
         temp.put("_temp", "_temp");
 
@@ -330,34 +330,34 @@ public class ApplicationContext implements ServletContextListener {
                             }
 
                             if (dataType == Types.BIT || dataType == Types.BOOLEAN) {
-                                attributeRecord.setJavaType(TypeEnum.Boolean.getLiteral());
+                                attributeRecord.setJavaType(AttributeTypeEnum.Boolean.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.INTEGER) {
-                                attributeRecord.setJavaType(TypeEnum.Integer.getLiteral());
+                                attributeRecord.setJavaType(AttributeTypeEnum.Integer.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.DOUBLE || dataType == Types.DECIMAL) {
-                                attributeRecord.setJavaType(TypeEnum.Double.getLiteral());
+                                attributeRecord.setJavaType(AttributeTypeEnum.Double.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.VARCHAR) {
-                                attributeRecord.setJavaType(TypeEnum.String.getLiteral());
+                                attributeRecord.setJavaType(AttributeTypeEnum.String.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.CHAR) {
-                                attributeRecord.setJavaType(TypeEnum.Character.getLiteral());
+                                attributeRecord.setJavaType(AttributeTypeEnum.Character.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.TIMESTAMP) {
-                                attributeRecord.setJavaType(TypeEnum.DateTime.getLiteral());
+                                attributeRecord.setJavaType(AttributeTypeEnum.DateTime.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.DATE) {
-                                attributeRecord.setJavaType(TypeEnum.Date.getLiteral());
+                                attributeRecord.setJavaType(AttributeTypeEnum.Date.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.TIME) {
-                                attributeRecord.setJavaType(TypeEnum.Time.getLiteral());
+                                attributeRecord.setJavaType(AttributeTypeEnum.Time.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (dataType == Types.LONGVARBINARY) {
-                                attributeRecord.setJavaType(TypeEnum.Blob.getLiteral());
+                                attributeRecord.setJavaType(AttributeTypeEnum.Blob.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else if (typeName.equals("TEXT")) {
-                                attributeRecord.setJavaType(TypeEnum.String.getLiteral());
+                                attributeRecord.setJavaType(AttributeTypeEnum.String.getLiteral());
                                 attributeRecord.setSqlType(typeName);
                             } else {
                                 throw new WicketRuntimeException("field type unknown " + dataType + " => " + typeName);
