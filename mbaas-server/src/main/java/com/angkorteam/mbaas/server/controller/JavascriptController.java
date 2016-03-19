@@ -257,14 +257,6 @@ public class JavascriptController {
         }
     }
 
-    @RequestMapping(path = "/create")
-    public void create() {
-    }
-
-    @RequestMapping(path = "/modify")
-    public void modify() {
-    }
-
     public interface Http {
     }
 

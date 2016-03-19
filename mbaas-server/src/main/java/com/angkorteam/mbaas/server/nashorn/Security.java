@@ -11,7 +11,7 @@ public class Security {
 
     public static void main(String[] args) {
         String sql = ":selec * from where pp =:ww_w";
-        Pattern pattern = Pattern.compile("");
+        Pattern pattern = Pattern.compile("\\:[a-z]{1}[a-z0-9\\_]*");
         Matcher matcher = pattern.matcher(sql);
         while (matcher.find()) {
             System.out.println(matcher.group());

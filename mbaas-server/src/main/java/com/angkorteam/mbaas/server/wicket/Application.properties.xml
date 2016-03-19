@@ -12,6 +12,10 @@
     <entry key="JavascriptNameValidator.duplicated">is taken</entry>
     <entry key="JavascriptPathValidator.format">is bad format</entry>
     <entry key="JavascriptPathValidator.duplicated">is taken</entry>
+    <entry key="QueryNameValidator.duplicated">is taken</entry>
+    <entry key="QueryPathValidator.format">is bad format</entry>
+    <entry key="QueryScriptValidator.format">is bad format</entry>
+    <entry key="QueryPathValidator.duplicated">is taken</entry>
 
     <entry key="Required"> is required.</entry>
     <entry key="IConverter">The value of '${label}' is not a valid ${type}.</entry>

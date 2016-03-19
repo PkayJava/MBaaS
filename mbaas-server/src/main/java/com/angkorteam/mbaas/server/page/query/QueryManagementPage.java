@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.javascript;
+package com.angkorteam.mbaas.server.page.query;
 
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
@@ -8,7 +8,7 @@ import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
-import com.angkorteam.mbaas.server.provider.JavascriptProvider;
+import com.angkorteam.mbaas.server.provider.QueryProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -28,12 +28,12 @@ import java.util.Map;
  * Created by socheat on 3/10/16.
  */
 @AuthorizeInstantiation("administrator")
-@Mount("/javascript/management")
-public class JavascriptManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
+@Mount("/query/management")
+public class QueryManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     @Override
     public String getPageHeader() {
-        return "Javascript Management";
+        return "Query Management";
     }
 
     @Override
@@ -41,10 +41,10 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         super.onInitialize();
 
         StringBuffer address = new StringBuffer();
-        address.append(getHttpAddress()).append("/api/javascript/execute/");
+        address.append(getHttpAddress()).append("/api/query/execute/");
 
-        JavascriptProvider provider = new JavascriptProvider(address.toString());
-        provider.selectField(String.class, "javascriptId");
+        QueryProvider provider = new QueryProvider(address.toString());
+        provider.selectField(String.class, "queryId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -55,13 +55,13 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("endpoint", this), "endpoint", this, provider));
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Edit", "Delete"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Parameter", "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", JavascriptManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", QueryManagementPage.class, getPageParameters());
         add(refreshLink);
     }
 
@@ -79,22 +79,24 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         if ("Deny".equals(link)) {
             return "btn-xs btn-danger";
         }
-
+        if ("Parameter".equals(link)) {
+            return "btn-xs btn-info";
+        }
         return "";
     }
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
-        String javascriptId = (String) object.get("javascriptId");
+        DSLContext context = getDSLContext();
+        String queryId = (String) object.get("queryId");
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
-            parameters.add("javascriptId", javascriptId);
-            setResponsePage(JavascriptModifyPage.class, parameters);
+            parameters.add("queryId", queryId);
+            setResponsePage(QueryModifyPage.class, parameters);
             return;
         }
         if ("Delete".equals(link)) {
-            DSLContext context = getDSLContext();
-            context.delete(Tables.JAVASCRIPT).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
+            context.delete(Tables.QUERY).where(Tables.QUERY.QUERY_ID.eq(queryId)).execute();
             return;
         }
         if ("endpoint".equals(link)) {
@@ -104,19 +106,33 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             return;
         }
         if ("Grant".equals(link)) {
-            DSLContext context = getDSLContext();
-            context.update(Tables.JAVASCRIPT).set(Tables.JAVASCRIPT.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
+            int count = context.selectCount().from(Tables.QUERY_PARAMETER).where(Tables.QUERY_PARAMETER.QUERY_ID.eq(queryId)).and(Tables.QUERY_PARAMETER.TYPE.isNull()).fetchOneInto(int.class);
+            if (count > 0) {
+                PageParameters parameters = new PageParameters();
+                parameters.add("queryId", queryId);
+                parameters.add("granted", true);
+                setResponsePage(QueryParameterModifyPage.class, parameters);
+            } else {
+                context.update(Tables.QUERY).set(Tables.QUERY.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.QUERY.QUERY_ID.eq(queryId)).execute();
+            }
             return;
         }
         if ("Deny".equals(link)) {
-            DSLContext context = getDSLContext();
-            context.update(Tables.JAVASCRIPT).set(Tables.JAVASCRIPT.SECURITY, SecurityEnum.Denied.getLiteral()).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
+            context.update(Tables.QUERY).set(Tables.QUERY.SECURITY, SecurityEnum.Denied.getLiteral()).where(Tables.QUERY.QUERY_ID.eq(queryId)).execute();
+            return;
+        }
+        if ("Parameter".equals(link)) {
+            PageParameters parameters = new PageParameters();
+            parameters.add("queryId", queryId);
+            setResponsePage(QueryParameterModifyPage.class, parameters);
             return;
         }
     }
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
+        DSLContext context = getDSLContext();
+        String queryId = (String) object.get("queryId");
         String security = (String) object.get("security");
         if ("Edit".equals(link)) {
             return true;
@@ -134,6 +150,12 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         }
         if ("Deny".equals(link)) {
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
+                return true;
+            }
+        }
+        if ("Parameter".equals(link)) {
+            int count = context.selectCount().from(Tables.QUERY_PARAMETER).where(Tables.QUERY_PARAMETER.QUERY_ID.eq(queryId)).fetchOneInto(int.class);
+            if (count > 0) {
                 return true;
             }
         }
@@ -142,6 +164,8 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
+        DSLContext context = getDSLContext();
+        String queryId = (String) object.get("queryId");
         String security = (String) object.get("security");
         if ("Edit".equals(link)) {
             return true;
@@ -161,6 +185,9 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
                 return true;
             }
+        }
+        if ("Parameter".equals(link)) {
+            return true;
         }
         return false;
     }

@@ -59,6 +59,7 @@ public class Constants {
     public static final String PATTERN_FOLDER = "pattern.folder";
     public static final String PATTERN_NAMING = "pattern.naming";
     public static final String PATTERN_PATH = "pattern.path";
+    public static final String PATTERN_QUERY_PARAMETER_NAME = "pattern.query.parameter.name";
 
     public static final String ENCRYPTION_PASSWORD = "encryption.password";
     public static final String ENCRYPTION_OUTPUT = "encryption.output";

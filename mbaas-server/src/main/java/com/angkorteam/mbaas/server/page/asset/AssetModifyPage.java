@@ -14,7 +14,7 @@ import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.function.MariaDBFunction;
-import com.angkorteam.mbaas.server.page.document.FieldPanel;
+import com.angkorteam.mbaas.server.template.TextFieldPanel;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.commons.lang3.StringUtils;
@@ -117,7 +117,7 @@ public class AssetModifyPage extends MasterPage {
 
         RepeatingView fields = new RepeatingView("fields");
         for (AttributePojo attribute : attributes) {
-            FieldPanel fieldPanel = new FieldPanel(fields.newChildId(), attribute, this.fields);
+            TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
             fields.add(fieldPanel);
             if (attribute.getVirtual()) {
                 AttributePojo masterAttribute = virtualAttributes.get(attribute.getVirtualAttributeId());
