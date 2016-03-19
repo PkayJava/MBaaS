@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.controller;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
+import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.request.javascript.JavaScriptExecuteRequest;
 import com.angkorteam.mbaas.plain.response.javascript.JavaScriptExecuteResponse;
 import com.angkorteam.mbaas.server.nashorn.JavaFilter;
@@ -54,7 +55,7 @@ public class JavascriptController {
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.PATH.eq(script)).fetchOneInto(javascriptTable);
 
-        if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript())) {
+        if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(javascriptRecord.getSecurity())) {
             JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
             response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
             return ResponseEntity.ok(response);
@@ -127,7 +128,7 @@ public class JavascriptController {
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.PATH.eq(script)).fetchOneInto(javascriptTable);
 
-        if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript())) {
+        if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(javascriptRecord.getSecurity())) {
             JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
             response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
             return ResponseEntity.ok(response);

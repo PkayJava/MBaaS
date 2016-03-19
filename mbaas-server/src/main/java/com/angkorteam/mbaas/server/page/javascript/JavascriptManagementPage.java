@@ -7,6 +7,7 @@ import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJo
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.provider.JavascriptProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -52,14 +53,15 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("endpoint", this), "endpoint", this, provider));
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Delete"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", JavascriptManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", JavascriptManagementPage.class, getPageParameters());
         add(refreshLink);
     }
 
@@ -71,20 +73,26 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         if ("Delete".equals(link)) {
             return "btn-xs btn-danger";
         }
+        if ("Grant".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Deny".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+
         return "";
     }
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
+        String javascriptId = (String) object.get("javascriptId");
         if ("Edit".equals(link)) {
-            String javascriptId = (String) object.get("javascriptId");
             PageParameters parameters = new PageParameters();
             parameters.add("javascriptId", javascriptId);
             setResponsePage(JavascriptModifyPage.class, parameters);
             return;
         }
         if ("Delete".equals(link)) {
-            String javascriptId = (String) object.get("javascriptId");
             DSLContext context = getDSLContext();
             context.delete(Tables.JAVASCRIPT).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
             return;
@@ -95,10 +103,21 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             setResponsePage(page);
             return;
         }
+        if ("Grant".equals(link)) {
+            DSLContext context = getDSLContext();
+            context.update(Tables.JAVASCRIPT).set(Tables.JAVASCRIPT.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
+            return;
+        }
+        if ("Deny".equals(link)) {
+            DSLContext context = getDSLContext();
+            context.update(Tables.JAVASCRIPT).set(Tables.JAVASCRIPT.SECURITY, SecurityEnum.Denied.getLiteral()).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
+            return;
+        }
     }
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
+        String security = (String) object.get("security");
         if ("Edit".equals(link)) {
             return true;
         }
@@ -107,12 +126,23 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         }
         if ("endpoint".equals(link)) {
             return true;
+        }
+        if ("Grant".equals(link)) {
+            if (SecurityEnum.Denied.getLiteral().equals(security)) {
+                return true;
+            }
+        }
+        if ("Deny".equals(link)) {
+            if (SecurityEnum.Granted.getLiteral().equals(security)) {
+                return true;
+            }
         }
         return false;
     }
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
+        String security = (String) object.get("security");
         if ("Edit".equals(link)) {
             return true;
         }
@@ -121,6 +151,16 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         }
         if ("endpoint".equals(link)) {
             return true;
+        }
+        if ("Grant".equals(link)) {
+            if (SecurityEnum.Denied.getLiteral().equals(security)) {
+                return true;
+            }
+        }
+        if ("Deny".equals(link)) {
+            if (SecurityEnum.Granted.getLiteral().equals(security)) {
+                return true;
+            }
         }
         return false;
     }

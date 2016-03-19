@@ -5,6 +5,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
+import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.validator.JavascriptNameValidator;
 import com.angkorteam.mbaas.server.validator.JavascriptPathValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -101,6 +102,7 @@ public class JavascriptCreatePage extends MasterPage {
 
         javascriptRecord.setJavascriptId(uuid);
         javascriptRecord.setName(this.name);
+        javascriptRecord.setSecurity(SecurityEnum.Denied.getLiteral());
         javascriptRecord.setPath(this.pathText);
         javascriptRecord.setScript(this.script);
         javascriptRecord.setDeleted(false);

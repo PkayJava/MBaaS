@@ -36,6 +36,10 @@ public class JavascriptProvider extends JooqProvider {
         return this.javascriptTable.JAVASCRIPT_ID;
     }
 
+    public Field<String> getSecurity() {
+        return this.javascriptTable.SECURITY;
+    }
+
     public Field<Date> getDateCreated() {
         return this.javascriptTable.DATE_CREATED;
     }
