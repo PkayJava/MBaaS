@@ -97,6 +97,7 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
         }
         if ("Delete".equals(link)) {
             context.delete(Tables.QUERY).where(Tables.QUERY.QUERY_ID.eq(queryId)).execute();
+            context.delete(Tables.QUERY_PARAMETER).where(Tables.QUERY_PARAMETER.QUERY_ID.eq(queryId)).execute();
             return;
         }
         if ("endpoint".equals(link)) {
