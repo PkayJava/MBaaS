@@ -1,14 +1,14 @@
 package com.angkorteam.mbaas.plain.enums;
 
-public enum PermissionEnum {
+public enum CollectionPermissionEnum {
     Read(1),
-    Modify(2),
-    Delete(4),
-    Create(8);
+    Attribute(2),
+    Drop(4),
+    Insert(8);
 
     private final int literal;
 
-    PermissionEnum(int literal) {
+    CollectionPermissionEnum(int literal) {
         this.literal = literal;
     }
 

@@ -12,6 +12,8 @@ import com.angkorteam.mbaas.plain.enums.QueryInputParamTypeEnum;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.template.SelectFieldPanel;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
+import com.angkorteam.mbaas.server.wicket.Mount;
+import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -27,6 +29,8 @@ import java.util.Map;
 /**
  * Created by socheat on 3/19/16.
  */
+@AuthorizeInstantiation("administrator")
+@Mount("/query/parameter/modify")
 public class QueryParameterModifyPage extends MasterPage {
 
     private String queryId;

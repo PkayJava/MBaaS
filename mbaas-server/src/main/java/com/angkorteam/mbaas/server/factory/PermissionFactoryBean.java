@@ -91,6 +91,28 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             return false;
         }
 
+        public boolean isQueryOwner(String mobileId, String queryName) {
+            MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+            UserTable userTable = Tables.USER.as("userTable");
+            QueryTable queryTable = Tables.QUERY.as("queryTable");
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
+            if (mobileRecord == null) {
+                return false;
+            }
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                return false;
+            }
+            QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(queryName)).fetchOneInto(queryTable);
+            if (queryRecord == null) {
+                return false;
+            }
+            if (queryRecord.getOwnerUserId().equals(userRecord.getUserId())) {
+                return true;
+            }
+            return false;
+        }
+
         public boolean isDocumentOwner(String mobileId, String collectionName, String documentId) {
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
             UserTable userTable = Tables.USER.as("userTable");
@@ -212,6 +234,61 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
         }
 
         public boolean hasDocumentPermission(String mobileId, String collectionName, String documentId, int action) {
+            MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+            RoleTable roleTable = Tables.ROLE.as("roleTable");
+            UserTable userTable = Tables.USER.as("userTable");
+            CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+            DocumentUserPrivacyTable documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
+            DocumentRolePrivacyTable documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
+
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(mobileId)).fetchOneInto(mobileTable);
+            if (mobileRecord == null) {
+                return false;
+            }
+
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                return false;
+            }
+
+            CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collectionName)).fetchOneInto(collectionTable);
+            if (collectionRecord == null) {
+                return false;
+            }
+
+            Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collectionRecord.getName() + "` WHERE " + collectionRecord.getName() + "_id = ?", Integer.class, documentId);
+            if (count <= 0) {
+                return false;
+            }
+
+            DocumentUserPrivacyRecord documentUserPrivacyRecord = context.select(documentUserPrivacyTable.fields())
+                    .from(documentUserPrivacyTable)
+                    .where(documentUserPrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                    .and(documentUserPrivacyTable.USER_ID.eq(userRecord.getUserId()))
+                    .and(documentUserPrivacyTable.DOCUMENT_ID.eq(documentId))
+                    .fetchOneInto(documentUserPrivacyTable);
+
+            if (documentUserPrivacyRecord != null && (documentUserPrivacyRecord.getPermisson() & action) == action) {
+                return true;
+            }
+
+            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
+
+            DocumentRolePrivacyRecord documentRolePrivacyRecord = context.select(documentRolePrivacyTable.fields())
+                    .from(documentRolePrivacyTable)
+                    .where(documentRolePrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                    .and(documentRolePrivacyTable.ROLE_ID.eq(roleRecord.getRoleId()))
+                    .and(documentRolePrivacyTable.DOCUMENT_ID.eq(documentId))
+                    .fetchOneInto(documentRolePrivacyTable);
+
+            if (documentRolePrivacyRecord != null && (documentRolePrivacyRecord.getPermisson() & action) == action) {
+                return true;
+            }
+
+            return false;
+        }
+
+        public boolean hasQueryPermission(String mobileId, String collectionName, String documentId, int action) {
             MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             UserTable userTable = Tables.USER.as("userTable");

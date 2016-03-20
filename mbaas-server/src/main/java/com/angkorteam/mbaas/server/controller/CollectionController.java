@@ -4,8 +4,8 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.plain.enums.PermissionEnum;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.CollectionPermissionEnum;
 import com.angkorteam.mbaas.plain.request.collection.*;
 import com.angkorteam.mbaas.plain.response.collection.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
@@ -181,7 +181,7 @@ public class CollectionController {
                 if (permission.isAdministratorUser(session)
                         || permission.isBackOfficeUser(session)
                         || permission.isCollectionOwner(session, requestBody.getCollectionName())
-                        || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())
+                        || permission.hasCollectionPermission(session, requestBody.getCollectionName(), CollectionPermissionEnum.Attribute.getLiteral())
                         ) {
                 } else {
                     errorMessages.put("collectionName", "you are not allow to create its attribute");
@@ -293,7 +293,7 @@ public class CollectionController {
                 if (permission.isAdministratorUser(session)
                         || permission.isBackOfficeUser(session)
                         || permission.isCollectionOwner(session, requestBody.getCollectionName())
-                        || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Delete.getLiteral())
+                        || permission.hasCollectionPermission(session, requestBody.getCollectionName(), CollectionPermissionEnum.Drop.getLiteral())
                         ) {
                 } else {
                     errorMessages.put("collectionName", "you are not allow to delete it");
@@ -374,7 +374,7 @@ public class CollectionController {
                 if (permission.isAdministratorUser(session)
                         || permission.isBackOfficeUser(session)
                         || permission.isCollectionOwner(session, requestBody.getCollectionName())
-                        || permission.hasCollectionPermission(session, requestBody.getCollectionName(), PermissionEnum.Modify.getLiteral())
+                        || permission.hasCollectionPermission(session, requestBody.getCollectionName(), CollectionPermissionEnum.Attribute.getLiteral())
                         ) {
                 } else {
                     errorMessages.put("collectionName", "you are not allow to delete its attribute");
@@ -443,10 +443,10 @@ public class CollectionController {
             errorMessages.put("actions", "is required");
         } else {
             for (Integer action : requestBody.getActions()) {
-                if (action != PermissionEnum.Delete.getLiteral()
-                        && action != PermissionEnum.Read.getLiteral()
-                        && action != PermissionEnum.Create.getLiteral()
-                        && action != PermissionEnum.Modify.getLiteral()) {
+                if (action != CollectionPermissionEnum.Attribute.getLiteral()
+                        && action != CollectionPermissionEnum.Read.getLiteral()
+                        && action != CollectionPermissionEnum.Drop.getLiteral()
+                        && action != CollectionPermissionEnum.Insert.getLiteral()) {
                     errorMessages.put("actions", "is bad");
                     break;
                 }
@@ -527,10 +527,10 @@ public class CollectionController {
             errorMessages.put("actions", "is required");
         } else {
             for (Integer action : requestBody.getActions()) {
-                if (action != PermissionEnum.Delete.getLiteral()
-                        && action != PermissionEnum.Read.getLiteral()
-                        && action != PermissionEnum.Create.getLiteral()
-                        && action != PermissionEnum.Modify.getLiteral()) {
+                if (action != CollectionPermissionEnum.Attribute.getLiteral()
+                        && action != CollectionPermissionEnum.Read.getLiteral()
+                        && action != CollectionPermissionEnum.Drop.getLiteral()
+                        && action != CollectionPermissionEnum.Insert.getLiteral()) {
                     errorMessages.put("actions", "is bad");
                     break;
                 }
@@ -611,10 +611,10 @@ public class CollectionController {
             errorMessages.put("actions", "is required");
         } else {
             for (Integer action : requestBody.getActions()) {
-                if (action != PermissionEnum.Delete.getLiteral()
-                        && action != PermissionEnum.Read.getLiteral()
-                        && action != PermissionEnum.Create.getLiteral()
-                        && action != PermissionEnum.Modify.getLiteral()) {
+                if (action != CollectionPermissionEnum.Attribute.getLiteral()
+                        && action != CollectionPermissionEnum.Read.getLiteral()
+                        && action != CollectionPermissionEnum.Drop.getLiteral()
+                        && action != CollectionPermissionEnum.Insert.getLiteral()) {
                     errorMessages.put("actions", "is bad");
                     break;
                 }
@@ -705,10 +705,10 @@ public class CollectionController {
             errorMessages.put("actions", "is required");
         } else {
             for (Integer action : requestBody.getActions()) {
-                if (action != PermissionEnum.Delete.getLiteral()
-                        && action != PermissionEnum.Read.getLiteral()
-                        && action != PermissionEnum.Create.getLiteral()
-                        && action != PermissionEnum.Modify.getLiteral()) {
+                if (action != CollectionPermissionEnum.Attribute.getLiteral()
+                        && action != CollectionPermissionEnum.Read.getLiteral()
+                        && action != CollectionPermissionEnum.Insert.getLiteral()
+                        && action != CollectionPermissionEnum.Drop.getLiteral()) {
                     errorMessages.put("actions", "is bad");
                     break;
                 }

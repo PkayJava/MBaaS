@@ -4,8 +4,9 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.plain.enums.PermissionEnum;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.CollectionPermissionEnum;
+import com.angkorteam.mbaas.plain.enums.DocumentPermissionEnum;
 import com.angkorteam.mbaas.plain.request.document.*;
 import com.angkorteam.mbaas.plain.response.document.*;
 import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
@@ -23,15 +24,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -262,7 +263,7 @@ public class DocumentController {
             if (permission.isAdministratorUser(session)
                     || permission.isBackOfficeUser(session)
                     || permission.isCollectionOwner(session, collection)
-                    || permission.hasCollectionPermission(session, collection, PermissionEnum.Create.getLiteral())) {
+                    || permission.hasCollectionPermission(session, collection, CollectionPermissionEnum.Insert.getLiteral())) {
             } else {
                 errorMessages.put("permission", "don't have write permission to this collection");
             }
@@ -280,77 +281,6 @@ public class DocumentController {
         DocumentCreateResponse response = new DocumentCreateResponse();
         response.getData().setCollectionName(collection);
         response.getData().setDocumentId(documentId);
-
-        return ResponseEntity.ok(response);
-    }
-
-    //endregion
-
-    //region /document/count/{collection}
-
-    @RequestMapping(
-            method = RequestMethod.POST, path = "/count/{collection}",
-            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<DocumentCountResponse> count(
-            HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
-            @PathVariable("collection") String collection,
-            @RequestBody DocumentCountRequest requestBody
-    ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
-        Map<String, String> errorMessages = new LinkedHashMap<>();
-
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        UserTable userTable = Tables.USER.as("userTable");
-        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
-
-        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
-        if (mobileRecord == null) {
-            errorMessages.put("session", "session invalid");
-        }
-
-        UserRecord userRecord = null;
-        if (mobileRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
-            if (userRecord == null) {
-                errorMessages.put("session", "session invalid");
-            }
-        }
-
-        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
-
-        CollectionRecord collectionRecord = null;
-        if (!patternNaming.matcher(collection).matches()) {
-            errorMessages.put("collection", "bad name");
-        } else {
-            collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
-            if (collectionRecord == null) {
-                errorMessages.put("collection", "collection is not found");
-            }
-        }
-
-        if (collectionRecord != null) {
-            if (permission.isAdministratorUser(session)
-                    || permission.isBackOfficeUser(session)
-                    || permission.isCollectionOwner(session, collection)
-                    || permission.hasCollectionPermission(session, collection, PermissionEnum.Read.getLiteral())) {
-            } else {
-                errorMessages.put("permission", "don't have write permission to this collection");
-            }
-        }
-
-        if (!errorMessages.isEmpty()) {
-            DocumentCountResponse response = new DocumentCountResponse();
-            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
-            response.getErrorMessages().putAll(errorMessages);
-            return ResponseEntity.ok(response);
-        }
-
-        Long total = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `" + collection + "`", Long.class);
-        DocumentCountResponse response = new DocumentCountResponse();
-        response.getData().setTotal(total);
 
         return ResponseEntity.ok(response);
     }
@@ -568,7 +498,7 @@ public class DocumentController {
                     || permission.isBackOfficeUser(session)
                     || permission.isCollectionOwner(session, collection)
                     || permission.isDocumentOwner(session, collection, documentId)
-                    || permission.hasDocumentPermission(session, collection, documentId, PermissionEnum.Modify.getLiteral())) {
+                    || permission.hasDocumentPermission(session, collection, documentId, DocumentPermissionEnum.Modify.getLiteral())) {
             } else {
                 errorMessages.put("permission", "don't have modify permission to this document");
             }
@@ -650,7 +580,7 @@ public class DocumentController {
                     || permission.isBackOfficeUser(session)
                     || permission.isCollectionOwner(session, collection)
                     || permission.isDocumentOwner(session, collection, documentId)
-                    || permission.hasDocumentPermission(session, collection, documentId, PermissionEnum.Delete.getLiteral())) {
+                    || permission.hasDocumentPermission(session, collection, documentId, DocumentPermissionEnum.Delete.getLiteral())) {
             } else {
                 errorMessages.put("permission", "don't have delete permission to this document");
             }
@@ -730,10 +660,9 @@ public class DocumentController {
             errorMessages.put("actions", "is required");
         } else {
             for (Integer action : requestBody.getActions()) {
-                if (action != PermissionEnum.Delete.getLiteral()
-                        && action != PermissionEnum.Read.getLiteral()
-                        && action != PermissionEnum.Create.getLiteral()
-                        && action != PermissionEnum.Modify.getLiteral()) {
+                if (action != DocumentPermissionEnum.Delete.getLiteral()
+                        && action != DocumentPermissionEnum.Read.getLiteral()
+                        && action != DocumentPermissionEnum.Modify.getLiteral()) {
                     errorMessages.put("actions", "is bad");
                     break;
                 }
@@ -824,10 +753,9 @@ public class DocumentController {
             errorMessages.put("actions", "is required");
         } else {
             for (Integer action : requestBody.getActions()) {
-                if (action != PermissionEnum.Delete.getLiteral()
-                        && action != PermissionEnum.Read.getLiteral()
-                        && action != PermissionEnum.Create.getLiteral()
-                        && action != PermissionEnum.Modify.getLiteral()) {
+                if (action != DocumentPermissionEnum.Delete.getLiteral()
+                        && action != DocumentPermissionEnum.Read.getLiteral()
+                        && action != DocumentPermissionEnum.Modify.getLiteral()) {
                     errorMessages.put("actions", "is bad");
                     break;
                 }
@@ -918,10 +846,9 @@ public class DocumentController {
             errorMessages.put("actions", "is required");
         } else {
             for (Integer action : requestBody.getActions()) {
-                if (action != PermissionEnum.Delete.getLiteral()
-                        && action != PermissionEnum.Read.getLiteral()
-                        && action != PermissionEnum.Create.getLiteral()
-                        && action != PermissionEnum.Modify.getLiteral()) {
+                if (action != DocumentPermissionEnum.Delete.getLiteral()
+                        && action != DocumentPermissionEnum.Read.getLiteral()
+                        && action != DocumentPermissionEnum.Modify.getLiteral()) {
                     errorMessages.put("actions", "is bad");
                     break;
                 }
@@ -1027,10 +954,9 @@ public class DocumentController {
             errorMessages.put("actions", "is required");
         } else {
             for (Integer action : requestBody.getActions()) {
-                if (action != PermissionEnum.Delete.getLiteral()
-                        && action != PermissionEnum.Read.getLiteral()
-                        && action != PermissionEnum.Create.getLiteral()
-                        && action != PermissionEnum.Modify.getLiteral()) {
+                if (action != DocumentPermissionEnum.Delete.getLiteral()
+                        && action != DocumentPermissionEnum.Read.getLiteral()
+                        && action != DocumentPermissionEnum.Modify.getLiteral()) {
                     errorMessages.put("actions", "is bad");
                     break;
                 }
@@ -1150,7 +1076,7 @@ public class DocumentController {
                     || permission.isBackOfficeUser(session)
                     || permission.isCollectionOwner(session, collection)
                     || permission.isDocumentOwner(session, collection, documentId)
-                    || permission.hasDocumentPermission(session, collection, documentId, PermissionEnum.Read.getLiteral())) {
+                    || permission.hasDocumentPermission(session, collection, documentId, DocumentPermissionEnum.Read.getLiteral())) {
             } else {
                 errorMessages.put("permission", "don't have read permission to this document");
             }
@@ -1192,120 +1118,6 @@ public class DocumentController {
 
         response.getData().getDocument().putAll(data);
 
-        return ResponseEntity.ok(response);
-    }
-
-    //endregion
-
-    //region /document/query/{collection}
-
-    @RequestMapping(
-            method = RequestMethod.POST, path = "/query/{collection}",
-            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<DocumentQueryResponse> query(
-            HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
-            @PathVariable("collection") String collection,
-            @RequestBody DocumentQueryRequest requestBody
-    ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
-        Map<String, String> errorMessages = new LinkedHashMap<>();
-
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
-        if (collectionRecord == null) {
-            errorMessages.put(collection, "is not found");
-        }
-
-        DocumentQueryRequest.Query query = requestBody.getQuery();
-
-        Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
-        if (query.getFields() == null || query.getFields().isEmpty()) {
-            errorMessages.put("fields", "there is no field to select");
-        } else {
-            if (collectionRecord != null) {
-                for (AttributeRecord fieldRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
-                    attributeRecords.put(fieldRecord.getName(), fieldRecord);
-                }
-                for (String field : query.getFields()) {
-                    if (!attributeRecords.containsKey(field)) {
-                        errorMessages.put(field, "is not found");
-                    }
-                }
-            }
-        }
-
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-
-        String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
-
-        Map<String, Object> params = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> entry : query.getParams().entrySet()) {
-            AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
-            if (attributeRecord.getJavaType().equals(Date.class.getName())
-                    || attributeRecord.getJavaType().equals(Time.class.getName())
-                    || attributeRecord.getJavaType().equals(Timestamp.class.getName())) {
-                try {
-                    Date date = FastDateFormat.getInstance(patternDatetime).parse((String) entry.getValue());
-                    params.put(entry.getKey(), date);
-                } catch (ParseException e) {
-                    errorMessages.put(entry.getKey(), "bad value");
-                }
-            } else {
-                params.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        if (query.getLimit() != null && query.getLimit() <= 0) {
-            errorMessages.put("limit", "limit must be grater then 0");
-        }
-        if (query.getOffset() != null && query.getOffset() < 0) {
-            errorMessages.put("limit", "limit must be grater or equal 0");
-        }
-
-        if (!errorMessages.isEmpty()) {
-            DocumentQueryResponse response = new DocumentQueryResponse();
-            response.setHttpCode(HttpStatus.BAD_REQUEST.value());
-            response.getErrorMessages().putAll(errorMessages);
-            return ResponseEntity.ok(response);
-        }
-
-        List<String> fields = new LinkedList<>();
-        for (String attribute : query.getFields()) {
-            AttributeRecord attributeRecord = attributeRecords.get(attribute);
-            if (attributeRecord.getExposed()) {
-                if (attributeRecord.getVirtual()) {
-                    AttributeRecord virtualRecord = attributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    fields.add(MariaDBFunction.columnGet(virtualRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()));
-                } else {
-                    fields.add("`" + attribute + "`");
-                }
-            }
-        }
-
-        String where = "";
-        if (query.getWhere() != null && !query.getWhere().isEmpty()) {
-            where = " WHERE " + StringUtils.join(query.getWhere(), " ") + " ";
-        }
-
-        String limit = "";
-        if (query.getLimit() != null && query.getLimit() > 0 && query.getOffset() != null && query.getOffset() >= 0) {
-            limit = " LIMIT " + query.getOffset() + "," + query.getLimit();
-        }
-
-        String field = StringUtils.join(fields, ", ");
-
-        NamedParameterJdbcTemplate parameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        List<Map<String, Object>> doucments = parameterJdbcTemplate.queryForList("SELECT " + field + " FROM `" + collection + "` " + where + limit, params);
-
-        DocumentQueryResponse response = new DocumentQueryResponse();
-        response.getData().setCollectionName(collection);
-        response.getData().setTotal(doucments.size());
-        response.getData().setDocuments(doucments);
         return ResponseEntity.ok(response);
     }
 

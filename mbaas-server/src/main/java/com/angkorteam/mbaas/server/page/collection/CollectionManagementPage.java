@@ -52,7 +52,7 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
         columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("document", this), "document", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("owner", this), "owner", provider));
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Attribute", "Delete"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Role Privacy", "User Privacy", "Attribute", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -84,6 +84,12 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
             parameters.add("collectionId", collectionId);
             setResponsePage(AttributeManagementPage.class, parameters);
         }
+        if ("Role Privacy".equals(link)) {
+            String collectionId = (String) object.get("collectionId");
+            PageParameters parameters = new PageParameters();
+            parameters.add("collectionId", collectionId);
+            setResponsePage(CollectionRolePrivacyManagementPage.class, parameters);
+        }
     }
 
     @Override
@@ -96,6 +102,9 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
             return true;
         }
         if ("Attribute".equals(link)) {
+            return true;
+        }
+        if ("Role Privacy".equals(link)) {
             return true;
         }
         return false;
@@ -112,6 +121,9 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
         if ("Attribute".equals(link)) {
             return true;
         }
+        if ("Role Privacy".equals(link)) {
+            return true;
+        }
         return false;
     }
 
@@ -121,6 +133,9 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
             return "btn-xs btn-danger";
         }
         if ("Attribute".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Role Privacy".equals(link)) {
             return "btn-xs btn-info";
         }
         return "";
