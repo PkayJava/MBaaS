@@ -42,7 +42,7 @@ public class Database {
 
     public Object queryFor(String query) throws DataAccessException {
         QueryTable queryTable = Tables.QUERY.as("queryTable");
-        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.PATH.eq(query)).fetchOneInto(queryTable);
+        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
 
         if (queryRecord == null || queryRecord.getScript() == null || "".equals(queryRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(queryRecord.getSecurity())) {
             throw new DataAccessResourceFailureException("query is not available");
@@ -107,7 +107,7 @@ public class Database {
         }
 
         QueryTable queryTable = Tables.QUERY.as("queryTable");
-        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.PATH.eq(query)).fetchOneInto(queryTable);
+        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
 
         if (queryRecord == null || queryRecord.getScript() == null || "".equals(queryRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(queryRecord.getSecurity())) {
             throw new DataAccessResourceFailureException(query + " is not available");
