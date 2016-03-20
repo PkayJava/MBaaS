@@ -10,8 +10,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.sql.DataSource;
-
 /**
  * Created by socheat on 2/15/16.
  */
@@ -19,8 +17,6 @@ import javax.sql.DataSource;
 public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.Permission>, InitializingBean {
 
     private Permission permission;
-
-    private DataSource dataSource;
 
     private DSLContext context;
 
@@ -43,15 +39,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.permission = new Permission(dataSource, context, jdbcTemplate);
-    }
-
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+        this.permission = new Permission(context, jdbcTemplate);
     }
 
     public DSLContext getContext() {
@@ -72,14 +60,11 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
 
     public static class Permission {
 
-        private final DataSource dataSource;
-
         private final DSLContext context;
 
         private final JdbcTemplate jdbcTemplate;
 
-        private Permission(DataSource dataSource, DSLContext context, JdbcTemplate jdbcTemplate) {
-            this.dataSource = dataSource;
+        private Permission(DSLContext context, JdbcTemplate jdbcTemplate) {
             this.context = context;
             this.jdbcTemplate = jdbcTemplate;
         }

@@ -21,8 +21,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.script.*;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -51,7 +53,7 @@ public class JavascriptController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("script") String script,
             @RequestBody(required = false) JavaScriptExecuteRequest requestBody
-    ) throws ScriptException {
+    ) throws ScriptException, IOException, ServletException {
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.PATH.eq(script)).fetchOneInto(javascriptTable);
 
@@ -61,7 +63,8 @@ public class JavascriptController {
             return ResponseEntity.ok(response);
         }
 
-        ScriptEngine engine = getScriptEngine(req);
+        com.angkorteam.mbaas.server.nashorn.Request request = new com.angkorteam.mbaas.server.nashorn.Request(req);
+        ScriptEngine engine = getScriptEngine(request);
         engine.eval(javascriptRecord.getScript());
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -74,7 +77,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpPost(req, requestBody);
+                    responseBody = http.httpPost(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -85,7 +88,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpPut(req, requestBody);
+                    responseBody = http.httpPut(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -124,7 +127,7 @@ public class JavascriptController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("script") String script,
             @RequestBody(required = false) JavaScriptExecuteRequest requestBody
-    ) throws ScriptException {
+    ) throws ScriptException, IOException, ServletException {
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.PATH.eq(script)).fetchOneInto(javascriptTable);
 
@@ -134,7 +137,8 @@ public class JavascriptController {
             return ResponseEntity.ok(response);
         }
 
-        ScriptEngine engine = getScriptEngine(req);
+        com.angkorteam.mbaas.server.nashorn.Request request = new com.angkorteam.mbaas.server.nashorn.Request(req);
+        ScriptEngine engine = getScriptEngine(request);
         engine.eval(javascriptRecord.getScript());
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -147,7 +151,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpGet(req, requestBody);
+                    responseBody = http.httpGet(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -158,7 +162,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpHead(req, requestBody);
+                    responseBody = http.httpHead(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -169,7 +173,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpPatch(req, requestBody);
+                    responseBody = http.httpPatch(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -180,7 +184,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpDelete(req, requestBody);
+                    responseBody = http.httpDelete(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -191,7 +195,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpOptions(req, requestBody);
+                    responseBody = http.httpOptions(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -202,7 +206,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpTrace(req, requestBody);
+                    responseBody = http.httpTrace(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
                     exception = e;
@@ -229,12 +233,12 @@ public class JavascriptController {
         }
     }
 
-    private ScriptEngine getScriptEngine(HttpServletRequest request) {
+    private ScriptEngine getScriptEngine(com.angkorteam.mbaas.server.nashorn.Request request) {
         NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
         ScriptEngine engine = factory.getScriptEngine(new JavaFilter(context));
         Bindings bindings = engine.createBindings();
         engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
-        bindings.put("MBaaS", new MBaaS(jdbcTemplate, request));
+        bindings.put("MBaaS", new MBaaS(context, jdbcTemplate, request));
         return engine;
     }
 
@@ -261,34 +265,34 @@ public class JavascriptController {
     }
 
     public interface HttpGet extends Http {
-        Object httpGet(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
+        Object httpGet(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpHead extends Http {
-        Object httpHead(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
+        Object httpHead(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpPost extends Http {
-        Object httpPost(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
+        Object httpPost(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpPut extends Http {
-        Object httpPut(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
+        Object httpPut(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpPatch extends Http {
-        Object httpPatch(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
+        Object httpPatch(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpDelete extends Http {
-        Object httpDelete(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
+        Object httpDelete(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpOptions extends Http {
-        Object httpOptions(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
+        Object httpOptions(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
     }
 
     public interface HttpTrace extends Http {
-        Object httpTrace(HttpServletRequest request, JavaScriptExecuteRequest requestBody);
+        Object httpTrace(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
     }
 }
