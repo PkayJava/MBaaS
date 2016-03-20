@@ -55,7 +55,7 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("endpoint", this), "endpoint", this, provider));
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Parameter", "Edit", "Delete"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Role Privacy", "User Privacy", "Deny", "Parameter", "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -80,6 +80,12 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
             return "btn-xs btn-danger";
         }
         if ("Parameter".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Role Privacy".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("User Privacy".equals(link)) {
             return "btn-xs btn-info";
         }
         return "";
@@ -128,6 +134,16 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
             setResponsePage(QueryParameterModifyPage.class, parameters);
             return;
         }
+        if ("Role Privacy".equals(link)) {
+            PageParameters parameters = new PageParameters();
+            parameters.add("queryId", queryId);
+            setResponsePage(QueryRolePrivacyManagementPage.class, parameters);
+        }
+        if ("User Privacy".equals(link)) {
+            PageParameters parameters = new PageParameters();
+            parameters.add("queryId", queryId);
+            setResponsePage(QueryUserPrivacyManagementPage.class, parameters);
+        }
     }
 
     @Override
@@ -160,6 +176,12 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
                 return true;
             }
         }
+        if ("Role Privacy".equals(link)) {
+            return true;
+        }
+        if ("User Privacy".equals(link)) {
+            return true;
+        }
         return false;
     }
 
@@ -188,6 +210,12 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
             }
         }
         if ("Parameter".equals(link)) {
+            return true;
+        }
+        if ("Role Privacy".equals(link)) {
+            return true;
+        }
+        if ("User Privacy".equals(link)) {
             return true;
         }
         return false;

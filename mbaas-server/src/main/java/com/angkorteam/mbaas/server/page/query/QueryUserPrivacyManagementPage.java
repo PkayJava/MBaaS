@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.collection;
+package com.angkorteam.mbaas.server.page.query;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
@@ -9,12 +9,12 @@ import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooq
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.CollectionUserPrivacyTable;
+import com.angkorteam.mbaas.model.entity.tables.QueryUserPrivacyTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.UserPojo;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionUserPrivacyRecord;
-import com.angkorteam.mbaas.plain.enums.CollectionPermissionEnum;
-import com.angkorteam.mbaas.server.provider.CollectionUserPrivacyProvider;
+import com.angkorteam.mbaas.model.entity.tables.records.QueryUserPrivacyRecord;
+import com.angkorteam.mbaas.plain.enums.QueryPermissionEnum;
+import com.angkorteam.mbaas.server.provider.QueryUserPrivacyProvider;
 import com.angkorteam.mbaas.server.renderer.UserChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -37,30 +37,30 @@ import java.util.Map;
  * Created by socheat on 3/20/16.
  */
 @AuthorizeInstantiation("administrator")
-@Mount("/collection/user/privacy/management")
-public class CollectionUserPrivacyManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
+@Mount("/query/user/privacy/management")
+public class QueryUserPrivacyManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
-    private String collectionId;
+    private String queryId;
 
     private UserPojo user;
     private DropDownChoice<UserPojo> userField;
     private TextFeedbackPanel userFeedback;
 
-    private Boolean attribute;
-    private DropDownChoice<Boolean> attributeField;
-    private TextFeedbackPanel attributeFeedback;
+    private Boolean modify;
+    private DropDownChoice<Boolean> modifyField;
+    private TextFeedbackPanel modifyFeedback;
 
     private Boolean read;
     private DropDownChoice<Boolean> readField;
     private TextFeedbackPanel readFeedback;
 
-    private Boolean drop;
-    private DropDownChoice<Boolean> dropField;
-    private TextFeedbackPanel dropFeedback;
+    private Boolean delete;
+    private DropDownChoice<Boolean> deleteField;
+    private TextFeedbackPanel deleteFeedback;
 
-    private Boolean insert;
-    private DropDownChoice<Boolean> insertField;
-    private TextFeedbackPanel insertFeedback;
+    private Boolean execute;
+    private DropDownChoice<Boolean> executeField;
+    private TextFeedbackPanel executeFeedback;
 
     @Override
     protected void onInitialize() {
@@ -68,11 +68,11 @@ public class CollectionUserPrivacyManagementPage extends MasterPage implements A
         DSLContext context = getDSLContext();
         UserTable userTable = Tables.USER.as("userTable");
 
-        this.collectionId = getPageParameters().get("collectionId").toString();
+        this.queryId = getPageParameters().get("queryId").toString();
 
-        CollectionUserPrivacyProvider provider = new CollectionUserPrivacyProvider(this.collectionId);
+        QueryUserPrivacyProvider provider = new QueryUserPrivacyProvider(this.queryId);
         provider.selectField(String.class, "userId");
-        provider.selectField(String.class, "collectionId");
+        provider.selectField(String.class, "queryId");
 
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
@@ -80,9 +80,9 @@ public class CollectionUserPrivacyManagementPage extends MasterPage implements A
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("login", this), "login", this, provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("attribute", this), "attribute", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("drop", this), "drop", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("insert", this), "insert", provider));
+        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("modify", this), "modify", provider));
+        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("delete", this), "delete", provider));
+        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("execute", this), "execute", provider));
         columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("read", this), "read", provider));
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Delete"));
 
@@ -90,7 +90,7 @@ public class CollectionUserPrivacyManagementPage extends MasterPage implements A
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", CollectionManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", QueryManagementPage.class, getPageParameters());
         add(refreshLink);
 
         Form<Void> form = new Form<>("form");
@@ -107,17 +107,17 @@ public class CollectionUserPrivacyManagementPage extends MasterPage implements A
         this.userFeedback = new TextFeedbackPanel("userFeedback", this.userField);
         form.add(this.userFeedback);
 
-        this.dropField = new DropDownChoice<>("dropField", new PropertyModel<>(this, "drop"), Arrays.asList(true, false));
-        this.dropField.setRequired(true);
-        form.add(this.dropField);
-        this.dropFeedback = new TextFeedbackPanel("dropFeedback", this.dropField);
-        form.add(this.dropFeedback);
+        this.deleteField = new DropDownChoice<>("deleteField", new PropertyModel<>(this, "delete"), Arrays.asList(true, false));
+        this.deleteField.setRequired(true);
+        form.add(this.deleteField);
+        this.deleteFeedback = new TextFeedbackPanel("deleteFeedback", this.deleteField);
+        form.add(this.deleteFeedback);
 
-        this.attributeField = new DropDownChoice<>("attributeField", new PropertyModel<>(this, "attribute"), Arrays.asList(true, false));
-        this.attributeField.setRequired(true);
-        form.add(this.attributeField);
-        this.attributeFeedback = new TextFeedbackPanel("attributeFeedback", this.attributeField);
-        form.add(this.attributeFeedback);
+        this.modifyField = new DropDownChoice<>("modifyField", new PropertyModel<>(this, "modify"), Arrays.asList(true, false));
+        this.modifyField.setRequired(true);
+        form.add(this.modifyField);
+        this.modifyFeedback = new TextFeedbackPanel("modifyFeedback", this.modifyField);
+        form.add(this.modifyFeedback);
 
         this.readField = new DropDownChoice<>("readField", new PropertyModel<>(this, "read"), Arrays.asList(true, false));
         this.readField.setRequired(true);
@@ -125,51 +125,51 @@ public class CollectionUserPrivacyManagementPage extends MasterPage implements A
         this.readFeedback = new TextFeedbackPanel("readFeedback", this.readField);
         form.add(this.readFeedback);
 
-        this.insertField = new DropDownChoice<>("insertField", new PropertyModel<>(this, "insert"), Arrays.asList(true, false));
-        this.insertField.setRequired(true);
-        form.add(this.insertField);
-        this.insertFeedback = new TextFeedbackPanel("insertFeedback", this.insertField);
-        form.add(this.insertFeedback);
+        this.executeField = new DropDownChoice<>("executeField", new PropertyModel<>(this, "execute"), Arrays.asList(true, false));
+        this.executeField.setRequired(true);
+        form.add(this.executeField);
+        this.executeFeedback = new TextFeedbackPanel("executeFeedback", this.executeField);
+        form.add(this.executeFeedback);
 
     }
 
     private void saveButtonOnSubmit(Button button) {
         DSLContext context = getDSLContext();
-        CollectionUserPrivacyTable collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("collectionUserPrivacyTable");
-        context.delete(collectionUserPrivacyTable).where(collectionUserPrivacyTable.USER_ID.eq(user.getUserId())).and(collectionUserPrivacyTable.COLLECTION_ID.eq(collectionId)).execute();
-        CollectionUserPrivacyRecord collectionUserPrivacyRecord = context.newRecord(collectionUserPrivacyTable);
-        collectionUserPrivacyRecord.setUserId(this.user.getUserId());
-        collectionUserPrivacyRecord.setCollectionId(this.collectionId);
+        QueryUserPrivacyTable queryUserPrivacyTable = Tables.QUERY_USER_PRIVACY.as("queryUserPrivacyTable");
+        context.delete(queryUserPrivacyTable).where(queryUserPrivacyTable.USER_ID.eq(user.getUserId())).and(queryUserPrivacyTable.QUERY_ID.eq(queryId)).execute();
+        QueryUserPrivacyRecord queryUserPrivacyRecord = context.newRecord(queryUserPrivacyTable);
+        queryUserPrivacyRecord.setUserId(this.user.getUserId());
+        queryUserPrivacyRecord.setQueryId(this.queryId);
         Integer permission = 0;
-        if (this.attribute) {
-            permission = permission | CollectionPermissionEnum.Attribute.getLiteral();
+        if (this.modify) {
+            permission = permission | QueryPermissionEnum.Modify.getLiteral();
         }
         if (this.read) {
-            permission = permission | CollectionPermissionEnum.Read.getLiteral();
+            permission = permission | QueryPermissionEnum.Read.getLiteral();
         }
-        if (this.insert) {
-            permission = permission | CollectionPermissionEnum.Insert.getLiteral();
+        if (this.execute) {
+            permission = permission | QueryPermissionEnum.Delete.getLiteral();
         }
-        if (this.drop) {
-            permission = permission | CollectionPermissionEnum.Drop.getLiteral();
+        if (this.delete) {
+            permission = permission | QueryPermissionEnum.Execute.getLiteral();
         }
-        collectionUserPrivacyRecord.setPermisson(permission);
-        collectionUserPrivacyRecord.store();
+        queryUserPrivacyRecord.setPermisson(permission);
+        queryUserPrivacyRecord.store();
         PageParameters parameters = new PageParameters();
-        parameters.add("collectionId", this.collectionId);
-        setResponsePage(CollectionUserPrivacyManagementPage.class, parameters);
+        parameters.add("queryId", this.queryId);
+        setResponsePage(QueryUserPrivacyManagementPage.class, parameters);
     }
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
         String userId = (String) object.get("userId");
-        String collectionId = (String) object.get("collectionId");
+        String queryId = (String) object.get("queryId");
         if ("Delete".equals(link)) {
             DSLContext context = getDSLContext();
-            context.delete(Tables.COLLECTION_USER_PRIVACY).where(Tables.COLLECTION_USER_PRIVACY.USER_ID.eq(userId)).and(Tables.COLLECTION_USER_PRIVACY.COLLECTION_ID.eq(collectionId)).execute();
+            context.delete(Tables.QUERY_USER_PRIVACY).where(Tables.QUERY_USER_PRIVACY.USER_ID.eq(userId)).and(Tables.QUERY_USER_PRIVACY.QUERY_ID.eq(queryId)).execute();
             PageParameters parameters = new PageParameters();
-            parameters.add("collectionId", this.collectionId);
-            setResponsePage(CollectionUserPrivacyManagementPage.class, parameters);
+            parameters.add("queryId", this.queryId);
+            setResponsePage(QueryUserPrivacyManagementPage.class, parameters);
         }
     }
 

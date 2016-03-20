@@ -90,11 +90,16 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
             parameters.add("collectionId", collectionId);
             setResponsePage(CollectionRolePrivacyManagementPage.class, parameters);
         }
+        if ("User Privacy".equals(link)) {
+            String collectionId = (String) object.get("collectionId");
+            PageParameters parameters = new PageParameters();
+            parameters.add("collectionId", collectionId);
+            setResponsePage(CollectionUserPrivacyManagementPage.class, parameters);
+        }
     }
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
-        Boolean system = (Boolean) object.get("system");
         if ("name".equals(link)) {
             return true;
         }
@@ -105,6 +110,9 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
             return true;
         }
         if ("Role Privacy".equals(link)) {
+            return true;
+        }
+        if ("User Privacy".equals(link)) {
             return true;
         }
         return false;
@@ -124,6 +132,9 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
         if ("Role Privacy".equals(link)) {
             return true;
         }
+        if ("User Privacy".equals(link)) {
+            return true;
+        }
         return false;
     }
 
@@ -136,6 +147,9 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
             return "btn-xs btn-info";
         }
         if ("Role Privacy".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("User Privacy".equals(link)) {
             return "btn-xs btn-info";
         }
         return "";

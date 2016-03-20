@@ -7,10 +7,12 @@ import com.angkorteam.mbaas.model.entity.tables.QueryTable;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryParameterRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
 import com.angkorteam.mbaas.plain.enums.QueryInputParamTypeEnum;
+import com.angkorteam.mbaas.plain.enums.QueryPermissionEnum;
 import com.angkorteam.mbaas.plain.enums.QueryReturnTypeEnum;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.request.query.QueryExecuteRequest;
 import com.angkorteam.mbaas.plain.response.query.QueryExecuteResponse;
+import com.angkorteam.mbaas.server.factory.PermissionFactoryBean;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.DSLContext;
@@ -53,6 +55,9 @@ public class QueryController {
     @Autowired
     private Gson gson;
 
+    @Autowired
+    private PermissionFactoryBean.Permission permission;
+
     @RequestMapping(
             path = "/execute/{query}",
             method = {RequestMethod.POST, RequestMethod.PUT},
@@ -71,6 +76,12 @@ public class QueryController {
         QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.PATH.eq(query)).fetchOneInto(queryTable);
 
         if (queryRecord == null || queryRecord.getScript() == null || "".equals(queryRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(queryRecord.getSecurity())) {
+            QueryExecuteResponse response = new QueryExecuteResponse();
+            response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
+            return ResponseEntity.ok(response);
+        }
+        if (permission.isQueryOwner(session, queryRecord.getName()) || permission.hasQueryPermission(session, query, QueryPermissionEnum.Execute.getLiteral())) {
+        } else {
             QueryExecuteResponse response = new QueryExecuteResponse();
             response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
             return ResponseEntity.ok(response);
@@ -121,7 +132,7 @@ public class QueryController {
         }
 
         QueryParameterTable queryParameterTable = Tables.QUERY_PARAMETER.as("queryParameterTable");
-        
+
         Map<String, QueryParameterRecord> queryParameterRecords = new LinkedHashMap<>();
         for (QueryParameterRecord queryParameterRecord : context.select(queryParameterTable.fields()).from(queryParameterTable).where(queryParameterTable.QUERY_ID.eq(queryRecord.getQueryId())).fetchInto(queryParameterTable)) {
             queryParameterRecords.put(queryParameterRecord.getName(), queryParameterRecord);

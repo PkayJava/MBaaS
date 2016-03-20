@@ -28,7 +28,7 @@ public class CollectionRolePrivacyProvider extends JooqProvider {
 
     public CollectionRolePrivacyProvider(String collectionId) {
         this.collectionId = collectionId;
-        this.from = collectionRolePrivacyTable.leftJoin(roleTable).on(collectionRolePrivacyTable.ROLE_ID.eq(roleTable.ROLE_ID));
+        this.from = collectionRolePrivacyTable.join(roleTable).on(collectionRolePrivacyTable.ROLE_ID.eq(roleTable.ROLE_ID));
     }
 
     public Field<String> getRoleId() {
