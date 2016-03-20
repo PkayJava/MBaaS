@@ -50,7 +50,6 @@
         <security:intercept-url pattern="/api/security/login" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/resource/**" access="permitAll"/>
         <security:intercept-url pattern="/api/javascript/**" access="permitAll"/>
-        <security:intercept-url pattern="/api/query/**" access="permitAll"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
     </security:http>
 
