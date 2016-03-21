@@ -4,6 +4,7 @@ CREATE TABLE query_parameter (
   query_id           VARCHAR(100) NOT NULL,
   name               VARCHAR(255) NOT NULL,
   type               VARCHAR(50),
+  sub_type           VARCHAR(50),
 
   optimistic         INT(11)      NOT NULL DEFAULT 0,
 

@@ -17,11 +17,19 @@ public enum QueryInputParamTypeEnum {
     Time("Time"),
     Date("Date"),
     DateTime("DateTime"),
-    List("List");
+    List("List", false);
+
+    private final boolean subType;
 
     private final String literal;
 
     QueryInputParamTypeEnum(String literal) {
+        this.literal = literal;
+        this.subType = true;
+    }
+
+    QueryInputParamTypeEnum(String literal, boolean subType) {
+        this.subType = subType;
         this.literal = literal;
     }
 
@@ -29,4 +37,7 @@ public enum QueryInputParamTypeEnum {
         return literal;
     }
 
+    public final boolean isSubType() {
+        return subType;
+    }
 }

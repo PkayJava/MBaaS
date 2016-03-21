@@ -10,7 +10,7 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.QueryPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryParameterRecord;
 import com.angkorteam.mbaas.plain.enums.QueryInputParamTypeEnum;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
-import com.angkorteam.mbaas.server.template.SelectFieldPanel;
+import com.angkorteam.mbaas.server.template.QueryParameterSelectFieldPanel;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
@@ -76,15 +76,20 @@ public class QueryParameterModifyPage extends MasterPage {
                 .fetchInto(QueryParameterPojo.class);
 
         List<String> types = new ArrayList<>();
+        List<String> subTypes = new ArrayList<>();
         for (QueryInputParamTypeEnum queryInputParamTypeEnum : QueryInputParamTypeEnum.values()) {
             types.add(queryInputParamTypeEnum.getLiteral());
+            if (queryInputParamTypeEnum.isSubType()) {
+                subTypes.add(queryInputParamTypeEnum.getLiteral());
+            }
         }
 
         RepeatingView fields = new RepeatingView("fields");
         for (QueryParameterPojo queryParameter : queryParameters) {
-            SelectFieldPanel fieldPanel = new SelectFieldPanel(fields.newChildId(), queryParameter, types, this.fields);
+            QueryParameterSelectFieldPanel fieldPanel = new QueryParameterSelectFieldPanel(fields.newChildId(), form, queryParameter, types, subTypes, this.fields);
             fields.add(fieldPanel);
             this.fields.put(queryParameter.getName(), queryParameter.getType());
+            this.fields.put(queryParameter.getName() + "SubType", queryParameter.getSubType());
         }
         this.form.add(fields);
 
@@ -101,9 +106,12 @@ public class QueryParameterModifyPage extends MasterPage {
         QueryParameterTable queryParameterTable = Tables.QUERY_PARAMETER.as("queryParameterTable");
 
         for (Map.Entry<String, String> entry : this.fields.entrySet()) {
-            QueryParameterRecord queryParameterRecord = context.select(queryParameterTable.fields()).from(queryParameterTable).where(queryParameterTable.QUERY_ID.eq(this.queryId)).and(queryParameterTable.NAME.eq(entry.getKey())).fetchOneInto(queryParameterTable);
-            queryParameterRecord.setType(entry.getValue());
-            queryParameterRecord.update();
+            if (!entry.getKey().endsWith("SubType")) {
+                QueryParameterRecord queryParameterRecord = context.select(queryParameterTable.fields()).from(queryParameterTable).where(queryParameterTable.QUERY_ID.eq(this.queryId)).and(queryParameterTable.NAME.eq(entry.getKey())).fetchOneInto(queryParameterTable);
+                queryParameterRecord.setType(entry.getValue());
+                queryParameterRecord.setSubType(this.fields.get(entry.getKey() + "SubType"));
+                queryParameterRecord.update();
+            }
         }
 
         if (this.granted) {
