@@ -20,10 +20,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 3/13/16.
@@ -115,7 +112,20 @@ public class Database {
 
         Map<String, Object> params = new HashMap<>();
         for (String key : js.keySet()) {
-            params.put(key, js.getMember(key));
+            Object object = js.getMember(key);
+            if (object instanceof JSObject) {
+                if (((JSObject) object).isArray()) {
+                    List<Object> values = new LinkedList<>();
+                    for (Object value : ((JSObject) object).values()) {
+                        values.add(value);
+                    }
+                    params.put(key, values);
+                } else {
+                    throw new DataAccessResourceFailureException(key + " type is not supported");
+                }
+            } else {
+                params.put(key, object);
+            }
         }
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
