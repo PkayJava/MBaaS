@@ -102,12 +102,6 @@
         <dependencies>
 
             <dependency>
-                <groupId>com.angkorteam.baasbox</groupId>
-                <artifactId>sdk-java</artifactId>
-                <version>1.0</version>
-            </dependency>
-
-            <dependency>
                 <groupId>com.angkorteam.framework.extension</groupId>
                 <artifactId>framework-extension</artifactId>
                 <version>${framework-extension.version}</version>

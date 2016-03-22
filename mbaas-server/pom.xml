@@ -32,12 +32,6 @@
     <dependencies>
 
         <dependency>
-            <groupId>com.angkorteam.baasbox</groupId>
-            <artifactId>sdk-java</artifactId>
-            <version>1.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.angkorteam.mbaas.plain</groupId>
             <artifactId>mbaas-plain</artifactId>
             <version>${project.parent.version}</version>
