@@ -18,7 +18,7 @@
         <jetty9.version>9.2.14.v20151106</jetty9.version>
         <junit.version>4.12</junit.version>
         <wtp.version>none</wtp.version>
-        <jackson.version>2.7.1</jackson.version>
+        <jackson.version>2.7.3</jackson.version>
         <jasypt.version>1.9.2</jasypt.version>
         <reflections.version>0.9.10</reflections.version>
         <joda-time.version>2.9.2</joda-time.version>
@@ -37,19 +37,19 @@
         <framework-extension.version>1.0</framework-extension.version>
 
         <!-- Database -->
-        <jooq.version>3.7.2</jooq.version>
-        <flywaydb.version>3.2.1</flywaydb.version>
+        <jooq.version>3.7.3</jooq.version>
+        <flywaydb.version>4.0</flywaydb.version>
 
         <!-- JDBC -->
-        <mariadb.version>1.3.5</mariadb.version>
+        <mariadb.version>1.3.6</mariadb.version>
         <mysql.version>5.1.38</mysql.version>
 
         <!-- Network -->
-        <httpclient.version>4.5.1</httpclient.version>
+        <httpclient.version>4.5.2</httpclient.version>
         <httpcore.version>4.4.4</httpcore.version>
-        <okhttp.version>2.7.4</okhttp.version>
-        <retrofit.version>1.9.0</retrofit.version>
-        <activemq.version>5.13.0</activemq.version>
+        <okhttp.version>3.2.0</okhttp.version>
+        <retrofit.version>2.0.0</retrofit.version>
+        <activemq.version>5.13.2</activemq.version>
         <netty.version>4.0.34.Final</netty.version>
 
         <!-- Apache Commons -->
@@ -73,9 +73,9 @@
         <magento.version>1.0</magento.version>
 
         <!-- SOAP -->
-        <axis2.version>1.7.0</axis2.version>
+        <axis2.version>1.7.1</axis2.version>
         <xmlbeans.version>2.6.0</xmlbeans.version>
-        <axiom.version>1.2.17</axiom.version>
+        <axiom.version>1.2.18</axiom.version>
 
         <!-- Hardware -->
         <sigar.version>1.7.0.1</sigar.version>
