@@ -279,7 +279,7 @@ public class ApplicationContext implements ServletContextListener {
             Connection connection = dataSource.getConnection();
             DatabaseMetaData databaseMetaData = connection.getMetaData();
             DbSupport databaseSupport = DbSupportFactory.createDbSupport(connection, true);
-            for (Table table : databaseSupport.getCurrentSchema().allTables()) {
+            for (Table table : databaseSupport.getSchema(databaseSupport.getCurrentSchemaName()).allTables()) {
                 CollectionRecord collectionRecord = collectionRecords.get(table.getName());
                 if (collectionRecord == null) {
                     collectionRecord = context.newRecord(collectionTable);

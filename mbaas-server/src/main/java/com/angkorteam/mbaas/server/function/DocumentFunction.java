@@ -198,7 +198,10 @@ public class DocumentFunction {
             }
         }
 
-        String documentId = UUID.randomUUID().toString();
+        String documentId = (String) requestBody.getDocument().get(collection + "_id");
+        if (documentId == null || "".equals(documentId)) {
+            documentId = UUID.randomUUID().toString();
+        }
         {
             // primary column
             columnNames.add("`" + collection + "_id" + "`");

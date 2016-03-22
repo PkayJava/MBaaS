@@ -6,13 +6,13 @@ import com.angkorteam.mbaas.model.entity.tables.QueryTable;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
 import com.angkorteam.mbaas.plain.enums.QueryReturnTypeEnum;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
+import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
+import com.angkorteam.mbaas.server.function.DocumentFunction;
 import jdk.nashorn.api.scripting.JSObject;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.DSLContext;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.*;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.IncorrectResultSetColumnCountException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,6 +35,71 @@ public class Database {
         this.jdbcTemplate = jdbcTemplate;
         this.context = context;
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+    }
+
+    public String uuid() {
+        return UUID.randomUUID().toString();
+    }
+
+    public String insert(String collection, JSObject document) {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String userAdmin = configuration.getString(Constants.USER_ADMIN);
+        String ownerUserId = jdbcTemplate.queryForObject("SELECT " + Tables.USER.USER_ID.getName() + " FROM " + Tables.USER.getName() + " WHERE " + Tables.USER.LOGIN.getName() + " = ?", String.class, userAdmin);
+        return insert(ownerUserId, collection, document);
+    }
+
+    public String insert(String ownerUserId, String collection, JSObject document) {
+        Map<String, Object> params = new HashMap<>();
+        if (document.isArray() || document.isStrictFunction() || document.isFunction()) {
+            throw new DataIntegrityViolationException("could not insert into " + collection);
+        }
+        for (String key : document.keySet()) {
+            Object value = document.getMember(key);
+            if (value instanceof Boolean
+                    || value instanceof Byte
+                    || value instanceof Short
+                    || value instanceof Integer
+                    || value instanceof Long
+                    || value instanceof Float
+                    || value instanceof Double
+                    || value instanceof Character
+                    || value instanceof String
+                    || value instanceof Date) {
+                params.put(key, value);
+            } else {
+                throw new DataIntegrityViolationException("could not insert into " + collection);
+            }
+        }
+        DocumentCreateRequest request = new DocumentCreateRequest();
+        request.setDocument(params);
+        return DocumentFunction.insertDocument(context, jdbcTemplate, ownerUserId, collection, request);
+    }
+
+    public void modify(String collection, String documentId, JSObject document) {
+        Map<String, Object> params = new HashMap<>();
+        if (document.isArray() || document.isStrictFunction() || document.isFunction()) {
+            throw new DataIntegrityViolationException("could not insert into " + collection);
+        }
+        for (String key : document.keySet()) {
+            Object value = document.getMember(key);
+            if (value instanceof Boolean
+                    || value instanceof Byte
+                    || value instanceof Short
+                    || value instanceof Integer
+                    || value instanceof Long
+                    || value instanceof Float
+                    || value instanceof Double
+                    || value instanceof Character
+                    || value instanceof String
+                    || value instanceof Date) {
+                params.put(key, value);
+            } else {
+                throw new DataIntegrityViolationException("could not insert into " + collection);
+            }
+        }
+        DocumentModifyRequest request = new DocumentModifyRequest();
+        request.setDocument(params);
+        DocumentFunction.modifyDocument(context, jdbcTemplate, collection, documentId, request);
     }
 
     public Object queryFor(String query) throws DataAccessException {
