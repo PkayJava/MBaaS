@@ -492,12 +492,12 @@
                 <version>${httpcore.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.squareup.retrofit</groupId>
+                <groupId>com.squareup.retrofit2</groupId>
                 <artifactId>retrofit</artifactId>
                 <version>${retrofit.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.squareup.okhttp</groupId>
+                <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
                 <version>${okhttp.version}</version>
             </dependency>
