@@ -12,6 +12,7 @@ import com.angkorteam.mbaas.plain.enums.QueryReturnTypeEnum;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.validator.QueryNameValidator;
 import com.angkorteam.mbaas.server.validator.QueryPathValidator;
+import com.angkorteam.mbaas.server.validator.QueryReturnSubTypeValidator;
 import com.angkorteam.mbaas.server.validator.QueryScriptValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -55,6 +56,10 @@ public class QueryCreatePage extends MasterPage {
     private String returnType;
     private DropDownChoice<String> returnTypeField;
     private TextFeedbackPanel returnTypeFeedback;
+
+    private String returnSubType;
+    private DropDownChoice<String> returnSubTypeField;
+    private TextFeedbackPanel returnSubTypeFeedback;
 
     private Button saveButton;
 
@@ -100,14 +105,26 @@ public class QueryCreatePage extends MasterPage {
         this.form.add(this.scriptFeedback);
 
         List<String> returnTypes = new ArrayList<>();
+        List<String> returnSubTypes = new ArrayList<>();
         for (QueryReturnTypeEnum queryReturnTypeEnum : QueryReturnTypeEnum.values()) {
             returnTypes.add(queryReturnTypeEnum.getLiteral());
+            if (queryReturnTypeEnum.isSubType()) {
+                returnSubTypes.add(queryReturnTypeEnum.getLiteral());
+            }
         }
+
         this.returnTypeField = new DropDownChoice<>("returnTypeField", new PropertyModel<>(this, "returnType"), returnTypes);
         this.returnTypeField.setRequired(true);
         this.form.add(this.returnTypeField);
         this.returnTypeFeedback = new TextFeedbackPanel("returnTypeFeedback", this.returnTypeField);
         this.form.add(returnTypeFeedback);
+
+        this.returnSubTypeField = new DropDownChoice<>("returnSubTypeField", new PropertyModel<>(this, "returnSubType"), returnSubTypes);
+        this.form.add(this.returnSubTypeField);
+        this.returnSubTypeFeedback = new TextFeedbackPanel("returnSubTypeFeedback", this.returnSubTypeField);
+        this.form.add(returnSubTypeFeedback);
+
+        this.form.add(new QueryReturnSubTypeValidator(this.returnTypeField, this.returnSubTypeField));
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
@@ -131,6 +148,7 @@ public class QueryCreatePage extends MasterPage {
         queryRecord.setDateCreated(new Date());
         queryRecord.setDescription(this.description);
         queryRecord.setReturnType(this.returnType);
+        queryRecord.setReturnSubType(this.returnSubType);
         queryRecord.store();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();

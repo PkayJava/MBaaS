@@ -18,15 +18,27 @@ public enum QueryReturnTypeEnum {
     Date("Date"),
     DateTime("DateTime"),
     Map("Map"),
-    List("List");
+    List("List", false);
 
     private final String literal;
 
+    private final boolean subType;
+
     QueryReturnTypeEnum(String literal) {
         this.literal = literal;
+        this.subType = true;
+    }
+
+    QueryReturnTypeEnum(String literal, boolean subType) {
+        this.literal = literal;
+        this.subType = subType;
     }
 
     public final String getLiteral() {
         return literal;
+    }
+
+    public final boolean isSubType() {
+        return subType;
     }
 }

@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
 import com.angkorteam.mbaas.plain.enums.QueryReturnTypeEnum;
 import com.angkorteam.mbaas.server.validator.QueryNameValidator;
 import com.angkorteam.mbaas.server.validator.QueryPathValidator;
+import com.angkorteam.mbaas.server.validator.QueryReturnSubTypeValidator;
 import com.angkorteam.mbaas.server.validator.QueryScriptValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -57,6 +58,10 @@ public class QueryModifyPage extends MasterPage {
     private String returnType;
     private DropDownChoice<String> returnTypeField;
     private TextFeedbackPanel returnTypeFeedback;
+
+    private String returnSubType;
+    private DropDownChoice<String> returnSubTypeField;
+    private TextFeedbackPanel returnSubTypeFeedback;
 
     private Button saveButton;
     private Button saveAndContinueButton;
@@ -113,16 +118,28 @@ public class QueryModifyPage extends MasterPage {
         this.scriptFeedback = new TextFeedbackPanel("scriptFeedback", this.scriptField);
         this.form.add(this.scriptFeedback);
 
-        this.returnType = queryRecord.getReturnType();
         List<String> returnTypes = new ArrayList<>();
+        List<String> returnSubTypes = new ArrayList<>();
         for (QueryReturnTypeEnum queryReturnTypeEnum : QueryReturnTypeEnum.values()) {
             returnTypes.add(queryReturnTypeEnum.getLiteral());
+            if (queryReturnTypeEnum.isSubType()) {
+                returnSubTypes.add(queryReturnTypeEnum.getLiteral());
+            }
         }
+        this.returnType = queryRecord.getReturnType();
         this.returnTypeField = new DropDownChoice<>("returnTypeField", new PropertyModel<>(this, "returnType"), returnTypes);
         this.returnTypeField.setRequired(true);
         this.form.add(this.returnTypeField);
         this.returnTypeFeedback = new TextFeedbackPanel("returnTypeFeedback", this.returnTypeField);
         this.form.add(returnTypeFeedback);
+
+        this.returnSubType = queryRecord.getReturnSubType();
+        this.returnSubTypeField = new DropDownChoice<>("returnSubTypeField", new PropertyModel<>(this, "returnSubType"), returnSubTypes);
+        this.form.add(this.returnSubTypeField);
+        this.returnSubTypeFeedback = new TextFeedbackPanel("returnSubTypeFeedback", this.returnSubTypeField);
+        this.form.add(returnSubTypeFeedback);
+
+        this.form.add(new QueryReturnSubTypeValidator(this.returnTypeField, this.returnSubTypeField));
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
@@ -169,6 +186,7 @@ public class QueryModifyPage extends MasterPage {
         queryRecord.setDescription(this.description);
         queryRecord.setOptimistic(this.optimistic);
         queryRecord.setReturnType(this.returnType);
+        queryRecord.setReturnSubType(this.returnSubType);
         queryRecord.update();
 
         QueryParameterTable queryParameterTable = Tables.QUERY_PARAMETER.as("queryParameterTable");
