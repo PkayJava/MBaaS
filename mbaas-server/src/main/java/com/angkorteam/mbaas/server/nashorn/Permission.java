@@ -51,7 +51,6 @@ public class Permission {
         if (this.mbaas.isAuthenticated()) {
             return false;
         }
-        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         UserTable userTable = Tables.USER.as("userTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.mbaas.getCurrentUserId())).fetchOneInto(userTable);

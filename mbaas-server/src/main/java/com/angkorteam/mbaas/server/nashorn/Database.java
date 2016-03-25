@@ -18,6 +18,7 @@ import org.springframework.jdbc.IncorrectResultSetColumnCountException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import javax.script.ScriptException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -30,10 +31,12 @@ public class Database {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JdbcTemplate jdbcTemplate;
     private final DSLContext context;
+    private final MBaaS mbaas;
 
-    public Database(DSLContext context, JdbcTemplate jdbcTemplate) {
+    public Database(DSLContext context, JdbcTemplate jdbcTemplate, MBaaS mbaas) {
         this.jdbcTemplate = jdbcTemplate;
         this.context = context;
+        this.mbaas = mbaas;
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
     }
 
@@ -41,10 +44,15 @@ public class Database {
         return UUID.randomUUID().toString();
     }
 
-    public String insert(String collection, JSObject document) {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String userAdmin = configuration.getString(Constants.USER_ADMIN);
-        String ownerUserId = jdbcTemplate.queryForObject("SELECT " + Tables.USER.USER_ID.getName() + " FROM " + Tables.USER.getName() + " WHERE " + Tables.USER.LOGIN.getName() + " = ?", String.class, userAdmin);
+    public String insert(String collection, JSObject document) throws ScriptException {
+        String ownerUserId = null;
+        if (this.mbaas.isAuthenticated()) {
+            ownerUserId = this.mbaas.getCurrentUserId();
+        } else {
+            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+            String userAdmin = configuration.getString(Constants.USER_ADMIN);
+            ownerUserId = jdbcTemplate.queryForObject("SELECT " + Tables.USER.USER_ID.getName() + " FROM " + Tables.USER.getName() + " WHERE " + Tables.USER.LOGIN.getName() + " = ?", String.class, userAdmin);
+        }
         return insert(ownerUserId, collection, document);
     }
 
@@ -73,6 +81,10 @@ public class Database {
         DocumentCreateRequest request = new DocumentCreateRequest();
         request.setDocument(params);
         return DocumentFunction.insertDocument(context, jdbcTemplate, ownerUserId, collection, request);
+    }
+
+    public void delete(String collection, String documentId) {
+        DocumentFunction.deleteDocument(context, jdbcTemplate, collection, documentId);
     }
 
     public void modify(String collection, String documentId, JSObject document) {
