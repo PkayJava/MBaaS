@@ -44,7 +44,7 @@ public class MBaaS {
 
     public MBaaS(DSLContext context, JdbcTemplate jdbcTemplate, Request request) {
         Console = new Console(LOGGER);
-        Database = new Database(context, jdbcTemplate);
+        Database = new Database(context, jdbcTemplate, this);
         Permission = new Permission(this, context, jdbcTemplate);
         this.context = context;
         this.request = request;
