@@ -2,19 +2,19 @@ CREATE TABLE application (
 
   application_id VARCHAR(100) NOT NULL,
 
-  user_id        VARCHAR(100) NOT NULL,
-  code           VARCHAR(255),
+  owner_user_id  VARCHAR(100) NOT NULL,
 
+  description    VARCHAR(255),
+  name           VARCHAR(255),
+
+  security       VARCHAR(15)  NOT NULL,
   date_created   DATETIME,
 
-  extra          BLOB,
+  optimistic     INT(11)      NOT NULL DEFAULT 0,
 
-  deleted        BIT(1)  NOT NULL DEFAULT 0,
-  optimistic     INT(11) NOT NULL DEFAULT 0,
-
-  UNIQUE (code),
-  INDEX (user_id),
-  INDEX (deleted),
+  INDEX (name),
+  INDEX (description),
+  INDEX (owner_user_id),
   PRIMARY KEY (application_id)
 
 );

@@ -16,6 +16,7 @@
     <entry key="QueryPathValidator.format">is bad format</entry>
     <entry key="QueryScriptValidator.format">is bad format</entry>
     <entry key="QueryPathValidator.duplicated">is taken</entry>
+    <entry key="ClientNameValidator.duplicated">is taken</entry>
 
     <entry key="Required"> is required.</entry>
     <entry key="IConverter">The value of '${label}' is not a valid ${type}.</entry>
