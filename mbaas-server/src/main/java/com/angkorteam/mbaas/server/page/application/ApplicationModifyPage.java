@@ -6,11 +6,13 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
+import com.angkorteam.mbaas.server.validator.PushValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.validation.validator.UrlValidator;
 import org.jooq.DSLContext;
 
 /**
@@ -29,6 +31,18 @@ public class ApplicationModifyPage extends MasterPage {
     private String description;
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
+
+    private String serverUrl;
+    private TextField<String> serverUrlField;
+    private TextFeedbackPanel serverUrlFeedback;
+
+    private String pushApplicationId;
+    private TextField<String> pushApplicationIdField;
+    private TextFeedbackPanel pushApplicationIdFeedback;
+
+    private String masterSecret;
+    private TextField<String> masterSecretField;
+    private TextFeedbackPanel masterSecretFeedback;
 
     private Form<Void> form;
     private Button saveButton;
@@ -64,9 +78,30 @@ public class ApplicationModifyPage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
+        this.serverUrl = applicationRecord.getServerUrl();
+        this.serverUrlField = new TextField<>("serverUrlField", new PropertyModel<>(this, "serverUrl"));
+        this.serverUrlField.add(new UrlValidator());
+        this.form.add(this.serverUrlField);
+        this.serverUrlFeedback = new TextFeedbackPanel("serverUrlFeedback", this.serverUrlField);
+        this.form.add(this.serverUrlFeedback);
+
+        this.pushApplicationId = applicationRecord.getPushApplicationId();
+        this.pushApplicationIdField = new TextField<>("pushApplicationIdField", new PropertyModel<>(this, "pushApplicationId"));
+        this.form.add(this.pushApplicationIdField);
+        this.pushApplicationIdFeedback = new TextFeedbackPanel("pushApplicationIdFeedback", this.pushApplicationIdField);
+        this.form.add(this.pushApplicationIdFeedback);
+
+        this.masterSecret = applicationRecord.getMasterSecret();
+        this.masterSecretField = new TextField<>("masterSecretField", new PropertyModel<>(this, "masterSecret"));
+        this.form.add(this.masterSecretField);
+        this.masterSecretFeedback = new TextFeedbackPanel("masterSecretFeedback", this.masterSecretField);
+        this.form.add(this.masterSecretFeedback);
+
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(this.saveButton);
+
+        this.form.add(new PushValidator(this.serverUrlField, this.pushApplicationIdField, this.masterSecretField));
     }
 
     private void saveButtonOnSubmit(Button button) {
@@ -76,6 +111,9 @@ public class ApplicationModifyPage extends MasterPage {
         ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(this.applicationId)).fetchOneInto(applicationTable);
         applicationRecord.setName(this.name);
         applicationRecord.setDescription(this.description);
+        applicationRecord.setServerUrl(this.serverUrl);
+        applicationRecord.setPushApplicationId(this.pushApplicationId);
+        applicationRecord.setMasterSecret(this.masterSecret);
         applicationRecord.update();
 
         setResponsePage(ApplicationManagementPage.class);
