@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -309,6 +310,12 @@ public class SecurityController {
         ClientTable clientTable = Tables.CLIENT.as("clientTable");
         ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.SECRET.eq(requestBody.getSecret())).fetchOneInto(clientTable);
         if (clientRecord == null) {
+            errorMessages.put("credential", "bad credential");
+        }
+
+        ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
+        if (applicationRecord == null) {
             errorMessages.put("credential", "bad credential");
         }
 
