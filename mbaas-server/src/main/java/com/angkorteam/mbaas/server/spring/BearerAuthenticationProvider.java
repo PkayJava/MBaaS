@@ -1,12 +1,8 @@
 package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.MobileTable;
-import com.angkorteam.mbaas.model.entity.tables.RoleTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
+import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.records.*;
 import org.jooq.DSLContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -52,6 +48,18 @@ public class BearerAuthenticationProvider implements org.springframework.securit
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
 
         if (userRecord == null) {
+            throw new BadCredentialsException("bearer token " + token + " is not valid");
+        }
+
+        ClientTable clientTable = Tables.CLIENT.as("clientTable");
+        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(mobileRecord.getClientId())).fetchOneInto(clientTable);
+        if (clientRecord == null) {
+            throw new BadCredentialsException("bearer token " + token + " is not valid");
+        }
+
+        ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
+        if (applicationRecord == null) {
             throw new BadCredentialsException("bearer token " + token + " is not valid");
         }
 
