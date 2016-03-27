@@ -342,7 +342,7 @@ public class SecurityController {
         mobileRecord.setClientIp(request.getRemoteAddr());
         mobileRecord.store();
 
-        responseBody.getData().setSession(mobileId);
+        responseBody.getData().setBearer(mobileId);
         responseBody.getData().setDateCreated(dateCreated);
         responseBody.getData().setLogin(userRecord.getLogin());
 

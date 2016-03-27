@@ -18,8 +18,8 @@ public class SecurityLoginResponse extends Response<SecurityLoginResponse.Body> 
     public static class Body {
 
         @Expose
-        @SerializedName("session")
-        private String session;
+        @SerializedName("bearer")
+        private String bearer;
 
         @Expose
         @SerializedName("dateCreated")
@@ -29,12 +29,12 @@ public class SecurityLoginResponse extends Response<SecurityLoginResponse.Body> 
         @SerializedName("login")
         private String login;
 
-        public String getSession() {
-            return session;
+        public String getBearer() {
+            return bearer;
         }
 
-        public void setSession(String session) {
-            this.session = session;
+        public void setBearer(String bearer) {
+            this.bearer = bearer;
         }
 
         public Date getDateCreated() {
