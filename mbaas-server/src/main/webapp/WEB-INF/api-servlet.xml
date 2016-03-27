@@ -38,9 +38,9 @@
     <security:global-method-security secured-annotations="enabled"/>
 
     <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager"
-                   entry-point-ref="authenticationEntryPoint">
+                   entry-point-ref="authenticationEntryPoint" create-session="stateless">
         <security:csrf disabled="true"/>
-        <security:custom-filter ref="authenticationFilter" before="SECURITY_CONTEXT_FILTER"/>
+        <security:custom-filter ref="authenticationFilter" before="ANONYMOUS_FILTER"/>
         <security:intercept-url pattern="/api/security/signup" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/security/login" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/resource/**" access="permitAll"/>
@@ -116,14 +116,13 @@
         <property name="jdbcTemplate" ref="jdbcTemplate"/>
     </bean>
 
-    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationEntryPoint">
-        <property name="realmName" value="MBaas API"/>
-    </bean>
+    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationEntryPoint"/>
 
     <bean id="jdbcTemplate" class="com.angkorteam.mbaas.server.factory.JdbcTemplateFactoryBean"/>
 
     <bean id="authenticationFilter" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationFilter">
         <constructor-arg index="0" ref="authenticationManager"/>
+        <constructor-arg index="1" ref="authenticationEntryPoint"/>
     </bean>
 
 </beans>

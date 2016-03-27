@@ -94,6 +94,7 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
             Authentication authResult = authenticationManager
                     .authenticate(authRequest);
+            authResult.setAuthenticated(true);
 
             if (debug) {
                 logger.debug("Authentication success: " + authResult);

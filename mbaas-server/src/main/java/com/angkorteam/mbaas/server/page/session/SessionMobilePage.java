@@ -45,6 +45,8 @@ public class SessionMobilePage extends MasterPage implements ActionFilteredJooqC
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("mobileId", this), "mobileId", this, provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("application", this), "application", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("client", this), "client", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("login", this), "login", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateSeen", this), "dateSeen", provider));

@@ -5,6 +5,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.link.Link;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
+import com.angkorteam.mbaas.server.function.HttpFunction;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
@@ -101,21 +102,7 @@ public abstract class MasterPage extends AdminLTEPage {
     }
 
     public String getHttpAddress() {
-        ServletContext servletContext = getServletContext();
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
-        StringBuffer address = new StringBuffer();
-        if (request.isSecure() && request.getServerPort() == 443) {
-            address.append("https://").append(request.getServerName()).append(servletContext.getContextPath());
-        } else if (!request.isSecure() && request.getServerPort() == 80) {
-            address.append("http://").append(request.getServerName()).append(servletContext.getContextPath());
-        } else {
-            if (request.isSecure()) {
-                address.append("https://");
-            } else {
-                address.append("http://");
-            }
-            address.append(request.getServerName()).append(":").append(request.getServerPort()).append(servletContext.getContextPath());
-        }
-        return address.toString();
+        return HttpFunction.getHttpAddress(request);
     }
 }
