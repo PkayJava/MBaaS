@@ -2,14 +2,8 @@ package com.angkorteam.mbaas.server.controller;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.MobileTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
+import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
@@ -299,6 +293,9 @@ public class SecurityController {
         if (requestBody.getPassword() == null || "".equals(requestBody.getPassword())) {
             errorMessages.put("password", "is required");
         }
+        if (requestBody.getSecret() == null || "".equals(requestBody.getSecret())) {
+            errorMessages.put("secret", "is required");
+        }
 
         List<Condition> where = new ArrayList<>();
         where.add(userTable.LOGIN.eq(requestBody.getUsername()));
@@ -306,7 +303,13 @@ public class SecurityController {
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(where).fetchOneInto(userTable);
         if (userRecord == null) {
-            errorMessages.put("login", "bad credential");
+            errorMessages.put("credential", "bad credential");
+        }
+
+        ClientTable clientTable = Tables.CLIENT.as("clientTable");
+        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.SECRET.eq(requestBody.getSecret())).fetchOneInto(clientTable);
+        if (clientRecord == null) {
+            errorMessages.put("credential", "bad credential");
         }
 
         if (!errorMessages.isEmpty()) {
@@ -325,6 +328,9 @@ public class SecurityController {
         mobileRecord.setMobileId(mobileId);
         mobileRecord.setDateCreated(dateCreated);
         mobileRecord.setUserId(userRecord.getUserId());
+        mobileRecord.setClientId(clientRecord.getClientId());
+        mobileRecord.setPushToken(requestBody.getPushToken());
+        mobileRecord.setApplicationId(clientRecord.getApplicationId());
         mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
         mobileRecord.setClientIp(request.getRemoteAddr());
         mobileRecord.store();

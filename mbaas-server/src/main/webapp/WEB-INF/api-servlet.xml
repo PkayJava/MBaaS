@@ -6,16 +6,11 @@
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:task="http://www.springframework.org/schema/task"
        xmlns:security="http://www.springframework.org/schema/security"
-       xmlns:integration="http://www.springframework.org/schema/integration"
-       xmlns:integration-mail="http://www.springframework.org/schema/integration/mail"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd
-       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.2.xsd
-       http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.2.xsd
-       http://www.springframework.org/schema/integration/mail http://www.springframework.org/schema/integration/mail/spring-integration-mail-4.2.xsd
-       ">
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.2.xsd">
 
     <context:component-scan base-package="com.angkorteam.mbaas.server"/>
 
@@ -44,8 +39,8 @@
 
     <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager"
                    entry-point-ref="authenticationEntryPoint">
-        <security:custom-filter ref="authenticationFilter" position="BASIC_AUTH_FILTER"/>
         <security:csrf disabled="true"/>
+        <security:custom-filter ref="authenticationFilter" before="SECURITY_CONTEXT_FILTER"/>
         <security:intercept-url pattern="/api/security/signup" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/security/login" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/resource/**" access="permitAll"/>
@@ -53,11 +48,20 @@
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
     </security:http>
 
-    <security:authentication-manager id="authenticationManager">
-        <security:authentication-provider user-service-ref="detailsService">
-            <security:password-encoder ref="passwordEncoder"/>
-        </security:authentication-provider>
-    </security:authentication-manager>
+    <bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
+        <constructor-arg index="0">
+            <list>
+                <ref bean="authenticationProvider"/>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="1" ref="providerManager"/>
+    </bean>
+
+    <security:authentication-manager alias="providerManager" erase-credentials="true"/>
+
+    <bean id="authenticationProvider" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationProvider">
+        <property name="context" ref="context"/>
+    </bean>
 
     <!--
     <integration:poller id="poller" default="true" fixed-delay="1000"/>
@@ -112,19 +116,14 @@
         <property name="jdbcTemplate" ref="jdbcTemplate"/>
     </bean>
 
-    <bean id="detailsService" class="com.angkorteam.mbaas.server.factory.UserDetailsServiceFactoryBean">
-        <property name="context" ref="context"/>
-    </bean>
-
-    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.TokenAuthenticationEntryPoint">
+    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationEntryPoint">
         <property name="realmName" value="MBaas API"/>
     </bean>
 
     <bean id="jdbcTemplate" class="com.angkorteam.mbaas.server.factory.JdbcTemplateFactoryBean"/>
 
-    <bean id="authenticationFilter" class="com.angkorteam.mbaas.server.spring.TokenAuthenticationFilter">
-        <constructor-arg ref="authenticationManager"/>
-        <property name="context" ref="context"/>
+    <bean id="authenticationFilter" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationFilter">
+        <constructor-arg index="0" ref="authenticationManager"/>
     </bean>
 
 </beans>

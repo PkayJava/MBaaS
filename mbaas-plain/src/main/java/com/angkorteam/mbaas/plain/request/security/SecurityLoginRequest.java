@@ -19,20 +19,12 @@ public class SecurityLoginRequest implements Serializable {
     private String password;
 
     @Expose
-    @SerializedName("appcode")
-    private String appCode;
+    @SerializedName("secret")
+    private String secret;
 
     @Expose
-    @SerializedName("token")
-    private String token;
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
+    @SerializedName("pushToken")
+    private String pushToken;
 
     public String getUsername() {
         return username;
@@ -50,11 +42,19 @@ public class SecurityLoginRequest implements Serializable {
         this.password = password;
     }
 
-    public String getAppCode() {
-        return appCode;
+    public String getSecret() {
+        return secret;
     }
 
-    public void setAppCode(String appCode) {
-        this.appCode = appCode;
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public String getPushToken() {
+        return pushToken;
+    }
+
+    public void setPushToken(String pushToken) {
+        this.pushToken = pushToken;
     }
 }

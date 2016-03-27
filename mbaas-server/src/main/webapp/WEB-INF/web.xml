@@ -14,6 +14,10 @@
         <listener-class>com.angkorteam.mbaas.server.spring.ApplicationContext</listener-class>
     </listener>
 
+    <listener>
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+    </listener>
+
     <filter>
         <filter-name>MBaaS Web</filter-name>
         <filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
