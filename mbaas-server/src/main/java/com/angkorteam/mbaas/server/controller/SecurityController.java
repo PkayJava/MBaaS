@@ -26,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,13 +72,43 @@ public class SecurityController {
         UserTable userTable = Tables.USER.as("userTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        ClientTable clientTable = Tables.CLIENT.as("clientTable");
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
 
-        if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
-            errorMessages.put("username", "is required");
+        ClientRecord clientRecord = null;
+        if (requestBody.getSecret() == null || "".equals(requestBody.getSecret())) {
+            errorMessages.put("secret", "is request");
         } else {
-            int count = context.selectCount().from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(Integer.class);
-            if (count > 0) {
-                errorMessages.put("username", "is not available");
+            clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.SECRET.eq(requestBody.getSecret())).fetchOneInto(clientTable);
+        }
+        if (clientRecord == null) {
+            errorMessages.put("secret", "is bad");
+        }
+        ApplicationRecord applicationRecord = null;
+        if (clientRecord != null) {
+            applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
+        }
+
+        if (applicationRecord == null) {
+            errorMessages.put("secret", "is bad");
+        }
+
+        if (applicationRecord != null) {
+            if (applicationRecord.getAutoRegistration()) {
+                if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
+                    requestBody.setUsername(UUID.randomUUID().toString());
+                }
+                if (requestBody.getPassword() == null || "".equals(requestBody.getPassword())) {
+                    requestBody.setPassword(UUID.randomUUID().toString());
+                }
+            }
+            if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
+                errorMessages.put("username", "is required");
+            } else {
+                int count = context.selectCount().from(userTable).where(userTable.LOGIN.eq(requestBody.getUsername())).fetchOneInto(Integer.class);
+                if (count > 0) {
+                    errorMessages.put("username", "is not available");
+                }
             }
         }
 
@@ -260,11 +289,11 @@ public class SecurityController {
             return ResponseEntity.ok(response);
         }
 
-        String userId = UserFunction.createUser(context, jdbcTemplate, request, requestBody);
+        String bearer = UserFunction.createUser(context, jdbcTemplate, request, requestBody);
 
         SecuritySignUpResponse responseBody = new SecuritySignUpResponse();
 
-        responseBody.getData().setUserId(userId);
+        responseBody.getData().setBearer(bearer);
         responseBody.getData().setLogin(requestBody.getUsername());
 
         return ResponseEntity.ok(responseBody);
@@ -287,36 +316,85 @@ public class SecurityController {
 
         UserTable userTable = Tables.USER.as("userTable");
         MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        ClientTable clientTable = Tables.CLIENT.as("clientTable");
 
-        if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
-            errorMessages.put("username", "is required");
-        }
-        if (requestBody.getPassword() == null || "".equals(requestBody.getPassword())) {
-            errorMessages.put("password", "is required");
-        }
+        ClientRecord clientRecord = null;
         if (requestBody.getSecret() == null || "".equals(requestBody.getSecret())) {
             errorMessages.put("secret", "is required");
+        } else {
+            clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.SECRET.eq(requestBody.getSecret())).fetchOneInto(clientTable);
         }
-
-        List<Condition> where = new ArrayList<>();
-        where.add(userTable.LOGIN.eq(requestBody.getUsername()));
-        where.add(userTable.PASSWORD.eq(requestBody.getPassword()));
-
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(where).fetchOneInto(userTable);
-        if (userRecord == null) {
-            errorMessages.put("credential", "bad credential");
-        }
-
-        ClientTable clientTable = Tables.CLIENT.as("clientTable");
-        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.SECRET.eq(requestBody.getSecret())).fetchOneInto(clientTable);
         if (clientRecord == null) {
             errorMessages.put("credential", "bad credential");
         }
 
-        ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
-        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
+        ApplicationRecord applicationRecord = null;
+        if (clientRecord != null) {
+            applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
+        }
         if (applicationRecord == null) {
             errorMessages.put("credential", "bad credential");
+        }
+
+        UserRecord userRecord = null;
+        MobileRecord mobileRecord = null;
+        if (applicationRecord != null) {
+            if (applicationRecord.getAutoRegistration()) {
+                if (requestBody.getDeviceToken() != null && !"".equals(requestBody.getDeviceToken())
+                        && requestBody.getDeviceType() != null && !"".equals(requestBody.getDeviceType())) {
+                    mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.DEVICE_TOKEN.eq(requestBody.getDeviceToken())).and(mobileTable.DEVICE_TYPE.eq(requestBody.getDeviceType())).fetchOneInto(mobileTable);
+                    if (mobileRecord == null) {
+                        mobileRecord = context.newRecord(mobileTable);
+                        mobileRecord.setMobileId(UUID.randomUUID().toString());
+                        mobileRecord.setDateCreated(new Date());
+                        mobileRecord.setClientId(clientRecord.getClientId());
+                        mobileRecord.setDeviceToken(requestBody.getDeviceToken());
+                        mobileRecord.setApplicationId(clientRecord.getApplicationId());
+                        mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+                        mobileRecord.setClientIp(request.getRemoteAddr());
+                        mobileRecord.store();
+                    }
+                } else {
+                    if (requestBody.getDeviceToken() == null || "".equals(requestBody.getDeviceToken())) {
+                        errorMessages.put("deviceToken", "is required");
+                    }
+                    if (requestBody.getDeviceType() == null || "".equals(requestBody.getDeviceType())) {
+                        errorMessages.put("deviceType", "is required");
+                    }
+                }
+            } else {
+                if (requestBody.getUsername() != null && !"".equals(requestBody.getUsername())
+                        && requestBody.getPassword() != null && !"".equals(requestBody.getPassword())) {
+                    List<Condition> where = new ArrayList<>();
+                    where.add(userTable.LOGIN.eq(requestBody.getUsername()));
+                    where.add(userTable.PASSWORD.eq(requestBody.getPassword()));
+                    userRecord = context.select(userTable.fields()).from(userTable).where(where).fetchOneInto(userTable);
+                    if (userRecord == null) {
+                        errorMessages.put("credential", "bad credential");
+                    } else {
+                        mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.DEVICE_TOKEN.eq(requestBody.getDeviceToken())).and(mobileTable.DEVICE_TYPE.eq(requestBody.getDeviceType())).fetchOneInto(mobileTable);
+                        if (mobileRecord == null) {
+                            mobileRecord = context.newRecord(mobileTable);
+                            mobileRecord.setMobileId(UUID.randomUUID().toString());
+                            mobileRecord.setDateCreated(new Date());
+                            mobileRecord.setClientId(clientRecord.getClientId());
+                            mobileRecord.setDeviceToken(requestBody.getDeviceToken());
+                            mobileRecord.setApplicationId(clientRecord.getApplicationId());
+                            mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+                            mobileRecord.setClientIp(request.getRemoteAddr());
+                            mobileRecord.store();
+                        }
+                    }
+                } else {
+                    if (requestBody.getUsername() == null || "".equals(requestBody.getUsername())) {
+                        errorMessages.put("username", "is required");
+                    }
+                    if (requestBody.getPassword() == null || "".equals(requestBody.getPassword())) {
+                        errorMessages.put("password", "is required");
+                    }
+                }
+            }
         }
 
         if (!errorMessages.isEmpty()) {
@@ -328,23 +406,13 @@ public class SecurityController {
 
         SecurityLoginResponse responseBody = new SecurityLoginResponse();
 
-        String mobileId = UUID.randomUUID().toString();
-        Date dateCreated = new Date();
-
-        MobileRecord mobileRecord = context.newRecord(mobileTable);
-        mobileRecord.setMobileId(mobileId);
-        mobileRecord.setDateCreated(dateCreated);
-        mobileRecord.setUserId(userRecord.getUserId());
-        mobileRecord.setClientId(clientRecord.getClientId());
-        mobileRecord.setDeviceToken(requestBody.getDeviceToken());
-        mobileRecord.setApplicationId(clientRecord.getApplicationId());
-        mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
-        mobileRecord.setClientIp(request.getRemoteAddr());
-        mobileRecord.store();
-
-        responseBody.getData().setBearer(mobileId);
-        responseBody.getData().setDateCreated(dateCreated);
-        responseBody.getData().setLogin(userRecord.getLogin());
+        if (mobileRecord != null) {
+            responseBody.getData().setBearer(mobileRecord.getMobileId());
+            responseBody.getData().setDateCreated(mobileRecord.getDateCreated());
+        }
+        if (userRecord != null) {
+            responseBody.getData().setLogin(userRecord.getLogin());
+        }
 
         return ResponseEntity.ok(responseBody);
     }

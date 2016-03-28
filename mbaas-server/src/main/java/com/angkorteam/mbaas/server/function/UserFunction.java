@@ -5,14 +5,13 @@ import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.plain.enums.ScopeEnum;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.ScopeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.security.SecuritySignUpRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
-import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -30,6 +29,7 @@ public class UserFunction {
         UserTable userTable = Tables.USER.as("userTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        ClientTable clientTable = Tables.CLIENT.as("clientTable");
 
         RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_REGISTERED))).fetchOneInto(roleTable);
 
@@ -37,6 +37,8 @@ public class UserFunction {
 
         String login = requestBody.getUsername();
         String password = requestBody.getPassword();
+
+        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.SECRET.eq(requestBody.getSecret())).fetchOneInto(clientTable);
 
         String userId = UUID.randomUUID().toString();
 
@@ -192,19 +194,9 @@ public class UserFunction {
         }
 
         MobileTable mobileTable = Tables.MOBILE.as("desktopTable");
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.DEVICE_TOKEN.eq(requestBody.getDeviceToken())).and(mobileTable.DEVICE_TYPE.eq(requestBody.getDeviceType())).fetchOneInto(mobileTable);
 
-        String mobileId = UUID.randomUUID().toString();
-        Date dateCreated = new Date();
-
-        MobileRecord mobileRecord = context.newRecord(mobileTable);
-        mobileRecord.setMobileId(mobileId);
-        mobileRecord.setDateCreated(dateCreated);
-        mobileRecord.setUserId(userRecord.getUserId());
-        mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
-        mobileRecord.setClientIp(request.getRemoteAddr());
-        mobileRecord.store();
-
-        return userId;
+        return mobileRecord.getMobileId();
     }
 
 }

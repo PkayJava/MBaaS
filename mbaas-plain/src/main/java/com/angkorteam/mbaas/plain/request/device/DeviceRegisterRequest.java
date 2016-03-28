@@ -13,6 +13,10 @@ import java.util.List;
 public class DeviceRegisterRequest extends Request {
 
     @Expose
+    @SerializedName("secret")
+    private String secret;
+
+    @Expose
     @SerializedName("deviceType")
     private String deviceType;
 
@@ -82,5 +86,13 @@ public class DeviceRegisterRequest extends Request {
 
     public void setCategories(List<String> categories) {
         this.categories = categories;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 }

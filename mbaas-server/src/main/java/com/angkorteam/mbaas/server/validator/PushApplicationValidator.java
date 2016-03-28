@@ -11,17 +11,17 @@ import org.apache.wicket.validation.ValidationError;
  */
 public class PushApplicationValidator extends JooqFormValidator {
 
-    private TextField<String> serverUrlField;
+    private TextField<String> pushServerUrlField;
     private TextField<String> pushApplicationIdField;
-    private TextField<String> masterSecretField;
+    private TextField<String> pushMasterSecretField;
 
     private FormComponent<?>[] formComponents;
 
-    public PushApplicationValidator(TextField<String> serverUrlField, TextField<String> pushApplicationIdField, TextField<String> masterSecretField) {
-        this.serverUrlField = serverUrlField;
+    public PushApplicationValidator(TextField<String> pushServerUrlField, TextField<String> pushApplicationIdField, TextField<String> pushMasterSecretField) {
+        this.pushServerUrlField = pushServerUrlField;
         this.pushApplicationIdField = pushApplicationIdField;
-        this.masterSecretField = masterSecretField;
-        this.formComponents = new FormComponent[]{this.serverUrlField, this.pushApplicationIdField, this.masterSecretField};
+        this.pushMasterSecretField = pushMasterSecretField;
+        this.formComponents = new FormComponent[]{this.pushServerUrlField, this.pushApplicationIdField, this.pushMasterSecretField};
     }
 
     @Override
@@ -31,23 +31,21 @@ public class PushApplicationValidator extends JooqFormValidator {
 
     @Override
     public void validate(Form<?> form) {
-        String serverUrl = this.serverUrlField.getConvertedInput();
+        String pushServerUrl = this.pushServerUrlField.getConvertedInput();
         String pushApplicationId = this.pushApplicationIdField.getConvertedInput();
-        String masterSecret = this.masterSecretField.getConvertedInput();
-        if ((serverUrl == null || "".equals(serverUrl))
+        String pushMasterSecret = this.pushMasterSecretField.getConvertedInput();
+        if ((pushServerUrl == null || "".equals(pushServerUrl))
                 && (pushApplicationId == null || "".equals(pushApplicationId))
-                && (masterSecret == null || "".equals(masterSecret))) {
+                && (pushMasterSecret == null || "".equals(pushMasterSecret))) {
         } else {
-            if (serverUrl == null || "".equals(serverUrl)) {
-                this.serverUrlField.error(new ValidationError("Required"));
-            } else {
-
+            if (pushServerUrl == null || "".equals(pushServerUrl)) {
+                this.pushServerUrlField.error(new ValidationError("Required"));
             }
             if (pushApplicationId == null || "".equals(pushApplicationId)) {
                 this.pushApplicationIdField.error(new ValidationError("Required"));
             }
-            if (masterSecret == null || "".equals(masterSecret)) {
-                this.masterSecretField.error(new ValidationError("Required"));
+            if (pushMasterSecret == null || "".equals(pushMasterSecret)) {
+                this.pushMasterSecretField.error(new ValidationError("Required"));
             }
         }
     }

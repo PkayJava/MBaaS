@@ -4,9 +4,7 @@ import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,16 +13,16 @@ import java.util.Map;
 public class SecuritySignUpRequest extends Request {
 
     @Expose
+    @SerializedName("secret")
+    private String secret;
+
+    @Expose
     @SerializedName("username")
     private String username;
 
     @Expose
     @SerializedName("password")
     private String password;
-
-    @Expose
-    @SerializedName("secret")
-    private String secret;
 
     @Expose
     @SerializedName("visibleByTheUser")
@@ -43,28 +41,12 @@ public class SecuritySignUpRequest extends Request {
     private Map<String, Object> visibleByAnonymousUsers = new HashMap<>();
 
     @Expose
-    @SerializedName("deviceType")
-    private String deviceType;
-
-    @Expose
     @SerializedName("deviceToken")
     private String deviceToken;
 
     @Expose
-    @SerializedName("alias")
-    private String alias;
-
-    @Expose
-    @SerializedName("operatingSystem")
-    private String operatingSystem;
-
-    @Expose
-    @SerializedName("osVersion")
-    private String osVersion;
-
-    @Expose
-    @SerializedName("categories")
-    private List<String> categories = new ArrayList<>();
+    @SerializedName("deviceType")
+    private String deviceType;
 
     public String getUsername() {
         return username;
@@ -122,14 +104,6 @@ public class SecuritySignUpRequest extends Request {
         this.secret = secret;
     }
 
-    public String getDeviceType() {
-        return deviceType;
-    }
-
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
-    }
-
     public String getDeviceToken() {
         return deviceToken;
     }
@@ -138,35 +112,11 @@ public class SecuritySignUpRequest extends Request {
         this.deviceToken = deviceToken;
     }
 
-    public String getAlias() {
-        return alias;
+    public String getDeviceType() {
+        return deviceType;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getOperatingSystem() {
-        return operatingSystem;
-    }
-
-    public void setOperatingSystem(String operatingSystem) {
-        this.operatingSystem = operatingSystem;
-    }
-
-    public String getOsVersion() {
-        return osVersion;
-    }
-
-    public void setOsVersion(String osVersion) {
-        this.osVersion = osVersion;
-    }
-
-    public List<String> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(List<String> categories) {
-        this.categories = categories;
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 }

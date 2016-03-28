@@ -4,8 +4,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by socheat on 2/4/16.
@@ -32,21 +30,6 @@ public class SecurityLoginRequest implements Serializable {
     @SerializedName("deviceToken")
     private String deviceToken;
 
-    @Expose
-    @SerializedName("alias")
-    private String alias;
-
-    @Expose
-    @SerializedName("operatingSystem")
-    private String operatingSystem;
-
-    @Expose
-    @SerializedName("osVersion")
-    private String osVersion;
-
-    @Expose
-    @SerializedName("categories")
-    private List<String> categories = new ArrayList<>();
 
     public String getUsername() {
         return username;
@@ -87,36 +70,5 @@ public class SecurityLoginRequest implements Serializable {
     public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
     }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getOperatingSystem() {
-        return operatingSystem;
-    }
-
-    public void setOperatingSystem(String operatingSystem) {
-        this.operatingSystem = operatingSystem;
-    }
-
-    public String getOsVersion() {
-        return osVersion;
-    }
-
-    public void setOsVersion(String osVersion) {
-        this.osVersion = osVersion;
-    }
-
-    public List<String> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(List<String> categories) {
-        this.categories = categories;
-    }
+    
 }

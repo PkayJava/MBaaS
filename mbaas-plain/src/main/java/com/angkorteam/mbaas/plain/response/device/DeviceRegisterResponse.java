@@ -1,15 +1,15 @@
-package com.angkorteam.mbaas.plain.response.security;
+package com.angkorteam.mbaas.plain.response.device;
 
 import com.angkorteam.mbaas.plain.response.Response;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by socheat on 2/16/16.
+ * Created by socheat on 3/28/16.
  */
-public class SecuritySignUpResponse extends Response<SecuritySignUpResponse.Body> {
+public class DeviceRegisterResponse extends Response<DeviceRegisterResponse.Body> {
 
-    public SecuritySignUpResponse() {
+    public DeviceRegisterResponse() {
         this.data = new Body();
     }
 
@@ -19,10 +19,6 @@ public class SecuritySignUpResponse extends Response<SecuritySignUpResponse.Body
         @SerializedName("bearer")
         private String bearer;
 
-        @Expose
-        @SerializedName("login")
-        private String login;
-
         public String getBearer() {
             return bearer;
         }
@@ -31,13 +27,5 @@ public class SecuritySignUpResponse extends Response<SecuritySignUpResponse.Body
             this.bearer = bearer;
         }
 
-        public String getLogin() {
-            return login;
-        }
-
-        public void setLogin(String login) {
-            this.login = login;
-        }
     }
-
 }

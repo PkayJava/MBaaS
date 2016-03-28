@@ -2,7 +2,7 @@ CREATE TABLE mobile (
 
   mobile_id               VARCHAR(100) NOT NULL,
 
-  user_id                 VARCHAR(100) NOT NULL,
+  user_id                 VARCHAR(100),
   client_id               VARCHAR(100) NOT NULL,
   application_id          VARCHAR(100) NOT NULL,
   date_created            DATETIME,
@@ -25,9 +25,13 @@ CREATE TABLE mobile (
 
   INDEX (date_created),
   INDEX (client_ip),
+  INDEX (device_token),
   INDEX (date_seen),
   INDEX (user_agent),
-  INDEX (device_token),
+  INDEX (device_type),
+  INDEX (device_alias),
+  INDEX (device_operating_system),
+  INDEX (device_os_version),
   INDEX (user_id),
   INDEX (application_id),
   INDEX (client_id),

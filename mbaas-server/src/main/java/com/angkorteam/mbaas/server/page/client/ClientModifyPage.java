@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ClientTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
 import com.angkorteam.mbaas.server.validator.ClientNameValidator;
+import com.angkorteam.mbaas.server.validator.PushClientValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
@@ -111,6 +112,8 @@ public class ClientModifyPage extends MasterPage {
         parameters.add("applicationId", this.applicationId);
         BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", ClientManagementPage.class, parameters);
         this.form.add(closeLink);
+
+        this.form.add(new PushClientValidator(this.pushVariantIdField, this.pushSecretField, this.pushGcmSenderIdField));
     }
 
     private void saveButtonOnSubmit(Button button) {

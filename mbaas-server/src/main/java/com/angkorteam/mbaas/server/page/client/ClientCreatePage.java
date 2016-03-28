@@ -10,6 +10,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.validator.ClientNameValidator;
+import com.angkorteam.mbaas.server.validator.PushClientValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
@@ -101,7 +102,9 @@ public class ClientCreatePage extends MasterPage {
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
+
         this.form.add(this.saveButton);
+        this.form.add(new PushClientValidator(this.pushVariantIdField, this.pushSecretField, this.pushGcmSenderIdField));
 
         PageParameters parameters = new PageParameters();
         parameters.add("applicationId", this.applicationId);
