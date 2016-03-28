@@ -10,10 +10,13 @@ import com.angkorteam.mbaas.server.validator.PushApplicationValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.validator.UrlValidator;
 import org.jooq.DSLContext;
+
+import java.util.Arrays;
 
 /**
  * Created by socheat on 3/8/16.
@@ -23,6 +26,10 @@ import org.jooq.DSLContext;
 public class ApplicationModifyPage extends MasterPage {
 
     private String applicationId;
+
+    private Boolean autoRegistration;
+    private DropDownChoice<Boolean> autoRegistrationField;
+    private TextFeedbackPanel autoRegistrationFeedback;
 
     private String name;
     private TextField<String> nameField;
@@ -63,6 +70,12 @@ public class ApplicationModifyPage extends MasterPage {
 
         this.form = new Form<>("form");
         add(this.form);
+
+        this.autoRegistration = applicationRecord.getAutoRegistration();
+        this.autoRegistrationField = new DropDownChoice<>("autoRegistrationField", new PropertyModel<>(this, "autoRegistration"), Arrays.asList(true, false));
+        this.form.add(this.autoRegistrationField);
+        this.autoRegistrationFeedback = new TextFeedbackPanel("autoRegistrationFeedback", this.autoRegistrationField);
+        this.form.add(this.autoRegistrationFeedback);
 
         this.name = applicationRecord.getName();
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
@@ -114,6 +127,7 @@ public class ApplicationModifyPage extends MasterPage {
         applicationRecord.setPushServerUrl(this.pushServerUrl);
         applicationRecord.setPushApplicationId(this.pushApplicationId);
         applicationRecord.setPushMasterSecret(this.pushMasterSecret);
+        applicationRecord.setAutoRegistration(this.autoRegistration);
         applicationRecord.update();
 
         setResponsePage(ApplicationManagementPage.class);

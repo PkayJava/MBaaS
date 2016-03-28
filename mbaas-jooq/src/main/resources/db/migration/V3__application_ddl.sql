@@ -7,6 +7,8 @@ CREATE TABLE application (
   description         VARCHAR(255),
   name                VARCHAR(255),
 
+  auto_registration   BIT(1)       NOT NULL,
+
   push_server_url     VARCHAR(255),
   push_application_id VARCHAR(255),
   push_master_secret  VARCHAR(255),

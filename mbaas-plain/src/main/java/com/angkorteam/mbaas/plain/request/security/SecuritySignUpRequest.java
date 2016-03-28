@@ -4,7 +4,9 @@ import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,12 +23,8 @@ public class SecuritySignUpRequest extends Request {
     private String password;
 
     @Expose
-    @SerializedName("appcode")
-    private String appCode;
-
-    @Expose
-    @SerializedName("token")
-    private String token;
+    @SerializedName("secret")
+    private String secret;
 
     @Expose
     @SerializedName("visibleByTheUser")
@@ -44,13 +42,29 @@ public class SecuritySignUpRequest extends Request {
     @SerializedName("visibleByAnonymousUsers")
     private Map<String, Object> visibleByAnonymousUsers = new HashMap<>();
 
-    public String getToken() {
-        return token;
-    }
+    @Expose
+    @SerializedName("deviceType")
+    private String deviceType;
 
-    public void setToken(String token) {
-        this.token = token;
-    }
+    @Expose
+    @SerializedName("deviceToken")
+    private String deviceToken;
+
+    @Expose
+    @SerializedName("alias")
+    private String alias;
+
+    @Expose
+    @SerializedName("operatingSystem")
+    private String operatingSystem;
+
+    @Expose
+    @SerializedName("osVersion")
+    private String osVersion;
+
+    @Expose
+    @SerializedName("categories")
+    private List<String> categories = new ArrayList<>();
 
     public String getUsername() {
         return username;
@@ -100,11 +114,59 @@ public class SecuritySignUpRequest extends Request {
         this.visibleByAnonymousUsers = visibleByAnonymousUsers;
     }
 
-    public String getAppCode() {
-        return appCode;
+    public String getSecret() {
+        return secret;
     }
 
-    public void setAppCode(String appCode) {
-        this.appCode = appCode;
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public String getDeviceToken() {
+        return deviceToken;
+    }
+
+    public void setDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getOperatingSystem() {
+        return operatingSystem;
+    }
+
+    public void setOperatingSystem(String operatingSystem) {
+        this.operatingSystem = operatingSystem;
+    }
+
+    public String getOsVersion() {
+        return osVersion;
+    }
+
+    public void setOsVersion(String osVersion) {
+        this.osVersion = osVersion;
+    }
+
+    public List<String> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
     }
 }

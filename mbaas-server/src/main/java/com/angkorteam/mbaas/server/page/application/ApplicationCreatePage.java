@@ -11,11 +11,13 @@ import com.angkorteam.mbaas.server.validator.PushApplicationValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.validator.UrlValidator;
 import org.jooq.DSLContext;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
@@ -25,6 +27,10 @@ import java.util.UUID;
 @AuthorizeInstantiation("administrator")
 @Mount("/application/create")
 public class ApplicationCreatePage extends MasterPage {
+
+    private Boolean autoRegistration;
+    private DropDownChoice<Boolean> autoRegistrationField;
+    private TextFeedbackPanel autoRegistrationFeedback;
 
     private String name;
     private TextField<String> nameField;
@@ -60,6 +66,11 @@ public class ApplicationCreatePage extends MasterPage {
 
         this.form = new Form<>("form");
         add(this.form);
+
+        this.autoRegistrationField = new DropDownChoice<>("autoRegistrationField", new PropertyModel<>(this, "autoRegistration"), Arrays.asList(true, false));
+        this.form.add(this.autoRegistrationField);
+        this.autoRegistrationFeedback = new TextFeedbackPanel("autoRegistrationFeedback", this.autoRegistrationField);
+        this.form.add(this.autoRegistrationFeedback);
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
@@ -107,6 +118,7 @@ public class ApplicationCreatePage extends MasterPage {
         applicationRecord.setDescription(this.description);
         applicationRecord.setDateCreated(new Date());
         applicationRecord.setSecurity(SecurityEnum.Denied.getLiteral());
+        applicationRecord.setAutoRegistration(this.autoRegistration);
         applicationRecord.setOwnerUserId(getSession().getUserId());
         applicationRecord.setPushServerUrl(this.pushServerUrl);
         applicationRecord.setPushApplicationId(this.pushApplicationId);

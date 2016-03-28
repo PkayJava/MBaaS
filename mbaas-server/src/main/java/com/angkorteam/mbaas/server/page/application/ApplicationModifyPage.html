@@ -9,6 +9,11 @@
         <form role="form" wicket:id="form">
             <div class="box-body">
                 <div class="form-group">
+                    <label wicket:for="autoRegistrationField">Auto Registration</label>
+                    <select wicket:id="autoRegistrationField" class="form-control"/>
+                    <span wicket:id="autoRegistrationFeedback" class="help-block"/>
+                </div>
+                <div class="form-group">
                     <label wicket:for="nameField">Name</label>
                     <input wicket:id="nameField" type="text" class="form-control"/>
                     <span wicket:id="nameFeedback" class="help-block"/>
