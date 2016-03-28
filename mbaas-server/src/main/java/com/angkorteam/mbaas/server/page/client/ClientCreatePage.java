@@ -39,6 +39,18 @@ public class ClientCreatePage extends MasterPage {
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
 
+    private String pushVariantId;
+    private TextField<String> pushVariantIdField;
+    private TextFeedbackPanel pushVariantIdFeedback;
+
+    private String pushSecret;
+    private TextField<String> pushSecretField;
+    private TextFeedbackPanel pushSecretFeedback;
+
+    private String pushGcmSenderId;
+    private TextField<String> pushGcmSenderIdField;
+    private TextFeedbackPanel pushGcmSenderIdFeedback;
+
     private Form<Void> form;
     private Button saveButton;
 
@@ -69,6 +81,24 @@ public class ClientCreatePage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
+        this.pushVariantIdField = new TextField<>("pushVariantIdField", new PropertyModel<>(this, "pushVariantId"));
+        this.pushVariantIdField.setRequired(true);
+        this.form.add(this.pushVariantIdField);
+        this.pushVariantIdFeedback = new TextFeedbackPanel("pushVariantIdFeedback", this.pushVariantIdField);
+        this.form.add(this.pushVariantIdFeedback);
+
+        this.pushSecretField = new TextField<>("pushSecretField", new PropertyModel<>(this, "pushSecret"));
+        this.pushSecretField.setRequired(true);
+        this.form.add(this.pushSecretField);
+        this.pushSecretFeedback = new TextFeedbackPanel("pushSecretFeedback", this.pushSecretField);
+        this.form.add(this.pushSecretFeedback);
+
+        this.pushGcmSenderIdField = new TextField<>("pushGcmSenderIdField", new PropertyModel<>(this, "pushGcmSenderId"));
+        this.pushGcmSenderIdField.setRequired(true);
+        this.form.add(this.pushGcmSenderIdField);
+        this.pushGcmSenderIdFeedback = new TextFeedbackPanel("pushGcmSenderIdFeedback", this.pushGcmSenderIdField);
+        this.form.add(this.pushGcmSenderIdFeedback);
+
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(this.saveButton);
@@ -97,6 +127,9 @@ public class ClientCreatePage extends MasterPage {
         clientRecord.setSecurity(SecurityEnum.Denied.getLiteral());
         clientRecord.setName(this.name);
         clientRecord.setDescription(this.description);
+        clientRecord.setPushGcmSenderId(this.pushGcmSenderId);
+        clientRecord.setPushSecret(this.pushSecret);
+        clientRecord.setPushVariantId(this.pushVariantId);
         clientRecord.store();
 
         PageParameters parameters = new PageParameters();

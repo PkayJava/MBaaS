@@ -7,9 +7,9 @@ CREATE TABLE application (
   description         VARCHAR(255),
   name                VARCHAR(255),
 
-  server_url          VARCHAR(255),
+  push_server_url     VARCHAR(255),
   push_application_id VARCHAR(255),
-  master_secret       VARCHAR(255),
+  push_master_secret  VARCHAR(255),
 
   security            VARCHAR(15)  NOT NULL,
   date_created        DATETIME,

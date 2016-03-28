@@ -51,10 +51,6 @@ public class MobileProvider extends JooqProvider {
         return this.mobileTable.CLIENT_IP;
     }
 
-    public Field<String> getPushToken() {
-        return this.mobileTable.PUSH_TOKEN;
-    }
-
     public Field<String> getUserAgent() {
         return this.mobileTable.USER_AGENT;
     }

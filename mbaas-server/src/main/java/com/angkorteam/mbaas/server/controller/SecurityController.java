@@ -336,7 +336,7 @@ public class SecurityController {
         mobileRecord.setDateCreated(dateCreated);
         mobileRecord.setUserId(userRecord.getUserId());
         mobileRecord.setClientId(clientRecord.getClientId());
-        mobileRecord.setPushToken(requestBody.getPushToken());
+        mobileRecord.setDeviceToken(requestBody.getDeviceToken());
         mobileRecord.setApplicationId(clientRecord.getApplicationId());
         mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
         mobileRecord.setClientIp(request.getRemoteAddr());

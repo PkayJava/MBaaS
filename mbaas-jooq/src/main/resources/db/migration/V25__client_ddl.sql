@@ -9,6 +9,10 @@ CREATE TABLE client (
   secret              VARCHAR(100) NOT NULL,
   date_created        DATETIME,
 
+  push_variant_id     VARCHAR(255),
+  push_secret         VARCHAR(255),
+  push_gcm_sender_id  VARCHAR(255),
+
   name                VARCHAR(255),
   description         VARCHAR(255),
   security            VARCHAR(15)  NOT NULL,

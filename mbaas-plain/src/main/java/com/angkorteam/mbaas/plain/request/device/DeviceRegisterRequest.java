@@ -1,28 +1,16 @@
-package com.angkorteam.mbaas.plain.request.security;
+package com.angkorteam.mbaas.plain.request.device;
 
+import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by socheat on 2/4/16.
+ * Created by socheat on 3/28/16.
  */
-public class SecurityLoginRequest implements Serializable {
-
-    @Expose
-    @SerializedName("secret")
-    private String secret;
-
-    @Expose
-    @SerializedName("username")
-    private String username;
-
-    @Expose
-    @SerializedName("password")
-    private String password;
+public class DeviceRegisterRequest extends Request {
 
     @Expose
     @SerializedName("deviceType")
@@ -48,28 +36,12 @@ public class SecurityLoginRequest implements Serializable {
     @SerializedName("categories")
     private List<String> categories = new ArrayList<>();
 
-    public String getUsername() {
-        return username;
+    public String getDeviceType() {
+        return deviceType;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 
     public String getDeviceToken() {
@@ -78,14 +50,6 @@ public class SecurityLoginRequest implements Serializable {
 
     public void setDeviceToken(String deviceToken) {
         this.deviceToken = deviceToken;
-    }
-
-    public String getDeviceType() {
-        return deviceType;
-    }
-
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
     }
 
     public String getAlias() {

@@ -9,7 +9,7 @@ import org.apache.wicket.validation.ValidationError;
 /**
  * Created by socheat on 3/27/16.
  */
-public class PushValidator extends JooqFormValidator {
+public class PushApplicationValidator extends JooqFormValidator {
 
     private TextField<String> serverUrlField;
     private TextField<String> pushApplicationIdField;
@@ -17,7 +17,7 @@ public class PushValidator extends JooqFormValidator {
 
     private FormComponent<?>[] formComponents;
 
-    public PushValidator(TextField<String> serverUrlField, TextField<String> pushApplicationIdField, TextField<String> masterSecretField) {
+    public PushApplicationValidator(TextField<String> serverUrlField, TextField<String> pushApplicationIdField, TextField<String> masterSecretField) {
         this.serverUrlField = serverUrlField;
         this.pushApplicationIdField = pushApplicationIdField;
         this.masterSecretField = masterSecretField;
