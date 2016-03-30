@@ -13,6 +13,11 @@ CREATE TABLE application (
   push_application_id VARCHAR(255),
   push_master_secret  VARCHAR(255),
 
+  oauth_roles         VARCHAR(255),
+
+  extra               BLOB,
+  -- oauth_role_{name} : true | false
+
   security            VARCHAR(15)  NOT NULL,
   date_created        DATETIME,
 

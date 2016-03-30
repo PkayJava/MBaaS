@@ -21,7 +21,7 @@
         <jackson.version>2.7.3</jackson.version>
         <jasypt.version>1.9.2</jasypt.version>
         <reflections.version>0.9.10</reflections.version>
-        <joda-time.version>2.9.2</joda-time.version>
+        <joda-time.version>2.9.3</joda-time.version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <gson.version>2.6.2</gson.version>
 
@@ -86,6 +86,7 @@
         <maven-jar-plugin>2.5</maven-jar-plugin>
         <properties-maven-plugin>1.0-alpha-2</properties-maven-plugin>
         <build-helper-maven-plugin>1.9.1</build-helper-maven-plugin>
+        <appengine-maven-plugin>1.9.34</appengine-maven-plugin>
     </properties>
 
     <modules>

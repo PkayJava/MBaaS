@@ -155,10 +155,10 @@ public class SecurityController {
             });
         }
         // finish field duplication check
-        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+        Pattern patternAttributeName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_ATTRIBUTE_NAME));
         for (Map.Entry<String, Object> field : fields.entrySet()) {
             String name = field.getKey();
-            if (!patternNaming.matcher(name).matches()) {
+            if (!patternAttributeName.matcher(name).matches()) {
                 errorMessages.put(name, "bad name");
             }
         }

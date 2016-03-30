@@ -100,10 +100,10 @@ public class CollectionController {
         String primaryName = requestBody.getCollectionName() + "_id";
         List<String> systemAttributes = Arrays.asList(primaryName, configuration.getString(Constants.JDBC_COLUMN_DELETED), configuration.getString(Constants.JDBC_COLUMN_EXTRA), configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
 
-        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+        Pattern patternAttributeName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_ATTRIBUTE_NAME));
 
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
-            if (!patternNaming.matcher(attribute.getName()).matches()) {
+            if (!patternAttributeName.matcher(attribute.getName()).matches()) {
                 errorMessages.put(attribute.getName(), "bad name");
             } else {
                 if (systemAttributes.contains(attribute.getName())) {
@@ -189,12 +189,12 @@ public class CollectionController {
             }
         }
 
-        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+        Pattern patternAttributeName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_ATTRIBUTE_NAME));
 
         AttributeRecord attributeRecord = null;
         if (requestBody.getAttributeName() == null || "".equals(requestBody.getAttributeName())) {
             errorMessages.put("attributeName", "is required");
-        } else if (!patternNaming.matcher(requestBody.getAttributeName()).matches()) {
+        } else if (!patternAttributeName.matcher(requestBody.getAttributeName()).matches()) {
             errorMessages.put(requestBody.getAttributeName(), "bad name");
         } else {
             if (collectionRecord != null) {
@@ -347,12 +347,12 @@ public class CollectionController {
             }
         }
 
-        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+        Pattern patternAttributeName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_ATTRIBUTE_NAME));
 
         AttributeRecord attributeRecord = null;
         if (requestBody.getAttributeName() == null || "".equals(requestBody.getAttributeName())) {
             errorMessages.put("attributeName", "is required");
-        } else if (!patternNaming.matcher(requestBody.getAttributeName()).matches()) {
+        } else if (!patternAttributeName.matcher(requestBody.getAttributeName()).matches()) {
             errorMessages.put(requestBody.getAttributeName(), "bad name");
         } else {
             if (collectionRecord != null) {

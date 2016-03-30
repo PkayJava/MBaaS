@@ -32,8 +32,8 @@ public class AttributeNameValidator extends JooqValidator<String> {
     public void validate(IValidatable<String> validatable) {
         String name = validatable.getValue();
         if (name != null && !"".equals(name)) {
-            Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
-            if (!patternNaming.matcher(name).matches()) {
+            Pattern patternAttributeName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_ATTRIBUTE_NAME));
+            if (!patternAttributeName.matcher(name).matches()) {
                 validatable.error(new ValidationError(this, "format"));
             } else {
                 AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");

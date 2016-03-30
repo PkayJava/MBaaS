@@ -92,10 +92,10 @@ public class DocumentController {
             }
         }
 
-        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+        Pattern patternCollectionName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_COLLECTION_NAME));
 
         CollectionRecord collectionRecord = null;
-        if (!patternNaming.matcher(collection).matches()) {
+        if (!patternCollectionName.matcher(collection).matches()) {
             errorMessages.put(collection, "bad name");
         } else {
             collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
@@ -120,7 +120,7 @@ public class DocumentController {
         String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
 
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            if (!patternNaming.matcher(entry.getKey()).matches()) {
+            if (!patternCollectionName.matcher(entry.getKey()).matches()) {
                 errorMessages.put(entry.getKey(), "bad name");
             } else {
                 if (!attributeNameRecords.containsKey(entry.getKey())) {
@@ -322,10 +322,10 @@ public class DocumentController {
             }
         }
 
-        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+        Pattern patternCollectionName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_COLLECTION_NAME));
 
         CollectionRecord collectionRecord = null;
-        if (!patternNaming.matcher(collection).matches()) {
+        if (!patternCollectionName.matcher(collection).matches()) {
             errorMessages.put("collection", "collection is bad name");
         } else {
             collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
@@ -347,7 +347,7 @@ public class DocumentController {
         String patternDatetime = configuration.getString(Constants.PATTERN_DATETIME);
 
         for (Map.Entry<String, Object> entry : requestBody.getDocument().entrySet()) {
-            if (!patternNaming.matcher(entry.getKey()).matches()) {
+            if (!patternCollectionName.matcher(entry.getKey()).matches()) {
                 errorMessages.put(entry.getKey(), "bad name");
             } else {
                 if (!attributeNameRecords.containsKey(entry.getKey())) {
@@ -556,10 +556,10 @@ public class DocumentController {
             }
         }
 
-        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+        Pattern patternCollectionName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_COLLECTION_NAME));
 
         CollectionRecord collectionRecord = null;
-        if (!patternNaming.matcher(collection).matches()) {
+        if (!patternCollectionName.matcher(collection).matches()) {
             errorMessages.put("collection", "collection is bad name");
         } else {
             collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
@@ -1042,10 +1042,10 @@ public class DocumentController {
             }
         }
 
-        Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
+        Pattern patternCollectionName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_COLLECTION_NAME));
 
         CollectionRecord collectionRecord = null;
-        if (!patternNaming.matcher(collection).matches()) {
+        if (!patternCollectionName.matcher(collection).matches()) {
             errorMessages.put("collection", "collection is bad name");
         } else {
             collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);

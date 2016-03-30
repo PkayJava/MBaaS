@@ -165,8 +165,8 @@ public class DocumentFunction {
                 AttributeRecord physicalRecord = attributeIdRecords.get(entry.getValue().getVirtualAttributeId());
                 if (virtualColumns.get(physicalRecord.getName()) == null || virtualColumns.get(physicalRecord.getName()).isEmpty()) {
                     Map<String, Object> temp = new LinkedHashMap<>();
-                    temp.put("_temp", "_temp");
-                    typeEnums.put("_temp", AttributeTypeEnum.String);
+                    temp.put("__temp", true);
+                    typeEnums.put("__temp", AttributeTypeEnum.Boolean);
                     virtualColumns.put(physicalRecord.getName(), temp);
                 }
             }
@@ -176,8 +176,8 @@ public class DocumentFunction {
                 AttributeRecord attributeRecord = entry.getValue();
                 if (attributeRecord.getJavaType().equals(AttributeTypeEnum.Blob.getLiteral()) && attributeRecord.getSystem()) {
                     Map<String, Object> temp = new LinkedHashMap<>();
-                    temp.put("_temp", "_temp");
-                    typeEnums.put("_temp", AttributeTypeEnum.String);
+                    temp.put("__temp", true);
+                    typeEnums.put("__temp", AttributeTypeEnum.Boolean);
                     virtualColumns.put(attributeRecord.getName(), temp);
                 }
             }

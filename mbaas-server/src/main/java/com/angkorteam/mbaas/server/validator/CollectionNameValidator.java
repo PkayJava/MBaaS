@@ -28,8 +28,8 @@ public class CollectionNameValidator extends JooqValidator<String> {
     public void validate(IValidatable<String> validatable) {
         String name = validatable.getValue();
         if (name != null && !"".equals(name)) {
-            Pattern patternNaming = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_NAMING));
-            if (!patternNaming.matcher(name).matches()) {
+            Pattern patternCollectionName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_COLLECTION_NAME));
+            if (!patternCollectionName.matcher(name).matches()) {
                 validatable.error(new ValidationError(this, "format"));
             } else {
                 CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");

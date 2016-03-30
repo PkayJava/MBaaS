@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page;
+package com.angkorteam.mbaas.server.page.oauth;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
@@ -9,40 +9,41 @@ import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.ClientTable;
 import com.angkorteam.mbaas.model.entity.tables.MobileTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.pojos.ApplicationPojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.ClientPojo;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
-import com.angkorteam.mbaas.server.renderer.ApplicationChoiceRenderer;
-import com.angkorteam.mbaas.server.renderer.ClientChoiceRenderer;
+import com.angkorteam.mbaas.server.page.BearerTokenPage;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
-import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.util.string.StringValue;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 /**
  * Created by socheat on 3/27/16.
  */
-@Mount("/bearer")
-public class BearerPage extends AdminLTEPage {
+@Mount("/oauth/permission")
+public class PermissionPage extends AdminLTEPage {
 
-    private ApplicationPojo applicationText;
-    private DropDownChoice<ApplicationPojo> applicationField;
-    private TextFeedbackPanel applicationFeedback;
+    private String applicationText;
+    private Label applicationLabel;
 
-    private ClientPojo client;
-    private DropDownChoice<ClientPojo> clientField;
-    private TextFeedbackPanel clientFeedback;
+    private String client;
+    private Label clientLabel;
+
+    private String clientId;
+    private String responseType;
+    private String redirectUri;
+    private String state;
 
     private String login;
     private TextField<String> loginField;
@@ -59,44 +60,40 @@ public class BearerPage extends AdminLTEPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        String secret = getPageParameters().get("secret").toString();
+
+        StringValue clientId = getPageParameters().get("client_id");
+        StringValue responseType = getPageParameters().get("response_type");
+        StringValue redirectUri = getPageParameters().get("redirect_uri");
+        StringValue state = getPageParameters().get("state");
+
+        this.clientId = clientId.toString("");
+        this.responseType = responseType.toString("");
+        this.redirectUri = redirectUri.toString("");
+        this.state = state.toString("");
 
         DSLContext context = getSession().getDSLContext();
         ClientTable clientTable = Tables.CLIENT.as("clientTable");
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
 
-        this.client = context.select(clientTable.fields()).from(clientTable).where(clientTable.SECRET.eq(secret)).fetchOneInto(ClientPojo.class);
-        if (this.client != null) {
-            this.applicationText = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(client.getApplicationId())).fetchOneInto(ApplicationPojo.class);
+        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(this.clientId)).fetchOneInto(clientTable);
+
+        ApplicationRecord applicationRecord = null;
+        if (clientRecord != null) {
+            this.client = clientRecord.getName();
+            applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
+        }
+
+        if (applicationRecord != null) {
+            this.applicationText = applicationRecord.getName();
         }
 
         this.form = new Form<>("form");
         add(this.form);
 
-        this.applicationField = new DropDownChoice<ApplicationPojo>("applicationField", new PropertyModel<>(this, "applicationText"), new PropertyModel<>(this, "applications"), new ApplicationChoiceRenderer()) {
-            @Override
-            protected boolean wantOnSelectionChangedNotifications() {
-                return true;
-            }
-
-            @Override
-            protected void onSelectionChanged(ApplicationPojo newSelection) {
-                super.onSelectionChanged(newSelection);
-                client = null;
-                clientField.clearInput();
-            }
-        };
-
-        this.applicationField.setRequired(true);
-        this.form.add(this.applicationField);
-        this.applicationFeedback = new TextFeedbackPanel("applicationFeedback", this.applicationField);
-        this.form.add(this.applicationFeedback);
-
-        this.clientField = new DropDownChoice<>("clientField", new PropertyModel<>(this, "client"), new PropertyModel<>(this, "clients"), new ClientChoiceRenderer());
-        this.clientField.setRequired(true);
-        this.form.add(this.clientField);
-        this.clientFeedback = new TextFeedbackPanel("clientFeedback", this.clientField);
-        this.form.add(this.clientFeedback);
+        this.applicationLabel = new Label("applicationField", new PropertyModel<>(this, "applicationText"));
+        this.form.add(this.applicationLabel);
+        this.clientLabel = new Label("clientLabel", new PropertyModel<>(this, "client"));
+        this.form.add(this.clientLabel);
 
         this.loginField = new TextField<>("loginField", new PropertyModel<>(this, "login"));
         this.loginField.setRequired(true);
@@ -117,23 +114,6 @@ public class BearerPage extends AdminLTEPage {
         this.form.add(this.okayButton);
     }
 
-    public List<ApplicationPojo> getApplications() {
-        DSLContext context = getSession().getDSLContext();
-        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
-        ClientTable clientTable = Tables.CLIENT.as("clientTable");
-        return context.select(applicationTable.fields()).from(applicationTable).innerJoin(clientTable).on(applicationTable.APPLICATION_ID.eq(clientTable.APPLICATION_ID)).groupBy(applicationTable.APPLICATION_ID).fetchInto(ApplicationPojo.class);
-    }
-
-
-    public List<ClientPojo> getClients() {
-        if (this.applicationText != null) {
-            DSLContext context = getSession().getDSLContext();
-            ClientTable clientTable = Tables.CLIENT.as("clientTable");
-            return context.select(clientTable.fields()).from(clientTable).where(clientTable.APPLICATION_ID.eq(this.applicationText.getApplicationId())).fetchInto(ClientPojo.class);
-        }
-        return new ArrayList<>(0);
-    }
-
     @Override
     public Session getSession() {
         return (Session) super.getSession();
@@ -150,8 +130,8 @@ public class BearerPage extends AdminLTEPage {
             MobileRecord mobileRecord = context.newRecord(mobileTable);
             String mobileId = UUID.randomUUID().toString();
             mobileRecord.setMobileId(mobileId);
-            mobileRecord.setApplicationId(this.applicationText.getApplicationId());
-            mobileRecord.setClientId(this.client.getClientId());
+            mobileRecord.setApplicationId(this.applicationText);
+            mobileRecord.setClientId(this.client);
             mobileRecord.setDateCreated(new Date());
             mobileRecord.setUserAgent(getSession().getClientInfo().getUserAgent());
             mobileRecord.setClientIp(getSession().getClientInfo().getProperties().getRemoteAddress());

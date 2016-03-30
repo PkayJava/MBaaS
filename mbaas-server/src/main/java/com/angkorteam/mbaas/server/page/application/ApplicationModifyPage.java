@@ -6,9 +6,11 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
+import com.angkorteam.mbaas.server.validator.ApplicationOAuthRoleValidator;
 import com.angkorteam.mbaas.server.validator.PushApplicationValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
@@ -16,7 +18,9 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.validator.UrlValidator;
 import org.jooq.DSLContext;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by socheat on 3/8/16.
@@ -38,6 +42,10 @@ public class ApplicationModifyPage extends MasterPage {
     private String description;
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
+
+    private String oauthRoles;
+    private TextField<String> oauthRolesField;
+    private TextFeedbackPanel oauthRolesFeedback;
 
     private String pushServerUrl;
     private TextField<String> pushServerUrlField;
@@ -91,6 +99,13 @@ public class ApplicationModifyPage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
+        this.oauthRoles = applicationRecord.getOauthRoles();
+        this.oauthRolesField = new TextField<>("oauthRolesField", new PropertyModel<>(this, "oauthRoles"));
+        this.oauthRolesField.add(new ApplicationOAuthRoleValidator());
+        this.form.add(this.oauthRolesField);
+        this.oauthRolesFeedback = new TextFeedbackPanel("oauthRolesFeedback", this.oauthRolesField);
+        this.form.add(this.oauthRolesFeedback);
+
         this.pushServerUrl = applicationRecord.getPushServerUrl();
         this.pushServerUrlField = new TextField<>("pushServerUrlField", new PropertyModel<>(this, "pushServerUrl"));
         this.pushServerUrlField.add(new UrlValidator());
@@ -120,6 +135,23 @@ public class ApplicationModifyPage extends MasterPage {
     private void saveButtonOnSubmit(Button button) {
         DSLContext context = getDSLContext();
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+
+        List<String> oauthRoles = new ArrayList<>();
+        if (this.oauthRoles != null && !"".equals(this.oauthRoles.trim())) {
+            for (String oauthRole : StringUtils.split(this.oauthRoles, ',')) {
+                String trimmed = oauthRole.trim();
+                if (!"".equals(trimmed)) {
+                    if (!oauthRoles.contains(trimmed)) {
+                        oauthRoles.add(trimmed);
+                    }
+                }
+            }
+        }
+
+        // recalculate test oauth_role_{name} to false and patch to true
+        if (!oauthRoles.isEmpty()) {
+            // String collectionId = jdbcTemplate.queryForObject("SELECT " + Tables.COLLECTION.COLLECTION_ID.getName() + " FROM `" + Tables.COLLECTION.getName() + "` WHERE " + Tables.COLLECTION.NAME.getName() + " = ?", String.class, Tables.APPLICATION.getName());
+        }
 
         ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(this.applicationId)).fetchOneInto(applicationTable);
         applicationRecord.setName(this.name);
