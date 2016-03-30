@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.oauth;
+package com.angkorteam.mbaas.server.page.oauth2;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
@@ -9,21 +9,25 @@ import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.ClientTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.ApplicationPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.ClientPojo;
+import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.renderer.ApplicationChoiceRenderer;
 import com.angkorteam.mbaas.server.renderer.ClientChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by socheat on 3/27/16.
  */
-@Mount("/oauth/starter")
+@Mount("/oauth2/starter")
 public class StarterPage extends AdminLTEPage {
 
     private ApplicationPojo applicationText;
@@ -108,6 +112,14 @@ public class StarterPage extends AdminLTEPage {
     }
 
     private void okayButtonOnSubmit(Button components) {
-
+        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
+        PageParameters parameters = new PageParameters();
+        parameters.add("client_id", this.client.getClientId());
+        parameters.add("response_type", "code");
+        parameters.add("state", UUID.randomUUID().toString());
+        parameters.add("scope", "");
+        String redirectUri = HttpFunction.getHttpAddress(request) + "/web" + StatusPage.class.getAnnotation(Mount.class).value();
+        parameters.add("redirect_uri", redirectUri);
+        setResponsePage(AuthorizePage.class, parameters);
     }
 }

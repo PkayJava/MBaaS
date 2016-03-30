@@ -129,12 +129,14 @@ public class ApplicationCreatePage extends MasterPage {
     private void saveButtonOnSubmit(Button button) {
 
         List<String> oauthRoles = new ArrayList<>();
+        List<String> oauthRolesSave = new ArrayList<>();
         if (this.oauthRoles != null && !"".equals(this.oauthRoles.trim())) {
             for (String oauthRole : StringUtils.split(this.oauthRoles, ',')) {
                 String trimmed = oauthRole.trim();
                 if (!"".equals(trimmed)) {
-                    if (!oauthRoles.contains(trimmed)) {
-                        oauthRoles.add(trimmed);
+                    if (!oauthRoles.contains("oauth_role_" + trimmed)) {
+                        oauthRoles.add("oauth_role_" + trimmed);
+                        oauthRolesSave.add(trimmed);
                     }
                 }
             }
@@ -156,7 +158,7 @@ public class ApplicationCreatePage extends MasterPage {
         applicationRecord.setPushApplicationId(this.pushApplicationId);
         applicationRecord.setPushMasterSecret(this.pushMasterSecret);
         if (!oauthRoles.isEmpty()) {
-            applicationRecord.setOauthRoles(StringUtils.join(oauthRoles, ", "));
+            applicationRecord.setOauthRoles(StringUtils.join(oauthRolesSave, ", "));
         }
         applicationRecord.store();
 
@@ -171,7 +173,6 @@ public class ApplicationCreatePage extends MasterPage {
         }
 
         if (!oauthRoles.isEmpty()) {
-
             String collectionId = jdbcTemplate.queryForObject("SELECT " + Tables.COLLECTION.COLLECTION_ID.getName() + " FROM `" + Tables.COLLECTION.getName() + "` WHERE " + Tables.COLLECTION.NAME.getName() + " = ?", String.class, Tables.APPLICATION.getName());
             Map<String, AttributeRecord> attributeRecords = new HashMap<>();
             AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");

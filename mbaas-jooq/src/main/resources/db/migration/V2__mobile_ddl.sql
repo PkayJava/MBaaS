@@ -1,12 +1,17 @@
 CREATE TABLE mobile (
 
+  -- refresh token
   mobile_id               VARCHAR(100) NOT NULL,
 
   user_id                 VARCHAR(100),
-  client_id               VARCHAR(100) NOT NULL,
-  application_id          VARCHAR(100) NOT NULL,
+  client_id               VARCHAR(100),
+  application_id          VARCHAR(100),
   date_created            DATETIME,
   date_seen               DATETIME,
+  access_token            VARCHAR(100),
+  date_token_issued       DATETIME,
+  time_to_live            INT(11),
+  grant_type              VARCHAR(100),
 
   user_agent              VARCHAR(255),
 
@@ -27,6 +32,7 @@ CREATE TABLE mobile (
   INDEX (client_ip),
   INDEX (device_token),
   INDEX (date_seen),
+  INDEX (grant_type),
   INDEX (user_agent),
   INDEX (device_type),
   INDEX (device_alias),
@@ -35,6 +41,7 @@ CREATE TABLE mobile (
   INDEX (user_id),
   INDEX (application_id),
   INDEX (client_id),
+  INDEX (access_token),
   PRIMARY KEY (mobile_id)
 
 );

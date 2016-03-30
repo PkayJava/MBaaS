@@ -1,11 +1,13 @@
 CREATE TABLE client (
 
+  -- client id
   client_id           VARCHAR(100) NOT NULL,
 
   application_id      VARCHAR(100),
 
   application_user_id VARCHAR(100),
   owner_user_id       VARCHAR(100),
+  -- client secret
   secret              VARCHAR(100) NOT NULL,
   date_created        DATETIME,
 

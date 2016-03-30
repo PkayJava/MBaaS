@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.server.function.HttpFunction;
-import com.angkorteam.mbaas.server.page.oauth.AuthorizePage;
+import com.angkorteam.mbaas.server.page.oauth2.AuthorizePage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

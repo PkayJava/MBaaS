@@ -5,7 +5,15 @@ import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
+import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
+import com.angkorteam.mbaas.server.function.AttributeFunction;
+import com.angkorteam.mbaas.server.function.DocumentFunction;
+import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import com.angkorteam.mbaas.server.validator.ApplicationOAuthRoleValidator;
 import com.angkorteam.mbaas.server.validator.PushApplicationValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -17,10 +25,9 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.validator.UrlValidator;
 import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by socheat on 3/8/16.
@@ -64,7 +71,7 @@ public class ApplicationModifyPage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Create New Application";
+        return "Modify Application";
     }
 
     @Override
@@ -137,20 +144,69 @@ public class ApplicationModifyPage extends MasterPage {
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
 
         List<String> oauthRoles = new ArrayList<>();
+        List<String> oauthRolesSave = new ArrayList<>();
         if (this.oauthRoles != null && !"".equals(this.oauthRoles.trim())) {
             for (String oauthRole : StringUtils.split(this.oauthRoles, ',')) {
                 String trimmed = oauthRole.trim();
                 if (!"".equals(trimmed)) {
-                    if (!oauthRoles.contains(trimmed)) {
-                        oauthRoles.add(trimmed);
+                    if (!oauthRoles.contains("oauth_role_" + trimmed)) {
+                        oauthRoles.add("oauth_role_" + trimmed);
+                        oauthRolesSave.add(trimmed);
                     }
                 }
             }
         }
 
-        // recalculate test oauth_role_{name} to false and patch to true
+        JdbcTemplate jdbcTemplate = getJdbcTemplate();
+
         if (!oauthRoles.isEmpty()) {
-            // String collectionId = jdbcTemplate.queryForObject("SELECT " + Tables.COLLECTION.COLLECTION_ID.getName() + " FROM `" + Tables.COLLECTION.getName() + "` WHERE " + Tables.COLLECTION.NAME.getName() + " = ?", String.class, Tables.APPLICATION.getName());
+
+            String collectionId = jdbcTemplate.queryForObject("SELECT " + Tables.COLLECTION.COLLECTION_ID.getName() + " FROM `" + Tables.COLLECTION.getName() + "` WHERE " + Tables.COLLECTION.NAME.getName() + " = ?", String.class, Tables.APPLICATION.getName());
+            Map<String, AttributeRecord> attributeRecords = new HashMap<>();
+            AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+            for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionId)).fetchInto(attributeTable)) {
+                attributeRecords.put(attributeRecord.getName(), attributeRecord);
+            }
+
+            List<String> adds = new ArrayList<>();
+            for (String oauthRole : oauthRoles) {
+                if (!attributeRecords.containsKey(oauthRole)) {
+                    adds.add(oauthRole);
+                }
+            }
+
+            for (String add : adds) {
+                CollectionAttributeCreateRequest request = new CollectionAttributeCreateRequest();
+                request.setCollectionName(Tables.APPLICATION.getName());
+                request.setNullable(true);
+                request.setJavaType(AttributeTypeEnum.Boolean.getLiteral());
+                request.setAttributeName(add);
+                AttributeFunction.createAttribute(context, request);
+            }
+
+            {
+                Map<String, Object> attributes = new HashMap<>();
+                String oauthRolesTemp = jdbcTemplate.queryForObject("SELECT " + MariaDBFunction.columnList(Tables.APPLICATION.EXTRA.getName()) + " FROM " + Tables.APPLICATION.getName() + " WHERE " + Tables.APPLICATION.APPLICATION_ID.getName() + " = ?", String.class, applicationId);
+                for (String oauthRoleTemp : oauthRolesTemp.split(",")) {
+                    oauthRoleTemp = oauthRoleTemp.substring(1, oauthRoleTemp.length() - 1);
+                    if (oauthRoleTemp.startsWith("oauth_role_")) {
+                        attributes.put(oauthRoleTemp, false);
+                    }
+                }
+                DocumentModifyRequest request = new DocumentModifyRequest();
+                request.setDocument(attributes);
+                DocumentFunction.modifyDocument(context, jdbcTemplate, Tables.APPLICATION.getName(), applicationId, request);
+            }
+
+            {
+                Map<String, Object> attributes = new HashMap<>();
+                for (String oauthRole : oauthRoles) {
+                    attributes.put(oauthRole, true);
+                }
+                DocumentModifyRequest request = new DocumentModifyRequest();
+                request.setDocument(attributes);
+                DocumentFunction.modifyDocument(context, jdbcTemplate, Tables.APPLICATION.getName(), applicationId, request);
+            }
         }
 
         ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(this.applicationId)).fetchOneInto(applicationTable);
@@ -160,6 +216,7 @@ public class ApplicationModifyPage extends MasterPage {
         applicationRecord.setPushApplicationId(this.pushApplicationId);
         applicationRecord.setPushMasterSecret(this.pushMasterSecret);
         applicationRecord.setAutoRegistration(this.autoRegistration);
+        applicationRecord.setOauthRoles(StringUtils.join(oauthRolesSave, ", "));
         applicationRecord.update();
 
         setResponsePage(ApplicationManagementPage.class);

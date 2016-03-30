@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.oauth;
+package com.angkorteam.mbaas.server.page.oauth2;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
@@ -7,13 +7,10 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.ClientTable;
-import com.angkorteam.mbaas.model.entity.tables.MobileTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
-import com.angkorteam.mbaas.server.page.BearerTokenPage;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
@@ -25,14 +22,11 @@ import org.apache.wicket.util.string.StringValue;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 
-import java.util.Date;
-import java.util.UUID;
-
 /**
  * Created by socheat on 3/27/16.
  */
-@Mount("/oauth/permission")
-public class PermissionPage extends AdminLTEPage {
+@Mount("/oauth2/authorize")
+public class AuthorizePage extends AdminLTEPage {
 
     private String applicationText;
     private Label applicationLabel;
@@ -40,10 +34,12 @@ public class PermissionPage extends AdminLTEPage {
     private String client;
     private Label clientLabel;
 
+    private String applicationId;
     private String clientId;
     private String responseType;
     private String redirectUri;
     private String state;
+    private String scope;
 
     private String login;
     private TextField<String> loginField;
@@ -65,11 +61,13 @@ public class PermissionPage extends AdminLTEPage {
         StringValue responseType = getPageParameters().get("response_type");
         StringValue redirectUri = getPageParameters().get("redirect_uri");
         StringValue state = getPageParameters().get("state");
+        StringValue scope = getPageParameters().get("scope");
 
         this.clientId = clientId.toString("");
         this.responseType = responseType.toString("");
         this.redirectUri = redirectUri.toString("");
         this.state = state.toString("");
+        this.scope = scope.toString("");
 
         DSLContext context = getSession().getDSLContext();
         ClientTable clientTable = Tables.CLIENT.as("clientTable");
@@ -84,14 +82,16 @@ public class PermissionPage extends AdminLTEPage {
         }
 
         if (applicationRecord != null) {
+            this.applicationId = applicationRecord.getApplicationId();
             this.applicationText = applicationRecord.getName();
         }
 
         this.form = new Form<>("form");
         add(this.form);
 
-        this.applicationLabel = new Label("applicationField", new PropertyModel<>(this, "applicationText"));
+        this.applicationLabel = new Label("applicationLabel", new PropertyModel<>(this, "applicationText"));
         this.form.add(this.applicationLabel);
+
         this.clientLabel = new Label("clientLabel", new PropertyModel<>(this, "client"));
         this.form.add(this.clientLabel);
 
@@ -126,19 +126,8 @@ public class PermissionPage extends AdminLTEPage {
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(this.login)).and(userTable.PASSWORD.eq(DSL.md5(this.password))).fetchOneInto(userTable);
 
         if (userRecord != null) {
-            MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
-            MobileRecord mobileRecord = context.newRecord(mobileTable);
-            String mobileId = UUID.randomUUID().toString();
-            mobileRecord.setMobileId(mobileId);
-            mobileRecord.setApplicationId(this.applicationText);
-            mobileRecord.setClientId(this.client);
-            mobileRecord.setDateCreated(new Date());
-            mobileRecord.setUserAgent(getSession().getClientInfo().getUserAgent());
-            mobileRecord.setClientIp(getSession().getClientInfo().getProperties().getRemoteAddress());
-            mobileRecord.setUserId(userRecord.getUserId());
-            mobileRecord.store();
-            BearerTokenPage tokenPage = new BearerTokenPage(mobileId);
-            setResponsePage(tokenPage);
+            PermissionPage permissionPage = new PermissionPage(this.applicationId, this.clientId, userRecord.getUserId(), this.responseType, this.redirectUri, this.state, this.scope);
+            setResponsePage(permissionPage);
         } else {
             this.loginField.error("incorrect");
             this.passwordField.error("incorrect");

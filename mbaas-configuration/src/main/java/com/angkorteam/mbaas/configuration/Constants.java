@@ -68,6 +68,9 @@ public class Constants {
 
     public static final String RESOURCE_REPO = "resource.repo";
 
+    public static final String AUTHORIZATION_TIME_TO_LIVE = "authorization.time_to_live";
+    public static final String ACCESS_TOKEN_TIME_TO_LIVE = "access_token.time_to_live";
+
     public static final String MAIL_SERVER = "mail.server";
     public static final String MAIL_PORT = "mail.port";
     public static final String MAIL_LOGIN = "mail.login";

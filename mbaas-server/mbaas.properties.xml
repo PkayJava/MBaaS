@@ -52,6 +52,10 @@
     <entry key="mail.password">123123a</entry>
     <entry key="mail.from">m1@home.com.kh</entry>
 
+    <entry key="authorization.time_to_live">15</entry>
+    <!-- 604800 seconds (one week) -->
+    <entry key="access_token.time_to_live">604800</entry>
+
     <entry key="pattern.datetime">yyyy-MM-dd'T'HH:mm:ssZZ</entry>
     <entry key="pattern.date">yyyy-MM-dd</entry>
     <entry key="pattern.time">HH:mm:ss</entry>
