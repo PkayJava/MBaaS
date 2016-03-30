@@ -118,7 +118,7 @@ public class StarterPage extends AdminLTEPage {
         parameters.add("response_type", "code");
         parameters.add("state", UUID.randomUUID().toString());
         parameters.add("scope", "");
-        String redirectUri = HttpFunction.getHttpAddress(request) + "/web" + StatusPage.class.getAnnotation(Mount.class).value();
+        String redirectUri = HttpFunction.getHttpAddress(request) + "/web" + CodePage.class.getAnnotation(Mount.class).value();
         parameters.add("redirect_uri", redirectUri);
         setResponsePage(AuthorizePage.class, parameters);
     }

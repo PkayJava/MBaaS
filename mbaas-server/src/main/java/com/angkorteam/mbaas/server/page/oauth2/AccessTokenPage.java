@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.server.wicket.Mount;
 /**
  * Created by socheat on 3/30/16.
  */
-@Mount("/oauth2/status")
-public class StatusPage extends AdminLTEPage {
+@Mount("/oauth2/access/token")
+public class AccessTokenPage extends AdminLTEPage {
+
 }
