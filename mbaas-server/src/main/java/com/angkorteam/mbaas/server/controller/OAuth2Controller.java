@@ -65,7 +65,7 @@ public class OAuth2Controller {
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
         MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
-        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(clientId)).and(clientTable.SECRET.eq(clientSecret)).fetchOneInto(clientTable);
+        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(clientId)).and(clientTable.CLIENT_SECRET.eq(clientSecret)).fetchOneInto(clientTable);
         if (clientRecord == null) {
             OAuth2AuthorizeResponse response = new OAuth2AuthorizeResponse();
             response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());

@@ -26,15 +26,15 @@ public class ClientProvider extends JooqProvider {
 
     public ClientProvider(String applicationId) {
         this.applicationId = applicationId;
-        this.from = this.clientTable.join(this.userTable).on(this.clientTable.OWNER_USER_ID.eq(this.userTable.USER_ID));
+        this.from = this.clientTable.join(this.userTable).on(this.clientTable.USER_ID.eq(this.userTable.USER_ID));
     }
 
     public Field<String> getClientId() {
         return this.clientTable.CLIENT_ID;
     }
 
-    public Field<String> getSecret() {
-        return this.clientTable.SECRET;
+    public Field<String> getClientSecret() {
+        return this.clientTable.CLIENT_SECRET;
     }
 
     public Field<String> getOwnerUser() {

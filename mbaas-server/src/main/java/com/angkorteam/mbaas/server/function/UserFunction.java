@@ -38,7 +38,7 @@ public class UserFunction {
         String login = requestBody.getUsername();
         String password = requestBody.getPassword();
 
-        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.SECRET.eq(requestBody.getSecret())).fetchOneInto(clientTable);
+        // ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_SECRET.eq(requestBody.getSecret())).fetchOneInto(clientTable);
 
         String userId = UUID.randomUUID().toString();
 

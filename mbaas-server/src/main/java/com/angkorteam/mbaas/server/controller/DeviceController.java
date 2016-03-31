@@ -65,7 +65,7 @@ public class DeviceController {
         if (requestBody.getSecret() == null || "".equals(requestBody.getSecret())) {
             errorMessages.put("secret", "is required");
         } else {
-            clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.SECRET.eq(requestBody.getSecret())).fetchOneInto(clientTable);
+            clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_SECRET.eq(requestBody.getSecret())).fetchOneInto(clientTable);
         }
 
         ApplicationRecord applicationRecord = null;

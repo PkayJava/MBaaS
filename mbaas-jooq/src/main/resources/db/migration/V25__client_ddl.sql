@@ -8,6 +8,7 @@ CREATE TABLE client (
 
   application_user_id VARCHAR(100),
 
+  client_secret       VARCHAR(100),
   date_created        DATETIME,
 
   push_variant_id     VARCHAR(255),
@@ -23,6 +24,7 @@ CREATE TABLE client (
   UNIQUE (name, application_id),
   INDEX (name),
   INDEX (description),
+  INDEX (client_secret),
   INDEX (application_id),
   INDEX (user_id),
   INDEX (application_user_id),

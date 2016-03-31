@@ -1,7 +1,7 @@
-CREATE TABLE client_secret (
+CREATE TABLE virtual_secret (
 
   -- client id
-  client_secret_id    VARCHAR(100) NOT NULL,
+  virtual_secret_id   VARCHAR(100) NOT NULL,
 
   application_id      VARCHAR(100),
   client_id           VARCHAR(100),
@@ -17,7 +17,7 @@ CREATE TABLE client_secret (
 
   optimistic          INT(11)      NOT NULL DEFAULT 0,
 
-  UNIQUE (client_secret_id, client_secret),
+  UNIQUE (virtual_secret_id, client_secret),
   INDEX (application_id),
   INDEX (client_id),
   INDEX (user_id),
@@ -26,6 +26,6 @@ CREATE TABLE client_secret (
   INDEX (date_created),
   INDEX (security),
 
-  PRIMARY KEY (client_secret_id)
+  PRIMARY KEY (virtual_secret_id)
 
 );
