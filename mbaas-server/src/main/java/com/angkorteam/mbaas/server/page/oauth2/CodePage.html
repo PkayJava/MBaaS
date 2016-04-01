@@ -13,18 +13,16 @@
 
         <form wicket:id="form">
             <div class="form-group">
-                <label>Application</label>
+                <label>State</label>
                 <span wicket:id="stateLabel" class="form-control"/>
             </div>
             <div class="form-group">
-                <label>Client</label>
+                <label>Code</label>
                 <span wicket:id="codeLabel" class="form-control"/>
             </div>
             <div class="row">
-                <div class="col-xs-8">
-                </div>
-                <div class="col-xs-4">
-                    <button wicket:id="claimAccessTokenButton" type="submit" class="btn btn-primary btn-block btn-flat">Claim Access Token</button>
+                <div class="col-xs-12">
+                    <button wicket:id="claimAccessTokenButton" type="submit" class="btn btn-primary pull-right btn-block btn-flat">Claim Access Token</button>
                 </div>
             </div>
         </form>

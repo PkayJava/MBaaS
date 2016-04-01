@@ -13,20 +13,16 @@
 
         <form wicket:id="form">
             <div class="form-group">
-                <label wicket:for="applicationField">Application</label>
-                <select wicket:id="applicationField" class="form-control"/>
-                <span wicket:id="applicationFeedback" class="help-block"/>
+                <label>Access Token</label>
+                <span wicket:id="accessTokenLabel" class="form-control"/>
             </div>
             <div class="form-group">
-                <label wicket:for="clientField">Client</label>
-                <select wicket:id="clientField" class="form-control"/>
-                <span wicket:id="clientFeedback" class="help-block"/>
+                <label>Server Time</label>
+                <span wicket:id="serverTimeLabel" class="form-control"/>
             </div>
             <div class="row">
-                <div class="col-xs-8">
-                </div>
-                <div class="col-xs-4">
-                    <button wicket:id="okayButton" type="submit" class="btn btn-primary btn-block btn-flat">Initiate</button>
+                <div class="col-xs-12">
+                    <button wicket:id="serverTimeButton" type="submit" class="btn btn-primary btn-block btn-flat">Server Time</button>
                 </div>
             </div>
         </form>

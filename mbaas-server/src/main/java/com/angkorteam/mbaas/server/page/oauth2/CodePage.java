@@ -12,9 +12,11 @@ import com.angkorteam.mbaas.server.oauth2.OAuth2Client;
 import com.angkorteam.mbaas.server.oauth2.OAuth2DTO;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.http.HttpStatus;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -60,38 +62,52 @@ public class CodePage extends AdminLTEPage {
     }
 
     @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        OAuth2DTO oAuth2DTO = (OAuth2DTO) getSession().getAttribute(this.state);
+        if (oAuth2DTO == null) {
+            setResponsePage(StarterPage.class);
+        }
+    }
+
+    @Override
     public Session getSession() {
         return (Session) super.getSession();
     }
 
     private void claimAccessTokenButtonOnSubmit(Button button) {
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
-        OAuth2DTO oAuth2DTO = (OAuth2DTO) getSession().getAttribute(this.state);
-        oAuth2DTO.setCode(this.code);
+        OAuth2DTO oauth2DTO = (OAuth2DTO) getSession().getAttribute(this.state);
+        oauth2DTO.setCode(this.code);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(HttpFunction.getHttpAddress(request))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        String clientId = oAuth2DTO.getClientId();
+        String clientId = oauth2DTO.getClientId();
 
         DSLContext context = getSession().getDSLContext();
         ClientTable clientTable = Tables.CLIENT.as("clientTable");
 
-        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(oAuth2DTO.getClientId())).fetchOneInto(clientTable);
+        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(oauth2DTO.getClientId())).fetchOneInto(clientTable);
 
         String clientSecret = clientRecord.getClientSecret();
         String grantType = "authorization_code";
-        String redirectUri = oAuth2DTO.getRedirectUri();
+        String redirectUri = oauth2DTO.getRedirectUri();
 
         OAuth2Client client = retrofit.create(OAuth2Client.class);
-        Call<OAuth2AuthorizeResponse> responseCall = client.authorize(clientId, clientSecret, grantType, redirectUri, this.code);
+        Call<OAuth2AuthorizeResponse> responseCall = client.oauth2Authorize(clientId, clientSecret, grantType, redirectUri, this.code);
         try {
             retrofit2.Response<OAuth2AuthorizeResponse> response = responseCall.execute();
-            oAuth2DTO.setAccessToken(response.body().getAccessToken());
-            oAuth2DTO.setExpiresIn(response.body().getExpiresIn());
-            oAuth2DTO.setRefreshToken(response.body().getRefreshToken());
-            oAuth2DTO.setTokenType(response.body().getTokenType());
+            if (response.code() == HttpStatus.SC_OK) {
+                oauth2DTO.setAccessToken(response.body().getAccessToken());
+                oauth2DTO.setExpiresIn(response.body().getExpiresIn());
+                oauth2DTO.setRefreshToken(response.body().getRefreshToken());
+                oauth2DTO.setTokenType(response.body().getTokenType());
+                PageParameters parameters = new PageParameters();
+                parameters.add("state", oauth2DTO.getState());
+                setResponsePage(AccessTokenPage.class, parameters);
+            }
         } catch (IOException e) {
             throw new WicketRuntimeException(e);
         }

@@ -4,7 +4,9 @@ import com.angkorteam.mbaas.plain.request.monitor.MonitorCpuRequest;
 import com.angkorteam.mbaas.plain.request.monitor.MonitorMemRequest;
 import com.angkorteam.mbaas.plain.response.monitor.MonitorCpuResponse;
 import com.angkorteam.mbaas.plain.response.monitor.MonitorMemResponse;
+import com.angkorteam.mbaas.plain.response.monitor.MonitorTimeResponse;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.wicket.util.lang.Bytes;
 import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.Mem;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.DecimalFormat;
+import java.util.Date;
 
 /**
  * Created by socheat on 2/18/16.
@@ -37,6 +40,19 @@ public class MonitorController {
 
     @Autowired
     private Gson gson;
+
+    @RequestMapping(
+            method = RequestMethod.GET, path = "/time",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<MonitorTimeResponse> time(
+            HttpServletRequest request
+    ) throws SigarException {
+        LOGGER.info("{}", request.getRequestURL());
+        MonitorTimeResponse response = new MonitorTimeResponse();
+        response.setData(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
+        return ResponseEntity.ok(response);
+    }
 
     //region /monitor/cpu
 

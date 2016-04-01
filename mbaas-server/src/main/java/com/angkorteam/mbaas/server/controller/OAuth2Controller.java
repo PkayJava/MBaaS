@@ -88,7 +88,7 @@ public class OAuth2Controller {
         where.add(authorizationTable.CLIENT_ID.eq(clientRecord.getClientId()));
         where.add(authorizationTable.APPLICATION_ID.eq(applicationRecord.getApplicationId()));
         where.add(authorizationTable.AUTHORIZATION_ID.eq(code));
-        AuthorizationRecord authorizationRecord = context.select(authorizationTable.fields()).where(where).fetchOneInto(authorizationTable);
+        AuthorizationRecord authorizationRecord = context.select(authorizationTable.fields()).from(authorizationTable).where(where).fetchOneInto(authorizationTable);
         if (authorizationRecord == null) {
             OAuth2AuthorizeResponse response = new OAuth2AuthorizeResponse();
             response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());

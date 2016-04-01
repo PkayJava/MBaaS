@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.spring;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -80,7 +81,7 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             ServletException {
         final boolean debug = logger.isDebugEnabled();
 
-        String header = request.getHeader("Authorization");
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (header == null || !header.toUpperCase().startsWith("BEARER ")) {
             chain.doFilter(request, response);

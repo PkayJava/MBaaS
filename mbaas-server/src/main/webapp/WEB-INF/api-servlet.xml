@@ -43,6 +43,7 @@
         <security:custom-filter ref="authenticationFilter" before="ANONYMOUS_FILTER"/>
         <security:intercept-url pattern="/api/security/signup" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/security/login" method="POST" access="permitAll"/>
+        <security:intercept-url pattern="/api/oauth2/**" access="permitAll"/>
         <security:intercept-url pattern="/api/resource/**" access="permitAll"/>
         <security:intercept-url pattern="/api/javascript/**" access="permitAll"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>

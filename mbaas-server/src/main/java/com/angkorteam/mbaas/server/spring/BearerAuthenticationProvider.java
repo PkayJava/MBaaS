@@ -32,7 +32,7 @@ public class BearerAuthenticationProvider implements org.springframework.securit
 
         MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
-        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(token)).fetchOneInto(mobileTable);
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(token)).fetchOneInto(mobileTable);
         if (mobileRecord == null) {
             throw new BadCredentialsException("bearer token " + token + " is not valid");
         }
