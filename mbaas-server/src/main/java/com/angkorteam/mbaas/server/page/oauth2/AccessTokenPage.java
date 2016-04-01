@@ -76,8 +76,12 @@ public class AccessTokenPage extends AdminLTEPage {
     private void serverTimeButtonOnSubmit(Button button) {
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         OAuth2DTO oauth2DTO = (OAuth2DTO) getSession().getAttribute(this.state);
+        String httpAddress = HttpFunction.getHttpAddress(request);
+        if (!httpAddress.endsWith("/")) {
+            httpAddress = httpAddress + "/";
+        }
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(HttpFunction.getHttpAddress(request))
+                .baseUrl(httpAddress)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         OAuth2Client client = retrofit.create(OAuth2Client.class);
