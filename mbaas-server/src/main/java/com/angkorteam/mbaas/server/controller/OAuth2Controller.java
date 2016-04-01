@@ -5,11 +5,13 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.GrantTypeEnum;
-import com.angkorteam.mbaas.plain.response.oauth2.OAuth2AuthorizeResponse;
-import com.angkorteam.mbaas.plain.response.oauth2.OAuth2ClientResponse;
-import com.angkorteam.mbaas.plain.response.oauth2.OAuth2PasswordResponse;
+import com.angkorteam.mbaas.plain.request.oauth2.OAuth2RefreshRequest;
+import com.angkorteam.mbaas.plain.request.oauth2.OAuth2TokenRequest;
+import com.angkorteam.mbaas.plain.response.oauth2.*;
+import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
@@ -21,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,6 +42,9 @@ public class OAuth2Controller {
 
     @Autowired
     private DSLContext context;
+
+    @Autowired
+    private Gson gson;
 
     @RequestMapping(
             path = "/authorize",
@@ -100,7 +106,11 @@ public class OAuth2Controller {
         mobileRecord.setDateCreated(new Date());
         mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
         mobileRecord.setDateTokenIssued(new Date());
-        mobileRecord.setAccessToken(UUID.randomUUID().toString());
+        String accessToken = UUID.randomUUID().toString();
+        while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
+            accessToken = UUID.randomUUID().toString();
+        }
+        mobileRecord.setAccessToken(accessToken);
         mobileRecord.setGrantType(GrantTypeEnum.Authorization.getLiteral());
         mobileRecord.store();
 
@@ -176,14 +186,18 @@ public class OAuth2Controller {
         mobileRecord.setDateCreated(new Date());
         mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
         mobileRecord.setDateTokenIssued(new Date());
-        mobileRecord.setAccessToken(UUID.randomUUID().toString());
+        String accessToken = UUID.randomUUID().toString();
+        while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
+            accessToken = UUID.randomUUID().toString();
+        }
+        mobileRecord.setAccessToken(accessToken);
         mobileRecord.setGrantType(GrantTypeEnum.Implicit.getLiteral());
         mobileRecord.store();
 
         List<String> params = new ArrayList<>();
         params.add("access_token=" + mobileRecord.getAccessToken());
         params.add("token_type=bearer");
-        params.add("expires_in=50000");
+        params.add("expires_in=" + mobileRecord.getTimeToLive());
         if (scope != null && !"".equals(scope)) {
             params.add("scope=" + scope);
         }
@@ -247,14 +261,18 @@ public class OAuth2Controller {
         mobileRecord.setDateCreated(new Date());
         mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
         mobileRecord.setDateTokenIssued(new Date());
-        mobileRecord.setAccessToken(UUID.randomUUID().toString());
+        String accessToken = UUID.randomUUID().toString();
+        while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
+            accessToken = UUID.randomUUID().toString();
+        }
+        mobileRecord.setAccessToken(accessToken);
         mobileRecord.setGrantType(GrantTypeEnum.Password.getLiteral());
         mobileRecord.store();
 
         OAuth2PasswordResponse response = new OAuth2PasswordResponse();
         response.setTokenType("bearer");
         response.setAccessToken(mobileRecord.getAccessToken());
-        response.setExpiresIn(5000);
+        response.setExpiresIn(mobileRecord.getTimeToLive());
         response.setRefreshToken(mobileRecord.getMobileId());
 
         return ResponseEntity.ok(response);
@@ -293,14 +311,105 @@ public class OAuth2Controller {
         mobileRecord.setDateCreated(new Date());
         mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
         mobileRecord.setDateTokenIssued(new Date());
-        mobileRecord.setAccessToken(UUID.randomUUID().toString());
+        String accessToken = UUID.randomUUID().toString();
+        while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
+            accessToken = UUID.randomUUID().toString();
+        }
+        mobileRecord.setAccessToken(accessToken);
         mobileRecord.setGrantType(GrantTypeEnum.Client.getLiteral());
         mobileRecord.store();
 
         OAuth2ClientResponse response = new OAuth2ClientResponse();
         response.setTokenType("bearer");
         response.setAccessToken(mobileRecord.getAccessToken());
-        response.setExpiresIn(5000);
+        response.setExpiresIn(mobileRecord.getTimeToLive());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @RequestMapping(
+            path = "/token",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<OAuth2TokenResponse> token(
+            HttpServletRequest request,
+            @RequestBody OAuth2TokenRequest requestBody
+    ) {
+        LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
+        if (requestBody.getAccessToken() == null || "".equals(requestBody.getAccessToken())) {
+            errorMessages.put("accessToken", "error");
+        } else {
+            MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(requestBody.getAccessToken())).fetchOneInto(mobileTable);
+            if (mobileRecord == null) {
+                errorMessages.put("accessToken", "error");
+            } else {
+                DateTime dateTime = new DateTime(mobileRecord.getDateTokenIssued());
+                dateTime = dateTime.plusSeconds(mobileRecord.getTimeToLive());
+                if (dateTime.isBeforeNow()) {
+                    OAuth2TokenResponse response = new OAuth2TokenResponse();
+                    response.setHttpCode(HttpStatus.NOT_EXTENDED.value());
+                    return ResponseEntity.badRequest().body(response);
+                }
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            OAuth2TokenResponse response = new OAuth2TokenResponse();
+            response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        OAuth2TokenResponse response = new OAuth2TokenResponse();
+        response.setScope("");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @RequestMapping(
+            path = "/refresh",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<OAuth2RefreshResponse> refresh(
+            HttpServletRequest request,
+            @RequestBody OAuth2RefreshRequest requestBody
+    ) {
+        LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
+        MobileRecord mobileRecord = null;
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+        if (requestBody.getRefreshToken() == null || "".equals(requestBody.getRefreshToken())) {
+            errorMessages.put("refreshToken", "error");
+        } else {
+            mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(requestBody.getRefreshToken())).fetchOneInto(mobileTable);
+            if (mobileRecord == null) {
+                errorMessages.put("refreshToken", "error");
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            OAuth2RefreshResponse response = new OAuth2RefreshResponse();
+            response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        String accessToken = UUID.randomUUID().toString();
+        while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
+            accessToken = UUID.randomUUID().toString();
+        }
+        mobileRecord.setAccessToken(accessToken);
+        mobileRecord.setDateTokenIssued(new Date());
+        mobileRecord.update();
+
+        OAuth2RefreshResponse response = new OAuth2RefreshResponse();
+        response.setTokenType("bearer");
+        response.setExpiresIn(mobileRecord.getTimeToLive());
+        response.setAccessToken(accessToken);
 
         return ResponseEntity.ok(response);
     }

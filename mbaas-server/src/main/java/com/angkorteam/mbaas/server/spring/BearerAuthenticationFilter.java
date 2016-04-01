@@ -1,8 +1,10 @@
 package com.angkorteam.mbaas.server.spring;
 
+import org.apache.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -105,6 +107,13 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
 
             onSuccessfulAuthentication(request, response, authResult);
 
+        } catch (CredentialsExpiredException e) {
+            if (ignoreFailure) {
+                chain.doFilter(request, response);
+            } else {
+                response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            }
+            return;
         } catch (AuthenticationException failed) {
             SecurityContextHolder.clearContext();
 

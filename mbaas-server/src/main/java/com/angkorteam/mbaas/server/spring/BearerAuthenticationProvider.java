@@ -6,9 +6,11 @@ import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.GrantTypeEnum;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
+import org.joda.time.DateTime;
 import org.jooq.DSLContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -36,7 +38,7 @@ public class BearerAuthenticationProvider implements org.springframework.securit
 
         MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(mobileTable);
         if (mobileRecord == null) {
-            throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+            throw new BadCredentialsException("bearer " + accessToken + " is not valid");
         }
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -45,6 +47,12 @@ public class BearerAuthenticationProvider implements org.springframework.securit
         mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
         mobileRecord.setClientIp(request.getRemoteAddr());
         mobileRecord.update();
+
+        DateTime dateTime = new DateTime(mobileRecord.getDateTokenIssued());
+        dateTime = dateTime.plusSeconds(mobileRecord.getTimeToLive());
+        if (dateTime.isBeforeNow()) {
+            throw new CredentialsExpiredException("bearer " + accessToken + " is expired");
+        }
 
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         String principal = null;
@@ -56,7 +64,7 @@ public class BearerAuthenticationProvider implements org.springframework.securit
             UserTable userTable = Tables.USER.as("userTable");
             UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
-                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
             principal = userRecord.getLogin();
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
@@ -66,19 +74,19 @@ public class BearerAuthenticationProvider implements org.springframework.securit
             ClientTable clientTable = Tables.CLIENT.as("clientTable");
             ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(mobileRecord.getClientId())).fetchOneInto(clientTable);
             if (clientRecord == null) {
-                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
             ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
             ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
             if (applicationRecord == null) {
-                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
             authorities.add(new SimpleGrantedAuthority(configuration.getString(Constants.ROLE_OAUTH2_AUTHORIZATION)));
         } else if (GrantTypeEnum.Password.getLiteral().equals(mobileRecord.getGrantType())) {
             UserTable userTable = Tables.USER.as("userTable");
             UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
-                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
             principal = userRecord.getLogin();
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
@@ -90,12 +98,12 @@ public class BearerAuthenticationProvider implements org.springframework.securit
             ClientTable clientTable = Tables.CLIENT.as("clientTable");
             ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(mobileRecord.getClientId())).fetchOneInto(clientTable);
             if (clientRecord == null) {
-                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
             ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
             ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
             if (applicationRecord == null) {
-                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
             principal = configuration.getString(Constants.ROLE_OAUTH2_IMPLICIT);
             authorities.add(new SimpleGrantedAuthority(principal));

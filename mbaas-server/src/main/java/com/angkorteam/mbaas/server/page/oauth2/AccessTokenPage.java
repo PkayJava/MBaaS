@@ -13,6 +13,7 @@ import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.http.HttpStatus;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.PropertyModel;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -102,6 +103,8 @@ public class AccessTokenPage extends AdminLTEPage {
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
+        } catch (Throwable e) {
+            throw new CredentialsExpiredException("bearer accessToken is not valid");
         }
     }
 
