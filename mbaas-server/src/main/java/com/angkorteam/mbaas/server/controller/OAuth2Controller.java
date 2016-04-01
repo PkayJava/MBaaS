@@ -134,20 +134,102 @@ public class OAuth2Controller {
             @RequestParam(value = "state", required = false) String state
     ) {
         LOGGER.info("{} response_type=>{} client_id=>{} redirect_uri=>{} scope=>{} state=>{}", request.getRequestURL(), responseType, clientId, redirectUri, scope, state);
+        if (!"code".equals(responseType)) {
+            List<String> params = new ArrayList<>();
+            params.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
+            params.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
+            params.add("error_uri=" + redirectUri);
+            if (state != null && !"".equals(state)) {
+                params.add("state=" + state);
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
+            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
+        }
+        if (redirectUri == null || "".equals(redirectUri)) {
+            List<String> params = new ArrayList<>();
+            params.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
+            params.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
+            params.add("error_uri=" + redirectUri);
+            if (state != null && !"".equals(state)) {
+                params.add("state=" + state);
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
+            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
+        }
+        ClientRecord clientRecord = null;
+        if (clientId == null || "".equals(clientId)) {
+            List<String> params = new ArrayList<>();
+            params.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
+            params.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
+            params.add("error_uri=" + redirectUri);
+            if (state != null && !"".equals(state)) {
+                params.add("state=" + state);
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
+            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
+        } else {
+            ClientTable clientTable = Tables.CLIENT.as("clientTable");
+            clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(clientId)).fetchOneInto(clientTable);
+            if (clientRecord == null) {
+                List<String> params = new ArrayList<>();
+                params.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
+                params.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
+                params.add("error_uri=" + redirectUri);
+                if (state != null && !"".equals(state)) {
+                    params.add("state=" + state);
+                }
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
+                return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
+            }
+        }
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = null;
+        applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
+        if (applicationRecord == null) {
+            List<String> params = new ArrayList<>();
+            params.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
+            params.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
+            params.add("error_uri=" + redirectUri);
+            if (state != null && !"".equals(state)) {
+                params.add("state=" + state);
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
+            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
+        }
 
-//        access_token 	Required. The access token assigned by the authorization server.
-//        token_type 	Required. The type of the token
-//        expires_in 	Recommended. A number of seconds after which the access token expires.
-//        scope 	Optional. The scope of the access token.
-//        state 	Required, if present in the autorization request. Must be same value as state parameter in request.
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+        MobileRecord mobileRecord = context.newRecord(mobileTable);
+        mobileRecord.setMobileId(UUID.randomUUID().toString());
+        mobileRecord.setApplicationId(applicationRecord.getApplicationId());
+        mobileRecord.setClientId(clientRecord.getClientId());
+        mobileRecord.setClientIp(request.getRemoteAddr());
+        mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+        mobileRecord.setDateCreated(new Date());
+        mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
+        mobileRecord.setDateTokenIssued(new Date());
+        mobileRecord.setAccessToken(UUID.randomUUID().toString());
+        mobileRecord.setGrantType(GrantTypeEnum.Implicit.getLiteral());
+        mobileRecord.store();
+
         List<String> params = new ArrayList<>();
-        params.add("access_token=" + UUID.randomUUID().toString());
+        params.add("access_token=" + mobileRecord.getAccessToken());
         params.add("token_type=bearer");
         params.add("expires_in=50000");
-        params.add("scope=pp,ee,ww");
-        params.add("state=wewewsdf21543");
+        if (scope != null && !"".equals(scope)) {
+            params.add("scope=" + scope);
+        }
+        if (state != null && !"".equals(state)) {
+            params.add("state=" + state);
+        }
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
+        headers.add(HttpHeaders.LOCATION, redirectUri + "?" + StringUtils.join(params, "&"));
         return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
     }
 

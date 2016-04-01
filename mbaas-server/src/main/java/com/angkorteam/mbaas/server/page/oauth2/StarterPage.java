@@ -16,7 +16,9 @@ import com.angkorteam.mbaas.server.renderer.ApplicationChoiceRenderer;
 import com.angkorteam.mbaas.server.renderer.ClientChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
@@ -132,22 +134,34 @@ public class StarterPage extends AdminLTEPage {
 
     private void okayButtonOnSubmit(Button components) {
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
-        String redirectUri = HttpFunction.getHttpAddress(request) + "/web" + CodePage.class.getAnnotation(Mount.class).value();
-        OAuth2DTO oAuth2DTO = new OAuth2DTO();
-        oAuth2DTO.setClientId(this.client.getClientId());
-        oAuth2DTO.setResponseType("code");
-        oAuth2DTO.setState(UUID.randomUUID().toString());
-        oAuth2DTO.setScope("");
-        oAuth2DTO.setRedirectUri(redirectUri);
-        getSession().setAttribute(oAuth2DTO.getState(), oAuth2DTO);
-        PageParameters parameters = new PageParameters();
-        parameters.add("client_id", oAuth2DTO.getClientId());
-        parameters.add("response_type", oAuth2DTO.getResponseType());
-        parameters.add("state", oAuth2DTO.getState());
-        parameters.add("scope", oAuth2DTO.getScope());
-        parameters.add("redirect_uri", oAuth2DTO.getRedirectUri());
+        OAuth2DTO oauth2DTO = new OAuth2DTO();
+        oauth2DTO.setState(UUID.randomUUID().toString());
+        oauth2DTO.setResponseType("code");
+        oauth2DTO.setClientId(this.client.getClientId());
+        oauth2DTO.setGrantType(this.oauth2);
+        oauth2DTO.setScope("");
+        getSession().setAttribute(oauth2DTO.getState(), oauth2DTO);
         if (GrantTypeEnum.Authorization.getLiteral().equals(this.oauth2)) {
+            String redirectUri = HttpFunction.getHttpAddress(request) + "/web" + CodePage.class.getAnnotation(Mount.class).value();
+            oauth2DTO.setRedirectUri(redirectUri);
+            PageParameters parameters = new PageParameters();
+            parameters.add("client_id", oauth2DTO.getClientId());
+            parameters.add("response_type", oauth2DTO.getResponseType());
+            parameters.add("state", oauth2DTO.getState());
+            parameters.add("scope", oauth2DTO.getScope());
+            parameters.add("redirect_uri", oauth2DTO.getRedirectUri());
             setResponsePage(AuthorizePage.class, parameters);
+        } else if (GrantTypeEnum.Implicit.getLiteral().equals(this.oauth2)) {
+            String redirectUri = HttpFunction.getHttpAddress(request) + "/web" + AccessTokenPage.class.getAnnotation(Mount.class).value();
+            oauth2DTO.setRedirectUri(redirectUri);
+            List<String> parameters = new ArrayList<>();
+            parameters.add("client_id=" + oauth2DTO.getClientId());
+            parameters.add("response_type=" + oauth2DTO.getResponseType());
+            parameters.add("state=" + oauth2DTO.getState());
+            parameters.add("scope=" + oauth2DTO.getScope());
+            parameters.add("redirect_uri=" + oauth2DTO.getRedirectUri());
+            RedirectPage redirectPage = new RedirectPage(HttpFunction.getHttpAddress(request) + "/api/oauth2/implicit?" + StringUtils.join(parameters, "&"));
+            setResponsePage(redirectPage);
         }
     }
 }

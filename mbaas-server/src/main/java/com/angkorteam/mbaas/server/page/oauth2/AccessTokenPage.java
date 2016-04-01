@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.page.oauth2;
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
+import com.angkorteam.mbaas.plain.enums.GrantTypeEnum;
 import com.angkorteam.mbaas.plain.response.monitor.MonitorTimeResponse;
 import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.oauth2.OAuth2Client;
@@ -46,6 +47,9 @@ public class AccessTokenPage extends AdminLTEPage {
 
         OAuth2DTO oauth2DTO = (OAuth2DTO) getSession().getAttribute(this.state);
         if (oauth2DTO != null) {
+            if (GrantTypeEnum.Implicit.getLiteral().equals(oauth2DTO.getGrantType())) {
+                oauth2DTO.setAccessToken(getPageParameters().get("access_token").toString(""));
+            }
             this.accessToken = oauth2DTO.getAccessToken();
         }
         this.accessTokenLabel = new Label("accessTokenLabel", new PropertyModel<>(this, "accessToken"));
