@@ -10,9 +10,11 @@ import com.angkorteam.mbaas.server.oauth2.OAuth2Client;
 import com.angkorteam.mbaas.server.oauth2.OAuth2DTO;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.http.HttpStatus;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.PropertyModel;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -91,8 +93,15 @@ public class AccessTokenPage extends AdminLTEPage {
         OAuth2Client client = retrofit.create(OAuth2Client.class);
         Call<MonitorTimeResponse> responseCall = client.monitorTime("Bearer " + oauth2DTO.getAccessToken());
         try {
-            this.serverTime = responseCall.execute().body().getData();
+            Response<MonitorTimeResponse> response = responseCall.execute();
+            if (response.code() == HttpStatus.SC_OK) {
+                MonitorTimeResponse responseBody = response.body();
+                this.serverTime = responseBody.getData();
+            } else {
+                this.serverTime = response.code() + " => " + response.message();
+            }
         } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 

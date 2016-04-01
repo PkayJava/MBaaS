@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.oauth2;
 
 import com.angkorteam.mbaas.plain.response.monitor.MonitorTimeResponse;
 import com.angkorteam.mbaas.plain.response.oauth2.OAuth2AuthorizeResponse;
+import com.angkorteam.mbaas.plain.response.oauth2.OAuth2ClientResponse;
 import com.angkorteam.mbaas.plain.response.oauth2.OAuth2PasswordResponse;
 import retrofit2.Call;
 import retrofit2.http.Field;
@@ -28,6 +29,11 @@ public interface OAuth2Client {
                                                 @Field("username") String username,
                                                 @Field("password") String password,
                                                 @Field("scope") String scope);
+
+    @POST("api/oauth2/client")
+    @FormUrlEncoded
+    Call<OAuth2ClientResponse> oauth2Client(@Field("grant_type") String grantType,
+                                              @Field("scope") String scope);
 
     @GET("api/monitor/time")
     Call<MonitorTimeResponse> monitorTime(@retrofit2.http.Header("Authorization") String authorization);

@@ -10,20 +10,28 @@ import com.angkorteam.mbaas.model.entity.tables.ClientTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.ApplicationPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.ClientPojo;
 import com.angkorteam.mbaas.plain.enums.GrantTypeEnum;
+import com.angkorteam.mbaas.plain.response.oauth2.OAuth2ClientResponse;
 import com.angkorteam.mbaas.server.function.HttpFunction;
+import com.angkorteam.mbaas.server.oauth2.OAuth2Client;
 import com.angkorteam.mbaas.server.oauth2.OAuth2DTO;
 import com.angkorteam.mbaas.server.renderer.ApplicationChoiceRenderer;
 import com.angkorteam.mbaas.server.renderer.ClientChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
+import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
+import retrofit2.Call;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -102,6 +110,9 @@ public class StarterPage extends AdminLTEPage {
                     applicationField.setRequired(true);
                     clientField.setRequired(true);
                 } else if (GrantTypeEnum.Password.getLiteral().equals(newSelection)) {
+                    applicationField.setRequired(false);
+                    clientField.setRequired(false);
+                } else if (GrantTypeEnum.Client.getLiteral().equals(newSelection)) {
                     applicationField.setRequired(false);
                     clientField.setRequired(false);
                 }
@@ -187,6 +198,36 @@ public class StarterPage extends AdminLTEPage {
             }
         } else if (GrantTypeEnum.Password.getLiteral().equals(this.oauth2)) {
             setResponsePage(PasswordPage.class);
+        } else if (GrantTypeEnum.Client.getLiteral().equals(this.oauth2)) {
+            String httpAddress = HttpFunction.getHttpAddress(request);
+            if (!httpAddress.endsWith("/")) {
+                httpAddress = httpAddress + "/";
+            }
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(httpAddress)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            String grantType = "client_credentials";
+
+            OAuth2Client client = retrofit.create(OAuth2Client.class);
+            Call<OAuth2ClientResponse> responseCall = client.oauth2Client(grantType, "");
+            try {
+                retrofit2.Response<OAuth2ClientResponse> response = responseCall.execute();
+                if (response.code() == HttpStatus.SC_OK) {
+                    OAuth2DTO oauth2DTO = new OAuth2DTO();
+                    oauth2DTO.setState(UUID.randomUUID().toString());
+                    oauth2DTO.setAccessToken(response.body().getAccessToken());
+                    oauth2DTO.setExpiresIn(response.body().getExpiresIn());
+                    oauth2DTO.setTokenType(response.body().getTokenType());
+                    getSession().setAttribute(oauth2DTO.getState(), oauth2DTO);
+                    PageParameters parameters = new PageParameters();
+                    parameters.add("state", oauth2DTO.getState());
+                    setResponsePage(AccessTokenPage.class, parameters);
+                }
+            } catch (IOException e) {
+                throw new WicketRuntimeException(e);
+            }
         }
     }
 }

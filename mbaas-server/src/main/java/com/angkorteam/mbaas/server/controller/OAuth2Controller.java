@@ -262,7 +262,8 @@ public class OAuth2Controller {
 
     @RequestMapping(
             path = "/client",
-            method = {RequestMethod.POST, RequestMethod.GET}
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<OAuth2ClientResponse> client(
             HttpServletRequest request,
@@ -270,10 +271,35 @@ public class OAuth2Controller {
             @RequestParam(value = "scope", required = false) String scope
     ) {
         LOGGER.info("{} grant_type=>{} scope=>{}", request.getRequestURL(), grantType, scope);
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+
+        if (!"client_credentials".equals(grantType)) {
+            errorMessages.put("grant_type", "incorrect");
+        }
+
+        if (!errorMessages.isEmpty()) {
+            OAuth2ClientResponse response = new OAuth2ClientResponse();
+            response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+        MobileRecord mobileRecord = context.newRecord(mobileTable);
+        mobileRecord.setMobileId(UUID.randomUUID().toString());
+        mobileRecord.setClientIp(request.getRemoteAddr());
+        mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+        mobileRecord.setDateCreated(new Date());
+        mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
+        mobileRecord.setDateTokenIssued(new Date());
+        mobileRecord.setAccessToken(UUID.randomUUID().toString());
+        mobileRecord.setGrantType(GrantTypeEnum.Client.getLiteral());
+        mobileRecord.store();
 
         OAuth2ClientResponse response = new OAuth2ClientResponse();
         response.setTokenType("bearer");
-        response.setAccessToken(UUID.randomUUID().toString());
+        response.setAccessToken(mobileRecord.getAccessToken());
         response.setExpiresIn(5000);
 
         return ResponseEntity.ok(response);

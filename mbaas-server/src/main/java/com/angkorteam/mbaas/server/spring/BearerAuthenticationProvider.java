@@ -47,44 +47,61 @@ public class BearerAuthenticationProvider implements org.springframework.securit
         mobileRecord.update();
 
         RoleTable roleTable = Tables.ROLE.as("roleTable");
-        RoleRecord roleRecord = null;
         String principal = null;
 
-        if (GrantTypeEnum.Authorization.getLiteral().equals(mobileRecord.getGrantType()) || GrantTypeEnum.Password.getLiteral().equals(mobileRecord.getGrantType())) {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        if (GrantTypeEnum.Authorization.getLiteral().equals(mobileRecord.getGrantType())) {
             UserTable userTable = Tables.USER.as("userTable");
             UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
-
             if (userRecord == null) {
                 throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
             }
-
             principal = userRecord.getLogin();
-            roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
-        }
-
-        if (GrantTypeEnum.Authorization.getLiteral().equals(mobileRecord.getGrantType()) || GrantTypeEnum.Implicit.getLiteral().equals(mobileRecord.getGrantType())) {
+            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
+            if (roleRecord != null) {
+                authorities.add(new SimpleGrantedAuthority(roleRecord.getName()));
+            }
             ClientTable clientTable = Tables.CLIENT.as("clientTable");
             ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(mobileRecord.getClientId())).fetchOneInto(clientTable);
             if (clientRecord == null) {
                 throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
             }
-
-            if (GrantTypeEnum.Implicit.getLiteral().equals(mobileRecord.getGrantType())) {
-                XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-                principal = clientRecord.getName();
-                roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_ANONYMOUS))).fetchOneInto(roleTable);
-            }
-
             ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
             ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
             if (applicationRecord == null) {
                 throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
             }
-        }
-
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        if (roleRecord != null) {
-            authorities.add(new SimpleGrantedAuthority(roleRecord.getName()));
+            authorities.add(new SimpleGrantedAuthority(configuration.getString(Constants.ROLE_OAUTH2_AUTHORIZATION)));
+        } else if (GrantTypeEnum.Password.getLiteral().equals(mobileRecord.getGrantType())) {
+            UserTable userTable = Tables.USER.as("userTable");
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            if (userRecord == null) {
+                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+            }
+            principal = userRecord.getLogin();
+            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
+            if (roleRecord != null) {
+                authorities.add(new SimpleGrantedAuthority(roleRecord.getName()));
+            }
+            authorities.add(new SimpleGrantedAuthority(configuration.getString(Constants.ROLE_OAUTH2_PASSWORD)));
+        } else if (GrantTypeEnum.Implicit.getLiteral().equals(mobileRecord.getGrantType())) {
+            ClientTable clientTable = Tables.CLIENT.as("clientTable");
+            ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(mobileRecord.getClientId())).fetchOneInto(clientTable);
+            if (clientRecord == null) {
+                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+            }
+            ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
+            ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
+            if (applicationRecord == null) {
+                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+            }
+            principal = configuration.getString(Constants.ROLE_OAUTH2_IMPLICIT);
+            authorities.add(new SimpleGrantedAuthority(principal));
+        } else if (GrantTypeEnum.Client.getLiteral().equals(mobileRecord.getGrantType())) {
+            principal = configuration.getString(Constants.ROLE_OAUTH2_CLIENT);
+            authorities.add(new SimpleGrantedAuthority(principal));
         }
 
         return new BearerAuthenticationToken(accessToken, principal, null, authorities);

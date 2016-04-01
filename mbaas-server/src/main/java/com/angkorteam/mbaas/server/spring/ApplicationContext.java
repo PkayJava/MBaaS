@@ -212,50 +212,28 @@ public class ApplicationContext implements ServletContextListener {
 
     protected void initRole(DSLContext context) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        Map<String, String> roles = new HashMap<>();
+        roles.put(configuration.getString(Constants.ROLE_ADMINISTRATOR), configuration.getString(Constants.ROLE_ADMINISTRATOR_DESCRIPTION));
+        roles.put(configuration.getString(Constants.ROLE_BACKOFFICE), configuration.getString(Constants.ROLE_BACKOFFICE_DESCRIPTION));
+        roles.put(configuration.getString(Constants.ROLE_REGISTERED), configuration.getString(Constants.ROLE_REGISTERED_DESCRIPTION));
+        roles.put(configuration.getString(Constants.ROLE_ANONYMOUS), configuration.getString(Constants.ROLE_ANONYMOUS_DESCRIPTION));
+        roles.put(configuration.getString(Constants.ROLE_OAUTH2_AUTHORIZATION), configuration.getString(Constants.ROLE_OAUTH2_AUTHORIZATION_DESCRIPTION));
+        roles.put(configuration.getString(Constants.ROLE_OAUTH2_CLIENT), configuration.getString(Constants.ROLE_OAUTH2_CLIENT_DESCRIPTION));
+        roles.put(configuration.getString(Constants.ROLE_OAUTH2_IMPLICIT), configuration.getString(Constants.ROLE_OAUTH2_IMPLICIT_DESCRIPTION));
+        roles.put(configuration.getString(Constants.ROLE_OAUTH2_PASSWORD), configuration.getString(Constants.ROLE_OAUTH2_PASSWORD_DESCRIPTION));
+
         RoleTable roleTable = Tables.ROLE.as("roleTable");
-
-        RoleRecord administratorRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_ADMINISTRATOR))).fetchOneInto(roleTable);
-        if (administratorRecord == null) {
-            administratorRecord = context.newRecord(roleTable);
-            administratorRecord.setRoleId(UUID.randomUUID().toString());
-            administratorRecord.setSystem(true);
-            administratorRecord.setName(configuration.getString(Constants.ROLE_ADMINISTRATOR));
-            administratorRecord.setDescription(configuration.getString(Constants.ROLE_ADMINISTRATOR_DESCRIPTION));
-            administratorRecord.setDeleted(false);
-            administratorRecord.store();
-        }
-
-        RoleRecord backofficeRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_BACKOFFICE))).fetchOneInto(roleTable);
-        if (backofficeRecord == null) {
-            backofficeRecord = context.newRecord(roleTable);
-            backofficeRecord.setRoleId(UUID.randomUUID().toString());
-            backofficeRecord.setSystem(true);
-            backofficeRecord.setName(configuration.getString(Constants.ROLE_BACKOFFICE));
-            backofficeRecord.setDescription(configuration.getString(Constants.ROLE_BACKOFFICE_DESCRIPTION));
-            backofficeRecord.setDeleted(false);
-            backofficeRecord.store();
-        }
-
-        RoleRecord registeredRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_REGISTERED))).fetchOneInto(roleTable);
-        if (registeredRecord == null) {
-            registeredRecord = context.newRecord(roleTable);
-            registeredRecord.setRoleId(UUID.randomUUID().toString());
-            registeredRecord.setSystem(true);
-            registeredRecord.setName(configuration.getString(Constants.ROLE_REGISTERED));
-            registeredRecord.setDescription(configuration.getString(Constants.ROLE_REGISTERED_DESCRIPTION));
-            registeredRecord.setDeleted(false);
-            registeredRecord.store();
-        }
-
-        RoleRecord anonymousRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_ANONYMOUS))).fetchOneInto(roleTable);
-        if (anonymousRecord == null) {
-            anonymousRecord = context.newRecord(roleTable);
-            anonymousRecord.setRoleId(UUID.randomUUID().toString());
-            anonymousRecord.setSystem(true);
-            anonymousRecord.setName(configuration.getString(Constants.ROLE_ANONYMOUS));
-            anonymousRecord.setDescription(configuration.getString(Constants.ROLE_ANONYMOUS_DESCRIPTION));
-            anonymousRecord.setDeleted(false);
-            anonymousRecord.store();
+        for (Map.Entry<String, String> role : roles.entrySet()) {
+            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(role.getKey())).fetchOneInto(roleTable);
+            if (roleRecord == null) {
+                roleRecord = context.newRecord(roleTable);
+                roleRecord.setRoleId(UUID.randomUUID().toString());
+                roleRecord.setName(role.getKey());
+                roleRecord.setDescription(role.getValue());
+                roleRecord.setSystem(true);
+                roleRecord.setDeleted(false);
+                roleRecord.store();
+            }
         }
     }
 
