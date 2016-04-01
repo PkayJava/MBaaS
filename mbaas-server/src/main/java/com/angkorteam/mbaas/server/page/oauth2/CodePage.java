@@ -111,6 +111,8 @@ public class CodePage extends AdminLTEPage {
                 PageParameters parameters = new PageParameters();
                 parameters.add("state", oauth2DTO.getState());
                 setResponsePage(AccessTokenPage.class, parameters);
+            } else {
+                setResponsePage(StarterPage.class);
             }
         } catch (IOException e) {
             throw new WicketRuntimeException(e);

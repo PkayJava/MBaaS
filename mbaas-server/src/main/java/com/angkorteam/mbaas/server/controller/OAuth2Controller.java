@@ -2,14 +2,8 @@ package com.angkorteam.mbaas.server.controller;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
-import com.angkorteam.mbaas.model.entity.tables.AuthorizationTable;
-import com.angkorteam.mbaas.model.entity.tables.ClientTable;
-import com.angkorteam.mbaas.model.entity.tables.MobileTable;
-import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.AuthorizationRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
+import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.GrantTypeEnum;
 import com.angkorteam.mbaas.plain.response.oauth2.OAuth2AuthorizeResponse;
 import com.angkorteam.mbaas.plain.response.oauth2.OAuth2ClientResponse;
@@ -18,6 +12,7 @@ import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by socheat on 3/30/16.
@@ -134,71 +126,41 @@ public class OAuth2Controller {
             @RequestParam(value = "state", required = false) String state
     ) {
         LOGGER.info("{} response_type=>{} client_id=>{} redirect_uri=>{} scope=>{} state=>{}", request.getRequestURL(), responseType, clientId, redirectUri, scope, state);
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
         if (!"code".equals(responseType)) {
-            List<String> params = new ArrayList<>();
-            params.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
-            params.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
-            params.add("error_uri=" + redirectUri);
-            if (state != null && !"".equals(state)) {
-                params.add("state=" + state);
-            }
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
-            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
+            errorMessages.put("response_type", "bad value");
         }
         if (redirectUri == null || "".equals(redirectUri)) {
-            List<String> params = new ArrayList<>();
-            params.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
-            params.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
-            params.add("error_uri=" + redirectUri);
-            if (state != null && !"".equals(state)) {
-                params.add("state=" + state);
-            }
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
-            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
+            errorMessages.put("redirect_uri", "is required");
         }
         ClientRecord clientRecord = null;
         if (clientId == null || "".equals(clientId)) {
-            List<String> params = new ArrayList<>();
-            params.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
-            params.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
-            params.add("error_uri=" + redirectUri);
-            if (state != null && !"".equals(state)) {
-                params.add("state=" + state);
-            }
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
-            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
+            errorMessages.put("redirect_uri", "is required");
         } else {
             ClientTable clientTable = Tables.CLIENT.as("clientTable");
             clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(clientId)).fetchOneInto(clientTable);
             if (clientRecord == null) {
-                List<String> params = new ArrayList<>();
-                params.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
-                params.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
-                params.add("error_uri=" + redirectUri);
-                if (state != null && !"".equals(state)) {
-                    params.add("state=" + state);
-                }
-                HttpHeaders headers = new HttpHeaders();
-                headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
-                return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
+                errorMessages.put("redirect_uri", "is required");
             }
         }
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
         ApplicationRecord applicationRecord = null;
         applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
         if (applicationRecord == null) {
-            List<String> params = new ArrayList<>();
-            params.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
-            params.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
-            params.add("error_uri=" + redirectUri);
-            if (state != null && !"".equals(state)) {
-                params.add("state=" + state);
-            }
+            errorMessages.put("redirect_uri", "is required");
+        }
+
+        if (!errorMessages.isEmpty()) {
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(params, "&"));
+            List<String> errorParams = new ArrayList<>();
+            errorParams.add("error=" + HttpStatus.INTERNAL_SERVER_ERROR.value());
+            errorParams.add("error_description=" + HttpStatus.INTERNAL_SERVER_ERROR.getDeclaringClass());
+            errorParams.add("error_uri=" + redirectUri);
+            if (state != null && !"".equals(state)) {
+                errorParams.add("state=" + state);
+            }
+            headers.add(HttpHeaders.LOCATION, redirectUri + StringUtils.join(errorParams, "&"));
             return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(headers).build();
         }
 
@@ -235,7 +197,8 @@ public class OAuth2Controller {
 
     @RequestMapping(
             path = "/password",
-            method = {RequestMethod.POST, RequestMethod.GET}
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<OAuth2PasswordResponse> password(
             HttpServletRequest request,
@@ -245,12 +208,54 @@ public class OAuth2Controller {
             @RequestParam(value = "scope", required = false) String scope
     ) {
         LOGGER.info("{} grant_type=>{} username=>{} password=>{} scope=>{}", request.getRequestURL(), grantType, username, password, scope);
+        Map<String, String> errorMessages = new LinkedHashMap<>();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+
+        if (!"password".equals(grantType)) {
+            errorMessages.put("grant_type", "incorrect");
+        }
+
+        if (password == null || "".equals(password)) {
+            errorMessages.put("credential", "incorrect");
+        }
+        if (username == null || "".equals(username)) {
+            errorMessages.put("credential", "incorrect");
+        }
+
+        UserTable userTable = Tables.USER.as("userTable");
+        UserRecord userRecord = null;
+        if (username != null && !"".equals(username) && password != null && !"".equals(password)) {
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(username)).and(userTable.PASSWORD.eq(DSL.md5(password))).fetchOneInto(userTable);
+            if (userRecord == null) {
+                errorMessages.put("credential", "incorrect");
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            OAuth2PasswordResponse response = new OAuth2PasswordResponse();
+            response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+        MobileRecord mobileRecord = context.newRecord(mobileTable);
+        mobileRecord.setMobileId(UUID.randomUUID().toString());
+        mobileRecord.setUserId(userRecord.getUserId());
+        mobileRecord.setClientIp(request.getRemoteAddr());
+        mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+        mobileRecord.setDateCreated(new Date());
+        mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
+        mobileRecord.setDateTokenIssued(new Date());
+        mobileRecord.setAccessToken(UUID.randomUUID().toString());
+        mobileRecord.setGrantType(GrantTypeEnum.Password.getLiteral());
+        mobileRecord.store();
 
         OAuth2PasswordResponse response = new OAuth2PasswordResponse();
         response.setTokenType("bearer");
-        response.setAccessToken(UUID.randomUUID().toString());
+        response.setAccessToken(mobileRecord.getAccessToken());
         response.setExpiresIn(5000);
-        response.setRefreshToken(UUID.randomUUID().toString());
+        response.setRefreshToken(mobileRecord.getMobileId());
 
         return ResponseEntity.ok(response);
     }

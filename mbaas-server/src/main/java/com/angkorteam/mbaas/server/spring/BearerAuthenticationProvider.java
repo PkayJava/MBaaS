@@ -32,7 +32,6 @@ public class BearerAuthenticationProvider implements org.springframework.securit
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String accessToken = ((BearerAuthenticationToken) authentication).getToken();
 
-
         MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
         MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(mobileTable);
@@ -51,7 +50,7 @@ public class BearerAuthenticationProvider implements org.springframework.securit
         RoleRecord roleRecord = null;
         String principal = null;
 
-        if (GrantTypeEnum.Authorization.getLiteral().equals(mobileRecord.getGrantType())) {
+        if (GrantTypeEnum.Authorization.getLiteral().equals(mobileRecord.getGrantType()) || GrantTypeEnum.Password.getLiteral().equals(mobileRecord.getGrantType())) {
             UserTable userTable = Tables.USER.as("userTable");
             UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
 
@@ -63,22 +62,24 @@ public class BearerAuthenticationProvider implements org.springframework.securit
             roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
         }
 
-        ClientTable clientTable = Tables.CLIENT.as("clientTable");
-        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(mobileRecord.getClientId())).fetchOneInto(clientTable);
-        if (clientRecord == null) {
-            throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
-        }
+        if (GrantTypeEnum.Authorization.getLiteral().equals(mobileRecord.getGrantType()) || GrantTypeEnum.Implicit.getLiteral().equals(mobileRecord.getGrantType())) {
+            ClientTable clientTable = Tables.CLIENT.as("clientTable");
+            ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(mobileRecord.getClientId())).fetchOneInto(clientTable);
+            if (clientRecord == null) {
+                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+            }
 
-        if (GrantTypeEnum.Implicit.getLiteral().equals(mobileRecord.getGrantType())) {
-            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-            principal = clientRecord.getName();
-            roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_ANONYMOUS))).fetchOneInto(roleTable);
-        }
+            if (GrantTypeEnum.Implicit.getLiteral().equals(mobileRecord.getGrantType())) {
+                XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+                principal = clientRecord.getName();
+                roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_ANONYMOUS))).fetchOneInto(roleTable);
+            }
 
-        ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
-        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
-        if (applicationRecord == null) {
-            throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+            ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
+            ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
+            if (applicationRecord == null) {
+                throw new BadCredentialsException("bearer accessToken " + accessToken + " is not valid");
+            }
         }
 
         List<GrantedAuthority> authorities = new ArrayList<>();

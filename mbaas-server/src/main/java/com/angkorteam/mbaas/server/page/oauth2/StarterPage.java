@@ -86,7 +86,27 @@ public class StarterPage extends AdminLTEPage {
         this.applicationFeedback = new TextFeedbackPanel("applicationFeedback", this.applicationField);
         this.form.add(this.applicationFeedback);
 
-        this.oauth2Field = new DropDownChoice<>("oauth2Field", new PropertyModel<>(this, "oauth2"), new PropertyModel<>(this, "oauth2s"));
+        this.oauth2Field = new DropDownChoice<String>("oauth2Field", new PropertyModel<>(this, "oauth2"), new PropertyModel<>(this, "oauth2s")) {
+            @Override
+            protected boolean wantOnSelectionChangedNotifications() {
+                return true;
+            }
+
+            @Override
+            protected void onSelectionChanged(String newSelection) {
+                super.onSelectionChanged(newSelection);
+                if (GrantTypeEnum.Implicit.getLiteral().equals(newSelection)) {
+                    applicationField.setRequired(true);
+                    clientField.setRequired(true);
+                } else if (GrantTypeEnum.Authorization.getLiteral().equals(newSelection)) {
+                    applicationField.setRequired(true);
+                    clientField.setRequired(true);
+                } else if (GrantTypeEnum.Password.getLiteral().equals(newSelection)) {
+                    applicationField.setRequired(false);
+                    clientField.setRequired(false);
+                }
+            }
+        };
         this.oauth2Field.setRequired(true);
         this.form.add(this.oauth2Field);
         this.oauth2Feedback = new TextFeedbackPanel("oauth2Feedback", this.oauth2Field);
@@ -134,34 +154,39 @@ public class StarterPage extends AdminLTEPage {
 
     private void okayButtonOnSubmit(Button components) {
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
-        OAuth2DTO oauth2DTO = new OAuth2DTO();
-        oauth2DTO.setState(UUID.randomUUID().toString());
-        oauth2DTO.setResponseType("code");
-        oauth2DTO.setClientId(this.client.getClientId());
-        oauth2DTO.setGrantType(this.oauth2);
-        oauth2DTO.setScope("");
-        getSession().setAttribute(oauth2DTO.getState(), oauth2DTO);
-        if (GrantTypeEnum.Authorization.getLiteral().equals(this.oauth2)) {
-            String redirectUri = HttpFunction.getHttpAddress(request) + "/web" + CodePage.class.getAnnotation(Mount.class).value();
-            oauth2DTO.setRedirectUri(redirectUri);
-            PageParameters parameters = new PageParameters();
-            parameters.add("client_id", oauth2DTO.getClientId());
-            parameters.add("response_type", oauth2DTO.getResponseType());
-            parameters.add("state", oauth2DTO.getState());
-            parameters.add("scope", oauth2DTO.getScope());
-            parameters.add("redirect_uri", oauth2DTO.getRedirectUri());
-            setResponsePage(AuthorizePage.class, parameters);
-        } else if (GrantTypeEnum.Implicit.getLiteral().equals(this.oauth2)) {
-            String redirectUri = HttpFunction.getHttpAddress(request) + "/web" + AccessTokenPage.class.getAnnotation(Mount.class).value();
-            oauth2DTO.setRedirectUri(redirectUri);
-            List<String> parameters = new ArrayList<>();
-            parameters.add("client_id=" + oauth2DTO.getClientId());
-            parameters.add("response_type=" + oauth2DTO.getResponseType());
-            parameters.add("state=" + oauth2DTO.getState());
-            parameters.add("scope=" + oauth2DTO.getScope());
-            parameters.add("redirect_uri=" + oauth2DTO.getRedirectUri());
-            RedirectPage redirectPage = new RedirectPage(HttpFunction.getHttpAddress(request) + "/api/oauth2/implicit?" + StringUtils.join(parameters, "&"));
-            setResponsePage(redirectPage);
+        if (GrantTypeEnum.Authorization.getLiteral().equals(this.oauth2)
+                || GrantTypeEnum.Implicit.getLiteral().equals(this.oauth2)) {
+            OAuth2DTO oauth2DTO = new OAuth2DTO();
+            oauth2DTO.setState(UUID.randomUUID().toString());
+            oauth2DTO.setResponseType("code");
+            oauth2DTO.setClientId(this.client.getClientId());
+            oauth2DTO.setGrantType(this.oauth2);
+            oauth2DTO.setScope("");
+            getSession().setAttribute(oauth2DTO.getState(), oauth2DTO);
+            if (GrantTypeEnum.Authorization.getLiteral().equals(this.oauth2)) {
+                String redirectUri = HttpFunction.getHttpAddress(request) + "/web" + CodePage.class.getAnnotation(Mount.class).value();
+                oauth2DTO.setRedirectUri(redirectUri);
+                PageParameters parameters = new PageParameters();
+                parameters.add("client_id", oauth2DTO.getClientId());
+                parameters.add("response_type", oauth2DTO.getResponseType());
+                parameters.add("state", oauth2DTO.getState());
+                parameters.add("scope", oauth2DTO.getScope());
+                parameters.add("redirect_uri", oauth2DTO.getRedirectUri());
+                setResponsePage(AuthorizePage.class, parameters);
+            } else if (GrantTypeEnum.Implicit.getLiteral().equals(this.oauth2)) {
+                String redirectUri = HttpFunction.getHttpAddress(request) + "/web" + AccessTokenPage.class.getAnnotation(Mount.class).value();
+                oauth2DTO.setRedirectUri(redirectUri);
+                List<String> parameters = new ArrayList<>();
+                parameters.add("client_id=" + oauth2DTO.getClientId());
+                parameters.add("response_type=" + oauth2DTO.getResponseType());
+                parameters.add("state=" + oauth2DTO.getState());
+                parameters.add("scope=" + oauth2DTO.getScope());
+                parameters.add("redirect_uri=" + oauth2DTO.getRedirectUri());
+                RedirectPage redirectPage = new RedirectPage(HttpFunction.getHttpAddress(request) + "/api/oauth2/implicit?" + StringUtils.join(parameters, "&"));
+                setResponsePage(redirectPage);
+            }
+        } else if (GrantTypeEnum.Password.getLiteral().equals(this.oauth2)) {
+            setResponsePage(PasswordPage.class);
         }
     }
 }
