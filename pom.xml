@@ -114,6 +114,12 @@
                 <version>${sigar.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>net.glxn.qrgen</groupId>
+                <artifactId>javase</artifactId>
+                <version>2.0</version>
+            </dependency>
+
             <!-- Magento 2 -->
             <dependency>
                 <groupId>com.angkorteam.magento2.backend</groupId>

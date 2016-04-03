@@ -1,6 +1,8 @@
 package com.angkorteam.mbaas.plain.enums;
 
-public enum SecurityEnum {
+import java.io.Serializable;
+
+public enum SecurityEnum implements Serializable{
 
     Granted("Granted"),
     Denied("Denied");

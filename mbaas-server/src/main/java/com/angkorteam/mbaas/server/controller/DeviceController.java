@@ -34,7 +34,8 @@ import java.util.UUID;
  * Created by socheat on 3/28/16.
  */
 
-@Controller("/rest/registry")
+@Controller
+@RequestMapping("/rest/registry")
 public class DeviceController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceController.class);

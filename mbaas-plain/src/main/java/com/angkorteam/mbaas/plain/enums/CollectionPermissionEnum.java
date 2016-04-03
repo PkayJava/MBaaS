@@ -1,6 +1,8 @@
 package com.angkorteam.mbaas.plain.enums;
 
-public enum CollectionPermissionEnum {
+import java.io.Serializable;
+
+public enum CollectionPermissionEnum implements Serializable {
     Read(1),
     Attribute(2),
     Drop(4),

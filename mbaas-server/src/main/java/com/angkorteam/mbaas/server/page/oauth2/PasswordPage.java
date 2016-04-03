@@ -77,10 +77,7 @@ public class PasswordPage extends AdminLTEPage {
     private void okayButtonOnSubmit(Button button) {
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
 
-        String httpAddress = HttpFunction.getHttpAddress(request);
-        if (!httpAddress.endsWith("/")) {
-            httpAddress = httpAddress + "/";
-        }
+        String httpAddress = HttpFunction.getHttpAddress(request) + "/";
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(httpAddress)
                 .addConverterFactory(GsonConverterFactory.create())

@@ -5,6 +5,7 @@
     <entry key="RoleNameValidator.duplicated">is taken</entry>
     <entry key="SettingKeyValidator.duplicated">is taken</entry>
     <entry key="UserLoginValidator.duplicated">is taken</entry>
+    <entry key="UserPasswordValidator.invalid">is invalid</entry>
     <entry key="AttributeNameValidator.duplicated">is taken</entry>
     <entry key="AttributeNameValidator.format">is bad format</entry>
     <entry key="CollectionNameValidator.duplicated">is taken</entry>

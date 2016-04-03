@@ -1,9 +1,11 @@
 package com.angkorteam.mbaas.plain.enums;
 
+import java.io.Serializable;
+
 /**
  * Created by socheat on 3/10/16.
  */
-public enum AttributeTypeEnum {
+public enum AttributeTypeEnum implements Serializable {
 
     Boolean("Boolean", java.lang.Boolean.class.getName(), "BIT"),
     Byte("Byte", java.lang.Byte.class.getName(), "INT"),

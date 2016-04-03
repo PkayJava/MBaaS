@@ -79,10 +79,7 @@ public class CodePage extends AdminLTEPage {
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         OAuth2DTO oauth2DTO = (OAuth2DTO) getSession().getAttribute(this.state);
         oauth2DTO.setCode(this.code);
-        String httpAddress = HttpFunction.getHttpAddress(request);
-        if (!httpAddress.endsWith("/")) {
-            httpAddress = httpAddress + "/";
-        }
+        String httpAddress = HttpFunction.getHttpAddress(request) + "/";
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(httpAddress)
                 .addConverterFactory(GsonConverterFactory.create())

@@ -6,7 +6,7 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 /**
  * Created by socheat on 3/1/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "registered"})
 public class DashboardPage extends MasterPage {
 
     @Override

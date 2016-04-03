@@ -25,7 +25,7 @@ public class LoginPage extends AdminLTEPage {
     private PasswordTextField passwordField;
     private TextFeedbackPanel passwordFeedback;
 
-    private Button okayButton;
+    private Button loginButton;
 
     private Form<Void> form;
 
@@ -50,9 +50,9 @@ public class LoginPage extends AdminLTEPage {
         this.passwordFeedback = new TextFeedbackPanel("passwordFeedback", this.passwordField);
         this.form.add(this.passwordFeedback);
 
-        this.okayButton = new Button("okayButton");
-        this.okayButton.setOnSubmit(this::okayButtonOnSubmit);
-        this.form.add(this.okayButton);
+        this.loginButton = new Button("loginButton");
+        this.loginButton.setOnSubmit(this::loginButtonOnSubmit);
+        this.form.add(this.loginButton);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class LoginPage extends AdminLTEPage {
         return (Session) super.getSession();
     }
 
-    private void okayButtonOnSubmit(Button components) {
+    private void loginButtonOnSubmit(Button button) {
         boolean signin = getSession().signIn(this.login, this.password);
         if (signin) {
             setResponsePage(getApplication().getHomePage());

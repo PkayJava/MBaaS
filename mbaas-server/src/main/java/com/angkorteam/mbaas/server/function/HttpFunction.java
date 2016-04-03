@@ -23,6 +23,11 @@ public class HttpFunction {
             }
             address.append(request.getServerName()).append(":").append(request.getServerPort()).append(servletContext.getContextPath());
         }
-        return address.toString();
+        String result = address.toString();
+        if (result.endsWith("/")) {
+            return result.substring(0, result.length() - 1);
+        } else {
+            return result;
+        }
     }
 }

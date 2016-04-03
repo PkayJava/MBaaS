@@ -1,9 +1,11 @@
 package com.angkorteam.mbaas.plain.enums;
 
+import java.io.Serializable;
+
 /**
  * Created by socheat on 3/30/16.
  */
-public enum GrantTypeEnum {
+public enum GrantTypeEnum implements Serializable {
 
     Authorization("Authorization", "Authorization Code Grant"),
     Implicit("Implicit", "Implicit Grant"),

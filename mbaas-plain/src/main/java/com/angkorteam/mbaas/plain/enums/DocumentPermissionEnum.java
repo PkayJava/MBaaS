@@ -1,6 +1,8 @@
 package com.angkorteam.mbaas.plain.enums;
 
-public enum DocumentPermissionEnum {
+import java.io.Serializable;
+
+public enum DocumentPermissionEnum implements Serializable {
     Read(1),
     Modify(2),
     Delete(4);

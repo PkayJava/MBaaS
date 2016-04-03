@@ -32,6 +32,11 @@
     <dependencies>
 
         <dependency>
+            <groupId>net.glxn.qrgen</groupId>
+            <artifactId>javase</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.angkorteam.mbaas.plain</groupId>
             <artifactId>mbaas-plain</artifactId>
             <version>${project.parent.version}</version>

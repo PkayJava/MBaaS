@@ -1,9 +1,11 @@
 package com.angkorteam.mbaas.plain.enums;
 
+import java.io.Serializable;
+
 /**
  * Created by socheat on 3/10/16.
  */
-public enum QueryReturnTypeEnum {
+public enum QueryReturnTypeEnum implements Serializable {
 
     Boolean("Boolean"),
     Byte("Byte"),

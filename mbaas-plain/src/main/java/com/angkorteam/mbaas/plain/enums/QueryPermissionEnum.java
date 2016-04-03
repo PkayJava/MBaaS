@@ -1,6 +1,8 @@
 package com.angkorteam.mbaas.plain.enums;
 
-public enum QueryPermissionEnum {
+import java.io.Serializable;
+
+public enum QueryPermissionEnum implements Serializable {
     Read(1),
     Modify(2),
     Delete(4),

@@ -164,6 +164,7 @@ public class ApplicationContext implements ServletContextListener {
             adminRecord.setLogin(configuration.getString(Constants.USER_ADMIN));
             adminRecord.setPassword(configuration.getString(Constants.USER_ADMIN_PASSWORD));
             adminRecord.setRoleId(roleRecord.getRoleId());
+            adminRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
             adminRecord.store();
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
             jdbcTemplate.update("UPDATE " + Tables.USER.getName() + " SET " + userTable.EXTRA.getName() + " = " + MariaDBFunction.columnCreate(temp, typeEnums) + " WHERE " + userTable.USER_ID.getName() + " = ?", uuid);
@@ -184,6 +185,7 @@ public class ApplicationContext implements ServletContextListener {
             mbaasRecord.setLogin(configuration.getString(Constants.USER_MBAAS));
             mbaasRecord.setPassword(configuration.getString(Constants.USER_MBAAS_PASSWORD));
             mbaasRecord.setRoleId(roleRecord.getRoleId());
+            mbaasRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
             mbaasRecord.store();
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_MBAAS_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
             jdbcTemplate.update("UPDATE " + Tables.USER.getName() + " SET " + userTable.EXTRA.getName() + " = " + MariaDBFunction.columnCreate(temp, typeEnums) + " WHERE " + userTable.USER_ID.getName() + " = ?", uuid);
@@ -204,6 +206,7 @@ public class ApplicationContext implements ServletContextListener {
             internalAdminRecord.setLogin(configuration.getString(Constants.USER_INTERNAL_ADMIN));
             internalAdminRecord.setPassword(configuration.getString(Constants.USER_INTERNAL_ADMIN_PASSWORD));
             internalAdminRecord.setRoleId(roleRecord.getRoleId());
+            internalAdminRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
             internalAdminRecord.store();
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_INTERNAL_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
             jdbcTemplate.update("UPDATE " + Tables.USER.getName() + " SET " + userTable.EXTRA.getName() + " = " + MariaDBFunction.columnCreate(temp, typeEnums) + " WHERE " + userTable.USER_ID.getName() + " = ?", uuid);

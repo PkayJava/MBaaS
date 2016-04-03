@@ -22,14 +22,19 @@
                 <input wicket:id="passwordField" type="password" class="form-control"/>
                 <span wicket:id="passwordFeedback" class="help-block"/>
             </div>
+            <div class="form-group">
+                <label wicket:for="retypePasswordField">Retype Password</label>
+                <input wicket:id="retypePasswordField" type="password" class="form-control"/>
+                <span wicket:id="retypePasswordFeedback" class="help-block"/>
+            </div>
             <div class="row">
                 <div class="col-xs-6">
                     <wicket:link>
-                        <a href="RegisterPage.html" class="btn btn-primary btn-block btn-flat">Register</a>
+                        <a href="LoginPage.html" class="btn btn-primary btn-block btn-flat">Cancel</a>
                     </wicket:link>
                 </div>
                 <div class="col-xs-6">
-                    <button wicket:id="loginButton" type="submit" class="btn btn-primary btn-block btn-flat">Login</button>
+                    <button wicket:id="registerButton" type="submit" class="btn btn-primary btn-block btn-flat">Register</button>
                 </div>
             </div>
         </form>

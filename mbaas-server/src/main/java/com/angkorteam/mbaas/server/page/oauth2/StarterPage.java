@@ -199,10 +199,7 @@ public class StarterPage extends AdminLTEPage {
         } else if (GrantTypeEnum.Password.getLiteral().equals(this.oauth2)) {
             setResponsePage(PasswordPage.class);
         } else if (GrantTypeEnum.Client.getLiteral().equals(this.oauth2)) {
-            String httpAddress = HttpFunction.getHttpAddress(request);
-            if (!httpAddress.endsWith("/")) {
-                httpAddress = httpAddress + "/";
-            }
+            String httpAddress = HttpFunction.getHttpAddress(request) + "/";
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(httpAddress)
                     .addConverterFactory(GsonConverterFactory.create())
