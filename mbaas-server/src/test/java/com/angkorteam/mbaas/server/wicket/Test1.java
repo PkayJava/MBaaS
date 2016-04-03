@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.wicket;
 
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import com.angkorteam.mbaas.plain.security.otp.Totp;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.script.ScriptException;
 
@@ -10,11 +11,11 @@ import javax.script.ScriptException;
 public class Test1 {
 
     public static void main(String[] args) throws ScriptException, NoSuchMethodException {
-        NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-//        ScriptEngine nashorn = factory.getScriptEngine(new NoJavaFilter());
-//        Object result = nashorn.eval("var JavaScript = Java.type('com.angkorteam.mbaas.server.wicket.JavaScript');var test = JavaScript.fun3({foo: 'bar1',bar: 'foo1'});");
-//        Object result = nashorn.eval("var JavaScript = Java.type('com.angkorteam.mbaas.server.wicket.JavaScript');var test = JavaScript.fun3(function (a){if(a==undefined){print('abc')}else{print(a);}});");
-//        System.out.println(result);
-//        System.out.println(result.getClass().getName());
+        String hash = StringUtils.split("857fad6a-4a7d-4618-9b20-4463cad96778||NHRKVMESWTEDMJSB", "||")[1];
+        Totp totp = new Totp(hash);
+//        System.out.println(totp.uri("sd"));
+//        System.out.println(totp.now());
+//        Totp totp = new Totp(secret);
+        System.out.println(totp.now());
     }
 }

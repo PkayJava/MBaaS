@@ -166,6 +166,7 @@ public class PermissionPage extends AdminLTEPage {
 
     private void denyButtonOnSubmit(Button button) {
         this.denied = true;
+        getSession().removeAttribute(this.state);
         List<String> params = new ArrayList<>();
         if (this.state != null && !"".equals(this.state)) {
             params.add("state=" + this.state);

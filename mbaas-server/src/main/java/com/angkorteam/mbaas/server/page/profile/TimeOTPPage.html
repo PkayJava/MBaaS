@@ -9,12 +9,16 @@
         <form role="form" wicket:id="form">
             <div class="box-body">
                 <div class="form-group">
-                    <label>Secret</label>
+                    <label>Status</label>
+                    <span wicket:id="statusLabel" class="form-control"/>
+                </div>
+                <div class="form-group">
                     <img wicket:id="secretImage" class="img-responsive"/>
                 </div>
             </div>
 
             <div class="box-footer">
+                <button wicket:id="revokeButton" type="submit" class="btn btn-primary">Revoke</button>
             </div>
         </form>
     </div>

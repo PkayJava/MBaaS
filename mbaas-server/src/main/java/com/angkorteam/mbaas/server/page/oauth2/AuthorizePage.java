@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.page.oauth2;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
+import com.angkorteam.framework.extension.wicket.html.form.AjaxButton;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
@@ -11,9 +12,16 @@ import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
+import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
+import com.angkorteam.mbaas.plain.enums.UserTotpStatusEnum;
+import com.angkorteam.mbaas.plain.security.otp.Totp;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
@@ -51,6 +59,8 @@ public class AuthorizePage extends AdminLTEPage {
 
     private Button okayButton;
 
+    private AjaxButton requestPasswordButton;
+
     private Form<Void> form;
 
     @Override
@@ -87,6 +97,7 @@ public class AuthorizePage extends AdminLTEPage {
         }
 
         this.form = new Form<>("form");
+        this.form.setOutputMarkupId(true);
         add(this.form);
 
         this.applicationLabel = new Label("applicationLabel", new PropertyModel<>(this, "applicationText"));
@@ -109,9 +120,48 @@ public class AuthorizePage extends AdminLTEPage {
         this.passwordFeedback = new TextFeedbackPanel("passwordFeedback", this.passwordField);
         this.form.add(this.passwordFeedback);
 
+        this.requestPasswordButton = new AjaxButton("requestPasswordButton");
+        this.requestPasswordButton.setOnSubmit(this::requestPasswordButtonOnSubmit);
+        this.form.add(this.requestPasswordButton);
+        this.requestPasswordButton.setVisible(false);
+
+        this.loginField.add(new OnChangeAjaxBehavior() {
+            @Override
+            protected void onUpdate(AjaxRequestTarget target) {
+                requestPasswordButton.setVisible(false);
+                target.add(requestPasswordButton);
+            }
+        });
+
+        this.loginField.add(new AjaxFormComponentUpdatingBehavior("onblur") {
+            @Override
+            protected void onUpdate(AjaxRequestTarget target) {
+                DSLContext context = getSession().getDSLContext();
+                UserTable userTable = Tables.USER.as("userTable");
+                UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(login)).fetchOneInto(userTable);
+                if (userRecord != null) {
+                    if (AuthenticationEnum.TwoSMS.getLiteral().equals(userRecord.getAuthentication())
+                            || AuthenticationEnum.TwoEMail.getLiteral().equals(userRecord.getAuthentication())) {
+                        requestPasswordButton.setVisible(true);
+                    } else {
+                        requestPasswordButton.setVisible(false);
+                    }
+                } else {
+                    requestPasswordButton.setVisible(false);
+                }
+                target.focusComponent(passwordField);
+                target.add(form);
+            }
+        });
+
+
         this.okayButton = new Button("okayButton");
         this.okayButton.setOnSubmit(this::okayButtonOnSubmit);
         this.form.add(this.okayButton);
+    }
+
+    private void requestPasswordButtonOnSubmit(AjaxButton self, AjaxRequestTarget target, org.apache.wicket.markup.html.form.Form<?> form) {
+
     }
 
     @Override
@@ -122,15 +172,35 @@ public class AuthorizePage extends AdminLTEPage {
     private void okayButtonOnSubmit(Button components) {
         DSLContext context = getSession().getDSLContext();
 
+        boolean error = true;
         UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(this.login)).and(userTable.PASSWORD.eq(DSL.md5(this.password))).fetchOneInto(userTable);
-
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(this.login)).fetchOneInto(userTable);
         if (userRecord != null) {
-            PermissionPage permissionPage = new PermissionPage(this.applicationId, this.clientId, userRecord.getUserId(), this.responseType, this.redirectUri, this.state, this.scope);
-            setResponsePage(permissionPage);
-        } else {
+            if (AuthenticationEnum.None.getLiteral().equals(userRecord.getAuthentication())) {
+                userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(this.login)).and(userTable.PASSWORD.eq(DSL.md5(this.password))).fetchOneInto(userTable);
+                if (userRecord != null) {
+                    error = false;
+                }
+            } else if (AuthenticationEnum.TOTP.getLiteral().equals(userRecord.getAuthentication())) {
+                if (UserTotpStatusEnum.Granted.getLiteral().equals(userRecord.getTotpStatus())) {
+                    String secret = StringUtils.split(userRecord.getTotpSecret(), "||")[1];
+                    Totp totp = new Totp(secret);
+                    try {
+                        if (totp.verify(this.password)) {
+                            error = false;
+                        }
+                    } catch (NumberFormatException e) {
+                    }
+                }
+            }
+        }
+
+        if (error) {
             this.loginField.error("incorrect");
             this.passwordField.error("incorrect");
+        } else {
+            PermissionPage permissionPage = new PermissionPage(this.applicationId, this.clientId, userRecord.getUserId(), this.responseType, this.redirectUri, this.state, this.scope);
+            setResponsePage(permissionPage);
         }
     }
 }
