@@ -79,7 +79,6 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         if ("Deny".equals(link)) {
             return "btn-xs btn-danger";
         }
-
         return "";
     }
 
@@ -117,7 +116,6 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
-        String security = (String) object.get("security");
         if ("Edit".equals(link)) {
             return true;
         }
@@ -128,11 +126,13 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             return true;
         }
         if ("Grant".equals(link)) {
+            String security = (String) object.get("security");
             if (SecurityEnum.Denied.getLiteral().equals(security)) {
                 return true;
             }
         }
         if ("Deny".equals(link)) {
+            String security = (String) object.get("security");
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
                 return true;
             }
@@ -142,7 +142,6 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
-        String security = (String) object.get("security");
         if ("Edit".equals(link)) {
             return true;
         }
@@ -153,11 +152,13 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             return true;
         }
         if ("Grant".equals(link)) {
+            String security = (String) object.get("security");
             if (SecurityEnum.Denied.getLiteral().equals(security)) {
                 return true;
             }
         }
         if ("Deny".equals(link)) {
+            String security = (String) object.get("security");
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
                 return true;
             }

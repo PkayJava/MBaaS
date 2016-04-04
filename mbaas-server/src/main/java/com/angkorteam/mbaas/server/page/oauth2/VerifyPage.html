@@ -21,20 +21,16 @@
                 <span wicket:id="clientLabel" class="form-control"/>
             </div>
             <div class="form-group">
-                <label wicket:for="loginField">Login</label>
-                <input wicket:id="loginField" type="text" class="form-control"/>
-                <span wicket:id="loginFeedback" class="help-block"/>
-            </div>
-            <div class="form-group">
-                <label wicket:for="passwordField">Password</label>
-                <input wicket:id="passwordField" type="password" class="form-control"/>
-                <span wicket:id="passwordFeedback" class="help-block"/>
+                <label wicket:for="otpField">One Time Password</label>
+                <input wicket:id="otpField" type="text" class="form-control"/>
+                <span wicket:id="otpFeedback" class="help-block"/>
             </div>
             <div class="row">
-                <div class="col-xs-8">
+                <div class="col-xs-6">
+                    <button wicket:id="resendButton" type="submit" class="btn btn-primary btn-block btn-flat">Resend</button>
                 </div>
-                <div class="col-xs-4">
-                    <button wicket:id="okayButton" type="submit" class="btn btn-primary btn-block btn-flat">Login</button>
+                <div class="col-xs-6">
+                    <button wicket:id="okayButton" type="submit" class="btn btn-primary btn-block btn-flat">Okay</button>
                 </div>
             </div>
         </form>

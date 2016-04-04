@@ -28,6 +28,8 @@ import org.jooq.impl.DefaultConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -61,9 +63,13 @@ public class ApplicationContext implements ServletContextListener {
 
     private JdbcTemplate jdbcTemplate;
 
+    private MailSender mailSender;
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
+        LOGGER.info("initializing mail sender");
+        this.mailSender = initMailSender();
         LOGGER.info("initializing database connection");
         this.dataSource = initDataSource();
         LOGGER.info("initializing database structure");
@@ -145,9 +151,9 @@ public class ApplicationContext implements ServletContextListener {
         UserTable userTable = Tables.USER.as("userTable");
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         Map<String, AttributeTypeEnum> typeEnums = new HashMap<>();
-        typeEnums.put("_temp", AttributeTypeEnum.String);
+        typeEnums.put("__temp", AttributeTypeEnum.Boolean);
         Map<String, Object> temp = new LinkedHashMap<>();
-        temp.put("_temp", "_temp");
+        temp.put("__temp", true);
 
         UserRecord adminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
         if (adminRecord == null) {
@@ -483,6 +489,18 @@ public class ApplicationContext implements ServletContextListener {
         return dataSource;
     }
 
+    protected MailSender initMailSender() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost(configuration.getString(Constants.MAIL_SERVER));
+        mailSender.setUsername(configuration.getString(Constants.MAIL_LOGIN));
+        mailSender.setPassword(configuration.getString(Constants.MAIL_PASSWORD));
+        mailSender.setDefaultEncoding("UTF-8");
+        mailSender.setPort(configuration.getInt(Constants.MAIL_PORT));
+        mailSender.setProtocol(configuration.getString(Constants.MAIL_PROTOCOL));
+        return mailSender;
+    }
+
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         if (this.dataSource != null) {
@@ -547,6 +565,10 @@ public class ApplicationContext implements ServletContextListener {
         encryptor.setPassword(configuration.getString(Constants.ENCRYPTION_PASSWORD));
         encryptor.setStringOutputType(configuration.getString(Constants.ENCRYPTION_OUTPUT));
         return encryptor;
+    }
+
+    public final MailSender getMailSender() {
+        return this.mailSender;
     }
 
     public final Flyway getFlyway() {

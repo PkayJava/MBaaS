@@ -6,6 +6,8 @@ import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooq
 import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
 import com.angkorteam.mbaas.server.provider.ApplicationProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
@@ -16,6 +18,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jooq.DSLContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +56,7 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
 
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Client", "Edit"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Client", "Edit"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -77,6 +80,16 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
             parameters.add("applicationId", applicationId);
             setResponsePage(ClientManagementPage.class, parameters);
         }
+        if ("Grant".equals(link)) {
+            String applicationId = (String) object.get("applicationId");
+            DSLContext context = getDSLContext();
+            context.update(Tables.APPLICATION).set(Tables.APPLICATION.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.APPLICATION.APPLICATION_ID.eq(applicationId)).execute();
+        }
+        if ("Deny".equals(link)) {
+            String applicationId = (String) object.get("applicationId");
+            DSLContext context = getDSLContext();
+            context.update(Tables.APPLICATION).set(Tables.APPLICATION.SECURITY, SecurityEnum.Denied.getLiteral()).where(Tables.APPLICATION.APPLICATION_ID.eq(applicationId)).execute();
+        }
     }
 
     @Override
@@ -86,6 +99,18 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
         }
         if ("Client".equals(link)) {
             return true;
+        }
+        if ("Grant".equals(link)) {
+            String security = (String) object.get("security");
+            if (SecurityEnum.Denied.getLiteral().equals(security)) {
+                return true;
+            }
+        }
+        if ("Deny".equals(link)) {
+            String security = (String) object.get("security");
+            if (SecurityEnum.Granted.getLiteral().equals(security)) {
+                return true;
+            }
         }
         return false;
     }
@@ -98,6 +123,18 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
         if ("Client".equals(link)) {
             return true;
         }
+        if ("Grant".equals(link)) {
+            String security = (String) object.get("security");
+            if (SecurityEnum.Denied.getLiteral().equals(security)) {
+                return true;
+            }
+        }
+        if ("Deny".equals(link)) {
+            String security = (String) object.get("security");
+            if (SecurityEnum.Granted.getLiteral().equals(security)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -108,6 +145,12 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
         }
         if ("Client".equals(link)) {
             return "btn-xs btn-info";
+        }
+        if ("Grant".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Deny".equals(link)) {
+            return "btn-xs btn-danger";
         }
         return "";
     }

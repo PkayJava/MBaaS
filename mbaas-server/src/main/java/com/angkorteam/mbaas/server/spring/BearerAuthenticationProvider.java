@@ -1,10 +1,12 @@
 package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.configuration.Constants;
+import com.angkorteam.mbaas.jooq.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.GrantTypeEnum;
+import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.joda.time.DateTime;
 import org.jooq.DSLContext;
@@ -66,6 +68,9 @@ public class BearerAuthenticationProvider implements org.springframework.securit
             if (userRecord == null) {
                 throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
+            if (UserStatusEnum.Suspended.getLiteral().equals(userRecord.getStatus())) {
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
+            }
             principal = userRecord.getLogin();
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
             if (roleRecord != null) {
@@ -76,9 +81,15 @@ public class BearerAuthenticationProvider implements org.springframework.securit
             if (clientRecord == null) {
                 throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
+            if (SecurityEnum.Denied.getLiteral().equals(clientRecord.getSecurity())) {
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
+            }
             ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
             ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
             if (applicationRecord == null) {
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
+            }
+            if (SecurityEnum.Denied.getLiteral().equals(applicationRecord.getSecurity())) {
                 throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
             authorities.add(new SimpleGrantedAuthority(configuration.getString(Constants.ROLE_OAUTH2_AUTHORIZATION)));
@@ -86,6 +97,9 @@ public class BearerAuthenticationProvider implements org.springframework.securit
             UserTable userTable = Tables.USER.as("userTable");
             UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
+            }
+            if (UserStatusEnum.Suspended.getLiteral().equals(userRecord.getStatus())) {
                 throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
             principal = userRecord.getLogin();
@@ -100,9 +114,15 @@ public class BearerAuthenticationProvider implements org.springframework.securit
             if (clientRecord == null) {
                 throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
+            if (SecurityEnum.Denied.getLiteral().equals(clientRecord.getSecurity())) {
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
+            }
             ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
             ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(clientRecord.getApplicationId())).fetchOneInto(applicationTable);
             if (applicationRecord == null) {
+                throw new BadCredentialsException("bearer " + accessToken + " is not valid");
+            }
+            if (SecurityEnum.Denied.getLiteral().equals(applicationRecord.getSecurity())) {
                 throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
             principal = configuration.getString(Constants.ROLE_OAUTH2_IMPLICIT);

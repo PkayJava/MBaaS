@@ -8,14 +8,14 @@ import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
 import com.angkorteam.mbaas.plain.enums.UserTotpStatusEnum;
+import com.angkorteam.mbaas.plain.security.otp.Totp;
 import com.angkorteam.mbaas.plain.security.otp.api.Base32;
 import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.model.PropertyModel;
@@ -35,15 +35,12 @@ public class TimeOTPPage extends MasterPage {
 
     private ExternalImage secretImage;
 
-    private String status;
-    private Label statusLabel;
-
-    private String otp;
-    private TextField<String> otpField;
+    private Integer otp;
+    private TextField<Integer> otpField;
     private TextFeedbackPanel otpFeedback;
 
     private Button revokeButton;
-    private Button activateButton;
+    private Button verifyButton;
 
     @Override
     protected void onInitialize() {
@@ -74,24 +71,40 @@ public class TimeOTPPage extends MasterPage {
             userRecord.update();
         }
 
-        this.status = userRecord.getTotpStatus();
-        this.statusLabel = new Label("statusLabel", new PropertyModel<>(this, "status"));
-        this.form.add(this.statusLabel);
-
-        this.otpField = new PasswordTextField("otpField", new PropertyModel<>(this, "otp"));
+        this.otpField = new TextField<>("otpField", new PropertyModel<>(this, "otp"));
         this.otpField.setRequired(true);
-        this.otpField.setLabel(JooqUtils.lookup("currentPassword", this));
+        this.otpField.setLabel(JooqUtils.lookup("One Time Password", this));
+        this.otpField.setVisible(!granted);
         this.form.add(this.otpField);
         this.otpFeedback = new TextFeedbackPanel("otpFeedback", this.otpField);
-        this.form.add(this.otpField);
+        this.form.add(this.otpFeedback);
 
         this.secretImage = new ExternalImage("secretImage", api);
+        this.secretImage.setVisible(!granted);
         this.form.add(secretImage);
 
         this.revokeButton = new Button("revokeButton");
         this.revokeButton.setOnSubmit(this::revokeButtonOnSubmit);
         this.form.add(this.revokeButton);
         this.revokeButton.setVisible(granted);
+
+        this.verifyButton = new Button("verifyButton");
+        this.verifyButton.setOnSubmit(this::verifyButtonOnSubmit);
+        this.form.add(this.verifyButton);
+        this.verifyButton.setVisible(!granted);
+    }
+
+    private void verifyButtonOnSubmit(Button button) {
+        DSLContext context = getDSLContext();
+        UserTable userTable = Tables.USER.as("userTable");
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(getSession().getUserId())).fetchOneInto(userTable);
+        Totp totp = new Totp(StringUtils.split(userRecord.getTotpSecret(), "||")[1]);
+        if (totp.verify(String.valueOf(this.otp))) {
+            userRecord.setTotpStatus(UserTotpStatusEnum.Granted.getLiteral());
+            userRecord.setAuthentication(AuthenticationEnum.TOTP.getLiteral());
+            userRecord.update();
+            setResponsePage(InformationPage.class);
+        }
     }
 
     private void revokeButtonOnSubmit(Button button) {
@@ -100,8 +113,9 @@ public class TimeOTPPage extends MasterPage {
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(getSession().getUserId())).fetchOneInto(userTable);
         userRecord.setTotpSecret(null);
         userRecord.setTotpStatus(UserTotpStatusEnum.Denied.getLiteral());
+        userRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
         userRecord.update();
-        setResponsePage(TimeOTPPage.class);
+        setResponsePage(InformationPage.class);
     }
 
 }

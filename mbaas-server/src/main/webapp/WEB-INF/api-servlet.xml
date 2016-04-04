@@ -84,14 +84,7 @@
 
     <bean id="serviceActivator" class="com.angkorteam.mbaas.server.service.IMAPServiceActivator"/>
 
-    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-        <property name="host" value="${mail.server}"/>
-        <property name="defaultEncoding" value="UTF-8"/>
-        <property name="port" value="${mail.port}"/>
-        <property name="protocol" value="${mail.protocol}"/>
-        <property name="username" value="${mail.login}"/>
-        <property name="password" value="${mail.password}"/>
-    </bean>
+    <bean id="mailSender" class="com.angkorteam.mbaas.server.factory.MailSenderFactoryBean"/>
 
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="maxUploadSize" value="104857600"/>

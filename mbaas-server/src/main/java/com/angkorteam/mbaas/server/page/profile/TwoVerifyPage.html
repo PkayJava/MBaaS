@@ -8,21 +8,14 @@
     <div class="box box-primary">
         <form role="form" wicket:id="form">
             <div class="box-body">
-                <wicket:enclosure child="secretImage">
-                <div class="form-group">
-                    <img wicket:id="secretImage" class="img-responsive"/>
-                </div>
-                </wicket:enclosure>
-                <wicket:enclosure child="otpField">
                 <div class="form-group">
                     <label wicket:for="otpField">One Time Password</label>
                     <input wicket:id="otpField" type="text" class="form-control"/>
                     <span wicket:id="otpFeedback" class="help-block"/>
                 </div>
-                    </wicket:enclosure>
             </div>
+
             <div class="box-footer">
-                <button wicket:id="revokeButton" type="submit" class="btn btn-primary">Revoke</button>
                 <button wicket:id="verifyButton" type="submit" class="btn btn-primary">Verify</button>
             </div>
         </form>

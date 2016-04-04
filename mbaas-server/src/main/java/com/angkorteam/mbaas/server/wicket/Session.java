@@ -12,6 +12,7 @@ import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
+import org.springframework.mail.MailSender;
 
 import java.util.Date;
 import java.util.UUID;
@@ -74,5 +75,10 @@ public class Session extends AuthenticatedWebSession {
     public final DSLContext getDSLContext() {
         Application application = (Application) getApplication();
         return application.getDSLContext();
+    }
+
+    public final MailSender getMailSender() {
+        Application application = (Application) getApplication();
+        return application.getMailSender();
     }
 }

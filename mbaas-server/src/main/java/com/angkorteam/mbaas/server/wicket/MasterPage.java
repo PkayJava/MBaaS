@@ -12,6 +12,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mail.MailSender;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -99,6 +100,11 @@ public abstract class MasterPage extends AdminLTEPage {
     public ServletContext getServletContext() {
         Application application = (Application) getApplication();
         return application.getServletContext();
+    }
+
+    public MailSender getMailSender() {
+        Application application = (Application) getApplication();
+        return application.getMailSender();
     }
 
     public String getHttpAddress() {

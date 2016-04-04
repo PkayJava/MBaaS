@@ -85,21 +85,18 @@ public class ClientModifyPage extends MasterPage {
 
         this.pushVariantId = clientRecord.getPushVariantId();
         this.pushVariantIdField = new TextField<>("pushVariantIdField", new PropertyModel<>(this, "pushVariantId"));
-        this.pushVariantIdField.setRequired(true);
         this.form.add(this.pushVariantIdField);
         this.pushVariantIdFeedback = new TextFeedbackPanel("pushVariantIdFeedback", this.pushVariantIdField);
         this.form.add(this.pushVariantIdFeedback);
 
         this.pushSecret = clientRecord.getPushSecret();
         this.pushSecretField = new TextField<>("pushSecretField", new PropertyModel<>(this, "pushSecret"));
-        this.pushSecretField.setRequired(true);
         this.form.add(this.pushSecretField);
         this.pushSecretFeedback = new TextFeedbackPanel("pushSecretFeedback", this.pushSecretField);
         this.form.add(this.pushSecretFeedback);
 
         this.pushGcmSenderId = clientRecord.getPushGcmSenderId();
         this.pushGcmSenderIdField = new TextField<>("pushGcmSenderIdField", new PropertyModel<>(this, "pushGcmSenderId"));
-        this.pushGcmSenderIdField.setRequired(true);
         this.form.add(this.pushGcmSenderIdField);
         this.pushGcmSenderIdFeedback = new TextFeedbackPanel("pushGcmSenderIdFeedback", this.pushGcmSenderIdField);
         this.form.add(this.pushGcmSenderIdFeedback);
@@ -113,7 +110,7 @@ public class ClientModifyPage extends MasterPage {
         BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", ClientManagementPage.class, parameters);
         this.form.add(closeLink);
 
-        this.form.add(new PushClientValidator(this.pushVariantIdField, this.pushSecretField, this.pushGcmSenderIdField));
+        this.form.add(new PushClientValidator(this.pushVariantIdField, this.pushSecretField));
     }
 
     private void saveButtonOnSubmit(Button button) {

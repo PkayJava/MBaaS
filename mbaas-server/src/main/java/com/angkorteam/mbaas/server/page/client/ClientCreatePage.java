@@ -83,19 +83,16 @@ public class ClientCreatePage extends MasterPage {
         this.form.add(this.descriptionFeedback);
 
         this.pushVariantIdField = new TextField<>("pushVariantIdField", new PropertyModel<>(this, "pushVariantId"));
-        this.pushVariantIdField.setRequired(true);
         this.form.add(this.pushVariantIdField);
         this.pushVariantIdFeedback = new TextFeedbackPanel("pushVariantIdFeedback", this.pushVariantIdField);
         this.form.add(this.pushVariantIdFeedback);
 
         this.pushSecretField = new TextField<>("pushSecretField", new PropertyModel<>(this, "pushSecret"));
-        this.pushSecretField.setRequired(true);
         this.form.add(this.pushSecretField);
         this.pushSecretFeedback = new TextFeedbackPanel("pushSecretFeedback", this.pushSecretField);
         this.form.add(this.pushSecretFeedback);
 
         this.pushGcmSenderIdField = new TextField<>("pushGcmSenderIdField", new PropertyModel<>(this, "pushGcmSenderId"));
-        this.pushGcmSenderIdField.setRequired(true);
         this.form.add(this.pushGcmSenderIdField);
         this.pushGcmSenderIdFeedback = new TextFeedbackPanel("pushGcmSenderIdFeedback", this.pushGcmSenderIdField);
         this.form.add(this.pushGcmSenderIdFeedback);
@@ -104,7 +101,7 @@ public class ClientCreatePage extends MasterPage {
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
 
         this.form.add(this.saveButton);
-        this.form.add(new PushClientValidator(this.pushVariantIdField, this.pushSecretField, this.pushGcmSenderIdField));
+        this.form.add(new PushClientValidator(this.pushVariantIdField, this.pushSecretField));
 
         PageParameters parameters = new PageParameters();
         parameters.add("applicationId", this.applicationId);

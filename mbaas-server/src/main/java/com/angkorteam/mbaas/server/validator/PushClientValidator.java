@@ -13,15 +13,13 @@ public class PushClientValidator extends JooqFormValidator {
 
     private TextField<String> pushVariantIdField;
     private TextField<String> pushSecretField;
-    private TextField<String> pushGcmSenderIdField;
 
     private FormComponent<?>[] formComponents;
 
-    public PushClientValidator(TextField<String> pushVariantIdField, TextField<String> pushSecretField, TextField<String> pushGcmSenderIdField) {
+    public PushClientValidator(TextField<String> pushVariantIdField, TextField<String> pushSecretField) {
         this.pushVariantIdField = pushVariantIdField;
         this.pushSecretField = pushSecretField;
-        this.pushGcmSenderIdField = pushGcmSenderIdField;
-        this.formComponents = new FormComponent[]{this.pushVariantIdField, this.pushSecretField, this.pushGcmSenderIdField};
+        this.formComponents = new FormComponent[]{this.pushVariantIdField, this.pushSecretField};
     }
 
     @Override
@@ -33,20 +31,15 @@ public class PushClientValidator extends JooqFormValidator {
     public void validate(Form<?> form) {
         String pushVariantId = this.pushVariantIdField.getConvertedInput();
         String pushSecret = this.pushSecretField.getConvertedInput();
-        String pushGcmSenderId = this.pushGcmSenderIdField.getConvertedInput();
 
         if ((pushVariantId == null || "".equals(pushVariantId))
-                && (pushSecret == null || "".equals(pushSecret))
-                && (pushGcmSenderId == null || "".equals(pushGcmSenderId))) {
+                && (pushSecret == null || "".equals(pushSecret))) {
         } else {
             if (pushVariantId == null || "".equals(pushVariantId)) {
                 this.pushVariantIdField.error(new ValidationError("Required"));
             }
             if (pushSecret == null || "".equals(pushSecret)) {
                 this.pushSecretField.error(new ValidationError("Required"));
-            }
-            if (pushGcmSenderId == null || "".equals(pushGcmSenderId)) {
-                this.pushGcmSenderIdField.error(new ValidationError("Required"));
             }
         }
     }

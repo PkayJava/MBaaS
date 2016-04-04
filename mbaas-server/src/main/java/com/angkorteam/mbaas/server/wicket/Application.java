@@ -17,6 +17,7 @@ import org.apache.wicket.resource.DynamicJQueryResourceReference;
 import org.jooq.DSLContext;
 import org.reflections.Reflections;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mail.MailSender;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -89,6 +90,11 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     public final JdbcTemplate getJdbcTemplate() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
         return applicationContext.getJdbcTemplate();
+    }
+
+    public final MailSender getMailSender() {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        return applicationContext.getMailSender();
     }
 
     @Override
