@@ -22,6 +22,7 @@ import org.jooq.DSLContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by socheat on 3/7/16.
@@ -45,21 +46,18 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
 
         ClientProvider provider = new ClientProvider(this.applicationId);
 
-        provider.selectField(String.class, "clientId");
-
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("clientId", this), "clientId", this, provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("clientSecret", this), "clientSecret", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("clientSecret", this), "clientSecret", this, provider));
 
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Edit"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Revoke", "Grant", "Deny", "Edit"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -95,6 +93,12 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
             context.update(Tables.CLIENT).set(Tables.CLIENT.SECURITY, SecurityEnum.Denied.getLiteral()).where(Tables.CLIENT.CLIENT_ID.eq(clientId)).execute();
             return;
         }
+        if ("Revoke".equals(link)) {
+            String clientId = (String) object.get("clientId");
+            DSLContext context = getDSLContext();
+            context.update(Tables.CLIENT).set(Tables.CLIENT.CLIENT_SECRET, UUID.randomUUID().toString()).where(Tables.CLIENT.CLIENT_ID.eq(clientId)).execute();
+            return;
+        }
     }
 
     @Override
@@ -113,6 +117,9 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
                 return true;
             }
+        }
+        if ("Revoke".equals(link)) {
+            return true;
         }
         return false;
     }
@@ -134,6 +141,9 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
                 return true;
             }
         }
+        if ("Revoke".equals(link)) {
+            return true;
+        }
         return false;
     }
 
@@ -146,6 +156,9 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
             return "btn-xs btn-info";
         }
         if ("Deny".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        if ("Revoke".equals(link)) {
             return "btn-xs btn-danger";
         }
         return "";
