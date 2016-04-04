@@ -64,12 +64,12 @@ public class DocumentController {
     )
     public ResponseEntity<DocumentCreateResponse> create(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("collection") String collection,
             @RequestBody DocumentCreateRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -295,13 +295,13 @@ public class DocumentController {
     )
     public ResponseEntity<DocumentModifyResponse> modify(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("collection") String collection,
             @PathVariable("documentId") String documentId,
             @RequestBody DocumentModifyRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         UserTable userTable = Tables.USER.as("userTable");
@@ -529,13 +529,13 @@ public class DocumentController {
     )
     public ResponseEntity<DocumentDeleteResponse> delete(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("collection") String collection,
             @PathVariable("documentId") String documentId,
             @RequestBody DocumentDeleteRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         UserTable userTable = Tables.USER.as("userTable");
@@ -611,11 +611,11 @@ public class DocumentController {
     )
     public ResponseEntity<DocumentPermissionUsernameResponse> grantPermissionUsername(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody DocumentPermissionUsernameRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -704,11 +704,11 @@ public class DocumentController {
     )
     public ResponseEntity<DocumentPermissionRoleNameResponse> grantPermissionRoleName(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody DocumentPermissionRoleNameRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -797,11 +797,11 @@ public class DocumentController {
     )
     public ResponseEntity<DocumentPermissionUsernameResponse> revokePermissionUsername(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody DocumentPermissionUsernameRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -905,11 +905,11 @@ public class DocumentController {
     )
     public ResponseEntity<DocumentPermissionRoleNameResponse> revokePermissionRoleName(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody DocumentPermissionRoleNameRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -1013,13 +1013,13 @@ public class DocumentController {
     )
     public ResponseEntity<DocumentRetrieveResponse> retrieve(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("collection") String collection,
             @PathVariable("documentId") String documentId,
             @RequestBody DocumentRetrieveRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();

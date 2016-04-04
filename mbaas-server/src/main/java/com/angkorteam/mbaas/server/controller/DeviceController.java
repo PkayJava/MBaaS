@@ -52,7 +52,7 @@ public class DeviceController {
     )
     public ResponseEntity<DeviceRegisterResponse> register(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody DeviceRegisterRequest requestBody
     ) {
@@ -133,7 +133,7 @@ public class DeviceController {
     )
     public ResponseEntity<DeviceUnregisterResponse> unregister(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("id") String id
     ) {
@@ -150,7 +150,7 @@ public class DeviceController {
     )
     public ResponseEntity<DevicePushMessageResponse> pushMessage(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody DevicePushMessageRequest requestBody

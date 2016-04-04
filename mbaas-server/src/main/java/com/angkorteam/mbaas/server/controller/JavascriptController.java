@@ -49,7 +49,7 @@ public class JavascriptController {
     public ResponseEntity<JavaScriptExecuteResponse> executeJson(
             HttpServletRequest req,
             HttpServletResponse resp,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("script") String script,
             @RequestBody(required = false) JavaScriptExecuteRequest requestBody
@@ -123,7 +123,7 @@ public class JavascriptController {
     public ResponseEntity<JavaScriptExecuteResponse> execute(
             HttpServletRequest req,
             HttpServletResponse resp,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("script") String script,
             @RequestBody(required = false) JavaScriptExecuteRequest requestBody

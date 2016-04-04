@@ -37,7 +37,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> socialLogin(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("socialNetwork") String socialNetwork,
             @RequestBody SocialLoginRequest request
@@ -50,7 +50,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> socialLink(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("socialNetwork") String socialNetwork,
             @RequestBody SocialLinkRequest request
@@ -63,7 +63,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> socialUnlink(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("socialNetwork") String socialNetwork,
             @RequestBody Request request
@@ -77,7 +77,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> followUser(
             HttpServletRequest request,
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request requestBody
@@ -90,7 +90,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> unfollowUser(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request request
@@ -103,7 +103,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> fetchFollowing(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request request
@@ -116,7 +116,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> fetchFollowers(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request request
@@ -129,7 +129,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> enablePushNotification(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("os") String os,
             @PathVariable("token") String token,
@@ -143,7 +143,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> disablePushNotification(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("token") String token,
             @RequestBody Request request
@@ -157,7 +157,7 @@ public class RestAPIController {
 //            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
 //    )
 //    public ResponseEntity<Response> sendPushNotification(
-//            @Header("X-MBAAS-APPCODE") String appCode,
+//            @Header("client_id") String clientId,
 //            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
 //            @RequestBody SendPushNotificationRequest request
 //    ) {
@@ -170,7 +170,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> createLink(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("sourceId") String sourceId,
             @PathVariable("label") String label,
@@ -185,7 +185,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> retrieveLink(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody Request request
@@ -198,7 +198,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> retrieveLink(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody RetrieveLinkRequest request
     ) {
@@ -210,7 +210,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> deleteLink(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody Request request
@@ -223,7 +223,7 @@ public class RestAPIController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> uploadFile(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody UploadFileRequest request
     ) {
@@ -235,7 +235,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Response> deleteFile(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody Request request
@@ -248,7 +248,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> retrieveFile(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody Request request
@@ -261,7 +261,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> retrieveFileDetail(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @RequestBody Request request
@@ -274,7 +274,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> retrieveFilesDetail(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody RetrieveFilesDetailRequest request
     ) {
@@ -286,7 +286,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> grantFileAccessUsername(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
@@ -301,7 +301,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> grantFileAccessRoleName(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
@@ -316,7 +316,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> revokeFileAccessUsername(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
@@ -331,7 +331,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> revokeFileAccessRoleName(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
@@ -346,7 +346,7 @@ public class RestAPIController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> createAsset(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody CreateAssetRequest request
     ) {
@@ -358,7 +358,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> retrieveAsset(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("name") String name,
             @RequestBody Request request
@@ -371,7 +371,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> deleteAsset(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("name") String name,
             @RequestBody Request request
@@ -384,7 +384,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> fetchAsset(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody FetchAssetRequest request
     ) {
@@ -396,7 +396,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> fetchCurrentSetting(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody Request request
     ) {
@@ -408,7 +408,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> fetchSectionSetting(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("section") String section,
             @RequestBody Request request
@@ -421,7 +421,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> updateValueSetting(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("section") String section,
             @PathVariable("key") String key,
@@ -436,7 +436,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> listGroup(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody Request request
     ) {
@@ -448,7 +448,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> readSpecificGroup(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("name") String name,
             @RequestBody Request request
@@ -461,7 +461,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> enableEndpointGroup(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("name") String name,
             @RequestBody Request request
@@ -474,7 +474,7 @@ public class RestAPIController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<InputStreamResource> disableEndpointGroup(
-            @Header("X-MBAAS-APPCODE") String appCode,
+            @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("name") String name,
             @RequestBody Request request

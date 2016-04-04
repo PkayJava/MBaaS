@@ -58,7 +58,7 @@ public class MeController {
     )
     public ResponseEntity<MeSuspendResponse> suspend(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody MeSuspendRequest requestBody
     ) {
@@ -92,7 +92,7 @@ public class MeController {
     )
     public ResponseEntity<MeRetrieveResponse> loggedUserProfile(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody MeRetrieveRequest requestBody
     ) {
@@ -132,7 +132,7 @@ public class MeController {
     )
     public ResponseEntity<MeModifyResponse> updateUserProfile(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody MeModifyRequest requestBody
     ) {
@@ -332,7 +332,7 @@ public class MeController {
     )
     public ResponseEntity<MePasswordResponse> changePassword(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody MePasswordRequest requestBody
     ) {
@@ -359,7 +359,7 @@ public class MeController {
     )
     public ResponseEntity<MeUsernameResponse> changeUsername(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody MeUsernameRequest requestBody
     ) {

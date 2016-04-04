@@ -77,7 +77,7 @@ public class UserController {
     )
     public ResponseEntity<UserSuspendResponse> suspend(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody UserSuspendRequest requestBody
@@ -114,7 +114,7 @@ public class UserController {
     )
     public ResponseEntity<Response> activate(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody Request requestBody
@@ -150,7 +150,7 @@ public class UserController {
     )
     public ResponseEntity<UserRetrieveResponse> fetchUserProfile(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody UserRetrieveRequest requestBody
@@ -174,7 +174,7 @@ public class UserController {
     )
     public ResponseEntity<UserQueryResponse> fetchUsers(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody UserQueryRequest requestBody
     ) {
@@ -206,7 +206,7 @@ public class UserController {
     )
     public ResponseEntity<UserPasswordResetResponse> passwordReset(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @PathVariable("username") String username,
             @RequestBody UserPasswordResetRequest requestBody

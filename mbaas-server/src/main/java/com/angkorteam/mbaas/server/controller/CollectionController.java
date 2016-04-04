@@ -64,11 +64,11 @@ public class CollectionController {
     )
     public ResponseEntity<CollectionCreateResponse> create(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionCreateRequest requestBody
     ) throws SQLException {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -154,11 +154,11 @@ public class CollectionController {
     )
     public ResponseEntity<CollectionAttributeCreateResponse> createAttribute(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionAttributeCreateRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -260,11 +260,11 @@ public class CollectionController {
     )
     public ResponseEntity<CollectionDeleteResponse> delete(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionDeleteRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         PrimaryTable primaryTable = Tables.PRIMARY.as("primaryTable");
@@ -326,11 +326,11 @@ public class CollectionController {
     )
     public ResponseEntity<CollectionAttributeDeleteResponse> deleteAttribute(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionAttributeDeleteRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -408,11 +408,11 @@ public class CollectionController {
     )
     public ResponseEntity<CollectionPermissionUsernameResponse> grantPermissionUsername(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionPermissionUsernameRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -492,11 +492,11 @@ public class CollectionController {
     )
     public ResponseEntity<CollectionPermissionRoleNameResponse> grantPermissionRoleName(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionPermissionRoleNameRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -576,11 +576,11 @@ public class CollectionController {
     )
     public ResponseEntity<CollectionPermissionUsernameResponse> revokePermissionUsername(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionPermissionUsernameRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -670,11 +670,11 @@ public class CollectionController {
     )
     public ResponseEntity<CollectionPermissionRoleNameResponse> revokePermissionRoleName(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
             @RequestBody CollectionPermissionRoleNameRequest requestBody
     ) {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");

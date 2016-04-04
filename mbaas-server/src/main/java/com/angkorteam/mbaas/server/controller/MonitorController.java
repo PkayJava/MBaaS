@@ -62,11 +62,11 @@ public class MonitorController {
     )
     public ResponseEntity<MonitorCpuResponse> cpu(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody MonitorCpuRequest requestBody
     ) throws SigarException {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
 
         MonitorCpuResponse response = new MonitorCpuResponse();
         Sigar sigar = new Sigar();
@@ -97,11 +97,11 @@ public class MonitorController {
     )
     public ResponseEntity<MonitorMemResponse> mem(
             HttpServletRequest request,
-            @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
+            @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @RequestBody MonitorMemRequest requestBody
     ) throws SigarException {
-        LOGGER.info("{} appCode=>{} session=>{} body=>{}", request.getRequestURL(), appCode, session, gson.toJson(requestBody));
+        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
 
         MonitorMemResponse response = new MonitorMemResponse();
         Sigar sigar = new Sigar();
