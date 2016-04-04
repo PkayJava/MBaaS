@@ -18,6 +18,14 @@
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
 
+    <listener>
+        <listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
+    </listener>
+
+    <session-config>
+        <session-timeout>10</session-timeout>
+    </session-config>
+
     <filter>
         <filter-name>MBaaS Web</filter-name>
         <filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>

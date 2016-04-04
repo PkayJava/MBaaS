@@ -7,15 +7,20 @@ import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
+import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebSession;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailSender;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
+import java.util.WeakHashMap;
 
 /**
  * Created by socheat on 3/1/16.
@@ -26,8 +31,15 @@ public class Session extends AuthenticatedWebSession {
 
     private String userId;
 
+    private transient DSLContext context;
+
+    private final static transient Logger LOGGER = LoggerFactory.getLogger(Session.class);
+
+    public static final transient Map<String, Session> SESSIONS = new WeakHashMap<>();
+
     public Session(Request request) {
         super(request);
+        this.context = getDSLContext();
     }
 
     @Override
@@ -58,7 +70,7 @@ public class Session extends AuthenticatedWebSession {
             this.userId = userRecord.getUserId();
 
             Application application = (Application) getApplication();
-            application.trackSession(sessionId, this);
+            application.trackSession(sessionId, this, SESSIONS);
         }
         return userRecord != null;
     }
@@ -80,5 +92,19 @@ public class Session extends AuthenticatedWebSession {
     public final MailSender getMailSender() {
         Application application = (Application) getApplication();
         return application.getMailSender();
+    }
+
+    @Override
+    public void onInvalidate() {
+        super.onInvalidate();
+        LOGGER.info("session {} is revoked", getId());
+        this.context.delete(Tables.DESKTOP).where(Tables.DESKTOP.SESSION_ID.eq(getId())).execute();
+        Session session = SESSIONS.remove(getId());
+        if (session != null) {
+            try {
+                session.invalidateNow();
+            } catch (WicketRuntimeException e) {
+            }
+        }
     }
 }

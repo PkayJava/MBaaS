@@ -16,13 +16,14 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.resource.DynamicJQueryResourceReference;
 import org.jooq.DSLContext;
 import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 /**
  * Application object for your web application.
@@ -30,7 +31,8 @@ import java.util.WeakHashMap;
  */
 public class Application extends AuthenticatedWebApplication implements IDSLContext {
 
-    private transient Map<String, Session> sessions;
+    private transient static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+
 
     @Override
     public RuntimeConfigurationType getConfigurationType() {
@@ -52,7 +54,6 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     @Override
     public void init() {
         super.init();
-        this.sessions = new WeakHashMap<>();
         getRequestCycleSettings().setBufferResponse(true);
         getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
         initPageMount();
@@ -107,16 +108,20 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
         return LoginPage.class;
     }
 
-    public void trackSession(String sessionId, Session session) {
-        this.sessions.put(sessionId, session);
+    public void trackSession(String sessionId, Session session, Map<String, Session> sessions) {
+        sessions.put(sessionId, session);
     }
 
-    public void invalidate(String sessionId) {
+    public void invalidate(String sessionId, Map<String, Session> sessions) {
+        LOGGER.info("session {} is revoked", sessionId);
         DSLContext context = getDSLContext();
         context.delete(Tables.DESKTOP).where(Tables.DESKTOP.SESSION_ID.eq(sessionId)).execute();
-        Session session = this.sessions.remove(sessionId);
+        Session session = sessions.remove(sessionId);
         if (session != null) {
-            session.invalidateNow();
+            try {
+                session.invalidateNow();
+            } catch (WicketRuntimeException e) {
+            }
         }
     }
 

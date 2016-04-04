@@ -10,10 +10,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.server.provider.DesktopProvider;
-import com.angkorteam.mbaas.server.wicket.Application;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
-import com.angkorteam.mbaas.server.wicket.MasterPage;
-import com.angkorteam.mbaas.server.wicket.Mount;
+import com.angkorteam.mbaas.server.wicket.*;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -79,7 +76,7 @@ public class SessionDesktopPage extends MasterPage implements ActionFilteredJooq
             DesktopTable desktopTable = Tables.DESKTOP.as("desktopTable");
             DesktopRecord desktopRecord = context.select(desktopTable.fields()).from(desktopTable).where(desktopTable.DESKTOP_ID.eq(desktopId)).fetchOneInto(desktopTable);
             Application application = (Application) getApplication();
-            application.invalidate(desktopRecord.getSessionId());
+            application.invalidate(desktopRecord.getSessionId(), Session.SESSIONS);
             return;
         }
     }

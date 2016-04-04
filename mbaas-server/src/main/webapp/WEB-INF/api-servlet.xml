@@ -61,6 +61,8 @@
         <constructor-arg index="1" ref="providerManager"/>
     </bean>
 
+    <bean class="com.angkorteam.mbaas.server.spring.SessionDestroyedListener"/>
+
     <security:authentication-manager alias="providerManager" erase-credentials="true"/>
 
     <bean id="authenticationProvider" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationProvider">
