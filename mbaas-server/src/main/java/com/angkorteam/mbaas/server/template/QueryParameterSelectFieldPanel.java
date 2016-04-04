@@ -40,23 +40,23 @@ public class QueryParameterSelectFieldPanel extends Panel {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        Label labelType = new Label("labelType", this.name);
-        this.add(labelType);
-        DropDownChoice<String> fieldType = new DropDownChoice<>("fieldType", new PropertyModel<>(this.fields, this.name), this.types);
-        fieldType.setRequired(true);
-        fieldType.setLabel(JooqUtils.lookup(this.name, getPage()));
-        TextFeedbackPanel feedbackType = new TextFeedbackPanel("feedbackType", fieldType);
-        this.add(fieldType);
-        this.add(feedbackType);
+        Label typeReturnLabel = new Label("typeReturnLabel", this.name);
+        this.add(typeReturnLabel);
+        DropDownChoice<String> typeReturnField = new DropDownChoice<>("typeReturnField", new PropertyModel<>(this.fields, this.name), this.types);
+        typeReturnField.setRequired(true);
+        typeReturnField.setLabel(JooqUtils.lookup(this.name, getPage()));
+        this.add(typeReturnField);
+        TextFeedbackPanel typeReturnFeedback = new TextFeedbackPanel("typeReturnFeedback", typeReturnField);
+        this.add(typeReturnFeedback);
 
-        Label labelSubType = new Label("labelSubType", this.name + "'s sub type");
-        this.add(labelSubType);
-        DropDownChoice<String> fieldSubType = new DropDownChoice<>("fieldSubType", new PropertyModel<>(this.fields, this.name + "SubType"), this.subTypes);
-        fieldSubType.setLabel(JooqUtils.lookup(this.name + "SubType", getPage()));
-        TextFeedbackPanel feedbackSubType = new TextFeedbackPanel("feedbackSubType", fieldSubType);
-        this.add(fieldSubType);
-        this.add(feedbackSubType);
+        Label subTypeReturnLabel = new Label("subTypeReturnLabel", this.name + "'s sub type");
+        this.add(subTypeReturnLabel);
+        DropDownChoice<String> subTypeReturnField = new DropDownChoice<>("subTypeReturnField", new PropertyModel<>(this.fields, this.name + "SubType"), this.subTypes);
+        subTypeReturnField.setLabel(JooqUtils.lookup(this.name + "SubType", getPage()));
+        this.add(subTypeReturnField);
+        TextFeedbackPanel subTypeReturnFeedback = new TextFeedbackPanel("subTypeReturnFeedback", subTypeReturnField);
+        this.add(subTypeReturnFeedback);
 
-        this.form.add(new QueryParameterSubTypeValidator(fieldType, fieldSubType));
+        this.form.add(new QueryParameterSubTypeValidator(typeReturnField, subTypeReturnField));
     }
 }
