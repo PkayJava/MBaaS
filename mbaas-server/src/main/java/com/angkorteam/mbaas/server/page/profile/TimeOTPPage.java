@@ -104,6 +104,8 @@ public class TimeOTPPage extends MasterPage {
             userRecord.setAuthentication(AuthenticationEnum.TOTP.getLiteral());
             userRecord.update();
             setResponsePage(InformationPage.class);
+        } else {
+            this.otpField.error("invalid");
         }
     }
 
