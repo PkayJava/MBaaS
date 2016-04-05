@@ -47,6 +47,7 @@
         <security:intercept-url pattern="/api/oauth2/**" access="permitAll"/>
         <security:intercept-url pattern="/api/resource/**" access="permitAll"/>
         <security:intercept-url pattern="/api/qr" access="permitAll"/>
+        <security:intercept-url pattern="/api/otp" access="permitAll"/>
         <security:intercept-url pattern="/api/javascript/**" access="permitAll"/>
         <security:intercept-url pattern="/api/monitor/**" access="hasAnyAuthority('oauth2.authorization','oauth2.implicit','oauth2.password','oauth2.client')"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
