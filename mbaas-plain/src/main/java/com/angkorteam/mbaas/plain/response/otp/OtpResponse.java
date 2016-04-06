@@ -16,7 +16,7 @@ public class OtpResponse extends Response<OtpResponse.Body> {
     public static class Body {
 
         @Expose
-        @SerializedName("result")
+        @SerializedName("hash")
         private String hash;
 
         public String getHash() {
