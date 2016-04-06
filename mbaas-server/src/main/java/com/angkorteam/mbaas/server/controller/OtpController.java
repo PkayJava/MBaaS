@@ -4,7 +4,6 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
-import com.angkorteam.mbaas.plain.enums.ResultEnum;
 import com.angkorteam.mbaas.plain.enums.UserTotpStatusEnum;
 import com.angkorteam.mbaas.plain.request.otp.OtpRequest;
 import com.angkorteam.mbaas.plain.response.otp.OtpResponse;
@@ -86,11 +85,10 @@ public class OtpController {
             userRecord.setAuthentication(AuthenticationEnum.TOTP.getLiteral());
             userRecord.update();
             OtpResponse response = new OtpResponse();
-            response.setData(ResultEnum.OK.getLiteral());
+            response.getData().setHash(userRecord.getTotpHash());
             return ResponseEntity.ok(response);
         } else {
             OtpResponse response = new OtpResponse();
-            response.setData(ResultEnum.ERROR.getLiteral());
             response.setHttpCode(HttpStatus.BAD_REQUEST.value());
             response.getErrorMessages().putAll(errorMessages);
             return ResponseEntity.ok(response);
