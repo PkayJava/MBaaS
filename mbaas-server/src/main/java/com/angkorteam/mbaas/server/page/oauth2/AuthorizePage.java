@@ -2,7 +2,6 @@ package com.angkorteam.mbaas.server.page.oauth2;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
-import com.angkorteam.framework.extension.wicket.html.form.AjaxButton;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
@@ -59,7 +58,7 @@ public class AuthorizePage extends AdminLTEPage {
 
     private Button okayButton;
 
-    private AjaxButton requestPasswordButton;
+    private Button registerButton;
 
     private Form<Void> form;
 
@@ -123,6 +122,11 @@ public class AuthorizePage extends AdminLTEPage {
         this.okayButton = new Button("okayButton");
         this.okayButton.setOnSubmit(this::okayButtonOnSubmit);
         this.form.add(this.okayButton);
+
+        this.registerButton = new Button("registerButton");
+        this.registerButton.setOnSubmit(this::registerButtonOnSubmit);
+        this.registerButton.setDefaultFormProcessing(false);
+        this.form.add(this.registerButton);
     }
 
     @Override
@@ -130,7 +134,12 @@ public class AuthorizePage extends AdminLTEPage {
         return (Session) super.getSession();
     }
 
-    private void okayButtonOnSubmit(Button components) {
+    private void registerButtonOnSubmit(Button button) {
+        RegisterPage page = new RegisterPage(this);
+        setResponsePage(page);
+    }
+
+    private void okayButtonOnSubmit(Button button) {
         DSLContext context = getSession().getDSLContext();
         UserTable userTable = Tables.USER.as("userTable");
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(this.login)).and(userTable.PASSWORD.eq(DSL.md5(this.password))).fetchOneInto(userTable);

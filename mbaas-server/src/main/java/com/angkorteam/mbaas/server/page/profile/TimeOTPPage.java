@@ -39,12 +39,41 @@ public class TimeOTPPage extends MasterPage {
     private TextField<Integer> otpField;
     private TextFeedbackPanel otpFeedback;
 
+    private String api;
+
     private Button revokeButton;
     private Button verifyButton;
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
+
+        this.form = new Form<>("form");
+        add(this.form);
+
+        this.otpField = new TextField<>("otpField", new PropertyModel<>(this, "otp"));
+        this.otpField.setRequired(true);
+        this.otpField.setLabel(JooqUtils.lookup("One Time Password", this));
+        this.form.add(this.otpField);
+        this.otpFeedback = new TextFeedbackPanel("otpFeedback", this.otpField);
+        this.form.add(this.otpFeedback);
+
+        this.secretImage = new ExternalImage("secretImage", new PropertyModel<>(this, "api"));
+        this.form.add(secretImage);
+
+        this.revokeButton = new Button("revokeButton");
+        this.revokeButton.setOnSubmit(this::revokeButtonOnSubmit);
+        this.form.add(this.revokeButton);
+
+        this.verifyButton = new Button("verifyButton");
+        this.verifyButton.setOnSubmit(this::verifyButtonOnSubmit);
+        this.form.add(this.verifyButton);
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+
         DSLContext context = getDSLContext();
         UserTable userTable = Tables.USER.as("userTable");
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(getSession().getUserId())).fetchOneInto(userTable);
@@ -61,10 +90,7 @@ public class TimeOTPPage extends MasterPage {
 
         String secret = UUID.randomUUID().toString();
         String hash = Base32.random();
-        String api = HttpFunction.getHttpAddress(request) + "/api/qr?secret=" + secret + "||" + hash;
-
-        this.form = new Form<>("form");
-        add(this.form);
+        this.api = HttpFunction.getHttpAddress(request) + "/api/qr?secret=" + secret + "||" + hash;
 
         if (!granted) {
             userRecord.setTotpSecret(secret);
@@ -73,26 +99,9 @@ public class TimeOTPPage extends MasterPage {
             userRecord.update();
         }
 
-        this.otpField = new TextField<>("otpField", new PropertyModel<>(this, "otp"));
-        this.otpField.setRequired(true);
-        this.otpField.setLabel(JooqUtils.lookup("One Time Password", this));
         this.otpField.setVisible(!granted);
-        this.form.add(this.otpField);
-        this.otpFeedback = new TextFeedbackPanel("otpFeedback", this.otpField);
-        this.form.add(this.otpFeedback);
-
-        this.secretImage = new ExternalImage("secretImage", api);
         this.secretImage.setVisible(!granted);
-        this.form.add(secretImage);
-
-        this.revokeButton = new Button("revokeButton");
-        this.revokeButton.setOnSubmit(this::revokeButtonOnSubmit);
-        this.form.add(this.revokeButton);
         this.revokeButton.setVisible(granted);
-
-        this.verifyButton = new Button("verifyButton");
-        this.verifyButton.setOnSubmit(this::verifyButtonOnSubmit);
-        this.form.add(this.verifyButton);
         this.verifyButton.setVisible(!granted);
     }
 
