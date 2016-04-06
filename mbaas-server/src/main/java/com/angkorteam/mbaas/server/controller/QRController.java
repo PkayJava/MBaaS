@@ -39,6 +39,8 @@ public class QRController {
         }
 
         ByteArrayOutputStream bytes = QRCode.from(secret).withSize(s, s).to(ImageType.JPG).stream();
+        response.setContentType("image/jpg");
+        response.setContentLength(bytes.size());
         response.getOutputStream().write(bytes.toByteArray());
     }
 
