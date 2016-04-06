@@ -59,14 +59,16 @@ public class TimeOTPPage extends MasterPage {
 
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
 
-        String secret = UUID.randomUUID().toString() + "||" + Base32.random();
-        String api = HttpFunction.getHttpAddress(request) + "/api/qr?secret=" + secret;
+        String secret = UUID.randomUUID().toString();
+        String hash = Base32.random();
+        String api = HttpFunction.getHttpAddress(request) + "/api/qr?secret=" + secret + "||" + hash;
 
         this.form = new Form<>("form");
         add(this.form);
 
         if (!granted) {
             userRecord.setTotpSecret(secret);
+            userRecord.setTotpHash(hash);
             userRecord.setTotpStatus(UserTotpStatusEnum.Denied.getLiteral());
             userRecord.update();
         }

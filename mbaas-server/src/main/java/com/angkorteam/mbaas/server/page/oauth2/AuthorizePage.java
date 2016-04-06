@@ -19,7 +19,6 @@ import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
@@ -162,8 +161,8 @@ public class AuthorizePage extends AdminLTEPage {
             if (userRecord != null
                     && AuthenticationEnum.TOTP.getLiteral().equals(userRecord.getAuthentication())
                     && UserTotpStatusEnum.Granted.getLiteral().equals(userRecord.getTotpStatus())) {
-                String secret = StringUtils.split(userRecord.getTotpSecret(), "||")[1];
-                Totp totp = new Totp(secret);
+                String hash = userRecord.getTotpHash();
+                Totp totp = new Totp(hash);
                 try {
                     if (totp.verify(this.password)) {
                         PermissionPage permissionPage = new PermissionPage(this.applicationId, this.clientId, userRecord.getUserId(), this.responseType, this.redirectUri, this.state, this.scope);
@@ -174,7 +173,6 @@ public class AuthorizePage extends AdminLTEPage {
                 }
             }
         }
-
 
         this.loginField.error("incorrect");
         this.passwordField.error("incorrect");

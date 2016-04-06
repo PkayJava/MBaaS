@@ -19,6 +19,7 @@ CREATE TABLE user (
 
   -- TOTP
   totp_secret                       VARCHAR(100),
+  totp_hash                         VARCHAR(100),
   totp_status                       VARCHAR(100),
 
   account_non_expired               BIT(1)       NOT NULL DEFAULT 1,
