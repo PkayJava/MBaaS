@@ -134,7 +134,7 @@ public class AuthorizePage extends AdminLTEPage {
         DSLContext context = getSession().getDSLContext();
         UserTable userTable = Tables.USER.as("userTable");
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(this.login)).and(userTable.PASSWORD.eq(DSL.md5(this.password))).fetchOneInto(userTable);
-        if (userRecord != null) {
+        if (userRecord != null && !AuthenticationEnum.TOTP.getLiteral().equals(userRecord.getAuthentication())) {
             if (AuthenticationEnum.TwoEMail.getLiteral().equals(userRecord.getAuthentication())) {
                 String verify = RandomStringUtils.randomNumeric(6);
                 MailSender mailSender = getSession().getMailSender();
