@@ -10,7 +10,6 @@ import com.angkorteam.mbaas.plain.request.otp.OtpRequest;
 import com.angkorteam.mbaas.plain.response.otp.OtpResponse;
 import com.angkorteam.mbaas.plain.security.otp.Totp;
 import com.google.gson.Gson;
-import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +80,7 @@ public class OtpController {
             return ResponseEntity.ok(response);
         }
 
-        Totp totp = new Totp(StringUtils.split(requestBody.getSecret(), "||")[1]);
+        Totp totp = new Totp(userRecord.getTotpHash());
         if (totp.verify(requestBody.getOtp())) {
             userRecord.setTotpStatus(UserTotpStatusEnum.Granted.getLiteral());
             userRecord.setAuthentication(AuthenticationEnum.TOTP.getLiteral());
