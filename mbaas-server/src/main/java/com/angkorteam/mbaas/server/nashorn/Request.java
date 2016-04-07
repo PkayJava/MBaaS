@@ -1,5 +1,7 @@
 package com.angkorteam.mbaas.server.nashorn;
 
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
@@ -71,22 +73,27 @@ public class Request {
         {
             List<Part> parts = new LinkedList<>();
             Map<String, Part> partsMap = new LinkedHashMap<>();
-            for (String parameterName : this.parameterNames) {
-                Part part = request.getPart(parameterName);
-                if (part != null) {
-                    parts.add(part);
-                    partsMap.put(parameterName, part);
+            if (ServletFileUpload.isMultipartContent(request)) {
+                for (String parameterName : this.parameterNames) {
+                    Part part = request.getPart(parameterName);
+                    if (part != null) {
+                        parts.add(part);
+                        partsMap.put(parameterName, part);
+                    }
                 }
-            }
-            if (parts.isEmpty()) {
-                this.parts = Collections.unmodifiableList(new ArrayList<>(0));
-            } else {
-                this.parts = Collections.unmodifiableList(parts);
-            }
-            if (partsMap.isEmpty()) {
-                this.partsMap = Collections.unmodifiableMap(new HashMap<>(0));
+                if (parts.isEmpty()) {
+                    this.parts = Collections.unmodifiableList(new ArrayList<>(0));
+                } else {
+                    this.parts = Collections.unmodifiableList(parts);
+                }
+                if (partsMap.isEmpty()) {
+                    this.partsMap = Collections.unmodifiableMap(new HashMap<>(0));
+                } else {
+                    this.partsMap = Collections.unmodifiableMap(partsMap);
+                }
             } else {
                 this.partsMap = Collections.unmodifiableMap(partsMap);
+                this.parts = Collections.unmodifiableList(parts);
             }
         }
 
