@@ -5,13 +5,6 @@ import com.angkorteam.mbaas.plain.response.Response;
 /**
  * Created by socheat on 3/28/16.
  */
-public class DeviceMetricsResponse extends Response<DeviceMetricsResponse.Body> {
+public class DeviceMetricsResponse extends Response<String> {
 
-    public DeviceMetricsResponse() {
-        this.data = new Body();
-    }
-
-    public static class Body {
-
-    }
 }
