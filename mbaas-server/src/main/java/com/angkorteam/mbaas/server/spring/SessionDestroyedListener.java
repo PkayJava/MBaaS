@@ -11,7 +11,7 @@ public class SessionDestroyedListener implements ApplicationListener<HttpSession
 
     @Override
     public void onApplicationEvent(HttpSessionDestroyedEvent httpSessionDestroyedEvent) {
-        LOGGER.info("session {} is revoke" + httpSessionDestroyedEvent.getId());
+        LOGGER.info("session {} is revoked", httpSessionDestroyedEvent.getId());
     }
 
 }
