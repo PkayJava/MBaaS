@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.service.PusherDTOResponse;
+import com.angkorteam.mbaas.server.service.RevokerDTOResponse;
 import com.google.gson.Gson;
 import okhttp3.ResponseBody;
 import org.apache.commons.codec.binary.Base64;
@@ -32,8 +33,8 @@ public class Main {
                 .build();
         PusherClient client = retrofit.create(PusherClient.class);
 
-        Call<ResponseBody> responseCall = client.unregister(basic, "d6Gxxb-k28A:APA91bGrz0tlFvAiUh6UL8RiFB0r7KXRyix-4SJxthv8izcE77tmuO_voGQKGwg_p2BxebK71hPIO3O9cSp13PUZhx-aH46P8ML1XjzpxPcyVhk3V2Z5cwH2fdsRDChamx1yttWGCuIT");
-        Response<ResponseBody> responseBody = null;
+        Call<RevokerDTOResponse> responseCall = client.unregister(basic, "d6Gxxb-k28A:APA91bGrz0tlFvAiUh6UL8RiFB0r7KXRyix-4SJxthv8izcE77tmuO_voGQKGwg_p2BxebK71hPIO3O9cSp13PUZhx-aH46P8ML1XjzpxPcyVhk3V2Z5cwH2fdsRDChamx1yttWGCuIT");
+        Response<RevokerDTOResponse> responseBody = null;
         try {
             responseBody = responseCall.execute();
         } catch (Throwable e) {
