@@ -1,24 +1,25 @@
-package com.angkorteam.mbaas.plain.request.device;
+package com.angkorteam.mbaas.server.service;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Created by socheat on 3/28/16.
+ * Created by socheat on 3/31/16.
  */
-public class DeviceRegisterRequest extends Request {
+public class PusherDTOResponse implements Serializable {
 
     @Expose
-    @SerializedName("clientId")
-    private String clientId;
+    @SerializedName("id")
+    private String id;
 
     @Expose
-    @SerializedName("clientSecret")
-    private String clientSecret;
+    @SerializedName("enabled")
+    private boolean enabled;
 
     @Expose
     @SerializedName("deviceType")
@@ -41,8 +42,28 @@ public class DeviceRegisterRequest extends Request {
     private String osVersion;
 
     @Expose
+    @SerializedName("platform")
+    private String platform;
+
+    @Expose
     @SerializedName("categories")
-    private List<String> categories = new ArrayList<>();
+    private List<Map<String, String>> categories;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public String getDeviceType() {
         return deviceType;
@@ -84,27 +105,19 @@ public class DeviceRegisterRequest extends Request {
         this.osVersion = osVersion;
     }
 
-    public List<String> getCategories() {
+    public List<Map<String, String>> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<String> categories) {
+    public void setCategories(List<Map<String, String>> categories) {
         this.categories = categories;
     }
 
-    public String getClientId() {
-        return clientId;
+    public String getPlatform() {
+        return platform;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getClientSecret() {
-        return clientSecret;
-    }
-
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
+    public void setPlatform(String platform) {
+        this.platform = platform;
     }
 }

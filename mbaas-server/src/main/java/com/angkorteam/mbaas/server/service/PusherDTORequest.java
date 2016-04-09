@@ -1,24 +1,16 @@
-package com.angkorteam.mbaas.plain.request.device;
+package com.angkorteam.mbaas.server.service;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by socheat on 3/28/16.
+ * Created by socheat on 3/31/16.
  */
-public class DeviceRegisterRequest extends Request {
-
-    @Expose
-    @SerializedName("clientId")
-    private String clientId;
-
-    @Expose
-    @SerializedName("clientSecret")
-    private String clientSecret;
+public class PusherDTORequest implements Serializable {
 
     @Expose
     @SerializedName("deviceType")
@@ -90,21 +82,5 @@ public class DeviceRegisterRequest extends Request {
 
     public void setCategories(List<String> categories) {
         this.categories = categories;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getClientSecret() {
-        return clientSecret;
-    }
-
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
     }
 }

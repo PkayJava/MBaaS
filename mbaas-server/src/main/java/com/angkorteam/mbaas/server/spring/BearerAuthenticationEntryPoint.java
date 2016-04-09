@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.spring;
 import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.page.oauth2.AuthorizePage;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
@@ -20,7 +21,15 @@ public class BearerAuthenticationEntryPoint implements AuthenticationEntryPoint 
                          AuthenticationException authException) throws IOException, ServletException {
         StringBuffer address = new StringBuffer();
         address.append(HttpFunction.getHttpAddress(request)).append("/web" + AuthorizePage.class.getAnnotation(Mount.class).value());
-        response.sendRedirect(address.toString());
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authorization != null
+                && !"".equals(authorization)
+                && authorization.toUpperCase().startsWith("BEARER ")
+                && !"".equals(authorization.toUpperCase().substring(7))) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } else {
+            response.sendRedirect(address.toString());
+        }
     }
 
 }

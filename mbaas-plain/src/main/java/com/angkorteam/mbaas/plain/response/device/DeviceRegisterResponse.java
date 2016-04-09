@@ -16,16 +16,15 @@ public class DeviceRegisterResponse extends Response<DeviceRegisterResponse.Body
     public static class Body {
 
         @Expose
-        @SerializedName("bearer")
-        private String bearer;
+        @SerializedName("accessToken")
+        private String accessToken;
 
-        public String getBearer() {
-            return bearer;
+        public String getAccessToken() {
+            return accessToken;
         }
 
-        public void setBearer(String bearer) {
-            this.bearer = bearer;
+        public void setAccessToken(String accessToken) {
+            this.accessToken = accessToken;
         }
-
     }
 }
