@@ -5,9 +5,9 @@ import com.angkorteam.mbaas.plain.response.Response;
 /**
  * Created by socheat on 3/28/16.
  */
-public class DevicePushMessageResponse extends Response<DevicePushMessageResponse.Body> {
+public class DeviceMetricsResponse extends Response<DeviceMetricsResponse.Body> {
 
-    public DevicePushMessageResponse() {
+    public DeviceMetricsResponse() {
         this.data = new Body();
     }
 
