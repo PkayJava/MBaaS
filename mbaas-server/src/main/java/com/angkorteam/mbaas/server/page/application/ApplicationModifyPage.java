@@ -23,7 +23,6 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.validation.validator.UrlValidator;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -53,10 +52,6 @@ public class ApplicationModifyPage extends MasterPage {
     private String oauthRoles;
     private TextField<String> oauthRolesField;
     private TextFeedbackPanel oauthRolesFeedback;
-
-    private String pushServerUrl;
-    private TextField<String> pushServerUrlField;
-    private TextFeedbackPanel pushServerUrlFeedback;
 
     private String pushApplicationId;
     private TextField<String> pushApplicationIdField;
@@ -113,13 +108,6 @@ public class ApplicationModifyPage extends MasterPage {
         this.oauthRolesFeedback = new TextFeedbackPanel("oauthRolesFeedback", this.oauthRolesField);
         this.form.add(this.oauthRolesFeedback);
 
-        this.pushServerUrl = applicationRecord.getPushServerUrl();
-        this.pushServerUrlField = new TextField<>("pushServerUrlField", new PropertyModel<>(this, "pushServerUrl"));
-        this.pushServerUrlField.add(new UrlValidator());
-        this.form.add(this.pushServerUrlField);
-        this.pushServerUrlFeedback = new TextFeedbackPanel("pushServerUrlFeedback", this.pushServerUrlField);
-        this.form.add(this.pushServerUrlFeedback);
-
         this.pushApplicationId = applicationRecord.getPushApplicationId();
         this.pushApplicationIdField = new TextField<>("pushApplicationIdField", new PropertyModel<>(this, "pushApplicationId"));
         this.form.add(this.pushApplicationIdField);
@@ -136,7 +124,7 @@ public class ApplicationModifyPage extends MasterPage {
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(this.saveButton);
 
-        this.form.add(new PushApplicationValidator(this.pushServerUrlField, this.pushApplicationIdField, this.pushMasterSecretField));
+        this.form.add(new PushApplicationValidator(this.pushApplicationIdField, this.pushMasterSecretField));
     }
 
     private void saveButtonOnSubmit(Button button) {
@@ -212,7 +200,6 @@ public class ApplicationModifyPage extends MasterPage {
         ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(this.applicationId)).fetchOneInto(applicationTable);
         applicationRecord.setName(this.name);
         applicationRecord.setDescription(this.description);
-        applicationRecord.setPushServerUrl(this.pushServerUrl);
         applicationRecord.setPushApplicationId(this.pushApplicationId);
         applicationRecord.setPushMasterSecret(this.pushMasterSecret);
         applicationRecord.setAutoRegistration(this.autoRegistration);

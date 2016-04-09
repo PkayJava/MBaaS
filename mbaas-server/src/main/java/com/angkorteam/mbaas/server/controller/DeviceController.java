@@ -155,7 +155,8 @@ public class DeviceController {
             mobileRecord.update();
         }
 
-        String pushAddress = applicationRecord.getPushServerUrl();
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String pushAddress = configuration.getString(Constants.PUSH_SERVER_URL);
         String basic = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
 
         PusherDTORequest dto = new PusherDTORequest();
@@ -237,7 +238,8 @@ public class DeviceController {
 
         mobileRecord.delete();
 
-        String pushAddress = applicationRecord.getPushServerUrl();
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String pushAddress = configuration.getString(Constants.PUSH_SERVER_URL);
         String basic = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
         String httpAddress = pushAddress.endsWith("/") ? pushAddress : pushAddress + "/";
         Retrofit retrofit = new Retrofit.Builder()
@@ -291,7 +293,8 @@ public class DeviceController {
             return ResponseEntity.ok(response);
         }
 
-        String pushAddress = applicationRecord.getPushServerUrl();
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String pushAddress = configuration.getString(Constants.PUSH_SERVER_URL);
         String basic = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
         String httpAddress = pushAddress.endsWith("/") ? pushAddress : pushAddress + "/";
         Retrofit retrofit = new Retrofit.Builder()

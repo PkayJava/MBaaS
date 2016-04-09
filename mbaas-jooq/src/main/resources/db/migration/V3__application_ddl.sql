@@ -9,7 +9,6 @@ CREATE TABLE application (
 
   auto_registration   BIT(1)       NOT NULL,
 
-  push_server_url     VARCHAR(255),
   push_application_id VARCHAR(255),
   push_master_secret  VARCHAR(255),
 

@@ -72,6 +72,8 @@
     <entry key="pattern.oauth.role.name"><![CDATA[^[a-z]{1}[a-z]*]]></entry>
     <entry key="pattern.query.parameter.name">\:[a-z]{1}[a-z0-9\_]*</entry>
 
+    <entry key="push.server.url">http://192.168.1.110:6080/ag-push</entry>
+
     <entry key="resource.repo">/opt/sandbox/mbaas</entry>
 
     <entry key="encryption.password"><![CDATA[7808654h4zzx05DheFMZ]]></entry>

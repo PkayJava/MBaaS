@@ -11,17 +11,15 @@ import org.apache.wicket.validation.ValidationError;
  */
 public class PushApplicationValidator extends JooqFormValidator {
 
-    private TextField<String> pushServerUrlField;
     private TextField<String> pushApplicationIdField;
     private TextField<String> pushMasterSecretField;
 
     private FormComponent<?>[] formComponents;
 
-    public PushApplicationValidator(TextField<String> pushServerUrlField, TextField<String> pushApplicationIdField, TextField<String> pushMasterSecretField) {
-        this.pushServerUrlField = pushServerUrlField;
+    public PushApplicationValidator(TextField<String> pushApplicationIdField, TextField<String> pushMasterSecretField) {
         this.pushApplicationIdField = pushApplicationIdField;
         this.pushMasterSecretField = pushMasterSecretField;
-        this.formComponents = new FormComponent[]{this.pushServerUrlField, this.pushApplicationIdField, this.pushMasterSecretField};
+        this.formComponents = new FormComponent[]{this.pushApplicationIdField, this.pushMasterSecretField};
     }
 
     @Override
@@ -31,16 +29,11 @@ public class PushApplicationValidator extends JooqFormValidator {
 
     @Override
     public void validate(Form<?> form) {
-        String pushServerUrl = this.pushServerUrlField.getConvertedInput();
         String pushApplicationId = this.pushApplicationIdField.getConvertedInput();
         String pushMasterSecret = this.pushMasterSecretField.getConvertedInput();
-        if ((pushServerUrl == null || "".equals(pushServerUrl))
-                && (pushApplicationId == null || "".equals(pushApplicationId))
+        if ((pushApplicationId == null || "".equals(pushApplicationId))
                 && (pushMasterSecret == null || "".equals(pushMasterSecret))) {
         } else {
-            if (pushServerUrl == null || "".equals(pushServerUrl)) {
-                this.pushServerUrlField.error(new ValidationError("Required"));
-            }
             if (pushApplicationId == null || "".equals(pushApplicationId)) {
                 this.pushApplicationIdField.error(new ValidationError("Required"));
             }

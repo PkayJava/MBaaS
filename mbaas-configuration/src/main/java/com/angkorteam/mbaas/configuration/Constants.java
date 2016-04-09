@@ -86,6 +86,8 @@ public class Constants {
     public static final String MAIL_PROTOCOL = "mail.protocol";
     public static final String MAIL_FROM = "mail.from";
 
+    public static final String PUSH_SERVER_URL = "push.server.url";
+
     public static final String APP_VERSION = "app.version";
 
     private static XMLPropertiesConfiguration configuration;
