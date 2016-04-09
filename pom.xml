@@ -96,7 +96,6 @@
         <module>mbaas-jooq</module>
         <module>mbaas-configuration</module>
         <module>mbaas-server</module>
-        <module>mbaas-magento2</module>
     </modules>
 
     <dependencyManagement>
