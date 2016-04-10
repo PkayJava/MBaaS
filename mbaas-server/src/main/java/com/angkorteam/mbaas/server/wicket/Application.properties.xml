@@ -10,6 +10,7 @@
     <entry key="AttributeNameValidator.format">is bad format</entry>
     <entry key="CollectionNameValidator.duplicated">is taken</entry>
     <entry key="CollectionNameValidator.format">is bad format</entry>
+    <entry key="UserDataValidator.format">is bad format</entry>
     <entry key="JavascriptNameValidator.duplicated">is taken</entry>
     <entry key="JavascriptPathValidator.format">is bad format</entry>
     <entry key="JavascriptPathValidator.duplicated">is taken</entry>
