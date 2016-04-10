@@ -9,11 +9,13 @@ import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.server.service.MessageDTORequest;
 import com.angkorteam.mbaas.server.service.MessageDTOResponse;
 import com.angkorteam.mbaas.server.service.PusherClient;
+import com.angkorteam.mbaas.server.validator.UserDataValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
@@ -21,7 +23,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
-import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by socheat on 4/10/16.
@@ -35,6 +37,10 @@ public class PushSendPage extends MasterPage {
     private String alert;
     private TextField<String> alertField;
     private TextFeedbackPanel alertFeedback;
+
+    private String userData;
+    private TextArea<String> userDataField;
+    private TextFeedbackPanel userDataFeedback;
 
     private Form<Void> form;
     private Button sendButton;
@@ -59,6 +65,12 @@ public class PushSendPage extends MasterPage {
         this.alertFeedback = new TextFeedbackPanel("alertFeedback", this.alertField);
         this.form.add(this.alertFeedback);
 
+        this.userDataField = new TextArea<>("userDataField", new PropertyModel<>(this, "userData"));
+        this.userDataField.add(new UserDataValidator());
+        this.form.add(this.userDataField);
+        this.userDataFeedback = new TextFeedbackPanel("userDataFeedback", this.userDataField);
+        this.form.add(this.userDataFeedback);
+
         this.sendButton = new Button("sendButton");
         this.sendButton.setOnSubmit(this::sendButtonOnSubmit);
         this.form.add(this.sendButton);
@@ -73,9 +85,19 @@ public class PushSendPage extends MasterPage {
         String authorization = "Basic " + Base64.encodeBase64String((applicationRecord.getPushApplicationId() + ":" + applicationRecord.getPushMasterSecret()).getBytes());
         PusherClient pusherClient = getPusherClient();
 
+        Gson gson = new Gson();
+        Map<String, Object> userData = null;
+        if (this.userData != null && !"".equals(this.userData)) {
+            userData = gson.fromJson(this.userData, Map.class);
+        }
+
         MessageDTORequest request = new MessageDTORequest();
-        request.getMessage().getUserData().put("time", DateFormatUtils.ISO_DATE_TIME_ZONE_FORMAT.format(new Date()));
         request.getMessage().setAlert(this.alert);
+        if (userData != null) {
+            for (Map.Entry<String, Object> item : userData.entrySet()) {
+                request.getMessage().getUserData().put(item.getKey(), item.getValue());
+            }
+        }
         Call<MessageDTOResponse> responseCall = pusherClient.send(authorization, request);
         try {
             Response<MessageDTOResponse> response = responseCall.execute();
