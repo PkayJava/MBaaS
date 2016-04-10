@@ -21,8 +21,8 @@ public class BearerAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
         UnknownResponse responseBody = new UnknownResponse();
-        responseBody.setResult(HttpStatus.UNAUTHORIZED.getReasonPhrase());
-        responseBody.setHttpCode(HttpServletResponse.SC_UNAUTHORIZED);
+        responseBody.setResult(HttpStatus.FORBIDDEN.getReasonPhrase());
+        responseBody.setHttpCode(HttpStatus.FORBIDDEN.value());
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
         this.gson.toJson(responseBody, response.getWriter());
