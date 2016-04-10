@@ -7,10 +7,10 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.server.service.MessageDTORequest;
+import com.angkorteam.mbaas.server.service.MessageDTOResponse;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import okhttp3.ResponseBody;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.TextField;
@@ -73,10 +73,9 @@ public class PushSendPage extends MasterPage {
 
         MessageDTORequest request = new MessageDTORequest();
         request.getMessage().setAlert(this.alert);
-        Call<ResponseBody> responseCall = pusherClient.send(authorization, request);
+        Call<MessageDTOResponse> responseCall = pusherClient.send(authorization, request);
         try {
-            Response<ResponseBody> response = responseCall.execute();
-            System.out.println(response.body().string());
+            Response<MessageDTOResponse> response = responseCall.execute();
         } catch (IOException e) {
             e.printStackTrace();
         }

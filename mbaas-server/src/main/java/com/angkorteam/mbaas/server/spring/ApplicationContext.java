@@ -528,6 +528,8 @@ public class ApplicationContext implements ServletContextListener {
                 e.printStackTrace();
             }
         }
+        if (this.pusherClient != null) {
+        }
     }
 
     public final DataSource getDataSource() {

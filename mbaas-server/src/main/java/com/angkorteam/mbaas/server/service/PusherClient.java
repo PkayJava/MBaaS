@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.server.service;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -20,8 +19,6 @@ public interface PusherClient {
 
     @POST("rest/sender")
     @Streaming
-    Call<ResponseBody> send(@Header("authorization") String authorization, @Body MessageDTORequest request);
+    Call<MessageDTOResponse> send(@Header("authorization") String authorization, @Body MessageDTORequest request);
 
-//    @POST("rest/sender")
-//    Call<MessageDTOResponse> send(@Header("authorization") String authorization, @Body MessageDTORequest request);
 }

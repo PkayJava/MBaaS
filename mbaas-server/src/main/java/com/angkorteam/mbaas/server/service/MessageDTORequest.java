@@ -41,34 +41,50 @@ public class MessageDTORequest {
 
         @Expose
         @SerializedName("categories")
-        private final List<String> categories = new ArrayList<>();
+        private String[] categories;
 
         @Expose
         @SerializedName("variants")
-        private final List<String> variants = new ArrayList<>();
+        private String[] variants;
 
         @Expose
         @SerializedName("alias")
-        private final List<String> alias = new ArrayList<>();
+        private String[] alias;
 
         @Expose
         @SerializedName("deviceType")
-        private final List<String> deviceType = new ArrayList<>();
+        private String[] deviceType;
 
-        public List<String> getCategories() {
+        public String[] getCategories() {
             return categories;
         }
 
-        public List<String> getVariants() {
+        public void setCategories(String... categories) {
+            this.categories = categories;
+        }
+
+        public String[] getVariants() {
             return variants;
         }
 
-        public List<String> getAlias() {
+        public void setVariants(String... variants) {
+            this.variants = variants;
+        }
+
+        public String[] getAlias() {
             return alias;
         }
 
-        public List<String> getDeviceType() {
+        public void setAlias(String... alias) {
+            this.alias = alias;
+        }
+
+        public String[] getDeviceType() {
             return deviceType;
+        }
+
+        public void setDeviceType(String... deviceType) {
+            this.deviceType = deviceType;
         }
     }
 
