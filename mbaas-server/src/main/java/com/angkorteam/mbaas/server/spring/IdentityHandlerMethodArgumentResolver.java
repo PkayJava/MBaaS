@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.spring;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.MobileTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
 import org.jooq.DSLContext;
 import org.springframework.core.MethodParameter;
@@ -61,6 +62,13 @@ public class IdentityHandlerMethodArgumentResolver implements HandlerMethodArgum
             }
             userId = mobileRecord.getUserId();
             applicationId = mobileRecord.getApplicationId();
+        }
+
+        if (userId == null || "".equals(userId)) {
+            ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(applicationId)).fetchOneInto(applicationTable);
+            if (applicationRecord != null) {
+                userId = applicationRecord.getUserId();
+            }
         }
 
         Identity identity = new Identity(userId, applicationId, clientId, mobileId, userAgent, remoteIp, clientSecret, accessToken, appVersion, sdkVersion);
