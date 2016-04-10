@@ -47,7 +47,11 @@ public class BearerAuthenticationProvider implements org.springframework.securit
         Date dateSeen = new Date();
         mobileRecord.setDateSeen(dateSeen);
         mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
-        mobileRecord.setClientIp(request.getRemoteAddr());
+        String clientId = request.getHeader("X-FORWARDED-FOR");
+        if (clientId == null && !"".equals(clientId)) {
+            clientId = request.getRemoteAddr();
+        }
+        mobileRecord.setClientIp(clientId);
         mobileRecord.update();
 
         DateTime dateTime = new DateTime(mobileRecord.getDateTokenIssued());
