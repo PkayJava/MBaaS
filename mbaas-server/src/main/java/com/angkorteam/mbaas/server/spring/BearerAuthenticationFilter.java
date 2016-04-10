@@ -1,7 +1,9 @@
 package com.angkorteam.mbaas.server.spring;
 
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.response.UnknownResponse;
 import com.google.gson.Gson;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -85,15 +87,15 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             ServletException {
         final boolean debug = logger.isDebugEnabled();
 
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (header == null || !header.toUpperCase().startsWith("BEARER ")) {
+        if (authorization == null || !authorization.toUpperCase().startsWith("BEARER ")) {
             chain.doFilter(request, response);
             return;
         }
 
         try {
-            String bearer = header.substring(7);
+            String bearer = authorization.substring(7);
 
             BearerAuthenticationToken authRequest = new BearerAuthenticationToken(bearer);
             authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
@@ -112,7 +114,10 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             if (ignoreFailure) {
                 chain.doFilter(request, response);
             } else {
+                XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
                 UnknownResponse responseBody = new UnknownResponse();
+                responseBody.setVersion(configuration.getString(Constants.APP_VERSION));
+                responseBody.setMethod(request.getMethod());
                 responseBody.setResult(org.springframework.http.HttpStatus.LOCKED.getReasonPhrase());
                 responseBody.setHttpCode(org.springframework.http.HttpStatus.LOCKED.value());
                 response.setContentType("application/json");
