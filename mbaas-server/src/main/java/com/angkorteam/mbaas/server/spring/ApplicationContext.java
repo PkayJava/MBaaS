@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.*;
 import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import com.angkorteam.mbaas.server.service.PusherClient;
+import okhttp3.OkHttpClient;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
@@ -70,6 +71,8 @@ public class ApplicationContext implements ServletContextListener {
 
     private PusherClient pusherClient;
 
+    private OkHttpClient client;
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
@@ -103,6 +106,16 @@ public class ApplicationContext implements ServletContextListener {
         }
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
+    }
+
+    protected OkHttpClient initOkClient() {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.readTimeout(5, TimeUnit.SECONDS);
+        builder.writeTimeout(5, TimeUnit.SECONDS);
+        builder.followRedirects(false);
+        builder.followSslRedirects(false);
+        builder.retryOnConnectionFailure(true);
+        return builder.build();
     }
 
     protected PusherClient initPusherClient() {

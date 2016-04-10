@@ -53,7 +53,8 @@
         <security:intercept-url pattern="/api/otp" access="permitAll"/>
         <security:intercept-url pattern="/api/javascript/**" access="permitAll"/>
         <security:intercept-url pattern="/api/rest/registry/**" access="permitAll"/>
-        <security:intercept-url pattern="/api/monitor/**" access="hasAnyAuthority('oauth2.authorization','oauth2.implicit','oauth2.password','oauth2.client')"/>
+        <security:intercept-url pattern="/api/monitor/**"
+                                access="hasAnyAuthority('oauth2.authorization','oauth2.implicit','oauth2.password','oauth2.client')"/>
         <security:intercept-url pattern="/api/file/**" access="hasAnyAuthority('oauth2.authorization')"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
     </security:http>
@@ -127,7 +128,9 @@
         <property name="jdbcTemplate" ref="jdbcTemplate"/>
     </bean>
 
-    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationEntryPoint"/>
+    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationEntryPoint">
+        <property name="gson" ref="gson"/>
+    </bean>
 
     <bean id="jdbcTemplate" class="com.angkorteam.mbaas.server.factory.JdbcTemplateFactoryBean"/>
 
