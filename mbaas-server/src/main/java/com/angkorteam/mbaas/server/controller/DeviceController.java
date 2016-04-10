@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.model.entity.tables.MobileTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
+import com.angkorteam.mbaas.plain.Identity;
 import com.angkorteam.mbaas.plain.enums.GrantTypeEnum;
 import com.angkorteam.mbaas.plain.request.device.DeviceRegisterRequest;
 import com.angkorteam.mbaas.plain.response.device.DeviceMetricsResponse;
@@ -26,7 +27,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -60,7 +64,7 @@ public class DeviceController {
     )
     public ResponseEntity<DeviceRegisterResponse> register(
             HttpServletRequest request,
-            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization,
+            Identity identity,
             @RequestBody DeviceRegisterRequest requestBody
     ) {
         LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
@@ -113,12 +117,7 @@ public class DeviceController {
         MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         MobileRecord mobileRecord = null;
 
-        if (authorization != null && !"".equals(authorization)) {
-            if (authorization.length() > 7 && "bearer".equals(authorization.substring(0, 6).toLowerCase())) {
-                String accessToken = authorization.substring(7);
-                mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(mobileTable);
-            }
-        }
+        mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(identity.getMobileId())).fetchOneInto(mobileTable);
 
         if (mobileRecord == null) {
             mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.DEVICE_TOKEN.eq(requestBody.getDeviceToken())).and(mobileTable.DEVICE_TYPE.eq(requestBody.getDeviceType())).fetchOneInto(mobileTable);

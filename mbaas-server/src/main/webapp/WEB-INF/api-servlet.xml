@@ -17,6 +17,9 @@
     <context:property-placeholder location="file:${user.home}/.xml/mbaas.properties.xml" file-encoding="UTF-8"/>
 
     <mvc:annotation-driven>
+        <mvc:argument-resolvers>
+            <ref bean="identityResolver"/>
+        </mvc:argument-resolvers>
         <mvc:message-converters>
             <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter">
                 <property name="gson" ref="gson"/>
@@ -50,7 +53,8 @@
         <security:intercept-url pattern="/api/otp" access="permitAll"/>
         <security:intercept-url pattern="/api/javascript/**" access="permitAll"/>
         <security:intercept-url pattern="/api/rest/registry/**" access="permitAll"/>
-        <security:intercept-url pattern="/api/monitor/**" access="hasAnyAuthority('oauth2.authorization','oauth2.implicit','oauth2.password','oauth2.client')"/>
+        <security:intercept-url pattern="/api/monitor/**"
+                                access="hasAnyAuthority('oauth2.authorization','oauth2.implicit','oauth2.password','oauth2.client')"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
     </security:http>
 
@@ -84,6 +88,10 @@
 
     <bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
         <property name="caseSensitive" value="false"/>
+    </bean>
+
+    <bean id="identityResolver" class="com.angkorteam.mbaas.server.spring.IdentityHandlerMethodArgumentResolver">
+        <property name="context" ref="context"/>
     </bean>
 
     <bean id="serviceActivator" class="com.angkorteam.mbaas.server.service.IMAPServiceActivator"/>

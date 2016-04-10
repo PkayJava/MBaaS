@@ -35,7 +35,7 @@ public class FileProvider extends JooqProvider {
         this.fileTable = Tables.FILE.as("fileTable");
         this.userTable = Tables.USER.as("userTable");
 
-        this.from = fileTable.join(userTable).on(fileTable.OWNER_USER_ID.eq(userTable.USER_ID));
+        this.from = fileTable.join(userTable).on(fileTable.USER_ID.eq(userTable.USER_ID));
         DSLContext context = getDSLContext();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
