@@ -52,7 +52,7 @@ public class AssetController {
     private JdbcTemplate jdbcTemplate;
 
     @RequestMapping(
-            path = "/create/{filename}",
+            path = "/create/{filename:.+}",
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )

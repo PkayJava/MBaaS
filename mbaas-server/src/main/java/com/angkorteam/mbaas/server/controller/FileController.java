@@ -58,7 +58,7 @@ public class FileController {
     private Gson gson;
 
     @RequestMapping(
-            path = "/create/{filename}",
+            path = "/create/{filename:.+}",
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
