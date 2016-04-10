@@ -113,8 +113,8 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
                 chain.doFilter(request, response);
             } else {
                 UnknownResponse responseBody = new UnknownResponse();
-                responseBody.setResult(org.springframework.http.HttpStatus.UNAUTHORIZED.getReasonPhrase());
-                responseBody.setHttpCode(HttpServletResponse.SC_UNAUTHORIZED);
+                responseBody.setResult(org.springframework.http.HttpStatus.LOCKED.getReasonPhrase());
+                responseBody.setHttpCode(org.springframework.http.HttpStatus.LOCKED.value());
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_OK);
                 this.gson.toJson(responseBody, response.getWriter());
