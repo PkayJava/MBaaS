@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by Khauv Socheat on 2/6/2016.
  */
-public class RetrieveFilesDetailRequest extends Request {
+public class RetrieveFilesDetailRequest {
 
     @Expose
     @SerializedName("query")

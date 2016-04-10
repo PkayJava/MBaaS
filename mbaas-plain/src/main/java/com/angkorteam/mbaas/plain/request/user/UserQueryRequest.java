@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.plain.request.user;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -13,7 +12,7 @@ import java.util.Map;
 /**
  * Created by Khauv Socheat on 2/12/2016.
  */
-public class UserQueryRequest extends Request {
+public class UserQueryRequest {
 
     @Expose
     @SerializedName("query")

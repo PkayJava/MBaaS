@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by Khauv Socheat on 2/7/2016.
  */
-public class FetchAssetRequest extends Request {
+public class FetchAssetRequest {
 
     @Expose
     @SerializedName("query")

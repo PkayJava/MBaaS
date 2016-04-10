@@ -23,4 +23,8 @@ public interface Identity extends Serializable {
 
     String getUserAgent();
 
+    String getAppVersion();
+
+    String getSDKVersion();
+
 }

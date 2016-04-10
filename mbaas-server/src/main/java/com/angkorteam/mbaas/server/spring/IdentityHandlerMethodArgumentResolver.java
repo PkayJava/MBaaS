@@ -39,6 +39,8 @@ public class IdentityHandlerMethodArgumentResolver implements HandlerMethodArgum
         String userId = null;
         String applicationId = null;
         String accessToken = null;
+        String appVersion = webRequest.getHeader("app_version");
+        String sdkVersion = webRequest.getHeader("sdk_version");
         if (authorization != null && !"".equals(authorization) && authorization.length() >= 7 && authorization.substring(0, 6).toLowerCase().equals("bearer")) {
             accessToken = authorization.substring(7);
         }
@@ -61,7 +63,7 @@ public class IdentityHandlerMethodArgumentResolver implements HandlerMethodArgum
             applicationId = mobileRecord.getApplicationId();
         }
 
-        Identity identity = new Identity(userId, applicationId, clientId, mobileId, userAgent, remoteIp, clientSecret, accessToken);
+        Identity identity = new Identity(userId, applicationId, clientId, mobileId, userAgent, remoteIp, clientSecret, accessToken, appVersion, sdkVersion);
         return identity;
     }
 

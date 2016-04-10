@@ -26,8 +26,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> social(
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @RequestBody Request request
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session
     ) {
         return ResponseEntity.ok(null);
     }
@@ -65,8 +64,7 @@ public class RestAPIController {
     public ResponseEntity<Response> socialUnlink(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("socialNetwork") String socialNetwork,
-            @RequestBody Request request
+            @PathVariable("socialNetwork") String socialNetwork
     ) {
         return ResponseEntity.ok(null);
     }
@@ -79,8 +77,7 @@ public class RestAPIController {
             HttpServletRequest request,
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("username") String username,
-            @RequestBody Request requestBody
+            @PathVariable("username") String username
     ) {
         return ResponseEntity.ok(null);
     }
@@ -92,8 +89,7 @@ public class RestAPIController {
     public ResponseEntity<Response> unfollowUser(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("username") String username,
-            @RequestBody Request request
+            @PathVariable("username") String username
     ) {
         return ResponseEntity.ok(null);
     }
@@ -105,8 +101,7 @@ public class RestAPIController {
     public ResponseEntity<Response> fetchFollowing(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("username") String username,
-            @RequestBody Request request
+            @PathVariable("username") String username
     ) {
         return ResponseEntity.ok(null);
     }
@@ -118,8 +113,7 @@ public class RestAPIController {
     public ResponseEntity<Response> fetchFollowers(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("username") String username,
-            @RequestBody Request request
+            @PathVariable("username") String username
     ) {
         return ResponseEntity.ok(null);
     }
@@ -132,8 +126,7 @@ public class RestAPIController {
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("os") String os,
-            @PathVariable("token") String token,
-            @RequestBody Request request
+            @PathVariable("token") String token
     ) {
         return ResponseEntity.ok(null);
     }
@@ -145,8 +138,7 @@ public class RestAPIController {
     public ResponseEntity<Response> disablePushNotification(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("token") String token,
-            @RequestBody Request request
+            @PathVariable("token") String token
     ) {
         return ResponseEntity.ok(null);
     }
@@ -174,8 +166,7 @@ public class RestAPIController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("sourceId") String sourceId,
             @PathVariable("label") String label,
-            @PathVariable("destinationId") String destinationId,
-            @RequestBody Request request
+            @PathVariable("destinationId") String destinationId
     ) {
         return ResponseEntity.ok(null);
     }
@@ -187,8 +178,7 @@ public class RestAPIController {
     public ResponseEntity<Response> retrieveLink(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("id") String id,
-            @RequestBody Request request
+            @PathVariable("id") String id
     ) {
         return ResponseEntity.ok(null);
     }
@@ -212,8 +202,7 @@ public class RestAPIController {
     public ResponseEntity<Response> deleteLink(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("id") String id,
-            @RequestBody Request request
+            @PathVariable("id") String id
     ) {
         return ResponseEntity.ok(null);
     }
@@ -224,8 +213,7 @@ public class RestAPIController {
     )
     public ResponseEntity<Response> uploadFile(
             @Header("client_id") String clientId,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @RequestBody UploadFileRequest request
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session
     ) {
         return ResponseEntity.ok(null);
     }
@@ -237,8 +225,7 @@ public class RestAPIController {
     public ResponseEntity<Response> deleteFile(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("id") String id,
-            @RequestBody Request request
+            @PathVariable("id") String id
     ) {
         return ResponseEntity.ok(null);
     }
@@ -250,8 +237,7 @@ public class RestAPIController {
     public ResponseEntity<InputStreamResource> retrieveFile(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("id") String id,
-            @RequestBody Request request
+            @PathVariable("id") String id
     ) {
         return ResponseEntity.ok(null);
     }
@@ -263,8 +249,7 @@ public class RestAPIController {
     public ResponseEntity<InputStreamResource> retrieveFileDetail(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("id") String id,
-            @RequestBody Request request
+            @PathVariable("id") String id
     ) {
         return ResponseEntity.ok(null);
     }
@@ -290,8 +275,7 @@ public class RestAPIController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
-            @PathVariable("username") String username,
-            @RequestBody Request request
+            @PathVariable("username") String username
     ) {
         return ResponseEntity.ok(null);
     }
@@ -305,8 +289,7 @@ public class RestAPIController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
-            @PathVariable("rolename") String rolename,
-            @RequestBody Request request
+            @PathVariable("rolename") String rolename
     ) {
         return ResponseEntity.ok(null);
     }
@@ -320,8 +303,7 @@ public class RestAPIController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
-            @PathVariable("username") String username,
-            @RequestBody Request request
+            @PathVariable("username") String username
     ) {
         return ResponseEntity.ok(null);
     }
@@ -335,8 +317,7 @@ public class RestAPIController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("id") String id,
             @PathVariable("action") String action,
-            @PathVariable("rolename") String rolename,
-            @RequestBody Request request
+            @PathVariable("rolename") String rolename
     ) {
         return ResponseEntity.ok(null);
     }
@@ -347,8 +328,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> createAsset(
             @Header("client_id") String clientId,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @RequestBody CreateAssetRequest request
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session
     ) {
         return ResponseEntity.ok(null);
     }
@@ -360,8 +340,7 @@ public class RestAPIController {
     public ResponseEntity<InputStreamResource> retrieveAsset(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("name") String name,
-            @RequestBody Request request
+            @PathVariable("name") String name
     ) {
         return ResponseEntity.ok(null);
     }
@@ -373,8 +352,7 @@ public class RestAPIController {
     public ResponseEntity<InputStreamResource> deleteAsset(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("name") String name,
-            @RequestBody Request request
+            @PathVariable("name") String name
     ) {
         return ResponseEntity.ok(null);
     }
@@ -397,8 +375,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> fetchCurrentSetting(
             @Header("client_id") String clientId,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @RequestBody Request request
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session
     ) {
         return ResponseEntity.ok(null);
     }
@@ -410,8 +387,7 @@ public class RestAPIController {
     public ResponseEntity<InputStreamResource> fetchSectionSetting(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("section") String section,
-            @RequestBody Request request
+            @PathVariable("section") String section
     ) {
         return ResponseEntity.ok(null);
     }
@@ -425,8 +401,7 @@ public class RestAPIController {
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
             @PathVariable("section") String section,
             @PathVariable("key") String key,
-            @PathVariable("value") String value,
-            @RequestBody Request request
+            @PathVariable("value") String value
     ) {
         return ResponseEntity.ok(null);
     }
@@ -437,8 +412,7 @@ public class RestAPIController {
     )
     public ResponseEntity<InputStreamResource> listGroup(
             @Header("client_id") String clientId,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @RequestBody Request request
+            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session
     ) {
         return ResponseEntity.ok(null);
     }
@@ -450,8 +424,7 @@ public class RestAPIController {
     public ResponseEntity<InputStreamResource> readSpecificGroup(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("name") String name,
-            @RequestBody Request request
+            @PathVariable("name") String name
     ) {
         return ResponseEntity.ok(null);
     }
@@ -463,8 +436,7 @@ public class RestAPIController {
     public ResponseEntity<InputStreamResource> enableEndpointGroup(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("name") String name,
-            @RequestBody Request request
+            @PathVariable("name") String name
     ) {
         return ResponseEntity.ok(null);
     }
@@ -476,8 +448,7 @@ public class RestAPIController {
     public ResponseEntity<InputStreamResource> disableEndpointGroup(
             @Header("client_id") String clientId,
             @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
-            @PathVariable("name") String name,
-            @RequestBody Request request
+            @PathVariable("name") String name
     ) {
         return ResponseEntity.ok(null);
     }

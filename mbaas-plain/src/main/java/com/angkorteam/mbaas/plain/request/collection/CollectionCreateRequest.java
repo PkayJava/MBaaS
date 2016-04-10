@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.plain.request.collection;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +9,7 @@ import java.util.List;
 /**
  * Created by Khauv Socheat on 2/12/2016.
  */
-public class CollectionCreateRequest extends Request {
+public class CollectionCreateRequest {
 
     @Expose
     @SerializedName("collectionName")

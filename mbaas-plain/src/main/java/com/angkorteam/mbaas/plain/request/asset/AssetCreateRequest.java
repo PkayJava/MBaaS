@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.plain.request.asset;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +9,7 @@ import java.util.Map;
 /**
  * Created by socheat on 4/9/16.
  */
-public class AssetCreateRequest extends Request {
+public class AssetCreateRequest {
 
     @Expose
     @SerializedName("filename")

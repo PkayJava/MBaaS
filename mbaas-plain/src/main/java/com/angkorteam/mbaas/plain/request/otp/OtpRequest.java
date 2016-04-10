@@ -1,13 +1,12 @@
 package com.angkorteam.mbaas.plain.request.otp;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by socheat on 4/3/16.
  */
-public class OtpRequest extends Request {
+public class OtpRequest {
 
     @Expose
     @SerializedName("secret")

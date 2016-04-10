@@ -21,7 +21,11 @@ public final class Identity implements com.angkorteam.mbaas.plain.Identity {
 
     private final String accessToken;
 
-    public Identity(String userId, String applicationId, String clientId, String clientSecret, String mobileId, String userAgent, String remoteIp, String accessToken) {
+    private final String appVersion;
+
+    private final String SDKVersion;
+
+    public Identity(String userId, String applicationId, String clientId, String clientSecret, String mobileId, String userAgent, String remoteIp, String accessToken, String appVersion, String sdkVersion) {
         this.userId = userId;
         this.applicationId = applicationId;
         this.clientId = clientId;
@@ -30,6 +34,8 @@ public final class Identity implements com.angkorteam.mbaas.plain.Identity {
         this.remoteIp = remoteIp;
         this.clientSecret = clientSecret;
         this.accessToken = accessToken;
+        this.appVersion = appVersion;
+        this.SDKVersion = sdkVersion;
     }
 
     @Override
@@ -70,5 +76,15 @@ public final class Identity implements com.angkorteam.mbaas.plain.Identity {
     @Override
     public String getClientSecret() {
         return clientSecret;
+    }
+
+    @Override
+    public String getAppVersion() {
+        return this.appVersion;
+    }
+
+    @Override
+    public String getSDKVersion() {
+        return this.SDKVersion;
     }
 }

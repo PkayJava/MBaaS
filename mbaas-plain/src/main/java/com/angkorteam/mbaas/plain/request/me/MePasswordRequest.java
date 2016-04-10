@@ -1,13 +1,12 @@
 package com.angkorteam.mbaas.plain.request.me;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by Khauv Socheat on 2/12/2016.
  */
-public class MePasswordRequest extends Request {
+public class MePasswordRequest {
 
     @Expose
     @SerializedName("old")

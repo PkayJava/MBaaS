@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.plain.request.device;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +9,7 @@ import java.util.List;
 /**
  * Created by socheat on 3/28/16.
  */
-public class DeviceRegisterRequest extends Request {
+public class DeviceRegisterRequest {
 
     @Expose
     @SerializedName("clientId")

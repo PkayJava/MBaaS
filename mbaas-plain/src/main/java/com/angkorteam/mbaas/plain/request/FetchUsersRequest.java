@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by Khauv Socheat on 2/4/2016.
  */
-public class FetchUsersRequest extends Request {
+public class FetchUsersRequest {
 
     @Expose
     @SerializedName("query")

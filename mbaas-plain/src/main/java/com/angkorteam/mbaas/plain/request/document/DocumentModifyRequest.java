@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.plain.request.document;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +9,7 @@ import java.util.Map;
 /**
  * Created by Khauv Socheat on 2/5/2016.
  */
-public class DocumentModifyRequest extends Request {
+public class DocumentModifyRequest {
 
     @Expose
     @SerializedName("document")

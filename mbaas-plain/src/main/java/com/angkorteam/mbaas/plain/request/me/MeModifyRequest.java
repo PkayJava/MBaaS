@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.plain.request.me;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +8,7 @@ import java.util.Map;
 /**
  * Created by Khauv Socheat on 2/12/2016.
  */
-public class MeModifyRequest extends Request {
+public class MeModifyRequest {
 
     @Expose
     @SerializedName("visibleByTheUser")

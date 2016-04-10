@@ -1,13 +1,12 @@
 package com.angkorteam.mbaas.plain.request.collection;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by Khauv Socheat on 2/13/2016.
  */
-public class CollectionAttributeCreateRequest extends Request {
+public class CollectionAttributeCreateRequest {
 
     @Expose
     @SerializedName("collectionName")

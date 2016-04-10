@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.plain.request.query;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +9,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/19/16.
  */
-public class QueryExecuteRequest extends Request {
+public class QueryExecuteRequest {
 
     @Expose
     @SerializedName("parameters")

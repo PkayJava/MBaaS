@@ -3,12 +3,10 @@ package com.angkorteam.mbaas.plain.request.security;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
-
 /**
  * Created by socheat on 2/4/16.
  */
-public class SecurityLoginRequest implements Serializable {
+public class SecurityLoginRequest {
 
     @Expose
     @SerializedName("secret")
@@ -70,5 +68,5 @@ public class SecurityLoginRequest implements Serializable {
     public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
     }
-    
+
 }

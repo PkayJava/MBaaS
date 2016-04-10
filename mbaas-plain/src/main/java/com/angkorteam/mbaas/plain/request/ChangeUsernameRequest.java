@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by Khauv Socheat on 2/4/2016.
  */
-public class ChangeUsernameRequest extends Request {
+public class ChangeUsernameRequest {
 
     @Expose
     @SerializedName("username")

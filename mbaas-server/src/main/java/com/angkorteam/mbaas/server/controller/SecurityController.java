@@ -5,7 +5,6 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
-import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.security.SecurityLogoutRequest;
 import com.angkorteam.mbaas.plain.request.security.SecuritySignUpRequest;
@@ -455,10 +454,10 @@ public class SecurityController {
     public ResponseEntity<SecurityLogoutSessionResponse> logoutSession(
             HttpServletRequest request,
             @RequestHeader(name = "X-MBAAS-APPCODE", required = false) String appCode,
-            @PathVariable("session") String session,
-            @RequestBody Request requestBody
+            @PathVariable("session") String session
+
     ) {
-        LOGGER.info("{} appCode=>{} session=> body=>{}", request.getRequestURL(), appCode, request.getHeader("X-MBAAS-MOBILE"), gson.toJson(requestBody));
+        LOGGER.info("{} appCode=>{} session=>{}", request.getRequestURL(), appCode, request.getHeader("X-MBAAS-MOBILE"));
 
         SecurityLogoutSessionResponse responseBody = new SecurityLogoutSessionResponse();
 

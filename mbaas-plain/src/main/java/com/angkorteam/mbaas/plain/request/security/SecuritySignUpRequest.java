@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.plain.request.security;
 
-import com.angkorteam.mbaas.plain.request.Request;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +9,7 @@ import java.util.Map;
 /**
  * Created by socheat on 2/4/16.
  */
-public class SecuritySignUpRequest extends Request {
+public class SecuritySignUpRequest {
 
     @Expose
     @SerializedName("secret")

@@ -4,7 +4,6 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
-import com.angkorteam.mbaas.plain.request.Request;
 import com.angkorteam.mbaas.plain.request.user.UserPasswordResetRequest;
 import com.angkorteam.mbaas.plain.request.user.UserQueryRequest;
 import com.angkorteam.mbaas.plain.request.user.UserRetrieveRequest;
@@ -116,10 +115,9 @@ public class UserController {
             HttpServletRequest request,
             @RequestHeader(name = "client_id", required = false) String clientId,
             @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
-            @PathVariable("username") String username,
-            @RequestBody Request requestBody
+            @PathVariable("username") String username
     ) {
-        LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
+        LOGGER.info("{}", request.getRequestURL());
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         UnknownResponse responseBody = new UnknownResponse();
