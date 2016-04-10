@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.server.function.HttpFunction;
+import com.angkorteam.mbaas.server.service.PusherClient;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
@@ -110,5 +111,10 @@ public abstract class MasterPage extends AdminLTEPage {
     public String getHttpAddress() {
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         return HttpFunction.getHttpAddress(request);
+    }
+
+    public PusherClient getPusherClient() {
+        Application application = (Application) getApplication();
+        return application.getPusherClient();
     }
 }

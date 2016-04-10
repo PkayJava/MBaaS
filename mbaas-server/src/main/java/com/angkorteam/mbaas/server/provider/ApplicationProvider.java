@@ -41,6 +41,14 @@ public class ApplicationProvider extends JooqProvider {
         return this.applicationTable.NAME;
     }
 
+    public Field<String> getPushMasterSecret() {
+        return this.applicationTable.PUSH_MASTER_SECRET;
+    }
+
+    public Field<String> getPushApplicationId() {
+        return this.applicationTable.PUSH_APPLICATION_ID;
+    }
+
     public Field<Date> getDateCreated() {
         return this.applicationTable.DATE_CREATED;
     }

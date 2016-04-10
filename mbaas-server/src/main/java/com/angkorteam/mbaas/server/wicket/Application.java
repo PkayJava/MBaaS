@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
+import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.RuntimeConfigurationType;
@@ -96,6 +97,11 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     public final MailSender getMailSender() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
         return applicationContext.getMailSender();
+    }
+
+    public final PusherClient getPusherClient() {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        return applicationContext.getPusherClient();
     }
 
     @Override

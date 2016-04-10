@@ -9,6 +9,7 @@ import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqCo
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
+import com.angkorteam.mbaas.server.page.push.PushSendPage;
 import com.angkorteam.mbaas.server.provider.ApplicationProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -43,6 +44,8 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
         ApplicationProvider provider = new ApplicationProvider();
 
         provider.selectField(String.class, "applicationId");
+        provider.selectField(String.class, "pushApplicationId");
+        provider.selectField(String.class, "pushMasterSecret");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -56,7 +59,7 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
 
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Client", "Edit"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Push", "Client", "Edit"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -73,22 +76,33 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
             PageParameters parameters = new PageParameters();
             parameters.add("applicationId", applicationId);
             setResponsePage(ApplicationModifyPage.class, parameters);
+            return;
         }
         if ("Client".equals(link)) {
             String applicationId = (String) object.get("applicationId");
             PageParameters parameters = new PageParameters();
             parameters.add("applicationId", applicationId);
             setResponsePage(ClientManagementPage.class, parameters);
+            return;
         }
         if ("Grant".equals(link)) {
             String applicationId = (String) object.get("applicationId");
             DSLContext context = getDSLContext();
             context.update(Tables.APPLICATION).set(Tables.APPLICATION.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.APPLICATION.APPLICATION_ID.eq(applicationId)).execute();
+            return;
         }
         if ("Deny".equals(link)) {
             String applicationId = (String) object.get("applicationId");
             DSLContext context = getDSLContext();
             context.update(Tables.APPLICATION).set(Tables.APPLICATION.SECURITY, SecurityEnum.Denied.getLiteral()).where(Tables.APPLICATION.APPLICATION_ID.eq(applicationId)).execute();
+            return;
+        }
+        if ("Push".equals(link)) {
+            String applicationId = (String) object.get("applicationId");
+            PageParameters parameters = new PageParameters();
+            parameters.add("applicationId", applicationId);
+            setResponsePage(PushSendPage.class, parameters);
+            return;
         }
     }
 
@@ -109,6 +123,13 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
         if ("Deny".equals(link)) {
             String security = (String) object.get("security");
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
+                return true;
+            }
+        }
+        if ("Push".equals(link)) {
+            String pushApplicationId = (String) object.get("pushApplicationId");
+            String pushMasterSecret = (String) object.get("pushMasterSecret");
+            if (pushMasterSecret != null && !"".equals(pushMasterSecret) && pushApplicationId != null && !"".equals(pushApplicationId)) {
                 return true;
             }
         }
@@ -135,6 +156,13 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
                 return true;
             }
         }
+        if ("Push".equals(link)) {
+            String pushApplicationId = (String) object.get("pushApplicationId");
+            String pushMasterSecret = (String) object.get("pushMasterSecret");
+            if (pushMasterSecret != null && !"".equals(pushMasterSecret) && pushApplicationId != null && !"".equals(pushApplicationId)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -147,6 +175,9 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
             return "btn-xs btn-info";
         }
         if ("Grant".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Push".equals(link)) {
             return "btn-xs btn-info";
         }
         if ("Deny".equals(link)) {
