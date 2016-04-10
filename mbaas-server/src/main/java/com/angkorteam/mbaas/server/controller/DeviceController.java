@@ -259,19 +259,19 @@ public class DeviceController {
     }
 
     @RequestMapping(
-            method = RequestMethod.PUT, path = "/device/pushMessage/{clientId}/{messageId}",
+            method = RequestMethod.PUT, path = "/device/pushMessage/{messageId}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<DeviceMetricsResponse> sendMetrics(
             HttpServletRequest request,
-            @PathVariable("clientId") String clientId,
+            Identity identity,
             @PathVariable("messageId") String messageId
     ) {
         LOGGER.info("{}", request.getRequestURL());
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         ClientTable clientTable = Tables.CLIENT.as("clientTable");
-        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(clientId)).fetchOneInto(clientTable);
+        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(identity.getClientId())).fetchOneInto(clientTable);
 
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
         ApplicationRecord applicationRecord = null;
