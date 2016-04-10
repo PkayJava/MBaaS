@@ -17,7 +17,6 @@ import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.jooq.DSLContext;
@@ -29,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -66,14 +66,9 @@ public class FileController {
             HttpServletRequest request,
             HttpServletResponse resp,
             Identity identity,
-            @PathVariable("filename") String filename
+            @PathVariable("filename") String filename,
+            @RequestBody FileCreateRequest requestBody
     ) throws IOException {
-//        ,
-//        @RequestBody(required = true) FileCreateRequest requestBody
-        String string = IOUtils.toString(request.getInputStream());
-        System.out.println(string);
-        FileCreateRequest requestBody = gson.fromJson(string, FileCreateRequest.class);
-
         LOGGER.info("{}", request.getRequestURL());
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();

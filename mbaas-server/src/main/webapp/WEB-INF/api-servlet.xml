@@ -103,7 +103,7 @@
     </bean>
 
     <bean id="gson" class="org.springframework.http.converter.json.GsonFactoryBean">
-        <property name="base64EncodeByteArrays" value="true"/>
+        <property name="base64EncodeByteArrays" value="false"/>
         <property name="disableHtmlEscaping" value="true"/>
         <property name="prettyPrinting" value="false"/>
         <property name="serializeNulls" value="false"/>

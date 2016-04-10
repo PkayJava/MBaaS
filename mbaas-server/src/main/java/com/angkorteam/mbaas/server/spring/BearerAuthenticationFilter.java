@@ -102,7 +102,6 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             if (debug) {
                 logger.debug("Authentication success: " + authResult);
             }
-
             SecurityContextHolder.getContext().setAuthentication(authResult);
 
             onSuccessfulAuthentication(request, response, authResult);
