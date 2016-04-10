@@ -72,7 +72,7 @@ public class MeController {
         UserRecord userRecord = null;
 
         if (mobileRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
         }
 
         if (userRecord != null) {
@@ -106,7 +106,7 @@ public class MeController {
 
         UserRecord userRecord = null;
         if (mobileRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
         }
 
         if (userRecord == null) {
@@ -289,7 +289,7 @@ public class MeController {
         }
 
         MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
 
         if (!virtualColumns.isEmpty()) {
             for (Map.Entry<String, List<String>> entry : virtualColumns.entrySet()) {
@@ -343,7 +343,7 @@ public class MeController {
         MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
         MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
         userRecord.setPassword(requestBody.getNewPassword());
         userRecord.update();
 
@@ -370,7 +370,7 @@ public class MeController {
         MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
 
         MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
         userRecord.setLogin(requestBody.getUsername());
         userRecord.update();
 

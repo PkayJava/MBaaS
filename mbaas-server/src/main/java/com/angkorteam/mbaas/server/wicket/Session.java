@@ -59,7 +59,7 @@ public class Session extends AuthenticatedWebSession {
 
             DesktopRecord desktopRecord = context.newRecord(desktopTable);
             desktopRecord.setDesktopId(UUID.randomUUID().toString());
-            desktopRecord.setUserId(userRecord.getUserId());
+            desktopRecord.setOwnerUserId(userRecord.getUserId());
             desktopRecord.setDateSeen(new Date());
             desktopRecord.setDateCreated(new Date());
             desktopRecord.setSessionId(sessionId);

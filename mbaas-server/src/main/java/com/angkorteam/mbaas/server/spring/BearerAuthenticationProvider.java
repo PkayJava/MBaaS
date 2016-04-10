@@ -68,7 +68,7 @@ public class BearerAuthenticationProvider implements org.springframework.securit
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         if (GrantTypeEnum.Authorization.getLiteral().equals(mobileRecord.getGrantType())) {
             UserTable userTable = Tables.USER.as("userTable");
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }
@@ -99,7 +99,7 @@ public class BearerAuthenticationProvider implements org.springframework.securit
             authorities.add(new SimpleGrantedAuthority(configuration.getString(Constants.ROLE_OAUTH2_AUTHORIZATION)));
         } else if (GrantTypeEnum.Password.getLiteral().equals(mobileRecord.getGrantType())) {
             UserTable userTable = Tables.USER.as("userTable");
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 throw new BadCredentialsException("bearer " + accessToken + " is not valid");
             }

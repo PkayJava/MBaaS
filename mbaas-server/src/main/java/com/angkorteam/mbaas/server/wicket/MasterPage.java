@@ -55,7 +55,7 @@ public abstract class MasterPage extends AdminLTEPage {
 
         DesktopRecord desktopRecord = context.select(desktopTable.fields()).from(desktopTable).where(desktopTable.SESSION_ID.eq(session.getId())).fetchOneInto(desktopTable);
         if (desktopRecord != null) {
-            desktopRecord.setUserId(session.getUserId());
+            desktopRecord.setOwnerUserId(session.getUserId());
             desktopRecord.setDateSeen(new Date());
             desktopRecord.setClientIp(getSession().getClientInfo().getProperties().getRemoteAddress());
             desktopRecord.setUserAgent(getSession().getClientInfo().getUserAgent());

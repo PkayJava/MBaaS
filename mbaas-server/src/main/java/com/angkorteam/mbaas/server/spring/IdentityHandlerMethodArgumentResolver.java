@@ -60,18 +60,18 @@ public class IdentityHandlerMethodArgumentResolver implements HandlerMethodArgum
             if (clientId != null && !"".equals(clientId)) {
                 clientId = mobileRecord.getClientId();
             }
-            userId = mobileRecord.getUserId();
+            userId = mobileRecord.getOwnerUserId();
             applicationId = mobileRecord.getApplicationId();
         }
 
         if (userId == null || "".equals(userId)) {
             ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(applicationId)).fetchOneInto(applicationTable);
             if (applicationRecord != null) {
-                userId = applicationRecord.getUserId();
+                userId = applicationRecord.getOwnerUserId();
             }
         }
 
-        Identity identity = new Identity(userId, applicationId, clientId, mobileId, userAgent, remoteIp, clientSecret, accessToken, appVersion, sdkVersion);
+        Identity identity = new Identity(userId, applicationId, clientId, clientSecret, mobileId, userAgent, remoteIp, accessToken, appVersion, sdkVersion);
         return identity;
     }
 

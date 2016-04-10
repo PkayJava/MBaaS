@@ -26,7 +26,7 @@ public class ClientProvider extends JooqProvider {
 
     public ClientProvider(String applicationId) {
         this.applicationId = applicationId;
-        this.from = this.clientTable.join(this.userTable).on(this.clientTable.USER_ID.eq(this.userTable.USER_ID));
+        this.from = this.clientTable.join(this.userTable).on(this.clientTable.OWNER_USER_ID.eq(this.userTable.USER_ID));
     }
 
     public Field<String> getClientId() {

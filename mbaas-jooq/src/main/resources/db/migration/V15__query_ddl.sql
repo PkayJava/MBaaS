@@ -11,7 +11,7 @@ CREATE TABLE query (
   date_created    DATETIME     NOT NULL DEFAULT NOW(),
   security        VARCHAR(15)  NOT NULL,
 
-  owner_user_id   VARCHAR(100) NOT NULL,
+  owner_user_id   VARCHAR(100),
 
   optimistic      INT(11)      NOT NULL DEFAULT 0,
 

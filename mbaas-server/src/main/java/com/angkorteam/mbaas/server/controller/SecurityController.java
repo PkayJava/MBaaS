@@ -401,9 +401,9 @@ public class SecurityController {
 
         MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
-        String userId = mobileRecord.getUserId();
+        String userId = mobileRecord.getOwnerUserId();
 
-        context.delete(mobileTable).where(mobileTable.USER_ID.eq(userId)).execute();
+        context.delete(mobileTable).where(mobileTable.OWNER_USER_ID.eq(userId)).execute();
 
         return ResponseEntity.ok(responseBody);
     }

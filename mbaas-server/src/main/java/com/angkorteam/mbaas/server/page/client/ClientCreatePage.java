@@ -119,9 +119,9 @@ public class ClientCreatePage extends MasterPage {
 
         ClientRecord clientRecord = context.newRecord(clientTable);
         clientRecord.setDateCreated(new Date());
-        clientRecord.setUserId(getSession().getUserId());
+        clientRecord.setOwnerUserId(getSession().getUserId());
         clientRecord.setApplicationId(this.applicationId);
-        clientRecord.setApplicationUserId(applicationRecord.getUserId());
+        clientRecord.setApplicationUserId(applicationRecord.getOwnerUserId());
         clientRecord.setClientSecret(UUID.randomUUID().toString());
         clientRecord.setClientId(UUID.randomUUID().toString());
         clientRecord.setSecurity(SecurityEnum.Denied.getLiteral());

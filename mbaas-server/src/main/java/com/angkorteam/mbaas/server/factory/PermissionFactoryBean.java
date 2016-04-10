@@ -77,7 +77,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             if (mobileRecord == null) {
                 return false;
             }
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 return false;
             }
@@ -99,7 +99,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             if (mobileRecord == null) {
                 return false;
             }
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 return false;
             }
@@ -121,7 +121,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             if (mobileRecord == null) {
                 return false;
             }
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 return false;
             }
@@ -150,7 +150,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             if (mobileRecord == null) {
                 return false;
             }
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 return false;
             }
@@ -173,7 +173,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             if (mobileRecord == null) {
                 return false;
             }
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 return false;
             }
@@ -196,7 +196,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             if (mobileRecord == null) {
                 return false;
             }
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 return false;
             }
@@ -219,7 +219,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
             if (mobileRecord == null) {
                 return false;
             }
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 return false;
             }
@@ -246,7 +246,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
                 return false;
             }
 
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 return false;
             }
@@ -301,7 +301,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
                 return false;
             }
 
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 return false;
             }
@@ -349,7 +349,7 @@ public class PermissionFactoryBean implements FactoryBean<PermissionFactoryBean.
                 return false;
             }
 
-            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 return false;
             }

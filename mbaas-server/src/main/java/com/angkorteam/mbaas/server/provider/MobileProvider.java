@@ -27,7 +27,7 @@ public class MobileProvider extends JooqProvider {
     private TableLike<?> from;
 
     public MobileProvider() {
-        this.from = this.mobileTable.leftJoin(this.userTable).on(this.mobileTable.USER_ID.eq(this.userTable.USER_ID))
+        this.from = this.mobileTable.leftJoin(this.userTable).on(this.mobileTable.OWNER_USER_ID.eq(this.userTable.USER_ID))
                 .leftJoin(this.clientTable).on(this.mobileTable.CLIENT_ID.eq(this.clientTable.CLIENT_ID))
                 .leftJoin(this.applicationTable).on(this.clientTable.APPLICATION_ID.eq(this.applicationTable.APPLICATION_ID));
         setSort("dateSeen", SortOrder.DESCENDING);

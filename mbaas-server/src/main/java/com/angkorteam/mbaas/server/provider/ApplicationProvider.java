@@ -25,7 +25,7 @@ public class ApplicationProvider extends JooqProvider {
     private TableLike<?> from;
 
     public ApplicationProvider() {
-        this.from = this.applicationTable.join(this.userTable).on(this.applicationTable.USER_ID.eq(this.userTable.USER_ID)).leftJoin(this.clientTable).on(this.applicationTable.APPLICATION_ID.eq(this.clientTable.APPLICATION_ID));
+        this.from = this.applicationTable.join(this.userTable).on(this.applicationTable.OWNER_USER_ID.eq(this.userTable.USER_ID)).leftJoin(this.clientTable).on(this.applicationTable.APPLICATION_ID.eq(this.clientTable.APPLICATION_ID));
         setGroupBy(this.applicationTable.APPLICATION_ID);
     }
 

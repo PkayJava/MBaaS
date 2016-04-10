@@ -131,7 +131,7 @@ public class ApplicationCreatePage extends MasterPage {
         applicationRecord.setDescription(this.description);
         applicationRecord.setDateCreated(new Date());
         applicationRecord.setSecurity(SecurityEnum.Denied.getLiteral());
-        applicationRecord.setUserId(getSession().getUserId());
+        applicationRecord.setOwnerUserId(getSession().getUserId());
         applicationRecord.setPushApplicationId(this.pushApplicationId);
         applicationRecord.setPushMasterSecret(this.pushMasterSecret);
         if (!oauthRoles.isEmpty()) {

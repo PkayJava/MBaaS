@@ -35,7 +35,7 @@ public class AssetProvider extends JooqProvider {
         this.assetTable = Tables.ASSET.as("assetTable");
         this.userTable = Tables.USER.as("userTable");
 
-        this.from = assetTable.join(userTable).on(assetTable.USER_ID.eq(userTable.USER_ID));
+        this.from = assetTable.join(userTable).on(assetTable.OWNER_USER_ID.eq(userTable.USER_ID));
         DSLContext context = getDSLContext();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");

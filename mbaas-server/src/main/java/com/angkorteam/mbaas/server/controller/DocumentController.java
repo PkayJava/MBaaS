@@ -86,7 +86,7 @@ public class DocumentController {
 
         UserRecord userRecord = null;
         if (mobileRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 errorMessages.put("session", "session invalid");
             }
@@ -316,7 +316,7 @@ public class DocumentController {
 
         UserRecord userRecord = null;
         if (mobileRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 errorMessages.put("session", "session invalid");
             }
@@ -550,7 +550,7 @@ public class DocumentController {
 
         UserRecord userRecord = null;
         if (mobileRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 errorMessages.put("session", "session invalid");
             }
@@ -1036,7 +1036,7 @@ public class DocumentController {
 
         UserRecord userRecord = null;
         if (mobileRecord != null) {
-            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getUserId())).fetchOneInto(userTable);
+            userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
             if (userRecord == null) {
                 errorMessages.put("session", "session invalid");
             }

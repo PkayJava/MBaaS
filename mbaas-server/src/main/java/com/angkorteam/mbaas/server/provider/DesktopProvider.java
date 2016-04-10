@@ -24,7 +24,7 @@ public class DesktopProvider extends JooqProvider {
     private TableLike<?> from;
 
     public DesktopProvider() {
-        this.from = desktopTable.join(userTable).on(desktopTable.USER_ID.eq(userTable.USER_ID));
+        this.from = desktopTable.join(userTable).on(desktopTable.OWNER_USER_ID.eq(userTable.USER_ID));
         setSort("dateSeen", SortOrder.DESCENDING);
     }
 

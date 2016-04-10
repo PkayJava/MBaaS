@@ -4,7 +4,7 @@ CREATE TABLE client (
   client_id           VARCHAR(100) NOT NULL,
 
   application_id      VARCHAR(100),
-  user_id             VARCHAR(100),
+  owner_user_id       VARCHAR(100),
 
   application_user_id VARCHAR(100),
 
@@ -26,7 +26,7 @@ CREATE TABLE client (
   INDEX (description),
   INDEX (client_secret),
   INDEX (application_id),
-  INDEX (user_id),
+  INDEX (owner_user_id),
   INDEX (application_user_id),
   PRIMARY KEY (client_id)
 

@@ -2,7 +2,7 @@ CREATE TABLE application (
 
   application_id      VARCHAR(100) NOT NULL,
 
-  user_id             VARCHAR(100) NOT NULL,
+  owner_user_id       VARCHAR(100),
 
   description         VARCHAR(255),
   name                VARCHAR(255),
@@ -22,7 +22,7 @@ CREATE TABLE application (
 
   INDEX (name),
   INDEX (description),
-  INDEX (user_id),
+  INDEX (owner_user_id),
   PRIMARY KEY (application_id)
 
 );

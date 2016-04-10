@@ -71,7 +71,7 @@ public class MBaaS {
 
         UserTable userTable = Tables.USER.as("userTable");
         if (mobilePojo != null) {
-            userPojo = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobilePojo.getUserId())).fetchOneInto(UserPojo.class);
+            userPojo = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobilePojo.getOwnerUserId())).fetchOneInto(UserPojo.class);
         }
 
         RoleTable roleTable = Tables.ROLE.as("roleTable");

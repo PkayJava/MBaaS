@@ -8,7 +8,7 @@ CREATE TABLE `collection` (
   system        BIT(1)       NOT NULL DEFAULT 0,
   reference     BIT(1)       NOT NULL DEFAULT 0,
 
-  owner_user_id VARCHAR(100) NOT NULL,
+  owner_user_id VARCHAR(100),
 
   UNIQUE KEY (name),
   INDEX (owner_user_id),

@@ -100,7 +100,7 @@ public class OAuth2Controller {
         mobileRecord.setMobileId(UUID.randomUUID().toString());
         mobileRecord.setApplicationId(applicationRecord.getApplicationId());
         mobileRecord.setClientId(clientRecord.getClientId());
-        mobileRecord.setUserId(authorizationRecord.getUserId());
+        mobileRecord.setOwnerUserId(authorizationRecord.getOwnerUserId());
         mobileRecord.setClientIp(request.getRemoteAddr());
         mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
         mobileRecord.setDateCreated(new Date());
@@ -255,7 +255,7 @@ public class OAuth2Controller {
         MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
         MobileRecord mobileRecord = context.newRecord(mobileTable);
         mobileRecord.setMobileId(UUID.randomUUID().toString());
-        mobileRecord.setUserId(userRecord.getUserId());
+        mobileRecord.setOwnerUserId(userRecord.getUserId());
         mobileRecord.setClientIp(request.getRemoteAddr());
         mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
         mobileRecord.setDateCreated(new Date());

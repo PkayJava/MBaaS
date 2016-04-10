@@ -3,7 +3,7 @@ CREATE TABLE mobile (
   -- refresh token
   mobile_id               VARCHAR(100) NOT NULL,
 
-  user_id                 VARCHAR(100),
+  owner_user_id           VARCHAR(100),
   client_id               VARCHAR(100),
   application_id          VARCHAR(100),
   date_created            DATETIME,
@@ -38,7 +38,7 @@ CREATE TABLE mobile (
   INDEX (device_alias),
   INDEX (device_operating_system),
   INDEX (device_os_version),
-  INDEX (user_id),
+  INDEX (owner_user_id),
   INDEX (application_id),
   INDEX (client_id),
   INDEX (access_token),
