@@ -44,6 +44,7 @@
                    entry-point-ref="authenticationEntryPoint" create-session="stateless">
         <security:csrf disabled="true"/>
         <!-- SecurityExpressionRoot -->
+        <security:access-denied-handler ref="accessDeniedHandler"/>
         <security:custom-filter ref="authenticationFilter" before="ANONYMOUS_FILTER"/>
         <security:intercept-url pattern="/api/security/signup" method="POST" access="permitAll"/>
         <security:intercept-url pattern="/api/security/login" method="POST" access="permitAll"/>
@@ -133,6 +134,10 @@
     </bean>
 
     <bean id="jdbcTemplate" class="com.angkorteam.mbaas.server.factory.JdbcTemplateFactoryBean"/>
+
+    <bean id="accessDeniedHandler" class="com.angkorteam.mbaas.server.spring.AccessDeniedHandler">
+        <property name="gson" ref="gson"/>
+    </bean>
 
     <bean id="authenticationFilter" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationFilter">
         <constructor-arg index="0" ref="authenticationManager"/>
