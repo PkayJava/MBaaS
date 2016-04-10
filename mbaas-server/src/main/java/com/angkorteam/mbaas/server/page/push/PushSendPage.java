@@ -12,6 +12,7 @@ import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
@@ -20,6 +21,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * Created by socheat on 4/10/16.
@@ -72,6 +74,7 @@ public class PushSendPage extends MasterPage {
         PusherClient pusherClient = getPusherClient();
 
         MessageDTORequest request = new MessageDTORequest();
+        request.getMessage().getUserData().put("time", DateFormatUtils.ISO_DATE_TIME_ZONE_FORMAT.format(new Date()));
         request.getMessage().setAlert(this.alert);
         Call<MessageDTOResponse> responseCall = pusherClient.send(authorization, request);
         try {
