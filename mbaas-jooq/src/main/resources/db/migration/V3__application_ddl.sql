@@ -2,12 +2,10 @@ CREATE TABLE application (
 
   application_id      VARCHAR(100) NOT NULL,
 
-  owner_user_id       VARCHAR(100) NOT NULL,
+  user_id             VARCHAR(100) NOT NULL,
 
   description         VARCHAR(255),
   name                VARCHAR(255),
-
-  auto_registration   BIT(1)       NOT NULL,
 
   push_application_id VARCHAR(255),
   push_master_secret  VARCHAR(255),
@@ -24,7 +22,7 @@ CREATE TABLE application (
 
   INDEX (name),
   INDEX (description),
-  INDEX (owner_user_id),
+  INDEX (user_id),
   PRIMARY KEY (application_id)
 
 );
