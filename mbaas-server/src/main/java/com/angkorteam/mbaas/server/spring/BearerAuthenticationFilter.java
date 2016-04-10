@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.spring;
 
-import org.apache.http.HttpStatus;
+import com.angkorteam.mbaas.plain.response.UnknownResponse;
+import com.google.gson.Gson;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,6 +34,7 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
     private AuthenticationManager authenticationManager;
     private boolean ignoreFailure = false;
     private String credentialsCharset = "UTF-8";
+    private Gson gson;
 
     /**
      * Creates an instance which will authenticate against the supplied
@@ -110,7 +112,12 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             if (ignoreFailure) {
                 chain.doFilter(request, response);
             } else {
-                response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+                UnknownResponse responseBody = new UnknownResponse();
+                responseBody.setResult(org.springframework.http.HttpStatus.UNAUTHORIZED.getReasonPhrase());
+                responseBody.setHttpCode(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.setStatus(HttpServletResponse.SC_OK);
+                this.gson.toJson(responseBody, response.getWriter());
             }
             return;
         } catch (AuthenticationException failed) {
@@ -127,7 +134,6 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             } else {
                 authenticationEntryPoint.commence(request, response, failed);
             }
-
             return;
         }
 
@@ -169,5 +175,13 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
 
     protected String getCredentialsCharset(HttpServletRequest httpRequest) {
         return credentialsCharset;
+    }
+
+    public Gson getGson() {
+        return gson;
+    }
+
+    public void setGson(Gson gson) {
+        this.gson = gson;
     }
 }
