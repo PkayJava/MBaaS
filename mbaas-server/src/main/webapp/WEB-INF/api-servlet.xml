@@ -110,6 +110,8 @@
         <property name="dateFormatPattern" value="${pattern.datetime}"/>
     </bean>
 
+    <bean id="pusherClient" class="com.angkorteam.mbaas.server.factory.PusherClientFactoryBean"/>
+
     <bean id="dataSource" class="com.angkorteam.mbaas.server.factory.BasicDataSourceFactoryBean"/>
 
     <bean id="flyway" class="com.angkorteam.mbaas.server.factory.FlywayFactoryBean"/>

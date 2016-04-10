@@ -33,8 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -54,6 +52,9 @@ public class DeviceController {
 
     @Autowired
     private DSLContext context;
+
+    @Autowired
+    private PusherClient pusherClient;
 
     @Autowired
     private Gson gson;
@@ -154,9 +155,7 @@ public class DeviceController {
             mobileRecord.update();
         }
 
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String pushAddress = configuration.getString(Constants.PUSH_SERVER_URL);
-        String basic = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
+        String credential = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
 
         PusherDTORequest dto = new PusherDTORequest();
         dto.setDeviceToken(requestBody.getDeviceToken());
@@ -166,14 +165,7 @@ public class DeviceController {
         dto.setOsVersion(requestBody.getOsVersion());
         dto.setCategories(requestBody.getCategories());
 
-        String httpAddress = pushAddress.endsWith("/") ? pushAddress : pushAddress + "/";
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(httpAddress)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        PusherClient client = retrofit.create(PusherClient.class);
-
-        Call<PusherDTOResponse> responseCall = client.register(basic, dto);
+        Call<PusherDTOResponse> responseCall = pusherClient.register(credential, dto);
         Response<PusherDTOResponse> responseBody = null;
         try {
             responseBody = responseCall.execute();
@@ -237,17 +229,8 @@ public class DeviceController {
 
         mobileRecord.delete();
 
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String pushAddress = configuration.getString(Constants.PUSH_SERVER_URL);
-        String basic = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
-        String httpAddress = pushAddress.endsWith("/") ? pushAddress : pushAddress + "/";
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(httpAddress)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        PusherClient client = retrofit.create(PusherClient.class);
-
-        Call<RevokerDTOResponse> responseCall = client.unregister(basic, mobileRecord.getDeviceToken());
+        String credential = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
+        Call<RevokerDTOResponse> responseCall = pusherClient.unregister(credential, mobileRecord.getDeviceToken());
         Response<RevokerDTOResponse> responseBody = null;
         try {
             responseBody = responseCall.execute();
@@ -292,17 +275,8 @@ public class DeviceController {
             return ResponseEntity.ok(response);
         }
 
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String pushAddress = configuration.getString(Constants.PUSH_SERVER_URL);
-        String basic = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
-        String httpAddress = pushAddress.endsWith("/") ? pushAddress : pushAddress + "/";
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(httpAddress)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        PusherClient client = retrofit.create(PusherClient.class);
-
-        Call<MetricsDTOResponse> responseCall = client.sendMetrics(basic, messageId);
+        String credential = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
+        Call<MetricsDTOResponse> responseCall = this.pusherClient.sendMetrics(credential, messageId);
         Response<MetricsDTOResponse> responseBody = null;
         try {
             responseBody = responseCall.execute();

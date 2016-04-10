@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.*;
 import com.angkorteam.mbaas.server.function.MariaDBFunction;
+import com.angkorteam.mbaas.server.service.PusherClient;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
@@ -30,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -65,6 +68,8 @@ public class ApplicationContext implements ServletContextListener {
 
     private MailSender mailSender;
 
+    private PusherClient pusherClient;
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
@@ -78,6 +83,7 @@ public class ApplicationContext implements ServletContextListener {
         this.configuration = initConfiguration(dataSource);
         this.jdbcTemplate = initJdbcTemplate(dataSource);
         this.context = initDSLContext(configuration);
+        this.pusherClient = initPusherClient();
         LOGGER.info("initializing string encryptors");
         this.stringEncryptor = initStringEncryptor();
         LOGGER.info("initializing default role");
@@ -97,6 +103,18 @@ public class ApplicationContext implements ServletContextListener {
         }
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
+    }
+
+    protected PusherClient initPusherClient() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String pushAddress = configuration.getString(Constants.PUSH_SERVER_URL);
+        String httpAddress = pushAddress.endsWith("/") ? pushAddress : pushAddress + "/";
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(httpAddress)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        PusherClient pusherClient = retrofit.create(PusherClient.class);
+        return pusherClient;
     }
 
     protected void initNashorn(DSLContext context) {
@@ -585,5 +603,9 @@ public class ApplicationContext implements ServletContextListener {
 
     public final JdbcTemplate getJdbcTemplate() {
         return jdbcTemplate;
+    }
+
+    public final PusherClient getPusherClient() {
+        return pusherClient;
     }
 }
