@@ -143,9 +143,9 @@
                         <version>${mariadb.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>com.angkorteam.mbaas.maven</groupId>
-                        <artifactId>mbaas-maven</artifactId>
-                        <version>${project.parent.version}</version>
+                        <groupId>com.angkorteam.gradle</groupId>
+                        <artifactId>plugin-task</artifactId>
+                        <version>1.0</version>
                     </dependency>
                 </dependencies>
 
@@ -159,7 +159,7 @@
                         <password>${jdbc.password}</password>
                     </jdbc>
                     <generator>
-                        <name>com.angkorteam.mbaas.maven.JavaGenerator</name>
+                        <name>com.angkorteam.jooq.JavaGenerator</name>
                         <database>
                             <name>${jdbc.dialect}</name>
                             <recordVersionFields>optimistic</recordVersionFields>
@@ -197,7 +197,7 @@
                             </forcedTypes>
                         </database>
                         <strategy>
-                            <name>com.angkorteam.mbaas.maven.DefaultGeneratorStrategy</name>
+                            <name>com.angkorteam.jooq.DefaultGeneratorStrategy</name>
                         </strategy>
                         <generate>
                             <deprecated>false</deprecated>

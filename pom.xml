@@ -91,7 +91,6 @@
 
     <modules>
         <module>mbaas-plain</module>
-        <module>mbaas-maven</module>
         <module>mbaas-jooq</module>
         <module>mbaas-configuration</module>
         <module>mbaas-server</module>
