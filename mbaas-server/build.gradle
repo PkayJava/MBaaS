@@ -1,6 +1,21 @@
+buildscript {
+    repositories {
+        maven { url 'http://pkayjava.ddns.net:8081/nexus/content/groups/public' }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        //classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
+        //classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.11'
+        //classpath 'io.github.robwin:swagger2markup-gradle-plugin:0.9.2'
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'maven'
+//apply plugin: 'org.asciidoctor.convert'
+//apply plugin: 'io.github.robwin.swagger2markup'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -69,6 +84,9 @@ dependencies {
 
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion
     compile 'org.apache.logging.log4j:log4j-core:' + log4jVersion
+
+    compile 'io.swagger:swagger-annotations:' + swaggerVersion
+    compile 'com.google.guava:guava:' + guavaVersion
 }
 
 uploadArchives {

@@ -45,5 +45,8 @@ allprojects {
         jetty9Version = '9.2.14.v20151106'
         log4jVersion = '2.5'
         okhttp3Version = '3.2.0'
+        swaggerVersion = '1.5.8'
+        guavaVersion = '19.0'
+
     }
 }
