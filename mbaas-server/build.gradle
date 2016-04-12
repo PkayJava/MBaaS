@@ -1,0 +1,86 @@
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'maven'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+group = 'mbaas-server'
+version = '1.0'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java'
+        }
+        resources {
+            srcDir 'src/resources'
+        }
+    }
+}
+
+dependencies {
+    compile project(':mbaas-plain')
+    compile project(':mbaas-jooq')
+    compile project(':mbaas-configuration')
+
+    compile 'com.google.code.gson:gson:' + gsonVersion
+
+    compile 'org.flywaydb:flyway-core:' + flywayVersion
+
+    compile 'com.angkorteam.framework.extension:framework-extension:' + frameworkextensionVersion
+    compile 'org.apache.wicket:wicket-auth-roles:' + wicketVersion
+    compile 'org.apache.wicket:wicket-datetime:' + wicketVersion
+
+    compile 'org.springframework:spring-core:' + springVersion
+    compile 'org.springframework:spring-context:' + springVersion
+    compile 'org.springframework:spring-context-support:' + springVersion
+    compile 'org.springframework:spring-jdbc:' + springVersion
+    compile 'org.springframework:spring-webmvc:' + springVersion
+
+    compile 'org.springframework.integration:spring-integration-core:' + springVersion
+    compile 'org.springframework.integration:spring-integration-mail:' + springVersion
+
+    compile 'org.apache.commons:commons-email:' + commonsemailVersion
+
+    compile 'org.springframework.security:spring-security-core:' + springsecurityVersion
+    compile 'org.springframework.security:spring-security-web:' + springsecurityVersion
+    compile 'org.springframework.security:spring-security-config:' + springsecurityVersion
+    compile 'org.springframework.security:spring-security-acl:' + springsecurityVersion
+
+    compile 'com.squareup.retrofit2:retrofit:' + retrofitVersion
+    compile 'com.squareup.retrofit2:converter-gson:' + retrofitVersion
+    compile 'com.squareup.okhttp3:okhttp-apache:' + okhttp3Version
+
+    compile 'org.mariadb.jdbc:mariadb-java-client:' + mariadbVersion
+
+    compile 'sigar:sigar:' + sigarVersion
+    compile 'org.reflections:reflections:' + reflectionsVersion
+    compile 'org.jasypt:jasypt:' + jasyptVersion
+    compile 'commons-codec:commons-codec:' + commonscodecVersion
+    compile 'net.glxn.qrgen:javase:' + qrVersion
+
+    compile 'org.apache.commons:commons-dbcp2:' + commonsdbcp2Version
+    compile 'org.apache.commons:commons-lang3:' + commonslang3Version
+
+    compile 'javax.servlet:javax.servlet-api:' + servletVersion
+
+    compile 'org.eclipse.jetty.aggregate:jetty-all:' + jetty9Version
+
+    compile 'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion
+    compile 'org.apache.logging.log4j:log4j-core:' + log4jVersion
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "http://pkayjava.ddns.net:8081/nexus/content/repositories/releases") {
+                authentication(userName: "admin", password: "admin123")
+            }
+            pom.groupId = 'com.angkorteam.mbaas.server';
+            pom.artifactId = 'mbaas-server'
+            pom.version = '1.0'
+            pom.packaging = 'war'
+        }
+    }
+}
