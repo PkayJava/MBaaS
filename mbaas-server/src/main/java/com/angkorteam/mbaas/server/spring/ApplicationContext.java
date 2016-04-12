@@ -1,7 +1,6 @@
 package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
@@ -71,7 +70,7 @@ public class ApplicationContext implements ServletContextListener {
 
     private PusherClient pusherClient;
 
-    private OkHttpClient client;
+    private OkHttpClient httpClient;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -86,7 +85,8 @@ public class ApplicationContext implements ServletContextListener {
         this.configuration = initConfiguration(dataSource);
         this.jdbcTemplate = initJdbcTemplate(dataSource);
         this.context = initDSLContext(configuration);
-        this.pusherClient = initPusherClient();
+        this.httpClient = initHttpClient();
+        this.pusherClient = initPusherClient(this.httpClient);
         LOGGER.info("initializing string encryptors");
         this.stringEncryptor = initStringEncryptor();
         LOGGER.info("initializing default role");
@@ -108,7 +108,7 @@ public class ApplicationContext implements ServletContextListener {
         servletContext.setAttribute(KEY, this);
     }
 
-    protected OkHttpClient initOkClient() {
+    protected OkHttpClient initHttpClient() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.readTimeout(5, TimeUnit.SECONDS);
         builder.writeTimeout(5, TimeUnit.SECONDS);
@@ -118,12 +118,13 @@ public class ApplicationContext implements ServletContextListener {
         return builder.build();
     }
 
-    protected PusherClient initPusherClient() {
+    protected PusherClient initPusherClient(OkHttpClient httpClient) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         String pushAddress = configuration.getString(Constants.PUSH_SERVER_URL);
         String httpAddress = pushAddress.endsWith("/") ? pushAddress : pushAddress + "/";
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(httpAddress)
+                .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         PusherClient pusherClient = retrofit.create(PusherClient.class);
