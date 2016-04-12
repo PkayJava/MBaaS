@@ -90,7 +90,6 @@
     </properties>
 
     <modules>
-        <module>mbaas-client</module>
         <module>mbaas-plain</module>
         <module>mbaas-maven</module>
         <module>mbaas-jooq</module>
