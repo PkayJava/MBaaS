@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.jooq.enums;
+package com.angkorteam.mbaas.plain.enums;
 
 /**
  * Created by socheat on 3/2/16.
