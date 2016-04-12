@@ -11,7 +11,6 @@ import com.angkorteam.mbaas.server.oauth2.OAuth2DTO;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
-import org.apache.http.HttpStatus;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
@@ -22,6 +21,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -89,7 +89,7 @@ public class PasswordPage extends AdminLTEPage {
         Call<OAuth2PasswordResponse> responseCall = client.oauth2Password(grantType, this.login, this.password, "");
         try {
             retrofit2.Response<OAuth2PasswordResponse> response = responseCall.execute();
-            if (response.code() == HttpStatus.SC_OK) {
+            if (response.code() == HttpServletResponse.SC_OK) {
                 OAuth2DTO oauth2DTO = new OAuth2DTO();
                 oauth2DTO.setState(UUID.randomUUID().toString());
                 oauth2DTO.setAccessToken(response.body().getAccessToken());

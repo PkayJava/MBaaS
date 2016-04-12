@@ -10,7 +10,6 @@ import com.angkorteam.mbaas.server.oauth2.OAuth2Client;
 import com.angkorteam.mbaas.server.oauth2.OAuth2DTO;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
-import org.apache.http.HttpStatus;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.PropertyModel;
 import org.springframework.security.authentication.CredentialsExpiredException;
@@ -20,6 +19,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -92,7 +92,7 @@ public class AccessTokenPage extends AdminLTEPage {
         Call<MonitorTimeResponse> responseCall = client.monitorTime("Bearer " + oauth2DTO.getAccessToken());
         try {
             Response<MonitorTimeResponse> response = responseCall.execute();
-            if (response.code() == HttpStatus.SC_OK) {
+            if (response.code() == HttpServletResponse.SC_OK) {
                 MonitorTimeResponse responseBody = response.body();
                 this.serverTime = responseBody.getData();
             } else {

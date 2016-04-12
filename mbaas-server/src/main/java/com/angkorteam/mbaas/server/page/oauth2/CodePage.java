@@ -12,7 +12,6 @@ import com.angkorteam.mbaas.server.oauth2.OAuth2Client;
 import com.angkorteam.mbaas.server.oauth2.OAuth2DTO;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
-import org.apache.http.HttpStatus;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.PropertyModel;
@@ -23,6 +22,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -100,7 +100,7 @@ public class CodePage extends AdminLTEPage {
         Call<OAuth2AuthorizeResponse> responseCall = client.oauth2Authorize(clientId, clientSecret, grantType, redirectUri, this.code);
         try {
             retrofit2.Response<OAuth2AuthorizeResponse> response = responseCall.execute();
-            if (response.code() == HttpStatus.SC_OK) {
+            if (response.code() == HttpServletResponse.SC_OK) {
                 oauth2DTO.setAccessToken(response.body().getAccessToken());
                 oauth2DTO.setExpiresIn(response.body().getExpiresIn());
                 oauth2DTO.setRefreshToken(response.body().getRefreshToken());
