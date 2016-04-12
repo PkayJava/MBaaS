@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<wicket:extend>
+    <div class="box box-primary">
+        <form role="form" wicket:id="form">
+            <div class="box-body">
+                <div class="form-group">
+                    <label wicket:for="otpField">One Time Password</label>
+                    <input wicket:id="otpField" type="text" class="form-control"/>
+                    <span wicket:id="otpFeedback" class="help-block"/>
+                </div>
+            </div>
+
+            <div class="box-footer">
+                <button wicket:id="verifyButton" type="submit" class="btn btn-primary">Verify</button>
+            </div>
+        </form>
+    </div>
+</wicket:extend>
+</body>
+</html>

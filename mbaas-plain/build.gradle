@@ -1,0 +1,26 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+group = 'mbaas-plain'
+version = '1.0'
+
+dependencies {
+    compile 'com.google.code.gson:gson:' + gsonVersion
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "http://pkayjava.ddns.net:8081/nexus/content/repositories/releases") {
+                authentication(userName: "admin", password: "admin123")
+            }
+            pom.groupId = 'com.angkorteam.mbaas.plain';
+            pom.artifactId = 'mbaas-plain'
+            pom.version = '1.0'
+            pom.packaging = 'jar'
+        }
+    }
+}

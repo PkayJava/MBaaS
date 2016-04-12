@@ -1,0 +1,73 @@
+buildscript {
+    dependencies {
+        classpath 'org.mariadb.jdbc:mariadb-java-client:' + mariadbVersion
+        classpath 'org.flywaydb:flyway-gradle-plugin:' + flywayVersion
+        classpath 'com.angkorteam.gradle:plugin-task:1.0'
+    }
+    repositories {
+        maven { url 'http://pkayjava.ddns.net:8081/nexus/content/groups/public' }
+        jcenter();
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'org.flywaydb.flyway'
+apply plugin: 'com.angkorteam.gradle'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+group = 'mbaas-jooq'
+version = '1.0'
+
+dependencies {
+    compile 'org.jooq:jooq:' + jooqVersion
+    compile 'joda-time:joda-time:' + jodatimeVersion
+    compile 'com.angkorteam.gradle:plugin-task:1.0'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/java', 'buildSrc/src/main/java'
+        }
+        resources {
+            srcDir 'src/resources'
+        }
+    }
+}
+
+flyway {
+    driver = project.ext.get('temp.jdbc.driver')
+    url = project.ext.get('temp.jdbc.url')
+    user = project.ext.get('temp.jdbc.username')
+    password = project.ext.get('temp.jdbc.password')
+    encoding = 'UTF-8'
+    baselineOnMigrate = true
+}
+
+jooq {
+    jdbcDriver = project.ext.get('temp.jdbc.driver')
+    jdbcUrl = project.ext.get('temp.jdbc.url')
+    jdbcUser = project.ext.get('temp.jdbc.username')
+    jdbcPassword = project.ext.get('temp.jdbc.password')
+    database = project.ext.get('temp.jdbc.database')
+    dialect = project.ext.get('temp.jdbc.dialect')
+    packageName = 'com.angkorteam.mbaas.model.entity'
+    outputDirectory = 'buildSrc/src/main/java'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: 'http://pkayjava.ddns.net:8081/nexus/content/repositories/releases') {
+                authentication(userName: 'admin', password: 'admin123')
+            }
+            pom.groupId = 'com.angkorteam.mbaas.jooq';
+            pom.artifactId = 'mbaas-jooq'
+            pom.version = '1.0'
+            pom.packaging = 'jar'
+        }
+    }
+}
