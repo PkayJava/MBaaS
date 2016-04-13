@@ -14,13 +14,16 @@ import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
 import com.angkorteam.mbaas.plain.enums.UserTotpStatusEnum;
 import com.angkorteam.mbaas.plain.security.otp.Totp;
+import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.string.StringValue;
 import org.jooq.DSLContext;
@@ -28,6 +31,10 @@ import org.jooq.impl.DSL;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by socheat on 3/27/16.
@@ -56,9 +63,9 @@ public class AuthorizePage extends AdminLTEPage {
     private PasswordTextField passwordField;
     private TextFeedbackPanel passwordFeedback;
 
-    private Button okayButton;
+    private Button loginButton;
 
-    private Button registerButton;
+    private Button cancelButton;
 
     private Form<Void> form;
 
@@ -119,14 +126,14 @@ public class AuthorizePage extends AdminLTEPage {
         this.passwordFeedback = new TextFeedbackPanel("passwordFeedback", this.passwordField);
         this.form.add(this.passwordFeedback);
 
-        this.okayButton = new Button("okayButton");
-        this.okayButton.setOnSubmit(this::okayButtonOnSubmit);
-        this.form.add(this.okayButton);
+        this.loginButton = new Button("loginButton");
+        this.loginButton.setOnSubmit(this::loginButtonOnSubmit);
+        this.form.add(this.loginButton);
 
-        this.registerButton = new Button("registerButton");
-        this.registerButton.setOnSubmit(this::registerButtonOnSubmit);
-        this.registerButton.setDefaultFormProcessing(false);
-        this.form.add(this.registerButton);
+        this.cancelButton = new Button("cancelButton");
+        this.cancelButton.setOnSubmit(this::cancelButtonOnSubmit);
+        this.cancelButton.setDefaultFormProcessing(false);
+        this.form.add(this.cancelButton);
     }
 
     @Override
@@ -134,12 +141,27 @@ public class AuthorizePage extends AdminLTEPage {
         return (Session) super.getSession();
     }
 
-    private void registerButtonOnSubmit(Button button) {
-        RegisterPage page = new RegisterPage(this);
-        setResponsePage(page);
+    private void cancelButtonOnSubmit(Button button) {
+        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
+        getSession().removeAttribute(this.state);
+        List<String> params = new ArrayList<>();
+        if (this.state != null && !"".equals(this.state)) {
+            params.add("state=" + this.state);
+        }
+        if (this.redirectUri == null || "".equals(this.redirectUri)) {
+            this.redirectUri = HttpFunction.getHttpAddress(request) + "/web/oauth2/response";
+        }
+        params.add("error=consent_required");
+        params.add("error_uri=");
+        params.add("error_description=The user denied access to your application");
+        if (params.isEmpty()) {
+            setResponsePage(new RedirectPage(this.redirectUri));
+        } else {
+            setResponsePage(new RedirectPage(this.redirectUri + "?" + StringUtils.join(params, "&")));
+        }
     }
 
-    private void okayButtonOnSubmit(Button button) {
+    private void loginButtonOnSubmit(Button button) {
         DSLContext context = getSession().getDSLContext();
         UserTable userTable = Tables.USER.as("userTable");
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(this.login)).and(userTable.PASSWORD.eq(DSL.md5(this.password))).fetchOneInto(userTable);
