@@ -120,7 +120,6 @@ public class OAuth2Controller {
             mobileRecord.setGrantType(GrantTypeEnum.Authorization.getLiteral());
             mobileRecord.store();
         } else {
-            mobileRecord.setMobileId(UUID.randomUUID().toString());
             mobileRecord.setApplicationId(applicationRecord.getApplicationId());
             mobileRecord.setClientId(clientRecord.getClientId());
             mobileRecord.setOwnerUserId(authorizationRecord.getOwnerUserId());
