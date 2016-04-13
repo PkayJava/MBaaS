@@ -12,6 +12,7 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'application'
 apply plugin: 'war'
 apply plugin: 'maven'
 //apply plugin: 'org.asciidoctor.convert'
@@ -77,6 +78,8 @@ dependencies {
     compile 'io.swagger:swagger-annotations:' + swaggerVersion
     compile 'com.google.guava:guava:' + guavaVersion
 }
+
+mainClassName = 'com.angkorteam.mbaas.server.Start'
 
 uploadArchives {
     repositories {

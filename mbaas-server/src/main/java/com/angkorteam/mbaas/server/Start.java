@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.wicket;
+package com.angkorteam.mbaas.server;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.*;
@@ -7,7 +7,9 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import javax.management.MBeanServer;
+import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.nio.file.Paths;
 
 /**
  * Separate startup class for people that want to run the examples directly. Use parameter
@@ -66,7 +68,13 @@ public class Start {
         WebAppContext bb = new WebAppContext();
         bb.setServer(server);
         bb.setContextPath("/");
-        bb.setWar("mbaas-server/src/main/webapp");
+        String path = Paths.get(".").toAbsolutePath().normalize().toString();
+        File war = new File(path, "src/main/webapp");
+        if (!war.exists()) {
+            war = new File(path, "mbaas-server/src/main/webapp");
+        }
+        System.out.println(path);
+        bb.setWar(war.getAbsolutePath());
 
         // uncomment the next two lines if you want to start Jetty with WebSocket (JSR-356) support
         // you need org.apache.wicket:wicket-native-websocket-javax in the classpath!
