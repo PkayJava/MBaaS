@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
+import com.angkorteam.mbaas.plain.Identity;
 import com.angkorteam.mbaas.plain.enums.GrantTypeEnum;
 import com.angkorteam.mbaas.plain.request.oauth2.OAuth2RefreshRequest;
 import com.angkorteam.mbaas.plain.request.oauth2.OAuth2TokenRequest;
@@ -53,6 +54,7 @@ public class OAuth2Controller {
     )
     public ResponseEntity<OAuth2AuthorizeResponse> authorize(
             HttpServletRequest request,
+            Identity identity,
             @RequestParam(value = "client_id", required = false) String clientId,
             @RequestParam(value = "client_secret", required = false) String clientSecret,
             @RequestParam(value = "grant_type", required = false) String grantType,
@@ -98,23 +100,41 @@ public class OAuth2Controller {
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        MobileRecord mobileRecord = context.newRecord(mobileTable);
-        mobileRecord.setMobileId(UUID.randomUUID().toString());
-        mobileRecord.setApplicationId(applicationRecord.getApplicationId());
-        mobileRecord.setClientId(clientRecord.getClientId());
-        mobileRecord.setOwnerUserId(authorizationRecord.getOwnerUserId());
-        mobileRecord.setClientIp(request.getRemoteAddr());
-        mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
-        mobileRecord.setDateCreated(new Date());
-        mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
-        mobileRecord.setDateTokenIssued(new Date());
-        String accessToken = UUID.randomUUID().toString();
-        while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
-            accessToken = UUID.randomUUID().toString();
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(identity.getAccessToken())).fetchOneInto(mobileTable);
+        if (mobileRecord == null) {
+            mobileRecord = context.newRecord(mobileTable);
+            mobileRecord.setMobileId(UUID.randomUUID().toString());
+            mobileRecord.setApplicationId(applicationRecord.getApplicationId());
+            mobileRecord.setClientId(clientRecord.getClientId());
+            mobileRecord.setOwnerUserId(authorizationRecord.getOwnerUserId());
+            mobileRecord.setClientIp(request.getRemoteAddr());
+            mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+            mobileRecord.setDateCreated(new Date());
+            mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
+            mobileRecord.setDateTokenIssued(new Date());
+            String accessToken = UUID.randomUUID().toString();
+            while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
+                accessToken = UUID.randomUUID().toString();
+            }
+            mobileRecord.setAccessToken(accessToken);
+            mobileRecord.setGrantType(GrantTypeEnum.Authorization.getLiteral());
+            mobileRecord.store();
+        } else {
+            mobileRecord.setMobileId(UUID.randomUUID().toString());
+            mobileRecord.setApplicationId(applicationRecord.getApplicationId());
+            mobileRecord.setClientId(clientRecord.getClientId());
+            mobileRecord.setOwnerUserId(authorizationRecord.getOwnerUserId());
+            mobileRecord.setClientIp(request.getRemoteAddr());
+            mobileRecord.setGrantType(GrantTypeEnum.Authorization.getLiteral());
+            mobileRecord.setDateTokenIssued(new Date());
+            mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+            String accessToken = UUID.randomUUID().toString();
+            while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
+                accessToken = UUID.randomUUID().toString();
+            }
+            mobileRecord.setAccessToken(accessToken);
+            mobileRecord.update();
         }
-        mobileRecord.setAccessToken(accessToken);
-        mobileRecord.setGrantType(GrantTypeEnum.Authorization.getLiteral());
-        mobileRecord.store();
 
         OAuth2AuthorizeResponse response = new OAuth2AuthorizeResponse();
         response.setAccessToken(mobileRecord.getAccessToken());
