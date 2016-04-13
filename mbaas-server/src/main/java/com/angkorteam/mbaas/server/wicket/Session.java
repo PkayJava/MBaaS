@@ -98,7 +98,9 @@ public class Session extends AuthenticatedWebSession {
     public void onInvalidate() {
         super.onInvalidate();
         LOGGER.info("session {} is revoked", getId());
-        this.context.delete(Tables.DESKTOP).where(Tables.DESKTOP.SESSION_ID.eq(getId())).execute();
+        if (this.context != null) {
+            this.context.delete(Tables.DESKTOP).where(Tables.DESKTOP.SESSION_ID.eq(getId())).execute();
+        }
         Session session = SESSIONS.remove(getId());
         if (session != null) {
             try {
