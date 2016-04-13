@@ -119,40 +119,56 @@ public class DeviceController {
         MobileRecord mobileRecord = null;
 
         mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(identity.getMobileId())).fetchOneInto(mobileTable);
-
-        if (mobileRecord == null) {
-            mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.DEVICE_TOKEN.eq(requestBody.getDeviceToken())).and(mobileTable.DEVICE_TYPE.eq(requestBody.getDeviceType())).fetchOneInto(mobileTable);
-        }
-        if (mobileRecord == null) {
-            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-            mobileRecord = context.newRecord(mobileTable);
-            mobileRecord.setMobileId(UUID.randomUUID().toString());
-            mobileRecord.setGrantType(GrantTypeEnum.Client.getLiteral());
-            mobileRecord.setApplicationId(applicationRecord.getApplicationId());
+        if (mobileRecord != null) {
             mobileRecord.setAccessToken(UUID.randomUUID().toString());
-            mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
             mobileRecord.setDateTokenIssued(new Date());
-            mobileRecord.setClientId(clientRecord.getClientId());
+            mobileRecord.setApplicationId(applicationRecord.getApplicationId());
             mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
             mobileRecord.setClientIp(request.getRemoteAddr());
-            mobileRecord.setDateCreated(new Date());
+            mobileRecord.setClientId(clientRecord.getClientId());
+
             mobileRecord.setDeviceType(requestBody.getDeviceType());
             mobileRecord.setDeviceToken(requestBody.getDeviceToken());
             mobileRecord.setDeviceAlias(requestBody.getAlias());
             mobileRecord.setDeviceOsVersion(requestBody.getOsVersion());
             mobileRecord.setDeviceOperatingSystem(requestBody.getOperatingSystem());
-            mobileRecord.store();
-        } else {
-            mobileRecord.setAccessToken(UUID.randomUUID().toString());
-            mobileRecord.setDateTokenIssued(new Date());
-            mobileRecord.setApplicationId(applicationRecord.getApplicationId());
-            mobileRecord.setClientId(clientRecord.getClientId());
-            mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
-            mobileRecord.setClientIp(request.getRemoteAddr());
-            mobileRecord.setDeviceAlias(requestBody.getAlias());
-            mobileRecord.setDeviceOsVersion(requestBody.getOsVersion());
-            mobileRecord.setDeviceOperatingSystem(requestBody.getOperatingSystem());
+
             mobileRecord.update();
+        } else {
+            mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.DEVICE_TOKEN.eq(requestBody.getDeviceToken())).and(mobileTable.DEVICE_TYPE.eq(requestBody.getDeviceType())).fetchOneInto(mobileTable);
+            if (mobileRecord == null) {
+                XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+                mobileRecord = context.newRecord(mobileTable);
+                mobileRecord.setMobileId(UUID.randomUUID().toString());
+                mobileRecord.setGrantType(GrantTypeEnum.Client.getLiteral());
+                mobileRecord.setApplicationId(applicationRecord.getApplicationId());
+                mobileRecord.setAccessToken(UUID.randomUUID().toString());
+                mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
+                mobileRecord.setDateTokenIssued(new Date());
+                mobileRecord.setClientId(clientRecord.getClientId());
+                mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+                mobileRecord.setClientIp(request.getRemoteAddr());
+                mobileRecord.setDateCreated(new Date());
+
+                mobileRecord.setDeviceType(requestBody.getDeviceType());
+                mobileRecord.setDeviceToken(requestBody.getDeviceToken());
+                mobileRecord.setDeviceAlias(requestBody.getAlias());
+                mobileRecord.setDeviceOsVersion(requestBody.getOsVersion());
+                mobileRecord.setDeviceOperatingSystem(requestBody.getOperatingSystem());
+                mobileRecord.store();
+            } else {
+                mobileRecord.setAccessToken(UUID.randomUUID().toString());
+                mobileRecord.setDateTokenIssued(new Date());
+                mobileRecord.setApplicationId(applicationRecord.getApplicationId());
+                mobileRecord.setClientId(clientRecord.getClientId());
+                mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+                mobileRecord.setClientIp(request.getRemoteAddr());
+
+                mobileRecord.setDeviceAlias(requestBody.getAlias());
+                mobileRecord.setDeviceOsVersion(requestBody.getOsVersion());
+                mobileRecord.setDeviceOperatingSystem(requestBody.getOperatingSystem());
+                mobileRecord.update();
+            }
         }
 
         String credential = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
