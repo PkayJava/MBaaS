@@ -11,6 +11,11 @@
         <param-value>classpath:/application-context.xml</param-value>
     </context-param>
 
+    <context-param>
+        <param-name>org.eclipse.jetty.websocket.jsr356</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
     <listener>
         <listener-class>com.angkorteam.mbaas.server.spring.ApplicationContext</listener-class>
     </listener>
