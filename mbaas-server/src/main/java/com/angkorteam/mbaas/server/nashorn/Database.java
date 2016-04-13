@@ -61,6 +61,13 @@ public class Database {
         if (document.isArray() || document.isStrictFunction() || document.isFunction()) {
             throw new DataIntegrityViolationException("could not insert into " + collection);
         }
+        parse(params, document, collection);
+        DocumentCreateRequest request = new DocumentCreateRequest();
+        request.setDocument(params);
+        return DocumentFunction.insertDocument(context, jdbcTemplate, ownerUserId, collection, request);
+    }
+
+    private void parse(Map<String, Object> params, JSObject document, String collection) {
         for (String key : document.keySet()) {
             Object value = document.getMember(key);
             if (value instanceof Boolean
@@ -78,9 +85,6 @@ public class Database {
                 throw new DataIntegrityViolationException("could not insert into " + collection);
             }
         }
-        DocumentCreateRequest request = new DocumentCreateRequest();
-        request.setDocument(params);
-        return DocumentFunction.insertDocument(context, jdbcTemplate, ownerUserId, collection, request);
     }
 
     public void delete(String collection, String documentId) {
@@ -92,29 +96,13 @@ public class Database {
         if (document.isArray() || document.isStrictFunction() || document.isFunction()) {
             throw new DataIntegrityViolationException("could not insert into " + collection);
         }
-        for (String key : document.keySet()) {
-            Object value = document.getMember(key);
-            if (value instanceof Boolean
-                    || value instanceof Byte
-                    || value instanceof Short
-                    || value instanceof Integer
-                    || value instanceof Long
-                    || value instanceof Float
-                    || value instanceof Double
-                    || value instanceof Character
-                    || value instanceof String
-                    || value instanceof Date) {
-                params.put(key, value);
-            } else {
-                throw new DataIntegrityViolationException("could not insert into " + collection);
-            }
-        }
+        parse(params, document, collection);
         DocumentModifyRequest request = new DocumentModifyRequest();
         request.setDocument(params);
         DocumentFunction.modifyDocument(context, jdbcTemplate, collection, documentId, request);
     }
 
-    public Object queryFor(String query) throws DataAccessException {
+    public Object executeQuery(String query) throws DataAccessException {
         QueryTable queryTable = Tables.QUERY.as("queryTable");
         QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
 
@@ -203,7 +191,7 @@ public class Database {
         return null;
     }
 
-    public Object queryFor(String query, JSObject js) throws DataAccessException {
+    public Object executeQuery(String query, JSObject js) throws DataAccessException {
         if (js.isArray() || js.isStrictFunction() || js.isStrictFunction()) {
             throw new DataAccessResourceFailureException(query);
         }

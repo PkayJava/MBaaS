@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.request.javascript.JavaScriptExecuteRequest;
+import com.angkorteam.mbaas.plain.response.Response;
 import com.angkorteam.mbaas.plain.response.javascript.JavaScriptExecuteResponse;
 import com.angkorteam.mbaas.server.nashorn.JavaFilter;
 import com.angkorteam.mbaas.server.nashorn.MBaaS;
@@ -70,7 +71,7 @@ public class JavascriptController {
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
         boolean found = false;
         boolean error = false;
-        Throwable exception = null;
+        Throwable throwable = null;
         Object responseBody = null;
         if (method == HttpMethod.POST) {
             HttpPost http = invocable.getInterface(HttpPost.class);
@@ -80,7 +81,7 @@ public class JavascriptController {
                     responseBody = http.httpPost(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
-                    exception = e;
+                    throwable = e;
                 }
             }
         } else if (method == HttpMethod.PUT) {
@@ -91,11 +92,15 @@ public class JavascriptController {
                     responseBody = http.httpPut(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
-                    exception = e;
+                    throwable = e;
                 }
             }
         }
 
+        return returnResponse(found, error, throwable, script, responseBody);
+    }
+
+    protected ResponseEntity<JavaScriptExecuteResponse> returnResponse(boolean found, boolean error, Throwable throwable, String script, Object responseBody) {
         if (!found) {
             JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
             response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
@@ -104,7 +109,7 @@ public class JavascriptController {
             if (error) {
                 JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
                 response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-                response.setResult(exception.getMessage());
+                response.setResult(throwable.getMessage());
                 return ResponseEntity.ok(response);
             } else {
                 JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
@@ -145,7 +150,7 @@ public class JavascriptController {
         Object responseBody = null;
         boolean found = false;
         boolean error = false;
-        Throwable exception = null;
+        Throwable throwable = null;
         if (method == HttpMethod.GET) {
             HttpGet http = invocable.getInterface(HttpGet.class);
             if (http != null) {
@@ -154,7 +159,7 @@ public class JavascriptController {
                     responseBody = http.httpGet(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
-                    exception = e;
+                    throwable = e;
                 }
             }
         } else if (method == HttpMethod.HEAD) {
@@ -165,7 +170,7 @@ public class JavascriptController {
                     responseBody = http.httpHead(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
-                    exception = e;
+                    throwable = e;
                 }
             }
         } else if (method == HttpMethod.PATCH) {
@@ -176,7 +181,7 @@ public class JavascriptController {
                     responseBody = http.httpPatch(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
-                    exception = e;
+                    throwable = e;
                 }
             }
         } else if (method == HttpMethod.DELETE) {
@@ -187,7 +192,7 @@ public class JavascriptController {
                     responseBody = http.httpDelete(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
-                    exception = e;
+                    throwable = e;
                 }
             }
         } else if (method == HttpMethod.OPTIONS) {
@@ -198,7 +203,7 @@ public class JavascriptController {
                     responseBody = http.httpOptions(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
-                    exception = e;
+                    throwable = e;
                 }
             }
         } else if (method == HttpMethod.TRACE) {
@@ -209,28 +214,12 @@ public class JavascriptController {
                     responseBody = http.httpTrace(request, requestBody);
                 } catch (Throwable e) {
                     error = true;
-                    exception = e;
+                    throwable = e;
                 }
             }
         }
 
-        if (!found) {
-            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-            response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
-            return ResponseEntity.ok(response);
-        } else {
-            if (error) {
-                JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-                response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-                response.setResult(exception.getMessage());
-                return ResponseEntity.ok(response);
-            } else {
-                JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-                response.getData().setScript(script);
-                response.getData().setBody(parseBody(responseBody));
-                return ResponseEntity.ok(response);
-            }
-        }
+        return returnResponse(found, error, throwable, script, responseBody);
     }
 
     private ScriptEngine getScriptEngine(com.angkorteam.mbaas.server.nashorn.Request request) {
