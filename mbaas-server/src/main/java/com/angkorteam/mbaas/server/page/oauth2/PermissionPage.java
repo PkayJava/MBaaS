@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.model.entity.tables.ClientTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.AuthorizationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
+import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -22,6 +23,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -136,6 +138,7 @@ public class PermissionPage extends AdminLTEPage {
     }
 
     private void grantButtonOnSubmit(Button button) {
+        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         this.denied = true;
         List<String> params = new ArrayList<>();
         if (this.state != null && !"".equals(this.state)) {
@@ -157,6 +160,9 @@ public class PermissionPage extends AdminLTEPage {
         authorizationRecord.setTimeToLive(timeToLive);
         authorizationRecord.store();
         params.add("code=" + authorizationRecord.getAuthorizationId());
+        if (this.redirectUri == null || "".equals(this.redirectUri)) {
+            this.redirectUri = HttpFunction.getHttpAddress(request) + "/web/oauth2/response";
+        }
         if (params.isEmpty()) {
             setResponsePage(new RedirectPage(this.redirectUri));
         } else {
