@@ -57,8 +57,9 @@ public class OAuth2Controller {
             @RequestParam(value = "client_secret", required = false) String clientSecret,
             @RequestParam(value = "grant_type", required = false) String grantType,
             @RequestParam(value = "redirect_uri", required = false) String redirectUri,
+            @RequestParam(value = "state", required = false) String state,
             @RequestParam(value = "code", required = false) String code) {
-        LOGGER.info("{} client_id=>{} client_secret=>{} grant_type=>{} redirect_uri=>{} code=>{}", request.getRequestURL(), clientId, clientSecret, grantType, redirectUri, code);
+        LOGGER.info("{} client_id=>{} client_secret=>{} grant_type=>{} redirect_uri=>{} code=>{} state=>{}", request.getRequestURL(), clientId, clientSecret, grantType, redirectUri, code, state);
         ClientTable clientTable = Tables.CLIENT.as("clientTable");
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
         MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
@@ -86,6 +87,7 @@ public class OAuth2Controller {
         where.add(authorizationTable.CLIENT_ID.eq(clientRecord.getClientId()));
         where.add(authorizationTable.APPLICATION_ID.eq(applicationRecord.getApplicationId()));
         where.add(authorizationTable.AUTHORIZATION_ID.eq(code));
+        where.add(authorizationTable.STATE.eq(state));
         AuthorizationRecord authorizationRecord = context.select(authorizationTable.fields()).from(authorizationTable).where(where).fetchOneInto(authorizationTable);
         if (authorizationRecord == null) {
             OAuth2AuthorizeResponse response = new OAuth2AuthorizeResponse();

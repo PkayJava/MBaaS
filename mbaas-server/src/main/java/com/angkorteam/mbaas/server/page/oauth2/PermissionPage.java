@@ -157,6 +157,7 @@ public class PermissionPage extends AdminLTEPage {
         authorizationRecord.setApplicationId(this.applicationId);
         authorizationRecord.setClientId(this.clientId);
         authorizationRecord.setOwnerUserId(this.userId);
+        authorizationRecord.setState(this.state);
         authorizationRecord.setTimeToLive(timeToLive);
         authorizationRecord.store();
         params.add("code=" + authorizationRecord.getAuthorizationId());
