@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
 public class OAuth2RefreshRequest {
 
     @Expose
-    @SerializedName("refresh_token")
+    @SerializedName("refreshToken")
     private String refreshToken;
 
     public String getRefreshToken() {

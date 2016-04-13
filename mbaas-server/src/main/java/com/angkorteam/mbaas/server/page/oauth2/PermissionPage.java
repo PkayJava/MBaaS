@@ -173,14 +173,18 @@ public class PermissionPage extends AdminLTEPage {
 
     private void denyButtonOnSubmit(Button button) {
         this.denied = true;
+        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         getSession().removeAttribute(this.state);
         List<String> params = new ArrayList<>();
         if (this.state != null && !"".equals(this.state)) {
             params.add("state=" + this.state);
         }
+        if (this.redirectUri == null || "".equals(this.redirectUri)) {
+            this.redirectUri = HttpFunction.getHttpAddress(request) + "/web/oauth2/response";
+        }
         params.add("error=consent_required");
+        params.add("error_uri=");
         params.add("error_description=The user denied access to your application");
-        // error_uri=""
         if (params.isEmpty()) {
             setResponsePage(new RedirectPage(this.redirectUri));
         } else {
