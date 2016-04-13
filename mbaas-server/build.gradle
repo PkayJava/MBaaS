@@ -23,17 +23,6 @@ targetCompatibility = JavaVersion.VERSION_1_8
 group = 'mbaas-server'
 version = '1.0'
 
-sourceSets {
-    main {
-        java {
-            srcDir 'src/java'
-        }
-        resources {
-            srcDir 'src/resources'
-        }
-    }
-}
-
 dependencies {
     compile project(':mbaas-plain')
     compile project(':mbaas-jooq')

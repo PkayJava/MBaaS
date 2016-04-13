@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.nashorn;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.QueryTable;
+import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
 import com.angkorteam.mbaas.plain.enums.QueryReturnTypeEnum;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
@@ -12,6 +13,7 @@ import com.angkorteam.mbaas.server.function.DocumentFunction;
 import jdk.nashorn.api.scripting.JSObject;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.springframework.dao.*;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.IncorrectResultSetColumnCountException;
@@ -30,12 +32,16 @@ public class Database {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JdbcTemplate jdbcTemplate;
-    private final DSLContext context;
     private final MBaaS mbaas;
+    public final DSLContext Context;
+    public final Class<DSL> DSL;
+    public final Class<Tables> Tables;
 
     public Database(DSLContext context, JdbcTemplate jdbcTemplate, MBaaS mbaas) {
         this.jdbcTemplate = jdbcTemplate;
-        this.context = context;
+        DSL = org.jooq.impl.DSL.class;
+        Tables = com.angkorteam.mbaas.model.entity.Tables.class;
+        this.Context = context;
         this.mbaas = mbaas;
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
     }
@@ -51,7 +57,8 @@ public class Database {
         } else {
             XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             String userAdmin = configuration.getString(Constants.USER_ADMIN);
-            ownerUserId = jdbcTemplate.queryForObject("SELECT " + Tables.USER.USER_ID.getName() + " FROM " + Tables.USER.getName() + " WHERE " + Tables.USER.LOGIN.getName() + " = ?", String.class, userAdmin);
+            UserTable userTable = com.angkorteam.mbaas.model.entity.Tables.USER.as("userTable");
+            ownerUserId = jdbcTemplate.queryForObject("SELECT " + userTable.USER_ID.getName() + " FROM " + userTable.getName() + " WHERE " + userTable.LOGIN.getName() + " = ?", String.class, userAdmin);
         }
         return insert(ownerUserId, collection, document);
     }
@@ -64,7 +71,7 @@ public class Database {
         parse(params, document, collection);
         DocumentCreateRequest request = new DocumentCreateRequest();
         request.setDocument(params);
-        return DocumentFunction.insertDocument(context, jdbcTemplate, ownerUserId, collection, request);
+        return DocumentFunction.insertDocument(Context, jdbcTemplate, ownerUserId, collection, request);
     }
 
     private void parse(Map<String, Object> params, JSObject document, String collection) {
@@ -88,7 +95,7 @@ public class Database {
     }
 
     public void delete(String collection, String documentId) {
-        DocumentFunction.deleteDocument(context, jdbcTemplate, collection, documentId);
+        DocumentFunction.deleteDocument(Context, jdbcTemplate, collection, documentId);
     }
 
     public void modify(String collection, String documentId, JSObject document) {
@@ -99,12 +106,12 @@ public class Database {
         parse(params, document, collection);
         DocumentModifyRequest request = new DocumentModifyRequest();
         request.setDocument(params);
-        DocumentFunction.modifyDocument(context, jdbcTemplate, collection, documentId, request);
+        DocumentFunction.modifyDocument(Context, jdbcTemplate, collection, documentId, request);
     }
 
     public Object executeQuery(String query) throws DataAccessException {
-        QueryTable queryTable = Tables.QUERY.as("queryTable");
-        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
+        QueryTable queryTable = com.angkorteam.mbaas.model.entity.Tables.QUERY.as("queryTable");
+        QueryRecord queryRecord = Context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
 
         if (queryRecord == null || queryRecord.getScript() == null || "".equals(queryRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(queryRecord.getSecurity())) {
             throw new DataAccessResourceFailureException("query is not available");
@@ -196,8 +203,8 @@ public class Database {
             throw new DataAccessResourceFailureException(query);
         }
 
-        QueryTable queryTable = Tables.QUERY.as("queryTable");
-        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
+        QueryTable queryTable = com.angkorteam.mbaas.model.entity.Tables.QUERY.as("queryTable");
+        QueryRecord queryRecord = Context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
 
         if (queryRecord == null || queryRecord.getScript() == null || "".equals(queryRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(queryRecord.getSecurity())) {
             throw new DataAccessResourceFailureException(query + " is not available");
