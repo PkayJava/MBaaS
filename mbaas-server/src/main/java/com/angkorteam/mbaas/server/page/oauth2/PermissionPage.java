@@ -105,10 +105,10 @@ public class PermissionPage extends AdminLTEPage {
         add(this.form);
 
         this.applicationLabel = new Label("applicationLabel", new PropertyModel<>(this, "applicationText"));
-        this.form.add(this.applicationLabel);
+        this.add(this.applicationLabel);
 
         this.clientLabel = new Label("clientLabel", new PropertyModel<>(this, "client"));
-        this.form.add(this.clientLabel);
+        this.add(this.clientLabel);
 
         RepeatingView permissions = new RepeatingView("permissions");
         if (this.scope != null) {
