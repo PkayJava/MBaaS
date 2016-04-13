@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+    <div class="login-logo">
+        <b>Angkor Team</b>
+    </div>
+    <div class="login-box-body">
+        <p class="login-box-msg">Mobile Backend as a Service</p>
+
+        <form wicket:id="form">
+            <div class="form-group">
+                <label>Application</label>
+                <span wicket:id="applicationLabel" class="form-control"/>
+            </div>
+            <div class="form-group">
+                <label>Client</label>
+                <span wicket:id="clientLabel" class="form-control"/>
+            </div>
+            <div class="form-group">
+                <label wicket:for="otpField">One Time Password</label>
+                <input wicket:id="otpField" type="text" class="form-control"/>
+                <span wicket:id="otpFeedback" class="help-block"/>
+            </div>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button wicket:id="resendButton" type="submit" class="btn btn-primary btn-block btn-flat">Resend</button>
+                </div>
+                <div class="col-xs-6">
+                    <button wicket:id="okayButton" type="submit" class="btn btn-primary btn-block btn-flat">Okay</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<wicket:extend>
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <a wicket:id="refreshLink">Refresh</a> |
+            <wicket:link>
+                <a href="CollectionCreatePage.html">New Collection</a>
+            </wicket:link>
+        </div>
+        <div class="box-body">
+            <form wicket:id="filter-form">
+                <table wicket:id="table"/>
+            </form>
+        </div>
+    </div>
+</wicket:extend>
+</body>
+</html>

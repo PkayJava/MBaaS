@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<wicket:extend>
+    <div class="box box-primary">
+        <form role="form" wicket:id="form">
+            <div class="box-body">
+                <div class="form-group">
+                    <label wicket:for="emailAddressField">Email Address</label>
+                    <input wicket:id="emailAddressField" type="text" class="form-control"/>
+                    <span wicket:id="emailAddressFeedback" class="help-block"/>
+                </div>
+            </div>
+
+            <div class="box-footer">
+                <button wicket:id="disableButton" type="submit" class="btn btn-primary">Disable</button>
+                <button wicket:id="okayButton" type="submit" class="btn btn-primary">Okay</button>
+            </div>
+        </form>
+    </div>
+</wicket:extend>
+</body>
+</html>
