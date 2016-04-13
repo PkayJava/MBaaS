@@ -46,14 +46,14 @@
         <!-- SecurityExpressionRoot -->
         <security:access-denied-handler ref="accessDeniedHandler"/>
         <security:custom-filter ref="authenticationFilter" before="ANONYMOUS_FILTER"/>
-        <security:intercept-url pattern="/api/security/signup" method="POST" access="permitAll"/>
-        <security:intercept-url pattern="/api/security/login" method="POST" access="permitAll"/>
-        <security:intercept-url pattern="/api/oauth2/**" access="permitAll"/>
-        <security:intercept-url pattern="/api/resource/**" access="permitAll"/>
-        <security:intercept-url pattern="/api/qr" access="permitAll"/>
-        <security:intercept-url pattern="/api/otp" access="permitAll"/>
-        <security:intercept-url pattern="/api/javascript/**" access="permitAll"/>
-        <security:intercept-url pattern="/api/rest/registry/**" access="permitAll"/>
+        <security:intercept-url pattern="/api/security/signup" filters="none" access="permitAll" method="POST"/>
+        <security:intercept-url pattern="/api/security/login" filters="none" access="permitAll" method="POST"/>
+        <security:intercept-url pattern="/api/oauth2/**" filters="none" access="permitAll"/>
+        <security:intercept-url pattern="/api/resource/**" filters="none" access="permitAll"/>
+        <security:intercept-url pattern="/api/qr" filters="none" access="permitAll"/>
+        <security:intercept-url pattern="/api/otp" filters="none" access="permitAll"/>
+        <security:intercept-url pattern="/api/javascript/**" filters="none" access="permitAll"/>
+        <security:intercept-url pattern="/api/rest/registry/**" filters="none" access="permitAll"/>
         <security:intercept-url pattern="/api/monitor/**" access="hasAnyAuthority('oauth2.authorization')"/>
         <security:intercept-url pattern="/api/file/**" access="hasAnyAuthority('oauth2.authorization')"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
