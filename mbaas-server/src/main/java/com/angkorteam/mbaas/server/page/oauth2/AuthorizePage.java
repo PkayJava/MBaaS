@@ -107,10 +107,10 @@ public class AuthorizePage extends AdminLTEPage {
         add(this.form);
 
         this.applicationLabel = new Label("applicationLabel", new PropertyModel<>(this, "applicationText"));
-        this.form.add(this.applicationLabel);
+        this.add(this.applicationLabel);
 
         this.clientLabel = new Label("clientLabel", new PropertyModel<>(this, "client"));
-        this.form.add(this.clientLabel);
+        this.add(this.clientLabel);
 
         this.loginField = new TextField<>("loginField", new PropertyModel<>(this, "login"));
         this.loginField.setRequired(true);

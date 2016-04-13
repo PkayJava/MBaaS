@@ -6,20 +6,11 @@
 <body class="hold-transition login-page">
 <div class="login-box">
     <div class="login-logo">
-        <b>Angkor Team</b>
+        <b wicket:id="applicationLabel"></b>
     </div>
     <div class="login-box-body">
-        <p class="login-box-msg">Mobile Backend as a Service</p>
-
+        <p wicket:id="clientLabel" class="login-box-msg"></p>
         <form wicket:id="form">
-            <div class="form-group">
-                <label>Application</label>
-                <span wicket:id="applicationLabel" class="form-control"/>
-            </div>
-            <div class="form-group">
-                <label>Client</label>
-                <span wicket:id="clientLabel" class="form-control"/>
-            </div>
             <div class="form-group">
                 <label wicket:for="loginField">Login</label>
                 <input wicket:id="loginField" type="text" class="form-control"/>
