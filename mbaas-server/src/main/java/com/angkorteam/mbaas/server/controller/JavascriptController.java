@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.controller;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
+import com.angkorteam.mbaas.plain.Identity;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.request.javascript.JavaScriptExecuteRequest;
 import com.angkorteam.mbaas.plain.response.Response;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,8 +53,7 @@ public class JavascriptController {
     public ResponseEntity<JavaScriptExecuteResponse> executeJson(
             HttpServletRequest req,
             HttpServletResponse resp,
-            @RequestHeader(name = "client_id", required = false) String clientId,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            Identity identity,
             @PathVariable("script") String script,
             @RequestBody(required = false) JavaScriptExecuteRequest requestBody
     ) throws ScriptException, IOException, ServletException {
@@ -66,7 +67,7 @@ public class JavascriptController {
         }
 
         com.angkorteam.mbaas.server.nashorn.Request request = new com.angkorteam.mbaas.server.nashorn.Request(req);
-        ScriptEngine engine = getScriptEngine(request);
+        ScriptEngine engine = getScriptEngine(request, identity);
         engine.eval(javascriptRecord.getScript());
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -108,10 +109,17 @@ public class JavascriptController {
             return ResponseEntity.ok(response);
         } else {
             if (error) {
-                JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-                response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-                response.setResult(throwable.getMessage());
-                return ResponseEntity.ok(response);
+                if (throwable instanceof BadCredentialsException) {
+                    JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
+                    response.setHttpCode(HttpStatus.UNAUTHORIZED.value());
+                    response.setResult(HttpStatus.UNAUTHORIZED.getReasonPhrase());
+                    return ResponseEntity.ok(response);
+                } else {
+                    JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
+                    response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                    response.setResult(throwable.getMessage());
+                    return ResponseEntity.ok(response);
+                }
             } else {
                 JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
                 response.getData().setScript(script);
@@ -129,8 +137,7 @@ public class JavascriptController {
     public ResponseEntity<JavaScriptExecuteResponse> execute(
             HttpServletRequest req,
             HttpServletResponse resp,
-            @RequestHeader(name = "client_id", required = false) String clientId,
-            @RequestHeader(name = "X-MBAAS-SESSION", required = false) String session,
+            Identity identity,
             @PathVariable("script") String script,
             @RequestBody(required = false) JavaScriptExecuteRequest requestBody
     ) throws ScriptException, IOException, ServletException {
@@ -144,7 +151,7 @@ public class JavascriptController {
         }
 
         com.angkorteam.mbaas.server.nashorn.Request request = new com.angkorteam.mbaas.server.nashorn.Request(req);
-        ScriptEngine engine = getScriptEngine(request);
+        ScriptEngine engine = getScriptEngine(request, identity);
         engine.eval(javascriptRecord.getScript());
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -223,12 +230,12 @@ public class JavascriptController {
         return returnResponse(found, error, throwable, script, responseBody);
     }
 
-    private ScriptEngine getScriptEngine(com.angkorteam.mbaas.server.nashorn.Request request) {
+    private ScriptEngine getScriptEngine(com.angkorteam.mbaas.server.nashorn.Request request, Identity identity) {
         NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
         ScriptEngine engine = factory.getScriptEngine(new JavaFilter(context));
         Bindings bindings = engine.createBindings();
         engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
-        bindings.put("MBaaS", new MBaaS(context, jdbcTemplate, request));
+        bindings.put("MBaaS", new MBaaS(context, identity, jdbcTemplate, request));
         return engine;
     }
 

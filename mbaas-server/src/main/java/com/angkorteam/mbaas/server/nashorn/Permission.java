@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
+import com.angkorteam.mbaas.plain.Identity;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,19 +22,19 @@ public class Permission {
 
     private final MBaaS mbaas;
 
-    public Permission(MBaaS mbaas, DSLContext context, JdbcTemplate jdbcTemplate) {
+    private final Identity identity;
+
+    public Permission(MBaaS mbaas, Identity identity, DSLContext context, JdbcTemplate jdbcTemplate) {
         this.context = context;
+        this.identity = identity;
         this.jdbcTemplate = jdbcTemplate;
         this.mbaas = mbaas;
     }
 
-    public boolean isCollectionOwner(String collectionName) throws ScriptException {
-        if (this.mbaas.isAuthenticated()) {
-            return false;
-        }
+    public boolean isCollectionOwner(String collectionName) {
         UserTable userTable = Tables.USER.as("userTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.mbaas.getCurrentUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(identity.getUserId())).fetchOneInto(userTable);
         if (userRecord == null) {
             return false;
         }
@@ -47,13 +48,10 @@ public class Permission {
         return false;
     }
 
-    public boolean isDocumentOwner(String collectionName, String documentId) throws ScriptException {
-        if (this.mbaas.isAuthenticated()) {
-            return false;
-        }
+    public boolean isDocumentOwner(String collectionName, String documentId) {
         UserTable userTable = Tables.USER.as("userTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.mbaas.getCurrentUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(identity.getUserId())).fetchOneInto(userTable);
         if (userRecord == null) {
             return false;
         }
@@ -74,13 +72,10 @@ public class Permission {
         return false;
     }
 
-    public boolean isAdministratorUser() throws ScriptException {
-        if (this.mbaas.isAuthenticated()) {
-            return false;
-        }
+    public boolean isAdministratorUser() {
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.mbaas.getCurrentUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(identity.getUserId())).fetchOneInto(userTable);
         if (userRecord == null) {
             return false;
         }
@@ -95,13 +90,10 @@ public class Permission {
         return false;
     }
 
-    public boolean isBackOfficeUser() throws ScriptException {
-        if (this.mbaas.isAuthenticated()) {
-            return false;
-        }
+    public boolean isBackOfficeUser() {
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.mbaas.getCurrentUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(identity.getUserId())).fetchOneInto(userTable);
         if (userRecord == null) {
             return false;
         }
@@ -116,13 +108,10 @@ public class Permission {
         return false;
     }
 
-    public boolean isRegisteredUser() throws ScriptException {
-        if (this.mbaas.isAuthenticated()) {
-            return false;
-        }
+    public boolean isRegisteredUser() {
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.mbaas.getCurrentUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(identity.getUserId())).fetchOneInto(userTable);
         if (userRecord == null) {
             return false;
         }
@@ -137,13 +126,10 @@ public class Permission {
         return false;
     }
 
-    public boolean hasRole(String roleName) throws ScriptException {
-        if (this.mbaas.isAuthenticated()) {
-            return false;
-        }
+    public boolean hasRole(String roleName) {
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.mbaas.getCurrentUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(identity.getUserId())).fetchOneInto(userTable);
         if (userRecord == null) {
             return false;
         }
@@ -157,17 +143,14 @@ public class Permission {
         return false;
     }
 
-    public boolean hasDocumentPermission(String collectionName, String documentId, int action) throws ScriptException {
-        if (this.mbaas.isAuthenticated()) {
-            return false;
-        }
+    public boolean hasDocumentPermission(String collectionName, String documentId, int action) {
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         UserTable userTable = Tables.USER.as("userTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         DocumentUserPrivacyTable documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
         DocumentRolePrivacyTable documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
 
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.mbaas.getCurrentUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(identity.getUserId())).fetchOneInto(userTable);
         if (userRecord == null) {
             return false;
         }
@@ -209,17 +192,14 @@ public class Permission {
         return false;
     }
 
-    public boolean hasCollectionPermission(String collection, int action) throws ScriptException {
-        if (this.mbaas.isAuthenticated()) {
-            return false;
-        }
+    public boolean hasCollectionPermission(String collection, int action) {
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         UserTable userTable = Tables.USER.as("userTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         CollectionUserPrivacyTable tableUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("tableUserPrivacyTable");
         CollectionRolePrivacyTable tableRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("tableRolePrivacyTable");
 
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.mbaas.getCurrentUserId())).fetchOneInto(userTable);
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(identity.getUserId())).fetchOneInto(userTable);
         if (userRecord == null) {
             return false;
         }

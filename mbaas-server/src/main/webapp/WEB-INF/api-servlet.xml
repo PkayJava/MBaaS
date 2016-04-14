@@ -45,7 +45,6 @@
     <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/resource/**"/>
     <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/qr"/>
     <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/otp"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/javascript/**"/>
     <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/rest/registry/**"/>
     <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager"
                    entry-point-ref="authenticationEntryPoint" create-session="stateless">
@@ -53,8 +52,9 @@
         <!-- SecurityExpressionRoot -->
         <security:access-denied-handler ref="accessDeniedHandler"/>
         <security:custom-filter ref="authenticationFilter" before="ANONYMOUS_FILTER"/>
-        <security:intercept-url pattern="/api/monitor/**" access="hasAnyAuthority('oauth2.authorization')"/>
-        <security:intercept-url pattern="/api/file/**" access="hasAnyAuthority('oauth2.authorization')"/>
+        <security:intercept-url pattern="/api/monitor/**" access="fullyAuthenticated"/>
+        <security:intercept-url pattern="/api/file/**" access="fullyAuthenticated"/>
+        <security:intercept-url pattern="/api/javascript/**" access="fullyAuthenticated"/>
         <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
     </security:http>
 
