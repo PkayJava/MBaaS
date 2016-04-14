@@ -57,7 +57,7 @@ public abstract class MasterPage extends AdminLTEPage {
 
     private String mmenuApplicationClass = "";
     private String mmenuSettingClass = "";
-    private String mmenuLocalization = "";
+    private String mmenuLocalizationClass = "";
 
     private String mmenuInformationClass = "";
     private String mmenuOneTimePasswordClass = "";
