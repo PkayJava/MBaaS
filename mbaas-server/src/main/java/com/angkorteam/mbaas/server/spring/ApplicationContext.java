@@ -40,6 +40,8 @@ import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -144,6 +146,8 @@ public class ApplicationContext implements ServletContextListener {
         granted.add(Character.class.getName());
         granted.add(String.class.getName());
         granted.add(Date.class.getName());
+        granted.add(BigDecimal.class.getName());
+        granted.add(BigInteger.class.getName());
 
         granted.add(Arrays.class.getName());
         granted.add(Collections.class.getName());
@@ -163,6 +167,8 @@ public class ApplicationContext implements ServletContextListener {
         granted.add(ArrayDeque.class.getName());
         granted.add(ConcurrentLinkedDeque.class.getName());
         granted.add(Stack.class.getName());
+        granted.add(Tables.class.getName());
+        granted.add(DSL.class.getName());
 
         NashornTable nashornTable = Tables.NASHORN.as("nashornTable");
 

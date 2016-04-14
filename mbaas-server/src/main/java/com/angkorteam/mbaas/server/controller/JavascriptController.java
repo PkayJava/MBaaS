@@ -244,6 +244,11 @@ public class JavascriptController {
         Bindings bindings = engine.createBindings();
         engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
         bindings.put("MBaaS", new MBaaS(context, identity, jdbcTemplate, request));
+        try {
+            engine.eval("var Tables = Java.type('com.angkorteam.mbaas.model.entity.Tables')");
+            engine.eval("var DSL = Java.type('org.jooq.impl.DSL')");
+        } catch (ScriptException e) {
+        }
         return engine;
     }
 

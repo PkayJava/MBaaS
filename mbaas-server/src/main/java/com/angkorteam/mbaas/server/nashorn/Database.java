@@ -35,15 +35,11 @@ public class Database {
     private final JdbcTemplate jdbcTemplate;
     private final MBaaS mbaas;
     public final DSLContext Context;
-    public final Class<DSL> DSL;
-    public final Class<Tables> Tables;
     private final Identity identity;
 
     public Database(DSLContext context, Identity identity, JdbcTemplate jdbcTemplate, MBaaS mbaas) {
         this.jdbcTemplate = jdbcTemplate;
         this.identity = identity;
-        DSL = org.jooq.impl.DSL.class;
-        Tables = com.angkorteam.mbaas.model.entity.Tables.class;
         this.Context = context;
         this.mbaas = mbaas;
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
