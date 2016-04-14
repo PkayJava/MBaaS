@@ -120,7 +120,11 @@ public class DeviceController {
 
         mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(identity.getMobileId())).fetchOneInto(mobileTable);
         if (mobileRecord != null) {
-            mobileRecord.setAccessToken(UUID.randomUUID().toString());
+            if (identity.getAccessToken() != null && !"".equals(identity.getAccessToken())) {
+                mobileRecord.setAccessToken(identity.getAccessToken());
+            } else {
+                mobileRecord.setAccessToken(UUID.randomUUID().toString());
+            }
             mobileRecord.setDateTokenIssued(new Date());
             mobileRecord.setApplicationId(applicationRecord.getApplicationId());
             mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
@@ -157,7 +161,11 @@ public class DeviceController {
                 mobileRecord.setDeviceOperatingSystem(requestBody.getOperatingSystem());
                 mobileRecord.store();
             } else {
-                mobileRecord.setAccessToken(UUID.randomUUID().toString());
+                if (identity.getAccessToken() != null && !"".equals(identity.getAccessToken())) {
+                    mobileRecord.setAccessToken(identity.getAccessToken());
+                } else {
+                    mobileRecord.setAccessToken(UUID.randomUUID().toString());
+                }
                 mobileRecord.setDateTokenIssued(new Date());
                 mobileRecord.setApplicationId(applicationRecord.getApplicationId());
                 mobileRecord.setClientId(clientRecord.getClientId());
