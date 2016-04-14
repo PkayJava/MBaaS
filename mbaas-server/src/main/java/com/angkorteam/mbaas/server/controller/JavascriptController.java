@@ -68,7 +68,11 @@ public class JavascriptController {
 
         com.angkorteam.mbaas.server.nashorn.Request request = new com.angkorteam.mbaas.server.nashorn.Request(req);
         ScriptEngine engine = getScriptEngine(request, identity);
-        engine.eval(javascriptRecord.getScript());
+        try {
+            engine.eval(javascriptRecord.getScript());
+        } catch (Throwable e) {
+            return returnResponse(false, true, e, script, null);
+        }
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
         boolean found = false;
@@ -152,7 +156,11 @@ public class JavascriptController {
 
         com.angkorteam.mbaas.server.nashorn.Request request = new com.angkorteam.mbaas.server.nashorn.Request(req);
         ScriptEngine engine = getScriptEngine(request, identity);
-        engine.eval(javascriptRecord.getScript());
+        try {
+            engine.eval(javascriptRecord.getScript());
+        } catch (Throwable e) {
+            return returnResponse(false, true, e, script, null);
+        }
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
         Object responseBody = null;
