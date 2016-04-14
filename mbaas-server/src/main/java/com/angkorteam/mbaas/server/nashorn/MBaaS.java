@@ -41,11 +41,11 @@ public class MBaaS {
 
     public final Identity Identity;
 
-    public MBaaS(DSLContext context, Identity Identity, JdbcTemplate jdbcTemplate, Request request) {
+    public MBaaS(DSLContext context, Identity identity, JdbcTemplate jdbcTemplate, Request request) {
         this.Console = new Console(LOGGER);
-        this.Identity = Identity;
-        this.Database = new Database(context, jdbcTemplate, this);
-        this.Permission = new Permission(this, Identity, context, jdbcTemplate);
+        this.Identity = identity;
+        this.Database = new Database(context, identity, jdbcTemplate, this);
+        this.Permission = new Permission(this, identity, context, jdbcTemplate);
         this.context = context;
         this.request = request;
     }
