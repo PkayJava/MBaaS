@@ -337,8 +337,10 @@ public class ApplicationContext implements ServletContextListener {
                             attributeRecord.setNullable(resultSet.getBoolean(ColumnEnum.NULLABLE.getLiteral()));
                             if (columnName.equals(collectionRecord.getName() + "_id")) {
                                 attributeRecord.setAutoIncrement(true);
+                                attributeRecord.setVisibility(VisibilityEnum.Shown.getLiteral());
                             } else {
                                 attributeRecord.setAutoIncrement(false);
+                                attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
                             }
                             attributeRecord.setSystem(true);
                             attributeRecord.setVirtual(false);

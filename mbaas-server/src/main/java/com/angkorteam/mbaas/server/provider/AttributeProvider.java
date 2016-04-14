@@ -43,6 +43,10 @@ public class AttributeProvider extends JooqProvider {
         return this.attributeTable.SQL_TYPE;
     }
 
+    public Field<String> getVisibility() {
+        return this.attributeTable.VISIBILITY;
+    }
+
     public Field<Boolean> getVirtual() {
         return this.attributeTable.VIRTUAL;
     }

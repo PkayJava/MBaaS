@@ -55,7 +55,7 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("endpoint", this), "endpoint", this, provider));
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Role Privacy", "User Privacy", "Deny", "Parameter", "Edit", "Delete"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Role Privacy", "User Privacy", "Parameter", "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));

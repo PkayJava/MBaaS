@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.PrimaryRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionDeleteRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -109,6 +110,7 @@ public class CollectionFunction {
             attributeRecord.setAutoIncrement(true);
             attributeRecord.setSystem(true);
             attributeRecord.setVirtual(false);
+            attributeRecord.setVisibility(VisibilityEnum.Shown.getLiteral());
             attributeRecord.setExposed(true);
             attributeRecord.setJavaType(AttributeTypeEnum.String.getLiteral());
             attributeRecord.setSqlType("VARCHAR");
@@ -127,6 +129,7 @@ public class CollectionFunction {
             attributeRecord.setName(configuration.getString(Constants.JDBC_COLUMN_EXTRA));
             attributeRecord.setNullable(true);
             attributeRecord.setSystem(true);
+            attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
             attributeRecord.setAutoIncrement(false);
             attributeRecord.setVirtual(false);
             attributeRecord.setExposed(false);
@@ -144,6 +147,7 @@ public class CollectionFunction {
             attributeRecord.setAutoIncrement(false);
             attributeRecord.setVirtual(false);
             attributeRecord.setSystem(true);
+            attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
             attributeRecord.setExposed(false);
             attributeRecord.setJavaType(AttributeTypeEnum.Integer.getLiteral());
             attributeRecord.setSqlType("INT");
@@ -158,6 +162,7 @@ public class CollectionFunction {
             attributeRecord.setNullable(false);
             attributeRecord.setAutoIncrement(false);
             attributeRecord.setVirtual(false);
+            attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
             attributeRecord.setSystem(true);
             attributeRecord.setExposed(true);
             attributeRecord.setJavaType(AttributeTypeEnum.DateTime.getLiteral());
@@ -174,6 +179,7 @@ public class CollectionFunction {
             attributeRecord.setAutoIncrement(false);
             attributeRecord.setVirtual(false);
             attributeRecord.setSystem(true);
+            attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
             attributeRecord.setExposed(false);
             attributeRecord.setJavaType(AttributeTypeEnum.Boolean.getLiteral());
             attributeRecord.setSqlType("BIT");
@@ -187,6 +193,7 @@ public class CollectionFunction {
             attributeRecord.setNullable(false);
             attributeRecord.setAutoIncrement(false);
             attributeRecord.setVirtual(false);
+            attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
             attributeRecord.setSystem(true);
             attributeRecord.setExposed(false);
             attributeRecord.setJavaType(AttributeTypeEnum.String.getLiteral());
@@ -201,6 +208,7 @@ public class CollectionFunction {
             attributeRecord.setName(attribute.getName());
             attributeRecord.setNullable(attribute.isNullable());
             attributeRecord.setSystem(false);
+            attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
             attributeRecord.setAutoIncrement(false);
             attributeRecord.setVirtual(false);
             attributeRecord.setExposed(true);

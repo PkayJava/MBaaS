@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.*;
@@ -45,6 +46,7 @@ public class DocumentProvider extends JooqProvider {
         List<AttributeRecord> attributeRecords = context.select(attributeTable.fields())
                 .from(attributeTable)
                 .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
+                //.and(attributeTable.VISIBILITY.eq(VisibilityEnum.Shown.getLiteral()))
                 .fetchInto(attributeTable);
 
         Map<String, AttributeRecord> virtualAttributeRecords = new HashMap<>();

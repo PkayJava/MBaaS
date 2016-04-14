@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
 import com.angkorteam.mbaas.server.provider.DocumentProvider;
@@ -62,6 +63,7 @@ public class DocumentManagementPage extends MasterPage implements ActionFiltered
         List<AttributeRecord> attributeRecords = context.select(attributeTable.fields())
                 .from(attributeTable)
                 .where(attributeTable.COLLECTION_ID.eq(collection.getCollectionId()))
+                .and(attributeTable.VISIBILITY.eq(VisibilityEnum.Shown.getLiteral()))
                 .fetchInto(attributeTable);
 
         this.provider = new DocumentProvider(this.collection.getCollectionId());
