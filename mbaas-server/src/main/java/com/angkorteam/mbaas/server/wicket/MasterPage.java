@@ -127,7 +127,7 @@ public abstract class MasterPage extends AdminLTEPage {
         logoutLink.setVisible(getSession().isSignedIn());
 
         WebMarkupContainer menuGeneral = new WebMarkupContainer("menuGeneral");
-        menuGeneral.add(new AttributeModifier("class", new PropertyModel<>(this, "menuGeneralClass")));
+        menuGeneral.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuGeneralClass")));
         add(menuGeneral);
         WebMarkupContainer mmenuApplication = new WebMarkupContainer("mmenuApplication", new PropertyModel<>(this, "mmenuApplicationClass"));
         menuGeneral.add(mmenuApplication);
@@ -137,7 +137,7 @@ public abstract class MasterPage extends AdminLTEPage {
         menuGeneral.add(mmenuLocalization);
 
         WebMarkupContainer menuProfile = new WebMarkupContainer("menuProfile");
-        menuProfile.add(new AttributeModifier("class", new PropertyModel<>(this, "menuProfileClass")));
+        menuProfile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuProfileClass")));
         add(menuProfile);
         WebMarkupContainer mmenuInformation = new WebMarkupContainer("mmenuInformation", new PropertyModel<>(this, "mmenuInformationClass"));
         menuProfile.add(mmenuInformation);
@@ -149,7 +149,7 @@ public abstract class MasterPage extends AdminLTEPage {
         menuProfile.add(mmenuPassword);
 
         WebMarkupContainer menuSecurity = new WebMarkupContainer("menuSecurity");
-        menuSecurity.add(new AttributeModifier("class", new PropertyModel<>(this, "menuSecurityClass")));
+        menuSecurity.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSecurityClass")));
         add(menuSecurity);
         WebMarkupContainer mmenuUser = new WebMarkupContainer("mmenuUser", new PropertyModel<>(this, "mmenuUserClass"));
         menuSecurity.add(mmenuUser);
@@ -159,7 +159,7 @@ public abstract class MasterPage extends AdminLTEPage {
         menuSecurity.add(mmenuNashorn);
 
         WebMarkupContainer menuData = new WebMarkupContainer("menuData");
-        menuData.add(new AttributeModifier("class", new PropertyModel<>(this, "menuDataClass")));
+        menuData.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuDataClass")));
         add(menuData);
         WebMarkupContainer mmenuCollection = new WebMarkupContainer("mmenuCollection", new PropertyModel<>(this, "mmenuCollectionClass"));
         menuData.add(mmenuCollection);
@@ -167,7 +167,7 @@ public abstract class MasterPage extends AdminLTEPage {
         menuData.add(mmenuQuery);
 
         WebMarkupContainer menuStorage = new WebMarkupContainer("menuStorage");
-        menuStorage.add(new AttributeModifier("class", new PropertyModel<>(this, "menuStorageClass")));
+        menuStorage.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuStorageClass")));
         add(menuStorage);
         WebMarkupContainer mmenuFile = new WebMarkupContainer("mmenuFile", new PropertyModel<>(this, "mmenuFileClass"));
         menuStorage.add(mmenuFile);
@@ -175,7 +175,7 @@ public abstract class MasterPage extends AdminLTEPage {
         menuStorage.add(mmenuAsset);
 
         WebMarkupContainer menuSession = new WebMarkupContainer("menuSession");
-        menuSession.add(new AttributeModifier("class", new PropertyModel<>(this, "menuSessionClass")));
+        menuSession.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSessionClass")));
         add(menuSession);
         WebMarkupContainer mmenuDesktop = new WebMarkupContainer("mmenuDesktop", new PropertyModel<>(this, "mmenuDesktopClass"));
         menuSession.add(mmenuDesktop);
@@ -183,7 +183,7 @@ public abstract class MasterPage extends AdminLTEPage {
         menuSession.add(mmenuMobile);
 
         WebMarkupContainer menuPlugin = new WebMarkupContainer("menuPlugin");
-        menuPlugin.add(new AttributeModifier("class", new PropertyModel<>(this, "menuPluginClass")));
+        menuPlugin.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuPluginClass")));
         add(menuPlugin);
         WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript", new PropertyModel<>(this, "mmenuJavascriptClass"));
         menuPlugin.add(mmenuJavascript);
