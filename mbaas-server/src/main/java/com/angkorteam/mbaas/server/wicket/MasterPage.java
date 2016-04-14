@@ -33,6 +33,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
+import org.springframework.security.access.method.P;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +54,30 @@ public abstract class MasterPage extends AdminLTEPage {
     private String menuStorageClass = "treeview";
     private String menuSessionClass = "treeview";
     private String menuPluginClass = "treeview";
+
+    private String mmenuApplicationClass = "";
+    private String mmenuSettingClass = "";
+    private String mmenuLocalization = "";
+
+    private String mmenuInformationClass = "";
+    private String mmenuOneTimePasswordClass = "";
+    private String mmenu2Factor2EmailClass = "";
+    private String mmenuPasswordClass = "";
+
+    private String mmenuUserClass = "";
+    private String mmenuRoleClass = "";
+    private String mmenuNashornClass = "";
+
+    private String mmenuCollectionClass = "";
+    private String mmenuQueryClass = "";
+
+    private String mmenuFileClass = "";
+    private String mmenuAssetClass = "";
+
+    private String mmenuDesktopClass = "";
+    private String mmenuMobileClass = "";
+
+    private String mmenuJavascriptClass;
 
     public MasterPage() {
     }
@@ -104,35 +129,71 @@ public abstract class MasterPage extends AdminLTEPage {
         WebMarkupContainer menuGeneral = new WebMarkupContainer("menuGeneral");
         menuGeneral.add(new AttributeModifier("class", new PropertyModel<>(this, "menuGeneralClass")));
         add(menuGeneral);
+        WebMarkupContainer mmenuApplication = new WebMarkupContainer("mmenuApplication", new PropertyModel<>(this, "mmenuApplicationClass"));
+        menuGeneral.add(mmenuApplication);
+        WebMarkupContainer mmenuSetting = new WebMarkupContainer("mmenuSetting", new PropertyModel<>(this, "mmenuSettingClass"));
+        menuGeneral.add(mmenuSetting);
+        WebMarkupContainer mmenuLocalization = new WebMarkupContainer("mmenuLocalization", new PropertyModel<>(this, "mmenuLocalizationClass"));
+        menuGeneral.add(mmenuLocalization);
 
         WebMarkupContainer menuProfile = new WebMarkupContainer("menuProfile");
         menuProfile.add(new AttributeModifier("class", new PropertyModel<>(this, "menuProfileClass")));
         add(menuProfile);
+        WebMarkupContainer mmenuInformation = new WebMarkupContainer("mmenuInformation", new PropertyModel<>(this, "mmenuInformationClass"));
+        menuProfile.add(mmenuInformation);
+        WebMarkupContainer mmenuOneTimePassword = new WebMarkupContainer("mmenuOneTimePassword", new PropertyModel<>(this, "mmenuOneTimePasswordClass"));
+        menuProfile.add(mmenuOneTimePassword);
+        WebMarkupContainer mmenu2Factor2Email = new WebMarkupContainer("mmenu2Factor2Email", new PropertyModel<>(this, "mmenu2Factor2EmailClass"));
+        menuProfile.add(mmenu2Factor2Email);
+        WebMarkupContainer mmenuPassword = new WebMarkupContainer("mmenuPassword", new PropertyModel<>(this, "mmenuPasswordClass"));
+        menuProfile.add(mmenuPassword);
 
         WebMarkupContainer menuSecurity = new WebMarkupContainer("menuSecurity");
         menuSecurity.add(new AttributeModifier("class", new PropertyModel<>(this, "menuSecurityClass")));
         add(menuSecurity);
+        WebMarkupContainer mmenuUser = new WebMarkupContainer("mmenuUser", new PropertyModel<>(this, "mmenuUserClass"));
+        menuSecurity.add(mmenuUser);
+        WebMarkupContainer mmenuRole = new WebMarkupContainer("mmenuRole", new PropertyModel<>(this, "mmenuRoleClass"));
+        menuSecurity.add(mmenuRole);
+        WebMarkupContainer mmenuNashorn = new WebMarkupContainer("mmenuNashorn", new PropertyModel<>(this, "mmenuNashornClass"));
+        menuSecurity.add(mmenuNashorn);
 
         WebMarkupContainer menuData = new WebMarkupContainer("menuData");
         menuData.add(new AttributeModifier("class", new PropertyModel<>(this, "menuDataClass")));
         add(menuData);
+        WebMarkupContainer mmenuCollection = new WebMarkupContainer("mmenuCollection", new PropertyModel<>(this, "mmenuCollectionClass"));
+        menuData.add(mmenuCollection);
+        WebMarkupContainer mmenuQuery = new WebMarkupContainer("mmenuQuery", new PropertyModel<>(this, "mmenuQueryClass"));
+        menuData.add(mmenuQuery);
 
         WebMarkupContainer menuStorage = new WebMarkupContainer("menuStorage");
         menuStorage.add(new AttributeModifier("class", new PropertyModel<>(this, "menuStorageClass")));
         add(menuStorage);
+        WebMarkupContainer mmenuFile = new WebMarkupContainer("mmenuFile", new PropertyModel<>(this, "mmenuFileClass"));
+        menuStorage.add(mmenuFile);
+        WebMarkupContainer mmenuAsset = new WebMarkupContainer("mmenuAsset", new PropertyModel<>(this, "mmenuAssetClass"));
+        menuStorage.add(mmenuAsset);
 
         WebMarkupContainer menuSession = new WebMarkupContainer("menuSession");
         menuSession.add(new AttributeModifier("class", new PropertyModel<>(this, "menuSessionClass")));
         add(menuSession);
+        WebMarkupContainer mmenuDesktop = new WebMarkupContainer("mmenuDesktop", new PropertyModel<>(this, "mmenuDesktopClass"));
+        menuSession.add(mmenuDesktop);
+        WebMarkupContainer mmenuMobile = new WebMarkupContainer("mmenuMobile", new PropertyModel<>(this, "mmenuMobileClass"));
+        menuSession.add(mmenuMobile);
 
         WebMarkupContainer menuPlugin = new WebMarkupContainer("menuPlugin");
         menuPlugin.add(new AttributeModifier("class", new PropertyModel<>(this, "menuPluginClass")));
         add(menuPlugin);
+        WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript", new PropertyModel<>(this, "mmenuJavascriptClass"));
+        menuPlugin.add(mmenuJavascript);
     }
 
     @Override
     protected void onBeforeRender() {
         super.onBeforeRender();
+
+        // Parent Menu
         if (getPage() instanceof ApplicationManagementPage || getPage() instanceof SettingManagementPage || getPage() instanceof ResourceManagementPage) {
             this.menuGeneralClass = "treeview active";
         } else {
@@ -173,6 +234,93 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuPluginClass = "treeview active";
         } else {
             this.menuPluginClass = "treeview";
+        }
+
+        // Menu
+        if (getPage() instanceof ApplicationManagementPage) {
+            this.mmenuApplicationClass = "active";
+        } else {
+            this.mmenuApplicationClass = "";
+        }
+        if (getPage() instanceof SettingManagementPage) {
+            this.mmenuSettingClass = "active";
+        } else {
+            this.mmenuSettingClass = "";
+        }
+        if (getPage() instanceof ResourceManagementPage) {
+            this.mmenuLocalization = "active";
+        } else {
+            this.mmenuLocalization = "";
+        }
+        if (getPage() instanceof InformationPage) {
+            this.mmenuInformationClass = "active";
+        } else {
+            this.mmenuInformationClass = "";
+        }
+        if (getPage() instanceof TimeOTPPage) {
+            this.mmenuOneTimePasswordClass = "active";
+        } else {
+            this.mmenuOneTimePasswordClass = "";
+        }
+        if (getPage() instanceof TwoMailPage) {
+            this.mmenu2Factor2EmailClass = "active";
+        } else {
+            this.mmenu2Factor2EmailClass = "";
+        }
+        if (getPage() instanceof PasswordPage) {
+            this.mmenuPasswordClass = "active";
+        } else {
+            this.mmenuPasswordClass = "";
+        }
+        if (getPage() instanceof UserManagementPage) {
+            this.mmenuUserClass = "active";
+        } else {
+            this.mmenuUserClass = "";
+        }
+        if (getPage() instanceof RoleManagementPage) {
+            this.mmenuRoleClass = "active";
+        } else {
+            this.mmenuRoleClass = "";
+        }
+        if (getPage() instanceof NashornManagementPage) {
+            this.mmenuNashornClass = "active";
+        } else {
+            this.mmenuNashornClass = "";
+        }
+        if (getPage() instanceof CollectionManagementPage) {
+            this.mmenuCollectionClass = "active";
+        } else {
+            this.mmenuCollectionClass = "";
+        }
+        if (getPage() instanceof QueryManagementPage) {
+            this.mmenuQueryClass = "active";
+        } else {
+            this.mmenuQueryClass = "";
+        }
+        if (getPage() instanceof FileManagementPage) {
+            this.mmenuFileClass = "active";
+        } else {
+            this.mmenuFileClass = "";
+        }
+        if (getPage() instanceof AssetManagementPage) {
+            this.mmenuAssetClass = "active";
+        } else {
+            this.mmenuAssetClass = "";
+        }
+        if (getPage() instanceof SessionDesktopPage) {
+            this.mmenuDesktopClass = "active";
+        } else {
+            this.mmenuDesktopClass = "";
+        }
+        if (getPage() instanceof SessionMobilePage) {
+            this.mmenuMobileClass = "active";
+        } else {
+            this.mmenuMobileClass = "";
+        }
+        if (getPage() instanceof JavascriptManagementPage) {
+            this.mmenuJavascriptClass = "active";
+        } else {
+            this.mmenuJavascriptClass = "";
         }
     }
 

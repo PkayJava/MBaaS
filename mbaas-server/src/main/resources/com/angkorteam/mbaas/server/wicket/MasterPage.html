@@ -57,11 +57,15 @@
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                        <wicket:link>
-                            <li><a href="../page/application/ApplicationManagementPage.html"><i class="fa fa-wrench"></i>Application</a></li>
-                            <li><a href="../page/setting/SettingManagementPage.html"><i class="fa fa-tags"></i>Setting</a></li>
-                            <li><a href="../page/resource/ResourceManagementPage.html"><i class="fa fa-font"></i>Localization</a></li>
-                        </wicket:link>
+                        <li wicket:id="mmenuApplication">
+                            <wicket:link><a href="../page/application/ApplicationManagementPage.html"><i class="fa fa-wrench"></i>Application</a></wicket:link>
+                        </li>
+                        <li wicket:id="mmenuSetting">
+                            <wicket:link><a href="../page/setting/SettingManagementPage.html"><i class="fa fa-tags"></i>Setting</a></wicket:link>
+                        </li>
+                        <li wicket:id="mmenuLocalization">
+                            <wicket:link><a href="../page/resource/ResourceManagementPage.html"><i class="fa fa-font"></i>Localization</a></wicket:link>
+                        </li>
                     </ul>
                 </li>
                 <li class="treeview" wicket:id="menuProfile">
@@ -71,12 +75,18 @@
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                        <wicket:link>
-                            <li><a href="../page/profile/InformationPage.html"><i class="fa fa-info"></i>Information</a></li>
-                            <li><a href="../page/profile/TimeOTPPage.html"><i class="fa fa-qrcode"></i>One Time Password</a></li>
-                            <li><a href="../page/profile/TwoMailPage.html"><i class="fa fa-envelope"></i>2 Factors EMail</a></li>
-                            <li><a href="../page/profile/PasswordPage.html"><i class="fa fa-key"></i>Password</a></li>
-                        </wicket:link>
+                        <li wicket:id="mmenuInformation">
+                            <wicket:link><a href="../page/profile/InformationPage.html"><i class="fa fa-info"></i>Information</a></wicket:link>
+                        </li>
+                        <li wicket:id="mmenuOneTimePassword">
+                            <wicket:link><a href="../page/profile/TimeOTPPage.html"><i class="fa fa-qrcode"></i>One Time Password</a></wicket:link>
+                        </li>
+                        <li wicket:id="mmenu2Factor2Email">
+                            <wicket:link><a href="../page/profile/TwoMailPage.html"><i class="fa fa-envelope"></i>2 Factors EMail</a></wicket:link>
+                        </li>
+                        <li wicket:id="mmenuPassword">
+                            <wicket:link><a href="../page/profile/PasswordPage.html"><i class="fa fa-key"></i>Password</a></wicket:link>
+                        </li>
                     </ul>
                 </li>
                 <li class="treeview" wicket:id="menuSecurity">
@@ -86,11 +96,15 @@
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                        <wicket:link>
-                            <li><a href="../page/user/UserManagementPage.html"><i class="fa fa-users"></i>User</a></li>
-                            <li><a href="../page/role/RoleManagementPage.html"><i class="fa fa-key"></i>Role</a></li>
-                            <li><a href="../page/nashorn/NashornManagementPage.html"><i class="fa fa-heartbeat"></i>Nashorn</a></li>
-                        </wicket:link>
+                        <li wicket:id="mmenuUser">
+                            <wicket:link><a href="../page/user/UserManagementPage.html"><i class="fa fa-users"></i>User</a></wicket:link>
+                        </li>
+                        <li wicket:id="mmenuRole">
+                            <wicket:link><a href="../page/role/RoleManagementPage.html"><i class="fa fa-key"></i>Role</a></wicket:link>
+                        </li>
+                        <li wicket:id="mmenuNashorn">
+                            <wicket:link><a href="../page/nashorn/NashornManagementPage.html"><i class="fa fa-heartbeat"></i>Nashorn</a></wicket:link>
+                        </li>
                     </ul>
                 </li>
                 <li class="treeview" wicket:id="menuData">
@@ -100,10 +114,12 @@
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                        <wicket:link>
-                            <li><a href="../page/collection/CollectionManagementPage.html"><i class="fa fa-cube"></i>Collection</a></li>
-                            <li><a href="../page/query/QueryManagementPage.html"><i class="fa fa-cubes"></i>Query</a></li>
-                        </wicket:link>
+                        <li wicket:id="mmenuCollection">
+                            <wicket:link><a href="../page/collection/CollectionManagementPage.html"><i class="fa fa-cube"></i>Collection</a></wicket:link>
+                        </li>
+                        <li wicket:id="mmenuQuery">
+                            <wicket:link><a href="../page/query/QueryManagementPage.html"><i class="fa fa-cubes"></i>Query</a></wicket:link>
+                        </li>
                     </ul>
                 </li>
                 <li class="treeview" wicket:id="menuStorage">
@@ -113,10 +129,12 @@
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                        <wicket:link>
-                            <li><a href="../page/file/FileManagementPage.html"><i class="fa fa-cloud-download"></i>File</a></li>
-                            <li><a href="../page/asset/AssetManagementPage.html"><i class="fa fa-cloud-download"></i>Asset</a></li>
-                        </wicket:link>
+                        <li wicket:id="mmenuFile">
+                            <wicket:link><a href="../page/file/FileManagementPage.html"><i class="fa fa-cloud-download"></i>File</a></wicket:link>
+                        </li>
+                        <li wicket:id="mmenuAsset">
+                            <wicket:link><a href="../page/asset/AssetManagementPage.html"><i class="fa fa-cloud-download"></i>Asset</a></wicket:link>
+                        </li>
                     </ul>
                 </li>
                 <li class="treeview" wicket:id="menuSession">
@@ -126,10 +144,12 @@
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                        <wicket:link>
-                            <li><a href="../page/session/SessionDesktopPage.html"><i class="fa fa-desktop"></i>Desktop</a></li>
-                            <li><a href="../page/session/SessionMobilePage.html"><i class="fa fa-mobile"></i>Mobile</a></li>
-                        </wicket:link>
+                        <li wicket:id="mmenuDesktop">
+                            <wicket:link><a href="../page/session/SessionDesktopPage.html"><i class="fa fa-desktop"></i>Desktop</a></wicket:link>
+                        </li>
+                        <li wicket:id="mmenuMobile">
+                            <wicket:link><a href="../page/session/SessionMobilePage.html"><i class="fa fa-mobile"></i>Mobile</a></wicket:link>
+                        </li>
                     </ul>
                 </li>
                 <li class="treeview" wicket:id="menuPlugin">
@@ -139,9 +159,9 @@
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                        <wicket:link>
-                            <li><a href="../page/javascript/JavascriptManagementPage.html"><i class="fa fa-code"></i>Javascript</a></li>
-                        </wicket:link>
+                        <li wicket:id="mmenuJavascript">
+                            <wicket:link><a href="../page/javascript/JavascriptManagementPage.html"><i class="fa fa-code"></i>Javascript</a></wicket:link>
+                        </li>
                     </ul>
                 </li>
             </ul>
