@@ -264,9 +264,9 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuSettingClass = "";
         }
         if (getPage() instanceof ResourceManagementPage) {
-            this.mmenuLocalization = "active";
+            this.mmenuLocalizationClass = "active";
         } else {
-            this.mmenuLocalization = "";
+            this.mmenuLocalizationClass = "";
         }
         if (getPage() instanceof InformationPage) {
             this.mmenuInformationClass = "active";
