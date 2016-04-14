@@ -5,11 +5,18 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.Identity;
+import com.angkorteam.mbaas.plain.enums.GrantTypeEnum;
+import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.script.ScriptException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by socheat on 3/18/16.
@@ -127,20 +134,34 @@ public class Permission {
     }
 
     public boolean hasRole(String roleName) {
+        List<String> roles = new ArrayList<>();
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         UserTable userTable = Tables.USER.as("userTable");
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(identity.getUserId())).fetchOneInto(userTable);
-        if (userRecord == null) {
-            return false;
+
+        RoleRecord roleRecord = null;
+        if (userRecord != null) {
+            roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
         }
-        RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userRecord.getRoleId())).fetchOneInto(roleTable);
-        if (roleRecord == null) {
-            return false;
+        if (roleRecord != null) {
+            roles.add(roleRecord.getName());
         }
-        if (roleRecord.getName().equals(roleName)) {
-            return true;
+
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(identity.getMobileId())).fetchOneInto(mobileTable);
+        if (mobileRecord != null) {
+            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+            if (GrantTypeEnum.Authorization.getLiteral().equals(mobileRecord.getGrantType())) {
+                roles.add(configuration.getString(Constants.ROLE_OAUTH2_AUTHORIZATION));
+            } else if (GrantTypeEnum.Password.getLiteral().equals(mobileRecord.getGrantType())) {
+                roles.add(configuration.getString(Constants.ROLE_OAUTH2_PASSWORD));
+            } else if (GrantTypeEnum.Implicit.getLiteral().equals(mobileRecord.getGrantType())) {
+                roles.add(configuration.getString(Constants.ROLE_OAUTH2_IMPLICIT));
+            } else if (GrantTypeEnum.Client.getLiteral().equals(mobileRecord.getGrantType())) {
+                roles.add(configuration.getString(Constants.ROLE_OAUTH2_CLIENT));
+            }
         }
-        return false;
+        return roles.contains(roleName);
     }
 
     public boolean hasDocumentPermission(String collectionName, String documentId, int action) {
