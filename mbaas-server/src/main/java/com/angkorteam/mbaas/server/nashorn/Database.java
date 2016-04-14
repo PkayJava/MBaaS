@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.QueryTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
+import com.angkorteam.mbaas.plain.Identity;
 import com.angkorteam.mbaas.plain.enums.QueryReturnTypeEnum;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
@@ -36,9 +37,11 @@ public class Database {
     public final DSLContext Context;
     public final Class<DSL> DSL;
     public final Class<Tables> Tables;
+    private final Identity identity;
 
-    public Database(DSLContext context, JdbcTemplate jdbcTemplate, MBaaS mbaas) {
+    public Database(DSLContext context, Identity identity, JdbcTemplate jdbcTemplate, MBaaS mbaas) {
         this.jdbcTemplate = jdbcTemplate;
+        this.identity = identity;
         DSL = org.jooq.impl.DSL.class;
         Tables = com.angkorteam.mbaas.model.entity.Tables.class;
         this.Context = context;
@@ -51,10 +54,8 @@ public class Database {
     }
 
     public String insert(String collection, JSObject document) throws ScriptException {
-        String ownerUserId = null;
-        if (this.mbaas.isAuthenticated()) {
-            ownerUserId = this.mbaas.getCurrentUserId();
-        } else {
+        String ownerUserId = identity.getUserId();
+        if (ownerUserId == null || "".equals(ownerUserId)) {
             XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             String userAdmin = configuration.getString(Constants.USER_ADMIN);
             UserTable userTable = com.angkorteam.mbaas.model.entity.Tables.USER.as("userTable");
