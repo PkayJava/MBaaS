@@ -71,7 +71,7 @@ public class JavascriptController {
         try {
             engine.eval(javascriptRecord.getScript());
         } catch (Throwable e) {
-            return returnResponse(false, true, e, script, null);
+            return returnResponse(true, true, e, script, null);
         }
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -159,7 +159,7 @@ public class JavascriptController {
         try {
             engine.eval(javascriptRecord.getScript());
         } catch (Throwable e) {
-            return returnResponse(false, true, e, script, null);
+            return returnResponse(true, true, e, script, null);
         }
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
