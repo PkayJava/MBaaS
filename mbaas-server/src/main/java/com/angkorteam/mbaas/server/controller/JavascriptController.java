@@ -246,6 +246,7 @@ public class JavascriptController {
         Bindings bindings = engine.createBindings();
         engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
         bindings.put("MBaaS", new MBaaS(context, identity, jdbcTemplate, request));
+        bindings.put("Context", context);
         try {
             List<Class<?>> clazzes = new ArrayList<>();
             clazzes.add(Boolean.class);

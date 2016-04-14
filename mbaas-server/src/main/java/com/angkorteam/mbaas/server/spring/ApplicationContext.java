@@ -148,10 +148,8 @@ public class ApplicationContext implements ServletContextListener {
         granted.add(Date.class.getName());
         granted.add(BigDecimal.class.getName());
         granted.add(BigInteger.class.getName());
-
         granted.add(Arrays.class.getName());
         granted.add(Collections.class.getName());
-
         granted.add(LinkedHashMap.class.getName());
         granted.add(LinkedHashSet.class.getName());
         granted.add(Hashtable.class.getName());

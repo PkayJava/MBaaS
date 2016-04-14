@@ -34,13 +34,13 @@ public class Database {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JdbcTemplate jdbcTemplate;
     private final MBaaS mbaas;
-    public final DSLContext Context;
+    private final DSLContext context;
     private final Identity identity;
 
     public Database(DSLContext context, Identity identity, JdbcTemplate jdbcTemplate, MBaaS mbaas) {
         this.jdbcTemplate = jdbcTemplate;
         this.identity = identity;
-        this.Context = context;
+        this.context = context;
         this.mbaas = mbaas;
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
     }
@@ -68,7 +68,7 @@ public class Database {
         parse(params, document, collection);
         DocumentCreateRequest request = new DocumentCreateRequest();
         request.setDocument(params);
-        return DocumentFunction.insertDocument(Context, jdbcTemplate, ownerUserId, collection, request);
+        return DocumentFunction.insertDocument(context, jdbcTemplate, ownerUserId, collection, request);
     }
 
     private void parse(Map<String, Object> params, JSObject document, String collection) {
@@ -92,7 +92,7 @@ public class Database {
     }
 
     public void delete(String collection, String documentId) {
-        DocumentFunction.deleteDocument(Context, jdbcTemplate, collection, documentId);
+        DocumentFunction.deleteDocument(context, jdbcTemplate, collection, documentId);
     }
 
     public void modify(String collection, String documentId, JSObject document) {
@@ -103,12 +103,12 @@ public class Database {
         parse(params, document, collection);
         DocumentModifyRequest request = new DocumentModifyRequest();
         request.setDocument(params);
-        DocumentFunction.modifyDocument(Context, jdbcTemplate, collection, documentId, request);
+        DocumentFunction.modifyDocument(context, jdbcTemplate, collection, documentId, request);
     }
 
     public Object executeQuery(String query) throws DataAccessException {
         QueryTable queryTable = com.angkorteam.mbaas.model.entity.Tables.QUERY.as("queryTable");
-        QueryRecord queryRecord = Context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
+        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
 
         if (queryRecord == null || queryRecord.getScript() == null || "".equals(queryRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(queryRecord.getSecurity())) {
             throw new DataAccessResourceFailureException("query is not available");
@@ -201,7 +201,7 @@ public class Database {
         }
 
         QueryTable queryTable = com.angkorteam.mbaas.model.entity.Tables.QUERY.as("queryTable");
-        QueryRecord queryRecord = Context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
+        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.NAME.eq(query)).fetchOneInto(queryTable);
 
         if (queryRecord == null || queryRecord.getScript() == null || "".equals(queryRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(queryRecord.getSecurity())) {
             throw new DataAccessResourceFailureException(query + " is not available");

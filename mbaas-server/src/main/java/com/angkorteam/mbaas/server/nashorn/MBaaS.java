@@ -37,8 +37,6 @@ public class MBaaS {
 
     private final Request request;
 
-    private final DSLContext context;
-
     public final Identity Identity;
 
     public MBaaS(DSLContext context, Identity identity, JdbcTemplate jdbcTemplate, Request request) {
@@ -46,7 +44,6 @@ public class MBaaS {
         this.Identity = identity;
         this.Database = new Database(context, identity, jdbcTemplate, this);
         this.Permission = new Permission(this, identity, context, jdbcTemplate);
-        this.context = context;
         this.request = request;
     }
 
