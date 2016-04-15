@@ -13,15 +13,15 @@
     <Loggers>
         <logger name="org.apache.wicket" level="INFO" additivity="false">
             <AppenderRef ref="CONSOLE"/>
-            <AppenderRef ref="file"/>
+            <!--<AppenderRef ref="file"/>-->
         </logger>
         <logger name="com.angkorteam.mbaas" level="INFO" additivity="false">
             <AppenderRef ref="CONSOLE"/>
-            <AppenderRef ref="file"/>
+            <!--<AppenderRef ref="file"/>-->
         </logger>
         <Root level="WARN">
             <AppenderRef ref="CONSOLE"/>
-            <AppenderRef ref="file"/>
+            <!--<AppenderRef ref="file"/>-->
         </Root>
     </Loggers>
 </log4j:configuration>
