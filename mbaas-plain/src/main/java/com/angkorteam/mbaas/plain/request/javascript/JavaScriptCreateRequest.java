@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by socheat on 2/27/16.
  */
-public class JavaScriptCreateRequest {
+public class JavaScriptCreateRequest{
 
     @Expose
     @SerializedName("content")
@@ -19,4 +19,5 @@ public class JavaScriptCreateRequest {
     public void setContent(String content) {
         this.content = content;
     }
+    
 }

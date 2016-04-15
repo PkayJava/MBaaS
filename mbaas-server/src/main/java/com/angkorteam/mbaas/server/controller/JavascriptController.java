@@ -5,13 +5,12 @@ import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
 import com.angkorteam.mbaas.plain.Identity;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
-import com.angkorteam.mbaas.plain.request.javascript.JavaScriptExecuteRequest;
-import com.angkorteam.mbaas.plain.response.Response;
 import com.angkorteam.mbaas.plain.response.javascript.JavaScriptExecuteResponse;
 import com.angkorteam.mbaas.server.nashorn.JavaFilter;
 import com.angkorteam.mbaas.server.nashorn.MBaaS;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import org.apache.commons.collections.map.HashedMap;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,15 +56,13 @@ public class JavascriptController {
             HttpServletResponse resp,
             Identity identity,
             @PathVariable("script") String script,
-            @RequestBody(required = false) JavaScriptExecuteRequest requestBody
+            @RequestBody(required = false) Map<String, Object> requestBody
     ) throws ScriptException, IOException, ServletException {
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.PATH.eq(script)).fetchOneInto(javascriptTable);
 
         if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(javascriptRecord.getSecurity())) {
-            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-            response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
-            return ResponseEntity.ok(response);
+            return returnMethodNotAllowed();
         }
 
         com.angkorteam.mbaas.server.nashorn.Request request = new com.angkorteam.mbaas.server.nashorn.Request(req);
@@ -73,7 +70,7 @@ public class JavascriptController {
         try {
             engine.eval(javascriptRecord.getScript());
         } catch (Throwable e) {
-            return returnResponse(true, true, e, script, null);
+            return returnThrowable(e);
         }
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -105,54 +102,25 @@ public class JavascriptController {
             }
         }
 
-        return returnResponse(found, error, throwable, script, responseBody);
-    }
-
-    protected ResponseEntity<JavaScriptExecuteResponse> returnResponse(boolean found, boolean error, Throwable throwable, String script, Object responseBody) {
-        if (!found) {
-            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-            response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
-            return ResponseEntity.ok(response);
-        } else {
-            if (error) {
-                if (throwable instanceof BadCredentialsException) {
-                    JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-                    response.setHttpCode(HttpStatus.UNAUTHORIZED.value());
-                    response.setResult(HttpStatus.UNAUTHORIZED.getReasonPhrase());
-                    return ResponseEntity.ok(response);
-                } else {
-                    JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-                    response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-                    response.setResult(throwable.getMessage());
-                    return ResponseEntity.ok(response);
-                }
-            } else {
-                JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-                response.setData(parseBody(responseBody));
-                return ResponseEntity.ok(response);
-            }
-        }
+        return returnResponse(found, error, throwable, responseBody);
     }
 
     @RequestMapping(
             path = "/execute/{script}",
-            method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.OPTIONS, RequestMethod.TRACE},
+            method = {RequestMethod.GET, RequestMethod.DELETE},
             consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<JavaScriptExecuteResponse> execute(
             HttpServletRequest req,
             HttpServletResponse resp,
             Identity identity,
-            @PathVariable("script") String script,
-            @RequestBody(required = false) JavaScriptExecuteRequest requestBody
+            @PathVariable("script") String script
     ) throws ScriptException, IOException, ServletException {
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.PATH.eq(script)).fetchOneInto(javascriptTable);
 
         if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(javascriptRecord.getSecurity())) {
-            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-            response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
-            return ResponseEntity.ok(response);
+            return returnMethodNotAllowed();
         }
 
         com.angkorteam.mbaas.server.nashorn.Request request = new com.angkorteam.mbaas.server.nashorn.Request(req);
@@ -160,7 +128,7 @@ public class JavascriptController {
         try {
             engine.eval(javascriptRecord.getScript());
         } catch (Throwable e) {
-            return returnResponse(true, true, e, script, null);
+            return returnThrowable(e);
         }
         Invocable invocable = (Invocable) engine;
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
@@ -173,29 +141,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpGet(request, requestBody);
-                } catch (Throwable e) {
-                    error = true;
-                    throwable = e;
-                }
-            }
-        } else if (method == HttpMethod.HEAD) {
-            HttpHead http = invocable.getInterface(HttpHead.class);
-            if (http != null) {
-                found = true;
-                try {
-                    responseBody = http.httpHead(request, requestBody);
-                } catch (Throwable e) {
-                    error = true;
-                    throwable = e;
-                }
-            }
-        } else if (method == HttpMethod.PATCH) {
-            HttpPatch http = invocable.getInterface(HttpPatch.class);
-            if (http != null) {
-                found = true;
-                try {
-                    responseBody = http.httpPatch(request, requestBody);
+                    responseBody = http.httpGet(request, new HashMap<>());
                 } catch (Throwable e) {
                     error = true;
                     throwable = e;
@@ -206,29 +152,7 @@ public class JavascriptController {
             if (http != null) {
                 found = true;
                 try {
-                    responseBody = http.httpDelete(request, requestBody);
-                } catch (Throwable e) {
-                    error = true;
-                    throwable = e;
-                }
-            }
-        } else if (method == HttpMethod.OPTIONS) {
-            HttpOptions http = invocable.getInterface(HttpOptions.class);
-            if (http != null) {
-                found = true;
-                try {
-                    responseBody = http.httpOptions(request, requestBody);
-                } catch (Throwable e) {
-                    error = true;
-                    throwable = e;
-                }
-            }
-        } else if (method == HttpMethod.TRACE) {
-            HttpTrace http = invocable.getInterface(HttpTrace.class);
-            if (http != null) {
-                found = true;
-                try {
-                    responseBody = http.httpTrace(request, requestBody);
+                    responseBody = http.httpDelete(request, new HashMap<>());
                 } catch (Throwable e) {
                     error = true;
                     throwable = e;
@@ -236,7 +160,7 @@ public class JavascriptController {
             }
         }
 
-        return returnResponse(found, error, throwable, script, responseBody);
+        return returnResponse(found, error, throwable, responseBody);
     }
 
     private ScriptEngine getScriptEngine(com.angkorteam.mbaas.server.nashorn.Request request, Identity identity) {
@@ -306,38 +230,59 @@ public class JavascriptController {
         }
     }
 
+    protected ResponseEntity<JavaScriptExecuteResponse> returnThrowable(Throwable throwable) {
+        if (throwable instanceof BadCredentialsException) {
+            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
+            response.setHttpCode(HttpStatus.UNAUTHORIZED.value());
+            response.setResult(HttpStatus.UNAUTHORIZED.getReasonPhrase());
+            return ResponseEntity.ok(response);
+        } else {
+            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
+            response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setResult(throwable.getMessage());
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    protected ResponseEntity<JavaScriptExecuteResponse> returnResponse(boolean found, boolean error, Throwable throwable, Object responseBody) {
+        if (!found) {
+            JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
+            response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
+            return ResponseEntity.ok(response);
+        } else {
+            if (error) {
+                return returnThrowable(throwable);
+            } else {
+                JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
+                response.setData(parseBody(responseBody));
+                return ResponseEntity.ok(response);
+            }
+        }
+    }
+
+    protected ResponseEntity<JavaScriptExecuteResponse> returnMethodNotAllowed() {
+        JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
+        response.setHttpCode(HttpStatus.METHOD_NOT_ALLOWED.value());
+        response.setResult(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase());
+        return ResponseEntity.ok(response);
+    }
+
     public interface Http {
     }
 
     public interface HttpGet extends Http {
-        Object httpGet(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
-    }
-
-    public interface HttpHead extends Http {
-        Object httpHead(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
+        Object httpGet(com.angkorteam.mbaas.server.nashorn.Request request, Map<String, Object> requestBody);
     }
 
     public interface HttpPost extends Http {
-        Object httpPost(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
+        Object httpPost(com.angkorteam.mbaas.server.nashorn.Request request, Map<String, Object> requestBody);
     }
 
     public interface HttpPut extends Http {
-        Object httpPut(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
-    }
-
-    public interface HttpPatch extends Http {
-        Object httpPatch(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
+        Object httpPut(com.angkorteam.mbaas.server.nashorn.Request request, Map<String, Object> requestBody);
     }
 
     public interface HttpDelete extends Http {
-        Object httpDelete(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
-    }
-
-    public interface HttpOptions extends Http {
-        Object httpOptions(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
-    }
-
-    public interface HttpTrace extends Http {
-        Object httpTrace(com.angkorteam.mbaas.server.nashorn.Request request, JavaScriptExecuteRequest requestBody);
+        Object httpDelete(com.angkorteam.mbaas.server.nashorn.Request request, Map<String, Object> requestBody);
     }
 }
