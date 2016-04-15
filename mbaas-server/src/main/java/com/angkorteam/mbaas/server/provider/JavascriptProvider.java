@@ -52,8 +52,8 @@ public class JavascriptProvider extends JooqProvider {
         return this.javascriptTable.DESCRIPTION;
     }
 
-    public Field<String> getName() {
-        return this.javascriptTable.NAME;
+    public Field<String> getPath() {
+        return this.javascriptTable.PATH;
     }
 
     public Field<String> getOwner() {

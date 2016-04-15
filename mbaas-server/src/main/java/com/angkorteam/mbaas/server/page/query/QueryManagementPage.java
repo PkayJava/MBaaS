@@ -54,8 +54,7 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("endpoint", this), "endpoint", this, provider));
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Role Privacy", "User Privacy", "Parameter", "Edit", "Delete"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Role Privacy", "User Privacy", "Edit", "Delete", "Parameter"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -106,12 +105,6 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
             context.delete(Tables.QUERY_PARAMETER).where(Tables.QUERY_PARAMETER.QUERY_ID.eq(queryId)).execute();
             return;
         }
-        if ("endpoint".equals(link)) {
-            String endpoint = (String) object.get("endpoint");
-            RedirectPage page = new RedirectPage(endpoint);
-            setResponsePage(page);
-            return;
-        }
         if ("Grant".equals(link)) {
             int count = context.selectCount().from(Tables.QUERY_PARAMETER).where(Tables.QUERY_PARAMETER.QUERY_ID.eq(queryId)).and(Tables.QUERY_PARAMETER.TYPE.isNull()).fetchOneInto(int.class);
             if (count > 0) {
@@ -148,6 +141,10 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
+        return isEnable(link, object);
+    }
+
+    protected boolean isEnable(String link, Map<String, Object> object) {
         DSLContext context = getDSLContext();
         String queryId = (String) object.get("queryId");
         String security = (String) object.get("security");
@@ -155,9 +152,6 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
             return true;
         }
         if ("Delete".equals(link)) {
-            return true;
-        }
-        if ("endpoint".equals(link)) {
             return true;
         }
         if ("Grant".equals(link)) {
@@ -187,37 +181,6 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
-        DSLContext context = getDSLContext();
-        String queryId = (String) object.get("queryId");
-        String security = (String) object.get("security");
-        if ("Edit".equals(link)) {
-            return true;
-        }
-        if ("Delete".equals(link)) {
-            return true;
-        }
-        if ("endpoint".equals(link)) {
-            return true;
-        }
-        if ("Grant".equals(link)) {
-            if (SecurityEnum.Denied.getLiteral().equals(security)) {
-                return true;
-            }
-        }
-        if ("Deny".equals(link)) {
-            if (SecurityEnum.Granted.getLiteral().equals(security)) {
-                return true;
-            }
-        }
-        if ("Parameter".equals(link)) {
-            return true;
-        }
-        if ("Role Privacy".equals(link)) {
-            return true;
-        }
-        if ("User Privacy".equals(link)) {
-            return true;
-        }
-        return false;
+        return isEnable(link, object);
     }
 }
