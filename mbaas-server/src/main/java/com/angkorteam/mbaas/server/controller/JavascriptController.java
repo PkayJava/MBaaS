@@ -70,6 +70,7 @@ public class JavascriptController {
         try {
             engine.eval(javascriptRecord.getScript());
         } catch (Throwable e) {
+            e.printStackTrace();
             return returnThrowable(e);
         }
         Invocable invocable = (Invocable) engine;
@@ -85,6 +86,7 @@ public class JavascriptController {
                 try {
                     responseBody = http.httpPost(request, requestBody);
                 } catch (Throwable e) {
+                    e.printStackTrace();
                     error = true;
                     throwable = e;
                 }
@@ -96,6 +98,7 @@ public class JavascriptController {
                 try {
                     responseBody = http.httpPut(request, requestBody);
                 } catch (Throwable e) {
+                    e.printStackTrace();
                     error = true;
                     throwable = e;
                 }
@@ -128,6 +131,7 @@ public class JavascriptController {
         try {
             engine.eval(javascriptRecord.getScript());
         } catch (Throwable e) {
+            e.printStackTrace();
             return returnThrowable(e);
         }
         Invocable invocable = (Invocable) engine;
@@ -143,6 +147,7 @@ public class JavascriptController {
                 try {
                     responseBody = http.httpGet(request, new HashMap<>());
                 } catch (Throwable e) {
+                    e.printStackTrace();
                     error = true;
                     throwable = e;
                 }
@@ -154,6 +159,7 @@ public class JavascriptController {
                 try {
                     responseBody = http.httpDelete(request, new HashMap<>());
                 } catch (Throwable e) {
+                    e.printStackTrace();
                     error = true;
                     throwable = e;
                 }
@@ -207,6 +213,7 @@ public class JavascriptController {
                 engine.eval("var " + clazz.getSimpleName() + " = Java.type('" + clazz.getName() + "')");
             }
         } catch (ScriptException e) {
+            e.printStackTrace();
         }
         return engine;
     }
