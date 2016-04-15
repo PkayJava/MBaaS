@@ -128,8 +128,7 @@ public class JavascriptController {
                 }
             } else {
                 JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
-                response.getData().setScript(script);
-                response.getData().setBody(parseBody(responseBody));
+                response.setData(parseBody(responseBody));
                 return ResponseEntity.ok(response);
             }
         }
