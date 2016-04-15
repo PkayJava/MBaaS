@@ -10,7 +10,6 @@ import com.angkorteam.mbaas.server.nashorn.JavaFilter;
 import com.angkorteam.mbaas.server.nashorn.MBaaS;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
-import org.apache.commons.collections.map.HashedMap;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.script.*;
 import javax.servlet.ServletException;
@@ -70,7 +72,6 @@ public class JavascriptController {
         try {
             engine.eval(javascriptRecord.getScript());
         } catch (Throwable e) {
-            e.printStackTrace();
             return returnThrowable(e);
         }
         Invocable invocable = (Invocable) engine;
@@ -86,7 +87,6 @@ public class JavascriptController {
                 try {
                     responseBody = http.httpPost(request, requestBody);
                 } catch (Throwable e) {
-                    e.printStackTrace();
                     error = true;
                     throwable = e;
                 }
@@ -98,7 +98,6 @@ public class JavascriptController {
                 try {
                     responseBody = http.httpPut(request, requestBody);
                 } catch (Throwable e) {
-                    e.printStackTrace();
                     error = true;
                     throwable = e;
                 }
@@ -131,7 +130,6 @@ public class JavascriptController {
         try {
             engine.eval(javascriptRecord.getScript());
         } catch (Throwable e) {
-            e.printStackTrace();
             return returnThrowable(e);
         }
         Invocable invocable = (Invocable) engine;
@@ -147,7 +145,6 @@ public class JavascriptController {
                 try {
                     responseBody = http.httpGet(request, new HashMap<>());
                 } catch (Throwable e) {
-                    e.printStackTrace();
                     error = true;
                     throwable = e;
                 }
@@ -159,7 +156,6 @@ public class JavascriptController {
                 try {
                     responseBody = http.httpDelete(request, new HashMap<>());
                 } catch (Throwable e) {
-                    e.printStackTrace();
                     error = true;
                     throwable = e;
                 }
@@ -213,7 +209,6 @@ public class JavascriptController {
                 engine.eval("var " + clazz.getSimpleName() + " = Java.type('" + clazz.getName() + "')");
             }
         } catch (ScriptException e) {
-            e.printStackTrace();
         }
         return engine;
     }
