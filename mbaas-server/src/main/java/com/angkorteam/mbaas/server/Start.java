@@ -28,11 +28,11 @@ public class Start {
 
         HttpConfiguration http_config = new HttpConfiguration();
         http_config.setSecureScheme("https");
-        http_config.setSecurePort(7443);
+        http_config.setSecurePort(9443);
         http_config.setOutputBufferSize(32768);
 
         ServerConnector http = new ServerConnector(server, new HttpConnectionFactory(http_config));
-        http.setPort(7080);
+        http.setPort(9080);
         http.setIdleTimeout(1000 * 60 * 60);
 
         server.addConnector(http);
@@ -56,18 +56,18 @@ public class Start {
 
             ServerConnector https = new ServerConnector(server, new SslConnectionFactory(
                     sslContextFactory, "http/1.1"), new HttpConnectionFactory(https_config));
-            https.setPort(7443);
+            https.setPort(9443);
             https.setIdleTimeout(500000);
 
             server.addConnector(https);
-            System.out.println("SSL access to the examples has been enabled on port 7443");
-            System.out.println("You can access the application using on http://localhost:7080");
+            System.out.println("SSL access to the examples has been enabled on port 9443");
+            System.out.println("You can access the application using on http://localhost:9080");
             System.out.println();
         }
 
         WebAppContext bb = new WebAppContext();
         bb.setServer(server);
-        bb.setContextPath("/");
+        bb.setContextPath("/mbaas-server");
         String path = Paths.get(".").toAbsolutePath().normalize().toString();
         File war = new File(path, "src/main/webapp");
         if (!war.exists()) {
