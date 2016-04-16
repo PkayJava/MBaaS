@@ -1,3 +1,11 @@
+/mbaas-server/build
+/mbaas-plain/build
+/mbaas-jooq/build
+/mbaas-jooq/buildSrc
+/mbaas-configuration/build
+/build
+/.gradle
+/.idea
 target/
 pom.xml.tag
 pom.xml.releaseBackup

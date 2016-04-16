@@ -4,11 +4,6 @@
         <Console name="CONSOLE" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
-        <File name="file" fileName="logs/mbaas.log">
-            <PatternLayout>
-                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
-            </PatternLayout>
-        </File>
     </Appenders>
     <Loggers>
         <logger name="org.apache.wicket" level="INFO" additivity="false">
