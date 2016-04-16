@@ -40,27 +40,21 @@
 
     <security:global-method-security secured-annotations="enabled"/>
 
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
-                   pattern="/api/security/signup"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
-                   pattern="/api/oauth2/**"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
-                   pattern="/api/resource/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/security/signup"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/oauth2/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/resource/**"/>
     <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/qr"/>
     <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/otp"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
-                   pattern="/api/rest/registry/**"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
-                   pattern="/api/javascript/**"/>
-    <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager"
-                   entry-point-ref="authenticationEntryPoint" create-session="stateless">
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/rest/registry/**"/>
+    <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager" entry-point-ref="authenticationEntryPoint" create-session="stateless">
         <security:csrf disabled="true"/>
         <!-- SecurityExpressionRoot -->
         <security:access-denied-handler ref="accessDeniedHandler"/>
         <security:custom-filter ref="authenticationFilter" before="ANONYMOUS_FILTER"/>
-        <security:intercept-url pattern="/api/monitor/**" access="fullyAuthenticated"/>
-        <security:intercept-url pattern="/api/file/**" access="fullyAuthenticated"/>
-        <security:intercept-url pattern="/api/**" access="fullyAuthenticated"/>
+        <security:intercept-url access="fullyAuthenticated" pattern="/api/monitor/**"/>
+        <security:intercept-url access="fullyAuthenticated" pattern="/api/javascript/**"/>
+        <security:intercept-url access="fullyAuthenticated" pattern="/api/file/**"/>
+        <security:intercept-url access="fullyAuthenticated" pattern="/api/**"/>
     </security:http>
 
     <bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
