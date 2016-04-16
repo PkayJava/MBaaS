@@ -110,7 +110,7 @@ public class AssetController {
 
         AssetCreateResponse response = new AssetCreateResponse();
         response.getData().setContentType(mime);
-        response.getData().setFileId(uuid);
+        response.getData().setAssetId(uuid);
         response.getData().setFilename(filename);
         response.getData().setAddress(address.toString());
 
