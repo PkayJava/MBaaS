@@ -326,7 +326,109 @@ public class Database {
         return this.namedParameterJdbcTemplate.queryForMap(sql, paramMap);
     }
 
-    public List<Map<String, Object>> queryForList(String sql) throws DataAccessException {
+    public boolean queryForBoolean(String sql) throws DataAccessException {
+        return queryForObject(sql, boolean.class);
+    }
+
+    public boolean queryForBoolean(String sql, JSObject js) throws DataAccessException {
+        return queryForObject(sql, js, boolean.class);
+    }
+
+    public byte queryForByte(String sql) throws DataAccessException {
+        return queryForObject(sql, byte.class);
+    }
+
+    public byte queryForByte(String sql, JSObject js) throws DataAccessException {
+        return queryForObject(sql, js, byte.class);
+    }
+
+    public short queryForShort(String sql) throws DataAccessException {
+        return queryForObject(sql, short.class);
+    }
+
+    public short queryForShort(String sql, JSObject js) throws DataAccessException {
+        return queryForObject(sql, js, short.class);
+    }
+
+    public int queryForInteger(String sql) throws DataAccessException {
+        return queryForObject(sql, int.class);
+    }
+
+    public int queryForInteger(String sql, JSObject js) throws DataAccessException {
+        return queryForObject(sql, js, int.class);
+    }
+
+    public long queryForLong(String sql) throws DataAccessException {
+        return queryForObject(sql, long.class);
+    }
+
+    public long queryForLong(String sql, JSObject js) throws DataAccessException {
+        return queryForObject(sql, js, long.class);
+    }
+
+    public float queryForFloat(String sql) throws DataAccessException {
+        return queryForObject(sql, float.class);
+    }
+
+    public float queryForFloat(String sql, JSObject js) throws DataAccessException {
+        return queryForObject(sql, js, float.class);
+    }
+
+    public double queryForDouble(String sql) throws DataAccessException {
+        return queryForObject(sql, double.class);
+    }
+
+    public double queryForDouble(String sql, JSObject js) throws DataAccessException {
+        return queryForObject(sql, js, double.class);
+    }
+
+    public Date queryForDate(String sql) throws DataAccessException {
+        return queryForObject(sql, Date.class);
+    }
+
+    public Date queryForDate(String sql, JSObject js) throws DataAccessException {
+        return queryForObject(sql, js, Date.class);
+    }
+
+    public String queryForString(String sql) throws DataAccessException {
+        return queryForObject(sql, String.class);
+    }
+
+    public String queryForString(String sql, JSObject js) throws DataAccessException {
+        return queryForObject(sql, js, String.class);
+    }
+
+    public char queryForCharacter(String sql) throws DataAccessException {
+        return queryForObject(sql, char.class);
+    }
+
+    public char queryForCharacter(String sql, JSObject js) throws DataAccessException {
+        return queryForObject(sql, js, char.class);
+    }
+
+    public <T> T queryForObject(String sql, Class<T> clazz) throws DataAccessException {
+        if (!sql.trim().substring(0, "select".length()).toLowerCase().equals("select")) {
+            throw new DataAccessResourceFailureException(sql);
+        }
+        return this.jdbcTemplate.queryForObject(sql, clazz);
+    }
+
+    private <T> T queryForObject(String sql, JSObject js, Class<T> clazz) throws DataAccessException {
+        if (js.isArray() || js.isStrictFunction() || js.isStrictFunction()) {
+            throw new DataAccessResourceFailureException(sql);
+        }
+        Map<String, Object> paramMap = new HashMap<>();
+        for (String key : js.keySet()) {
+            paramMap.put(key, js.getMember(key));
+        }
+
+        if (!sql.trim().substring(0, "select".length()).toLowerCase().equals("select")) {
+            throw new DataAccessResourceFailureException(sql);
+        }
+        return this.namedParameterJdbcTemplate.queryForObject(sql, paramMap, clazz);
+    }
+
+    private List<Map<String, Object>> queryForList(String sql) throws DataAccessException {
         if (!sql.trim().substring(0, "select".length()).toLowerCase().equals("select")) {
             throw new DataAccessResourceFailureException(sql);
         }
