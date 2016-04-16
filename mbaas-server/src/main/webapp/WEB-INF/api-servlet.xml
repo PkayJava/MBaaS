@@ -16,7 +16,7 @@
 
     <context:property-placeholder location="file:${user.home}/.xml/mbaas.properties.xml" file-encoding="UTF-8"/>
 
-    <mvc:annotation-driven>
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
         <mvc:argument-resolvers>
             <ref bean="identityResolver"/>
         </mvc:argument-resolvers>
@@ -25,7 +25,7 @@
                 <property name="gson" ref="gson"/>
             </bean>
         </mvc:message-converters>
-        <mvc:path-matching path-matcher="pathMatcher" suffix-pattern="false"/>
+        <mvc:path-matching path-matcher="pathMatcher" suffix-pattern="false" registered-suffixes-only="true"/>
     </mvc:annotation-driven>
 
     <mvc:resources mapping="/resource/**" location="file:${resource.repo}/" cache-period="604800">
@@ -40,13 +40,18 @@
 
     <security:global-method-security secured-annotations="enabled"/>
 
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/security/signup"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/oauth2/**"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/resource/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
+                   pattern="/api/security/signup"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
+                   pattern="/api/oauth2/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
+                   pattern="/api/resource/**"/>
     <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/qr"/>
     <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/otp"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/rest/registry/**"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/javascript/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
+                   pattern="/api/rest/registry/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
+                   pattern="/api/javascript/**"/>
     <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager"
                    entry-point-ref="authenticationEntryPoint" create-session="stateless">
         <security:csrf disabled="true"/>
@@ -65,6 +70,18 @@
             </list>
         </constructor-arg>
         <constructor-arg index="1" ref="providerManager"/>
+    </bean>
+
+    <bean id="contentNegotiationManager"
+          class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="favorPathExtension" value="false"/>
+        <property name="favorParameter" value="true"/>
+        <property name="mediaTypes">
+            <props>
+                <prop key="json">application/json</prop>
+                <prop key="xml">application/xml</prop>
+            </props>
+        </property>
     </bean>
 
     <bean class="com.angkorteam.mbaas.server.spring.SessionDestroyedListener"/>
