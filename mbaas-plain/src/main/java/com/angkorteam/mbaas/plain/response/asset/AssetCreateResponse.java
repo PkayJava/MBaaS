@@ -16,8 +16,8 @@ public class AssetCreateResponse extends Response<AssetCreateResponse.Body> {
     public static class Body {
 
         @Expose
-        @SerializedName("fileId")
-        private String fileId;
+        @SerializedName("assetId")
+        private String assetId;
 
         @Expose
         @SerializedName("contentType")
@@ -31,12 +31,12 @@ public class AssetCreateResponse extends Response<AssetCreateResponse.Body> {
         @SerializedName("address")
         private String address;
 
-        public String getFileId() {
-            return fileId;
+        public String getAssetId() {
+            return assetId;
         }
 
-        public void setFileId(String fileId) {
-            this.fileId = fileId;
+        public void setAssetId(String assetId) {
+            this.assetId = assetId;
         }
 
         public String getContentType() {
