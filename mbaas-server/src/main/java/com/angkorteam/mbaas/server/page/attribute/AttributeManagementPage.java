@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
+import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
 import com.angkorteam.mbaas.server.page.document.DocumentManagementPage;
@@ -59,6 +60,7 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
         AttributeProvider provider = new AttributeProvider(this.collectionId);
 
         provider.selectField(String.class, "attributeId");
+        provider.selectField(Boolean.class, "system");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -70,12 +72,9 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("sqlType", this), "sqlType", provider));
         columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("virtual", this), "virtual", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("virtualAttribute", this), "virtualAttribute", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("system", this), "system", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("exposed", this), "exposed", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("nullable", this), "nullable", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("autoIncrement", this), "autoIncrement", provider));
+        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("visibility", this), "visibility", provider));
 
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Delete"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Show", "Hide", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -95,12 +94,12 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
+        DSLContext context = getDSLContext();
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         if ("Delete".equals(link)) {
-            AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
             CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
 
             String attributeId = (String) object.get("attributeId");
-            DSLContext context = getDSLContext();
 
             AttributeRecord attributeRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.ATTRIBUTE_ID.eq(attributeId)).fetchOneInto(attributeTable);
             CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
@@ -111,6 +110,14 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
             requestBody.setCollectionName(collectionRecord.getName());
             AttributeFunction.deleteAttribute(context, jdbcTemplate, requestBody);
         }
+        if ("Hide".equals(link)) {
+            String attributeId = (String) object.get("attributeId");
+            context.update(attributeTable).set(attributeTable.VISIBILITY, VisibilityEnum.Hided.getLiteral()).where(attributeTable.ATTRIBUTE_ID.eq(attributeId)).execute();
+        }
+        if ("Show".equals(link)) {
+            String attributeId = (String) object.get("attributeId");
+            context.update(attributeTable).set(attributeTable.VISIBILITY, VisibilityEnum.Shown.getLiteral()).where(attributeTable.ATTRIBUTE_ID.eq(attributeId)).execute();
+        }
     }
 
     @Override
@@ -118,6 +125,18 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
         if ("Delete".equals(link)) {
             Boolean system = (Boolean) object.get("system");
             if (!system) {
+                return true;
+            }
+        }
+        if ("Hide".equals(link)) {
+            String visibility = (String) object.get("visibility");
+            if (VisibilityEnum.Shown.getLiteral().equals(visibility)) {
+                return true;
+            }
+        }
+        if ("Show".equals(link)) {
+            String visibility = (String) object.get("visibility");
+            if (VisibilityEnum.Hided.getLiteral().equals(visibility)) {
                 return true;
             }
         }
@@ -132,6 +151,18 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
                 return true;
             }
         }
+        if ("Hide".equals(link)) {
+            String visibility = (String) object.get("visibility");
+            if (VisibilityEnum.Shown.getLiteral().equals(visibility)) {
+                return true;
+            }
+        }
+        if ("Show".equals(link)) {
+            String visibility = (String) object.get("visibility");
+            if (VisibilityEnum.Hided.getLiteral().equals(visibility)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -139,6 +170,12 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
     public String onCSSLink(String link, Map<String, Object> object) {
         if ("Delete".equals(link)) {
             return "btn-xs btn-danger";
+        }
+        if ("Show".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Hide".equals(link)) {
+            return "btn-xs btn-info";
         }
         return "";
     }

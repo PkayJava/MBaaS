@@ -13,6 +13,8 @@ CREATE TABLE `attribute` (
 
   system               BIT(1)       NOT NULL,
   exposed              BIT(1)       NOT NULL,
+  -- SHOWN | HIDED
+  visibility           VARCHAR(50)  NOT NULL,
   nullable             BIT(1)       NOT NULL,
   auto_increment       BIT(1)       NOT NULL,
 

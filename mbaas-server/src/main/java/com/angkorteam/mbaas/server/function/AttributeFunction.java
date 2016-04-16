@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -56,6 +57,7 @@ public class AttributeFunction {
         attributeRecord.setSystem(false);
         attributeRecord.setName(requestBody.getAttributeName());
         attributeRecord.setAutoIncrement(false);
+        attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
         attributeRecord.setExposed(true);
         attributeRecord.setVirtualAttributeId(virtualRecord.getAttributeId());
         attributeRecord.setJavaType(requestBody.getJavaType());

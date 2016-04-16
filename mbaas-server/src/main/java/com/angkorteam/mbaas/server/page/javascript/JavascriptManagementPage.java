@@ -50,11 +50,10 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("path", this), "path", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("endpoint", this), "endpoint", this, provider));
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
@@ -96,12 +95,6 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             context.delete(Tables.JAVASCRIPT).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
             return;
         }
-        if ("endpoint".equals(link)) {
-            String endpoint = (String) object.get("endpoint");
-            RedirectPage page = new RedirectPage(endpoint);
-            setResponsePage(page);
-            return;
-        }
         if ("Grant".equals(link)) {
             DSLContext context = getDSLContext();
             context.update(Tables.JAVASCRIPT).set(Tables.JAVASCRIPT.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
@@ -116,32 +109,15 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
-        if ("Edit".equals(link)) {
-            return true;
-        }
-        if ("Delete".equals(link)) {
-            return true;
-        }
-        if ("endpoint".equals(link)) {
-            return true;
-        }
-        if ("Grant".equals(link)) {
-            String security = (String) object.get("security");
-            if (SecurityEnum.Denied.getLiteral().equals(security)) {
-                return true;
-            }
-        }
-        if ("Deny".equals(link)) {
-            String security = (String) object.get("security");
-            if (SecurityEnum.Granted.getLiteral().equals(security)) {
-                return true;
-            }
-        }
-        return false;
+        return isEnable(link, object);
     }
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
+        return isEnable(link, object);
+    }
+
+    protected boolean isEnable(String link, Map<String, Object> object) {
         if ("Edit".equals(link)) {
             return true;
         }

@@ -68,7 +68,7 @@ public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
         responseBody.setVersion(configuration.getString(Constants.APP_VERSION));
         responseBody.setMethod(request.getMethod().name());
 
-        LOGGER.info("{} {}", request.getURI(), gson.toJson(responseBody));
+        LOGGER.info("{}", request.getURI());
 
         return responseBody;
     }
