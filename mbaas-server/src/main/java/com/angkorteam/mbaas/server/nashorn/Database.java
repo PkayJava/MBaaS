@@ -406,7 +406,7 @@ public class Database {
         return queryForObject(sql, js, char.class);
     }
 
-    public <T> T queryForObject(String sql, Class<T> clazz) throws DataAccessException {
+    private <T> T queryForObject(String sql, Class<T> clazz) throws DataAccessException {
         if (!sql.trim().substring(0, "select".length()).toLowerCase().equals("select")) {
             throw new DataAccessResourceFailureException(sql);
         }
@@ -428,7 +428,7 @@ public class Database {
         return this.namedParameterJdbcTemplate.queryForObject(sql, paramMap, clazz);
     }
 
-    private List<Map<String, Object>> queryForList(String sql) throws DataAccessException {
+    public List<Map<String, Object>> queryForList(String sql) throws DataAccessException {
         if (!sql.trim().substring(0, "select".length()).toLowerCase().equals("select")) {
             throw new DataAccessResourceFailureException(sql);
         }
@@ -447,6 +447,107 @@ public class Database {
             throw new DataAccessResourceFailureException(sql);
         }
         return this.namedParameterJdbcTemplate.queryForList(sql, paramMap);
+    }
+
+    private <T> List<T> queryForListObject(String sql, Class<T> clazz) throws DataAccessException {
+        if (!sql.trim().substring(0, "select".length()).toLowerCase().equals("select")) {
+            throw new DataAccessResourceFailureException(sql);
+        }
+        return this.jdbcTemplate.queryForList(sql, clazz);
+    }
+
+    private <T> List<T> queryForListObject(String sql, JSObject js, Class<T> clazz) throws DataAccessException {
+        if (js.isArray() || js.isStrictFunction() || js.isStrictFunction()) {
+            throw new DataAccessResourceFailureException(sql);
+        }
+        Map<String, Object> paramMap = new HashMap<>();
+        for (String key : js.keySet()) {
+            paramMap.put(key, js.getMember(key));
+        }
+        if (!sql.trim().substring(0, "select".length()).toLowerCase().equals("select")) {
+            throw new DataAccessResourceFailureException(sql);
+        }
+        return this.namedParameterJdbcTemplate.queryForList(sql, paramMap, clazz);
+    }
+
+    public List<Boolean> queryForListBoolean(String sql) throws DataAccessException {
+        return this.queryForListObject(sql, Boolean.class);
+    }
+
+    public List<Boolean> queryForListBoolean(String sql, JSObject js) throws DataAccessException {
+        return this.queryForListObject(sql, js, Boolean.class);
+    }
+
+    public List<Byte> queryForListByte(String sql) throws DataAccessException {
+        return this.queryForListObject(sql, Byte.class);
+    }
+
+    public List<Byte> queryForListByte(String sql, JSObject js) throws DataAccessException {
+        return this.queryForListObject(sql, js, Byte.class);
+    }
+
+    public List<Short> queryForListShort(String sql) throws DataAccessException {
+        return this.queryForListObject(sql, Short.class);
+    }
+
+    public List<Short> queryForListShort(String sql, JSObject js) throws DataAccessException {
+        return this.queryForListObject(sql, js, Short.class);
+    }
+
+    public List<Integer> queryForListInteger(String sql) throws DataAccessException {
+        return this.queryForListObject(sql, Integer.class);
+    }
+
+    public List<Integer> queryForListInteger(String sql, JSObject js) throws DataAccessException {
+        return this.queryForListObject(sql, js, Integer.class);
+    }
+
+    public List<Long> queryForListLong(String sql) throws DataAccessException {
+        return this.queryForListObject(sql, Long.class);
+    }
+
+    public List<Long> queryForListLong(String sql, JSObject js) throws DataAccessException {
+        return this.queryForListObject(sql, js, Long.class);
+    }
+
+    public List<Float> queryForListFloat(String sql) throws DataAccessException {
+        return this.queryForListObject(sql, Float.class);
+    }
+
+    public List<Float> queryForListFloat(String sql, JSObject js) throws DataAccessException {
+        return this.queryForListObject(sql, js, Float.class);
+    }
+
+    public List<Double> queryForListDouble(String sql) throws DataAccessException {
+        return this.queryForListObject(sql, Double.class);
+    }
+
+    public List<Double> queryForListDouble(String sql, JSObject js) throws DataAccessException {
+        return this.queryForListObject(sql, js, Double.class);
+    }
+
+    public List<String> queryForListString(String sql) throws DataAccessException {
+        return this.queryForListObject(sql, String.class);
+    }
+
+    public List<String> queryForListString(String sql, JSObject js) throws DataAccessException {
+        return this.queryForListObject(sql, js, String.class);
+    }
+
+    public List<Character> queryForListCharacter(String sql) throws DataAccessException {
+        return this.queryForListObject(sql, Character.class);
+    }
+
+    public List<Character> queryForListCharacter(String sql, JSObject js) throws DataAccessException {
+        return this.queryForListObject(sql, js, Character.class);
+    }
+
+    public List<Date> queryForListDate(String sql) throws DataAccessException {
+        return this.queryForListObject(sql, Date.class);
+    }
+
+    public List<Date> queryForListDate(String sql, JSObject js) throws DataAccessException {
+        return this.queryForListObject(sql, js, Date.class);
     }
 
     public int update(String sql) throws DataAccessException {
