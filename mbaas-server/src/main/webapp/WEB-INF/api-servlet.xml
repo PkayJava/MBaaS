@@ -28,6 +28,14 @@
         <mvc:path-matching path-matcher="pathMatcher" suffix-pattern="false" registered-suffixes-only="true"/>
     </mvc:annotation-driven>
 
+    <mvc:interceptors path-matcher="pathMatcher">
+        <ref bean="interceptor"/>
+    </mvc:interceptors>
+
+    <bean id="interceptor" class="com.angkorteam.mbaas.server.spring.ExecutionTimeHandlerInterceptor">
+        <property name="gson" ref="gson"/>
+    </bean>
+
     <mvc:resources mapping="/resource/**" location="file:${resource.repo}/" cache-period="604800">
         <mvc:cache-control cache-private="true" cache-public="true" max-age="604800" no-store="true" no-cache="true"
                            must-revalidate="true" no-transform="true" proxy-revalidate="true" s-maxage="604800"/>

@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
+import com.angkorteam.mbaas.plain.Identity;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.enums.CollectionPermissionEnum;
 import com.angkorteam.mbaas.plain.enums.DocumentPermissionEnum;
@@ -64,12 +65,11 @@ public class DocumentController {
     )
     public ResponseEntity<DocumentCreateResponse> create(
             HttpServletRequest request,
-            @RequestHeader(name = "client_id", required = false) String clientId,
-            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
+            Identity identity,
             @PathVariable("collection") String collection,
             @RequestBody DocumentCreateRequest requestBody
     ) {
-        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
+        LOGGER.info("identity=>{}", gson.toJson(identity));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -79,7 +79,7 @@ public class DocumentController {
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(identity.getMobileId())).fetchOneInto(mobileTable);
         if (mobileRecord == null) {
             errorMessages.put("session", "session invalid");
         }
@@ -260,10 +260,10 @@ public class DocumentController {
         }
 
         if (collectionRecord != null) {
-            if (permission.isAdministratorUser(session)
-                    || permission.isBackOfficeUser(session)
-                    || permission.isCollectionOwner(session, collection)
-                    || permission.hasCollectionPermission(session, collection, CollectionPermissionEnum.Insert.getLiteral())) {
+            if (permission.isAdministratorUser(identity.getMobileId())
+                    || permission.isBackOfficeUser(identity.getMobileId())
+                    || permission.isCollectionOwner(identity.getMobileId(), collection)
+                    || permission.hasCollectionPermission(identity.getMobileId(), collection, CollectionPermissionEnum.Insert.getLiteral())) {
             } else {
                 errorMessages.put("permission", "don't have write permission to this collection");
             }

@@ -4,6 +4,8 @@
 
     <entry key="wicket">DEPLOYMENT</entry>
 
+    <entry key="maintenance">false</entry>
+
     <entry key="temp.jdbc.driver">org.mariadb.jdbc.Driver</entry>
     <entry key="temp.jdbc.url"><![CDATA[jdbc:mariadb://pkayjava.ddns.net:3306/mbaas_temp?createDatabaseIfNotExist=true&autoReconnect=true]]></entry>
     <entry key="temp.jdbc.database">mbaas_temp</entry>

@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.advice;
+package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.response.Response;
@@ -27,11 +27,6 @@ import java.util.Map;
 @ControllerAdvice
 public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseEntityAdvice.class);
-
-    @Autowired
-    private Gson gson;
-
     public ResponseEntityAdvice() {
     }
 
@@ -48,15 +43,18 @@ public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
         if (body == null) {
             responseBody = new UnknownResponse();
             responseBody.setHttpCode(HttpStatus.OK.value());
-            if (responseBody.getResult() == null) {
-                responseBody.setResult(HttpStatus.OK.getReasonPhrase());
-            }
+            responseBody.setResult(HttpStatus.OK.getReasonPhrase());
         } else {
             if (responseBody.getHttpCode() == null) {
                 responseBody.setHttpCode(HttpStatus.OK.value());
+                responseBody.setResult(HttpStatus.OK.getReasonPhrase());
             }
             if (responseBody.getResult() == null) {
-                responseBody.setResult(HttpStatus.valueOf(responseBody.getHttpCode()).getReasonPhrase());
+                try {
+                    responseBody.setResult(HttpStatus.valueOf(responseBody.getHttpCode()).getReasonPhrase());
+                } catch (IllegalArgumentException e) {
+                    responseBody.setResult("Unknown");
+                }
             }
         }
         HttpHeaders httpHeaders = request.getHeaders();
@@ -67,8 +65,6 @@ public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
 
         responseBody.setVersion(configuration.getString(Constants.APP_VERSION));
         responseBody.setMethod(request.getMethod().name());
-
-        LOGGER.info("{}", request.getURI());
 
         return responseBody;
     }

@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.plain.response.UnknownResponse;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.CredentialsExpiredException;
@@ -114,15 +115,12 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             if (ignoreFailure) {
                 chain.doFilter(request, response);
             } else {
-                XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-                UnknownResponse responseBody = new UnknownResponse();
-                responseBody.setVersion(configuration.getString(Constants.APP_VERSION));
-                responseBody.setMethod(request.getMethod());
-                responseBody.setResult(org.springframework.http.HttpStatus.LOCKED.getReasonPhrase());
-                responseBody.setHttpCode(org.springframework.http.HttpStatus.LOCKED.value());
-                response.setContentType("application/json");
+                UnknownResponse responseBody = ResponseUtils.unknownResponse(request, HttpStatus.LOCKED);
+                byte[] json = gson.toJson(responseBody).getBytes();
                 response.setStatus(HttpServletResponse.SC_OK);
-                this.gson.toJson(responseBody, response.getWriter());
+                response.setContentType("application/json");
+                response.setContentLength(json.length);
+                response.getOutputStream().write(json);
             }
             return;
         } catch (AuthenticationException failed) {

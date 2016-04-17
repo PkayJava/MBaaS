@@ -12,6 +12,8 @@ public class Constants {
 
     public static final String KEY = "mbaas.properties.xml";
 
+    public static final String MAINTENANCE = "maintenance";
+
     public static final String WICKET = "wicket";
 
     public static final String TEMP_JDBC_DATABASE = "temp.jdbc.database";

@@ -22,15 +22,12 @@ public class BearerAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        UnknownResponse responseBody = new UnknownResponse();
-        responseBody.setVersion(configuration.getString(Constants.APP_VERSION));
-        responseBody.setMethod(request.getMethod());
-        responseBody.setResult(HttpStatus.FORBIDDEN.getReasonPhrase());
-        responseBody.setHttpCode(HttpStatus.FORBIDDEN.value());
-        response.setContentType("application/json");
+        UnknownResponse responseBody = ResponseUtils.unknownResponse(request, HttpStatus.FORBIDDEN);
+        byte[] json = gson.toJson(responseBody).getBytes();
         response.setStatus(HttpServletResponse.SC_OK);
-        this.gson.toJson(responseBody, response.getWriter());
+        response.setContentType("application/json");
+        response.setContentLength(json.length);
+        response.getOutputStream().write(json);
     }
 
     public Gson getGson() {
