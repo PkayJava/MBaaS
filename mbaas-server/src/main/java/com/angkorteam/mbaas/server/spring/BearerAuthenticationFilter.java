@@ -86,7 +86,18 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response, FilterChain chain) throws IOException,
             ServletException {
-        final boolean debug = logger.isDebugEnabled();
+
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        Boolean maintenance = configuration.getBoolean(Constants.MAINTENANCE, false);
+        if (maintenance) {
+            UnknownResponse responseBody = ResponseUtils.unknownResponse(request, HttpStatus.SERVICE_UNAVAILABLE);
+            byte[] json = gson.toJson(responseBody).getBytes();
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/json");
+            response.setContentLength(json.length);
+            response.getOutputStream().write(json);
+            return;
+        }
 
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
@@ -104,9 +115,6 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
                     .authenticate(authRequest);
             authResult.setAuthenticated(true);
 
-            if (debug) {
-                logger.debug("Authentication success: " + authResult);
-            }
             SecurityContextHolder.getContext().setAuthentication(authResult);
 
             onSuccessfulAuthentication(request, response, authResult);
@@ -125,10 +133,6 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             return;
         } catch (AuthenticationException failed) {
             SecurityContextHolder.clearContext();
-
-            if (debug) {
-                logger.debug("Authentication request for failed: " + failed);
-            }
 
             onUnsuccessfulAuthentication(request, response, failed);
 
