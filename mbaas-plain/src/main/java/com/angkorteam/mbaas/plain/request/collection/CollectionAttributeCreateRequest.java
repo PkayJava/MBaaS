@@ -21,8 +21,20 @@ public class CollectionAttributeCreateRequest {
     private boolean nullable = true;
 
     @Expose
-    @SerializedName("javaType")
-    private String javaType;
+    @SerializedName("eav")
+    private boolean eav = true;
+
+    @Expose
+    @SerializedName("attributeType")
+    private String attributeType;
+
+    public boolean isEav() {
+        return eav;
+    }
+
+    public void setEav(boolean eav) {
+        this.eav = eav;
+    }
 
     public String getCollectionName() {
         return collectionName;
@@ -40,12 +52,12 @@ public class CollectionAttributeCreateRequest {
         this.attributeName = attributeName;
     }
 
-    public String getJavaType() {
-        return javaType;
+    public String getAttributeType() {
+        return attributeType;
     }
 
-    public void setJavaType(String javaType) {
-        this.javaType = javaType;
+    public void setAttributeType(String attributeType) {
+        this.attributeType = attributeType;
     }
 
     public boolean isNullable() {

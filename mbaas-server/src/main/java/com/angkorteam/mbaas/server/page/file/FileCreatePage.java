@@ -9,7 +9,7 @@ import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.FileTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.template.TextFieldPanel;
@@ -30,10 +30,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 
 import java.io.File;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 3/11/16.
@@ -90,26 +87,14 @@ public class FileCreatePage extends MasterPage {
 
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        List<AttributePojo> attributePojos = context.select(attributeTable.fields())
+        List<AttributePojo> attributes = context.select(attributeTable.fields())
                 .from(attributeTable)
-                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                .and(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Boolean.getLiteral())
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Byte.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Short.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Integer.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Long.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Float.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Double.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Character.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.String.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Time.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Date.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.DateTime.getLiteral())))
+                .where(attributeTable.COLLECTION_ID.eq(collectionId))
                 .and(attributeTable.SYSTEM.eq(false))
                 .fetchInto(AttributePojo.class);
 
         RepeatingView fields = new RepeatingView("fields");
-        for (AttributePojo attribute : attributePojos) {
+        for (AttributePojo attribute : attributes) {
             TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
             fields.add(fieldPanel);
         }
@@ -142,12 +127,13 @@ public class FileCreatePage extends MasterPage {
         fields.put(Tables.FILE.EXTENSION.getName(), extension);
         fields.put(Tables.FILE.LENGTH.getName(), length);
         fields.put(Tables.FILE.LABEL.getName(), this.name);
-        final String uuid = DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), collectionRecord.getName(), requestBody);
-        String name = uuid + "_" + this.name;
+        final String documentId = UUID.randomUUID().toString();
+        DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), documentId, collectionRecord.getName(), requestBody);
+        String name = documentId + "_" + this.name;
 
         FileTable fileTable = Tables.FILE.as("fileTable");
         DSLContext context = getDSLContext();
-        context.update(fileTable).set(fileTable.NAME, name).where(fileTable.FILE_ID.eq(uuid)).execute();
+        context.update(fileTable).set(fileTable.NAME, name).where(fileTable.FILE_ID.eq(documentId)).execute();
 
         File container = new File(repo + "/file" + fileRepo);
         container.mkdirs();

@@ -28,10 +28,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 3/20/16.
@@ -139,6 +136,7 @@ public class QueryUserPrivacyManagementPage extends MasterPage implements Action
         context.delete(queryUserPrivacyTable).where(queryUserPrivacyTable.USER_ID.eq(user.getUserId())).and(queryUserPrivacyTable.QUERY_ID.eq(queryId)).execute();
         QueryUserPrivacyRecord queryUserPrivacyRecord = context.newRecord(queryUserPrivacyTable);
         queryUserPrivacyRecord.setUserId(this.user.getUserId());
+        queryUserPrivacyRecord.setQueryUserPrivacyId(UUID.randomUUID().toString());
         queryUserPrivacyRecord.setQueryId(this.queryId);
         Integer permission = 0;
         if (this.modify) {

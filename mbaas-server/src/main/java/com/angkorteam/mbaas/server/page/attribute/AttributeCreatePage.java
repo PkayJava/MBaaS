@@ -20,10 +20,12 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by socheat on 3/8/16.
@@ -39,9 +41,13 @@ public class AttributeCreatePage extends MasterPage {
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
 
-    private String javaType;
-    private DropDownChoice<String> javaTypeField;
-    private TextFeedbackPanel javaTypeFeedback;
+    private String attributeType;
+    private DropDownChoice<String> attributeTypeField;
+    private TextFeedbackPanel attributeTypeFeedback;
+
+    private String eav;
+    private DropDownChoice<String> eavField;
+    private TextFeedbackPanel eavFeedback;
 
     private String nullable;
     private DropDownChoice<String> nullableField;
@@ -77,23 +83,29 @@ public class AttributeCreatePage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        List<String> javaTypes = new ArrayList<>();
+        List<String> attributeTypes = new ArrayList<>();
         for (AttributeTypeEnum attributeTypeEnum : AttributeTypeEnum.values()) {
             if (attributeTypeEnum.isExposed()) {
-                javaTypes.add(attributeTypeEnum.getLiteral());
+                attributeTypes.add(attributeTypeEnum.getLiteral());
             }
         }
-        this.javaTypeField = new DropDownChoice<>("javaTypeField", new PropertyModel<>(this, "javaType"), javaTypes);
-        this.javaTypeField.setRequired(true);
-        this.form.add(this.javaTypeField);
-        this.javaTypeFeedback = new TextFeedbackPanel("javaTypeFeedback", this.javaTypeField);
-        this.form.add(javaTypeFeedback);
+        this.attributeTypeField = new DropDownChoice<>("attributeTypeField", new PropertyModel<>(this, "attributeType"), attributeTypes);
+        this.attributeTypeField.setRequired(true);
+        this.form.add(this.attributeTypeField);
+        this.attributeTypeFeedback = new TextFeedbackPanel("attributeTypeFeedback", this.attributeTypeField);
+        this.form.add(attributeTypeFeedback);
 
         this.nullableField = new DropDownChoice<>("nullableField", new PropertyModel<>(this, "nullable"), Arrays.asList("Yes", "No"));
         this.nullableField.setRequired(true);
         this.form.add(this.nullableField);
         this.nullableFeedback = new TextFeedbackPanel("nullableFeedback", this.nullableField);
         this.form.add(this.nullableFeedback);
+
+        this.eavField = new DropDownChoice<>("eavField", new PropertyModel<>(this, "eav"), Arrays.asList("Yes", "No"));
+        this.eavField.setRequired(true);
+        this.form.add(this.eavField);
+        this.eavFeedback = new TextFeedbackPanel("eavFeedback", this.eavField);
+        this.form.add(this.eavFeedback);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
@@ -107,6 +119,7 @@ public class AttributeCreatePage extends MasterPage {
 
     private void saveButtonOnSubmit(Button button) {
         DSLContext context = getDSLContext();
+        JdbcTemplate jdbcTemplate = getJdbcTemplate();
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
 
         CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
@@ -114,10 +127,11 @@ public class AttributeCreatePage extends MasterPage {
         CollectionAttributeCreateRequest requestBody = new CollectionAttributeCreateRequest();
         requestBody.setAttributeName(this.name);
         requestBody.setNullable("Yes".equals(this.nullable));
-        requestBody.setJavaType(this.javaType);
+        requestBody.setEav("Yes".equals(this.eav));
+        requestBody.setAttributeType(AttributeTypeEnum.valueOf(this.attributeType).getLiteral());
         requestBody.setCollectionName(collectionRecord.getName());
 
-        AttributeFunction.createAttribute(context, requestBody);
+        AttributeFunction.createAttribute(context, jdbcTemplate, UUID.randomUUID().toString(), requestBody);
 
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collectionId);

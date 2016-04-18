@@ -23,9 +23,6 @@ CREATE TABLE mobile (
 
   client_ip               VARCHAR(30),
 
-  extra                   BLOB,
-  -- device_category_{name} : boolean
-
   optimistic              INT(11)      NOT NULL DEFAULT 0,
 
   INDEX (date_created),

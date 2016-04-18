@@ -12,7 +12,7 @@ public class FileAttributeFunction {
 
     public static String createAttribute(DSLContext context, CollectionAttributeCreateRequest requestBody) {
 //        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("UserPrivacyTable");
-        String attributeId = AttributeFunction.createAttribute(context, requestBody);
+//        String attributeId = AttributeFunction.createAttribute(context, requestBody);
 //        UserPrivacyRecord userPrivacyRecord = context.newRecord(userPrivacyTable);
 //        String uuid = UUID.randomUUID().toString();
 //        userPrivacyRecord.setUserPrivacyId(uuid);
@@ -20,7 +20,8 @@ public class FileAttributeFunction {
 //        userPrivacyRecord.setUserId(userId);
 //        userPrivacyRecord.setScope(scope.getLiteral());
 //        userPrivacyRecord.store();
-        return attributeId;
+//        return attributeId;
+        return null;
     }
 
     public static void deleteAttribute(DSLContext context, JdbcTemplate jdbcTemplate, CollectionAttributeDeleteRequest requestBody) {

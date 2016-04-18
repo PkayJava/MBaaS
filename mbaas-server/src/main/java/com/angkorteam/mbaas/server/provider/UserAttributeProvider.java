@@ -19,7 +19,6 @@ import java.util.List;
 public class UserAttributeProvider extends JooqProvider {
 
     private AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-    private AttributeTable masterAttributeTable = Tables.ATTRIBUTE.as("masterAttributeTable");
     private UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 
     private TableLike<?> from;
@@ -32,7 +31,7 @@ public class UserAttributeProvider extends JooqProvider {
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         this.userId = userId;
         this.collectionId = context.select(collectionTable.COLLECTION_ID).from(collectionTable).where(collectionTable.NAME.eq(Tables.USER.getName())).fetchOneInto(String.class);
-        this.from = attributeTable.leftJoin(masterAttributeTable).on(attributeTable.VIRTUAL_ATTRIBUTE_ID.eq(masterAttributeTable.ATTRIBUTE_ID));
+        this.from = attributeTable;
     }
 
     public Field<String> getName() {
@@ -43,37 +42,14 @@ public class UserAttributeProvider extends JooqProvider {
         return this.attributeTable.ATTRIBUTE_ID;
     }
 
-    public Field<String> getJavaType() {
-        return this.attributeTable.JAVA_TYPE;
+    public Field<String> getAttributeType() {
+        return this.attributeTable.ATTRIBUTE_TYPE;
     }
 
-    public Field<String> getSqlType() {
-        return this.attributeTable.SQL_TYPE;
+    public Field<Integer> getExtra() {
+        return this.attributeTable.EXTRA;
     }
 
-    public Field<Boolean> getVirtual() {
-        return this.attributeTable.VIRTUAL;
-    }
-
-    public Field<String> getVirtualAttribute() {
-        return this.masterAttributeTable.NAME.as("masterAttributeName");
-    }
-
-    public Field<Boolean> getSystem() {
-        return this.attributeTable.SYSTEM;
-    }
-
-    public Field<Boolean> getExposed() {
-        return this.attributeTable.EXPOSED;
-    }
-
-    public Field<Boolean> getNullable() {
-        return this.attributeTable.NULLABLE;
-    }
-
-    public Field<Boolean> getAutoIncrement() {
-        return this.attributeTable.AUTO_INCREMENT;
-    }
 
     public Field<String> getUserPrivacyId() {
         DSLContext context = getDSLContext();

@@ -9,8 +9,6 @@ CREATE TABLE asset (
   `extension`   VARCHAR(10),
   `length`      INT(11)      NOT NULL,
 
-  extra         BLOB,
-
   date_created  DATETIME     NOT NULL DEFAULT NOW(),
 
   owner_user_id VARCHAR(100),

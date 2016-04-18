@@ -5,16 +5,10 @@ import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRoleRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
-import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
-import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
-import com.angkorteam.mbaas.server.function.AttributeFunction;
-import com.angkorteam.mbaas.server.function.DocumentFunction;
-import com.angkorteam.mbaas.server.function.MariaDBFunction;
+import com.angkorteam.mbaas.server.function.CommonFunction;
 import com.angkorteam.mbaas.server.validator.ApplicationOAuthRoleValidator;
 import com.angkorteam.mbaas.server.validator.PushApplicationValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -26,7 +20,10 @@ import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by socheat on 3/8/16.
@@ -107,19 +104,7 @@ public class ApplicationCreatePage extends MasterPage {
 
     private void saveButtonOnSubmit(Button button) {
 
-        List<String> oauthRoles = new ArrayList<>();
-        List<String> oauthRolesSave = new ArrayList<>();
-        if (this.oauthRoles != null && !"".equals(this.oauthRoles.trim())) {
-            for (String oauthRole : StringUtils.split(this.oauthRoles, ',')) {
-                String trimmed = oauthRole.trim();
-                if (!"".equals(trimmed)) {
-                    if (!oauthRoles.contains("oauth_role_" + trimmed)) {
-                        oauthRoles.add("oauth_role_" + trimmed);
-                        oauthRolesSave.add(trimmed);
-                    }
-                }
-            }
-        }
+        List<String> oauthRoles = CommonFunction.splitNoneWhite(this.oauthRoles);
 
         DSLContext context = getDSLContext();
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
@@ -135,55 +120,16 @@ public class ApplicationCreatePage extends MasterPage {
         applicationRecord.setPushApplicationId(this.pushApplicationId);
         applicationRecord.setPushMasterSecret(this.pushMasterSecret);
         if (!oauthRoles.isEmpty()) {
-            applicationRecord.setOauthRoles(StringUtils.join(oauthRolesSave, ", "));
+            applicationRecord.setOauthRoles(StringUtils.join(oauthRoles, ", "));
         }
         applicationRecord.store();
 
-        JdbcTemplate jdbcTemplate = getJdbcTemplate();
-
-        {
-            Map<String, Object> attributes = new HashMap<>();
-            Map<String, AttributeTypeEnum> attributeTypeEnums = new HashMap<>();
-            attributes.put("__temp", true);
-            attributeTypeEnums.put("__temp", AttributeTypeEnum.Boolean);
-            jdbcTemplate.update("UPDATE `" + Tables.APPLICATION.getName() + "` SET " + Tables.APPLICATION.EXTRA.getName() + " = " + MariaDBFunction.columnCreate(attributes, attributeTypeEnums) + " WHERE " + Tables.APPLICATION.APPLICATION_ID.getName() + " = ?", applicationRecord.getApplicationId());
-        }
-
-        if (!oauthRoles.isEmpty()) {
-            String collectionId = jdbcTemplate.queryForObject("SELECT " + Tables.COLLECTION.COLLECTION_ID.getName() + " FROM `" + Tables.COLLECTION.getName() + "` WHERE " + Tables.COLLECTION.NAME.getName() + " = ?", String.class, Tables.APPLICATION.getName());
-            Map<String, AttributeRecord> attributeRecords = new HashMap<>();
-            AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-            for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionId)).fetchInto(attributeTable)) {
-                attributeRecords.put(attributeRecord.getName(), attributeRecord);
-            }
-
-            List<String> adds = new ArrayList<>();
-            for (String oauthRole : oauthRoles) {
-                if (!attributeRecords.containsKey(oauthRole)) {
-                    adds.add(oauthRole);
-                }
-            }
-
-            for (String add : adds) {
-                CollectionAttributeCreateRequest request = new CollectionAttributeCreateRequest();
-                request.setCollectionName(Tables.APPLICATION.getName());
-                request.setNullable(true);
-                request.setJavaType(AttributeTypeEnum.Boolean.getLiteral());
-                request.setAttributeName(add);
-                AttributeFunction.createAttribute(context, request);
-            }
-
-            Map<String, Object> attributes = new HashMap<>();
-
-            for (String oauthRole : oauthRoles) {
-                attributes.put(oauthRole, true);
-            }
-
-            if (!attributes.isEmpty()) {
-                DocumentModifyRequest request = new DocumentModifyRequest();
-                request.setDocument(attributes);
-                DocumentFunction.modifyDocument(context, jdbcTemplate, Tables.APPLICATION.getName(), applicationId, request);
-            }
+        for (String oauthRole : oauthRoles) {
+            ApplicationRoleRecord applicationRoleRecord = context.newRecord(Tables.APPLICATION_ROLE);
+            applicationRoleRecord.setApplicationRoleId(UUID.randomUUID().toString());
+            applicationRoleRecord.setApplicationId(applicationId);
+            applicationRoleRecord.setName(oauthRole);
+            applicationRoleRecord.store();
         }
 
         setResponsePage(ApplicationManagementPage.class);

@@ -28,10 +28,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 3/20/16.
@@ -138,6 +135,7 @@ public class CollectionUserPrivacyManagementPage extends MasterPage implements A
         CollectionUserPrivacyTable collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("collectionUserPrivacyTable");
         context.delete(collectionUserPrivacyTable).where(collectionUserPrivacyTable.USER_ID.eq(user.getUserId())).and(collectionUserPrivacyTable.COLLECTION_ID.eq(collectionId)).execute();
         CollectionUserPrivacyRecord collectionUserPrivacyRecord = context.newRecord(collectionUserPrivacyTable);
+        collectionUserPrivacyRecord.setCollectionUserPrivacyId(UUID.randomUUID().toString());
         collectionUserPrivacyRecord.setUserId(this.user.getUserId());
         collectionUserPrivacyRecord.setCollectionId(this.collectionId);
         Integer permission = 0;

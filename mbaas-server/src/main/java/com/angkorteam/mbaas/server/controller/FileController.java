@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by socheat on 4/9/16.
@@ -96,11 +97,12 @@ public class FileController {
         fields.put(Tables.FILE.LABEL.getName(), filename);
         fields.put(Tables.FILE.CLIENT_ID.getName(), identity.getClientId());
 
-        final String uuid = DocumentFunction.insertDocument(context, jdbcTemplate, identity.getUserId(), collectionRecord.getName(), documentCreateRequest);
-        String name = uuid + "_" + filename;
+        final String documentId = UUID.randomUUID().toString();
+        DocumentFunction.insertDocument(context, jdbcTemplate, identity.getUserId(), documentId, collectionRecord.getName(), documentCreateRequest);
+        String name = documentId + "_" + filename;
 
         FileTable fileTable = Tables.FILE.as("fileTable");
-        context.update(fileTable).set(fileTable.NAME, name).where(fileTable.FILE_ID.eq(uuid)).execute();
+        context.update(fileTable).set(fileTable.NAME, name).where(fileTable.FILE_ID.eq(documentId)).execute();
 
         File container = new File(repo + "/file" + fileRepo);
         container.mkdirs();
@@ -111,13 +113,13 @@ public class FileController {
             LOGGER.info(e.getMessage());
         }
 
-        FileRecord fileRecord = context.select(fileTable.fields()).from(fileTable).where(fileTable.FILE_ID.eq(uuid)).fetchOneInto(fileTable);
+        FileRecord fileRecord = context.select(fileTable.fields()).from(fileTable).where(fileTable.FILE_ID.eq(documentId)).fetchOneInto(fileTable);
         StringBuffer address = new StringBuffer();
         address.append(HttpFunction.getHttpAddress(request)).append("/api/resource/file").append(fileRecord.getPath()).append("/").append(fileRecord.getName());
 
         FileCreateResponse response = new FileCreateResponse();
         response.getData().setContentType(mime);
-        response.getData().setFileId(uuid);
+        response.getData().setFileId(documentId);
         response.getData().setFilename(filename);
         response.getData().setAddress(address.toString());
 

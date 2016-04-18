@@ -6,7 +6,6 @@ CREATE TABLE `collection` (
 
   locked        BIT(1)       NOT NULL DEFAULT 0,
   system        BIT(1)       NOT NULL DEFAULT 0,
-  reference     BIT(1)       NOT NULL DEFAULT 0,
 
   owner_user_id VARCHAR(100),
 

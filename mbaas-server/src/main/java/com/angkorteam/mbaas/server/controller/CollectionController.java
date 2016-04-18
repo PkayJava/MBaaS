@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
+import com.angkorteam.mbaas.plain.Identity;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.enums.CollectionPermissionEnum;
 import com.angkorteam.mbaas.plain.request.collection.*;
@@ -29,10 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -64,11 +62,9 @@ public class CollectionController {
     )
     public ResponseEntity<CollectionCreateResponse> create(
             HttpServletRequest request,
-            @RequestHeader(name = "client_id", required = false) String clientId,
-            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
+            Identity identity,
             @RequestBody CollectionCreateRequest requestBody
     ) throws SQLException {
-        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -85,20 +81,20 @@ public class CollectionController {
             }
         }
 
-        if (permission.isAdministratorUser(session)
-                || permission.isBackOfficeUser(session)) {
+        if (permission.isAdministratorUser(identity.getMobileId())
+                || permission.isBackOfficeUser(identity.getMobileId())) {
         } else {
             errorMessages.put("collectionName", "you are not allow to create new collection");
         }
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
-        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(session)).fetchOneInto(mobileTable);
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.MOBILE_ID.eq(identity.getMobileId())).fetchOneInto(mobileTable);
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
 
         String primaryName = requestBody.getCollectionName() + "_id";
-        List<String> systemAttributes = Arrays.asList(primaryName, configuration.getString(Constants.JDBC_COLUMN_DELETED), configuration.getString(Constants.JDBC_COLUMN_EXTRA), configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
+        List<String> systemAttributes = Arrays.asList(primaryName, configuration.getString(Constants.JDBC_COLUMN_DELETED), configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
 
         Pattern patternAttributeName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_ATTRIBUTE_NAME));
 
@@ -108,23 +104,6 @@ public class CollectionController {
             } else {
                 if (systemAttributes.contains(attribute.getName())) {
                     errorMessages.put(attribute.getName(), "overridden system field");
-                }
-                if (attribute.getJavaType() == null || "".equals(attribute.getJavaType())) {
-                    errorMessages.put(attribute.getName(), "javaType is required");
-                }
-                if (!attribute.getJavaType().equals(AttributeTypeEnum.Boolean.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.Byte.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.Short.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.Integer.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.Long.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.Float.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.Double.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.Character.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.String.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.Time.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.Date.getLiteral())
-                        && !attribute.getJavaType().equals(AttributeTypeEnum.DateTime.getLiteral())) {
-                    errorMessages.put(attribute.getName(), "javaType is not support");
                 }
             }
         }
@@ -205,32 +184,13 @@ public class CollectionController {
             }
         }
 
-        if (requestBody.getJavaType() == null || "".equals(requestBody.getJavaType())) {
+        if (requestBody.getAttributeType() == null || "".equals(requestBody.getAttributeType())) {
             errorMessages.put("javaType", "is required");
         } else {
-            if (!requestBody.getJavaType().equals(AttributeTypeEnum.Integer.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.Double.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.Float.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.Byte.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.Short.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.Long.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.Boolean.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.Character.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.Date.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.Time.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.DateTime.getLiteral())
-                    && !requestBody.getJavaType().equals(AttributeTypeEnum.String.getLiteral())) {
+            try {
+                AttributeTypeEnum.valueOf(requestBody.getAttributeType());
+            } catch (IllegalArgumentException e) {
                 errorMessages.put("javaType", "is not allow");
-            }
-        }
-
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-
-        AttributeRecord virtualRecord = null;
-        if (collectionRecord != null) {
-            virtualRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.NAME.eq(configuration.getString(Constants.JDBC_COLUMN_EXTRA))).and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTable);
-            if (virtualRecord == null) {
-                errorMessages.put("collectionName", "does not support dynamic column");
             }
         }
 
@@ -241,7 +201,7 @@ public class CollectionController {
             return ResponseEntity.ok(response);
         }
 
-        AttributeFunction.createAttribute(context, requestBody);
+        AttributeFunction.createAttribute(context, jdbcTemplate, UUID.randomUUID().toString(), requestBody);
 
         CollectionAttributeCreateResponse response = new CollectionAttributeCreateResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());
@@ -267,14 +227,7 @@ public class CollectionController {
         LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        PrimaryTable primaryTable = Tables.PRIMARY.as("primaryTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        AttributeTable attributeTables = Tables.ATTRIBUTE.as("attributeTables");
-        CollectionUserPrivacyTable collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("CollectionROlePrivacyTable");
-        CollectionRolePrivacyTable collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
-        DocumentUserPrivacyTable documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
-        DocumentRolePrivacyTable documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
-        IndexTable indexTable = Tables.INDEX.as("indexTable");
 
         CollectionRecord collectionRecord = null;
         if (requestBody.getCollectionName() == null || "".equals(requestBody.getCollectionName())) {

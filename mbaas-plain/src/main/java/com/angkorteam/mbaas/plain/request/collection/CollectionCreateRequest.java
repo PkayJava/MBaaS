@@ -46,8 +46,8 @@ public class CollectionCreateRequest {
         private boolean nullable = true;
 
         @Expose
-        @SerializedName("javaType")
-        private String javaType;
+        @SerializedName("attributeType")
+        private String attributeType;
 
         public String getName() {
             return name;
@@ -65,12 +65,12 @@ public class CollectionCreateRequest {
             this.nullable = nullable;
         }
 
-        public String getJavaType() {
-            return javaType;
+        public String getAttributeType() {
+            return attributeType;
         }
 
-        public void setJavaType(String javaType) {
-            this.javaType = javaType;
+        public void setAttributeType(String attributeType) {
+            this.attributeType = attributeType;
         }
     }
 }

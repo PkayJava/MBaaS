@@ -16,7 +16,6 @@ import java.util.List;
 public class AttributeProvider extends JooqProvider {
 
     private AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-    private AttributeTable masterAttributeTable = Tables.ATTRIBUTE.as("masterAttributeTable");
 
     private TableLike<?> from;
 
@@ -24,7 +23,7 @@ public class AttributeProvider extends JooqProvider {
 
     public AttributeProvider(String collectionId) {
         this.collectionId = collectionId;
-        this.from = attributeTable.leftJoin(masterAttributeTable).on(attributeTable.VIRTUAL_ATTRIBUTE_ID.eq(masterAttributeTable.ATTRIBUTE_ID));
+        this.from = attributeTable;
     }
 
     public Field<String> getName() {
@@ -35,40 +34,20 @@ public class AttributeProvider extends JooqProvider {
         return this.attributeTable.ATTRIBUTE_ID;
     }
 
-    public Field<String> getJavaType() {
-        return this.attributeTable.JAVA_TYPE;
-    }
-
-    public Field<String> getSqlType() {
-        return this.attributeTable.SQL_TYPE;
-    }
-
-    public Field<String> getVisibility() {
-        return this.attributeTable.VISIBILITY;
-    }
-
-    public Field<Boolean> getVirtual() {
-        return this.attributeTable.VIRTUAL;
-    }
-
-    public Field<String> getVirtualAttribute() {
-        return this.masterAttributeTable.NAME.as("masterAttributeName");
+    public Field<String> getAttributeType() {
+        return this.attributeTable.ATTRIBUTE_TYPE;
     }
 
     public Field<Boolean> getSystem() {
         return this.attributeTable.SYSTEM;
     }
 
-    public Field<Boolean> getExposed() {
-        return this.attributeTable.EXPOSED;
+    public Field<Integer> getExtra() {
+        return this.attributeTable.EXTRA;
     }
 
-    public Field<Boolean> getNullable() {
-        return this.attributeTable.NULLABLE;
-    }
-
-    public Field<Boolean> getAutoIncrement() {
-        return this.attributeTable.AUTO_INCREMENT;
+    public Field<String> getVisibility() {
+        return this.attributeTable.VISIBILITY;
     }
 
     @Override

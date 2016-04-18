@@ -5,7 +5,6 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.*;
-import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import okhttp3.OkHttpClient;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -186,10 +185,6 @@ public class ApplicationContext implements ServletContextListener {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         UserTable userTable = Tables.USER.as("userTable");
         RoleTable roleTable = Tables.ROLE.as("roleTable");
-        Map<String, AttributeTypeEnum> typeEnums = new HashMap<>();
-        typeEnums.put("__temp", AttributeTypeEnum.Boolean);
-        Map<String, Object> temp = new LinkedHashMap<>();
-        temp.put("__temp", true);
 
         UserRecord adminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
         if (adminRecord == null) {
@@ -209,7 +204,6 @@ public class ApplicationContext implements ServletContextListener {
             adminRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
             adminRecord.store();
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
-            jdbcTemplate.update("UPDATE " + Tables.USER.getName() + " SET " + userTable.EXTRA.getName() + " = " + MariaDBFunction.columnCreate(temp, typeEnums) + " WHERE " + userTable.USER_ID.getName() + " = ?", uuid);
         }
 
         UserRecord mbaasRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_MBAAS))).fetchOneInto(userTable);
@@ -230,7 +224,6 @@ public class ApplicationContext implements ServletContextListener {
             mbaasRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
             mbaasRecord.store();
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_MBAAS_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
-            jdbcTemplate.update("UPDATE " + Tables.USER.getName() + " SET " + userTable.EXTRA.getName() + " = " + MariaDBFunction.columnCreate(temp, typeEnums) + " WHERE " + userTable.USER_ID.getName() + " = ?", uuid);
         }
 
         UserRecord internalAdminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_INTERNAL_ADMIN))).fetchOneInto(userTable);
@@ -251,7 +244,6 @@ public class ApplicationContext implements ServletContextListener {
             internalAdminRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
             internalAdminRecord.store();
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_INTERNAL_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
-            jdbcTemplate.update("UPDATE " + Tables.USER.getName() + " SET " + userTable.EXTRA.getName() + " = " + MariaDBFunction.columnCreate(temp, typeEnums) + " WHERE " + userTable.USER_ID.getName() + " = ?", uuid);
         }
     }
 
@@ -287,8 +279,6 @@ public class ApplicationContext implements ServletContextListener {
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        PrimaryTable primaryTable = Tables.PRIMARY.as("primaryTable");
-        IndexTable indexTable = Tables.INDEX.as("indexTable");
         UserTable userTable = Tables.USER.as("userTable");
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
@@ -309,20 +299,23 @@ public class ApplicationContext implements ServletContextListener {
                     collectionRecord.setCollectionId(UUID.randomUUID().toString());
                     collectionRecord.setName(table.getName());
                     collectionRecord.setSystem(true);
-                    if (table.getName().equals("user")) {
-                        collectionRecord.setReference(false);
-                    } else {
-                        collectionRecord.setReference(true);
-                    }
                     collectionRecord.setOwnerUserId(userRecord.getUserId());
                     collectionRecord.store();
                 }
                 List<AttributeRecord> temporaryAttributeRecords = context.select(attributeTable.fields()).from(attributeTable)
                         .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                        .and(attributeTable.VIRTUAL.eq(false))
                         .fetchInto(attributeTable);
                 Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
                 for (AttributeRecord attributeRecord : temporaryAttributeRecords) {
+                    int extra = attributeRecord.getExtra();
+                    if (AttributeExtraEnum.PRIMARY == (extra & AttributeExtraEnum.PRIMARY)) {
+                        extra = extra - AttributeExtraEnum.PRIMARY;
+                    }
+                    if (AttributeExtraEnum.INDEX == (extra & AttributeExtraEnum.INDEX)) {
+                        extra = extra - AttributeExtraEnum.INDEX;
+                    }
+                    attributeRecord.setExtra(extra);
+                    attributeRecord.update();
                     attributeRecords.put(attributeRecord.getName(), attributeRecord);
                 }
                 {
@@ -330,62 +323,123 @@ public class ApplicationContext implements ServletContextListener {
                     while (resultSet.next()) {
                         String columnName = resultSet.getString(ColumnEnum.COLUMN_NAME.getLiteral());
                         if (!attributeRecords.containsKey(columnName)) {
+                            int extra = 0;
                             AttributeRecord attributeRecord = context.newRecord(attributeTable);
                             attributeRecord.setAttributeId(UUID.randomUUID().toString());
                             attributeRecord.setCollectionId(collectionRecord.getCollectionId());
                             attributeRecord.setName(columnName);
-                            attributeRecord.setNullable(resultSet.getBoolean(ColumnEnum.NULLABLE.getLiteral()));
+                            if (resultSet.getBoolean(ColumnEnum.NULLABLE.getLiteral())) {
+                                extra = extra | AttributeExtraEnum.NULLABLE;
+                            }
                             if (columnName.equals(collectionRecord.getName() + "_id")) {
-                                attributeRecord.setAutoIncrement(true);
+                                extra = extra | AttributeExtraEnum.AUTO_INCREMENT;
                                 attributeRecord.setVisibility(VisibilityEnum.Shown.getLiteral());
                             } else {
-                                attributeRecord.setAutoIncrement(false);
                                 attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
                             }
+                            extra = extra | AttributeExtraEnum.EXPOSED;
                             attributeRecord.setSystem(true);
-                            attributeRecord.setVirtual(false);
+                            attributeRecord.setEav(false);
+                            attributeRecord.setExtra(extra);
 
                             int dataType = resultSet.getInt(ColumnEnum.DATA_TYPE.getLiteral());
+                            int columnSize = resultSet.getInt(ColumnEnum.COLUMN_SIZE.getLiteral());
                             String typeName = resultSet.getString(ColumnEnum.TYPE_NAME.getLiteral());
 
-                            if (dataType == Types.LONGVARBINARY) {
-                                attributeRecord.setExposed(false);
-                            } else {
-                                attributeRecord.setExposed(true);
-                            }
+                            String errorMessage = "collection " + table.getName() + ", attribute " + columnName + " dataType " + dataType + ",  typeName " + typeName + ", columnSize " + columnSize;
 
-                            if (dataType == Types.BIT || dataType == Types.BOOLEAN) {
-                                attributeRecord.setJavaType(AttributeTypeEnum.Boolean.getLiteral());
-                                attributeRecord.setSqlType(typeName);
+                            boolean handled = false;
+
+                            if (dataType == Types.BIT) {
+                                if ("BIT".equals(typeName)) {
+                                    if (columnSize == 1) {
+                                        attributeRecord.setAttributeType(AttributeTypeEnum.Boolean.getLiteral());
+                                        handled = true;
+                                    } else {
+                                        attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                        handled = true;
+                                    }
+                                } else if ("TINYINT".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                    handled = true;
+                                }
+                            } else if (dataType == Types.TINYINT) {
+                                if ("TINYINT".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                    handled = true;
+                                }
+                            } else if (dataType == Types.SMALLINT) {
+                                if ("SMALLINT".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                    handled = true;
+                                }
+                            } else if (dataType == Types.BOOLEAN) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Boolean.getLiteral());
                             } else if (dataType == Types.INTEGER) {
-                                attributeRecord.setJavaType(AttributeTypeEnum.Integer.getLiteral());
-                                attributeRecord.setSqlType(typeName);
-                            } else if (dataType == Types.DOUBLE || dataType == Types.DECIMAL) {
-                                attributeRecord.setJavaType(AttributeTypeEnum.Double.getLiteral());
-                                attributeRecord.setSqlType(typeName);
-                            } else if (dataType == Types.VARCHAR) {
-                                attributeRecord.setJavaType(AttributeTypeEnum.String.getLiteral());
-                                attributeRecord.setSqlType(typeName);
-                            } else if (dataType == Types.CHAR) {
-                                attributeRecord.setJavaType(AttributeTypeEnum.Character.getLiteral());
-                                attributeRecord.setSqlType(typeName);
+                                if ("INT".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                    handled = true;
+                                } else if ("MEDIUMINT".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                    handled = true;
+                                }
+                            } else if (dataType == Types.BIGINT) {
+                                if ("BIGINT".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                    handled = true;
+                                }
+                            } else if (dataType == Types.REAL) {
+                                if ("FLOAT".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Float.getLiteral());
+                                    handled = true;
+                                }
+                            } else if (dataType == Types.DOUBLE) {
+                                if ("DOUBLE".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Double.getLiteral());
+                                    handled = true;
+                                }
+                            } else if (dataType == Types.DECIMAL) {
+                                if ("DECIMAL".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Double.getLiteral());
+                                    handled = true;
+                                }
+                            } else if ((dataType == Types.CHAR && "CHAR".equals(typeName)) || (dataType == Types.VARCHAR && "VARCHAR".equals(typeName))) {
+                                if (columnSize > 255) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Text.getLiteral());
+                                    handled = true;
+                                } else if (columnSize > 1) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.String.getLiteral());
+                                    handled = true;
+                                } else {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Character.getLiteral());
+                                    handled = true;
+                                }
                             } else if (dataType == Types.TIMESTAMP) {
-                                attributeRecord.setJavaType(AttributeTypeEnum.DateTime.getLiteral());
-                                attributeRecord.setSqlType(typeName);
+                                if ("DATETIME".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.DateTime.getLiteral());
+                                    handled = true;
+                                } else if ("TIMESTAMP".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.DateTime.getLiteral());
+                                    handled = true;
+                                }
                             } else if (dataType == Types.DATE) {
-                                attributeRecord.setJavaType(AttributeTypeEnum.Date.getLiteral());
-                                attributeRecord.setSqlType(typeName);
+                                if ("DATE".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Date.getLiteral());
+                                    handled = true;
+                                }
                             } else if (dataType == Types.TIME) {
-                                attributeRecord.setJavaType(AttributeTypeEnum.Time.getLiteral());
-                                attributeRecord.setSqlType(typeName);
-                            } else if (dataType == Types.LONGVARBINARY) {
-                                attributeRecord.setJavaType(AttributeTypeEnum.Blob.getLiteral());
-                                attributeRecord.setSqlType(typeName);
-                            } else if (typeName.equals("TEXT")) {
-                                attributeRecord.setJavaType(AttributeTypeEnum.String.getLiteral());
-                                attributeRecord.setSqlType(typeName);
-                            } else {
-                                throw new WicketRuntimeException("field type unknown " + dataType + " => " + typeName);
+                                if ("TIME".equals(typeName)) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Time.getLiteral());
+                                    handled = true;
+                                }
+                            } else if (dataType == Types.LONGVARCHAR) {
+                                if (typeName.equals("TEXT")) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Text.getLiteral());
+                                    handled = true;
+                                }
+                            }
+                            if (!handled) {
+                                throw new WicketRuntimeException(errorMessage);
                             }
                             attributeRecord.store();
                         } else {
@@ -399,61 +453,17 @@ public class ApplicationContext implements ServletContextListener {
                             .execute();
                 }
                 {
-                    Map<String, AttributeRecord> blobRecords = new LinkedHashMap<>();
-                    for (AttributeRecord blobRecord : context.select(attributeTable.fields()).from(attributeTable)
-                            .where(attributeTable.SQL_TYPE.eq("BLOB"))
-                            .and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                            .and(attributeTable.VIRTUAL.eq(false))
-                            .fetchInto(attributeTable)) {
-                        blobRecords.put(blobRecord.getAttributeId(), blobRecord);
-                    }
-                    if (blobRecords == null || blobRecords.isEmpty()) {
-                        context.delete(attributeTable)
-                                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                                .and(attributeTable.VIRTUAL.eq(true))
-                                .execute();
-                    } else {
-                        List<AttributeRecord> virtualRecords = context.select(attributeTable.fields()).from(attributeTable)
-                                .where(attributeTable.VIRTUAL.eq(true))
-                                .and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                                .fetchInto(attributeTable);
-                        for (AttributeRecord virtualRecord : virtualRecords) {
-                            if (!blobRecords.containsKey(virtualRecord.getVirtualAttributeId())) {
-                                context.delete(attributeTable)
-                                        .where(attributeTable.ATTRIBUTE_ID.eq(virtualRecord.getAttributeId()))
-                                        .execute();
-                            }
-                        }
-                    }
-                }
-                {
                     ResultSet resultSet = databaseMetaData.getPrimaryKeys(null, null, table.getName());
                     while (resultSet.next()) {
                         String columnName = resultSet.getString(PrimaryKeyEnum.COLUMN_NAME.getLiteral());
                         AttributeRecord attributeRecord = context.select(attributeTable.fields()).from(attributeTable)
                                 .where(attributeTable.NAME.eq(columnName))
                                 .and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                                .and(attributeTable.VIRTUAL.eq(false))
                                 .fetchOneInto(attributeTable);
-                        PrimaryRecord primaryRecord = context.select(primaryTable.fields()).from(primaryTable)
-                                .where(primaryTable.ATTRIBUTE_ID.eq(attributeRecord.getAttributeId()))
-                                .and(primaryTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                                .fetchOneInto(primaryTable);
-                        if (primaryRecord == null) {
-                            primaryRecord = context.newRecord(primaryTable);
-                            primaryRecord.setAttributeId(attributeRecord.getAttributeId());
-                            primaryRecord.setCollectionId(collectionRecord.getCollectionId());
-                            primaryRecord.store();
-                        }
+                        int extra = attributeRecord.getExtra() | AttributeExtraEnum.PRIMARY;
+                        attributeRecord.setExtra(extra);
+                        attributeRecord.update();
                     }
-                }
-                List<IndexRecord> temporaryIndexRecords = context.select(indexTable.fields()).from(indexTable)
-                        .where(indexTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                        .fetchInto(indexTable);
-                Map<String, IndexRecord> indexRecords = new LinkedHashMap<>();
-                for (IndexRecord indexRecord : temporaryIndexRecords) {
-                    String key = collectionRecord.getCollectionId() + indexRecord.getName() + indexRecord.getAttributeId();
-                    indexRecords.put(key, indexRecord);
                 }
                 {
                     ResultSet resultSet = databaseMetaData.getIndexInfo(null, null, table.getName(), false, false);
@@ -468,25 +478,10 @@ public class ApplicationContext implements ServletContextListener {
                                 .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
                                 .and(attributeTable.NAME.eq(columnName))
                                 .fetchOneInto(attributeTable);
-                        String key = collectionRecord.getCollectionId() + indexName + attributeRecord.getAttributeId();
-                        if (!indexRecords.containsKey(key)) {
-                            IndexRecord indexRecord = context.newRecord(indexTable);
-                            indexRecord.setIndexId(UUID.randomUUID().toString());
-                            indexRecord.setCollectionId(collectionRecord.getCollectionId());
-                            indexRecord.setAttributeId(attributeRecord.getAttributeId());
-                            indexRecord.setName(indexName);
-                            indexRecord.setType(resultSet.getInt(IndexInfoEnum.TYPE.getLiteral()));
-                            indexRecord.setUnique(!resultSet.getBoolean(IndexInfoEnum.NON_UNIQUE.getLiteral()));
-                            indexRecord.store();
-                        } else {
-                            indexRecords.remove(key);
-                        }
+                        int extra = attributeRecord.getExtra();
+                        attributeRecord.setExtra(extra | AttributeExtraEnum.INDEX);
+                        attributeRecord.update();
                     }
-                }
-                for (Map.Entry<String, IndexRecord> entry : indexRecords.entrySet()) {
-                    context.delete(indexTable)
-                            .where(indexTable.INDEX_ID.eq(entry.getValue().getIndexId()))
-                            .execute();
                 }
             }
         } catch (SQLException e) {

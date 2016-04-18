@@ -8,7 +8,7 @@ import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.template.TextFieldPanel;
@@ -23,6 +23,7 @@ import org.jooq.DSLContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by socheat on 3/7/16.
@@ -55,26 +56,14 @@ public class DocumentCreatePage extends MasterPage {
 
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        List<AttributePojo> attributePojos = context.select(attributeTable.fields())
+        List<AttributePojo> attributes = context.select(attributeTable.fields())
                 .from(attributeTable)
                 .where(attributeTable.COLLECTION_ID.eq(collectionId))
-                .and(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Boolean.getLiteral())
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Byte.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Short.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Integer.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Long.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Float.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Double.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Character.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.String.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Time.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Date.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.DateTime.getLiteral())))
                 .and(attributeTable.SYSTEM.eq(false))
                 .fetchInto(AttributePojo.class);
 
         RepeatingView fields = new RepeatingView("fields");
-        for (AttributePojo attribute : attributePojos) {
+        for (AttributePojo attribute : attributes) {
             TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
             fields.add(fieldPanel);
         }
@@ -99,7 +88,8 @@ public class DocumentCreatePage extends MasterPage {
         CollectionRecord collectionRecord = getDSLContext().select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
         DocumentCreateRequest requestBody = new DocumentCreateRequest();
         requestBody.setDocument(fields);
-        DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), collectionRecord.getName(), requestBody);
+        String documentId = UUID.randomUUID().toString();
+        DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), documentId, collectionRecord.getName(), requestBody);
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", collectionId);
         setResponsePage(DocumentManagementPage.class, parameters);

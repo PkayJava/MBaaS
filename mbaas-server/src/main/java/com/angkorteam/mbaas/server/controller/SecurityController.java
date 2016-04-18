@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
+import com.angkorteam.mbaas.plain.Identity;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.security.SecurityLogoutRequest;
@@ -12,6 +13,7 @@ import com.angkorteam.mbaas.plain.response.security.SecurityLoginResponse;
 import com.angkorteam.mbaas.plain.response.security.SecurityLogoutResponse;
 import com.angkorteam.mbaas.plain.response.security.SecurityLogoutSessionResponse;
 import com.angkorteam.mbaas.plain.response.security.SecuritySignUpResponse;
+import com.angkorteam.mbaas.server.MBaaS;
 import com.angkorteam.mbaas.server.function.UserFunction;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -42,7 +44,7 @@ import java.util.regex.Pattern;
 @RequestMapping(path = "/security")
 public class SecurityController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MBaaS.class);
 
     @Autowired
     private DSLContext context;
@@ -61,9 +63,9 @@ public class SecurityController {
     )
     public ResponseEntity<SecuritySignUpResponse> signup(
             HttpServletRequest request,
+            Identity identity,
             @RequestBody SecuritySignUpRequest requestBody
     ) {
-        LOGGER.info("{} body=>{}", request.getRequestURL(), gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -105,170 +107,6 @@ public class SecurityController {
             errorMessages.put("password", "is required");
         }
 
-        // begin field duplication check
-        Map<String, Object> fields = new LinkedHashMap<>();
-        if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
-            requestBody.getVisibleByAnonymousUsers().entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {
-                if (fields.containsKey(entry.getKey())) {
-                    errorMessages.put(entry.getKey(), "overridden other field");
-                } else {
-                    fields.put(entry.getKey(), entry.getValue());
-                }
-            });
-        }
-        if (requestBody.getVisibleByFriends() != null && !requestBody.getVisibleByFriends().isEmpty()) {
-            requestBody.getVisibleByFriends().entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {
-                if (fields.containsKey(entry.getKey())) {
-                    errorMessages.put(entry.getKey(), "overridden other field");
-                } else {
-                    fields.put(entry.getKey(), entry.getValue());
-                }
-            });
-        }
-        if (requestBody.getVisibleByRegisteredUsers() != null && !requestBody.getVisibleByRegisteredUsers().isEmpty()) {
-            requestBody.getVisibleByRegisteredUsers().entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {
-                if (fields.containsKey(entry.getKey())) {
-                    errorMessages.put(entry.getKey(), "overridden other field");
-                } else {
-                    fields.put(entry.getKey(), entry.getValue());
-                }
-            });
-        }
-        if (requestBody.getVisibleByTheUser() != null && !requestBody.getVisibleByTheUser().isEmpty()) {
-            requestBody.getVisibleByTheUser().entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {
-                if (fields.containsKey(entry.getKey())) {
-                    errorMessages.put(entry.getKey(), "overridden other field");
-                } else {
-                    fields.put(entry.getKey(), entry.getValue());
-                }
-            });
-        }
-        // finish field duplication check
-        Pattern patternAttributeName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_ATTRIBUTE_NAME));
-        for (Map.Entry<String, Object> field : fields.entrySet()) {
-            String name = field.getKey();
-            if (!patternAttributeName.matcher(name).matches()) {
-                errorMessages.put(name, "bad name");
-            }
-        }
-
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.USER.getName())).fetchOneInto(collectionTable);
-        List<AttributeRecord> attributeRecords = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable);
-
-        // begin field type validation
-        for (AttributeRecord attributeRecord : attributeRecords) {
-            Object object = fields.get(attributeRecord.getName());
-            if (object != null) {
-                AttributeTypeEnum attributeTypeEnum = AttributeTypeEnum.valueOf(attributeRecord.getJavaType());
-                if (attributeTypeEnum == AttributeTypeEnum.Boolean) {
-                    if (object instanceof Boolean) {
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be boolean");
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.Byte) {
-                    if (object instanceof Byte) {
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be byte");
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.Short) {
-                    if (object instanceof Short) {
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be short");
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.Integer) {
-                    if (object instanceof Integer) {
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be integer");
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.Long) {
-                    if (object instanceof Long) {
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be long");
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.Float) {
-                    if (object instanceof Float) {
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be float");
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.Double) {
-                    if (object instanceof Double) {
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be double");
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.Character) {
-                    if (object instanceof Character) {
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be char or character");
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.String) {
-                    if (object instanceof String) {
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be string");
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.Time) {
-                    if (object instanceof Date) {
-                    } else if (object instanceof String) {
-                        DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_TIME));
-                        Date value = null;
-                        try {
-                            value = dateFormat.parse((String) object);
-                        } catch (ParseException e) {
-                            dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
-                            try {
-                                value = dateFormat.parse((String) object);
-                            } catch (ParseException e1) {
-                            }
-                        }
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be date or string format " + configuration.getString(Constants.PATTERN_TIME));
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.Date) {
-                    if (object instanceof Date) {
-                    } else if (object instanceof String) {
-                        DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATE));
-                        Date value = null;
-                        try {
-                            value = dateFormat.parse((String) object);
-                        } catch (ParseException e) {
-                            dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
-                            try {
-                                value = dateFormat.parse((String) object);
-                            } catch (ParseException e1) {
-                            }
-                        }
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be date or string format " + configuration.getString(Constants.PATTERN_DATE));
-                    }
-                } else if (attributeTypeEnum == AttributeTypeEnum.DateTime) {
-                    if (object instanceof Date) {
-                    } else if (object instanceof String) {
-                        DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
-                        Date value = null;
-                        try {
-                            value = dateFormat.parse((String) object);
-                        } catch (ParseException e) {
-                        }
-                    } else {
-                        errorMessages.put(attributeRecord.getName(), "data type must be date or string format " + configuration.getString(Constants.PATTERN_DATETIME));
-                    }
-                }
-            }
-        }
-        fields.entrySet().stream().filter(entry -> entry.getValue() != null).forEach(entry -> {
-            if (entry.getValue() instanceof Boolean) {
-            } else if (entry.getValue() instanceof Byte) {
-            } else if (entry.getValue() instanceof Short) {
-            } else if (entry.getValue() instanceof Integer) {
-            } else if (entry.getValue() instanceof Long) {
-            } else if (entry.getValue() instanceof Float) {
-            } else if (entry.getValue() instanceof Double) {
-            } else if (entry.getValue() instanceof Character) {
-            } else if (entry.getValue() instanceof String) {
-            } else if (entry.getValue() instanceof Date) {
-            } else {
-                errorMessages.put(entry.getKey(), "data type must be boolean, byte, short, integer, long, float, double, character, string, date ");
-            }
-        });
         // finish type validation
 
         if (!errorMessages.isEmpty()) {
@@ -278,11 +116,18 @@ public class SecurityController {
             return ResponseEntity.ok(response);
         }
 
-        String bearer = UserFunction.createUser(context, jdbcTemplate, request, requestBody);
+        String userId = UUID.randomUUID().toString();
+        boolean good = UserFunction.createUser(userId, context, jdbcTemplate, request, requestBody);
+        if (!good) {
+            SecuritySignUpResponse response = new SecuritySignUpResponse();
+            response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setResult(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+            return ResponseEntity.ok(response);
+        }
 
         SecuritySignUpResponse responseBody = new SecuritySignUpResponse();
 
-        responseBody.getData().setBearer(bearer);
+        responseBody.getData().setUserId(userId);
         responseBody.getData().setLogin(requestBody.getUsername());
 
         return ResponseEntity.ok(responseBody);

@@ -10,6 +10,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.validation.validator.RangeValidator;
+import org.apache.wicket.validation.validator.StringValidator;
 
 import java.util.Date;
 import java.util.Map;
@@ -27,7 +29,7 @@ public class TextFieldPanel extends Panel {
 
     public TextFieldPanel(String id, AttributePojo attribute, Map<String, Object> modelObject) {
         super(id);
-        this.type = attribute.getJavaType();
+        this.type = attribute.getAttributeType();
         this.name = attribute.getName();
         this.fields = modelObject;
     }
@@ -114,11 +116,21 @@ public class TextFieldPanel extends Panel {
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);
             this.add(feedback);
+        } else if (this.type.equals(AttributeTypeEnum.Text.getLiteral())) {
+            Label label = new Label("label", this.name);
+            this.add(label);
+            TextField<String> field = new TextField<>("field", new PropertyModel<>(this.fields, this.name));
+            field.setType(String.class);
+            field.setLabel(JooqUtils.lookup(this.name, getPage()));
+            TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
+            this.add(field);
+            this.add(feedback);
         } else if (this.type.equals(AttributeTypeEnum.String.getLiteral())) {
             Label label = new Label("label", this.name);
             this.add(label);
             TextField<String> field = new TextField<>("field", new PropertyModel<>(this.fields, this.name));
             field.setType(String.class);
+            field.add(StringValidator.maximumLength(255));
             field.setLabel(JooqUtils.lookup(this.name, getPage()));
             TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
             this.add(field);

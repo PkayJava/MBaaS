@@ -9,8 +9,6 @@ import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
-import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
-import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -57,88 +55,29 @@ public class DocumentProvider extends JooqProvider {
         Table<Record> table = DSL.table(this.collectionName);
 
         for (AttributeRecord attributeRecord : attributeRecords) {
-            if (AttributeTypeEnum.Boolean.getLiteral().equals(attributeRecord.getJavaType())) {
-                if (!attributeRecord.getVirtual()) {
-                    boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Boolean.class));
-                } else {
-                    AttributeRecord virtualAttributeRecord = virtualAttributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    Field<Boolean> field = DSL.field(MariaDBFunction.columnGet(collectionRecord.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Boolean.class);
-                    boardField(attributeRecord.getName(), field);
-                }
-            } else if (AttributeTypeEnum.Byte.getLiteral().equals(attributeRecord.getJavaType())) {
-                if (!attributeRecord.getVirtual()) {
-                    boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Byte.class));
-                } else {
-                    AttributeRecord virtualAttributeRecord = virtualAttributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    Field<Byte> field = DSL.field(MariaDBFunction.columnGet(collectionRecord.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Byte.class);
-                    boardField(attributeRecord.getName(), field);
-                }
-            } else if (AttributeTypeEnum.Short.getLiteral().equals(attributeRecord.getJavaType())) {
-                if (!attributeRecord.getVirtual()) {
-                    boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Short.class));
-                } else {
-                    AttributeRecord virtualAttributeRecord = virtualAttributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    Field<Short> field = DSL.field(MariaDBFunction.columnGet(collectionRecord.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Short.class);
-                    boardField(attributeRecord.getName(), field);
-                }
-            } else if (AttributeTypeEnum.Integer.getLiteral().equals(attributeRecord.getJavaType())) {
-                if (!attributeRecord.getVirtual()) {
-                    boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Integer.class));
-                } else {
-                    AttributeRecord virtualAttributeRecord = virtualAttributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    Field<Integer> field = DSL.field(MariaDBFunction.columnGet(collectionRecord.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Integer.class);
-                    boardField(attributeRecord.getName(), field);
-                }
-            } else if (AttributeTypeEnum.Long.getLiteral().equals(attributeRecord.getJavaType())) {
-                if (!attributeRecord.getVirtual()) {
-                    boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Long.class));
-                } else {
-                    AttributeRecord virtualAttributeRecord = virtualAttributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    Field<Long> field = DSL.field(MariaDBFunction.columnGet(collectionRecord.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Long.class);
-                    boardField(attributeRecord.getName(), field);
-                }
-            } else if (AttributeTypeEnum.Float.getLiteral().equals(attributeRecord.getJavaType())) {
-                if (!attributeRecord.getVirtual()) {
-                    boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Float.class));
-                } else {
-                    AttributeRecord virtualAttributeRecord = virtualAttributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    Field<Float> field = DSL.field(MariaDBFunction.columnGet(collectionRecord.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Float.class);
-                    boardField(attributeRecord.getName(), field);
-                }
-            } else if (AttributeTypeEnum.Double.getLiteral().equals(attributeRecord.getJavaType())) {
-                if (!attributeRecord.getVirtual()) {
-                    boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Double.class));
-                } else {
-                    AttributeRecord virtualAttributeRecord = virtualAttributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    Field<Double> field = DSL.field(MariaDBFunction.columnGet(collectionRecord.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Double.class);
-                    boardField(attributeRecord.getName(), field);
-                }
-            } else if (AttributeTypeEnum.Character.getLiteral().equals(attributeRecord.getJavaType())) {
-                if (!attributeRecord.getVirtual()) {
-                    boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Character.class));
-                } else {
-                    AttributeRecord virtualAttributeRecord = virtualAttributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    Field<Character> field = DSL.field(MariaDBFunction.columnGet(collectionRecord.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Character.class);
-                    boardField(attributeRecord.getName(), field);
-                }
-            } else if (AttributeTypeEnum.String.getLiteral().equals(attributeRecord.getJavaType())) {
-                if (!attributeRecord.getVirtual()) {
-                    boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), String.class));
-                } else {
-                    AttributeRecord virtualAttributeRecord = virtualAttributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    Field<String> field = DSL.field(MariaDBFunction.columnGet(collectionRecord.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), String.class);
-                    boardField(attributeRecord.getName(), field);
-                }
-            } else if (AttributeTypeEnum.Time.getLiteral().equals(attributeRecord.getJavaType())
-                    || AttributeTypeEnum.Date.getLiteral().equals(attributeRecord.getJavaType())
-                    || AttributeTypeEnum.DateTime.getLiteral().equals(attributeRecord.getJavaType())) {
-                if (!attributeRecord.getVirtual()) {
-                    boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Date.class));
-                } else {
-                    AttributeRecord virtualAttributeRecord = virtualAttributeRecords.get(attributeRecord.getVirtualAttributeId());
-                    Field<Date> field = DSL.field(MariaDBFunction.columnGet(collectionRecord.getName() + "." + virtualAttributeRecord.getName(), attributeRecord.getName(), attributeRecord.getJavaType()), Date.class);
-                    boardField(attributeRecord.getName(), field);
-                }
+            AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
+            if (AttributeTypeEnum.Boolean == attributeType) {
+                boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Boolean.class));
+            } else if (AttributeTypeEnum.Byte == attributeType) {
+                boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Byte.class));
+            } else if (AttributeTypeEnum.Short == attributeType) {
+                boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Short.class));
+            } else if (AttributeTypeEnum.Integer == attributeType) {
+                boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Integer.class));
+            } else if (AttributeTypeEnum.Long == attributeType) {
+                boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Long.class));
+            } else if (AttributeTypeEnum.Float == attributeType) {
+                boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Float.class));
+            } else if (AttributeTypeEnum.Double == attributeType) {
+                boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Double.class));
+            } else if (AttributeTypeEnum.Character == attributeType) {
+                boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), String.class));
+            } else if (AttributeTypeEnum.String == attributeType) {
+                boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), String.class));
+            } else if (AttributeTypeEnum.Time == attributeType
+                    || AttributeTypeEnum.Date == attributeType
+                    || AttributeTypeEnum.DateTime == attributeType) {
+                boardField(attributeRecord.getName(), DSL.field(collectionRecord.getName() + "." + attributeRecord.getName(), Date.class));
             }
         }
 

@@ -10,11 +10,11 @@ import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
-import com.angkorteam.mbaas.server.template.TextFieldPanel;
 import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
+import com.angkorteam.mbaas.server.template.TextFieldPanel;
 import com.angkorteam.mbaas.server.validator.UserLoginValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -33,6 +33,7 @@ import org.jooq.impl.DSL;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by socheat on 3/1/16.
@@ -117,26 +118,14 @@ public class UserCreatePage extends MasterPage {
 
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        List<AttributePojo> attributePojos = context.select(attributeTable.fields())
+        List<AttributePojo> attributes = context.select(attributeTable.fields())
                 .from(attributeTable)
-                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                .and(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Boolean.getLiteral())
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Byte.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Short.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Integer.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Long.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Float.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Double.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Character.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.String.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Time.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Date.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.DateTime.getLiteral())))
+                .where(attributeTable.COLLECTION_ID.eq(collectionId))
                 .and(attributeTable.SYSTEM.eq(false))
                 .fetchInto(AttributePojo.class);
 
         RepeatingView fields = new RepeatingView("fields");
-        for (AttributePojo attribute : attributePojos) {
+        for (AttributePojo attribute : attributes) {
             TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
             fields.add(fieldPanel);
         }
@@ -155,10 +144,11 @@ public class UserCreatePage extends MasterPage {
         fields.put(Tables.USER.LOGIN.getName(), this.login);
         fields.put(Tables.USER.PASSWORD.getName(), this.password);
         fields.put(Tables.USER.ROLE_ID.getName(), this.role.getRoleId());
-        String uuid = DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), collectionRecord.getName(), requestBody);
+        String documentId = UUID.randomUUID().toString();
+        DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), documentId, collectionRecord.getName(), requestBody);
         DSLContext context = getDSLContext();
         UserTable userTable = Tables.USER.as("userTable");
-        context.update(userTable).set(userTable.PASSWORD, DSL.md5(password)).where(userTable.USER_ID.eq(uuid)).execute();
+        context.update(userTable).set(userTable.PASSWORD, DSL.md5(password)).where(userTable.USER_ID.eq(documentId)).execute();
         setResponsePage(UserManagementPage.class);
     }
 

@@ -7,19 +7,19 @@ import java.io.Serializable;
  */
 public enum AttributeTypeEnum implements Serializable {
 
-    Boolean("Boolean", java.lang.Boolean.class.getName(), "BIT"),
-    Byte("Byte", java.lang.Byte.class.getName(), "INT"),
-    Short("Short", java.lang.Short.class.getName(), "INT"),
-    Integer("Integer", java.lang.Integer.class.getName(), "INT"),
-    Long("Long", java.lang.Long.class.getName(), "INT"),
-    Float("Float", java.lang.Float.class.getName(), "DECIMAL"),
-    Double("Double", java.lang.Double.class.getName(), "DECIMAL"),
-    Character("Character", java.lang.Character.class.getName(), "VARCHAR"),
-    String("String", java.lang.String.class.getName(), "VARCHAR"),
-    Time("Time", java.sql.Time.class.getName(), "DATETIME"),
-    Date("Date", java.sql.Date.class.getName(), "DATETIME"),
-    DateTime("DateTime", java.sql.Timestamp.class.getName(), "DATETIME"),
-    Blob("Blob", java.lang.Byte[].class.getName(), "BLOB", false);
+    Boolean("Boolean", java.lang.Boolean.class.getName(), "BIT(1)"),
+    Byte("Byte", java.lang.Byte.class.getName(), "INT(11)"),
+    Short("Short", java.lang.Short.class.getName(), "INT(11)"),
+    Integer("Integer", java.lang.Integer.class.getName(), "INT(11)"),
+    Long("Long", java.lang.Long.class.getName(), "INT(11)"),
+    Float("Float", java.lang.Float.class.getName(), "DECIMAL(15,4)"),
+    Double("Double", java.lang.Double.class.getName(), "DECIMAL(15,4)"),
+    Character("Character", java.lang.Character.class.getName(), "VARCHAR(1)"),
+    Text("Text", java.lang.String.class.getName(), "TEXT"),
+    String("String", java.lang.String.class.getName(), "VARCHAR(255)"),
+    Time("Time", java.sql.Time.class.getName(), "TIME"),
+    Date("Date", java.sql.Date.class.getName(), "DATE"),
+    DateTime("DateTime", java.sql.Timestamp.class.getName(), "DATETIME");
 
     private final String literal;
 
@@ -56,33 +56,7 @@ public enum AttributeTypeEnum implements Serializable {
         return exposed;
     }
 
-    public static final AttributeTypeEnum parse(Class<?> clazz) {
-        if (clazz == Boolean.class || clazz == boolean.class) {
-            return AttributeTypeEnum.Boolean;
-        } else if (clazz == Byte.class || clazz == byte.class) {
-            return AttributeTypeEnum.Byte;
-        } else if (clazz == Short.class || clazz == Short.class) {
-            return AttributeTypeEnum.Short;
-        } else if (clazz == Integer.class || clazz == int.class) {
-            return AttributeTypeEnum.Integer;
-        } else if (clazz == Long.class || clazz == long.class) {
-            return AttributeTypeEnum.Long;
-        } else if (clazz == Float.class || clazz == float.class) {
-            return AttributeTypeEnum.Float;
-        } else if (clazz == Double.class || clazz == double.class) {
-            return AttributeTypeEnum.Double;
-        } else if (clazz == Character.class || clazz == char.class) {
-            return AttributeTypeEnum.Character;
-        } else if (clazz == String.class) {
-            return AttributeTypeEnum.String;
-        } else if (clazz == java.util.Date.class) {
-            return AttributeTypeEnum.DateTime;
-        } else {
-            throw new IllegalArgumentException("clazz must be byte, short, integer, long, float, double, character, string, date");
-        }
-    }
-
-    public static final AttributeTypeEnum parse(Object object) {
+    public static final AttributeTypeEnum parseExternalAttributeType(Object object) {
         if (object instanceof Boolean) {
             return AttributeTypeEnum.Boolean;
         } else if (object instanceof Byte) {
@@ -101,8 +75,6 @@ public enum AttributeTypeEnum implements Serializable {
             return AttributeTypeEnum.Character;
         } else if (object instanceof String) {
             return AttributeTypeEnum.String;
-        } else if (object instanceof java.util.Date) {
-            return AttributeTypeEnum.DateTime;
         } else {
             throw new IllegalArgumentException("clazz must be byte, short, integer, long, float, double, character, string, date");
         }

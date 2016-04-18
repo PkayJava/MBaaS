@@ -58,9 +58,8 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
         this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
 
         AttributeProvider provider = new AttributeProvider(this.collectionId);
-
-        provider.selectField(String.class, "attributeId");
         provider.selectField(Boolean.class, "system");
+        provider.selectField(String.class, "attributeId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -68,11 +67,9 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
 
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("javaType", this), "javaType", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("sqlType", this), "sqlType", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("virtual", this), "virtual", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("virtualAttribute", this), "virtualAttribute", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("visibility", this), "visibility", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("attributeType", this), "attributeType", provider));
+        columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("extra", this), "extra", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("visibility", this), "visibility", provider));
 
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Show", "Hide", "Delete"));
 

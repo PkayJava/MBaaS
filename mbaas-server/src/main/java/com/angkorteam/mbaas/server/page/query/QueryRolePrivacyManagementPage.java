@@ -28,10 +28,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 3/20/16.
@@ -138,6 +135,7 @@ public class QueryRolePrivacyManagementPage extends MasterPage implements Action
         QueryRolePrivacyTable queryRolePrivacyTable = Tables.QUERY_ROLE_PRIVACY.as("queryRolePrivacyTable");
         context.delete(queryRolePrivacyTable).where(queryRolePrivacyTable.ROLE_ID.eq(role.getRoleId())).and(queryRolePrivacyTable.QUERY_ID.eq(queryId)).execute();
         QueryRolePrivacyRecord queryRolePrivacyRecord = context.newRecord(queryRolePrivacyTable);
+        queryRolePrivacyRecord.setQueryRolePrivacyId(UUID.randomUUID().toString());
         queryRolePrivacyRecord.setRoleId(this.role.getRoleId());
         queryRolePrivacyRecord.setQueryId(this.queryId);
         Integer permission = 0;

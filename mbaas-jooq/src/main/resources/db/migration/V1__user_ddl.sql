@@ -30,8 +30,6 @@ CREATE TABLE user (
   password_reset_token              VARCHAR(255),
   password_reset_token_expired_date DATETIME,
 
-  extra                             BLOB,
-
   deleted                           BIT(1)       NOT NULL DEFAULT 0,
   optimistic                        INT(11)      NOT NULL DEFAULT 0,
 

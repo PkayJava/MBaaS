@@ -28,10 +28,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 3/20/16.
@@ -138,6 +135,7 @@ public class CollectionRolePrivacyManagementPage extends MasterPage implements A
         CollectionRolePrivacyTable collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
         context.delete(collectionRolePrivacyTable).where(collectionRolePrivacyTable.ROLE_ID.eq(role.getRoleId())).and(collectionRolePrivacyTable.COLLECTION_ID.eq(collectionId)).execute();
         CollectionRolePrivacyRecord collectionRolePrivacyRecord = context.newRecord(collectionRolePrivacyTable);
+        collectionRolePrivacyRecord.setCollectionRolePrivacyId(UUID.randomUUID().toString());
         collectionRolePrivacyRecord.setRoleId(this.role.getRoleId());
         collectionRolePrivacyRecord.setCollectionId(this.collectionId);
         Integer permission = 0;

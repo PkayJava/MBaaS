@@ -10,10 +10,9 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.FileRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
-import com.angkorteam.mbaas.server.function.MariaDBFunction;
 import com.angkorteam.mbaas.server.template.TextFieldPanel;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -93,18 +92,6 @@ public class FileModifyPage extends MasterPage {
         List<AttributePojo> attributes = context.select(attributeTable.fields())
                 .from(attributeTable)
                 .where(attributeTable.COLLECTION_ID.eq(collectionId))
-                .and(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Boolean.getLiteral())
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Byte.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Short.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Integer.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Long.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Float.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Double.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Character.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.String.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Time.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.Date.getLiteral()))
-                        .or(attributeTable.JAVA_TYPE.eq(AttributeTypeEnum.DateTime.getLiteral())))
                 .and(attributeTable.SYSTEM.eq(false))
                 .fetchInto(AttributePojo.class);
 
@@ -119,13 +106,7 @@ public class FileModifyPage extends MasterPage {
         for (AttributePojo attribute : attributes) {
             TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
             fields.add(fieldPanel);
-            if (attribute.getVirtual()) {
-                AttributePojo masterAttribute = virtualAttributes.get(attribute.getVirtualAttributeId());
-                String column = MariaDBFunction.columnGet(masterAttribute.getName(), attribute.getName(), attribute.getJavaType(), attribute.getName());
-                selectFields.add(column);
-            } else {
-                selectFields.add(attribute.getName());
-            }
+            selectFields.add(attribute.getName());
         }
 
         if (!selectFields.isEmpty()) {

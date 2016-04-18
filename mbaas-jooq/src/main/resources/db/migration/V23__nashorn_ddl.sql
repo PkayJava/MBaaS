@@ -7,7 +7,6 @@ CREATE TABLE nashorn (
 
   INDEX (security),
   INDEX (date_created),
-
   PRIMARY KEY (nashorn_id)
 
 );

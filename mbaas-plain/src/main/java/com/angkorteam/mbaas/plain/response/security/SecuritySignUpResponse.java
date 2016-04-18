@@ -16,19 +16,19 @@ public class SecuritySignUpResponse extends Response<SecuritySignUpResponse.Body
     public static class Body {
 
         @Expose
-        @SerializedName("bearer")
-        private String bearer;
+        @SerializedName("userId")
+        private String userId;
 
         @Expose
         @SerializedName("login")
         private String login;
 
-        public String getBearer() {
-            return bearer;
+        public String getUserId() {
+            return userId;
         }
 
-        public void setBearer(String bearer) {
-            this.bearer = bearer;
+        public void setUserId(String userId) {
+            this.userId = userId;
         }
 
         public String getLogin() {

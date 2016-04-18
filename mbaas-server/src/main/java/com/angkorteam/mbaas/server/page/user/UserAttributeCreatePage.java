@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -36,9 +37,9 @@ public class UserAttributeCreatePage extends MasterPage {
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
 
-    private String javaType;
-    private DropDownChoice<String> javaTypeField;
-    private TextFeedbackPanel javaTypeFeedback;
+    private String attributeType;
+    private DropDownChoice<String> attributeTypeField;
+    private TextFeedbackPanel attributeTypeFeedback;
 
     private String nullable;
     private DropDownChoice<String> nullableField;
@@ -75,17 +76,17 @@ public class UserAttributeCreatePage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        List<String> javaTypes = new LinkedList<>();
+        List<String> attributeTypes = new LinkedList<>();
         for (AttributeTypeEnum attributeTypeEnum : AttributeTypeEnum.values()) {
             if (attributeTypeEnum.isExposed()) {
-                javaTypes.add(attributeTypeEnum.getLiteral());
+                attributeTypes.add(attributeTypeEnum.getLiteral());
             }
         }
-        this.javaTypeField = new DropDownChoice<>("javaTypeField", new PropertyModel<>(this, "javaType"), javaTypes);
-        this.javaTypeField.setRequired(true);
-        this.form.add(this.javaTypeField);
-        this.javaTypeFeedback = new TextFeedbackPanel("javaTypeFeedback", this.javaTypeField);
-        this.form.add(javaTypeFeedback);
+        this.attributeTypeField = new DropDownChoice<>("attributeTypeField", new PropertyModel<>(this, "attributeType"), attributeTypes);
+        this.attributeTypeField.setRequired(true);
+        this.form.add(this.attributeTypeField);
+        this.attributeTypeFeedback = new TextFeedbackPanel("attributeTypeFeedback", this.attributeTypeField);
+        this.form.add(attributeTypeFeedback);
 
         List<String> nullables = Arrays.asList("Yes", "No");
         this.nullableField = new DropDownChoice<>("nullableField", new PropertyModel<>(this, "nullable"), nullables);
@@ -113,6 +114,7 @@ public class UserAttributeCreatePage extends MasterPage {
 
     private void saveButtonOnSubmit(Button button) {
         DSLContext context = getDSLContext();
+        JdbcTemplate jdbcTemplate = getJdbcTemplate();
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
 
         CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
@@ -120,7 +122,7 @@ public class UserAttributeCreatePage extends MasterPage {
         CollectionAttributeCreateRequest requestBody = new CollectionAttributeCreateRequest();
         requestBody.setAttributeName(this.name);
         requestBody.setNullable("Yes".equals(this.nullable));
-        requestBody.setJavaType(this.javaType);
+        requestBody.setAttributeType(this.attributeType);
         requestBody.setCollectionName(collectionRecord.getName());
 
         ScopeEnum scope = null;
@@ -130,7 +132,7 @@ public class UserAttributeCreatePage extends MasterPage {
                 break;
             }
         }
-        UserAttributeFunction.createAttribute(context, requestBody, getSession().getUserId(), scope);
+        UserAttributeFunction.createAttribute(context, jdbcTemplate, requestBody, getSession().getUserId(), scope);
 
         setResponsePage(UserAttributeManagementPage.class);
     }

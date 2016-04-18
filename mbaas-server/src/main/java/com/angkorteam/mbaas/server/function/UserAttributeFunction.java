@@ -22,10 +22,11 @@ import java.util.concurrent.Executors;
  */
 public class UserAttributeFunction {
 
-    public static String createAttribute(DSLContext context, CollectionAttributeCreateRequest requestBody, String userId, ScopeEnum scope) {
-        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("UserPrivacyTable");
+    public static String createAttribute(DSLContext context, JdbcTemplate jdbcTemplate, CollectionAttributeCreateRequest requestBody, String userId, ScopeEnum scope) {
+        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
         requestBody.setCollectionName(Tables.USER.getName());
-        String attributeId = AttributeFunction.createAttribute(context, requestBody);
+        String attributeId = UUID.randomUUID().toString();
+        AttributeFunction.createAttribute(context, jdbcTemplate, attributeId, requestBody);
         UserPrivacyRecord userPrivacyRecord = context.newRecord(userPrivacyTable);
         String uuid = UUID.randomUUID().toString();
         userPrivacyRecord.setUserPrivacyId(uuid);

@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by socheat on 4/9/16.
@@ -89,11 +90,12 @@ public class AssetController {
         fields.put(Tables.ASSET.LABEL.getName(), filename);
         fields.put(Tables.ASSET.CLIENT_ID.getName(), identity.getClientId());
 
-        final String uuid = DocumentFunction.insertDocument(context, jdbcTemplate, identity.getUserId(), collectionRecord.getName(), documentCreateRequest);
-        String name = uuid + "_" + filename;
+        final String documentId = UUID.randomUUID().toString();
+        DocumentFunction.insertDocument(context, jdbcTemplate, identity.getUserId(), documentId, collectionRecord.getName(), documentCreateRequest);
+        String name = documentId + "_" + filename;
 
         AssetTable assetTable = Tables.ASSET.as("assetTable");
-        context.update(assetTable).set(assetTable.NAME, name).where(assetTable.ASSET_ID.eq(uuid)).execute();
+        context.update(assetTable).set(assetTable.NAME, name).where(assetTable.ASSET_ID.eq(documentId)).execute();
 
         File container = new File(repo + "/asset" + fileRepo);
         container.mkdirs();
@@ -104,13 +106,13 @@ public class AssetController {
             LOGGER.info(e.getMessage());
         }
 
-        AssetRecord assetRecord = context.select(assetTable.fields()).from(assetTable).where(assetTable.ASSET_ID.eq(uuid)).fetchOneInto(assetTable);
+        AssetRecord assetRecord = context.select(assetTable.fields()).from(assetTable).where(assetTable.ASSET_ID.eq(documentId)).fetchOneInto(assetTable);
         StringBuffer address = new StringBuffer();
         address.append(HttpFunction.getHttpAddress(request)).append("/api/resource/asset").append(assetRecord.getPath()).append("/").append(assetRecord.getName());
 
         AssetCreateResponse response = new AssetCreateResponse();
         response.getData().setContentType(mime);
-        response.getData().setAssetId(uuid);
+        response.getData().setAssetId(documentId);
         response.getData().setFilename(filename);
         response.getData().setAddress(address.toString());
 

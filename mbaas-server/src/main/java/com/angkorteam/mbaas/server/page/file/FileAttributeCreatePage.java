@@ -35,9 +35,9 @@ public class FileAttributeCreatePage extends MasterPage {
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
 
-    private String javaType;
-    private DropDownChoice<String> javaTypeField;
-    private TextFeedbackPanel javaTypeFeedback;
+    private String attributeType;
+    private DropDownChoice<String> attributeTypeField;
+    private TextFeedbackPanel attributeTypeFeedback;
 
     private String nullable;
     private DropDownChoice<String> nullableField;
@@ -70,17 +70,17 @@ public class FileAttributeCreatePage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        List<String> javaTypes = new LinkedList<>();
+        List<String> attributeTypes = new LinkedList<>();
         for (AttributeTypeEnum attributeTypeEnum : AttributeTypeEnum.values()) {
             if (attributeTypeEnum.isExposed()) {
-                javaTypes.add(attributeTypeEnum.getLiteral());
+                attributeTypes.add(attributeTypeEnum.getLiteral());
             }
         }
-        this.javaTypeField = new DropDownChoice<>("javaTypeField", new PropertyModel<>(this, "javaType"), javaTypes);
-        this.javaTypeField.setRequired(true);
-        this.form.add(this.javaTypeField);
-        this.javaTypeFeedback = new TextFeedbackPanel("javaTypeFeedback", this.javaTypeField);
-        this.form.add(javaTypeFeedback);
+        this.attributeTypeField = new DropDownChoice<>("attributeTypeField", new PropertyModel<>(this, "attributeType"), attributeTypes);
+        this.attributeTypeField.setRequired(true);
+        this.form.add(this.attributeTypeField);
+        this.attributeTypeFeedback = new TextFeedbackPanel("attributeTypeFeedback", this.attributeTypeField);
+        this.form.add(attributeTypeFeedback);
 
         List<String> nullables = Arrays.asList("Yes", "No");
         this.nullableField = new DropDownChoice<>("nullableField", new PropertyModel<>(this, "nullable"), nullables);
@@ -103,7 +103,7 @@ public class FileAttributeCreatePage extends MasterPage {
         CollectionAttributeCreateRequest requestBody = new CollectionAttributeCreateRequest();
         requestBody.setAttributeName(this.name);
         requestBody.setNullable("Yes".equals(this.nullable));
-        requestBody.setJavaType(this.javaType);
+        requestBody.setAttributeType(this.attributeType);
         requestBody.setCollectionName(collectionRecord.getName());
 
         FileAttributeFunction.createAttribute(context, requestBody);

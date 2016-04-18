@@ -68,7 +68,9 @@ public class Database {
         parse(params, document, collection);
         DocumentCreateRequest request = new DocumentCreateRequest();
         request.setDocument(params);
-        return DocumentFunction.insertDocument(context, jdbcTemplate, ownerUserId, collection, request);
+        String documentId = UUID.randomUUID().toString();
+        DocumentFunction.insertDocument(context, jdbcTemplate, ownerUserId, documentId, collection, request);
+        return documentId;
     }
 
     private void parse(Map<String, Object> params, JSObject document, String collection) {

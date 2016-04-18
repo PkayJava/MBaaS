@@ -50,7 +50,7 @@ public class AssetAttributeManagementPage extends MasterPage implements ActionFi
         this.collectionId = context.select(collectionTable.COLLECTION_ID).from(collectionTable).where(collectionTable.NAME.eq(Tables.ASSET.getName())).fetchOneInto(String.class);
 
         AttributeProvider provider = new AttributeProvider(this.collectionId);
-
+        provider.selectField(String.class, "system");
         provider.selectField(String.class, "attributeId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
@@ -59,14 +59,8 @@ public class AssetAttributeManagementPage extends MasterPage implements ActionFi
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
 
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("javaType", this), "javaType", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("sqlType", this), "sqlType", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("virtual", this), "virtual", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("virtualAttribute", this), "virtualAttribute", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("system", this), "system", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("exposed", this), "exposed", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("nullable", this), "nullable", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("autoIncrement", this), "autoIncrement", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("attributeType", this), "attributeType", provider));
+        columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("extra", this), "extra", provider));
 
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Delete"));
 

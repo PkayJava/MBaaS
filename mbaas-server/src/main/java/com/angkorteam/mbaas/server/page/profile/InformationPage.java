@@ -71,7 +71,7 @@ public class InformationPage extends MasterPage {
             }
         }
         this.emailAddressField.add(EmailAddressValidator.getInstance());
-        this.emailAddressField.add(new UserEmailAddressValidator());
+        this.emailAddressField.add(new UserEmailAddressValidator(getSession().getUserId()));
         this.form.add(this.emailAddressField);
         this.emailAddressFeedback = new TextFeedbackPanel("emailAddressFeedback", this.emailAddressField);
         this.form.add(this.emailAddressFeedback);
@@ -85,7 +85,7 @@ public class InformationPage extends MasterPage {
                 this.mobileNumberField.setRequired(true);
             }
         }
-        this.mobileNumberField.add(new UserMobileNumberValidator());
+        this.mobileNumberField.add(new UserMobileNumberValidator(getSession().getUserId()));
         this.form.add(this.mobileNumberField);
         this.mobileNumberFeedback = new TextFeedbackPanel("mobileNumberFeedback", this.mobileNumberField);
         this.form.add(this.mobileNumberFeedback);
