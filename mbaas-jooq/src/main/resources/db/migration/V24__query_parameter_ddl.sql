@@ -6,9 +6,10 @@ CREATE TABLE query_parameter (
   type               VARCHAR(50),
   sub_type           VARCHAR(50),
 
-  optimistic         INT(11)      NOT NULL DEFAULT 0,
-
+  INDEX (query_id),
+  INDEX (name),
+  INDEX (type),
+  INDEX (sub_type),
   UNIQUE KEY (name, query_id),
   PRIMARY KEY (query_parameter_id)
-
 );

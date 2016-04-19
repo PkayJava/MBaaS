@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.validator;
 
-import com.angkorteam.mbaas.plain.enums.QueryReturnTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
@@ -32,7 +32,7 @@ public class QueryReturnSubTypeValidator extends AbstractFormValidator {
     @Override
     public void validate(Form<?> form) {
         if (returnType.getConvertedInput() != null && !"".equals(returnType.getConvertedInput())) {
-            if (QueryReturnTypeEnum.List.getLiteral().equals(returnType.getConvertedInput())) {
+            if (TypeEnum.List.getLiteral().equals(returnType.getConvertedInput())) {
                 if (returnSubType.getConvertedInput() == null || "".equals(returnSubType.getConvertedInput())) {
                     returnSubType.error(new ValidationError("Required"));
                 }

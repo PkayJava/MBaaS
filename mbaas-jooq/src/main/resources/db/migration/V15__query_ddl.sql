@@ -2,7 +2,6 @@ CREATE TABLE query (
 
   query_id        VARCHAR(100) NOT NULL,
   name            VARCHAR(255) NOT NULL,
-  path            VARCHAR(50)  NOT NULL,
   description     VARCHAR(255) NOT NULL,
 
   script          TEXT         NOT NULL,
@@ -13,10 +12,16 @@ CREATE TABLE query (
 
   owner_user_id   VARCHAR(100),
 
-  optimistic      INT(11)      NOT NULL DEFAULT 0,
+  optimistic      INT(11)               DEFAULT 0,
 
   UNIQUE KEY (name),
-  UNIQUE KEY (path),
+  INDEX (description),
+  FULLTEXT (script),
+  INDEX (return_type),
+  INDEX (return_sub_type),
+  INDEX (date_created),
+  INDEX (security),
+  INDEX (owner_user_id),
+  INDEX (optimistic),
   PRIMARY KEY (query_id)
-
 );

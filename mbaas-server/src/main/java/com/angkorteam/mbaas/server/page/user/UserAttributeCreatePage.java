@@ -41,6 +41,10 @@ public class UserAttributeCreatePage extends MasterPage {
     private DropDownChoice<String> attributeTypeField;
     private TextFeedbackPanel attributeTypeFeedback;
 
+    private String eav;
+    private DropDownChoice<String> eavField;
+    private TextFeedbackPanel eavFeedback;
+
     private String nullable;
     private DropDownChoice<String> nullableField;
     private TextFeedbackPanel nullableFeedback;
@@ -95,6 +99,12 @@ public class UserAttributeCreatePage extends MasterPage {
         this.nullableFeedback = new TextFeedbackPanel("nullableFeedback", this.nullableField);
         this.form.add(this.nullableFeedback);
 
+        this.eavField = new DropDownChoice<>("eavField", new PropertyModel<>(this, "eav"), Arrays.asList("Yes", "No"));
+        this.eavField.setRequired(true);
+        this.form.add(this.eavField);
+        this.eavFeedback = new TextFeedbackPanel("eavFeedback", this.eavField);
+        this.form.add(this.eavFeedback);
+
         List<String> scopes = Arrays.asList(
                 ScopeEnum.VisibleByAnonymousUser.getLiteral(),
                 ScopeEnum.VisibleByFriend.getLiteral(),
@@ -121,6 +131,7 @@ public class UserAttributeCreatePage extends MasterPage {
 
         CollectionAttributeCreateRequest requestBody = new CollectionAttributeCreateRequest();
         requestBody.setAttributeName(this.name);
+        requestBody.setEav("Yes".equals(this.eav));
         requestBody.setNullable("Yes".equals(this.nullable));
         requestBody.setAttributeType(this.attributeType);
         requestBody.setCollectionName(collectionRecord.getName());

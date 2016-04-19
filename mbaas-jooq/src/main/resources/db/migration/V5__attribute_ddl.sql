@@ -15,12 +15,13 @@ CREATE TABLE `attribute` (
 
   extra          INT(11) DEFAULT 0,
 
+  INDEX (collection_id),
   INDEX (name),
+  INDEX (attribute_type),
+  INDEX (visibility),
   INDEX (eav),
   INDEX (system),
   INDEX (extra),
-  INDEX (collection_id),
   UNIQUE KEY (name, collection_id),
   PRIMARY KEY (attribute_id)
-
 );

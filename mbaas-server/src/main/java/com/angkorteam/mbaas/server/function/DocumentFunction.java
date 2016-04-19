@@ -56,12 +56,25 @@ public class DocumentFunction {
                 if (entry.getValue() == null) {
                     continue;
                 }
-                columns.add(entry.getKey() + " = :" + entry.getKey());
-                values.put(entry.getKey(), entry.getValue());
+                if (!attributeRecords.get(entry.getKey()).getEav()) {
+                    columns.add(entry.getKey() + " = :" + entry.getKey());
+                    values.put(entry.getKey(), entry.getValue());
+                }
             }
             values.put(collection + "_id", documentId);
             NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
             namedParameterJdbcTemplate.update("UPDATE `" + collectionRecord.getName() + "` SET " + StringUtils.join(columns, ", ") + " WHERE " + collection + "_id = :" + collection + "_id", values);
+            for (Map.Entry<String, Object> entry : goodDocument.entrySet()) {
+                if (entry.getValue() == null) {
+                    continue;
+                }
+                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
+                if (attributeRecord.getEav()) {
+                    AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
+                    String eavTable = attributeType.getEavTable();
+                    jdbcTemplate.update("UPDATE " + eavTable + " SET EAV_VALUE = ? WHERE COLLECTION_ID = ? AND ATTRIBUTE_ID = ? AND DOCUMENT_ID = ?", entry.getValue(), collectionRecord.getCollectionId(), attributeRecord.getAttributeId(), documentId);
+                }
+            }
         }
         return good;
     }

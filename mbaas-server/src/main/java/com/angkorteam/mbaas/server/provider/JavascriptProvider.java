@@ -68,7 +68,6 @@ public class JavascriptProvider extends JooqProvider {
     @Override
     protected List<Condition> where() {
         List<Condition> where = new ArrayList<>();
-        where.add(javascriptTable.DELETED.eq(false));
         return where;
     }
 

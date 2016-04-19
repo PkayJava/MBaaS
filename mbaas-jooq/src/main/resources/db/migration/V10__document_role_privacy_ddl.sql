@@ -8,6 +8,10 @@ CREATE TABLE document_role_privacy (
 
   permisson                INT(11)      NOT NULL,
 
+  INDEX (role_id),
+  INDEX (collection_id),
+  INDEX (document_id),
+  INDEX (permisson),
   UNIQUE (role_id, collection_id, document_id),
   PRIMARY KEY (document_role_privacy_id)
 );

@@ -55,8 +55,6 @@ public class RoleModifyPage extends MasterPage {
 
         RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(this.roleId)).fetchOneInto(roleTable);
 
-        this.optimistic = roleRecord.getOptimistic();
-
         this.name = roleRecord.getName();
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
@@ -90,7 +88,6 @@ public class RoleModifyPage extends MasterPage {
         RoleTable roleTable = Tables.ROLE.as("roleTable");
 
         RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(this.roleId)).fetchOneInto(roleTable);
-        roleRecord.setOptimistic(this.optimistic);
         roleRecord.setName(this.name);
         roleRecord.setDescription(this.description);
         roleRecord.update();

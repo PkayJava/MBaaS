@@ -9,10 +9,10 @@ import com.angkorteam.mbaas.model.entity.tables.QueryParameterTable;
 import com.angkorteam.mbaas.model.entity.tables.QueryTable;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryParameterRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
-import com.angkorteam.mbaas.plain.enums.QueryReturnTypeEnum;
+import com.angkorteam.mbaas.plain.enums.SubTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.validator.QueryNameValidator;
-import com.angkorteam.mbaas.server.validator.QueryPathValidator;
 import com.angkorteam.mbaas.server.validator.QueryReturnSubTypeValidator;
 import com.angkorteam.mbaas.server.validator.QueryScriptValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -21,7 +21,6 @@ import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -41,10 +40,6 @@ public class QueryCreatePage extends MasterPage {
     private String name;
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
-
-    private String pathText;
-    private TextField<String> pathField;
-    private TextFeedbackPanel pathFeedback;
 
     private String description;
     private TextField<String> descriptionField;
@@ -85,13 +80,6 @@ public class QueryCreatePage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "pathText"));
-        this.pathField.setRequired(true);
-        this.pathField.add(new QueryPathValidator());
-        this.form.add(this.pathField);
-        this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
-        this.form.add(this.pathFeedback);
-
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
         this.form.add(this.descriptionField);
@@ -106,20 +94,23 @@ public class QueryCreatePage extends MasterPage {
         this.form.add(this.scriptFeedback);
 
         List<String> returnTypes = new ArrayList<>();
-        List<String> returnSubTypes = new ArrayList<>();
-        for (QueryReturnTypeEnum queryReturnTypeEnum : QueryReturnTypeEnum.values()) {
-            returnTypes.add(queryReturnTypeEnum.getLiteral());
-            if (queryReturnTypeEnum.isSubType()) {
-                returnSubTypes.add(queryReturnTypeEnum.getLiteral());
+        for (TypeEnum typeEnum : TypeEnum.values()) {
+            if (typeEnum.isSubType()) {
+                returnTypes.add(typeEnum.getLiteral());
             }
         }
-
         this.returnTypeField = new DropDownChoice<>("returnTypeField", new PropertyModel<>(this, "returnType"), returnTypes);
         this.returnTypeField.setRequired(true);
         this.form.add(this.returnTypeField);
         this.returnTypeFeedback = new TextFeedbackPanel("returnTypeFeedback", this.returnTypeField);
         this.form.add(returnTypeFeedback);
 
+        List<String> returnSubTypes = new ArrayList<>();
+        for (SubTypeEnum typeEnum : SubTypeEnum.values()) {
+            if (typeEnum.isSubType()) {
+                returnSubTypes.add(typeEnum.getLiteral());
+            }
+        }
         this.returnSubTypeField = new DropDownChoice<>("returnSubTypeField", new PropertyModel<>(this, "returnSubType"), returnSubTypes);
         this.form.add(this.returnSubTypeField);
         this.returnSubTypeFeedback = new TextFeedbackPanel("returnSubTypeFeedback", this.returnSubTypeField);
@@ -143,7 +134,6 @@ public class QueryCreatePage extends MasterPage {
         queryRecord.setQueryId(uuid);
         queryRecord.setName(this.name);
         queryRecord.setSecurity(SecurityEnum.Denied.getLiteral());
-        queryRecord.setPath(this.pathText);
         queryRecord.setScript(this.script);
         queryRecord.setOwnerUserId(getSession().getUserId());
         queryRecord.setDateCreated(new Date());

@@ -15,11 +15,16 @@ CREATE TABLE application (
   security            VARCHAR(15)  NOT NULL,
   date_created        DATETIME,
 
-  optimistic          INT(11)      NOT NULL DEFAULT 0,
+  optimistic          INT(11) DEFAULT 0,
 
-  INDEX (name),
-  INDEX (description),
   INDEX (owner_user_id),
+  INDEX (description),
+  INDEX (name),
+  INDEX (push_application_id),
+  INDEX (push_master_secret),
+  INDEX (oauth_roles),
+  INDEX (security),
+  INDEX (date_created),
+  INDEX (optimistic),
   PRIMARY KEY (application_id)
-
 );

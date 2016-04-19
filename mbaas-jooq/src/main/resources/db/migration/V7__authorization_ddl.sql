@@ -11,12 +11,14 @@ CREATE TABLE authorization (
   state            VARCHAR(100) NOT NULL,
   owner_user_id    VARCHAR(100),
 
-  optimistic       INT(11)      NOT NULL DEFAULT 0,
+  optimistic       INT(11) DEFAULT 0,
 
-  INDEX (state),
+  INDEX (date_created),
+  INDEX (time_to_live),
   INDEX (application_id),
   INDEX (client_id),
+  INDEX (state),
   INDEX (owner_user_id),
+  INDEX (optimistic),
   PRIMARY KEY (authorization_id)
-
 );

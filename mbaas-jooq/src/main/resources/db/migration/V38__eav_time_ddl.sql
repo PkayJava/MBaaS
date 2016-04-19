@@ -1,12 +1,12 @@
-CREATE TABLE eav_boolean (
+CREATE TABLE eav_time (
 
-  eav_boolean_id VARCHAR(100) NOT NULL,
+  eav_time_id    VARCHAR(100) NOT NULL,
 
   collection_id  VARCHAR(100) NOT NULL,
   attribute_id   VARCHAR(100) NOT NULL,
   document_id    VARCHAR(100) NOT NULL,
   attribute_type VARCHAR(50)  NOT NULL,
-  eav_value      BIT(1),
+  eav_value      TIME,
 
   INDEX (collection_id),
   INDEX (attribute_id),
@@ -14,5 +14,5 @@ CREATE TABLE eav_boolean (
   INDEX (attribute_type),
   INDEX (eav_value),
   UNIQUE (collection_id, attribute_id, document_id),
-  PRIMARY KEY (eav_boolean_id)
+  PRIMARY KEY (eav_time_id)
 );

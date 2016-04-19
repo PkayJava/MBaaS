@@ -17,6 +17,7 @@ import com.angkorteam.mbaas.server.template.TextFieldPanel;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +50,6 @@ public class AssetCreatePage extends MasterPage {
     private TextFeedbackPanel assetFeedback;
 
     private String collectionId;
-    private Map<String, Object> fields;
 
     private Button saveButton;
 
@@ -64,7 +64,6 @@ public class AssetCreatePage extends MasterPage {
     protected void onInitialize() {
         super.onInitialize();
         DSLContext context = getDSLContext();
-        this.fields = new LinkedHashMap<>();
 
         this.form = new Form<>("form");
         add(this.form);
@@ -85,21 +84,6 @@ public class AssetCreatePage extends MasterPage {
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.ASSET.getName())).fetchOneInto(collectionTable);
         this.collectionId = collectionRecord.getCollectionId();
-
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
-        List<AttributePojo> attributes = context.select(attributeTable.fields())
-                .from(attributeTable)
-                .where(attributeTable.COLLECTION_ID.eq(collectionId))
-                .and(attributeTable.SYSTEM.eq(false))
-                .fetchInto(AttributePojo.class);
-
-        RepeatingView fields = new RepeatingView("fields");
-        for (AttributePojo attribute : attributes) {
-            TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
-            fields.add(fieldPanel);
-        }
-        this.form.add(fields);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
@@ -122,6 +106,7 @@ public class AssetCreatePage extends MasterPage {
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         CollectionRecord collectionRecord = getDSLContext().select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
         DocumentCreateRequest requestBody = new DocumentCreateRequest();
+        Map<String, Object> fields = new HashMap<>();
         requestBody.setDocument(fields);
         fields.put(Tables.ASSET.PATH.getName(), path);
         fields.put(Tables.ASSET.MIME.getName(), mime);

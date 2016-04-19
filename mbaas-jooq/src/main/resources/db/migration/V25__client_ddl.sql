@@ -21,13 +21,17 @@ CREATE TABLE client (
 
   optimistic          INT(11)      NOT NULL DEFAULT 0,
 
-  UNIQUE (name, application_id),
-  INDEX (name),
-  INDEX (description),
-  INDEX (client_secret),
   INDEX (application_id),
   INDEX (owner_user_id),
   INDEX (application_user_id),
+  INDEX (client_secret),
+  INDEX (date_created),
+  INDEX (push_variant_id),
+  INDEX (push_secret),
+  INDEX (push_gcm_sender_id),
+  INDEX (name),
+  INDEX (description),
+  INDEX (security),
+  UNIQUE (name, application_id),
   PRIMARY KEY (client_id)
-
 );

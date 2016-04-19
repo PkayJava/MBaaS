@@ -6,10 +6,13 @@ CREATE TABLE eav_decimal (
   attribute_id   VARCHAR(100) NOT NULL,
   document_id    VARCHAR(100) NOT NULL,
   attribute_type VARCHAR(50)  NOT NULL,
-  value          DECIMAL(15, 4),
+  eav_value      DECIMAL(15, 4),
 
+  INDEX (collection_id),
+  INDEX (attribute_id),
+  INDEX (document_id),
+  INDEX (attribute_type),
+  INDEX (eav_value),
   UNIQUE (collection_id, attribute_id, document_id),
-  INDEX (value),
   PRIMARY KEY (eav_decimal_id)
-
 );

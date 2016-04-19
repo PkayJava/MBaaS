@@ -7,7 +7,10 @@ CREATE TABLE resource (
   `language`  VARCHAR(10),
   `label`     VARCHAR(255) NOT NULL,
 
+  INDEX (`key`),
+  INDEX (page),
+  INDEX (language),
+  INDEX (label),
   UNIQUE KEY (`key`, page, language),
   PRIMARY KEY (resource_id)
-
 );

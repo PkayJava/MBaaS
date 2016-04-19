@@ -7,6 +7,9 @@ CREATE TABLE query_user_privacy (
 
   permisson             INT(11)      NOT NULL,
 
+  INDEX (user_id),
+  INDEX (query_id),
+  INDEX (permisson),
   UNIQUE (user_id, query_id),
   PRIMARY KEY (query_user_privacy_id)
 );

@@ -3,7 +3,7 @@ package com.angkorteam.mbaas.server.template;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.mbaas.model.entity.tables.pojos.QueryParameterPojo;
-import com.angkorteam.mbaas.server.validator.QueryParameterSubTypeValidator;
+import com.angkorteam.mbaas.server.validator.SubTypeValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -57,6 +57,6 @@ public class QueryParameterSelectFieldPanel extends Panel {
         TextFeedbackPanel subTypeReturnFeedback = new TextFeedbackPanel("subTypeReturnFeedback", subTypeReturnField);
         this.add(subTypeReturnFeedback);
 
-        this.form.add(new QueryParameterSubTypeValidator(typeReturnField, subTypeReturnField));
+        this.form.add(new SubTypeValidator(typeReturnField, subTypeReturnField));
     }
 }

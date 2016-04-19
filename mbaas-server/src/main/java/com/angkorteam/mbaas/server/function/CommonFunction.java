@@ -253,29 +253,59 @@ public class CommonFunction {
                 AttributeRecord attributeRecord = attributeRecords.get(item.getKey());
                 AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
                 String uuid = UUID.randomUUID().toString();
+                // eav time
+                if (attributeType == AttributeTypeEnum.Time) {
+                    EavTimeRecord record = context.newRecord(Tables.EAV_TIME);
+                    record.setEavTimeId(uuid);
+                    record.setAttributeId(attributeRecord.getAttributeId());
+                    record.setCollectionId(collectionId);
+                    record.setDocumentId(documentId);
+                    record.setAttributeType(attributeType.getLiteral());
+                    record.setEavValue((Date) item.getValue());
+                    record.store();
+                }
+                // eav date
+                if (attributeType == AttributeTypeEnum.Date) {
+                    EavDateRecord record = context.newRecord(Tables.EAV_DATE);
+                    record.setEavDateId(uuid);
+                    record.setAttributeId(attributeRecord.getAttributeId());
+                    record.setCollectionId(collectionId);
+                    record.setDocumentId(documentId);
+                    record.setAttributeType(attributeType.getLiteral());
+                    record.setEavValue((Date) item.getValue());
+                    record.store();
+                }
                 // eav datetime
-                if (attributeType == AttributeTypeEnum.Time
-                        || attributeType == AttributeTypeEnum.Date
-                        || attributeType == AttributeTypeEnum.DateTime) {
+                if (attributeType == AttributeTypeEnum.DateTime) {
                     EavDateTimeRecord record = context.newRecord(Tables.EAV_DATE_TIME);
                     record.setEavDateTimeId(uuid);
                     record.setAttributeId(attributeRecord.getAttributeId());
                     record.setCollectionId(collectionId);
                     record.setDocumentId(documentId);
                     record.setAttributeType(attributeType.getLiteral());
-                    record.setValue((Date) item.getValue());
+                    record.setEavValue((Date) item.getValue());
                     record.store();
                 }
                 // eav varchar
-                if (attributeType == AttributeTypeEnum.Character
-                        || attributeType == AttributeTypeEnum.String) {
+                if (attributeType == AttributeTypeEnum.String) {
                     EavVarcharRecord record = context.newRecord(Tables.EAV_VARCHAR);
                     record.setEavVarcharId(uuid);
                     record.setAttributeId(attributeRecord.getAttributeId());
                     record.setAttributeType(attributeType.getLiteral());
                     record.setCollectionId(collectionId);
                     record.setDocumentId(documentId);
-                    record.setValue(String.valueOf(item.getValue()));
+                    record.setEavValue(String.valueOf(item.getValue()));
+                    record.store();
+                }
+                // eav character
+                if (attributeType == AttributeTypeEnum.Character) {
+                    EavCharacterRecord record = context.newRecord(Tables.EAV_CHARACTER);
+                    record.setEavCharacterId(uuid);
+                    record.setAttributeId(attributeRecord.getAttributeId());
+                    record.setAttributeType(attributeType.getLiteral());
+                    record.setCollectionId(collectionId);
+                    record.setDocumentId(documentId);
+                    record.setEavValue(String.valueOf(item.getValue()));
                     record.store();
                 }
                 // eav decimal
@@ -287,7 +317,7 @@ public class CommonFunction {
                     record.setCollectionId(collectionId);
                     record.setDocumentId(documentId);
                     record.setAttributeType(attributeType.getLiteral());
-                    record.setValue(new BigDecimal(((Number) item.getValue()).doubleValue()));
+                    record.setEavValue(new BigDecimal(((Number) item.getValue()).doubleValue()));
                     record.store();
                 }
                 // eav boolean
@@ -298,7 +328,7 @@ public class CommonFunction {
                     record.setAttributeType(attributeType.getLiteral());
                     record.setCollectionId(collectionId);
                     record.setDocumentId(documentId);
-                    record.setValue((Boolean) item.getValue());
+                    record.setEavValue((Boolean) item.getValue());
                     record.store();
                 }
                 // eav integer
@@ -312,7 +342,7 @@ public class CommonFunction {
                     record.setAttributeType(attributeType.getLiteral());
                     record.setCollectionId(collectionId);
                     record.setDocumentId(documentId);
-                    record.setValue(((Number) item.getValue()).intValue());
+                    record.setEavValue(((Number) item.getValue()).intValue());
                     record.store();
                 }
                 // eav text
@@ -323,7 +353,7 @@ public class CommonFunction {
                     record.setAttributeType(attributeType.getLiteral());
                     record.setCollectionId(collectionId);
                     record.setDocumentId(documentId);
-                    record.setValue((String) item.getValue());
+                    record.setEavValue((String) item.getValue());
                     record.store();
                 }
             }

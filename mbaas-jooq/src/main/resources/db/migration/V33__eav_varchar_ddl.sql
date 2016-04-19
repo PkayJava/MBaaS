@@ -6,10 +6,13 @@ CREATE TABLE eav_varchar (
   attribute_id   VARCHAR(100) NOT NULL,
   document_id    VARCHAR(100) NOT NULL,
   attribute_type VARCHAR(50)  NOT NULL,
-  value          VARCHAR(255),
+  eav_value      VARCHAR(255),
 
+  INDEX (collection_id),
+  INDEX (attribute_id),
+  INDEX (document_id),
+  INDEX (attribute_type),
+  FULLTEXT (eav_value),
   UNIQUE (collection_id, attribute_id, document_id),
-  FULLTEXT (value),
   PRIMARY KEY (eav_varchar_id)
-
 );

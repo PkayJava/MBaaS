@@ -6,6 +6,9 @@ CREATE TABLE query_role_privacy (
 
   permisson             INT(11)      NOT NULL,
 
+  INDEX (role_id),
+  INDEX (query_id),
+  INDEX (permisson),
   UNIQUE (role_id, query_id),
   PRIMARY KEY (query_role_privacy_id)
 );

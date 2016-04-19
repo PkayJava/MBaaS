@@ -9,9 +9,9 @@ import com.angkorteam.mbaas.model.entity.tables.QueryParameterTable;
 import com.angkorteam.mbaas.model.entity.tables.QueryTable;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryParameterRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
-import com.angkorteam.mbaas.plain.enums.QueryReturnTypeEnum;
+import com.angkorteam.mbaas.plain.enums.SubTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.validator.QueryNameValidator;
-import com.angkorteam.mbaas.server.validator.QueryPathValidator;
 import com.angkorteam.mbaas.server.validator.QueryReturnSubTypeValidator;
 import com.angkorteam.mbaas.server.validator.QueryScriptValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -20,7 +20,6 @@ import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -43,11 +42,6 @@ public class QueryModifyPage extends MasterPage {
     private String name;
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
-
-    private String pathText;
-    private TextField<String> pathField;
-    private TextFeedbackPanel pathFeedback;
-
     private String description;
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
@@ -89,20 +83,12 @@ public class QueryModifyPage extends MasterPage {
         this.optimistic = queryRecord.getOptimistic();
 
         this.name = queryRecord.getName();
-        this.pathText = queryRecord.getPath();
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
         this.nameField.add(new QueryNameValidator(this.queryId));
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
-
-        this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "pathText"));
-        this.pathField.setRequired(true);
-        this.pathField.add(new QueryPathValidator(this.queryId));
-        this.form.add(this.pathField);
-        this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
-        this.form.add(this.pathFeedback);
 
         this.description = queryRecord.getDescription();
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
@@ -120,11 +106,9 @@ public class QueryModifyPage extends MasterPage {
         this.form.add(this.scriptFeedback);
 
         List<String> returnTypes = new ArrayList<>();
-        List<String> returnSubTypes = new ArrayList<>();
-        for (QueryReturnTypeEnum queryReturnTypeEnum : QueryReturnTypeEnum.values()) {
-            returnTypes.add(queryReturnTypeEnum.getLiteral());
-            if (queryReturnTypeEnum.isSubType()) {
-                returnSubTypes.add(queryReturnTypeEnum.getLiteral());
+        for (TypeEnum typeEnum : TypeEnum.values()) {
+            if (typeEnum.isSubType()) {
+                returnTypes.add(typeEnum.getLiteral());
             }
         }
         this.returnType = queryRecord.getReturnType();
@@ -134,6 +118,12 @@ public class QueryModifyPage extends MasterPage {
         this.returnTypeFeedback = new TextFeedbackPanel("returnTypeFeedback", this.returnTypeField);
         this.form.add(returnTypeFeedback);
 
+        List<String> returnSubTypes = new ArrayList<>();
+        for (SubTypeEnum typeEnum : SubTypeEnum.values()) {
+            if (typeEnum.isSubType()) {
+                returnSubTypes.add(typeEnum.getLiteral());
+            }
+        }
         this.returnSubType = queryRecord.getReturnSubType();
         this.returnSubTypeField = new DropDownChoice<>("returnSubTypeField", new PropertyModel<>(this, "returnSubType"), returnSubTypes);
         this.form.add(this.returnSubTypeField);
@@ -182,7 +172,6 @@ public class QueryModifyPage extends MasterPage {
         QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.QUERY_ID.eq(this.queryId)).fetchOneInto(queryTable);
 
         queryRecord.setName(this.name);
-        queryRecord.setPath(this.pathText);
         queryRecord.setScript(this.script);
         queryRecord.setDescription(this.description);
         queryRecord.setOptimistic(this.optimistic);

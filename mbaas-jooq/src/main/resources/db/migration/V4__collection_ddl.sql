@@ -10,7 +10,8 @@ CREATE TABLE `collection` (
   owner_user_id VARCHAR(100),
 
   UNIQUE KEY (name),
+  INDEX (locked),
+  INDEX (system),
   INDEX (owner_user_id),
   PRIMARY KEY (collection_id)
-
 );

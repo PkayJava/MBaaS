@@ -34,10 +34,6 @@ public class QueryProvider extends JooqProvider {
         return this.queryTable.QUERY_ID;
     }
 
-    public Field<String> getPath() {
-        return this.queryTable.PATH;
-    }
-
     public Field<String> getName() {
         return this.queryTable.NAME;
     }

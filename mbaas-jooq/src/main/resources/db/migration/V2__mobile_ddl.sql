@@ -23,22 +23,24 @@ CREATE TABLE mobile (
 
   client_ip               VARCHAR(30),
 
-  optimistic              INT(11)      NOT NULL DEFAULT 0,
+  optimistic              INT(11) DEFAULT 0,
 
+  INDEX (owner_user_id),
+  INDEX (client_id),
+  INDEX (application_id),
   INDEX (date_created),
-  INDEX (client_ip),
-  INDEX (device_token),
   INDEX (date_seen),
+  INDEX (access_token),
+  INDEX (date_token_issued),
+  INDEX (time_to_live),
   INDEX (grant_type),
   INDEX (user_agent),
+  INDEX (device_token),
   INDEX (device_type),
   INDEX (device_alias),
   INDEX (device_operating_system),
   INDEX (device_os_version),
-  INDEX (owner_user_id),
-  INDEX (application_id),
-  INDEX (client_id),
-  INDEX (access_token),
+  INDEX (client_ip),
+  INDEX (optimistic),
   PRIMARY KEY (mobile_id)
-
 );

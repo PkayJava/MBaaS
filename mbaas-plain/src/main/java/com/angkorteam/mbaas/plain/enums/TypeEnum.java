@@ -5,14 +5,14 @@ import java.io.Serializable;
 /**
  * Created by socheat on 3/10/16.
  */
-public enum QueryReturnTypeEnum implements Serializable {
+public enum TypeEnum implements Serializable {
 
     Boolean("Boolean"),
-    Byte("Byte"),
-    Short("Short"),
+    Byte("Byte", false),
+    Short("Short", false),
     Integer("Integer"),
-    Long("Long"),
-    Float("Float"),
+    Long("Long", false),
+    Float("Float", false),
     Double("Double"),
     Character("Character"),
     String("String"),
@@ -20,18 +20,18 @@ public enum QueryReturnTypeEnum implements Serializable {
     Date("Date"),
     DateTime("DateTime"),
     Map("Map"),
-    List("List", false);
+    List("List");
 
     private final String literal;
 
     private final boolean subType;
 
-    QueryReturnTypeEnum(String literal) {
+    TypeEnum(String literal) {
         this.literal = literal;
         this.subType = true;
     }
 
-    QueryReturnTypeEnum(String literal, boolean subType) {
+    TypeEnum(String literal, boolean subType) {
         this.literal = literal;
         this.subType = subType;
     }

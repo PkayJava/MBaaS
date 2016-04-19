@@ -22,6 +22,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -68,7 +69,8 @@ public class DocumentModifyPage extends MasterPage {
                 .fetchInto(AttributePojo.class);
 
         List<String> joins = new ArrayList<>();
-        List<String> eavFields = new ArrayList<>();
+        List<String> attributeJoins = new ArrayList<>();
+        List<String> names = new ArrayList<>();
 
         boolean hasEav = false;
         for (AttributePojo attribute : attributes) {
@@ -77,18 +79,30 @@ public class DocumentModifyPage extends MasterPage {
                 AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attribute.getAttributeType());
                 String eavTable = null;
                 String eavField = null;
+                // eav time
+                if (attributeType == AttributeTypeEnum.Time) {
+                    eavTable = Tables.EAV_TIME.getName();
+                    eavField = Tables.EAV_TIME.getName() + "." + Tables.EAV_TIME.DOCUMENT_ID.getName();
+                }
+                // eav date
+                if (attributeType == AttributeTypeEnum.Date) {
+                    eavTable = Tables.EAV_DATE.getName();
+                    eavField = Tables.EAV_DATE.getName() + "." + Tables.EAV_DATE.DOCUMENT_ID.getName();
+                }
                 // eav datetime
-                if (attributeType == AttributeTypeEnum.Time
-                        || attributeType == AttributeTypeEnum.Date
-                        || attributeType == AttributeTypeEnum.DateTime) {
+                if (attributeType == AttributeTypeEnum.DateTime) {
                     eavTable = Tables.EAV_DATE_TIME.getName();
                     eavField = Tables.EAV_DATE_TIME.getName() + "." + Tables.EAV_DATE_TIME.DOCUMENT_ID.getName();
                 }
                 // eav varchar
-                if (attributeType == AttributeTypeEnum.Character
-                        || attributeType == AttributeTypeEnum.String) {
+                if (attributeType == AttributeTypeEnum.String) {
                     eavTable = Tables.EAV_VARCHAR.getName();
                     eavField = Tables.EAV_VARCHAR.getName() + "." + Tables.EAV_VARCHAR.DOCUMENT_ID.getName();
+                }
+                // eav character
+                if (attributeType == AttributeTypeEnum.Character) {
+                    eavTable = Tables.EAV_CHARACTER.getName();
+                    eavField = Tables.EAV_CHARACTER.getName() + "." + Tables.EAV_CHARACTER.DOCUMENT_ID.getName();
                 }
                 // eav decimal
                 if (attributeType == AttributeTypeEnum.Float
@@ -114,29 +128,34 @@ public class DocumentModifyPage extends MasterPage {
                     eavTable = Tables.EAV_TEXT.getName();
                     eavField = Tables.EAV_TEXT.getName() + "." + Tables.EAV_TEXT.DOCUMENT_ID.getName();
                 }
-                String join = "LEFT JOIN " + eavTable + " ON " + collection + "." + collection + "_id" + " = " + eavField;
+                String join = "LEFT JOIN " + eavTable + " ON " + collection.getName() + "." + collection.getName() + "_id" + " = " + eavField;
                 if (!joins.contains(join)) {
                     joins.add(join);
                 }
-                eavFields.add("MAX(CASE WHEN attribute.name = '" + attribute.getName() + "' THEN eav_varchar.value ELSE '' END) AS " + attribute.getName());
+
+                String attributeJoin = "LEFT JOIN attribute " + eavTable + "_attribute ON " + eavTable + "_attribute.attribute_id = " + eavTable + ".attribute_id";
+                if (!attributeJoins.contains(attributeJoin)) {
+                    attributeJoins.add(attributeJoin);
+                }
+                names.add("MAX( IF(" + eavTable + "_attribute.name = '" + attribute.getName() + "', " + eavTable + ".eav_value, NULL) ) AS " + attribute.getName());
+            } else {
+                names.add(attribute.getName());
             }
         }
-        if (hasEav) {
-            joins.add("LEFT JOIN " + Tables.ATTRIBUTE.getName() + " ON " + Tables.ATTRIBUTE.getName() + "." + Tables.ATTRIBUTE.ATTRIBUTE_ID.getName() + " = " + "");
-        }
-
 
 //        SELECT
-//        aaa.aaa_id,
-//                aaa.name AS NAME,
-//        MAX(CASE WHEN attribute.name = 'email' THEN eav.value ELSE '' END) AS email,
-//        MAX(CASE WHEN attribute.name = 'year' THEN eav.value ELSE '' END) AS `year`,
-//        MAX(CASE WHEN attribute.name = 'day' THEN eav.value ELSE '' END) AS `day`,
-//        MAX(CASE WHEN attribute.name = 'month' THEN eav.value ELSE '' END) AS `month`
-//        FROM aaa
-//        LEFT JOIN (SELECT eav_varchar.attribute_id AS attribute_id, eav_varchar.document_id AS document_id, eav_varchar.value AS VALUE FROM eav_varchar UNION SELECT eav_integer.attribute_id AS attribute_id, eav_integer.document_id AS document_id, eav_integer.value AS VALUE FROM eav_integer) eav ON aaa.aaa_id = eav.document_id
-//        LEFT JOIN attribute ON eav.attribute_id = attribute.attribute_id
-//        GROUP BY aaa.aaa_id
+//        people.people_id,
+//                people.email AS email,
+//        MAX( IF(eav_varchar_attribute.name = 'string_a', eav_varchar.eav_value, NULL) ) AS 'string_a',
+//                MAX( IF(eav_varchar_attribute.name = 'string_b', eav_varchar.eav_value, NULL) ) AS 'string_b',
+//                MAX( IF(eav_decimal_attribute.name = 'double_money', eav_decimal.eav_value, NULL) ) AS 'double_money',
+//                MAX( IF(eav_decimal_attribute.name = 'double_stat', eav_decimal.eav_value, NULL) ) AS 'double_stat'
+//        FROM people
+//        LEFT JOIN eav_varchar ON people.people_id = eav_varchar.document_id
+//        LEFT JOIN eav_decimal ON people.people_id = eav_decimal.document_id
+//        LEFT JOIN attribute eav_varchar_attribute ON eav_varchar_attribute.attribute_id = eav_varchar.attribute_id
+//        LEFT JOIN attribute eav_decimal_attribute ON eav_decimal_attribute.attribute_id = eav_decimal.attribute_id
+//        GROUP BY people.people_id
 
 
 //        SELECT
@@ -149,7 +168,6 @@ public class DocumentModifyPage extends MasterPage {
 //        LEFT JOIN attribute ON eav_varchar.attribute_id = attribute.attribute_id
 
         List<String> selectFields = new ArrayList<>();
-
         RepeatingView fields = new RepeatingView("fields");
         for (AttributePojo attribute : attributes) {
             TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
@@ -158,12 +176,13 @@ public class DocumentModifyPage extends MasterPage {
         }
 
         if (!selectFields.isEmpty()) {
-            CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
-            Map<String, Object> document = getJdbcTemplate().queryForMap("select " + StringUtils.join(selectFields, ", ") + " from `" + collectionRecord.getName() + "` where " + collectionRecord.getName() + "_id = ?", this.documentId);
-            if (document != null && !document.isEmpty()) {
-                for (Map.Entry<String, Object> entry : document.entrySet()) {
-                    this.fields.put(entry.getKey(), entry.getValue());
-                }
+            JdbcTemplate jdbcTemplate = getJdbcTemplate();
+            if (hasEav) {
+                String query = "SELECT " + StringUtils.join(names, ", ") + " FROM " + collection.getName() + " " + StringUtils.join(joins, " ") + " " + StringUtils.join(attributeJoins, " ") + " WHERE " + collection.getName() + "_id = ? GROUP BY " + collection.getName() + "_id";
+                this.fields.putAll(jdbcTemplate.queryForMap(query, documentId));
+            } else {
+                String query = "SELECT " + StringUtils.join(names, ", ") + " FROM " + collection.getName() + " WHERE " + collection.getName() + "_id = ?";
+                this.fields.putAll(jdbcTemplate.queryForMap(query, documentId));
             }
         }
 

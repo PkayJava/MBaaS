@@ -8,8 +8,9 @@ import com.angkorteam.mbaas.model.entity.tables.QueryTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.QueryParameterPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.QueryPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryParameterRecord;
-import com.angkorteam.mbaas.plain.enums.QueryInputParamTypeEnum;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.plain.enums.SubTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.template.QueryParameterSelectFieldPanel;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -76,11 +77,16 @@ public class QueryParameterModifyPage extends MasterPage {
                 .fetchInto(QueryParameterPojo.class);
 
         List<String> types = new ArrayList<>();
+        for (TypeEnum typeEnum : TypeEnum.values()) {
+            if (typeEnum.isSubType()) {
+                types.add(typeEnum.getLiteral());
+            }
+        }
+
         List<String> subTypes = new ArrayList<>();
-        for (QueryInputParamTypeEnum queryInputParamTypeEnum : QueryInputParamTypeEnum.values()) {
-            types.add(queryInputParamTypeEnum.getLiteral());
-            if (queryInputParamTypeEnum.isSubType()) {
-                subTypes.add(queryInputParamTypeEnum.getLiteral());
+        for (SubTypeEnum typeEnum : SubTypeEnum.values()) {
+            if (typeEnum.isSubType()) {
+                subTypes.add(typeEnum.getLiteral());
             }
         }
 

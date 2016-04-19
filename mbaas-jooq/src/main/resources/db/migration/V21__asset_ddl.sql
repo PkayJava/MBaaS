@@ -5,7 +5,7 @@ CREATE TABLE asset (
   `name`        VARCHAR(255),
   `label`       VARCHAR(255),
   `path`        VARCHAR(255) NOT NULL,
-  `mime`        VARCHAR(30),
+  `mime`        VARCHAR(100),
   `extension`   VARCHAR(10),
   `length`      INT(11)      NOT NULL,
 
@@ -14,17 +14,14 @@ CREATE TABLE asset (
   owner_user_id VARCHAR(100),
   client_id     VARCHAR(100),
 
-  optimistic    INT(11)      NOT NULL DEFAULT 0,
-
-  INDEX (`date_created`),
   INDEX (`name`),
   INDEX (`label`),
-  INDEX (`client_id`),
-  INDEX (`owner_user_id`),
   INDEX (`path`),
   INDEX (`mime`),
   INDEX (`extension`),
   INDEX (`length`),
+  INDEX (`date_created`),
+  INDEX (`owner_user_id`),
+  INDEX (`client_id`),
   PRIMARY KEY (asset_id)
-
 );

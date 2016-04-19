@@ -7,13 +7,11 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
-import com.angkorteam.mbaas.server.validator.JavascriptNameValidator;
 import com.angkorteam.mbaas.server.validator.JavascriptPathValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
@@ -27,10 +25,6 @@ import java.util.UUID;
 @AuthorizeInstantiation("administrator")
 @Mount("/javascript/create")
 public class JavascriptCreatePage extends MasterPage {
-
-    private String name;
-    private TextField<String> nameField;
-    private TextFeedbackPanel nameFeedback;
 
     private String pathText;
     private TextField<String> pathField;
@@ -61,13 +55,6 @@ public class JavascriptCreatePage extends MasterPage {
         add(this.form);
 
         this.script = getString("javascript.script");
-
-        this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
-        this.nameField.setRequired(true);
-        this.nameField.add(new JavascriptNameValidator());
-        this.form.add(this.nameField);
-        this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
-        this.form.add(this.nameFeedback);
 
         this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "pathText"));
         this.pathField.setRequired(true);
@@ -102,11 +89,9 @@ public class JavascriptCreatePage extends MasterPage {
         JavascriptRecord javascriptRecord = context.newRecord(javascriptTable);
 
         javascriptRecord.setJavascriptId(uuid);
-        javascriptRecord.setName(this.name);
         javascriptRecord.setSecurity(SecurityEnum.Denied.getLiteral());
         javascriptRecord.setPath(this.pathText);
         javascriptRecord.setScript(this.script);
-        javascriptRecord.setDeleted(false);
         javascriptRecord.setOwnerUserId(getSession().getUserId());
         javascriptRecord.setDateCreated(new Date());
         javascriptRecord.setDescription(this.description);

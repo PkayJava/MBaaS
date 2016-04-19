@@ -39,7 +39,7 @@ public class ProviderUtils {
             columns.add(new TextFilteredJooqColumn(Double.class, JooqUtils.lookup(column, page), column, provider));
         } else if (AttributeTypeEnum.Character == attributeType) {
             String column = attributeRecord.getName();
-            columns.add(new TextFilteredJooqColumn(Calendar.class, JooqUtils.lookup(column, page), column, provider));
+            columns.add(new TextFilteredJooqColumn(Character.class, JooqUtils.lookup(column, page), column, provider));
         } else if (AttributeTypeEnum.String == attributeType || AttributeTypeEnum.Text == attributeType) {
             String column = attributeRecord.getName();
             columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(column, page), column, provider));

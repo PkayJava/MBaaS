@@ -7,6 +7,9 @@ CREATE TABLE collection_role_privacy (
 
   permisson                  INT(11)      NOT NULL,
 
+  INDEX (role_id),
+  INDEX (collection_id),
+  INDEX (permisson),
   UNIQUE (role_id, collection_id),
   PRIMARY KEY (collection_role_privacy_id)
 );

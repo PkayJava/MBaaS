@@ -1,12 +1,11 @@
 package com.angkorteam.mbaas.server.nashorn;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.QueryTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
 import com.angkorteam.mbaas.plain.Identity;
-import com.angkorteam.mbaas.plain.enums.QueryReturnTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
@@ -14,7 +13,6 @@ import com.angkorteam.mbaas.server.function.DocumentFunction;
 import jdk.nashorn.api.scripting.JSObject;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
 import org.springframework.dao.*;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.IncorrectResultSetColumnCountException;
@@ -119,71 +117,71 @@ public class Database {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
         try {
-            if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Boolean.getLiteral())) {
+            if (queryRecord.getReturnType().equals(TypeEnum.Boolean.getLiteral())) {
                 return jdbcTemplate.queryForObject(queryRecord.getScript(), Boolean.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Byte.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Byte.getLiteral())) {
                 return jdbcTemplate.queryForObject(queryRecord.getScript(), Byte.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Short.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Short.getLiteral())) {
                 return jdbcTemplate.queryForObject(queryRecord.getScript(), Short.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Integer.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Integer.getLiteral())) {
                 return jdbcTemplate.queryForObject(queryRecord.getScript(), Integer.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Long.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Long.getLiteral())) {
                 return jdbcTemplate.queryForObject(queryRecord.getScript(), Long.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Float.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Float.getLiteral())) {
                 return jdbcTemplate.queryForObject(queryRecord.getScript(), Float.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Double.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Double.getLiteral())) {
                 return jdbcTemplate.queryForObject(queryRecord.getScript(), Double.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Character.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Character.getLiteral())) {
                 return jdbcTemplate.queryForObject(queryRecord.getScript(), Character.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.String.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.String.getLiteral())) {
                 return jdbcTemplate.queryForObject(queryRecord.getScript(), String.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Time.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Time.getLiteral())) {
                 DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_TIME));
                 Date value = jdbcTemplate.queryForObject(queryRecord.getScript(), Date.class);
                 if (value != null) {
                     return dateFormat.format(value);
                 }
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Date.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Date.getLiteral())) {
                 DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATE));
                 Date value = jdbcTemplate.queryForObject(queryRecord.getScript(), Date.class);
                 if (value != null) {
                     return dateFormat.format(value);
                 }
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.DateTime.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.DateTime.getLiteral())) {
                 DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
                 Date value = jdbcTemplate.queryForObject(queryRecord.getScript(), Date.class);
                 if (value != null) {
                     return dateFormat.format(value);
                 }
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Map.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Map.getLiteral())) {
                 return jdbcTemplate.queryForMap(queryRecord.getScript());
 
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.List.getLiteral())) {
-                if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Boolean.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.List.getLiteral())) {
+                if (queryRecord.getReturnSubType().equals(TypeEnum.Boolean.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Boolean.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Byte.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Byte.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Byte.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Short.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Short.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Short.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Integer.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Integer.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Integer.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Long.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Long.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Long.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Float.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Float.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Float.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Double.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Double.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Double.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Character.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Character.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Character.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.String.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.String.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), String.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Time.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Time.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Date.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Date.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Date.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Date.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.DateTime.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.DateTime.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript(), Date.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Map.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Map.getLiteral())) {
                     return jdbcTemplate.queryForList(queryRecord.getScript());
                 } else {
                     return jdbcTemplate.queryForList(queryRecord.getScript());
@@ -230,70 +228,70 @@ public class Database {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         try {
-            if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Boolean.getLiteral())) {
+            if (queryRecord.getReturnType().equals(TypeEnum.Boolean.getLiteral())) {
                 return namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Boolean.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Byte.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Byte.getLiteral())) {
                 return namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Byte.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Short.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Short.getLiteral())) {
                 return namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Short.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Integer.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Integer.getLiteral())) {
                 return namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Integer.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Long.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Long.getLiteral())) {
                 return namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Long.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Float.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Float.getLiteral())) {
                 return namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Float.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Double.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Double.getLiteral())) {
                 return namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Double.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Character.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Character.getLiteral())) {
                 return namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Character.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.String.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.String.getLiteral())) {
                 return namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, String.class);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Time.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Time.getLiteral())) {
                 DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_TIME));
                 Date value = namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Date.class);
                 if (value != null) {
                     return dateFormat.format(value);
                 }
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Date.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Date.getLiteral())) {
                 DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATE));
                 Date value = namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Date.class);
                 if (value != null) {
                     return dateFormat.format(value);
                 }
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.DateTime.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.DateTime.getLiteral())) {
                 DateFormat dateFormat = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
                 Date value = namedParameterJdbcTemplate.queryForObject(queryRecord.getScript(), params, Date.class);
                 if (value != null) {
                     return dateFormat.format(value);
                 }
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.Map.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.Map.getLiteral())) {
                 return namedParameterJdbcTemplate.queryForMap(queryRecord.getScript(), params);
-            } else if (queryRecord.getReturnType().equals(QueryReturnTypeEnum.List.getLiteral())) {
-                if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Boolean.getLiteral())) {
+            } else if (queryRecord.getReturnType().equals(TypeEnum.List.getLiteral())) {
+                if (queryRecord.getReturnSubType().equals(TypeEnum.Boolean.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Boolean.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Byte.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Byte.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Byte.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Short.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Short.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Short.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Integer.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Integer.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Integer.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Long.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Long.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Long.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Float.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Float.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Float.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Double.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Double.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Double.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Character.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Character.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Character.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.String.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.String.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, String.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Time.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Time.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Date.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Date.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Date.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Date.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.DateTime.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.DateTime.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params, Date.class);
-                } else if (queryRecord.getReturnSubType().equals(QueryReturnTypeEnum.Map.getLiteral())) {
+                } else if (queryRecord.getReturnSubType().equals(TypeEnum.Map.getLiteral())) {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params);
                 } else {
                     return namedParameterJdbcTemplate.queryForList(queryRecord.getScript(), params);

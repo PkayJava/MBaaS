@@ -9,14 +9,14 @@ CREATE TABLE desktop (
   user_agent    VARCHAR(255),
   client_ip     VARCHAR(30),
 
-  optimistic    INT(11)      NOT NULL DEFAULT 0,
+  optimistic    INT(11) DEFAULT 0,
 
   INDEX (owner_user_id),
-  INDEX (client_ip),
-  INDEX (user_agent),
   INDEX (date_created),
   INDEX (date_seen),
   UNIQUE KEY (session_id),
+  INDEX (user_agent),
+  INDEX (client_ip),
+  INDEX (optimistic),
   PRIMARY KEY (desktop_id)
-
 );

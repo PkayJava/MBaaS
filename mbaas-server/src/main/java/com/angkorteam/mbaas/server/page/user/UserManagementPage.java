@@ -48,16 +48,6 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
                 .fetchOneInto(collectionTable);
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        List<AttributeRecord> attributeRecords = context.select(attributeTable.fields())
-                .from(attributeTable)
-                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                .fetchInto(attributeTable);
-
-        Map<String, AttributeRecord> virtualAttributeRecords = new HashMap<>();
-        for (AttributeRecord attributeRecord : attributeRecords) {
-            virtualAttributeRecords.put(attributeRecord.getAttributeId(), attributeRecord);
-        }
-
         UserProvider provider = new UserProvider();
         provider.selectField(String.class, "userId");
         provider.selectField(Boolean.class, "system");
@@ -69,20 +59,13 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("login", this), "login", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("roleName", this), "roleName", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("status", this), "status", provider));
-        for (AttributeRecord attributeRecord : attributeRecords) {
-            if (attributeRecord.getSystem()) {
-                continue;
-            }
-            AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
-            ProviderUtils.addColumn(provider, columns, attributeRecord, attributeType, this);
-        }
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Change PWD", "Suspend", "Activate"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", UserManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", UserManagementPage.class, getPageParameters());
         add(refreshLink);
     }
 

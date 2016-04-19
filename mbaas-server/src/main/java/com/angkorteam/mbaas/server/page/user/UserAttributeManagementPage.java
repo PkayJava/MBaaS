@@ -22,6 +22,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.Filte
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
+import org.jooq.types.Interval;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class UserAttributeManagementPage extends MasterPage implements ActionFil
         this.collectionId = context.select(collectionTable.COLLECTION_ID).from(collectionTable).where(collectionTable.NAME.eq(Tables.USER.getName())).fetchOneInto(String.class);
 
         UserAttributeProvider provider = new UserAttributeProvider(getSession().getUserId());
-
+        provider.selectField(Boolean.class, "system");
         provider.selectField(String.class, "attributeId");
         provider.selectField(String.class, "userPrivacyId");
 
@@ -61,14 +62,8 @@ public class UserAttributeManagementPage extends MasterPage implements ActionFil
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
 
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("javaType", this), "javaType", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("sqlType", this), "sqlType", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("virtual", this), "virtual", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("virtualAttribute", this), "virtualAttribute", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("system", this), "system", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("exposed", this), "exposed", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("nullable", this), "nullable", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup("autoIncrement", this), "autoIncrement", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("attributeType", this), "attributeType", provider));
+        columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("extra", this), "extra", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("scope", this), "scope", provider));
 
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Permission", "Delete"));

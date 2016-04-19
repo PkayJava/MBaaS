@@ -42,7 +42,6 @@ public class UserFunction {
 
         UserRecord userRecord = context.newRecord(userTable);
         userRecord.setUserId(userId);
-        userRecord.setDeleted(false);
         userRecord.setRoleId(roleRecord.getRoleId());
         userRecord.setAccountNonExpired(true);
         userRecord.setCredentialsNonExpired(true);

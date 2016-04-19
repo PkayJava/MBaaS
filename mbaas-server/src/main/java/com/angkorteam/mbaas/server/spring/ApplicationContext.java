@@ -192,7 +192,6 @@ public class ApplicationContext implements ServletContextListener {
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_ADMIN_ROLE)))).fetchOneInto(roleTable);
             adminRecord = context.newRecord(userTable);
             adminRecord.setUserId(uuid);
-            adminRecord.setDeleted(false);
             adminRecord.setAccountNonExpired(true);
             adminRecord.setSystem(true);
             adminRecord.setAccountNonLocked(true);
@@ -212,7 +211,6 @@ public class ApplicationContext implements ServletContextListener {
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_MBAAS_ROLE)))).fetchOneInto(roleTable);
             mbaasRecord = context.newRecord(userTable);
             mbaasRecord.setUserId(uuid);
-            mbaasRecord.setDeleted(false);
             mbaasRecord.setSystem(true);
             mbaasRecord.setAccountNonExpired(true);
             mbaasRecord.setAccountNonLocked(true);
@@ -232,7 +230,6 @@ public class ApplicationContext implements ServletContextListener {
             RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_INTERNAL_ADMIN_ROLE)))).fetchOneInto(roleTable);
             internalAdminRecord = context.newRecord(userTable);
             internalAdminRecord.setUserId(uuid);
-            internalAdminRecord.setDeleted(false);
             internalAdminRecord.setSystem(true);
             internalAdminRecord.setAccountNonExpired(true);
             internalAdminRecord.setAccountNonLocked(true);
@@ -268,7 +265,6 @@ public class ApplicationContext implements ServletContextListener {
                 roleRecord.setName(role.getKey());
                 roleRecord.setDescription(role.getValue());
                 roleRecord.setSystem(true);
-                roleRecord.setDeleted(false);
                 roleRecord.store();
             }
         }
@@ -318,139 +314,141 @@ public class ApplicationContext implements ServletContextListener {
                     attributeRecord.update();
                     attributeRecords.put(attributeRecord.getName(), attributeRecord);
                 }
-                {
-                    ResultSet resultSet = databaseMetaData.getColumns(null, null, table.getName(), null);
-                    while (resultSet.next()) {
-                        String columnName = resultSet.getString(ColumnEnum.COLUMN_NAME.getLiteral());
-                        if (!attributeRecords.containsKey(columnName)) {
-                            int extra = 0;
-                            AttributeRecord attributeRecord = context.newRecord(attributeTable);
-                            attributeRecord.setAttributeId(UUID.randomUUID().toString());
-                            attributeRecord.setCollectionId(collectionRecord.getCollectionId());
-                            attributeRecord.setName(columnName);
-                            if (resultSet.getBoolean(ColumnEnum.NULLABLE.getLiteral())) {
-                                extra = extra | AttributeExtraEnum.NULLABLE;
-                            }
-                            if (columnName.equals(collectionRecord.getName() + "_id")) {
-                                extra = extra | AttributeExtraEnum.AUTO_INCREMENT;
-                                attributeRecord.setVisibility(VisibilityEnum.Shown.getLiteral());
-                            } else {
-                                attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
-                            }
-                            extra = extra | AttributeExtraEnum.EXPOSED;
-                            attributeRecord.setSystem(true);
-                            attributeRecord.setEav(false);
-                            attributeRecord.setExtra(extra);
+                List<String> physicalName = new ArrayList<>();
+                ResultSet columns = databaseMetaData.getColumns(null, null, table.getName(), null);
+                while (columns.next()) {
+                    String columnName = columns.getString(ColumnEnum.COLUMN_NAME.getLiteral());
+                    if (!attributeRecords.containsKey(columnName)) {
+                        int extra = 0;
+                        AttributeRecord attributeRecord = context.newRecord(attributeTable);
+                        attributeRecord.setAttributeId(UUID.randomUUID().toString());
+                        attributeRecord.setCollectionId(collectionRecord.getCollectionId());
+                        attributeRecord.setName(columnName);
+                        if (columns.getBoolean(ColumnEnum.NULLABLE.getLiteral())) {
+                            extra = extra | AttributeExtraEnum.NULLABLE;
+                        }
+                        if (columnName.equals(collectionRecord.getName() + "_id")) {
+                            extra = extra | AttributeExtraEnum.AUTO_INCREMENT;
+                            attributeRecord.setVisibility(VisibilityEnum.Shown.getLiteral());
+                        } else {
+                            attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
+                        }
+                        extra = extra | AttributeExtraEnum.EXPOSED;
+                        attributeRecord.setSystem(true);
+                        attributeRecord.setEav(false);
+                        attributeRecord.setExtra(extra);
 
-                            int dataType = resultSet.getInt(ColumnEnum.DATA_TYPE.getLiteral());
-                            int columnSize = resultSet.getInt(ColumnEnum.COLUMN_SIZE.getLiteral());
-                            String typeName = resultSet.getString(ColumnEnum.TYPE_NAME.getLiteral());
+                        int dataType = columns.getInt(ColumnEnum.DATA_TYPE.getLiteral());
+                        int columnSize = columns.getInt(ColumnEnum.COLUMN_SIZE.getLiteral());
+                        String typeName = columns.getString(ColumnEnum.TYPE_NAME.getLiteral());
 
-                            String errorMessage = "collection " + table.getName() + ", attribute " + columnName + " dataType " + dataType + ",  typeName " + typeName + ", columnSize " + columnSize;
+                        String errorMessage = "collection " + table.getName() + ", attribute " + columnName + " dataType " + dataType + ",  typeName " + typeName + ", columnSize " + columnSize;
 
-                            boolean handled = false;
+                        boolean handled = false;
 
-                            if (dataType == Types.BIT) {
-                                if ("BIT".equals(typeName)) {
-                                    if (columnSize == 1) {
-                                        attributeRecord.setAttributeType(AttributeTypeEnum.Boolean.getLiteral());
-                                        handled = true;
-                                    } else {
-                                        attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                        handled = true;
-                                    }
-                                } else if ("TINYINT".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                    handled = true;
-                                }
-                            } else if (dataType == Types.TINYINT) {
-                                if ("TINYINT".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                    handled = true;
-                                }
-                            } else if (dataType == Types.SMALLINT) {
-                                if ("SMALLINT".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                    handled = true;
-                                }
-                            } else if (dataType == Types.BOOLEAN) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Boolean.getLiteral());
-                            } else if (dataType == Types.INTEGER) {
-                                if ("INT".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                    handled = true;
-                                } else if ("MEDIUMINT".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                    handled = true;
-                                }
-                            } else if (dataType == Types.BIGINT) {
-                                if ("BIGINT".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                    handled = true;
-                                }
-                            } else if (dataType == Types.REAL) {
-                                if ("FLOAT".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Float.getLiteral());
-                                    handled = true;
-                                }
-                            } else if (dataType == Types.DOUBLE) {
-                                if ("DOUBLE".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Double.getLiteral());
-                                    handled = true;
-                                }
-                            } else if (dataType == Types.DECIMAL) {
-                                if ("DECIMAL".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Double.getLiteral());
-                                    handled = true;
-                                }
-                            } else if ((dataType == Types.CHAR && "CHAR".equals(typeName)) || (dataType == Types.VARCHAR && "VARCHAR".equals(typeName))) {
-                                if (columnSize > 255) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Text.getLiteral());
-                                    handled = true;
-                                } else if (columnSize > 1) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.String.getLiteral());
+                        if (dataType == Types.BIT) {
+                            if ("BIT".equals(typeName)) {
+                                if (columnSize == 1) {
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Boolean.getLiteral());
                                     handled = true;
                                 } else {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Character.getLiteral());
+                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
                                     handled = true;
                                 }
-                            } else if (dataType == Types.TIMESTAMP) {
-                                if ("DATETIME".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.DateTime.getLiteral());
-                                    handled = true;
-                                } else if ("TIMESTAMP".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.DateTime.getLiteral());
-                                    handled = true;
-                                }
-                            } else if (dataType == Types.DATE) {
-                                if ("DATE".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Date.getLiteral());
-                                    handled = true;
-                                }
-                            } else if (dataType == Types.TIME) {
-                                if ("TIME".equals(typeName)) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Time.getLiteral());
-                                    handled = true;
-                                }
-                            } else if (dataType == Types.LONGVARCHAR) {
-                                if (typeName.equals("TEXT")) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Text.getLiteral());
-                                    handled = true;
-                                }
+                            } else if ("TINYINT".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                handled = true;
                             }
-                            if (!handled) {
-                                throw new WicketRuntimeException(errorMessage);
+                        } else if (dataType == Types.TINYINT) {
+                            if ("TINYINT".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                handled = true;
                             }
-                            attributeRecord.store();
-                        } else {
-                            attributeRecords.remove(columnName);
+                        } else if (dataType == Types.SMALLINT) {
+                            if ("SMALLINT".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                handled = true;
+                            }
+                        } else if (dataType == Types.BOOLEAN) {
+                            attributeRecord.setAttributeType(AttributeTypeEnum.Boolean.getLiteral());
+                        } else if (dataType == Types.INTEGER) {
+                            if ("INT".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                handled = true;
+                            } else if ("MEDIUMINT".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                handled = true;
+                            }
+                        } else if (dataType == Types.BIGINT) {
+                            if ("BIGINT".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
+                                handled = true;
+                            }
+                        } else if (dataType == Types.REAL) {
+                            if ("FLOAT".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Float.getLiteral());
+                                handled = true;
+                            }
+                        } else if (dataType == Types.DOUBLE) {
+                            if ("DOUBLE".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Double.getLiteral());
+                                handled = true;
+                            }
+                        } else if (dataType == Types.DECIMAL) {
+                            if ("DECIMAL".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Double.getLiteral());
+                                handled = true;
+                            }
+                        } else if ((dataType == Types.CHAR && "CHAR".equals(typeName)) || (dataType == Types.VARCHAR && "VARCHAR".equals(typeName))) {
+                            if (columnSize > 255) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Text.getLiteral());
+                                handled = true;
+                            } else if (columnSize > 1) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.String.getLiteral());
+                                handled = true;
+                            } else {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Character.getLiteral());
+                                handled = true;
+                            }
+                        } else if (dataType == Types.TIMESTAMP) {
+                            if ("DATETIME".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.DateTime.getLiteral());
+                                handled = true;
+                            } else if ("TIMESTAMP".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.DateTime.getLiteral());
+                                handled = true;
+                            }
+                        } else if (dataType == Types.DATE) {
+                            if ("DATE".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Date.getLiteral());
+                                handled = true;
+                            }
+                        } else if (dataType == Types.TIME) {
+                            if ("TIME".equals(typeName)) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Time.getLiteral());
+                                handled = true;
+                            }
+                        } else if (dataType == Types.LONGVARCHAR) {
+                            if (typeName.equals("TEXT")) {
+                                attributeRecord.setAttributeType(AttributeTypeEnum.Text.getLiteral());
+                                handled = true;
+                            }
+                        }
+                        if (!handled) {
+                            throw new WicketRuntimeException(errorMessage);
+                        }
+                        attributeRecord.store();
+                    } else {
+                        if (attributeRecords.get(columnName).getEav()) {
+                            throw new WicketRuntimeException(table.getName() + " attribute " + columnName + " is already exists but it is EAV attribute");
                         }
                     }
+                    physicalName.add(columnName);
                 }
                 for (Map.Entry<String, AttributeRecord> entry : attributeRecords.entrySet()) {
-                    context.delete(attributeTable)
-                            .where(attributeTable.ATTRIBUTE_ID.eq(entry.getValue().getAttributeId()))
-                            .execute();
+                    if (!physicalName.contains(entry.getKey()) && !entry.getValue().getEav()) {
+                        context.delete(attributeTable).where(attributeTable.ATTRIBUTE_ID.eq(entry.getValue().getAttributeId())).execute();
+                    }
                 }
                 {
                     ResultSet resultSet = databaseMetaData.getPrimaryKeys(null, null, table.getName());

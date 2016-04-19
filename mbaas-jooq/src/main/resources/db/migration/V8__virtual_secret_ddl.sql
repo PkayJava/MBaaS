@@ -15,17 +15,17 @@ CREATE TABLE virtual_secret (
 
   security            VARCHAR(15)  NOT NULL,
 
-  optimistic          INT(11)      NOT NULL DEFAULT 0,
+  optimistic          INT(11) DEFAULT 0,
 
-  UNIQUE (virtual_secret_id, client_secret),
   INDEX (application_id),
   INDEX (client_id),
   INDEX (owner_user_id),
   INDEX (application_user_id),
   INDEX (client_user_id),
+  INDEX (client_secret),
   INDEX (date_created),
   INDEX (security),
-
+  INDEX (optimistic),
+  UNIQUE (virtual_secret_id, client_secret),
   PRIMARY KEY (virtual_secret_id)
-
 );

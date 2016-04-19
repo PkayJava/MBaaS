@@ -7,6 +7,9 @@ CREATE TABLE user_privacy (
 
   scope           VARCHAR(50)  NOT NULL,
 
+  INDEX (user_id),
+  INDEX (attribute_id),
+  INDEX (scope),
   UNIQUE KEY (user_id, attribute_id, scope),
   PRIMARY KEY (user_privacy_id)
 );

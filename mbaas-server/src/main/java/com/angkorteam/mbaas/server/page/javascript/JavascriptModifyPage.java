@@ -6,13 +6,11 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
-import com.angkorteam.mbaas.server.validator.JavascriptNameValidator;
 import com.angkorteam.mbaas.server.validator.JavascriptPathValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -26,11 +24,6 @@ import org.jooq.DSLContext;
 public class JavascriptModifyPage extends MasterPage {
 
     private String javascriptId;
-    private Integer optimistic;
-
-    private String name;
-    private TextField<String> nameField;
-    private TextFeedbackPanel nameFeedback;
 
     private String pathText;
     private TextField<String> pathField;
@@ -67,17 +60,7 @@ public class JavascriptModifyPage extends MasterPage {
         this.form = new Form<>("form");
         add(this.form);
 
-        this.optimistic = javascriptRecord.getOptimistic();
-
-        this.name = javascriptRecord.getName();
         this.pathText = javascriptRecord.getPath();
-        this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
-        this.nameField.setRequired(true);
-        this.nameField.add(new JavascriptNameValidator(this.javascriptId));
-        this.form.add(this.nameField);
-        this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
-        this.form.add(this.nameFeedback);
-
         this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "pathText"));
         this.pathField.setRequired(true);
         this.pathField.add(new JavascriptPathValidator(this.javascriptId));
@@ -114,11 +97,9 @@ public class JavascriptModifyPage extends MasterPage {
 
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
 
-        javascriptRecord.setName(this.name);
         javascriptRecord.setPath(this.pathText);
         javascriptRecord.setScript(this.script);
         javascriptRecord.setDescription(this.description);
-        javascriptRecord.setOptimistic(this.optimistic);
         javascriptRecord.update();
 
         setResponsePage(JavascriptManagementPage.class);
@@ -130,11 +111,9 @@ public class JavascriptModifyPage extends MasterPage {
 
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
 
-        javascriptRecord.setName(this.name);
         javascriptRecord.setPath(this.pathText);
         javascriptRecord.setScript(this.script);
         javascriptRecord.setDescription(this.description);
-        javascriptRecord.setOptimistic(this.optimistic);
         javascriptRecord.update();
 
         PageParameters parameters = new PageParameters();

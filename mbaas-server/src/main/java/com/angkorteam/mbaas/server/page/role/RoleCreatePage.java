@@ -78,7 +78,6 @@ public class RoleCreatePage extends MasterPage {
         RoleRecord roleRecord = context.newRecord(roleTable);
         roleRecord.setRoleId(UUID.randomUUID().toString());
         roleRecord.setSystem(false);
-        roleRecord.setDeleted(false);
         roleRecord.setName(this.name);
         roleRecord.setDescription(this.description);
         roleRecord.store();

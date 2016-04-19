@@ -39,7 +39,6 @@ import java.util.Map;
 public class FileModifyPage extends MasterPage {
 
     private String fileId;
-    private Integer optimistic;
     private CollectionPojo collection;
     private String collectionId;
     private String documentId;
@@ -59,8 +58,6 @@ public class FileModifyPage extends MasterPage {
 
     private String pathText;
     private Label pathLabel;
-
-    private Map<String, Object> fields;
 
     private Button saveButton;
 
@@ -85,43 +82,8 @@ public class FileModifyPage extends MasterPage {
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.FILE.getName())).fetchOneInto(CollectionPojo.class);
         this.collectionId = this.collection.getCollectionId();
-        this.fields = new HashMap<>();
-
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
-        List<AttributePojo> attributes = context.select(attributeTable.fields())
-                .from(attributeTable)
-                .where(attributeTable.COLLECTION_ID.eq(collectionId))
-                .and(attributeTable.SYSTEM.eq(false))
-                .fetchInto(AttributePojo.class);
-
-        Map<String, AttributePojo> virtualAttributes = new HashMap<>();
-        for (AttributePojo attribute : context.select(attributeTable.fields()).from(attributeTable).fetchInto(AttributePojo.class)) {
-            virtualAttributes.put(attribute.getAttributeId(), attribute);
-        }
-
-        List<String> selectFields = new ArrayList<>();
-
-        RepeatingView fields = new RepeatingView("fields");
-        for (AttributePojo attribute : attributes) {
-            TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
-            fields.add(fieldPanel);
-            selectFields.add(attribute.getName());
-        }
-
-        if (!selectFields.isEmpty()) {
-            CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
-            Map<String, Object> document = getJdbcTemplate().queryForMap("select " + StringUtils.join(selectFields, ", ") + " from `" + collectionRecord.getName() + "` where " + collectionRecord.getName() + "_id = ?", this.fileId);
-            if (document != null && !document.isEmpty()) {
-                for (Map.Entry<String, Object> entry : document.entrySet()) {
-                    this.fields.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
 
         FileRecord fileRecord = context.select(fileTable.fields()).from(fileTable).where(fileTable.FILE_ID.eq(fileId)).fetchOneInto(fileTable);
-
-        this.optimistic = fileRecord.getOptimistic();
 
         this.form = new Form<>("form");
         add(this.form);
@@ -152,7 +114,6 @@ public class FileModifyPage extends MasterPage {
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
 
-        this.form.add(fields);
         this.form.add(this.saveButton);
     }
 
@@ -162,9 +123,10 @@ public class FileModifyPage extends MasterPage {
 
         CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
 
+        Map<String, Object> fields = new HashMap<>();
         DocumentModifyRequest requestBody = new DocumentModifyRequest();
-        this.fields.put(Tables.FILE.LABEL.getName(), this.name);
-        requestBody.setDocument(this.fields);
+        fields.put(Tables.FILE.LABEL.getName(), this.name);
+        requestBody.setDocument(fields);
 
         DocumentFunction.modifyDocument(getDSLContext(), getJdbcTemplate(), collectionRecord.getName(), this.documentId, requestBody);
 

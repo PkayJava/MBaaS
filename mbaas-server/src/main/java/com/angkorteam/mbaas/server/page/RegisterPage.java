@@ -99,7 +99,6 @@ public class RegisterPage extends AdminLTEPage {
         userRecord.setUserId(userId);
         userRecord.setLogin(this.login);
         userRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
-        userRecord.setDeleted(false);
         userRecord.setAccountNonExpired(true);
         userRecord.setRoleId(roleRecord.getRoleId());
         userRecord.setAccountNonLocked(true);

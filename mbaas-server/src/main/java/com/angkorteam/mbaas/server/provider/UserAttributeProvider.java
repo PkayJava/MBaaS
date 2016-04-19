@@ -46,6 +46,10 @@ public class UserAttributeProvider extends JooqProvider {
         return this.attributeTable.ATTRIBUTE_TYPE;
     }
 
+    public Field<Boolean> getSystem() {
+        return this.attributeTable.SYSTEM;
+    }
+
     public Field<Integer> getExtra() {
         return this.attributeTable.EXTRA;
     }
