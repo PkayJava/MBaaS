@@ -5,7 +5,7 @@ buildscript {
         classpath 'com.angkorteam.gradle:plugin-task:1.0'
     }
     repositories {
-        maven { url 'http://pkayjava.ddns.net:8081/nexus/content/groups/public' }
+        maven { url "http://pkayjava.ddns.net:8081/repository/maven-public/" }
         jcenter();
     }
 }
@@ -61,7 +61,7 @@ jooq {
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: 'http://pkayjava.ddns.net:8081/nexus/content/repositories/releases') {
+            repository(url: "http://pkayjava.ddns.net:8081/repository/maven-releases/") {
                 authentication(userName: 'admin', password: 'admin123')
             }
             pom.groupId = 'com.angkorteam.mbaas.jooq';

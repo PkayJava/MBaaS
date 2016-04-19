@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        maven { url 'http://pkayjava.ddns.net:8081/nexus/content/groups/public' }
+        maven { url "http://pkayjava.ddns.net:8081/repository/maven-public/" }
         jcenter()
         mavenCentral()
     }
@@ -31,8 +31,8 @@ dependencies {
 
     compile 'com.google.code.gson:gson:' + gsonVersion
 
-    compile 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
-    compile 'io.github.robwin:swagger2markup-gradle-plugin:0.9.2'
+    //compile 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
+    //compile 'io.github.robwin:swagger2markup-gradle-plugin:0.9.2'
 
     compile 'org.flywaydb:flyway-core:' + flywayVersion
 
@@ -87,7 +87,7 @@ mainClassName = 'com.angkorteam.mbaas.server.Start'
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "http://pkayjava.ddns.net:8081/nexus/content/repositories/releases") {
+            repository(url: "http://pkayjava.ddns.net:8081/repository/maven-releases/") {
                 authentication(userName: "admin", password: "admin123")
             }
             pom.groupId = 'com.angkorteam.mbaas.server';
