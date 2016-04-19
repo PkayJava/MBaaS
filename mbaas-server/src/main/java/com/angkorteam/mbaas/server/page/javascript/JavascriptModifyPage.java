@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.page.javascript;
 
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.JavascriptTextField;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.JavascriptTextArea;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
@@ -34,7 +34,7 @@ public class JavascriptModifyPage extends MasterPage {
     private TextFeedbackPanel descriptionFeedback;
 
     private String script;
-    private JavascriptTextField scriptField;
+    private JavascriptTextArea scriptField;
     private TextFeedbackPanel scriptFeedback;
 
     private Button saveButton;
@@ -76,7 +76,7 @@ public class JavascriptModifyPage extends MasterPage {
         this.form.add(this.descriptionFeedback);
 
         this.script = javascriptRecord.getScript();
-        this.scriptField = new JavascriptTextField("scriptField", new PropertyModel<>(this, "script"));
+        this.scriptField = new JavascriptTextArea("scriptField", new PropertyModel<>(this, "script"));
         this.scriptField.setRequired(true);
         this.form.add(this.scriptField);
         this.scriptFeedback = new TextFeedbackPanel("scriptFeedback", this.scriptField);

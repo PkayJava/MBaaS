@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.page.query;
 
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.SQLTextField;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.SQLTextArea;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.configuration.Constants;
@@ -47,7 +47,7 @@ public class QueryModifyPage extends MasterPage {
     private TextFeedbackPanel descriptionFeedback;
 
     private String script;
-    private SQLTextField scriptField;
+    private SQLTextArea scriptField;
     private TextFeedbackPanel scriptFeedback;
 
     private String returnType;
@@ -98,7 +98,7 @@ public class QueryModifyPage extends MasterPage {
         this.form.add(this.descriptionFeedback);
 
         this.script = queryRecord.getScript();
-        this.scriptField = new SQLTextField("scriptField", new PropertyModel<>(this, "script"));
+        this.scriptField = new SQLTextArea("scriptField", new PropertyModel<>(this, "script"));
         this.scriptField.setRequired(true);
         this.scriptField.add(new QueryScriptValidator());
         this.form.add(this.scriptField);
