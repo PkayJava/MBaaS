@@ -12,6 +12,8 @@ import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -41,6 +43,8 @@ import java.util.concurrent.*;
 @Controller
 @RequestMapping(path = "/javascript")
 public class JavascriptController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(com.angkorteam.mbaas.server.MBaaS.class);
 
     @Autowired
     private DSLContext context;
@@ -233,6 +237,7 @@ public class JavascriptController {
     }
 
     protected ResponseEntity<JavaScriptExecuteResponse> returnThrowable(Throwable throwable) {
+        LOGGER.info(throwable.getMessage());
         if (throwable instanceof BadCredentialsException) {
             JavaScriptExecuteResponse response = new JavaScriptExecuteResponse();
             response.setHttpCode(HttpStatus.UNAUTHORIZED.value());
