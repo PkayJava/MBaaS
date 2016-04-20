@@ -126,56 +126,49 @@ public abstract class MasterPage extends AdminLTEPage {
         logoutLink.setOnClick(this::logoutLinkOnClick);
         logoutLink.setVisible(getSession().isSignedIn());
 
-        WebMarkupContainer menuGeneral = new WebMarkupContainer("menuGeneral");
-        menuGeneral.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuGeneralClass")));
-        add(menuGeneral);
-        WebMarkupContainer mmenuApplication = new WebMarkupContainer("mmenuApplication");
-        mmenuApplication.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuApplicationClass")));
-        menuGeneral.add(mmenuApplication);
-        WebMarkupContainer mmenuSetting = new WebMarkupContainer("mmenuSetting");
-        mmenuSetting.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuSettingClass")));
-        menuGeneral.add(mmenuSetting);
-        WebMarkupContainer mmenuLocalization = new WebMarkupContainer("mmenuLocalization");
-        mmenuLocalization.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuLocalizationClass")));
-        menuGeneral.add(mmenuLocalization);
+        {
+            WebMarkupContainer menuGeneral = new WebMarkupContainer("menuGeneral");
+            menuGeneral.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuGeneralClass")));
+            add(menuGeneral);
+            WebMarkupContainer mmenuSetting = new WebMarkupContainer("mmenuSetting");
+            mmenuSetting.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuSettingClass")));
+            menuGeneral.add(mmenuSetting);
+            WebMarkupContainer mmenuLocalization = new WebMarkupContainer("mmenuLocalization");
+            mmenuLocalization.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuLocalizationClass")));
+            menuGeneral.add(mmenuLocalization);
+        }
 
-        WebMarkupContainer menuProfile = new WebMarkupContainer("menuProfile");
-        menuProfile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuProfileClass")));
-        add(menuProfile);
-        WebMarkupContainer mmenuInformation = new WebMarkupContainer("mmenuInformation");
-        mmenuInformation.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuInformationClass")));
-        menuProfile.add(mmenuInformation);
-        WebMarkupContainer mmenuOneTimePassword = new WebMarkupContainer("mmenuOneTimePassword");
-        mmenuOneTimePassword.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuOneTimePasswordClass")));
-        menuProfile.add(mmenuOneTimePassword);
-        WebMarkupContainer mmenu2Factor2Email = new WebMarkupContainer("mmenu2Factor2Email");
-        mmenu2Factor2Email.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenu2Factor2EmailClass")));
-        menuProfile.add(mmenu2Factor2Email);
-        WebMarkupContainer mmenuPassword = new WebMarkupContainer("mmenuPassword", new PropertyModel<>(this, "mmenuPasswordClass"));
-        menuProfile.add(mmenuPassword);
+        {
+            WebMarkupContainer menuProfile = new WebMarkupContainer("menuProfile");
+            menuProfile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuProfileClass")));
+            add(menuProfile);
+            WebMarkupContainer mmenuInformation = new WebMarkupContainer("mmenuInformation");
+            mmenuInformation.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuInformationClass")));
+            menuProfile.add(mmenuInformation);
+            WebMarkupContainer mmenuOneTimePassword = new WebMarkupContainer("mmenuOneTimePassword");
+            mmenuOneTimePassword.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuOneTimePasswordClass")));
+            menuProfile.add(mmenuOneTimePassword);
+            WebMarkupContainer mmenu2Factor2Email = new WebMarkupContainer("mmenu2Factor2Email");
+            mmenu2Factor2Email.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenu2Factor2EmailClass")));
+            menuProfile.add(mmenu2Factor2Email);
+            WebMarkupContainer mmenuPassword = new WebMarkupContainer("mmenuPassword", new PropertyModel<>(this, "mmenuPasswordClass"));
+            menuProfile.add(mmenuPassword);
+        }
 
-        WebMarkupContainer menuSecurity = new WebMarkupContainer("menuSecurity");
-        menuSecurity.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSecurityClass")));
-        add(menuSecurity);
-        WebMarkupContainer mmenuUser = new WebMarkupContainer("mmenuUser");
-        mmenuUser.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuUserClass")));
-        menuSecurity.add(mmenuUser);
-        WebMarkupContainer mmenuRole = new WebMarkupContainer("mmenuRole");
-        mmenuRole.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuRoleClass")));
-        menuSecurity.add(mmenuRole);
-        WebMarkupContainer mmenuNashorn = new WebMarkupContainer("mmenuNashorn");
-        mmenuNashorn.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuNashornClass")));
-        menuSecurity.add(mmenuNashorn);
-
-        WebMarkupContainer menuData = new WebMarkupContainer("menuData");
-        menuData.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuDataClass")));
-        add(menuData);
-        WebMarkupContainer mmenuCollection = new WebMarkupContainer("mmenuCollection");
-        mmenuCollection.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuCollectionClass")));
-        menuData.add(mmenuCollection);
-        WebMarkupContainer mmenuQuery = new WebMarkupContainer("mmenuQuery");
-        mmenuQuery.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuQueryClass")));
-        menuData.add(mmenuQuery);
+        {
+            WebMarkupContainer menuSecurity = new WebMarkupContainer("menuSecurity");
+            menuSecurity.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSecurityClass")));
+            add(menuSecurity);
+            WebMarkupContainer mmenuUser = new WebMarkupContainer("mmenuUser");
+            mmenuUser.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuUserClass")));
+            menuSecurity.add(mmenuUser);
+            WebMarkupContainer mmenuRole = new WebMarkupContainer("mmenuRole");
+            mmenuRole.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuRoleClass")));
+            menuSecurity.add(mmenuRole);
+            WebMarkupContainer mmenuNashorn = new WebMarkupContainer("mmenuNashorn");
+            mmenuNashorn.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuNashornClass")));
+            menuSecurity.add(mmenuNashorn);
+        }
 
         WebMarkupContainer menuStorage = new WebMarkupContainer("menuStorage");
         menuStorage.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuStorageClass")));
@@ -187,22 +180,33 @@ public abstract class MasterPage extends AdminLTEPage {
         mmenuAsset.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuAssetClass")));
         menuStorage.add(mmenuAsset);
 
-        WebMarkupContainer menuSession = new WebMarkupContainer("menuSession");
-        menuSession.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSessionClass")));
-        add(menuSession);
-        WebMarkupContainer mmenuDesktop = new WebMarkupContainer("mmenuDesktop");
-        mmenuDesktop.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuDesktopClass")));
-        menuSession.add(mmenuDesktop);
-        WebMarkupContainer mmenuMobile = new WebMarkupContainer("mmenuMobile");
-        mmenuMobile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMobileClass")));
-        menuSession.add(mmenuMobile);
+        {
+            WebMarkupContainer menuSession = new WebMarkupContainer("menuSession");
+            menuSession.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSessionClass")));
+            add(menuSession);
+            WebMarkupContainer mmenuDesktop = new WebMarkupContainer("mmenuDesktop");
+            mmenuDesktop.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuDesktopClass")));
+            menuSession.add(mmenuDesktop);
+            WebMarkupContainer mmenuMobile = new WebMarkupContainer("mmenuMobile");
+            mmenuMobile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMobileClass")));
+            menuSession.add(mmenuMobile);
+        }
 
-        WebMarkupContainer menuPlugin = new WebMarkupContainer("menuPlugin");
-        menuPlugin.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuPluginClass")));
-        add(menuPlugin);
+
         WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript");
         mmenuJavascript.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJavascriptClass")));
-        menuPlugin.add(mmenuJavascript);
+        add(mmenuJavascript);
+
+        WebMarkupContainer mmenuApplication = new WebMarkupContainer("mmenuApplication");
+        mmenuApplication.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuApplicationClass")));
+        add(mmenuApplication);
+
+        WebMarkupContainer mmenuCollection = new WebMarkupContainer("mmenuCollection");
+        mmenuCollection.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuCollectionClass")));
+        add(mmenuCollection);
+        WebMarkupContainer mmenuQuery = new WebMarkupContainer("mmenuQuery");
+        mmenuQuery.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuQueryClass")));
+        add(mmenuQuery);
     }
 
     @Override
@@ -210,7 +214,7 @@ public abstract class MasterPage extends AdminLTEPage {
         super.onBeforeRender();
 
         // Parent Menu
-        if (getPage() instanceof ApplicationManagementPage || getPage() instanceof SettingManagementPage || getPage() instanceof ResourceManagementPage) {
+        if (getPage() instanceof SettingManagementPage || getPage() instanceof ResourceManagementPage) {
             this.menuGeneralClass = "treeview active";
         } else {
             this.menuGeneralClass = "treeview";
@@ -226,12 +230,6 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuSecurityClass = "treeview active";
         } else {
             this.menuSecurityClass = "treeview";
-        }
-
-        if (getPage() instanceof CollectionManagementPage || getPage() instanceof QueryManagementPage) {
-            this.menuDataClass = "treeview active";
-        } else {
-            this.menuDataClass = "treeview";
         }
 
         if (getPage() instanceof FileManagementPage || getPage() instanceof AssetManagementPage) {

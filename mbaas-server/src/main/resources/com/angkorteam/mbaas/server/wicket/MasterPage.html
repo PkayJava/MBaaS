@@ -57,9 +57,6 @@
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                        <li wicket:id="mmenuApplication">
-                            <wicket:link><a href="../page/application/ApplicationManagementPage.html"><i class="fa fa-wrench"></i>Application</a></wicket:link>
-                        </li>
                         <li wicket:id="mmenuSetting">
                             <wicket:link><a href="../page/setting/SettingManagementPage.html"><i class="fa fa-tags"></i>Setting</a></wicket:link>
                         </li>
@@ -107,21 +104,6 @@
                         </li>
                     </ul>
                 </li>
-                <li class="treeview" wicket:id="menuData">
-                    <a href="#">
-                        <i class="fa fa-database"></i>
-                        <span>Data</span>
-                        <i class="fa fa-angle-left pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li wicket:id="mmenuCollection">
-                            <wicket:link><a href="../page/collection/CollectionManagementPage.html"><i class="fa fa-cube"></i>Collection</a></wicket:link>
-                        </li>
-                        <li wicket:id="mmenuQuery">
-                            <wicket:link><a href="../page/query/QueryManagementPage.html"><i class="fa fa-cubes"></i>Query</a></wicket:link>
-                        </li>
-                    </ul>
-                </li>
                 <li class="treeview" wicket:id="menuStorage">
                     <a href="#">
                         <i class="fa fa-folder-open"></i>
@@ -152,17 +134,18 @@
                         </li>
                     </ul>
                 </li>
-                <li class="treeview" wicket:id="menuPlugin">
-                    <a href="#">
-                        <i class="fa fa-codepen"></i>
-                        <span>Plugin</span>
-                        <i class="fa fa-angle-left pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li wicket:id="mmenuJavascript">
-                            <wicket:link><a href="../page/javascript/JavascriptManagementPage.html"><i class="fa fa-code"></i>Javascript</a></wicket:link>
-                        </li>
-                    </ul>
+                <li class="header">Logic Console</li>
+                <li wicket:id="mmenuApplication">
+                    <wicket:link><a href="../page/application/ApplicationManagementPage.html"><i class="fa fa-wrench"></i>Application</a></wicket:link>
+                </li>
+                <li wicket:id="mmenuCollection">
+                    <wicket:link><a href="../page/collection/CollectionManagementPage.html"><i class="fa fa-cube"></i>Collection</a></wicket:link>
+                </li>
+                <li wicket:id="mmenuQuery">
+                    <wicket:link><a href="../page/query/QueryManagementPage.html"><i class="fa fa-cubes"></i>Query</a></wicket:link>
+                </li>
+                <li wicket:id="mmenuJavascript">
+                    <wicket:link><a href="../page/javascript/JavascriptManagementPage.html"><i class="fa fa-code"></i>Javascript</a></wicket:link>
                 </li>
             </ul>
             <!-- /.sidebar-menu -->
