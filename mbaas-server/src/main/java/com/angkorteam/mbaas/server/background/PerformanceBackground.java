@@ -6,17 +6,17 @@ import com.angkorteam.mbaas.model.entity.tables.records.DiskRecord;
 import com.angkorteam.mbaas.server.MBaaS;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.Executor;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,10 +42,13 @@ public class PerformanceBackground {
             return;
         }
         try {
-            String uuid = UUID.randomUUID().toString();
-            File fileUuid = new java.io.File(FileUtils.getTempDirectory(), uuid + ".txt");
-            Runtime.getRuntime().exec("iostat -m > \"" + fileUuid.getAbsolutePath() + "\"");
-            List<String> lines = FileUtils.readLines(fileUuid);
+            CommandLine cmdLine = CommandLine.parse("iostat -m");
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
+            DefaultExecutor executor = new DefaultExecutor();
+            executor.setStreamHandler(streamHandler);
+            executor.execute(cmdLine);
+            List<String> lines = IOUtils.readLines(new ByteArrayInputStream(outputStream.toByteArray()));
             CpuInfo cpuInfo = parseCpuInfo(lines);
             CpuRecord cpuRecord = context.newRecord(Tables.CPU);
             cpuRecord.setUser(cpuInfo.getUser());
