@@ -48,7 +48,10 @@ public class PerformanceBackground {
         try {
             String uuid = UUID.randomUUID().toString();
             File fileUuid = new java.io.File(FileUtils.getTempDirectory(), uuid + ".txt");
-            CommandLine cmdLine = CommandLine.parse("iostat  -m > " + uuid + ".txt");
+            CommandLine cmdLine = CommandLine.parse("iostat");
+            cmdLine.addArgument("-m", false);
+            cmdLine.addArgument(">", false);
+            cmdLine.addArgument(uuid + ".txt", true);
             this.executor.execute(cmdLine);
             List<String> lines = FileUtils.readLines(fileUuid);
             CpuInfo cpuInfo = parseCpuInfo(lines);
@@ -73,6 +76,7 @@ public class PerformanceBackground {
                 diskRecord.store();
             }
         } catch (Throwable e) {
+            e.printStackTrace();
             error = true;
         }
     }
