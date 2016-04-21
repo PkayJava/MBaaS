@@ -11,6 +11,7 @@ import org.springframework.beans.factory.InitializingBean;
  * Created by Khauv Socheat on 4/21/2016.
  */
 public class CommandExecutorFactoryBean implements FactoryBean<Executor>, InitializingBean {
+
     private Executor executor;
 
     @Override

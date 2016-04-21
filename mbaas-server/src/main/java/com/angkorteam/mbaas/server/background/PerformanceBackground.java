@@ -4,12 +4,11 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.records.CpuRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.DiskRecord;
 import com.angkorteam.mbaas.server.MBaaS;
-import com.google.gson.Gson;
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.io.FileUtils;
 import org.jooq.DSLContext;
-import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Khauv Socheat on 4/20/2016.
@@ -32,12 +34,6 @@ public class PerformanceBackground {
     @Autowired
     private DSLContext context;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private Executor executor;
-
     private boolean error = false;
 
     @Scheduled(cron = "0 * * * * *")
@@ -48,12 +44,7 @@ public class PerformanceBackground {
         try {
             String uuid = UUID.randomUUID().toString();
             File fileUuid = new java.io.File(FileUtils.getTempDirectory(), uuid + ".txt");
-            CommandLine cmdLine = CommandLine.parse("iostat");
-            cmdLine.addArgument("-m", false);
-            cmdLine.addArgument(">", false);
-            cmdLine.addArgument(uuid + ".txt", true);
-            LOGGER.info("{}", cmdLine.toString());
-            this.executor.execute(cmdLine);
+            Runtime.getRuntime().exec("iostat -m > \"" + fileUuid.getAbsolutePath() + "\"");
             List<String> lines = FileUtils.readLines(fileUuid);
             CpuInfo cpuInfo = parseCpuInfo(lines);
             CpuRecord cpuRecord = context.newRecord(Tables.CPU);
@@ -80,6 +71,16 @@ public class PerformanceBackground {
             e.printStackTrace();
             error = true;
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+        String uuid = UUID.randomUUID().toString();
+        CommandLine cmdLine = CommandLine.parse("iostat");
+        cmdLine.addArgument("-m", false);
+        cmdLine.addArgument(">", false);
+        cmdLine.addArgument("/tmp/" + uuid + ".txt", true);
+        DefaultExecutor defaultExecutor = new DefaultExecutor();
+        defaultExecutor.execute(cmdLine);
     }
 
     protected List<DiskInfo> parseDiskInfo(List<String> lines) {
