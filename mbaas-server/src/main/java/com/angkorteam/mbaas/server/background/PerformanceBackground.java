@@ -37,18 +37,18 @@ public class PerformanceBackground {
             return;
         }
         try {
-            Sigar sigar = new Sigar();
-            long processId = sigar.getPid();
-            ProcCpu procCpu = sigar.getProcCpu(processId);
-            ProcMem procMem = sigar.getProcMem(processId);
-            StatisticsRecord statisticsRecord = context.newRecord(Tables.STATISTICS);
-            statisticsRecord.setStatisticsId(UUID.randomUUID().toString());
-            statisticsRecord.setMemory(Double.valueOf(procMem.getSize()));
-            statisticsRecord.setCpu(procCpu.getPercent());
-            statisticsRecord.setDateCreated(new Date());
-            statisticsRecord.store();
-            LOGGER.info("cpu {} mem {}", statisticsRecord.getCpu(), statisticsRecord.getMemory());
-            sigar.close();
+//            Sigar sigar = new Sigar();
+//            long processId = sigar.getPid();
+//            ProcCpu procCpu = sigar.getProcCpu(processId);
+//            ProcMem procMem = sigar.getProcMem(processId);
+//            StatisticsRecord statisticsRecord = context.newRecord(Tables.STATISTICS);
+//            statisticsRecord.setStatisticsId(UUID.randomUUID().toString());
+//            statisticsRecord.setMemory(Double.valueOf(procMem.getSize()));
+//            statisticsRecord.setCpu(procCpu.getPercent());
+//            statisticsRecord.setDateCreated(new Date());
+//            statisticsRecord.store();
+//            LOGGER.info("cpu {} mem {}", statisticsRecord.getCpu(), statisticsRecord.getMemory());
+//            sigar.close();
         } catch (Throwable e) {
             e.printStackTrace();
             error = true;
