@@ -71,25 +71,45 @@ public class DashboardPage extends MasterPage {
 
         JdbcTemplate jdbcTemplate = getJdbcTemplate();
 
-        List<Map<String, Object>> items = jdbcTemplate.queryForList("select AVG (idle) as idle, DATE_FORMAT(date_created,'%Y-%m-%d') as date_created from cpu WHERE DATE_FORMAT(date_created,'%Y-%m-%d') IN (" + StringUtils.join(param, ", ") + ") GROUP BY DATE_FORMAT(date_created,'%Y-%m-%d')");
-        Map<String, Number> series = new HashMap<>();
+        List<Map<String, Object>> items = jdbcTemplate.queryForList("select AVG (idle) as idle,AVG (user) as user, DATE_FORMAT(date_created,'%Y-%m-%d') as date_created from cpu WHERE DATE_FORMAT(date_created,'%Y-%m-%d') IN (" + StringUtils.join(param, ", ") + ") GROUP BY DATE_FORMAT(date_created,'%Y-%m-%d')");
+
+        Map<String, Number> idleData = new HashMap<>();
+        Map<String, Number> userData = new HashMap<>();
         for (Map<String, Object> item : items) {
-            series.put((String) item.get("date_created"), (Number) item.get("idle"));
+            idleData.put((String) item.get("date_created"), (Number) item.get("idle"));
+            userData.put((String) item.get("date_created"), (Number) item.get("user"));
         }
 
-        Series<Number> networkSeries = new SimpleSeries();
-        networkSeries.setName("CPU");
-        List<Number> datas = new LinkedList<>();
-        for (String label : labels) {
-            Number idle = series.get(label);
-            if (idle == null) {
-                datas.add(0);
-            } else {
-                datas.add(idle);
+        {
+            Series<Number> idleSeries = new SimpleSeries();
+            idleSeries.setName("Idle");
+            List<Number> datas = new LinkedList<>();
+            for (String label : labels) {
+                Number idle = idleData.get(label);
+                if (idle == null) {
+                    datas.add(0);
+                } else {
+                    datas.add(idle);
+                }
             }
+            idleSeries.setData(datas);
+            options.addSeries(idleSeries);
         }
-        networkSeries.setData(datas);
-        options.addSeries(networkSeries);
+        {
+            Series<Number> userSeries = new SimpleSeries();
+            userSeries.setName("User");
+            List<Number> datas = new LinkedList<>();
+            for (String label : labels) {
+                Number user = userData.get(label);
+                if (user == null) {
+                    datas.add(0);
+                } else {
+                    datas.add(user);
+                }
+            }
+            userSeries.setData(datas);
+            options.addSeries(userSeries);
+        }
 
         Chart chart = new Chart("cpu", options);
         add(chart);
