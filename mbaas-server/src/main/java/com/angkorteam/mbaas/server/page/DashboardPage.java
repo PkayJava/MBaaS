@@ -74,18 +74,18 @@ public class DashboardPage extends MasterPage {
         List<Map<String, Object>> items = jdbcTemplate.queryForList("select AVG (idle) as idle, DATE_FORMAT(date_created,'%Y-%m-%d') as date_created from cpu WHERE DATE_FORMAT(date_created,'%Y-%m-%d') IN (" + StringUtils.join(param, ", ") + ") GROUP BY DATE_FORMAT(date_created,'%Y-%m-%d')");
         Map<String, Number> series = new HashMap<>();
         for (Map<String, Object> item : items) {
-            series.put((String) item.get("date_created"), (Number) item.get("quantity"));
+            series.put((String) item.get("date_created"), (Number) item.get("idle"));
         }
 
         Series<Number> networkSeries = new SimpleSeries();
         networkSeries.setName("CPU");
         List<Number> datas = new LinkedList<>();
         for (String label : labels) {
-            Number quantity = series.get(label);
-            if (quantity == null) {
+            Number idle = series.get(label);
+            if (idle == null) {
                 datas.add(0);
             } else {
-                datas.add(quantity);
+                datas.add(idle);
             }
         }
         networkSeries.setData(datas);
@@ -107,9 +107,9 @@ public class DashboardPage extends MasterPage {
         List<String> labels = new LinkedList<>();
         List<String> param = new LinkedList<>();
         while (true) {
+            lastMonday = lastMonday.plusDays(1);
             labels.add(DateFormatUtils.format(lastMonday.toDate(), "yyyy-MM-dd"));
             param.add("'" + DateFormatUtils.format(lastMonday.toDate(), "yyyy-MM-dd") + "'");
-            lastMonday = lastMonday.plusDays(1);
             if (lastMonday.equals(today)) {
                 break;
             }
