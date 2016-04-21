@@ -43,8 +43,8 @@
     </mvc:resources>
 
     <task:annotation-driven executor="executor" scheduler="scheduler"/>
-    <task:executor id="executor" pool-size="10"/>
-    <task:scheduler id="scheduler"/>
+    <task:executor id="executor" pool-size="10" queue-capacity="25"/>
+    <task:scheduler id="scheduler" pool-size="10"/>
 
     <security:global-method-security secured-annotations="enabled"/>
 

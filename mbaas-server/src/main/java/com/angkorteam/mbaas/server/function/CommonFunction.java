@@ -317,7 +317,7 @@ public class CommonFunction {
                     record.setCollectionId(collectionId);
                     record.setDocumentId(documentId);
                     record.setAttributeType(attributeType.getLiteral());
-                    record.setEavValue(new BigDecimal(((Number) item.getValue()).doubleValue()));
+                    record.setEavValue(((Number) item.getValue()).doubleValue());
                     record.store();
                 }
                 // eav boolean
