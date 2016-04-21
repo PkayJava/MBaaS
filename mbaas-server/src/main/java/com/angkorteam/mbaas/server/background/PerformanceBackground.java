@@ -47,8 +47,10 @@ public class PerformanceBackground {
             statisticsRecord.setCpu(procCpu.getPercent());
             statisticsRecord.setDateCreated(new Date());
             statisticsRecord.store();
+            LOGGER.info("cpu {} mem {}", statisticsRecord.getCpu(), statisticsRecord.getMemory());
             sigar.close();
         } catch (Throwable e) {
+            e.printStackTrace();
             error = true;
         }
     }
