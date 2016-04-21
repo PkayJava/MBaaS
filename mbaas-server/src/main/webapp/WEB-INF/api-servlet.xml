@@ -48,13 +48,18 @@
 
     <security:global-method-security secured-annotations="enabled"/>
 
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/security/signup"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/oauth2/**"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/resource/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
+                   pattern="/api/security/signup"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
+                   pattern="/api/oauth2/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
+                   pattern="/api/resource/**"/>
     <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/qr"/>
     <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/otp"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/rest/registry/**"/>
-    <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager" entry-point-ref="authenticationEntryPoint" create-session="stateless">
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none"
+                   pattern="/api/rest/registry/**"/>
+    <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager"
+                   entry-point-ref="authenticationEntryPoint" create-session="stateless">
         <security:csrf disabled="true"/>
         <!-- SecurityExpressionRoot -->
         <security:access-denied-handler ref="accessDeniedHandler"/>
@@ -87,6 +92,7 @@
     </bean>
 
     <bean class="com.angkorteam.mbaas.server.spring.SessionDestroyedListener"/>
+    <bean id="commandExecutor" class="com.angkorteam.mbaas.server.factory.CommandExecutorFactoryBean"/>
 
     <security:authentication-manager alias="providerManager" erase-credentials="true"/>
 

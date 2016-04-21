@@ -62,7 +62,7 @@ dependencies {
 
     compile 'org.mariadb.jdbc:mariadb-java-client:' + mariadbVersion
 
-    compile 'sigar:sigar:' + sigarVersion
+    // compile 'sigar:sigar:' + sigarVersion
     compile 'org.reflections:reflections:' + reflectionsVersion
     compile 'org.jasypt:jasypt:' + jasyptVersion
     compile 'commons-codec:commons-codec:' + commonscodecVersion
@@ -80,6 +80,11 @@ dependencies {
 
     compile 'io.swagger:swagger-annotations:' + swaggerVersion
     compile 'com.google.guava:guava:' + guavaVersion
+
+    compile 'commons-cli:commons-cli:' + commonscliVersion
+    compile 'org.apache.commons:commons-exec:' + commonsexecVersion
+
+    compile 'com.googlecode.wicked-charts:wicked-charts-wicket7:2.0.0'
 }
 
 mainClassName = 'com.angkorteam.mbaas.server.Start'
