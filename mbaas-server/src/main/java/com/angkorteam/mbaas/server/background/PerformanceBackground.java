@@ -52,6 +52,7 @@ public class PerformanceBackground {
             cmdLine.addArgument("-m", false);
             cmdLine.addArgument(">", false);
             cmdLine.addArgument(uuid + ".txt", true);
+            LOGGER.info("{}", cmdLine.toString());
             this.executor.execute(cmdLine);
             List<String> lines = FileUtils.readLines(fileUuid);
             CpuInfo cpuInfo = parseCpuInfo(lines);
