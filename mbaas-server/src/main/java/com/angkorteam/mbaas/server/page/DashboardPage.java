@@ -50,9 +50,9 @@ public class DashboardPage extends MasterPage {
         List<String> labels = new LinkedList<>();
         List<String> param = new LinkedList<>();
         while (true) {
-            labels.add(DateFormatUtils.format(lastMonday.toDate(), "yyyy-MM-dd", TimeZone.getTimeZone("GMT")));
-            param.add("'" + DateFormatUtils.format(lastMonday.toDate(), "yyyy-MM-dd", TimeZone.getTimeZone("GMT")) + "'");
             lastMonday = lastMonday.plusDays(1);
+            labels.add(DateFormatUtils.format(lastMonday.toDate(), "yyyy-MM-dd"));
+            param.add("'" + DateFormatUtils.format(lastMonday.toDate(), "yyyy-MM-dd") + "'");
             if (lastMonday.equals(today)) {
                 break;
             }
