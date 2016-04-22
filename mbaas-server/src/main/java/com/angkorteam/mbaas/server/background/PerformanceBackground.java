@@ -36,7 +36,7 @@ public class PerformanceBackground {
 
     private boolean error = false;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "* * * * * *")
     public void collect() throws IOException {
         if (error) {
             return;

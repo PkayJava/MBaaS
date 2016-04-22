@@ -63,6 +63,7 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
         double consume = executions.remove(id);
         LOGGER.info("{} consumed {} ss", request.getRequestURI(), consume / 1000f);
         NetworkRecord networkRecord = context.newRecord(Tables.NETWORK);
+        networkRecord.setNetworkId(java.util.UUID.randomUUID().toString());
         networkRecord.setDateCreated(new Date());
         networkRecord.setUri(request.getRequestURI());
         networkRecord.setConsume(consume);
@@ -77,5 +78,13 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
 
     public void setGson(Gson gson) {
         this.gson = gson;
+    }
+
+    public void setContext(DSLContext context){
+        this.context = context;
+    }
+
+    public DSLContext getContext(){
+        return context;
     }
 }

@@ -34,6 +34,7 @@
 
     <bean id="interceptor" class="com.angkorteam.mbaas.server.spring.ExecutionTimeHandlerInterceptor">
         <property name="gson" ref="gson"/>
+        <property name="context" ref="context"/>
     </bean>
 
     <mvc:resources mapping="/resource/**" location="file:${resource.repo}/" cache-period="604800">
