@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.server.function.HttpFunction;
+import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
 import com.angkorteam.mbaas.server.page.asset.AssetManagementPage;
 import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
@@ -27,6 +28,7 @@ import com.angkorteam.mbaas.server.service.PusherClient;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -115,6 +117,9 @@ public abstract class MasterPage extends AdminLTEPage {
         }
 
         super.onInitialize();
+
+        BookmarkablePageLink<Void> dashboardPageLink = new BookmarkablePageLink<Void>("dashboardPageLink", DashboardPage.class);
+        add(dashboardPageLink);
 
         Label labelDashboard = new Label("labelDashboard", "Mobile BaaS");
         add(labelDashboard);
