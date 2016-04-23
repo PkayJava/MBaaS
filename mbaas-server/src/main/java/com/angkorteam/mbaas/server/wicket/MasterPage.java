@@ -122,7 +122,7 @@ public abstract class MasterPage extends AdminLTEPage {
         add(dashboardPageLink);
 
         Label labelDashboard = new Label("labelDashboard", "Mobile BaaS");
-        add(labelDashboard);
+        dashboardPageLink.add(labelDashboard);
 
         this.pageHeaderLabel = new Label("pageHeaderLabel", new PropertyModel<>(this, "pageHeader"));
         add(this.pageHeaderLabel);
