@@ -334,44 +334,12 @@ public class Database {
         return queryForObject(sql, js, boolean.class);
     }
 
-    public byte queryForByte(String sql) throws DataAccessException {
-        return queryForObject(sql, byte.class);
-    }
-
-    public byte queryForByte(String sql, JSObject js) throws DataAccessException {
-        return queryForObject(sql, js, byte.class);
-    }
-
-    public short queryForShort(String sql) throws DataAccessException {
-        return queryForObject(sql, short.class);
-    }
-
-    public short queryForShort(String sql, JSObject js) throws DataAccessException {
-        return queryForObject(sql, js, short.class);
-    }
-
     public int queryForInteger(String sql) throws DataAccessException {
         return queryForObject(sql, int.class);
     }
 
     public int queryForInteger(String sql, JSObject js) throws DataAccessException {
         return queryForObject(sql, js, int.class);
-    }
-
-    public long queryForLong(String sql) throws DataAccessException {
-        return queryForObject(sql, long.class);
-    }
-
-    public long queryForLong(String sql, JSObject js) throws DataAccessException {
-        return queryForObject(sql, js, long.class);
-    }
-
-    public float queryForFloat(String sql) throws DataAccessException {
-        return queryForObject(sql, float.class);
-    }
-
-    public float queryForFloat(String sql, JSObject js) throws DataAccessException {
-        return queryForObject(sql, js, float.class);
     }
 
     public double queryForDouble(String sql) throws DataAccessException {
@@ -478,21 +446,6 @@ public class Database {
         return this.queryForListObject(sql, js, Boolean.class);
     }
 
-    public List<Byte> queryForListByte(String sql) throws DataAccessException {
-        return this.queryForListObject(sql, Byte.class);
-    }
-
-    public List<Byte> queryForListByte(String sql, JSObject js) throws DataAccessException {
-        return this.queryForListObject(sql, js, Byte.class);
-    }
-
-    public List<Short> queryForListShort(String sql) throws DataAccessException {
-        return this.queryForListObject(sql, Short.class);
-    }
-
-    public List<Short> queryForListShort(String sql, JSObject js) throws DataAccessException {
-        return this.queryForListObject(sql, js, Short.class);
-    }
 
     public List<Integer> queryForListInteger(String sql) throws DataAccessException {
         return this.queryForListObject(sql, Integer.class);
@@ -500,22 +453,6 @@ public class Database {
 
     public List<Integer> queryForListInteger(String sql, JSObject js) throws DataAccessException {
         return this.queryForListObject(sql, js, Integer.class);
-    }
-
-    public List<Long> queryForListLong(String sql) throws DataAccessException {
-        return this.queryForListObject(sql, Long.class);
-    }
-
-    public List<Long> queryForListLong(String sql, JSObject js) throws DataAccessException {
-        return this.queryForListObject(sql, js, Long.class);
-    }
-
-    public List<Float> queryForListFloat(String sql) throws DataAccessException {
-        return this.queryForListObject(sql, Float.class);
-    }
-
-    public List<Float> queryForListFloat(String sql, JSObject js) throws DataAccessException {
-        return this.queryForListObject(sql, js, Float.class);
     }
 
     public List<Double> queryForListDouble(String sql) throws DataAccessException {
