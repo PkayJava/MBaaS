@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.background;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.records.CpuRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.DiskRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.MemRecord;
 import com.angkorteam.mbaas.server.MBaaS;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -29,8 +30,6 @@ import java.util.UUID;
 @Service
 public class PerformanceBackground {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MBaaS.class);
-
     @Autowired
     private DSLContext context;
 
@@ -42,48 +41,60 @@ public class PerformanceBackground {
             return;
         }
         try {
-            CommandLine cmdLine = CommandLine.parse("iostat -m");
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
-            DefaultExecutor executor = new DefaultExecutor();
-            executor.setStreamHandler(streamHandler);
-            executor.execute(cmdLine);
-            List<String> lines = IOUtils.readLines(new ByteArrayInputStream(outputStream.toByteArray()));
-            CpuInfo cpuInfo = parseCpuInfo(lines);
-            CpuRecord cpuRecord = context.newRecord(Tables.CPU);
-            cpuRecord.setUser(cpuInfo.getUser());
-            cpuRecord.setSteal(cpuInfo.getSteal());
-            cpuRecord.setNice(cpuInfo.getNice());
-            cpuRecord.setIowait(cpuInfo.getIowait());
-            cpuRecord.setSystem(cpuInfo.getSystem());
-            cpuRecord.setIdle(cpuInfo.getIdle());
-            cpuRecord.setDateCreated(new Date());
-            cpuRecord.setCpuId(UUID.randomUUID().toString());
-            cpuRecord.store();
-            List<DiskInfo> diskInfos = parseDiskInfo(lines);
-            for (DiskInfo diskInfo : diskInfos) {
-                DiskRecord diskRecord = context.newRecord(Tables.DISK);
-                diskRecord.setDevice(diskInfo.getDevice());
-                diskRecord.setWrite(diskInfo.getWrite());
-                diskRecord.setRead(diskInfo.getRead());
-                diskRecord.setDiskId(UUID.randomUUID().toString());
-                diskRecord.setDateCreated(new Date());
-                diskRecord.store();
+            {
+                CommandLine commandLine = CommandLine.parse("/usr/bin/iostat -m");
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
+                DefaultExecutor executor = new DefaultExecutor();
+                executor.setStreamHandler(streamHandler);
+                executor.execute(commandLine);
+                List<String> lines = IOUtils.readLines(new ByteArrayInputStream(outputStream.toByteArray()));
+                CpuInfo cpuInfo = parseCpuInfo(lines);
+                CpuRecord cpuRecord = context.newRecord(Tables.CPU);
+                cpuRecord.setUser(cpuInfo.getUser());
+                cpuRecord.setSteal(cpuInfo.getSteal());
+                cpuRecord.setNice(cpuInfo.getNice());
+                cpuRecord.setIowait(cpuInfo.getIowait());
+                cpuRecord.setSystem(cpuInfo.getSystem());
+                cpuRecord.setIdle(cpuInfo.getIdle());
+                cpuRecord.setDateCreated(new Date());
+                cpuRecord.setCpuId(UUID.randomUUID().toString());
+                cpuRecord.store();
+                List<DiskInfo> diskInfos = parseDiskInfo(lines);
+                for (DiskInfo diskInfo : diskInfos) {
+                    DiskRecord diskRecord = context.newRecord(Tables.DISK);
+                    diskRecord.setDevice(diskInfo.getDevice());
+                    diskRecord.setWrite(diskInfo.getWrite());
+                    diskRecord.setRead(diskInfo.getRead());
+                    diskRecord.setDiskId(UUID.randomUUID().toString());
+                    diskRecord.setDateCreated(new Date());
+                    diskRecord.store();
+                }
+            }
+            {
+                CommandLine commandLine = CommandLine.parse("/usr/bin/free -m");
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
+                DefaultExecutor executor = new DefaultExecutor();
+                executor.setStreamHandler(streamHandler);
+                executor.execute(commandLine);
+                List<String> lines = IOUtils.readLines(new ByteArrayInputStream(outputStream.toByteArray()));
+                List<MemInfo> memInfos = parseMemInfo(lines);
+                for (MemInfo memInfo : memInfos) {
+                    MemRecord memRecord = context.newRecord(Tables.MEM);
+                    memRecord.setMemId(UUID.randomUUID().toString());
+                    memRecord.setDevice(memInfo.getDevice());
+                    memRecord.setTotal(memInfo.getTotal());
+                    memRecord.setUsed(memInfo.getUsed());
+                    memRecord.setFree(memInfo.getFree());
+                    memRecord.setDateCreated(new Date());
+                    memRecord.store();
+                }
             }
         } catch (Throwable e) {
             e.printStackTrace();
             error = true;
         }
-    }
-
-    public static void main(String[] args) throws IOException {
-        String uuid = UUID.randomUUID().toString();
-        CommandLine cmdLine = CommandLine.parse("iostat");
-        cmdLine.addArgument("-m", false);
-        cmdLine.addArgument(">", false);
-        cmdLine.addArgument("/tmp/" + uuid + ".txt", true);
-        DefaultExecutor defaultExecutor = new DefaultExecutor();
-        defaultExecutor.execute(cmdLine);
     }
 
     protected List<DiskInfo> parseDiskInfo(List<String> lines) {
@@ -109,6 +120,32 @@ public class PerformanceBackground {
             }
         }
         return diskInfos;
+    }
+
+    protected List<MemInfo> parseMemInfo(List<String> lines) {
+        List<MemInfo> memInfos = new ArrayList<>();
+        for (String line : lines) {
+            if (line != null && !"".equals(line)) {
+                if (line.startsWith("Mem:")) {
+                    String[] mems = line.substring(4).trim().replaceAll("\\s+", " ").split(" ");
+                    MemInfo memInfo = new MemInfo();
+                    memInfo.setDevice("Memory");
+                    memInfo.setTotal(Double.valueOf(mems[0]));
+                    memInfo.setUsed(Double.valueOf(mems[1]));
+                    memInfo.setFree(Double.valueOf(mems[2]));
+                    memInfos.add(memInfo);
+                } else if (line.startsWith("Swap:")) {
+                    String[] swaps = line.substring(5).trim().replaceAll("\\s+", " ").split(" ");
+                    MemInfo memInfo = new MemInfo();
+                    memInfo.setDevice("Swap");
+                    memInfo.setTotal(Double.valueOf(swaps[0]));
+                    memInfo.setUsed(Double.valueOf(swaps[1]));
+                    memInfo.setFree(Double.valueOf(swaps[2]));
+                    memInfos.add(memInfo);
+                }
+            }
+        }
+        return memInfos;
     }
 
     protected CpuInfo parseCpuInfo(List<String> lines) {
