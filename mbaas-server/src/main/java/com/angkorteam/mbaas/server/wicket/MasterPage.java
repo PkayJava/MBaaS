@@ -193,7 +193,8 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenu2Factor2Email = new WebMarkupContainer("mmenu2Factor2Email");
             mmenu2Factor2Email.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenu2Factor2EmailClass")));
             menuProfile.add(mmenu2Factor2Email);
-            WebMarkupContainer mmenuPassword = new WebMarkupContainer("mmenuPassword", new PropertyModel<>(this, "mmenuPasswordClass"));
+            WebMarkupContainer mmenuPassword = new WebMarkupContainer("mmenuPassword");
+            mmenuPassword.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuPasswordClass")));
             menuProfile.add(mmenuPassword);
         }
 
