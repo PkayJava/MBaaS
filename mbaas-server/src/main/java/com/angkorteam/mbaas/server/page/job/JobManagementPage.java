@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.client;
+package com.angkorteam.mbaas.server.page.job;
 
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
@@ -8,7 +8,7 @@ import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
-import com.angkorteam.mbaas.server.provider.ClientProvider;
+import com.angkorteam.mbaas.server.provider.JobProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -22,81 +22,89 @@ import org.jooq.DSLContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
- * Created by socheat on 3/7/16.
+ * Created by socheat on 4/24/16.
  */
 @AuthorizeInstantiation("administrator")
-@Mount("/client/management")
-public class ClientManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
-
-    private String applicationId;
+@Mount("/job/management")
+public class JobManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     @Override
     public String getPageHeader() {
-        return "Client Management";
+        return "Job Management";
     }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
 
-        this.applicationId = getPageParameters().get("applicationId").toString();
-
-        ClientProvider provider = new ClientProvider(this.applicationId);
+        JobProvider provider = new JobProvider();
+        provider.selectField(String.class, "jobId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("clientId", this), "clientId", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("clientSecret", this), "clientSecret", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("cron", this), "cron", this, provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("errorMessage", this), "errorMessage", this, provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("errorClass", this), "errorClass", this, provider));
+        columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateLastExecuted", this), "dateLastExecuted", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
-        columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
 
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Revoke", "Grant", "Deny", "Edit"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-
-        PageParameters parameters = new PageParameters();
-        parameters.add("applicationId", applicationId);
-        BookmarkablePageLink<Void> newClientLink = new BookmarkablePageLink<>("newClientLink", ClientCreatePage.class, parameters);
-        add(newClientLink);
-
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", ClientManagementPage.class, parameters);
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", JobManagementPage.class);
         add(refreshLink);
+
+    }
+
+    @Override
+    public String onCSSLink(String link, Map<String, Object> object) {
+        if ("Edit".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Grant".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Deny".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        if ("Delete".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        return "";
     }
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
-            parameters.add("applicationId", this.applicationId);
-            parameters.add("clientId", object.get("clientId"));
-            setResponsePage(ClientModifyPage.class, parameters);
+            parameters.add("jobId", object.get("jobId"));
+            setResponsePage(JobModifyPage.class, parameters);
         }
         if ("Grant".equals(link)) {
-            String clientId = (String) object.get("clientId");
+            String jobId = (String) object.get("jobId");
             DSLContext context = getDSLContext();
-            context.update(Tables.CLIENT).set(Tables.CLIENT.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.CLIENT.CLIENT_ID.eq(clientId)).execute();
+            context.update(Tables.JOB).set(Tables.JOB.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.JOB.JOB_ID.eq(jobId)).execute();
             return;
         }
         if ("Deny".equals(link)) {
-            String clientId = (String) object.get("clientId");
+            String jobId = (String) object.get("jobId");
             DSLContext context = getDSLContext();
-            context.update(Tables.CLIENT).set(Tables.CLIENT.SECURITY, SecurityEnum.Denied.getLiteral()).where(Tables.CLIENT.CLIENT_ID.eq(clientId)).execute();
+            context.update(Tables.JOB).set(Tables.JOB.SECURITY, SecurityEnum.Denied.getLiteral()).where(Tables.JOB.JOB_ID.eq(jobId)).execute();
             return;
         }
-        if ("Revoke".equals(link)) {
-            String clientId = (String) object.get("clientId");
+        if ("Delete".equals(link)) {
+            String jobId = (String) object.get("jobId");
             DSLContext context = getDSLContext();
-            context.update(Tables.CLIENT).set(Tables.CLIENT.CLIENT_SECRET, UUID.randomUUID().toString()).where(Tables.CLIENT.CLIENT_ID.eq(clientId)).execute();
+            context.delete(Tables.JOB).where(Tables.JOB.JOB_ID.eq(jobId)).execute();
             return;
         }
     }
@@ -127,26 +135,9 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
                 return true;
             }
         }
-        if ("Revoke".equals(link)) {
+        if ("Delete".equals(link)) {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public String onCSSLink(String link, Map<String, Object> object) {
-        if ("Edit".equals(link)) {
-            return "btn-xs btn-info";
-        }
-        if ("Grant".equals(link)) {
-            return "btn-xs btn-info";
-        }
-        if ("Deny".equals(link)) {
-            return "btn-xs btn-danger";
-        }
-        if ("Revoke".equals(link)) {
-            return "btn-xs btn-danger";
-        }
-        return "";
     }
 }

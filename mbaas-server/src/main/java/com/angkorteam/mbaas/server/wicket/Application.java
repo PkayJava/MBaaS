@@ -15,6 +15,7 @@ import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSessio
 import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.resource.DynamicJQueryResourceReference;
+import org.apache.wicket.util.time.Duration;
 import org.jooq.DSLContext;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -57,6 +58,10 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
         super.init();
         getRequestCycleSettings().setBufferResponse(true);
         getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
+        getMarkupSettings().setCompressWhitespace(true);
+        getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
+        getMarkupSettings().setStripWicketTags(true);
+        getMarkupSettings().setStripComments(true);
         initPageMount();
         getJavaScriptLibrarySettings().setJQueryReference(new DynamicJQueryResourceReference());
     }

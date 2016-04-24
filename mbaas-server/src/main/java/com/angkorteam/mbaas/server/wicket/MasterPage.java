@@ -7,23 +7,51 @@ import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.page.DashboardPage;
+import com.angkorteam.mbaas.server.page.application.ApplicationCreatePage;
 import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
+import com.angkorteam.mbaas.server.page.application.ApplicationModifyPage;
+import com.angkorteam.mbaas.server.page.asset.AssetCreatePage;
 import com.angkorteam.mbaas.server.page.asset.AssetManagementPage;
+import com.angkorteam.mbaas.server.page.asset.AssetModifyPage;
+import com.angkorteam.mbaas.server.page.attribute.AttributeCreatePage;
+import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
+import com.angkorteam.mbaas.server.page.client.ClientCreatePage;
+import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
+import com.angkorteam.mbaas.server.page.client.ClientModifyPage;
+import com.angkorteam.mbaas.server.page.collection.CollectionCreatePage;
 import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
+import com.angkorteam.mbaas.server.page.collection.CollectionRolePrivacyManagementPage;
+import com.angkorteam.mbaas.server.page.collection.CollectionUserPrivacyManagementPage;
+import com.angkorteam.mbaas.server.page.document.DocumentCreatePage;
+import com.angkorteam.mbaas.server.page.document.DocumentManagementPage;
+import com.angkorteam.mbaas.server.page.document.DocumentModifyPage;
+import com.angkorteam.mbaas.server.page.file.FileCreatePage;
 import com.angkorteam.mbaas.server.page.file.FileManagementPage;
+import com.angkorteam.mbaas.server.page.file.FileModifyPage;
+import com.angkorteam.mbaas.server.page.javascript.JavascriptCreatePage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptManagementPage;
+import com.angkorteam.mbaas.server.page.javascript.JavascriptModifyPage;
+import com.angkorteam.mbaas.server.page.job.JobCreatePage;
+import com.angkorteam.mbaas.server.page.job.JobManagementPage;
+import com.angkorteam.mbaas.server.page.job.JobModifyPage;
 import com.angkorteam.mbaas.server.page.nashorn.NashornManagementPage;
 import com.angkorteam.mbaas.server.page.profile.InformationPage;
 import com.angkorteam.mbaas.server.page.profile.PasswordPage;
 import com.angkorteam.mbaas.server.page.profile.TimeOTPPage;
 import com.angkorteam.mbaas.server.page.profile.TwoMailPage;
-import com.angkorteam.mbaas.server.page.query.QueryManagementPage;
+import com.angkorteam.mbaas.server.page.query.*;
+import com.angkorteam.mbaas.server.page.resource.ResourceCreatePage;
 import com.angkorteam.mbaas.server.page.resource.ResourceManagementPage;
+import com.angkorteam.mbaas.server.page.resource.ResourceModifyPage;
+import com.angkorteam.mbaas.server.page.role.RoleCreatePage;
 import com.angkorteam.mbaas.server.page.role.RoleManagementPage;
+import com.angkorteam.mbaas.server.page.role.RoleModifyPage;
 import com.angkorteam.mbaas.server.page.session.SessionDesktopPage;
 import com.angkorteam.mbaas.server.page.session.SessionMobilePage;
+import com.angkorteam.mbaas.server.page.setting.SettingCreatePage;
 import com.angkorteam.mbaas.server.page.setting.SettingManagementPage;
-import com.angkorteam.mbaas.server.page.user.UserManagementPage;
+import com.angkorteam.mbaas.server.page.setting.SettingModifyPage;
+import com.angkorteam.mbaas.server.page.user.*;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -80,6 +108,8 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuMobileClass = "";
 
     private String mmenuJavascriptClass;
+
+    private String mmenuJobClass = "";
 
     public MasterPage() {
     }
@@ -200,7 +230,6 @@ public abstract class MasterPage extends AdminLTEPage {
             menuSession.add(mmenuMobile);
         }
 
-
         WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript");
         mmenuJavascript.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJavascriptClass")));
         add(mmenuJavascript);
@@ -212,9 +241,14 @@ public abstract class MasterPage extends AdminLTEPage {
         WebMarkupContainer mmenuCollection = new WebMarkupContainer("mmenuCollection");
         mmenuCollection.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuCollectionClass")));
         add(mmenuCollection);
+
         WebMarkupContainer mmenuQuery = new WebMarkupContainer("mmenuQuery");
         mmenuQuery.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuQueryClass")));
         add(mmenuQuery);
+
+        WebMarkupContainer mmenuJob = new WebMarkupContainer("mmenuJob");
+        mmenuJob.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJobClass")));
+        add(mmenuJob);
     }
 
     @Override
@@ -222,7 +256,12 @@ public abstract class MasterPage extends AdminLTEPage {
         super.onBeforeRender();
 
         // Parent Menu
-        if (getPage() instanceof SettingManagementPage || getPage() instanceof ResourceManagementPage) {
+        if (getPage() instanceof SettingManagementPage
+                || getPage() instanceof SettingModifyPage
+                || getPage() instanceof SettingCreatePage
+                || getPage() instanceof ResourceManagementPage
+                || getPage() instanceof ResourceModifyPage
+                || getPage() instanceof ResourceCreatePage) {
             this.menuGeneralClass = "treeview active";
         } else {
             this.menuGeneralClass = "treeview";
@@ -234,13 +273,28 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuProfileClass = "treeview";
         }
 
-        if (getPage() instanceof UserManagementPage || getPage() instanceof RoleManagementPage || getPage() instanceof NashornManagementPage) {
+        if (getPage() instanceof UserManagementPage
+                || getPage() instanceof UserModifyPage
+                || getPage() instanceof UserCreatePage
+                || getPage() instanceof UserAttributeManagementPage
+                || getPage() instanceof UserAttributePermissionModifyPage
+                || getPage() instanceof UserAttributePermissionCreatePage
+                || getPage() instanceof UserAttributeCreatePage
+                || getPage() instanceof RoleManagementPage
+                || getPage() instanceof RoleModifyPage
+                || getPage() instanceof RoleCreatePage
+                || getPage() instanceof NashornManagementPage) {
             this.menuSecurityClass = "treeview active";
         } else {
             this.menuSecurityClass = "treeview";
         }
 
-        if (getPage() instanceof FileManagementPage || getPage() instanceof AssetManagementPage) {
+        if (getPage() instanceof FileManagementPage
+                || getPage() instanceof FileModifyPage
+                || getPage() instanceof FileCreatePage
+                || getPage() instanceof AssetManagementPage
+                || getPage() instanceof AssetModifyPage
+                || getPage() instanceof AssetCreatePage) {
             this.menuStorageClass = "treeview active";
         } else {
             this.menuStorageClass = "treeview";
@@ -252,24 +306,29 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuSessionClass = "treeview";
         }
 
-        if (getPage() instanceof JavascriptManagementPage) {
+        if (getPage() instanceof JavascriptManagementPage || getPage() instanceof JavascriptCreatePage || getPage() instanceof JavascriptModifyPage) {
             this.menuPluginClass = "treeview active";
         } else {
             this.menuPluginClass = "treeview";
         }
 
         // Menu
-        if (getPage() instanceof ApplicationManagementPage) {
+        if (getPage() instanceof ApplicationManagementPage
+                || getPage() instanceof ApplicationCreatePage
+                || getPage() instanceof ApplicationModifyPage
+                || getPage() instanceof ClientManagementPage
+                || getPage() instanceof ClientModifyPage
+                || getPage() instanceof ClientCreatePage) {
             this.mmenuApplicationClass = "active";
         } else {
             this.mmenuApplicationClass = "";
         }
-        if (getPage() instanceof SettingManagementPage) {
+        if (getPage() instanceof SettingManagementPage || getPage() instanceof SettingCreatePage || getPage() instanceof SettingModifyPage) {
             this.mmenuSettingClass = "active";
         } else {
             this.mmenuSettingClass = "";
         }
-        if (getPage() instanceof ResourceManagementPage) {
+        if (getPage() instanceof ResourceManagementPage || getPage() instanceof ResourceCreatePage || getPage() instanceof ResourceModifyPage) {
             this.mmenuLocalizationClass = "active";
         } else {
             this.mmenuLocalizationClass = "";
@@ -294,12 +353,18 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             this.mmenuPasswordClass = "";
         }
-        if (getPage() instanceof UserManagementPage) {
+        if (getPage() instanceof UserManagementPage
+                || getPage() instanceof UserAttributeManagementPage
+                || getPage() instanceof UserAttributeCreatePage
+                || getPage() instanceof UserAttributePermissionCreatePage
+                || getPage() instanceof UserAttributePermissionModifyPage
+                || getPage() instanceof UserCreatePage
+                || getPage() instanceof UserModifyPage) {
             this.mmenuUserClass = "active";
         } else {
             this.mmenuUserClass = "";
         }
-        if (getPage() instanceof RoleManagementPage) {
+        if (getPage() instanceof RoleManagementPage || getPage() instanceof RoleCreatePage || getPage() instanceof RoleModifyPage) {
             this.mmenuRoleClass = "active";
         } else {
             this.mmenuRoleClass = "";
@@ -309,22 +374,38 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             this.mmenuNashornClass = "";
         }
-        if (getPage() instanceof CollectionManagementPage) {
+        if (getPage() instanceof CollectionManagementPage
+                || getPage() instanceof CollectionCreatePage
+                || getPage() instanceof CollectionRolePrivacyManagementPage
+                || getPage() instanceof CollectionUserPrivacyManagementPage
+                || getPage() instanceof DocumentManagementPage
+                || getPage() instanceof DocumentCreatePage
+                || getPage() instanceof DocumentModifyPage
+                || getPage() instanceof AttributeManagementPage
+                || getPage() instanceof AttributeCreatePage) {
             this.mmenuCollectionClass = "active";
         } else {
             this.mmenuCollectionClass = "";
         }
-        if (getPage() instanceof QueryManagementPage) {
+        if (getPage() instanceof QueryManagementPage
+                || getPage() instanceof QueryUserPrivacyManagementPage
+                || getPage() instanceof QueryRolePrivacyManagementPage
+                || getPage() instanceof QueryCreatePage
+                || getPage() instanceof QueryModifyPage) {
             this.mmenuQueryClass = "active";
         } else {
             this.mmenuQueryClass = "";
         }
-        if (getPage() instanceof FileManagementPage) {
+        if (getPage() instanceof FileManagementPage
+                || getPage() instanceof FileCreatePage
+                || getPage() instanceof FileModifyPage) {
             this.mmenuFileClass = "active";
         } else {
             this.mmenuFileClass = "";
         }
-        if (getPage() instanceof AssetManagementPage) {
+        if (getPage() instanceof AssetManagementPage
+                || getPage() instanceof AssetCreatePage
+                || getPage() instanceof AssetModifyPage) {
             this.mmenuAssetClass = "active";
         } else {
             this.mmenuAssetClass = "";
@@ -339,10 +420,15 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             this.mmenuMobileClass = "";
         }
-        if (getPage() instanceof JavascriptManagementPage) {
+        if (getPage() instanceof JavascriptManagementPage || getPage() instanceof JavascriptCreatePage || getPage() instanceof JavascriptModifyPage) {
             this.mmenuJavascriptClass = "active";
         } else {
             this.mmenuJavascriptClass = "";
+        }
+        if (getPage() instanceof JobManagementPage || getPage() instanceof JobCreatePage || getPage() instanceof JobModifyPage) {
+            this.mmenuJobClass = "active";
+        } else {
+            this.mmenuJobClass = "";
         }
     }
 
