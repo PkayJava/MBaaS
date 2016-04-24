@@ -37,6 +37,10 @@ public class JobProvider extends JooqProvider {
         return this.jobTable.SECURITY;
     }
 
+    public Field<Double> getConsume() {
+        return this.jobTable.CONSUME;
+    }
+
     public Field<String> getName() {
         return this.jobTable.NAME;
     }
