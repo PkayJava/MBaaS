@@ -10,6 +10,9 @@ import javax.management.MBeanServer;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 /**
  * Separate startup class for people that want to run the examples directly. Use parameter
@@ -21,7 +24,8 @@ public class Start {
      *
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
+
         System.setProperty("wicket.configuration", "development");
 
         Server server = new Server();

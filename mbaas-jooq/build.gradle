@@ -1,6 +1,6 @@
 buildscript {
     dependencies {
-        classpath 'org.mariadb.jdbc:mariadb-java-client:' + mariadbVersion
+        classpath 'mysql:mysql-connector-java:' + mysqlVersion
         classpath 'org.flywaydb:flyway-gradle-plugin:' + flywayVersion
         classpath 'com.angkorteam.gradle:plugin-task:1.0'
     }

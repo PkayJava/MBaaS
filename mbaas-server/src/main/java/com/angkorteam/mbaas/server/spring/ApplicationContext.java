@@ -581,7 +581,9 @@ public class ApplicationContext implements ServletContextListener {
         configuration.setSettings(settings);
         configuration.setDataSource(dataSource);
 
-        if ("com.mysql.jdbc.Driver".equals(dataSource.getDriverClassName())) {
+        if ("com.mysql.cj.jdbc.Driver".equals(dataSource.getDriverClassName())) {
+            configuration.set(SQLDialect.MYSQL);
+        } else if ("com.mysql.jdbc.Driver".equals(dataSource.getDriverClassName())) {
             configuration.set(SQLDialect.MYSQL);
         } else if ("org.hsqldb.jdbcDriver".equals(dataSource.getDriverClassName())) {
             configuration.set(SQLDialect.HSQLDB);

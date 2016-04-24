@@ -92,6 +92,10 @@
         </property>
     </bean>
 
+    <bean class="com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean">
+        <property name="scheduler" ref="scheduler"/>
+    </bean>
+
     <bean class="com.angkorteam.mbaas.server.spring.SessionDestroyedListener"/>
     <bean id="commandExecutor" class="com.angkorteam.mbaas.server.factory.CommandExecutorFactoryBean"/>
 
