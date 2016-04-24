@@ -50,6 +50,7 @@ public class JobManagementPage extends MasterPage implements ActionFilteredJooqC
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("cron", this), "cron", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("errorClass", this), "errorClass", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("errorMessage", this), "errorMessage", this, provider));
+        columns.add(new TextFilteredJooqColumn(Double.class, JooqUtils.lookup("consume", this), "consume", this, provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateLastExecuted", this), "dateLastExecuted", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
