@@ -10,6 +10,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.JobRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
 import com.angkorteam.mbaas.server.validator.ClientNameValidator;
+import com.angkorteam.mbaas.server.validator.JobCronValidator;
 import com.angkorteam.mbaas.server.validator.JobNameValidator;
 import com.angkorteam.mbaas.server.validator.PushClientValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -73,6 +74,7 @@ public class JobCreatePage extends MasterPage {
 
         this.cronField = new TextField<>("cronField", new PropertyModel<>(this, "cron"));
         this.cronField.setRequired(true);
+        this.cronField.add(new JobCronValidator());
         this.form.add(this.cronField);
         this.cronFeedback = new TextFeedbackPanel("cronFeedback", this.cronField);
         this.form.add(this.cronFeedback);
@@ -95,6 +97,7 @@ public class JobCreatePage extends MasterPage {
         jobRecord.setOwnerUserId(getSession().getUserId());
         jobRecord.setSecurity(SecurityEnum.Denied.getLiteral());
         jobRecord.store();
+        getJavascriptService().schedule(jobRecord.getJobId());
         setResponsePage(JobManagementPage.class);
     }
 }

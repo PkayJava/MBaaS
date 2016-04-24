@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.*;
+import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import okhttp3.OkHttpClient;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;

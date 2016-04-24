@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.plain.Identity;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.response.javascript.JavaScriptExecuteResponse;
 import com.angkorteam.mbaas.server.nashorn.JavaFilter;
+import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.nashorn.MBaaS;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
@@ -176,44 +177,7 @@ public class JavascriptController {
         engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
         bindings.put("MBaaS", new MBaaS(context, identity, jdbcTemplate, request));
         bindings.put("Context", context);
-        try {
-            List<Class<?>> clazzes = new ArrayList<>();
-            clazzes.add(Boolean.class);
-            clazzes.add(Byte.class);
-            clazzes.add(Short.class);
-            clazzes.add(Integer.class);
-            clazzes.add(Long.class);
-            clazzes.add(Float.class);
-            clazzes.add(Double.class);
-            clazzes.add(Character.class);
-            clazzes.add(String.class);
-            clazzes.add(Date.class);
-            clazzes.add(BigDecimal.class);
-            clazzes.add(BigInteger.class);
-            clazzes.add(Arrays.class);
-            clazzes.add(Collections.class);
-            clazzes.add(LinkedHashMap.class);
-            clazzes.add(LinkedHashSet.class);
-            clazzes.add(Hashtable.class);
-            clazzes.add(Vector.class);
-            clazzes.add(LinkedList.class);
-            clazzes.add(ArrayList.class);
-            clazzes.add(HashMap.class);
-            clazzes.add(ArrayBlockingQueue.class);
-            clazzes.add(SynchronousQueue.class);
-            clazzes.add(LinkedBlockingDeque.class);
-            clazzes.add(DelayQueue.class);
-            clazzes.add(LinkedTransferQueue.class);
-            clazzes.add(ArrayDeque.class);
-            clazzes.add(ConcurrentLinkedDeque.class);
-            clazzes.add(Stack.class);
-            clazzes.add(Tables.class);
-            clazzes.add(DSL.class);
-            for (Class<?> clazz : clazzes) {
-                engine.eval("var " + clazz.getSimpleName() + " = Java.type('" + clazz.getName() + "')");
-            }
-        } catch (ScriptException e) {
-        }
+        JavascripUtils.eval(engine);
         return engine;
     }
 

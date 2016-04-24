@@ -92,12 +92,12 @@
         </property>
     </bean>
 
-    <bean class="com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean">
+    <bean id="javascriptService" class="com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean">
         <property name="scheduler" ref="scheduler"/>
+        <property name="context" ref="context"/>
     </bean>
 
     <bean class="com.angkorteam.mbaas.server.spring.SessionDestroyedListener"/>
-    <bean id="commandExecutor" class="com.angkorteam.mbaas.server.factory.CommandExecutorFactoryBean"/>
 
     <security:authentication-manager alias="providerManager" erase-credentials="true"/>
 

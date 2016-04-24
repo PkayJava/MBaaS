@@ -12,6 +12,7 @@ import com.angkorteam.mbaas.server.validator.JobNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
@@ -29,16 +30,14 @@ public class JobModifyPage extends MasterPage {
     private String jobId;
 
     private String name;
-    private TextField<String> nameField;
-    private TextFeedbackPanel nameFeedback;
+    private Label nameLabel;
+
+    private String cron;
+    private Label cronLabel;
 
     private String javascript;
     private JavascriptTextArea javascriptField;
     private TextFeedbackPanel javascriptFeedback;
-
-    private String cron;
-    private TextField<String> cronField;
-    private TextFeedbackPanel cronFeedback;
 
     private Form<Void> form;
     private Button saveButton;
@@ -62,12 +61,8 @@ public class JobModifyPage extends MasterPage {
         JobRecord jobRecord = context.select(jobTable.fields()).from(jobTable).where(jobTable.JOB_ID.eq(jobId)).fetchOneInto(jobTable);
 
         this.name = jobRecord.getName();
-        this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
-        this.nameField.add(new JobNameValidator(this.jobId));
-        this.nameField.setRequired(true);
-        this.form.add(this.nameField);
-        this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
-        this.form.add(this.nameFeedback);
+        this.nameLabel = new Label("nameLabel", new PropertyModel<>(this, "name"));
+        this.form.add(this.nameLabel);
 
         this.javascript = jobRecord.getJavascript();
         this.javascriptField = new JavascriptTextArea("javascriptField", new PropertyModel<>(this, "javascript"));
@@ -77,11 +72,8 @@ public class JobModifyPage extends MasterPage {
         this.form.add(this.javascriptFeedback);
 
         this.cron = jobRecord.getCron();
-        this.cronField = new TextField<>("cronField", new PropertyModel<>(this, "cron"));
-        this.cronField.setRequired(true);
-        this.form.add(this.cronField);
-        this.cronFeedback = new TextFeedbackPanel("cronFeedback", this.cronField);
-        this.form.add(this.cronFeedback);
+        this.cronLabel = new Label("cronLabel", new PropertyModel<>(this, "cron"));
+        this.form.add(this.cronLabel);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
@@ -93,10 +85,9 @@ public class JobModifyPage extends MasterPage {
         DSLContext context = getDSLContext();
         JobTable jobTable = Tables.JOB.as("jobTable");
         JobRecord jobRecord = context.select(jobTable.fields()).from(jobTable).where(jobTable.JOB_ID.eq(jobId)).fetchOneInto(jobTable);
-        jobRecord.setCron(this.cron);
         jobRecord.setJavascript(this.javascript);
-        jobRecord.setName(this.name);
         jobRecord.store();
+        getJavascriptService().schedule(jobRecord.getJobId());
         setResponsePage(JobManagementPage.class);
     }
 

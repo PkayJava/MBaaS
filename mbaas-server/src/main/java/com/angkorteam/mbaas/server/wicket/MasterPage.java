@@ -5,6 +5,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.link.Link;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
+import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.application.ApplicationCreatePage;
@@ -64,6 +65,9 @@ import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.method.P;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.context.support.XmlWebApplicationContext;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -473,5 +477,10 @@ public abstract class MasterPage extends AdminLTEPage {
     public PusherClient getPusherClient() {
         Application application = (Application) getApplication();
         return application.getPusherClient();
+    }
+
+    public JavascriptServiceFactoryBean.JavascriptService getJavascriptService() {
+        WebApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(getServletContext(), "org.springframework.web.servlet.FrameworkServlet.CONTEXT.MBaaS API");
+        return applicationContext.getBean(JavascriptServiceFactoryBean.JavascriptService.class);
     }
 }
