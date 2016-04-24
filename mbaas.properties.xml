@@ -11,7 +11,7 @@
     <entry key="temp.jdbc.database">mbaas_temp</entry>
     <entry key="temp.jdbc.username">root</entry>
     <entry key="temp.jdbc.password">ZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSX</entry>
-    <entry key="temp.jdbc.dialect">org.jooq.util.mysql.MysqlDatabase</entry>
+    <entry key="temp.jdbc.dialect">org.jooq.util.mysql.MySQLDatabase</entry>
 
     <entry key="app.jdbc.driver">org.mysql.jdbc.Driver</entry>
     <entry key="app.jdbc.url"><![CDATA[jdbc:mysql://pkayjava.ddns.net:3306/mbaas?createDatabaseIfNotExist=true&autoReconnect=true]]></entry>
