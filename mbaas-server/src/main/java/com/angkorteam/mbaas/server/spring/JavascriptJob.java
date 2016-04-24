@@ -40,6 +40,7 @@ public final class JavascriptJob implements Runnable {
         if (jobRecord == null || jobRecord.getSecurity().equals(SecurityEnum.Denied.getLiteral())) {
             return;
         }
+        long start;
         try {
             NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
             ScriptEngine engine = factory.getScriptEngine(new JavaFilter(context));
@@ -49,12 +50,20 @@ public final class JavascriptJob implements Runnable {
             bindings.put("Context", context);
             JavascripUtils.eval(engine);
             String javascript = jobRecord.getJavascript();
+            start = System.currentTimeMillis();
             engine.eval(javascript);
+            start = System.currentTimeMillis() - start;
+            double consume = ((double) start) / 1000d;
+            jobRecord.setConsume(consume);
             jobRecord.setErrorClass("");
             jobRecord.setErrorMessage("");
             jobRecord.setDateLastExecuted(new Date());
             jobRecord.update();
         } catch (Throwable e) {
+            start = System.currentTimeMillis();
+            start = System.currentTimeMillis() - start;
+            double consume = ((double) start) / 1000d;
+            jobRecord.setConsume(consume);
             jobRecord.setErrorClass(e.getClass().getSimpleName());
             jobRecord.setErrorMessage(e.getMessage());
             jobRecord.setDateLastExecuted(new Date());
