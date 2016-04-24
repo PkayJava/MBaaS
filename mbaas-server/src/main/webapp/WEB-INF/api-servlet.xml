@@ -95,6 +95,7 @@
     <bean id="javascriptService" class="com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean">
         <property name="scheduler" ref="scheduler"/>
         <property name="context" ref="context"/>
+        <property name="jdbcTemplate" ref="jdbcTemplate"/>
     </bean>
 
     <bean class="com.angkorteam.mbaas.server.spring.SessionDestroyedListener"/>

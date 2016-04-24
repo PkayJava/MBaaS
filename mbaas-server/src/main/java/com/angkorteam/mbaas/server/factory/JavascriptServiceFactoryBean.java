@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.server.spring.JavascriptTrigger;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -31,8 +32,18 @@ public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServi
 
     private ServletContext servletContext;
 
+    private JdbcTemplate jdbcTemplate;
+
     public TaskScheduler getScheduler() {
         return scheduler;
+    }
+
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public void setScheduler(TaskScheduler scheduler) {
@@ -49,7 +60,7 @@ public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServi
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.javascriptService = new JavascriptService(context, scheduler);
+        this.javascriptService = new JavascriptService(context, jdbcTemplate, scheduler);
         JobTable jobTable = Tables.JOB.as("jobTable");
         List<JobRecord> jobRecords = context.select(jobTable.fields()).from(jobTable).fetchInto(jobTable);
         for (JobRecord jobRecord : jobRecords) {
@@ -80,9 +91,12 @@ public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServi
 
         private final TaskScheduler scheduler;
 
-        public JavascriptService(DSLContext context, TaskScheduler scheduler) {
+        private final JdbcTemplate jdbcTemplate;
+
+        public JavascriptService(DSLContext context, JdbcTemplate jdbcTemplate, TaskScheduler scheduler) {
             this.context = context;
             this.scheduler = scheduler;
+            this.jdbcTemplate = jdbcTemplate;
         }
 
         public void schedule(String jobId) {
@@ -93,7 +107,7 @@ public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServi
             JobRecord jobRecord = context.select(jobTable.fields()).from(jobTable).where(jobTable.JOB_ID.eq(jobId)).fetchOneInto(jobTable);
             if (jobRecord != null) {
                 try {
-                    this.scheduler.schedule(new JavascriptJob(context, jobId), new JavascriptTrigger(context, jobId, jobRecord.getCron()));
+                    this.scheduler.schedule(new JavascriptJob(context, jdbcTemplate, jobId), new JavascriptTrigger(context, jobId, jobRecord.getCron()));
                     jobs.add(jobId);
                 } catch (IllegalArgumentException e) {
                 }
