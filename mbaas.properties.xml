@@ -7,20 +7,20 @@
     <entry key="maintenance">false</entry>
 
     <entry key="temp.jdbc.driver">org.mysql.jdbc.Driver</entry>
-    <entry key="temp.jdbc.url"><![CDATA[jdbc:mysql://pkayjava.ddns.net:3306/mbaas_temp?createDatabaseIfNotExist=true&autoReconnect=true]]></entry>
+    <entry key="temp.jdbc.url"><![CDATA[jdbc:mysql://pkayjava.ddns.net:3306/mbaas_temp?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&serverTimezone=UTC]]></entry>
     <entry key="temp.jdbc.database">mbaas_temp</entry>
     <entry key="temp.jdbc.username">root</entry>
     <entry key="temp.jdbc.password">ZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSX</entry>
     <entry key="temp.jdbc.dialect">org.jooq.util.mysql.MySQLDatabase</entry>
 
     <entry key="app.jdbc.driver">org.mysql.jdbc.Driver</entry>
-    <entry key="app.jdbc.url"><![CDATA[jdbc:mysql://pkayjava.ddns.net:3306/mbaas?createDatabaseIfNotExist=true&autoReconnect=true]]></entry>
+    <entry key="app.jdbc.url"><![CDATA[jdbc:mysql://pkayjava.ddns.net:3306/mbaas?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&serverTimezone=UTC]]></entry>
     <entry key="app.jdbc.database">mbaas</entry>
     <entry key="app.jdbc.username">root</entry>
     <entry key="app.jdbc.password">ZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSX</entry>
 
     <entry key="test.jdbc.driver">org.mysql.jdbc.Driver</entry>
-    <entry key="test.jdbc.url"><![CDATA[jdbc:mysql://pkayjava.ddns.net:3306/mbaas_test?createDatabaseIfNotExist=true&autoReconnect=true]]></entry>
+    <entry key="test.jdbc.url"><![CDATA[jdbc:mysql://pkayjava.ddns.net:3306/mbaas_test?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&serverTimezone=UTC]]></entry>
     <entry key="test.jdbc.database">mbaas_test</entry>
     <entry key="test.jdbc.username">root</entry>
     <entry key="test.jdbc.password">ZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSX</entry>
