@@ -45,9 +45,9 @@ public final class JavascriptJob implements Runnable {
             ScriptEngine engine = factory.getScriptEngine(new JavaFilter(context));
             Bindings bindings = engine.createBindings();
             engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
-            JavascripUtils.eval(engine);
             bindings.put("MBaaS", new MBaaS(context, null, jdbcTemplate, null));
             bindings.put("Context", context);
+            JavascripUtils.eval(engine);
             String javascript = jobRecord.getJavascript();
             engine.eval(javascript);
             jobRecord.setErrorClass("");
