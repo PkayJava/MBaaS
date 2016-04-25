@@ -24,12 +24,15 @@ public class MBaaS {
 
     public final Identity Identity;
 
+    public final Http Http;
+
     public MBaaS(DSLContext context, Identity identity, JdbcTemplate jdbcTemplate, Request request) {
         this.Console = new Console(LOGGER);
         this.Identity = identity;
         this.Database = new Database(context, identity, jdbcTemplate, this);
         this.Permission = new Permission(this, identity, context, jdbcTemplate);
         this.request = request;
+        this.Http = new Http();
     }
 
     public void promptLogin() {
