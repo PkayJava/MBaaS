@@ -87,6 +87,9 @@ public class Constants {
     public static final String MAIL_PROTOCOL = "mail.protocol";
     public static final String MAIL_FROM = "mail.from";
 
+    public static final String EXECUTOR_POOL_SIZE = "executor.pool_size";
+    public static final String EXECUTOR_QUEUE_CAPACITY = "executor.queue_capacity";
+
     public static final String PUSH_SERVER_URL = "push.server.url";
 
     public static final String APP_VERSION = "app.version";

@@ -44,8 +44,9 @@
     </mvc:resources>
 
     <task:annotation-driven executor="executor" scheduler="scheduler"/>
-    <task:executor id="executor" pool-size="10" queue-capacity="25"/>
-    <task:scheduler id="scheduler" pool-size="10"/>
+
+    <bean id="scheduler" class="com.angkorteam.mbaas.server.factory.TaskSchedulerFactoryBean"/>
+    <bean id="executor" class="com.angkorteam.mbaas.server.factory.TaskExecutorFactoryBean"/>
 
     <security:global-method-security secured-annotations="enabled"/>
 
@@ -92,11 +93,7 @@
         </property>
     </bean>
 
-    <bean id="javascriptService" class="com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean">
-        <property name="scheduler" ref="scheduler"/>
-        <property name="context" ref="context"/>
-        <property name="jdbcTemplate" ref="jdbcTemplate"/>
-    </bean>
+    <bean id="javascriptService" class="com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean"/>
 
     <bean class="com.angkorteam.mbaas.server.spring.SessionDestroyedListener"/>
 

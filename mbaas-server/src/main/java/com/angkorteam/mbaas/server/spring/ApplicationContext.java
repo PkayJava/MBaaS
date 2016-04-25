@@ -28,9 +28,13 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -74,6 +78,12 @@ public class ApplicationContext implements ServletContextListener {
 
     private OkHttpClient httpClient;
 
+    private ThreadPoolTaskExecutor executor;
+
+    private ThreadPoolTaskScheduler scheduler;
+
+    private JavascriptServiceFactoryBean.JavascriptService javascriptService;
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
@@ -106,8 +116,45 @@ public class ApplicationContext implements ServletContextListener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        LOGGER.info("thread internal pool");
+        this.executor = initExecutor();
+        this.scheduler = initScheduler();
+        this.javascriptService = initJavascriptService(context, jdbcTemplate, scheduler);
+
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
+    }
+
+    protected JavascriptServiceFactoryBean.JavascriptService initJavascriptService(DSLContext context, JdbcTemplate jdbcTemplate, TaskScheduler scheduler) {
+        JavascriptServiceFactoryBean.JavascriptService javascriptService = new JavascriptServiceFactoryBean.JavascriptService(context, jdbcTemplate, scheduler);
+        JobTable jobTable = Tables.JOB.as("jobTable");
+        List<JobRecord> jobRecords = context.select(jobTable.fields()).from(jobTable).fetchInto(jobTable);
+        for (JobRecord jobRecord : jobRecords) {
+            javascriptService.schedule(jobRecord.getJobId());
+        }
+        return javascriptService;
+    }
+
+    protected ThreadPoolTaskExecutor initExecutor() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(configuration.getInt(Constants.EXECUTOR_POOL_SIZE));
+        executor.setMaxPoolSize(configuration.getInt(Constants.EXECUTOR_POOL_SIZE));
+        executor.setQueueCapacity(configuration.getInt(Constants.EXECUTOR_QUEUE_CAPACITY));
+        executor.setDaemon(true);
+        executor.setBeanName("Executor");
+        executor.afterPropertiesSet();
+        return executor;
+    }
+
+    protected ThreadPoolTaskScheduler initScheduler() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setBeanName("Scheduler");
+        scheduler.setDaemon(true);
+        scheduler.setPoolSize(configuration.getInt(Constants.EXECUTOR_POOL_SIZE));
+        scheduler.afterPropertiesSet();
+        return scheduler;
     }
 
     protected OkHttpClient initHttpClient() {
@@ -535,14 +582,18 @@ public class ApplicationContext implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
+        if (this.executor != null) {
+            this.executor.shutdown();
+        }
+        if (this.scheduler != null) {
+            this.scheduler.shutdown();
+        }
         if (this.dataSource != null) {
             try {
                 this.dataSource.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
-        if (this.pusherClient != null) {
         }
     }
 
@@ -625,5 +676,17 @@ public class ApplicationContext implements ServletContextListener {
 
     public final PusherClient getPusherClient() {
         return pusherClient;
+    }
+
+    public final TaskExecutor getExecutor() {
+        return executor;
+    }
+
+    public final TaskScheduler getScheduler() {
+        return scheduler;
+    }
+
+    public final JavascriptServiceFactoryBean.JavascriptService getJavascriptService() {
+        return this.javascriptService;
     }
 }

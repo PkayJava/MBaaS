@@ -481,7 +481,7 @@ public abstract class MasterPage extends AdminLTEPage {
     }
 
     public JavascriptServiceFactoryBean.JavascriptService getJavascriptService() {
-        WebApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(getServletContext(), "org.springframework.web.servlet.FrameworkServlet.CONTEXT.MBaaS API");
-        return applicationContext.getBean(JavascriptServiceFactoryBean.JavascriptService.class);
+        Application application = (Application) getApplication();
+        return application.getJavascriptService();
     }
 }

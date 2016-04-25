@@ -4,6 +4,7 @@ import com.angkorteam.framework.extension.jooq.IDSLContext;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.server.Scope;
+import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
@@ -109,6 +110,12 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
         WebApplicationContextUtils.getWebApplicationContext(getServletContext());
         return applicationContext.getPusherClient();
+    }
+
+    public final JavascriptServiceFactoryBean.JavascriptService getJavascriptService() {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+        return applicationContext.getJavascriptService();
     }
 
     @Override

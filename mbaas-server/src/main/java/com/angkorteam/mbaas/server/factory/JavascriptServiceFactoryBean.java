@@ -24,48 +24,14 @@ import java.util.List;
  */
 public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServiceFactoryBean.JavascriptService>, InitializingBean, ServletContextAware {
 
-    private TaskScheduler scheduler;
-
-    private DSLContext context;
-
     private JavascriptService javascriptService;
 
     private ServletContext servletContext;
 
-    private JdbcTemplate jdbcTemplate;
-
-    public TaskScheduler getScheduler() {
-        return scheduler;
-    }
-
-    public JdbcTemplate getJdbcTemplate() {
-        return jdbcTemplate;
-    }
-
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    public void setScheduler(TaskScheduler scheduler) {
-        this.scheduler = scheduler;
-    }
-
-    public DSLContext getContext() {
-        return context;
-    }
-
-    public void setContext(DSLContext context) {
-        this.context = context;
-    }
-
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.javascriptService = new JavascriptService(context, jdbcTemplate, scheduler);
-        JobTable jobTable = Tables.JOB.as("jobTable");
-        List<JobRecord> jobRecords = context.select(jobTable.fields()).from(jobTable).fetchInto(jobTable);
-        for (JobRecord jobRecord : jobRecords) {
-            this.javascriptService.schedule(jobRecord.getJobId());
-        }
+        ApplicationContext applicationContext = ApplicationContext.get(this.servletContext);
+        this.javascriptService = applicationContext.getJavascriptService();
     }
 
     @Override
@@ -81,6 +47,11 @@ public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServi
     @Override
     public boolean isSingleton() {
         return true;
+    }
+
+    @Override
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
     }
 
     public static class JavascriptService {
@@ -113,10 +84,5 @@ public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServi
                 }
             }
         }
-    }
-
-    @Override
-    public void setServletContext(ServletContext servletContext) {
-        this.servletContext = servletContext;
     }
 }

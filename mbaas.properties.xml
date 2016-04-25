@@ -83,6 +83,9 @@
 
     <entry key="push.server.url">http://192.168.1.110:6080/ag-push</entry>
 
+    <entry key="executor.pool_size">10</entry>
+    <entry key="executor.queue_capacity">500</entry>
+
     <entry key="resource.repo">/opt/sandbox/mbaas</entry>
 
     <entry key="encryption.password"><![CDATA[7808654h4zzx05DheFMZ]]></entry>
