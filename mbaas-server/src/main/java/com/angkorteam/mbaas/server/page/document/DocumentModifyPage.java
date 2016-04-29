@@ -139,7 +139,7 @@ public class DocumentModifyPage extends MasterPage {
                 }
                 names.add("MAX( IF(" + eavTable + "_attribute.name = '" + attribute.getName() + "', " + eavTable + ".eav_value, NULL) ) AS " + attribute.getName());
             } else {
-                names.add(attribute.getName());
+                names.add(this.collection.getName() + "." + attribute.getName() + " AS " + attribute.getName());
             }
         }
 
@@ -151,13 +151,14 @@ public class DocumentModifyPage extends MasterPage {
             selectFields.add(attribute.getName());
         }
 
+        String documentIdField = collection.getName() + "." + collection.getName() + "_id";
         if (!selectFields.isEmpty()) {
             JdbcTemplate jdbcTemplate = getJdbcTemplate();
             if (hasEav) {
-                String query = "SELECT " + StringUtils.join(names, ", ") + " FROM " + collection.getName() + " " + StringUtils.join(joins, " ") + " " + StringUtils.join(attributeJoins, " ") + " WHERE " + collection.getName() + "_id = ? GROUP BY " + collection.getName() + "_id";
+                String query = "SELECT " + StringUtils.join(names, ", ") + " FROM " + collection.getName() + " " + StringUtils.join(joins, " ") + " " + StringUtils.join(attributeJoins, " ") + " WHERE " + documentIdField + " = ? GROUP BY " + documentIdField;
                 this.fields.putAll(jdbcTemplate.queryForMap(query, documentId));
             } else {
-                String query = "SELECT " + StringUtils.join(names, ", ") + " FROM " + collection.getName() + " WHERE " + collection.getName() + "_id = ?";
+                String query = "SELECT " + StringUtils.join(names, ", ") + " FROM " + collection.getName() + " WHERE " + documentIdField + " = ?";
                 this.fields.putAll(jdbcTemplate.queryForMap(query, documentId));
             }
         }

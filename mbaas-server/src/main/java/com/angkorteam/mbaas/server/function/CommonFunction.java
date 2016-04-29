@@ -90,7 +90,7 @@ public class CommonFunction {
                         } else if (externalType == AttributeTypeEnum.Float) {
                             try {
                                 Float number = (Float) value;
-                                int v = Integer.valueOf(String.valueOf(number));
+                                int v = number.intValue();
                                 resultDocument.put(item.getKey(), v);
                             } catch (NumberFormatException e) {
                                 return false;
@@ -98,7 +98,7 @@ public class CommonFunction {
                         } else if (externalType == AttributeTypeEnum.Double) {
                             try {
                                 Double number = (Double) value;
-                                int v = Integer.valueOf(String.valueOf(number));
+                                int v = number.intValue();
                                 resultDocument.put(item.getKey(), v);
                             } catch (NumberFormatException e) {
                                 return false;
