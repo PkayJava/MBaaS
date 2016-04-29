@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,7 +179,7 @@ public class SecurityController {
                     && requestBody.getPassword() != null && !"".equals(requestBody.getPassword())) {
                 List<Condition> where = new ArrayList<>();
                 where.add(userTable.LOGIN.eq(requestBody.getUsername()));
-                where.add(userTable.PASSWORD.eq(requestBody.getPassword()));
+                where.add(userTable.PASSWORD.eq(DSL.md5(requestBody.getPassword())));
                 userRecord = context.select(userTable.fields()).from(userTable).where(where).fetchOneInto(userTable);
                 if (userRecord == null) {
                     errorMessages.put("credential", "bad credential");
