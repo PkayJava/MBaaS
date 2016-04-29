@@ -10,9 +10,11 @@ import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
 import com.angkorteam.mbaas.plain.request.security.SecuritySignUpRequest;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
+import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -66,10 +68,10 @@ public class UserFunction {
             good = CommonFunction.ensureAttributes(attributeRecords, eavExternalAttributes);
         }
 
-        Map<String, Object> eavGoodAttributes = new java.util.HashMap<>();
+        Map<String, Object> goodDocument = new java.util.HashMap<>();
         if (good) {
             // data type checked
-            good = CommonFunction.checkDataTypes(attributeRecords, eavExternalAttributes, eavGoodAttributes);
+            good = CommonFunction.checkDataTypes(attributeRecords, eavExternalAttributes, goodDocument);
         }
 
         if (good) {
@@ -77,19 +79,37 @@ public class UserFunction {
             String login = requestBody.getUsername();
             String password = requestBody.getPassword();
 
-            UserRecord userRecord = context.newRecord(userTable);
-            userRecord.setUserId(userId);
-            userRecord.setRoleId(roleRecord.getRoleId());
-            userRecord.setAccountNonExpired(true);
-            userRecord.setCredentialsNonExpired(true);
-            userRecord.setAccountNonLocked(true);
-            userRecord.setStatus(UserStatusEnum.Active.getLiteral());
-            userRecord.setLogin(login);
-            userRecord.setPassword(password);
-            userRecord.store();
+            goodDocument.put(Tables.USER.ROLE_ID.getName(), roleRecord.getRoleId());
+            goodDocument.put(Tables.USER.ACCOUNT_NON_EXPIRED.getName(), true);
+            goodDocument.put(Tables.USER.CREDENTIALS_NON_EXPIRED.getName(), true);
+            goodDocument.put(Tables.USER.ACCOUNT_NON_LOCKED.getName(), true);
+            goodDocument.put(Tables.USER.STATUS.getName(), UserStatusEnum.Active.getLiteral());
+            goodDocument.put(Tables.USER.LOGIN.getName(), login);
+            goodDocument.put(Tables.USER.PASSWORD.getName(), password);
+            goodDocument.put(Tables.USER.USER_ID.getName(), userId);
+
+            List<String> fields = new LinkedList<>();
+            List<Object> values = new LinkedList<>();
+            Map<String, Object> eavs = new HashMap<>();
+            for (Map.Entry<String, Object> item : goodDocument.entrySet()) {
+                AttributeRecord attributeRecord = attributeRecords.get(item.getKey());
+                if (!attributeRecord.getEav()) {
+                    fields.add(item.getKey());
+                    values.add(":" + item.getKey());
+                } else {
+                    eavs.put(item.getKey(), item.getValue());
+                }
+            }
+            String jdbc = "INSERT INTO " + Tables.USER.getName() + "(" + StringUtils.join(fields, ",") + ") VALUES(" + StringUtils.join(values, ",") + ")";
+            NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(jdbcTemplate);
+            template.update(jdbc, goodDocument);
+
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(password)).where(userTable.USER_ID.eq(userId)).execute();
 
-            CommonFunction.saveEavAttributes(collectionRecord.getCollectionId(), userId, context, attributeRecords, eavGoodAttributes);
+            if (!eavs.isEmpty()) {
+                CommonFunction.saveEavAttributes(collectionRecord.getCollectionId(), userId, context, attributeRecords, eavs);
+            }
+
             if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
                 for (String name : requestBody.getVisibleByAnonymousUsers().keySet()) {
                     String attributeId = attributeRecords.get(name).getAttributeId();
