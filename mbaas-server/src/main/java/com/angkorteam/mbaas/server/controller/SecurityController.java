@@ -117,8 +117,8 @@ public class SecurityController {
         }
 
         String userId = UUID.randomUUID().toString();
-        boolean good = UserFunction.createUser(userId, context, jdbcTemplate, request, requestBody);
-        if (!good) {
+        boolean created = UserFunction.createUser(userId, context, jdbcTemplate, request, requestBody);
+        if (!created) {
             SecuritySignUpResponse response = new SecuritySignUpResponse();
             response.setHttpCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.setResult(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());

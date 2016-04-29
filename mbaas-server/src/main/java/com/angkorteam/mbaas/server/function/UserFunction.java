@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class UserFunction {
 
-    public static boolean createUser(String userId, DSLContext context, JdbcTemplate jdbcTemplate, HttpServletRequest request,  SecuritySignUpRequest requestBody) {
+    public static boolean createUser(String userId, DSLContext context, JdbcTemplate jdbcTemplate, HttpServletRequest request, SecuritySignUpRequest requestBody) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         UserTable userTable = Tables.USER.as("userTable");
@@ -36,21 +36,6 @@ public class UserFunction {
         for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
             attributeRecords.put(attributeRecord.getName(), attributeRecord);
         }
-
-        String login = requestBody.getUsername();
-        String password = requestBody.getPassword();
-
-        UserRecord userRecord = context.newRecord(userTable);
-        userRecord.setUserId(userId);
-        userRecord.setRoleId(roleRecord.getRoleId());
-        userRecord.setAccountNonExpired(true);
-        userRecord.setCredentialsNonExpired(true);
-        userRecord.setAccountNonLocked(true);
-        userRecord.setStatus(UserStatusEnum.Active.getLiteral());
-        userRecord.setLogin(login);
-        userRecord.setPassword(password);
-        userRecord.store();
-        context.update(userTable).set(userTable.PASSWORD, DSL.md5(password)).where(userTable.USER_ID.eq(userId)).execute();
 
         // remove null field and empty field
         CommonFunction.cleanEmpty(requestBody.getVisibleByTheUser());
@@ -88,6 +73,22 @@ public class UserFunction {
         }
 
         if (good) {
+
+            String login = requestBody.getUsername();
+            String password = requestBody.getPassword();
+
+            UserRecord userRecord = context.newRecord(userTable);
+            userRecord.setUserId(userId);
+            userRecord.setRoleId(roleRecord.getRoleId());
+            userRecord.setAccountNonExpired(true);
+            userRecord.setCredentialsNonExpired(true);
+            userRecord.setAccountNonLocked(true);
+            userRecord.setStatus(UserStatusEnum.Active.getLiteral());
+            userRecord.setLogin(login);
+            userRecord.setPassword(password);
+            userRecord.store();
+            context.update(userTable).set(userTable.PASSWORD, DSL.md5(password)).where(userTable.USER_ID.eq(userId)).execute();
+
             CommonFunction.saveEavAttributes(collectionRecord.getCollectionId(), userId, context, attributeRecords, eavGoodAttributes);
             if (requestBody.getVisibleByAnonymousUsers() != null && !requestBody.getVisibleByAnonymousUsers().isEmpty()) {
                 for (String name : requestBody.getVisibleByAnonymousUsers().keySet()) {
