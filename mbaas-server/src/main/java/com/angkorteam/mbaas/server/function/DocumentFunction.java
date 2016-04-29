@@ -44,6 +44,18 @@ public class DocumentFunction {
         // ensureField
         boolean good = CommonFunction.ensureAttributes(attributeRecords, requestBody.getDocument());
 
+        List<String> nulls = new ArrayList<>();
+        for (Map.Entry<String, Object> item : requestBody.getDocument().entrySet()) {
+            if (item.getValue() == null) {
+                nulls.add(item.getKey());
+            }
+        }
+        if (!nulls.isEmpty()) {
+            for (String key : nulls) {
+                requestBody.getDocument().remove(key);
+            }
+        }
+
         Map<String, Object> goodDocument = new HashMap<>();
         if (good) {
             // checkData Type
@@ -62,9 +74,16 @@ public class DocumentFunction {
                     values.put(entry.getKey(), entry.getValue());
                 }
             }
+            for (String nul : nulls) {
+                if (!attributeRecords.get(nul).getEav()) {
+                    columns.add(nul + " = :" + nul);
+                    values.put(nul, null);
+                }
+            }
             values.put(collection + "_id", documentId);
             NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
             namedParameterJdbcTemplate.update("UPDATE `" + collectionRecord.getName() + "` SET " + StringUtils.join(columns, ", ") + " WHERE " + collection + "_id = :" + collection + "_id", values);
+
             for (Map.Entry<String, Object> entry : goodDocument.entrySet()) {
                 if (entry.getValue() == null) {
                     continue;
@@ -76,6 +95,17 @@ public class DocumentFunction {
                     int effect = jdbcTemplate.update("UPDATE " + eavTable + " SET EAV_VALUE = ? WHERE COLLECTION_ID = ? AND ATTRIBUTE_ID = ? AND DOCUMENT_ID = ?", entry.getValue(), collectionRecord.getCollectionId(), attributeRecord.getAttributeId(), documentId);
                     if (effect == 0) {
                         jdbcTemplate.update("INSERT INTO " + eavTable + "(" + eavTable + "_id,COLLECTION_ID,DOCUMENT_ID,ATTRIBUTE_ID,ATTRIBUTE_TYPE,EAV_VALUE) values(?,?,?,?,?,?)", UUID.randomUUID().toString(), collectionRecord.getCollectionId(), documentId, attributeRecord.getAttributeId(), attributeRecord.getAttributeType(), entry.getValue());
+                    }
+                }
+            }
+            for (String nul : nulls) {
+                AttributeRecord attributeRecord = attributeRecords.get(nul);
+                if (attributeRecord.getEav()) {
+                    AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
+                    String eavTable = attributeType.getEavTable();
+                    int effect = jdbcTemplate.update("UPDATE " + eavTable + " SET EAV_VALUE = ? WHERE COLLECTION_ID = ? AND ATTRIBUTE_ID = ? AND DOCUMENT_ID = ?", null, collectionRecord.getCollectionId(), attributeRecord.getAttributeId(), documentId);
+                    if (effect == 0) {
+                        jdbcTemplate.update("INSERT INTO " + eavTable + "(" + eavTable + "_id,COLLECTION_ID,DOCUMENT_ID,ATTRIBUTE_ID,ATTRIBUTE_TYPE,EAV_VALUE) values(?,?,?,?,?,?)", UUID.randomUUID().toString(), collectionRecord.getCollectionId(), documentId, attributeRecord.getAttributeId(), attributeRecord.getAttributeType(), null);
                     }
                 }
             }
