@@ -87,6 +87,22 @@ public class CommonFunction {
                             } catch (NumberFormatException e) {
                                 return false;
                             }
+                        } else if (externalType == AttributeTypeEnum.Float) {
+                            try {
+                                Float number = (Float) value;
+                                int v = Integer.valueOf(String.valueOf(number));
+                                resultDocument.put(item.getKey(), v);
+                            } catch (NumberFormatException e) {
+                                return false;
+                            }
+                        } else if (externalType == AttributeTypeEnum.Double) {
+                            try {
+                                Double number = (Double) value;
+                                int v = Integer.valueOf(String.valueOf(number));
+                                resultDocument.put(item.getKey(), v);
+                            } catch (NumberFormatException e) {
+                                return false;
+                            }
                         } else {
                             return false;
                         }
