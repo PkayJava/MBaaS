@@ -13,6 +13,7 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
+import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
@@ -29,6 +30,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,8 +84,8 @@ public class UserModifyPage extends MasterPage {
         this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.USER.getName())).fetchOneInto(CollectionPojo.class);
         this.collectionId = this.collection.getCollectionId();
         this.fields = new HashMap<>();
-
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+
 
         List<AttributePojo> attributes = context.select(attributeTable.fields())
                 .from(attributeTable)
@@ -91,13 +93,82 @@ public class UserModifyPage extends MasterPage {
                 .and(attributeTable.SYSTEM.eq(false))
                 .fetchInto(AttributePojo.class);
 
-        Map<String, AttributePojo> virtualAttributes = new HashMap<>();
-        for (AttributePojo attribute : context.select(attributeTable.fields()).from(attributeTable).fetchInto(AttributePojo.class)) {
-            virtualAttributes.put(attribute.getAttributeId(), attribute);
+        List<String> joins = new ArrayList<>();
+        List<String> attributeJoins = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+
+        boolean hasEav = false;
+        for (AttributePojo attribute : attributes) {
+            if (attribute.getEav()) {
+                hasEav = true;
+                AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attribute.getAttributeType());
+                String eavTable = null;
+                String eavField = null;
+                // eav time
+                if (attributeType == AttributeTypeEnum.Time) {
+                    eavTable = Tables.EAV_TIME.getName();
+                    eavField = Tables.EAV_TIME.getName() + "." + Tables.EAV_TIME.DOCUMENT_ID.getName();
+                }
+                // eav date
+                if (attributeType == AttributeTypeEnum.Date) {
+                    eavTable = Tables.EAV_DATE.getName();
+                    eavField = Tables.EAV_DATE.getName() + "." + Tables.EAV_DATE.DOCUMENT_ID.getName();
+                }
+                // eav datetime
+                if (attributeType == AttributeTypeEnum.DateTime) {
+                    eavTable = Tables.EAV_DATE_TIME.getName();
+                    eavField = Tables.EAV_DATE_TIME.getName() + "." + Tables.EAV_DATE_TIME.DOCUMENT_ID.getName();
+                }
+                // eav varchar
+                if (attributeType == AttributeTypeEnum.String) {
+                    eavTable = Tables.EAV_VARCHAR.getName();
+                    eavField = Tables.EAV_VARCHAR.getName() + "." + Tables.EAV_VARCHAR.DOCUMENT_ID.getName();
+                }
+                // eav character
+                if (attributeType == AttributeTypeEnum.Character) {
+                    eavTable = Tables.EAV_CHARACTER.getName();
+                    eavField = Tables.EAV_CHARACTER.getName() + "." + Tables.EAV_CHARACTER.DOCUMENT_ID.getName();
+                }
+                // eav decimal
+                if (attributeType == AttributeTypeEnum.Float
+                        || attributeType == AttributeTypeEnum.Double) {
+                    eavTable = Tables.EAV_DECIMAL.getName();
+                    eavField = Tables.EAV_DECIMAL.getName() + "." + Tables.EAV_DECIMAL.DOCUMENT_ID.getName();
+                }
+                // eav boolean
+                if (attributeType == AttributeTypeEnum.Boolean) {
+                    eavTable = Tables.EAV_BOOLEAN.getName();
+                    eavField = Tables.EAV_BOOLEAN.getName() + "." + Tables.EAV_BOOLEAN.DOCUMENT_ID.getName();
+                }
+                // eav integer
+                if (attributeType == AttributeTypeEnum.Byte
+                        || attributeType == AttributeTypeEnum.Short
+                        || attributeType == AttributeTypeEnum.Integer
+                        || attributeType == AttributeTypeEnum.Long) {
+                    eavTable = Tables.EAV_INTEGER.getName();
+                    eavField = Tables.EAV_INTEGER.getName() + "." + Tables.EAV_INTEGER.DOCUMENT_ID.getName();
+                }
+                // eav text
+                if (attributeType == AttributeTypeEnum.Text) {
+                    eavTable = Tables.EAV_TEXT.getName();
+                    eavField = Tables.EAV_TEXT.getName() + "." + Tables.EAV_TEXT.DOCUMENT_ID.getName();
+                }
+                String join = "LEFT JOIN " + eavTable + " ON " + collection.getName() + "." + collection.getName() + "_id" + " = " + eavField;
+                if (!joins.contains(join)) {
+                    joins.add(join);
+                }
+
+                String attributeJoin = "LEFT JOIN attribute " + eavTable + "_attribute ON " + eavTable + "_attribute.attribute_id = " + eavTable + ".attribute_id";
+                if (!attributeJoins.contains(attributeJoin)) {
+                    attributeJoins.add(attributeJoin);
+                }
+                names.add("MAX( IF(" + eavTable + "_attribute.name = '" + attribute.getName() + "', " + eavTable + ".eav_value, NULL) ) AS " + attribute.getName());
+            } else {
+                names.add(attribute.getName());
+            }
         }
 
         List<String> selectFields = new ArrayList<>();
-
         RepeatingView fields = new RepeatingView("fields");
         for (AttributePojo attribute : attributes) {
             TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
@@ -106,12 +177,13 @@ public class UserModifyPage extends MasterPage {
         }
 
         if (!selectFields.isEmpty()) {
-            CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
-            Map<String, Object> document = getJdbcTemplate().queryForMap("select " + StringUtils.join(selectFields, ", ") + " from `" + collectionRecord.getName() + "` where " + collectionRecord.getName() + "_id = ?", this.userId);
-            if (document != null && !document.isEmpty()) {
-                for (Map.Entry<String, Object> entry : document.entrySet()) {
-                    this.fields.put(entry.getKey(), entry.getValue());
-                }
+            JdbcTemplate jdbcTemplate = getJdbcTemplate();
+            if (hasEav) {
+                String query = "SELECT " + StringUtils.join(names, ", ") + " FROM " + collection.getName() + " " + StringUtils.join(joins, " ") + " " + StringUtils.join(attributeJoins, " ") + " WHERE " + collection.getName() + "_id = ? GROUP BY " + collection.getName() + "_id";
+                this.fields.putAll(jdbcTemplate.queryForMap(query, documentId));
+            } else {
+                String query = "SELECT " + StringUtils.join(names, ", ") + " FROM " + collection.getName() + " WHERE " + collection.getName() + "_id = ?";
+                this.fields.putAll(jdbcTemplate.queryForMap(query, documentId));
             }
         }
 

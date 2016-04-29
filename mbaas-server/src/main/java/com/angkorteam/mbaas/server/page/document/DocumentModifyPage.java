@@ -143,30 +143,6 @@ public class DocumentModifyPage extends MasterPage {
             }
         }
 
-//        SELECT
-//        people.people_id,
-//                people.email AS email,
-//        MAX( IF(eav_varchar_attribute.name = 'string_a', eav_varchar.eav_value, NULL) ) AS 'string_a',
-//                MAX( IF(eav_varchar_attribute.name = 'string_b', eav_varchar.eav_value, NULL) ) AS 'string_b',
-//                MAX( IF(eav_decimal_attribute.name = 'double_money', eav_decimal.eav_value, NULL) ) AS 'double_money',
-//                MAX( IF(eav_decimal_attribute.name = 'double_stat', eav_decimal.eav_value, NULL) ) AS 'double_stat'
-//        FROM people
-//        LEFT JOIN eav_varchar ON people.people_id = eav_varchar.document_id
-//        LEFT JOIN eav_decimal ON people.people_id = eav_decimal.document_id
-//        LEFT JOIN attribute eav_varchar_attribute ON eav_varchar_attribute.attribute_id = eav_varchar.attribute_id
-//        LEFT JOIN attribute eav_decimal_attribute ON eav_decimal_attribute.attribute_id = eav_decimal.attribute_id
-//        GROUP BY people.people_id
-
-
-//        SELECT
-//        abc.abc_id AS document_id,
-//                collection.name AS collection_name,
-//        MAX(CASE WHEN attribute.name = 'email' THEN eav_varchar.value ELSE '' END) AS email,
-//        MAX(CASE WHEN attribute.name = 'dob' THEN eav_varchar.value ELSE '' END) AS dob
-//        FROM abc  LEFT JOIN eav_varchar ON abc.abc_id = eav_varchar.document_id
-//        LEFT JOIN collection ON collection.collection_id = eav_varchar.collection_id
-//        LEFT JOIN attribute ON eav_varchar.attribute_id = attribute.attribute_id
-
         List<String> selectFields = new ArrayList<>();
         RepeatingView fields = new RepeatingView("fields");
         for (AttributePojo attribute : attributes) {
