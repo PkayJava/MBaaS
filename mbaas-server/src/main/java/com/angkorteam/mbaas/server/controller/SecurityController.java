@@ -189,12 +189,22 @@ public class SecurityController {
                         mobileRecord = context.newRecord(mobileTable);
                         mobileRecord.setMobileId(UUID.randomUUID().toString());
                         mobileRecord.setDateCreated(new Date());
+                        mobileRecord.setDeviceType(requestBody.getDeviceType());
                         mobileRecord.setClientId(clientRecord.getClientId());
                         mobileRecord.setDeviceToken(requestBody.getDeviceToken());
                         mobileRecord.setApplicationId(clientRecord.getApplicationId());
                         mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
                         mobileRecord.setClientIp(request.getRemoteAddr());
+                        mobileRecord.setOwnerUserId(userRecord.getUserId());
                         mobileRecord.store();
+                    } else {
+                        mobileRecord.setClientId(clientRecord.getClientId());
+                        mobileRecord.setDeviceToken(requestBody.getDeviceToken());
+                        mobileRecord.setApplicationId(clientRecord.getApplicationId());
+                        mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+                        mobileRecord.setClientIp(request.getRemoteAddr());
+                        mobileRecord.setOwnerUserId(userRecord.getUserId());
+                        mobileRecord.update();
                     }
                 }
             } else {
