@@ -30,7 +30,7 @@ import java.util.*;
 /**
  * Created by socheat on 3/11/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator"})
 @Mount("/file/create")
 public class FileCreatePage extends MasterPage {
 

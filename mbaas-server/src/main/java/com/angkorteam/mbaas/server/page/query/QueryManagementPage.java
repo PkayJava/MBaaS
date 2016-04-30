@@ -16,7 +16,6 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 
@@ -27,7 +26,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/query/management")
 public class QueryManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -40,10 +39,13 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
     protected void onInitialize() {
         super.onInitialize();
 
-        StringBuffer address = new StringBuffer();
-        address.append(getHttpAddress()).append("/api/query/execute/");
-
-        QueryProvider provider = new QueryProvider(address.toString());
+        QueryProvider provider = null;
+        if (getSession().isAdministrator()) {
+            provider = new QueryProvider();
+        } else {
+            provider = new QueryProvider(getSession().getUserId());
+        }
+        provider.selectField(String.class, "ownerUserId");
         provider.selectField(String.class, "queryId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
@@ -53,6 +55,9 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
+        if (getSession().isAdministrator()) {
+            columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
+        }
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Role Privacy", "User Privacy", "Edit", "Delete", "Parameter"));
 
@@ -141,46 +146,89 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
-        return isEnable(link, object);
+        return isAccess(link, object);
     }
 
-    protected boolean isEnable(String link, Map<String, Object> object) {
+    protected boolean isAccess(String link, Map<String, Object> object) {
+        String ownerUserId = (String) object.get("ownerUserId");
         DSLContext context = getDSLContext();
         String queryId = (String) object.get("queryId");
         String security = (String) object.get("security");
         if ("Edit".equals(link)) {
-            return true;
+            if (getSession().isAdministrator()) {
+                return true;
+            } else {
+                if (getSession().getUserId().equals(ownerUserId)) {
+                    return true;
+                }
+            }
         }
         if ("Delete".equals(link)) {
-            return true;
+            if (getSession().isAdministrator()) {
+                return true;
+            } else {
+                if (getSession().getUserId().equals(ownerUserId)) {
+                    return true;
+                }
+            }
         }
         if ("Grant".equals(link)) {
             if (SecurityEnum.Denied.getLiteral().equals(security)) {
-                return true;
+                if (getSession().isAdministrator()) {
+                    return true;
+                } else {
+                    if (getSession().getUserId().equals(ownerUserId)) {
+                        return true;
+                    }
+                }
             }
         }
         if ("Deny".equals(link)) {
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
-                return true;
+                if (getSession().isAdministrator()) {
+                    return true;
+                } else {
+                    if (getSession().getUserId().equals(ownerUserId)) {
+                        return true;
+                    }
+                }
             }
         }
         if ("Parameter".equals(link)) {
             int count = context.selectCount().from(Tables.QUERY_PARAMETER).where(Tables.QUERY_PARAMETER.QUERY_ID.eq(queryId)).fetchOneInto(int.class);
             if (count > 0) {
-                return true;
+                if (getSession().isAdministrator()) {
+                    return true;
+                } else {
+                    if (getSession().getUserId().equals(ownerUserId)) {
+                        return true;
+                    }
+                }
             }
         }
         if ("Role Privacy".equals(link)) {
-            return true;
+            if (getSession().isAdministrator()) {
+                return true;
+            } else {
+                if (getSession().getUserId().equals(ownerUserId)) {
+                    return true;
+                }
+            }
         }
         if ("User Privacy".equals(link)) {
-            return true;
+            if (getSession().isAdministrator()) {
+                return true;
+            } else {
+                if (getSession().getUserId().equals(ownerUserId)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
-        return isEnable(link, object);
+        return isAccess(link, object);
     }
 }

@@ -10,6 +10,7 @@ import org.jooq.Field;
 import org.jooq.TableLike;
 import org.jooq.impl.DSL;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -22,9 +23,16 @@ public class ApplicationProvider extends JooqProvider {
     private UserTable userTable = Tables.USER.as("userTable");
     private ClientTable clientTable = Tables.CLIENT.as("clientTable");
 
+    private String ownerUserId;
+
     private TableLike<?> from;
 
     public ApplicationProvider() {
+        this(null);
+    }
+
+    public ApplicationProvider(String ownerUserId) {
+        this.ownerUserId = ownerUserId;
         this.from = this.applicationTable.join(this.userTable).on(this.applicationTable.OWNER_USER_ID.eq(this.userTable.USER_ID)).leftJoin(this.clientTable).on(this.applicationTable.APPLICATION_ID.eq(this.clientTable.APPLICATION_ID));
         setGroupBy(this.applicationTable.APPLICATION_ID);
     }
@@ -73,7 +81,11 @@ public class ApplicationProvider extends JooqProvider {
 
     @Override
     protected List<Condition> where() {
-        return null;
+        List<Condition> where = new ArrayList<>();
+        if (ownerUserId != null) {
+            where.add(this.userTable.USER_ID.eq(this.ownerUserId));
+        }
+        return where;
     }
 
     @Override

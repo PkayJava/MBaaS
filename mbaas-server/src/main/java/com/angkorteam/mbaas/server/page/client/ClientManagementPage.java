@@ -27,7 +27,7 @@ import java.util.UUID;
 /**
  * Created by socheat on 3/7/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/client/management")
 public class ClientManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -45,6 +45,7 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
         this.applicationId = getPageParameters().get("applicationId").toString();
 
         ClientProvider provider = new ClientProvider(this.applicationId);
+        provider.selectField(String.class, "ownerUserId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -112,23 +113,48 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
     }
 
     protected boolean isAccess(String link, Map<String, Object> object) {
+        String ownerUserId = (String) object.get("ownerUserId");
         if ("Edit".equals(link)) {
-            return true;
+            if (getSession().isAdministrator()) {
+                return true;
+            } else {
+                if (getSession().getUserId().equals(ownerUserId)) {
+                    return true;
+                }
+            }
         }
         if ("Grant".equals(link)) {
             String security = (String) object.get("security");
             if (SecurityEnum.Denied.getLiteral().equals(security)) {
-                return true;
+                if (getSession().isAdministrator()) {
+                    return true;
+                } else {
+                    if (getSession().getUserId().equals(ownerUserId)) {
+                        return true;
+                    }
+                }
             }
         }
         if ("Deny".equals(link)) {
             String security = (String) object.get("security");
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
-                return true;
+                if (getSession().isAdministrator()) {
+                    return true;
+                } else {
+                    if (getSession().getUserId().equals(ownerUserId)) {
+                        return true;
+                    }
+                }
             }
         }
         if ("Revoke".equals(link)) {
-            return true;
+            if (getSession().isAdministrator()) {
+                return true;
+            } else {
+                if (getSession().getUserId().equals(ownerUserId)) {
+                    return true;
+                }
+            }
         }
         return false;
     }

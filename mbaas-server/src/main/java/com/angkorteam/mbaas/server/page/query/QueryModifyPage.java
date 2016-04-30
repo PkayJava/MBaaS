@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.QueryParameterRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
 import com.angkorteam.mbaas.plain.enums.SubTypeEnum;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.server.page.job.JobManagementPage;
 import com.angkorteam.mbaas.server.validator.QueryNameValidator;
 import com.angkorteam.mbaas.server.validator.QueryReturnSubTypeValidator;
 import com.angkorteam.mbaas.server.validator.QueryScriptValidator;
@@ -32,7 +33,7 @@ import java.util.regex.Pattern;
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/query/modify")
 public class QueryModifyPage extends MasterPage {
 
@@ -139,6 +140,17 @@ public class QueryModifyPage extends MasterPage {
         this.saveAndContinueButton = new Button("saveAndContinueButton");
         this.saveAndContinueButton.setOnSubmit(this::saveAndContinueButtonOnSubmit);
         this.form.add(this.saveAndContinueButton);
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        DSLContext context = getDSLContext();
+        QueryTable queryTable = Tables.QUERY.as("queryTable");
+        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.QUERY_ID.eq(this.queryId)).fetchOneInto(queryTable);
+        if (getSession().isBackOffice() && !queryRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(QueryManagementPage.class);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

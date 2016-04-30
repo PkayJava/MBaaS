@@ -16,7 +16,7 @@ import org.apache.wicket.model.PropertyModel;
  * Created by socheat on 3/3/16.
  */
 @Mount("/collection/create")
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 public class CollectionCreatePage extends MasterPage {
 
     private String name;

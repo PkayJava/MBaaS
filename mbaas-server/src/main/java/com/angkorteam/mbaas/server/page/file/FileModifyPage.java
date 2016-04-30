@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/11/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator"})
 @Mount("/file/modify")
 public class FileModifyPage extends MasterPage {
 

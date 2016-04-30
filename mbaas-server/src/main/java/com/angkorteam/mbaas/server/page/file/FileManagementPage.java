@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/11/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator"})
 @Mount("/file/management")
 public class FileManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -63,11 +63,6 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
                 .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
                 .fetchInto(attributeTable);
 
-        Map<String, AttributeRecord> virtualAttributeRecords = new HashMap<>();
-        for (AttributeRecord attributeRecord : attributeRecords) {
-            virtualAttributeRecords.put(attributeRecord.getAttributeId(), attributeRecord);
-        }
-
         FileProvider provider = new FileProvider();
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
@@ -75,7 +70,7 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("fileId", this), "fileId", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("owner", this), "owner", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", provider));
         columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("length", this), "length", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("mime", this), "mime", provider));

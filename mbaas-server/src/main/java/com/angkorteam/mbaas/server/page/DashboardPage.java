@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * Created by socheat on 3/1/16.
  */
-@AuthorizeInstantiation({"administrator", "registered"})
+@AuthorizeInstantiation({"administrator", "backoffice"})
 public class DashboardPage extends MasterPage {
 
     @Override

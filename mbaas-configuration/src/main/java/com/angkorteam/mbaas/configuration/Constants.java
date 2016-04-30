@@ -32,8 +32,9 @@ public class Constants {
 
     public static final String JDBC_COLUMN_OPTIMISTIC = "jdbc.column.optimistic";
     public static final String JDBC_COLUMN_DELETED = "jdbc.column.deleted";
-    public static final String JDBC_COLUMN_OWNER_USER_ID = "jdbc.column.owner.user.id";
-    public static final String JDBC_COLUMN_DATE_CREATED = "jdbc.column.date.created";
+    public static final String JDBC_COLUMN_OWNER_USER_ID = "jdbc.column.owner_user_id";
+    public static final String JDBC_COLUMN_USER_ID = "jdbc.column.user_id";
+    public static final String JDBC_COLUMN_DATE_CREATED = "jdbc.column.date_created";
 
     public static final String ROLE_ADMINISTRATOR = "role.administrator";
     public static final String ROLE_ADMINISTRATOR_DESCRIPTION = "role.administrator.description";
@@ -55,12 +56,12 @@ public class Constants {
     public static final String USER_ADMIN = "user.admin";
     public static final String USER_ADMIN_ROLE = "user.admin.role";
     public static final String USER_ADMIN_PASSWORD = "user.admin.password";
-    public static final String USER_MBAAS = "user.mbaas";
-    public static final String USER_MBAAS_ROLE = "user.mbaas.role";
-    public static final String USER_MBAAS_PASSWORD = "user.mbaas.password";
-    public static final String USER_INTERNAL_ADMIN = "user.internal_admin";
-    public static final String USER_INTERNAL_ADMIN_ROLE = "user.internal_admin.role";
-    public static final String USER_INTERNAL_ADMIN_PASSWORD = "user.internal_admin.password";
+    public static final String USER_ANONYMOUS = "user.anonymous";
+    public static final String USER_ANONYMOUS_ROLE = "user.anonymous.role";
+    public static final String USER_ANONYMOUS_PASSWORD = "user.anonymous.password";
+    public static final String USER_BACKOFFICE = "user.backoffice";
+    public static final String USER_BACKOFFICE_ROLE = "user.backoffice.role";
+    public static final String USER_BACKOFFICE_PASSWORD = "user.backoffice.password";
 
     public static final String PATTERN_DATETIME = "pattern.datetime";
     public static final String PATTERN_TIME = "pattern.time";

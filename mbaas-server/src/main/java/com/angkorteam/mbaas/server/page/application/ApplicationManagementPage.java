@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/7/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/application/management")
 public class ApplicationManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -41,7 +41,12 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
     protected void onInitialize() {
         super.onInitialize();
 
-        ApplicationProvider provider = new ApplicationProvider();
+        ApplicationProvider provider = null;
+        if (getSession().isAdministrator()) {
+            provider = new ApplicationProvider();
+        } else {
+            provider = new ApplicationProvider(getSession().getUserId());
+        }
 
         provider.selectField(String.class, "applicationId");
         provider.selectField(String.class, "pushApplicationId");
@@ -54,7 +59,9 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
 
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
+        if (getSession().isAdministrator()) {
+            columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
+        }
         columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("client", this), "client", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));

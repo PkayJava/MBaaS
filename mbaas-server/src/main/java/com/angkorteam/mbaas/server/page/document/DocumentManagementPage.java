@@ -10,10 +10,12 @@ import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
+import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
 import com.angkorteam.mbaas.server.provider.DocumentProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -35,7 +37,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/3/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/document/management")
 public class DocumentManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -101,8 +103,17 @@ public class DocumentManagementPage extends MasterPage implements ActionFiltered
 
         BookmarkablePageLink<Void> attributeLink = new BookmarkablePageLink<>("attributeLink", AttributeManagementPage.class, getPageParameters());
         add(attributeLink);
+    }
 
-
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        DSLContext context = getDSLContext();
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collection.getCollectionId())).fetchOneInto(collectionTable);
+        if (getSession().isBackOffice() && !collectionRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(CollectionManagementPage.class);
+        }
     }
 
     @Override

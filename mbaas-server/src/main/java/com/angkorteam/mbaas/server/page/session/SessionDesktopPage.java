@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/14/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/session/desktop")
 public class SessionDesktopPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 

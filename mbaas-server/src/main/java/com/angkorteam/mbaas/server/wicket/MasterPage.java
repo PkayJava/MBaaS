@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.framework.extension.wicket.markup.html.link.Link;
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
@@ -54,6 +55,7 @@ import com.angkorteam.mbaas.server.page.setting.SettingManagementPage;
 import com.angkorteam.mbaas.server.page.setting.SettingModifyPage;
 import com.angkorteam.mbaas.server.page.user.*;
 import com.angkorteam.mbaas.server.service.PusherClient;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -115,6 +117,17 @@ public abstract class MasterPage extends AdminLTEPage {
 
     private String mmenuJobClass = "";
 
+    private WebMarkupContainer menuGeneral;
+    private WebMarkupContainer menuProfile;
+    private WebMarkupContainer menuSecurity;
+    private WebMarkupContainer menuSession;
+
+    private WebMarkupContainer menuLogicConsole;
+
+    private WebMarkupContainer menuStorage;
+    private WebMarkupContainer mmenuFile;
+    private WebMarkupContainer mmenuAsset;
+
     public MasterPage() {
     }
 
@@ -152,7 +165,7 @@ public abstract class MasterPage extends AdminLTEPage {
 
         super.onInitialize();
 
-        BookmarkablePageLink<Void> dashboardPageLink = new BookmarkablePageLink<Void>("dashboardPageLink", DashboardPage.class);
+        BookmarkablePageLink<Void> dashboardPageLink = new BookmarkablePageLink<Void>("dashboardPageLink", getApplication().getHomePage());
         add(dashboardPageLink);
 
         Label labelDashboard = new Label("labelDashboard", "Mobile BaaS");
@@ -169,96 +182,112 @@ public abstract class MasterPage extends AdminLTEPage {
         logoutLink.setVisible(getSession().isSignedIn());
 
         {
-            WebMarkupContainer menuGeneral = new WebMarkupContainer("menuGeneral");
-            menuGeneral.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuGeneralClass")));
-            add(menuGeneral);
+            this.menuGeneral = new WebMarkupContainer("menuGeneral");
+            this.menuGeneral.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuGeneralClass")));
+            add(this.menuGeneral);
             WebMarkupContainer mmenuSetting = new WebMarkupContainer("mmenuSetting");
             mmenuSetting.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuSettingClass")));
-            menuGeneral.add(mmenuSetting);
+            this.menuGeneral.add(mmenuSetting);
             WebMarkupContainer mmenuLocalization = new WebMarkupContainer("mmenuLocalization");
             mmenuLocalization.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuLocalizationClass")));
-            menuGeneral.add(mmenuLocalization);
+            this.menuGeneral.add(mmenuLocalization);
         }
 
         {
-            WebMarkupContainer menuProfile = new WebMarkupContainer("menuProfile");
-            menuProfile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuProfileClass")));
-            add(menuProfile);
+            this.menuProfile = new WebMarkupContainer("menuProfile");
+            this.menuProfile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuProfileClass")));
+            add(this.menuProfile);
             WebMarkupContainer mmenuInformation = new WebMarkupContainer("mmenuInformation");
             mmenuInformation.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuInformationClass")));
-            menuProfile.add(mmenuInformation);
+            this.menuProfile.add(mmenuInformation);
             WebMarkupContainer mmenuOneTimePassword = new WebMarkupContainer("mmenuOneTimePassword");
             mmenuOneTimePassword.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuOneTimePasswordClass")));
-            menuProfile.add(mmenuOneTimePassword);
+            this.menuProfile.add(mmenuOneTimePassword);
             WebMarkupContainer mmenu2Factor2Email = new WebMarkupContainer("mmenu2Factor2Email");
             mmenu2Factor2Email.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenu2Factor2EmailClass")));
-            menuProfile.add(mmenu2Factor2Email);
+            this.menuProfile.add(mmenu2Factor2Email);
             WebMarkupContainer mmenuPassword = new WebMarkupContainer("mmenuPassword");
             mmenuPassword.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuPasswordClass")));
-            menuProfile.add(mmenuPassword);
+            this.menuProfile.add(mmenuPassword);
         }
 
         {
-            WebMarkupContainer menuSecurity = new WebMarkupContainer("menuSecurity");
-            menuSecurity.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSecurityClass")));
-            add(menuSecurity);
+            this.menuSecurity = new WebMarkupContainer("menuSecurity");
+            this.menuSecurity.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSecurityClass")));
+            add(this.menuSecurity);
             WebMarkupContainer mmenuUser = new WebMarkupContainer("mmenuUser");
             mmenuUser.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuUserClass")));
-            menuSecurity.add(mmenuUser);
+            this.menuSecurity.add(mmenuUser);
             WebMarkupContainer mmenuRole = new WebMarkupContainer("mmenuRole");
             mmenuRole.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuRoleClass")));
-            menuSecurity.add(mmenuRole);
+            this.menuSecurity.add(mmenuRole);
             WebMarkupContainer mmenuNashorn = new WebMarkupContainer("mmenuNashorn");
             mmenuNashorn.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuNashornClass")));
-            menuSecurity.add(mmenuNashorn);
+            this.menuSecurity.add(mmenuNashorn);
         }
-
-        WebMarkupContainer menuStorage = new WebMarkupContainer("menuStorage");
-        menuStorage.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuStorageClass")));
-        add(menuStorage);
-        WebMarkupContainer mmenuFile = new WebMarkupContainer("mmenuFile");
-        mmenuFile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuFileClass")));
-        menuStorage.add(mmenuFile);
-        WebMarkupContainer mmenuAsset = new WebMarkupContainer("mmenuAsset");
-        mmenuAsset.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuAssetClass")));
-        menuStorage.add(mmenuAsset);
 
         {
-            WebMarkupContainer menuSession = new WebMarkupContainer("menuSession");
-            menuSession.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSessionClass")));
-            add(menuSession);
-            WebMarkupContainer mmenuDesktop = new WebMarkupContainer("mmenuDesktop");
-            mmenuDesktop.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuDesktopClass")));
-            menuSession.add(mmenuDesktop);
-            WebMarkupContainer mmenuMobile = new WebMarkupContainer("mmenuMobile");
-            mmenuMobile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMobileClass")));
-            menuSession.add(mmenuMobile);
+            this.menuStorage = new WebMarkupContainer("menuStorage");
+            this.menuStorage.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuStorageClass")));
+            add(this.menuStorage);
+            this.mmenuFile = new WebMarkupContainer("mmenuFile");
+            this.mmenuFile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuFileClass")));
+            this.menuStorage.add(this.mmenuFile);
+            this.mmenuAsset = new WebMarkupContainer("mmenuAsset");
+            this.mmenuAsset.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuAssetClass")));
+            this.menuStorage.add(this.mmenuAsset);
         }
 
-        WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript");
-        mmenuJavascript.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJavascriptClass")));
-        add(mmenuJavascript);
+        {
+            this.menuSession = new WebMarkupContainer("menuSession");
+            this.menuSession.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSessionClass")));
+            add(this.menuSession);
+            WebMarkupContainer mmenuDesktop = new WebMarkupContainer("mmenuDesktop");
+            mmenuDesktop.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuDesktopClass")));
+            this.menuSession.add(mmenuDesktop);
+            WebMarkupContainer mmenuMobile = new WebMarkupContainer("mmenuMobile");
+            mmenuMobile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMobileClass")));
+            this.menuSession.add(mmenuMobile);
+        }
 
-        WebMarkupContainer mmenuApplication = new WebMarkupContainer("mmenuApplication");
-        mmenuApplication.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuApplicationClass")));
-        add(mmenuApplication);
+        {
+            this.menuLogicConsole = new WebMarkupContainer("menuLogicConsole");
+            add(this.menuLogicConsole);
+            WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript");
+            mmenuJavascript.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJavascriptClass")));
+            this.menuLogicConsole.add(mmenuJavascript);
 
-        WebMarkupContainer mmenuCollection = new WebMarkupContainer("mmenuCollection");
-        mmenuCollection.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuCollectionClass")));
-        add(mmenuCollection);
+            WebMarkupContainer mmenuApplication = new WebMarkupContainer("mmenuApplication");
+            mmenuApplication.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuApplicationClass")));
+            this.menuLogicConsole.add(mmenuApplication);
 
-        WebMarkupContainer mmenuQuery = new WebMarkupContainer("mmenuQuery");
-        mmenuQuery.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuQueryClass")));
-        add(mmenuQuery);
+            WebMarkupContainer mmenuCollection = new WebMarkupContainer("mmenuCollection");
+            mmenuCollection.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuCollectionClass")));
+            this.menuLogicConsole.add(mmenuCollection);
 
-        WebMarkupContainer mmenuJob = new WebMarkupContainer("mmenuJob");
-        mmenuJob.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJobClass")));
-        add(mmenuJob);
+            WebMarkupContainer mmenuQuery = new WebMarkupContainer("mmenuQuery");
+            mmenuQuery.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuQueryClass")));
+            this.menuLogicConsole.add(mmenuQuery);
+
+            WebMarkupContainer mmenuJob = new WebMarkupContainer("mmenuJob");
+            mmenuJob.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJobClass")));
+            this.menuLogicConsole.add(mmenuJob);
+        }
     }
 
     @Override
     protected void onBeforeRender() {
         super.onBeforeRender();
+        boolean isAdministrator = getSession().isAdministrator();
+        boolean isBackOffice = getSession().isBackOffice();
+        boolean isRegistered = getSession().isRegistered();
+        this.menuGeneral.setVisible(isAdministrator);
+        this.menuSecurity.setVisible(isAdministrator);
+        this.menuSession.setVisible(isAdministrator);
+        this.menuLogicConsole.setVisible(isAdministrator || isBackOffice);
+        this.mmenuFile.setVisible(isAdministrator);
+        this.mmenuAsset.setVisible(isAdministrator || isBackOffice || isRegistered);
+        this.menuStorage.setVisible(this.mmenuAsset.isVisible() || this.mmenuFile.isVisible());
 
         // Parent Menu
         if (getPage() instanceof SettingManagementPage
@@ -272,7 +301,7 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuGeneralClass = "treeview";
         }
 
-        if (getPage() instanceof InformationPage || getPage() instanceof TimeOTPPage || getPage() instanceof TwoMailPage || getPage() instanceof PasswordPage) {
+        if (isRegistered || getPage() instanceof InformationPage || getPage() instanceof TimeOTPPage || getPage() instanceof TwoMailPage || getPage() instanceof PasswordPage) {
             this.menuProfileClass = "treeview active";
         } else {
             this.menuProfileClass = "treeview";

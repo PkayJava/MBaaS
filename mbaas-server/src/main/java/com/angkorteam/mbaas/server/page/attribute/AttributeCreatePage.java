@@ -10,6 +10,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
+import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
 import com.angkorteam.mbaas.server.validator.AttributeNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -30,7 +31,7 @@ import java.util.UUID;
 /**
  * Created by socheat on 3/8/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/attribute/create")
 public class AttributeCreatePage extends MasterPage {
 
@@ -115,6 +116,17 @@ public class AttributeCreatePage extends MasterPage {
         parameters.add("collectionId", this.collectionId);
         BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<Void>("closeLink", AttributeManagementPage.class, parameters);
         this.form.add(closeLink);
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        DSLContext context = getDSLContext();
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collection.getCollectionId())).fetchOneInto(collectionTable);
+        if (getSession().isBackOffice() && !collectionRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(CollectionManagementPage.class);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

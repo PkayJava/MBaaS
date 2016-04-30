@@ -8,6 +8,7 @@ import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.TableLike;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +22,14 @@ public class JobProvider extends JooqProvider {
 
     private TableLike<?> from;
 
+    private String ownerUserId;
+
     public JobProvider() {
+        this(null);
+    }
+
+    public JobProvider(String ownerUserId) {
+        this.ownerUserId = ownerUserId;
         this.from = this.jobTable.join(this.userTable).on(this.jobTable.OWNER_USER_ID.eq(this.userTable.USER_ID));
     }
 
@@ -31,6 +39,10 @@ public class JobProvider extends JooqProvider {
 
     public Field<String> getOwnerUser() {
         return this.userTable.LOGIN;
+    }
+
+    public Field<String> getOwnerUserId() {
+        return this.userTable.USER_ID;
     }
 
     public Field<String> getSecurity() {
@@ -73,7 +85,11 @@ public class JobProvider extends JooqProvider {
 
     @Override
     protected List<Condition> where() {
-        return null;
+        List<Condition> where = new ArrayList<>();
+        if (this.ownerUserId != null) {
+            where.add(userTable.USER_ID.eq(this.ownerUserId));
+        }
+        return where;
     }
 
     @Override

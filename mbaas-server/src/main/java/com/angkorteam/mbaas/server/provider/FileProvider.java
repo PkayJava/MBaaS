@@ -90,7 +90,7 @@ public class FileProvider extends JooqProvider {
         return this.fileTable.FILE_ID;
     }
 
-    public Field<String> getOwner() {
+    public Field<String> getOwnerUser() {
         return this.userTable.LOGIN;
     }
 

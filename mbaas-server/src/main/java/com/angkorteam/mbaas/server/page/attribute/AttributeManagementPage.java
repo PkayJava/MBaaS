@@ -14,6 +14,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
+import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
 import com.angkorteam.mbaas.server.page.document.DocumentManagementPage;
 import com.angkorteam.mbaas.server.provider.AttributeProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
@@ -34,7 +35,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/7/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/attribute/management")
 public class AttributeManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -90,6 +91,17 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
     }
 
     @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        DSLContext context = getDSLContext();
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collection.getCollectionId())).fetchOneInto(collectionTable);
+        if (getSession().isBackOffice() && !collectionRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(CollectionManagementPage.class);
+        }
+    }
+
+    @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
         DSLContext context = getDSLContext();
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
@@ -119,6 +131,10 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
+        return isAccess(link, object);
+    }
+
+    private boolean isAccess(String link, Map<String, Object> object) {
         if ("Delete".equals(link)) {
             Boolean system = (Boolean) object.get("system");
             if (!system) {
@@ -142,25 +158,7 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
-        if ("Delete".equals(link)) {
-            Boolean system = (Boolean) object.get("system");
-            if (!system) {
-                return true;
-            }
-        }
-        if ("Hide".equals(link)) {
-            String visibility = (String) object.get("visibility");
-            if (VisibilityEnum.Shown.getLiteral().equals(visibility)) {
-                return true;
-            }
-        }
-        if ("Show".equals(link)) {
-            String visibility = (String) object.get("visibility");
-            if (VisibilityEnum.Hided.getLiteral().equals(visibility)) {
-                return true;
-            }
-        }
-        return false;
+        return isAccess(link, object);
     }
 
     @Override

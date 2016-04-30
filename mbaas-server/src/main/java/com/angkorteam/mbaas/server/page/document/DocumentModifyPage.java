@@ -13,6 +13,7 @@ import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
+import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
 import com.angkorteam.mbaas.server.template.TextFieldPanel;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -31,7 +32,7 @@ import java.util.*;
  * Created by socheat on 3/7/16.
  */
 @Mount("/document/modify")
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 public class DocumentModifyPage extends MasterPage {
 
     private String collectionId;
@@ -176,6 +177,17 @@ public class DocumentModifyPage extends MasterPage {
         this.form.add(fields);
         this.form.add(closeLink);
         this.form.add(saveButton);
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        DSLContext context = getDSLContext();
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collection.getCollectionId())).fetchOneInto(collectionTable);
+        if (getSession().isBackOffice() && !collectionRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(CollectionManagementPage.class);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

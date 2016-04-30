@@ -10,10 +10,13 @@ import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.CollectionRolePrivacyTable;
+import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
+import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRolePrivacyRecord;
 import com.angkorteam.mbaas.plain.enums.CollectionPermissionEnum;
+import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
 import com.angkorteam.mbaas.server.provider.CollectionRolePrivacyProvider;
 import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
@@ -33,7 +36,7 @@ import java.util.*;
 /**
  * Created by socheat on 3/20/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/collection/role/privacy/management")
 public class CollectionRolePrivacyManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -87,7 +90,7 @@ public class CollectionRolePrivacyManagementPage extends MasterPage implements A
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", CollectionManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", CollectionManagementPage.class, getPageParameters());
         add(refreshLink);
 
         Form<Void> form = new Form<>("form");
@@ -128,6 +131,17 @@ public class CollectionRolePrivacyManagementPage extends MasterPage implements A
         this.insertFeedback = new TextFeedbackPanel("insertFeedback", this.insertField);
         form.add(this.insertFeedback);
 
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        DSLContext context = getDSLContext();
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collectionId)).fetchOneInto(collectionTable);
+        if (getSession().isBackOffice() && !collectionRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(CollectionManagementPage.class);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

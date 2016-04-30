@@ -18,15 +18,19 @@ import java.util.List;
  */
 public class JavascriptProvider extends JooqProvider {
 
-    private String address;
-
     private JavascriptTable javascriptTable;
     private UserTable userTable;
 
     private TableLike<?> from;
 
-    public JavascriptProvider(String address) {
-        this.address = address;
+    private String ownerUserId;
+
+    public JavascriptProvider() {
+        this(null);
+    }
+
+    public JavascriptProvider(String ownerUserId) {
+        this.ownerUserId = ownerUserId;
         this.javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
         this.userTable = Tables.USER.as("userTable");
         this.from = this.javascriptTable.join(this.userTable).on(this.javascriptTable.OWNER_USER_ID.eq(this.userTable.USER_ID));
@@ -44,10 +48,6 @@ public class JavascriptProvider extends JooqProvider {
         return this.javascriptTable.DATE_CREATED;
     }
 
-    public Field<String> getEndpoint() {
-        return DSL.concat(this.address, this.javascriptTable.PATH);
-    }
-
     public Field<String> getDescription() {
         return this.javascriptTable.DESCRIPTION;
     }
@@ -56,8 +56,12 @@ public class JavascriptProvider extends JooqProvider {
         return this.javascriptTable.PATH;
     }
 
-    public Field<String> getOwner() {
+    public Field<String> getOwnerUser() {
         return this.userTable.LOGIN;
+    }
+
+    public Field<String> getOwnerUserId() {
+        return this.userTable.USER_ID;
     }
 
     @Override
@@ -68,6 +72,9 @@ public class JavascriptProvider extends JooqProvider {
     @Override
     protected List<Condition> where() {
         List<Condition> where = new ArrayList<>();
+        if (this.ownerUserId != null) {
+            where.add(userTable.USER_ID.eq(this.ownerUserId));
+        }
         return where;
     }
 

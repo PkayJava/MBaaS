@@ -253,42 +253,42 @@ public class ApplicationContext implements ServletContextListener {
             context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
         }
 
-        UserRecord mbaasRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_MBAAS))).fetchOneInto(userTable);
-        if (mbaasRecord == null) {
+        UserRecord anonymousRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ANONYMOUS))).fetchOneInto(userTable);
+        if (anonymousRecord == null) {
             String uuid = UUID.randomUUID().toString();
-            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_MBAAS_ROLE)))).fetchOneInto(roleTable);
-            mbaasRecord = context.newRecord(userTable);
-            mbaasRecord.setUserId(uuid);
-            mbaasRecord.setSystem(true);
-            mbaasRecord.setAccountNonExpired(true);
-            mbaasRecord.setAccountNonLocked(true);
-            mbaasRecord.setCredentialsNonExpired(true);
-            mbaasRecord.setStatus(UserStatusEnum.Active.getLiteral());
-            mbaasRecord.setLogin(configuration.getString(Constants.USER_MBAAS));
-            mbaasRecord.setPassword(configuration.getString(Constants.USER_MBAAS_PASSWORD));
-            mbaasRecord.setRoleId(roleRecord.getRoleId());
-            mbaasRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
-            mbaasRecord.store();
-            context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_MBAAS_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
+            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_ANONYMOUS_ROLE)))).fetchOneInto(roleTable);
+            anonymousRecord = context.newRecord(userTable);
+            anonymousRecord.setUserId(uuid);
+            anonymousRecord.setSystem(true);
+            anonymousRecord.setAccountNonExpired(true);
+            anonymousRecord.setAccountNonLocked(true);
+            anonymousRecord.setCredentialsNonExpired(true);
+            anonymousRecord.setStatus(UserStatusEnum.Active.getLiteral());
+            anonymousRecord.setLogin(configuration.getString(Constants.USER_ANONYMOUS));
+            anonymousRecord.setPassword(configuration.getString(Constants.USER_ANONYMOUS_PASSWORD));
+            anonymousRecord.setRoleId(roleRecord.getRoleId());
+            anonymousRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
+            anonymousRecord.store();
+            context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_ANONYMOUS_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
         }
 
-        UserRecord internalAdminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_INTERNAL_ADMIN))).fetchOneInto(userTable);
-        if (internalAdminRecord == null) {
+        UserRecord backofficeRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_BACKOFFICE))).fetchOneInto(userTable);
+        if (backofficeRecord == null) {
             String uuid = UUID.randomUUID().toString();
-            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_INTERNAL_ADMIN_ROLE)))).fetchOneInto(roleTable);
-            internalAdminRecord = context.newRecord(userTable);
-            internalAdminRecord.setUserId(uuid);
-            internalAdminRecord.setSystem(true);
-            internalAdminRecord.setAccountNonExpired(true);
-            internalAdminRecord.setAccountNonLocked(true);
-            internalAdminRecord.setCredentialsNonExpired(true);
-            internalAdminRecord.setStatus(UserStatusEnum.Active.getLiteral());
-            internalAdminRecord.setLogin(configuration.getString(Constants.USER_INTERNAL_ADMIN));
-            internalAdminRecord.setPassword(configuration.getString(Constants.USER_INTERNAL_ADMIN_PASSWORD));
-            internalAdminRecord.setRoleId(roleRecord.getRoleId());
-            internalAdminRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
-            internalAdminRecord.store();
-            context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_INTERNAL_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
+            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_BACKOFFICE_ROLE)))).fetchOneInto(roleTable);
+            backofficeRecord = context.newRecord(userTable);
+            backofficeRecord.setUserId(uuid);
+            backofficeRecord.setSystem(true);
+            backofficeRecord.setAccountNonExpired(true);
+            backofficeRecord.setAccountNonLocked(true);
+            backofficeRecord.setCredentialsNonExpired(true);
+            backofficeRecord.setStatus(UserStatusEnum.Active.getLiteral());
+            backofficeRecord.setLogin(configuration.getString(Constants.USER_BACKOFFICE));
+            backofficeRecord.setPassword(configuration.getString(Constants.USER_BACKOFFICE_PASSWORD));
+            backofficeRecord.setRoleId(roleRecord.getRoleId());
+            backofficeRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
+            backofficeRecord.store();
+            context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_BACKOFFICE_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
         }
     }
 

@@ -2,6 +2,8 @@ package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.MobileTable;
+import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.NetworkRecord;
 import com.angkorteam.mbaas.plain.response.UnknownResponse;
 import com.angkorteam.mbaas.server.MBaaS;
@@ -69,6 +71,18 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
         networkRecord.setConsume(consume);
         networkRecord.setRemoteIp(request.getRemoteAddr());
         networkRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authorization != null && authorization.toUpperCase().startsWith("BEARER ")) {
+            String accessToken = authorization.substring(7);
+            MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(mobileTable);
+            if (mobileRecord != null) {
+                networkRecord.setMobileId(mobileRecord.getMobileId());
+                networkRecord.setUserId(mobileRecord.getOwnerUserId());
+                networkRecord.setApplicationId(mobileRecord.getApplicationId());
+                networkRecord.setClientId(mobileRecord.getClientId());
+            }
+        }
         networkRecord.store();
     }
 
@@ -80,11 +94,11 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
         this.gson = gson;
     }
 
-    public void setContext(DSLContext context){
+    public void setContext(DSLContext context) {
         this.context = context;
     }
 
-    public DSLContext getContext(){
+    public DSLContext getContext() {
         return context;
     }
 }

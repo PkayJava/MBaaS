@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.JobTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JobRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.server.page.javascript.JavascriptManagementPage;
 import com.angkorteam.mbaas.server.validator.JobNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -23,7 +24,7 @@ import java.util.UUID;
 /**
  * Created by socheat on 4/24/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/job/modify")
 public class JobModifyPage extends MasterPage {
 
@@ -50,14 +51,13 @@ public class JobModifyPage extends MasterPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        DSLContext context = getDSLContext();
 
         this.form = new Form<>("form");
         add(this.form);
 
         this.jobId = getPageParameters().get("jobId").toString();
+        DSLContext context = getDSLContext();
         JobTable jobTable = Tables.JOB.as("jobTable");
-
         JobRecord jobRecord = context.select(jobTable.fields()).from(jobTable).where(jobTable.JOB_ID.eq(jobId)).fetchOneInto(jobTable);
 
         this.name = jobRecord.getName();
@@ -79,6 +79,17 @@ public class JobModifyPage extends MasterPage {
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
 
         this.form.add(this.saveButton);
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        DSLContext context = getDSLContext();
+        JobTable jobTable = Tables.JOB.as("jobTable");
+        JobRecord jobRecord = context.select(jobTable.fields()).from(jobTable).where(jobTable.JOB_ID.eq(jobId)).fetchOneInto(jobTable);
+        if (getSession().isBackOffice() && !jobRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(JobManagementPage.class);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

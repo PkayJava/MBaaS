@@ -9,9 +9,11 @@ import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooq
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionUserPrivacyTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.UserPojo;
+import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionUserPrivacyRecord;
 import com.angkorteam.mbaas.plain.enums.CollectionPermissionEnum;
 import com.angkorteam.mbaas.server.provider.CollectionUserPrivacyProvider;
@@ -33,7 +35,7 @@ import java.util.*;
 /**
  * Created by socheat on 3/20/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/collection/user/privacy/management")
 public class CollectionUserPrivacyManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -128,6 +130,17 @@ public class CollectionUserPrivacyManagementPage extends MasterPage implements A
         this.insertFeedback = new TextFeedbackPanel("insertFeedback", this.insertField);
         form.add(this.insertFeedback);
 
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        DSLContext context = getDSLContext();
+        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collectionId)).fetchOneInto(collectionTable);
+        if (getSession().isBackOffice() && !collectionRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(CollectionManagementPage.class);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

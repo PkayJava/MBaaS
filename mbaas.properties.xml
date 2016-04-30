@@ -27,9 +27,10 @@
 
     <entry key="jdbc.column.extra">extra</entry>
     <entry key="jdbc.column.optimistic">optimistic</entry>
-    <entry key="jdbc.date.created">date_created</entry>
+    <entry key="jdbc.column.date_created">date_created</entry>
     <entry key="jdbc.column.deleted">deleted</entry>
-    <entry key="jdbc.owner.user.id">owner_user_id</entry>
+    <entry key="jdbc.column.owner_user_id">owner_user_id</entry>
+    <entry key="jdbc.column.user_id">user_id</entry>
 
     <entry key="role.administrator">administrator</entry>
     <entry key="role.administrator.description">Administrative role, users belonging to this role are Gods</entry>
@@ -48,17 +49,18 @@
     <entry key="role.oauth2.client">oauth2.client</entry>
     <entry key="role.oauth2.client.description">OAuth2 Client</entry>
 
+    <!-- administrator -->
     <entry key="user.admin">admin</entry>
     <entry key="user.admin.role">role.administrator</entry>
     <entry key="user.admin.password">admin</entry>
-
-    <entry key="user.mbaas">mbaas</entry>
-    <entry key="user.mbaas.role">role.anonymous</entry>
-    <entry key="user.mbaas.password">mbaas</entry>
-
-    <entry key="user.internal_admin">internal_admin</entry>
-    <entry key="user.internal_admin.role">role.administrator</entry>
-    <entry key="user.internal_admin.password">internal_admin</entry>
+    <!-- anonymous -->
+    <entry key="user.anonymous">anonymous</entry>
+    <entry key="user.anonymous.role">role.anonymous</entry>
+    <entry key="user.anonymous.password">anonymous</entry>
+    <!-- backoffice -->
+    <entry key="user.backoffice">backoffice</entry>
+    <entry key="user.backoffice.role">role.backoffice</entry>
+    <entry key="user.backoffice.password">backoffice</entry>
 
     <entry key="mail.server">mail.home.com.kh</entry>
     <entry key="mail.port">25</entry>

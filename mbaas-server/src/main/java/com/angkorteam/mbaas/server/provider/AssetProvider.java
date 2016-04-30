@@ -16,10 +16,7 @@ import org.jooq.Field;
 import org.jooq.TableLike;
 import org.jooq.impl.DSL;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 3/11/16.
@@ -31,7 +28,14 @@ public class AssetProvider extends JooqProvider {
 
     private TableLike<?> from;
 
+    private String ownerUserId;
+
     public AssetProvider() {
+        this(null);
+    }
+
+    public AssetProvider(String ownerUserId) {
+        this.ownerUserId = ownerUserId;
         this.assetTable = Tables.ASSET.as("assetTable");
         this.userTable = Tables.USER.as("userTable");
 
@@ -90,7 +94,7 @@ public class AssetProvider extends JooqProvider {
         return this.assetTable.ASSET_ID;
     }
 
-    public Field<String> getOwner() {
+    public Field<String> getOwnerUser() {
         return this.userTable.LOGIN;
     }
 
@@ -113,7 +117,11 @@ public class AssetProvider extends JooqProvider {
 
     @Override
     protected List<Condition> where() {
-        return null;
+        List<Condition> where = new ArrayList<>();
+        if (this.ownerUserId != null) {
+            where.add(userTable.USER_ID.eq(this.ownerUserId));
+        }
+        return where;
     }
 
     @Override

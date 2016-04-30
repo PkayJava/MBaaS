@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/1/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/collection/management")
 public class CollectionManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -41,8 +41,14 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
     protected void onInitialize() {
         super.onInitialize();
 
-        CollectionProvider provider = new CollectionProvider();
+        CollectionProvider provider = null;
+        if (getSession().isAdministrator()) {
+            provider = new CollectionProvider();
+        } else {
+            provider = new CollectionProvider(getSession().getUserId());
+        }
         provider.selectField(String.class, "collectionId");
+        provider.selectField(String.class, "ownerUserId");
         provider.selectField(Boolean.class, "system");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
@@ -51,7 +57,9 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
         columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("document", this), "document", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("owner", this), "owner", provider));
+        if (getSession().isAdministrator()) {
+            columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
+        }
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Role Privacy", "User Privacy", "Attribute", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
@@ -100,6 +108,10 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
+        return isAccess(link, object);
+    }
+
+    private boolean isAccess(String link, Map<String, Object> object) {
         if ("name".equals(link)) {
             return true;
         }
@@ -120,22 +132,7 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
-        if ("name".equals(link)) {
-            return true;
-        }
-        if ("Delete".equals(link)) {
-            return true;
-        }
-        if ("Attribute".equals(link)) {
-            return true;
-        }
-        if ("Role Privacy".equals(link)) {
-            return true;
-        }
-        if ("User Privacy".equals(link)) {
-            return true;
-        }
-        return false;
+        return isAccess(link, object);
     }
 
     @Override

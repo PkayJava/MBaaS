@@ -22,7 +22,7 @@ import java.util.UUID;
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/javascript/create")
 public class JavascriptCreatePage extends MasterPage {
 

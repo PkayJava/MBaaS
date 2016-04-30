@@ -10,8 +10,10 @@ import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.QueryRolePrivacyTable;
+import com.angkorteam.mbaas.model.entity.tables.QueryTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
+import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.QueryRolePrivacyRecord;
 import com.angkorteam.mbaas.plain.enums.QueryPermissionEnum;
 import com.angkorteam.mbaas.server.provider.QueryRolePrivacyProvider;
@@ -33,7 +35,7 @@ import java.util.*;
 /**
  * Created by socheat on 3/20/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/query/role/privacy/management")
 public class QueryRolePrivacyManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -128,6 +130,17 @@ public class QueryRolePrivacyManagementPage extends MasterPage implements Action
         this.executeFeedback = new TextFeedbackPanel("executeFeedback", this.executeField);
         form.add(this.executeFeedback);
 
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        DSLContext context = getDSLContext();
+        QueryTable queryTable = Tables.QUERY.as("queryTable");
+        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.QUERY_ID.eq(this.queryId)).fetchOneInto(queryTable);
+        if (getSession().isBackOffice() && !queryRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(QueryManagementPage.class);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

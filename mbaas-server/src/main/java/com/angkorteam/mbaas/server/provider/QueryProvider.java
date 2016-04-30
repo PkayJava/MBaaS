@@ -9,6 +9,7 @@ import org.jooq.Field;
 import org.jooq.TableLike;
 import org.jooq.impl.DSL;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,12 +22,16 @@ public class QueryProvider extends JooqProvider {
 
     private UserTable userTable = Tables.USER.as("userTable");
 
-    private String address;
-
     private TableLike<?> from;
 
-    public QueryProvider(String address) {
-        this.address = address;
+    private String ownerUserId;
+
+    public QueryProvider() {
+        this(null);
+    }
+
+    public QueryProvider(String ownerUserId) {
+        this.ownerUserId = ownerUserId;
         this.from = this.queryTable.join(this.userTable).on(this.queryTable.OWNER_USER_ID.eq(this.userTable.USER_ID));
     }
 
@@ -50,8 +55,12 @@ public class QueryProvider extends JooqProvider {
         return this.queryTable.SECURITY;
     }
 
-    public Field<String> getOwner() {
+    public Field<String> getOwnerUser() {
         return this.userTable.LOGIN;
+    }
+
+    public Field<String> getOwnerUserId() {
+        return this.userTable.USER_ID;
     }
 
     @Override
@@ -61,7 +70,11 @@ public class QueryProvider extends JooqProvider {
 
     @Override
     protected List<Condition> where() {
-        return null;
+        List<Condition> where = new ArrayList<>();
+        if (ownerUserId != null) {
+            where.add(this.userTable.USER_ID.eq(this.ownerUserId));
+        }
+        return where;
     }
 
     @Override

@@ -41,6 +41,10 @@ public class ClientProvider extends JooqProvider {
         return this.userTable.LOGIN;
     }
 
+    public Field<String> getOwnerUserId() {
+        return this.userTable.USER_ID;
+    }
+
     public Field<String> getSecurity() {
         return this.clientTable.SECURITY;
     }

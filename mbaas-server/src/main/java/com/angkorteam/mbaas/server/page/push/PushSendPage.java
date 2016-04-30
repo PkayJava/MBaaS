@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Created by socheat on 4/10/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/push/send")
 public class PushSendPage extends MasterPage {
 

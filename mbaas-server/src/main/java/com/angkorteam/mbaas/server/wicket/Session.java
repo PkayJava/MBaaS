@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.wicket;
 
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
@@ -7,6 +8,7 @@ import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebSession;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
@@ -82,6 +84,38 @@ public class Session extends AuthenticatedWebSession {
 
     public String getUserId() {
         return userId;
+    }
+
+    public boolean isAdministrator() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        if (isSignedIn() && getRoles().hasRole(configuration.getString(Constants.ROLE_ADMINISTRATOR))) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isBackOffice() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        if (isSignedIn() && getRoles().hasRole(configuration.getString(Constants.ROLE_BACKOFFICE))) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isRegistered() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        if (isSignedIn() && getRoles().hasRole(configuration.getString(Constants.ROLE_REGISTERED))) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isAnonymous() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        if (isSignedIn() && getRoles().hasRole(configuration.getString(Constants.ROLE_ANONYMOUS))) {
+            return true;
+        }
+        return false;
     }
 
     public final DSLContext getDSLContext() {

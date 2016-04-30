@@ -6,6 +6,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
 import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
+import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
 import com.angkorteam.mbaas.server.validator.JavascriptPathValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -19,7 +20,7 @@ import org.jooq.DSLContext;
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/javascript/modify")
 public class JavascriptModifyPage extends MasterPage {
 
@@ -54,7 +55,6 @@ public class JavascriptModifyPage extends MasterPage {
         this.javascriptId = getPageParameters().get("javascriptId").toString();
         DSLContext context = getDSLContext();
         JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
-
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
 
         this.form = new Form<>("form");
@@ -89,6 +89,17 @@ public class JavascriptModifyPage extends MasterPage {
         this.saveAndContinueButton = new Button("saveAndContinueButton");
         this.saveAndContinueButton.setOnSubmit(this::saveAndContinueButtonOnSubmit);
         this.form.add(this.saveAndContinueButton);
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        DSLContext context = getDSLContext();
+        JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
+        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
+        if (getSession().isBackOffice() && !javascriptRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(JavascriptManagementPage.class);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

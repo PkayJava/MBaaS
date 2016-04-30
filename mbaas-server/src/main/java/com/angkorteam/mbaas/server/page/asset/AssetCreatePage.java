@@ -37,7 +37,7 @@ import java.util.*;
 /**
  * Created by socheat on 3/11/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice", "registered"})
 @Mount("/asset/create")
 public class AssetCreatePage extends MasterPage {
 

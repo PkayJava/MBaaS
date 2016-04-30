@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
+import com.angkorteam.mbaas.server.page.profile.InformationPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -49,7 +50,18 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
      */
     @Override
     public Class<? extends WebPage> getHomePage() {
-        return DashboardPage.class;
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String roleRegistered = configuration.getString(Constants.ROLE_REGISTERED);
+        Session session = (Session) Session.get();
+        if (session == null || !session.isSignedIn()) {
+            return DashboardPage.class;
+        } else {
+            if (session.getRoles().hasRole(roleRegistered)) {
+                return InformationPage.class;
+            } else {
+                return DashboardPage.class;
+            }
+        }
     }
 
     /**

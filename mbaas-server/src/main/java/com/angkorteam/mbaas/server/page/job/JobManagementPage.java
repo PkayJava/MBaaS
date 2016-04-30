@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * Created by socheat on 4/24/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/job/management")
 public class JobManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -39,8 +39,14 @@ public class JobManagementPage extends MasterPage implements ActionFilteredJooqC
     protected void onInitialize() {
         super.onInitialize();
 
-        JobProvider provider = new JobProvider();
+        JobProvider provider = null;
+        if (getSession().isAdministrator()) {
+            provider = new JobProvider();
+        } else {
+            provider = new JobProvider(getSession().getUserId());
+        }
         provider.selectField(String.class, "jobId");
+        provider.selectField(String.class, "ownerUserId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -52,7 +58,9 @@ public class JobManagementPage extends MasterPage implements ActionFilteredJooqC
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("errorMessage", this), "errorMessage", this, provider));
         columns.add(new TextFilteredJooqColumn(Double.class, JooqUtils.lookup("consume", this), "consume", this, provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateLastExecuted", this), "dateLastExecuted", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
+        if (getSession().isAdministrator()) {
+            columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
+        }
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
 
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Edit", "Delete"));
@@ -121,23 +129,48 @@ public class JobManagementPage extends MasterPage implements ActionFilteredJooqC
     }
 
     protected boolean isAccess(String link, Map<String, Object> object) {
+        String ownerUserId = (String) object.get("ownerUserId");
         if ("Edit".equals(link)) {
-            return true;
+            if (getSession().isAdministrator()) {
+                return true;
+            } else {
+                if (getSession().getUserId().equals(ownerUserId)) {
+                    return true;
+                }
+            }
         }
         if ("Grant".equals(link)) {
             String security = (String) object.get("security");
             if (SecurityEnum.Denied.getLiteral().equals(security)) {
-                return true;
+                if (getSession().isAdministrator()) {
+                    return true;
+                } else {
+                    if (getSession().getUserId().equals(ownerUserId)) {
+                        return true;
+                    }
+                }
             }
         }
         if ("Deny".equals(link)) {
             String security = (String) object.get("security");
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
-                return true;
+                if (getSession().isAdministrator()) {
+                    return true;
+                } else {
+                    if (getSession().getUserId().equals(ownerUserId)) {
+                        return true;
+                    }
+                }
             }
         }
         if ("Delete".equals(link)) {
-            return true;
+            if (getSession().isAdministrator()) {
+                return true;
+            } else {
+                if (getSession().getUserId().equals(ownerUserId)) {
+                    return true;
+                }
+            }
         }
         return false;
     }

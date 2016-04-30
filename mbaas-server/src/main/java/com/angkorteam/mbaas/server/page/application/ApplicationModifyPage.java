@@ -32,7 +32,7 @@ import java.util.*;
 /**
  * Created by socheat on 3/8/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/application/modify")
 public class ApplicationModifyPage extends MasterPage {
 
@@ -116,6 +116,17 @@ public class ApplicationModifyPage extends MasterPage {
         this.form.add(this.saveButton);
 
         this.form.add(new PushApplicationValidator(this.pushApplicationIdField, this.pushMasterSecretField));
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        DSLContext context = getDSLContext();
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(this.applicationId)).fetchOneInto(applicationTable);
+        if (getSession().isBackOffice() && !applicationRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            setResponsePage(ApplicationManagementPage.class);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

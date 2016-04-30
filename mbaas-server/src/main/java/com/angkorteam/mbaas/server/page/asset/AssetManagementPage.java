@@ -2,7 +2,9 @@ package com.angkorteam.mbaas.server.page.asset;
 
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.table.filter.*;
+import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
+import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AssetTable;
@@ -11,7 +13,6 @@ import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.records.AssetRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.server.provider.AssetProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
@@ -30,14 +31,13 @@ import org.jooq.DSLContext;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Created by socheat on 3/11/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice", "registered"})
 @Mount("/asset/management")
 public class AssetManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -63,19 +63,21 @@ public class AssetManagementPage extends MasterPage implements ActionFilteredJoo
                 .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
                 .fetchInto(attributeTable);
 
-        Map<String, AttributeRecord> virtualAttributeRecords = new HashMap<>();
-        for (AttributeRecord attributeRecord : attributeRecords) {
-            virtualAttributeRecords.put(attributeRecord.getAttributeId(), attributeRecord);
+        AssetProvider provider = null;
+        if (getSession().isAdministrator()) {
+            provider = new AssetProvider();
+        } else {
+            provider = new AssetProvider(getSession().getUserId());
         }
-
-        AssetProvider provider = new AssetProvider();
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("assetId", this), "assetId", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("owner", this), "owner", provider));
+        if (getSession().isAdministrator()) {
+            columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
+        }
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", provider));
         columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("length", this), "length", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("mime", this), "mime", provider));

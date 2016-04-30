@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/query/create")
 public class QueryCreatePage extends MasterPage {
 

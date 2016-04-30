@@ -4,8 +4,11 @@ import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.ClientTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
+import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
 import com.angkorteam.mbaas.server.validator.ClientNameValidator;
 import com.angkorteam.mbaas.server.validator.PushClientValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -20,7 +23,7 @@ import org.jooq.DSLContext;
 /**
  * Created by socheat on 3/8/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/client/modify")
 public class ClientModifyPage extends MasterPage {
 
@@ -111,6 +114,19 @@ public class ClientModifyPage extends MasterPage {
         this.form.add(closeLink);
 
         this.form.add(new PushClientValidator(this.pushVariantIdField, this.pushSecretField));
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        DSLContext context = getDSLContext();
+        ClientTable clientTable = Tables.CLIENT.as("clientTable");
+        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(this.clientId)).fetchOneInto(clientTable);
+        if (getSession().isBackOffice() && !clientRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            PageParameters parameters = new PageParameters();
+            parameters.add("applicationId", this.applicationId);
+            setResponsePage(ClientManagementPage.class, parameters);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

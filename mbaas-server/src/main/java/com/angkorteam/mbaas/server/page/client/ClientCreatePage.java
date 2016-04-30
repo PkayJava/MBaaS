@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.model.entity.tables.ClientTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
 import com.angkorteam.mbaas.server.validator.ClientNameValidator;
 import com.angkorteam.mbaas.server.validator.PushClientValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -26,7 +27,7 @@ import java.util.UUID;
 /**
  * Created by socheat on 3/8/16.
  */
-@AuthorizeInstantiation("administrator")
+@AuthorizeInstantiation({"administrator", "backoffice"})
 @Mount("/client/create")
 public class ClientCreatePage extends MasterPage {
 
@@ -107,6 +108,19 @@ public class ClientCreatePage extends MasterPage {
         parameters.add("applicationId", this.applicationId);
         BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", ClientManagementPage.class, parameters);
         this.form.add(closeLink);
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        DSLContext context = getDSLContext();
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(this.applicationId)).fetchOneInto(applicationTable);
+        if (getSession().isBackOffice() && !applicationRecord.getOwnerUserId().equals(getSession().getUserId())) {
+            PageParameters parameters = new PageParameters();
+            parameters.add("applicationId", this.applicationId);
+            setResponsePage(ClientManagementPage.class, parameters);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

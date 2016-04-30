@@ -23,10 +23,16 @@ public class CollectionProvider extends JooqProvider {
 
     private UserTable userTable;
 
+    private String ownerUserId;
+
     public CollectionProvider() {
+        this(null);
+    }
+
+    public CollectionProvider(String ownerUserId) {
+        this.ownerUserId = ownerUserId;
         this.collectionTable = Tables.COLLECTION.as("collectionTable");
         this.userTable = Tables.USER.as("userTable");
-
         {
             DSLContext context = getDSLContext();
             List<String> names = context.select(collectionTable.NAME).from(collectionTable).fetchInto(String.class);
@@ -41,8 +47,12 @@ public class CollectionProvider extends JooqProvider {
         this.from = collectionTable.join(userTable).on(collectionTable.OWNER_USER_ID.eq(userTable.USER_ID));
     }
 
-    public Field<String> getOwner() {
+    public Field<String> getOwnerUser() {
         return this.userTable.LOGIN;
+    }
+
+    public Field<String> getOwnerUserId() {
+        return this.userTable.USER_ID;
     }
 
     public Field<Integer> getDocument() {
@@ -70,6 +80,9 @@ public class CollectionProvider extends JooqProvider {
     protected List<Condition> where() {
         List<Condition> where = new ArrayList<>();
         where.add(this.collectionTable.SYSTEM.eq(false));
+        if (ownerUserId != null) {
+            where.add(this.userTable.USER_ID.eq(ownerUserId));
+        }
         return where;
     }
 
