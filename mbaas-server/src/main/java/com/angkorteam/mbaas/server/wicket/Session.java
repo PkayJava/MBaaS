@@ -2,9 +2,11 @@ package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
@@ -32,6 +34,8 @@ public class Session extends AuthenticatedWebSession {
     private Roles roles;
 
     private String userId;
+
+    private String applicationId;
 
     private transient DSLContext context;
 
@@ -74,7 +78,16 @@ public class Session extends AuthenticatedWebSession {
             Application application = (Application) getApplication();
             application.trackSession(sessionId, this, SESSIONS);
         }
-        return userRecord != null;
+
+        boolean verified = userRecord != null;
+
+        if (verified) {
+            ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+            ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.OWNER_USER_ID.eq(userRecord.getUserId())).limit(1).fetchOneInto(applicationTable);
+            this.applicationId = applicationRecord.getApplicationId();
+        }
+
+        return verified;
     }
 
     @Override
@@ -142,5 +155,13 @@ public class Session extends AuthenticatedWebSession {
             } catch (WicketRuntimeException e) {
             }
         }
+    }
+
+    public final String getApplicationId() {
+        return applicationId;
+    }
+
+    public final void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 }

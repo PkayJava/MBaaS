@@ -25,12 +25,10 @@
     <entry key="test.jdbc.username">root</entry>
     <entry key="test.jdbc.password">ZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSXZAQ!@WSX</entry>
 
-    <entry key="jdbc.column.extra">extra</entry>
     <entry key="jdbc.column.optimistic">optimistic</entry>
     <entry key="jdbc.column.date_created">date_created</entry>
     <entry key="jdbc.column.deleted">deleted</entry>
     <entry key="jdbc.column.owner_user_id">owner_user_id</entry>
-    <entry key="jdbc.column.user_id">user_id</entry>
 
     <entry key="role.administrator">administrator</entry>
     <entry key="role.administrator.description">Administrative role, users belonging to this role are Gods</entry>

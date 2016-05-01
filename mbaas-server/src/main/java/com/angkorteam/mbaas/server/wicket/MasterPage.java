@@ -2,13 +2,13 @@ package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.framework.extension.wicket.markup.html.link.Link;
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.function.HttpFunction;
-import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.application.ApplicationCreatePage;
 import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
 import com.angkorteam.mbaas.server.page.application.ApplicationModifyPage;
@@ -55,25 +55,23 @@ import com.angkorteam.mbaas.server.page.setting.SettingManagementPage;
 import com.angkorteam.mbaas.server.page.setting.SettingModifyPage;
 import com.angkorteam.mbaas.server.page.user.*;
 import com.angkorteam.mbaas.server.service.PusherClient;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.string.StringValue;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
-import org.springframework.security.access.method.P;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-import org.springframework.web.context.support.XmlWebApplicationContext;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by socheat on 3/10/16.
@@ -149,6 +147,7 @@ public abstract class MasterPage extends AdminLTEPage {
 
     @Override
     protected void onInitialize() {
+        super.onInitialize();
         Session session = getSession();
 
         DSLContext context = getDSLContext();
@@ -163,10 +162,15 @@ public abstract class MasterPage extends AdminLTEPage {
             desktopRecord.update();
         }
 
-        super.onInitialize();
-
-        BookmarkablePageLink<Void> dashboardPageLink = new BookmarkablePageLink<Void>("dashboardPageLink", getApplication().getHomePage());
+        BookmarkablePageLink<Void> dashboardPageLink = new BookmarkablePageLink<>("dashboardPageLink", getApplication().getHomePage());
         add(dashboardPageLink);
+
+        StringValue switchApplicationId = getPageParameters().get("switchApplicationId");
+        if (switchApplicationId != null && !switchApplicationId.toString("").equals("")) {
+            getSession().setApplicationId(switchApplicationId.toString());
+        }
+
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
 
         Label labelDashboard = new Label("labelDashboard", "Mobile BaaS");
         dashboardPageLink.add(labelDashboard);
@@ -175,6 +179,27 @@ public abstract class MasterPage extends AdminLTEPage {
         add(this.pageHeaderLabel);
         this.pageDescriptionLabel = new Label("pageDescriptionLabel", new PropertyModel<>(this, "pageDescription"));
         add(this.pageDescriptionLabel);
+
+        {
+            WebMarkupContainer applicationMenu = new WebMarkupContainer("applicationMenu");
+            add(applicationMenu);
+            Label currentApplicationLabel = new Label("currentApplicationLabel", new PropertyModel<>(this, "currentApplicationName"));
+            applicationMenu.add(currentApplicationLabel);
+            List<ApplicationRecord> applicationRecords = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.OWNER_USER_ID.eq(getSession().getUserId())).fetchInto(applicationTable);
+            RepeatingView fields = new RepeatingView("applicationItems");
+            applicationMenu.add(fields);
+            for (ApplicationRecord applicationRecord : applicationRecords) {
+                WebMarkupContainer markupContainer = new WebMarkupContainer(fields.newChildId());
+                PageParameters parameters = new PageParameters();
+                parameters.add("switchApplicationId", applicationRecord.getApplicationId());
+                BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("applicationItemLink", getApplication().getHomePage(), parameters);
+                markupContainer.add(link);
+                Label applicationItemLabel = new Label("applicationItemLabel", applicationRecord.getName());
+                link.add(applicationItemLabel);
+                fields.add(markupContainer);
+            }
+            applicationMenu.setVisible(!getSession().isRegistered());
+        }
 
         Link<Void> logoutLink = new Link<>("logoutLink");
         add(logoutLink);
@@ -253,6 +278,11 @@ public abstract class MasterPage extends AdminLTEPage {
         {
             this.menuLogicConsole = new WebMarkupContainer("menuLogicConsole");
             add(this.menuLogicConsole);
+            this.menuLogicConsole.setVisible(getSession().getApplicationId() != null && !"".equals(getSession().getApplicationId()));
+
+            Label currentApplicationConsole = new Label("currentApplicationConsole", new PropertyModel<>(this, "currentApplicationName"));
+            this.menuLogicConsole.add(currentApplicationConsole);
+
             WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript");
             mmenuJavascript.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJavascriptClass")));
             this.menuLogicConsole.add(mmenuJavascript);
@@ -463,6 +493,32 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuJobClass = "active";
         } else {
             this.mmenuJobClass = "";
+        }
+
+        if (getSession().isBackOffice() && getApplicationQuantity() <= 0) {
+            if (getPage() instanceof ApplicationCreatePage) {
+            } else {
+                setResponsePage(ApplicationCreatePage.class);
+            }
+        }
+    }
+
+    public int getApplicationQuantity() {
+        DSLContext context = getDSLContext();
+        return context.selectCount().from(Tables.APPLICATION).where(Tables.APPLICATION.OWNER_USER_ID.eq(getSession().getUserId())).fetchOneInto(int.class);
+    }
+
+    public String getCurrentApplicationName() {
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        DSLContext context = getDSLContext();
+        ApplicationRecord applicationRecord = null;
+        if (getSession().getApplicationId() != null && !"".equals(getSession().getApplicationId())) {
+            applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(getSession().getApplicationId())).fetchOneInto(applicationTable);
+        }
+        if (applicationRecord != null) {
+            return applicationRecord.getName();
+        } else {
+            return "Select One";
         }
     }
 

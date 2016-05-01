@@ -92,6 +92,7 @@ public class JavascriptCreatePage extends MasterPage {
         javascriptRecord.setSecurity(SecurityEnum.Denied.getLiteral());
         javascriptRecord.setPath(this.pathText);
         javascriptRecord.setScript(this.script);
+        javascriptRecord.setApplicationId(getSession().getApplicationId());
         javascriptRecord.setOwnerUserId(getSession().getUserId());
         javascriptRecord.setDateCreated(new Date());
         javascriptRecord.setDescription(this.description);

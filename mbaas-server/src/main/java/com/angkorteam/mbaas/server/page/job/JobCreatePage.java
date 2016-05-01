@@ -92,6 +92,7 @@ public class JobCreatePage extends MasterPage {
         jobRecord.setJobId(UUID.randomUUID().toString());
         jobRecord.setDateCreated(new Date());
         jobRecord.setCron(this.cron);
+        jobRecord.setApplicationId(getSession().getApplicationId());
         jobRecord.setJavascript(this.javascript);
         jobRecord.setName(this.name);
         jobRecord.setOwnerUserId(getSession().getUserId());

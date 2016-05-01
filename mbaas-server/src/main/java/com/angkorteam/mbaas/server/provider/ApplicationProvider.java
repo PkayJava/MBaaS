@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.ClientTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.server.wicket.Session;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.TableLike;

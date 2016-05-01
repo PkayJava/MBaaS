@@ -12,17 +12,13 @@ CREATE TABLE mobile (
   date_token_issued       DATETIME,
   time_to_live            INT(11),
   grant_type              VARCHAR(100),
-
   user_agent              VARCHAR(255),
-
   device_token            VARCHAR(255),
   device_type             VARCHAR(255),
   device_alias            VARCHAR(255),
   device_operating_system VARCHAR(80),
   device_os_version       VARCHAR(50),
-
   client_ip               VARCHAR(30),
-
   optimistic              INT(11) DEFAULT 0,
 
   INDEX (owner_user_id),

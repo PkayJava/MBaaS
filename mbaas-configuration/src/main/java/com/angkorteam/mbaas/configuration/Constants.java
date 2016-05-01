@@ -33,7 +33,6 @@ public class Constants {
     public static final String JDBC_COLUMN_OPTIMISTIC = "jdbc.column.optimistic";
     public static final String JDBC_COLUMN_DELETED = "jdbc.column.deleted";
     public static final String JDBC_COLUMN_OWNER_USER_ID = "jdbc.column.owner_user_id";
-    public static final String JDBC_COLUMN_USER_ID = "jdbc.column.user_id";
     public static final String JDBC_COLUMN_DATE_CREATED = "jdbc.column.date_created";
 
     public static final String ROLE_ADMINISTRATOR = "role.administrator";

@@ -138,6 +138,7 @@ public class QueryCreatePage extends MasterPage {
         queryRecord.setOwnerUserId(getSession().getUserId());
         queryRecord.setDateCreated(new Date());
         queryRecord.setDescription(this.description);
+        queryRecord.setApplicationId(getSession().getApplicationId());
         queryRecord.setReturnType(this.returnType);
         queryRecord.setReturnSubType(this.returnSubType);
         queryRecord.store();

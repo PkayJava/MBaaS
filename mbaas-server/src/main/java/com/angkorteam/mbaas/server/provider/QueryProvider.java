@@ -4,6 +4,7 @@ import com.angkorteam.framework.extension.share.provider.JooqProvider;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.QueryTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.server.wicket.Session;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.TableLike;
@@ -74,6 +75,8 @@ public class QueryProvider extends JooqProvider {
         if (ownerUserId != null) {
             where.add(this.userTable.USER_ID.eq(this.ownerUserId));
         }
+        Session session = (Session) Session.get();
+        where.add(this.queryTable.APPLICATION_ID.eq(session.getApplicationId()));
         return where;
     }
 

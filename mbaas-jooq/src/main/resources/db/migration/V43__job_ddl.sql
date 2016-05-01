@@ -11,6 +11,8 @@ CREATE TABLE job (
   `date_last_executed` DATETIME,
   security             VARCHAR(50)  NOT NULL,
   date_created         DATETIME     NOT NULL,
+  application_id       VARCHAR(100) NOT NULL,
+
   UNIQUE (`name`),
   INDEX (`cron`),
   FULLTEXT (`javascript`),
@@ -21,5 +23,6 @@ CREATE TABLE job (
   INDEX (`date_last_executed`),
   INDEX (`security`),
   INDEX (date_created),
+  INDEX (application_id),
   PRIMARY KEY (job_id)
 );

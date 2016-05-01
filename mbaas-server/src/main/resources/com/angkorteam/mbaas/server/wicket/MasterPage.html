@@ -29,8 +29,31 @@
             <wicket:enclosure child="logoutLink">
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
+                    <li class="dropdown notifications-menu" wicket:id="applicationMenu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-wrench"></i> <wicket:container wicket:id="currentApplicationLabel"></wicket:container>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="header">Your Applications</li>
+                            <li>
+                                <!-- inner menu: contains the actual data -->
+                                <ul class="menu">
+                                    <li wicket:id="applicationItems">
+                                        <a wicket:id="applicationItemLink">
+                                            <i class="fa fa-star-half-full text-aqua"></i> <wicket:container wicket:id="applicationItemLabel"/>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="footer">
+                                <wicket:link>
+                                    <a href="../page/application/ApplicationManagementPage.html">See All Applications</a>
+                                </wicket:link>
+                            </li>
+                        </ul>
+                    </li>
                     <li>
-                        <a wicket:id="logoutLink">Logout</a>
+                        <a wicket:id="logoutLink"><i class="fa fa-sign-out"></i>Logout</a>
                     </li>
                 </ul>
             </div>
@@ -86,7 +109,7 @@
                 </li>
                 <li class="treeview" wicket:id="menuSecurity">
                     <a href="#">
-                        <i class="fa fa-unlock-alt"></i>
+                        <i class="fa fa-shield"></i>
                         <span>Security</span>
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
@@ -133,7 +156,7 @@
                     </ul>
                 </li>
                 <wicket:container wicket:id="menuLogicConsole">
-                <li class="header">Logic Console</li>
+                <li class="header"><wicket:container wicket:id="currentApplicationConsole"/> Console</li>
                 <li wicket:id="mmenuApplication">
                     <wicket:link><a href="../page/application/ApplicationManagementPage.html"><i class="fa fa-wrench"></i><span>Application</span></a></wicket:link>
                 </li>

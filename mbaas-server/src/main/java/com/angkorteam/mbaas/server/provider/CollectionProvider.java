@@ -4,6 +4,7 @@ import com.angkorteam.framework.extension.share.provider.JooqProvider;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.server.wicket.Session;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 
@@ -83,6 +84,8 @@ public class CollectionProvider extends JooqProvider {
         if (ownerUserId != null) {
             where.add(this.userTable.USER_ID.eq(ownerUserId));
         }
+        Session session = (Session) Session.get();
+        where.add(this.collectionTable.APPLICATION_ID.eq(session.getApplicationId()));
         return where;
     }
 
