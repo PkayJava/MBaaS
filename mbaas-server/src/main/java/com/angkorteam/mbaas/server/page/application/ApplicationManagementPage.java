@@ -66,7 +66,7 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
 
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Push", "Client", "Edit"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Backup", "Grant", "Deny", "Push", "Client", "Edit"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -115,7 +115,15 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
+        return isAccess(link, object);
+    }
+
+
+    protected boolean isAccess(String link, Map<String, Object> object) {
         if ("Edit".equals(link)) {
+            return true;
+        }
+        if ("Backup".equals(link)) {
             return true;
         }
         if ("Client".equals(link)) {
@@ -145,37 +153,15 @@ public class ApplicationManagementPage extends MasterPage implements ActionFilte
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
-        if ("Edit".equals(link)) {
-            return true;
-        }
-        if ("Client".equals(link)) {
-            return true;
-        }
-        if ("Grant".equals(link)) {
-            String security = (String) object.get("security");
-            if (SecurityEnum.Denied.getLiteral().equals(security)) {
-                return true;
-            }
-        }
-        if ("Deny".equals(link)) {
-            String security = (String) object.get("security");
-            if (SecurityEnum.Granted.getLiteral().equals(security)) {
-                return true;
-            }
-        }
-        if ("Push".equals(link)) {
-            String pushApplicationId = (String) object.get("pushApplicationId");
-            String pushMasterSecret = (String) object.get("pushMasterSecret");
-            if (pushMasterSecret != null && !"".equals(pushMasterSecret) && pushApplicationId != null && !"".equals(pushApplicationId)) {
-                return true;
-            }
-        }
-        return false;
+        return isAccess(link, object);
     }
 
     @Override
     public String onCSSLink(String link, Map<String, Object> object) {
         if ("Edit".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Backup".equals(link)) {
             return "btn-xs btn-info";
         }
         if ("Client".equals(link)) {

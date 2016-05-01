@@ -202,10 +202,22 @@ public abstract class MasterPage extends AdminLTEPage {
             applicationMenu.setVisible(!getSession().isRegistered());
         }
 
-        Link<Void> logoutLink = new Link<>("logoutLink");
-        add(logoutLink);
-        logoutLink.setOnClick(this::logoutLinkOnClick);
-        logoutLink.setVisible(getSession().isSignedIn());
+        {
+            Link<Void> logoutLink = new Link<>("logoutLink");
+            add(logoutLink);
+            logoutLink.setOnClick(this::logoutLinkOnClick);
+            logoutLink.setVisible(getSession().isSignedIn());
+
+            Link<Void> backupLink = new Link<>("backupLink");
+            add(backupLink);
+            backupLink.setOnClick(this::backupLinkOnClick);
+            backupLink.setVisible(getSession().getApplicationId() != null && !"".equals(getSession().getApplicationId()));
+
+            Link<Void> importLink = new Link<>("importLink");
+            add(importLink);
+            importLink.setOnClick(this::importLinkOnClick);
+            importLink.setVisible(getSession().isSignedIn());
+        }
 
         {
             this.menuGeneral = new WebMarkupContainer("menuGeneral");
@@ -528,6 +540,14 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             return "Select One Application";
         }
+    }
+
+    private void backupLinkOnClick(Link link) {
+        System.out.println("Backup");
+    }
+
+    private void importLinkOnClick(Link link) {
+        System.out.println("Backup");
     }
 
     private void logoutLinkOnClick(Link link) {
