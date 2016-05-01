@@ -46,6 +46,7 @@ public class ApplicationFunction {
         tables.add(Tables.COLLECTION_USER_PRIVACY.getName());
         tables.add(Tables.ATTRIBUTE.getName());
         tables.add(Tables.DOCUMENT_ROLE_PRIVACY.getName());
+        "".intern();
         tables.add(Tables.DOCUMENT_USER_PRIVACY.getName());
         tables.add(Tables.MOBILE.getName());
         tables.add(Tables.CLIENT.getName());
@@ -57,13 +58,13 @@ public class ApplicationFunction {
         tables.add(Tables.JAVASCRIPT.getName());
         tables.add(Tables.EAV_BOOLEAN.getName());
         tables.add(Tables.EAV_CHARACTER.getName());
-        tables.add(Tables.EAV_DATE.getName());
-        tables.add(Tables.EAV_DATE_TIME.getName());
-        tables.add(Tables.EAV_DECIMAL.getName());
-        tables.add(Tables.EAV_INTEGER.getName());
+        tables.add(Tables.EAV_VARCHAR.getName());
         tables.add(Tables.EAV_TEXT.getName());
         tables.add(Tables.EAV_TIME.getName());
-        tables.add(Tables.EAV_VARCHAR.getName());
+        tables.add(Tables.EAV_DATE.getName());
+        tables.add(Tables.EAV_DATE_TIME.getName());
+        tables.add(Tables.EAV_INTEGER.getName());
+        tables.add(Tables.EAV_DECIMAL.getName());
 
         File working = new File(FileUtils.getTempDirectory(), "MBaaS_" + DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
         working.mkdirs();
@@ -137,6 +138,13 @@ public class ApplicationFunction {
         }
 
         for (String table : jdbcTemplate.queryForList("SELECT " + Tables.COLLECTION.NAME.getName() + " FROM " + Tables.COLLECTION.getName() + " WHERE " + Tables.COLLECTION.APPLICATION_ID.getName() + " = ?", String.class, applicationId)) {
+            routine++;
+            Map<String, Object> structure = jdbcTemplate.queryForMap("SHOW CREATE TABLE " + table);
+            String ddl = (String) structure.get("Create Table");
+            File ddlFile = new File(working, ROUTINE.format(routine) + "_" + table + "_ddl.sql");
+            FileUtils.touch(ddlFile);
+            FileUtils.write(ddlFile, ddl + "\n\r", true);
+            routine++;
             List<Map<String, Object>> documents = jdbcTemplate.queryForList("SELECT * FROM " + table);
             File tableFile = new File(working, ROUTINE.format(routine) + "_" + table + ".sql");
             FileUtils.touch(tableFile);
