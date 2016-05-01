@@ -66,9 +66,17 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.IRequestCycle;
+import org.apache.wicket.request.handler.resource.ResourceStreamRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.ContentDisposition;
 import org.apache.wicket.util.file.File;
+import org.apache.wicket.util.file.Files;
+import org.apache.wicket.util.resource.FileResourceStream;
+import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.string.StringValue;
+import org.apache.wicket.util.string.Strings;
+import org.apache.wicket.util.time.Duration;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
@@ -556,7 +564,20 @@ public abstract class MasterPage extends AdminLTEPage {
 
     private void backupLinkOnClick(Link link) {
         try {
-            ApplicationFunction.backup(getJdbcTemplate(), getSession().getApplicationId());
+            java.io.File mbaas = ApplicationFunction.backup(getJdbcTemplate(), getSession().getApplicationId());
+
+            IResourceStream resourceStream = new FileResourceStream(
+                    new org.apache.wicket.util.file.File(mbaas));
+            getRequestCycle().scheduleRequestHandlerAfterCurrent(
+                    new ResourceStreamRequestHandler(resourceStream) {
+                        @Override
+                        public void respond(IRequestCycle requestCycle) {
+                            super.respond(requestCycle);
+                            Files.remove(mbaas);
+                        }
+                    }.setFileName(mbaas.getName())
+                            .setContentDisposition(ContentDisposition.ATTACHMENT)
+                            .setCacheDuration(Duration.NONE));
         } catch (IOException e) {
         }
     }

@@ -86,6 +86,7 @@ dependencies {
 
     compile 'com.googlecode.wicked-charts:wicked-charts-wicket7:2.0.0'
     compile 'com.mashape.unirest:unirest-java:' + unirestVersion
+    compile 'org.apache.commons:commons-compress:' + commonscompressVersion
 
 }
 
