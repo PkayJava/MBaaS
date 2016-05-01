@@ -65,7 +65,10 @@ public class ClientCreatePage extends MasterPage {
     protected void onInitialize() {
         super.onInitialize();
 
-        this.applicationId = getPageParameters().get("applicationId").toString();
+        this.applicationId = getPageParameters().get("applicationId").toString("");
+        if ("".equals(this.applicationId)) {
+            this.applicationId = getSession().getApplicationId();
+        }
 
         this.form = new Form<>("form");
         add(this.form);

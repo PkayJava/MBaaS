@@ -344,6 +344,7 @@ public class ApplicationContext implements ServletContextListener {
                     collectionRecord.setName(table.getName());
                     collectionRecord.setSystem(true);
                     collectionRecord.setOwnerUserId(userRecord.getUserId());
+                    collectionRecord.setApplicationId("-1");
                     collectionRecord.store();
                 }
                 List<AttributeRecord> temporaryAttributeRecords = context.select(attributeTable.fields()).from(attributeTable)

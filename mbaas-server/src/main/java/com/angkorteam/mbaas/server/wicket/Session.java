@@ -84,7 +84,9 @@ public class Session extends AuthenticatedWebSession {
         if (verified) {
             ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
             ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.OWNER_USER_ID.eq(userRecord.getUserId())).limit(1).fetchOneInto(applicationTable);
-            this.applicationId = applicationRecord.getApplicationId();
+            if (applicationRecord != null) {
+                this.applicationId = applicationRecord.getApplicationId();
+            }
         }
 
         return verified;

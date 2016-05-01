@@ -112,6 +112,7 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuMobileClass = "";
 
     private String mmenuJavascriptClass;
+    private String mmenuClientClass = "";
 
     private String mmenuJobClass = "";
 
@@ -192,7 +193,7 @@ public abstract class MasterPage extends AdminLTEPage {
                 WebMarkupContainer markupContainer = new WebMarkupContainer(fields.newChildId());
                 PageParameters parameters = new PageParameters();
                 parameters.add("switchApplicationId", applicationRecord.getApplicationId());
-                BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("applicationItemLink", getApplication().getHomePage(), parameters);
+                BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("applicationItemLink", ClientManagementPage.class, parameters);
                 markupContainer.add(link);
                 Label applicationItemLabel = new Label("applicationItemLabel", applicationRecord.getName());
                 link.add(applicationItemLabel);
@@ -278,7 +279,6 @@ public abstract class MasterPage extends AdminLTEPage {
         {
             this.menuLogicConsole = new WebMarkupContainer("menuLogicConsole");
             add(this.menuLogicConsole);
-            this.menuLogicConsole.setVisible(getSession().getApplicationId() != null && !"".equals(getSession().getApplicationId()));
 
             Label currentApplicationConsole = new Label("currentApplicationConsole", new PropertyModel<>(this, "currentApplicationName"));
             this.menuLogicConsole.add(currentApplicationConsole);
@@ -290,6 +290,10 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuApplication = new WebMarkupContainer("mmenuApplication");
             mmenuApplication.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuApplicationClass")));
             this.menuLogicConsole.add(mmenuApplication);
+
+            WebMarkupContainer mmenuClient = new WebMarkupContainer("mmenuClient");
+            mmenuClient.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuClientClass")));
+            this.menuLogicConsole.add(mmenuClient);
 
             WebMarkupContainer mmenuCollection = new WebMarkupContainer("mmenuCollection");
             mmenuCollection.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuCollectionClass")));
@@ -314,7 +318,7 @@ public abstract class MasterPage extends AdminLTEPage {
         this.menuGeneral.setVisible(isAdministrator);
         this.menuSecurity.setVisible(isAdministrator);
         this.menuSession.setVisible(isAdministrator);
-        this.menuLogicConsole.setVisible(isAdministrator || isBackOffice);
+        this.menuLogicConsole.setVisible((getSession().getApplicationId() != null && !"".equals(getSession().getApplicationId()) && (isAdministrator || isBackOffice)));
         this.mmenuFile.setVisible(isAdministrator);
         this.mmenuAsset.setVisible(isAdministrator || isBackOffice || isRegistered);
         this.menuStorage.setVisible(this.mmenuAsset.isVisible() || this.mmenuFile.isVisible());
@@ -379,13 +383,17 @@ public abstract class MasterPage extends AdminLTEPage {
         // Menu
         if (getPage() instanceof ApplicationManagementPage
                 || getPage() instanceof ApplicationCreatePage
-                || getPage() instanceof ApplicationModifyPage
-                || getPage() instanceof ClientManagementPage
-                || getPage() instanceof ClientModifyPage
-                || getPage() instanceof ClientCreatePage) {
+                || getPage() instanceof ApplicationModifyPage) {
             this.mmenuApplicationClass = "active";
         } else {
             this.mmenuApplicationClass = "";
+        }
+        if (getPage() instanceof ClientManagementPage
+                || getPage() instanceof ClientModifyPage
+                || getPage() instanceof ClientCreatePage) {
+            this.mmenuClientClass = "active";
+        } else {
+            this.mmenuClientClass = "";
         }
         if (getPage() instanceof SettingManagementPage || getPage() instanceof SettingCreatePage || getPage() instanceof SettingModifyPage) {
             this.mmenuSettingClass = "active";
@@ -518,7 +526,7 @@ public abstract class MasterPage extends AdminLTEPage {
         if (applicationRecord != null) {
             return applicationRecord.getName();
         } else {
-            return "Select One";
+            return "Select One Application";
         }
     }
 

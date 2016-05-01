@@ -64,7 +64,10 @@ public class ClientModifyPage extends MasterPage {
         DSLContext context = getDSLContext();
         ClientTable clientTable = Tables.CLIENT.as("clientTable");
 
-        this.applicationId = getPageParameters().get("applicationId").toString();
+        this.applicationId = getPageParameters().get("applicationId").toString("");
+        if ("".equals(this.applicationId)) {
+            this.applicationId = getSession().getApplicationId();
+        }
         this.clientId = getPageParameters().get("clientId").toString();
         ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(this.clientId)).fetchOneInto(clientTable);
 

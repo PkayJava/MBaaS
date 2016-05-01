@@ -42,7 +42,10 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
     protected void onInitialize() {
         super.onInitialize();
 
-        this.applicationId = getPageParameters().get("applicationId").toString();
+        this.applicationId = getPageParameters().get("applicationId").toString("");
+        if ("".equals(this.applicationId)) {
+            this.applicationId = getSession().getApplicationId();
+        }
 
         ClientProvider provider = new ClientProvider(this.applicationId);
         provider.selectField(String.class, "ownerUserId");
