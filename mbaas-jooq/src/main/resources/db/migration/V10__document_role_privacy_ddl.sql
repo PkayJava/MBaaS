@@ -1,14 +1,14 @@
 CREATE TABLE document_role_privacy (
 
   document_role_privacy_id VARCHAR(100) NOT NULL,
-
+  application_id           VARCHAR(100) NOT NULL,
   role_id                  VARCHAR(100) NOT NULL,
   collection_id            VARCHAR(100) NOT NULL,
   document_id              VARCHAR(100) NOT NULL,
-
   permisson                INT(11)      NOT NULL,
 
   INDEX (role_id),
+  INDEX (application_id),
   INDEX (collection_id),
   INDEX (document_id),
   INDEX (permisson),

@@ -143,7 +143,7 @@ public class AttributeCreatePage extends MasterPage {
         requestBody.setAttributeType(AttributeTypeEnum.valueOf(this.attributeType).getLiteral());
         requestBody.setCollectionName(collectionRecord.getName());
 
-        AttributeFunction.createAttribute(context, jdbcTemplate, UUID.randomUUID().toString(), requestBody);
+        AttributeFunction.createAttribute(context, jdbcTemplate, getSession().getApplicationId(), UUID.randomUUID().toString(), requestBody);
 
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collectionId);

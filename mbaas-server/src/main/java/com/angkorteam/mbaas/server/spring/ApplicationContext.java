@@ -370,6 +370,7 @@ public class ApplicationContext implements ServletContextListener {
                     if (!attributeRecords.containsKey(columnName)) {
                         int extra = 0;
                         AttributeRecord attributeRecord = context.newRecord(attributeTable);
+                        attributeRecord.setApplicationId("-1");
                         attributeRecord.setAttributeId(UUID.randomUUID().toString());
                         attributeRecord.setCollectionId(collectionRecord.getCollectionId());
                         attributeRecord.setName(columnName);

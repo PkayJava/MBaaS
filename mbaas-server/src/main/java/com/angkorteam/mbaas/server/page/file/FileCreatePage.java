@@ -102,6 +102,7 @@ public class FileCreatePage extends MasterPage {
         requestBody.setDocument(fields);
         fields.put(Tables.FILE.PATH.getName(), path);
         fields.put(Tables.FILE.MIME.getName(), mime);
+        fields.put(Tables.FILE.APPLICATION_ID.getName(), getSession().getApplicationId());
         fields.put(Tables.FILE.EXTENSION.getName(), extension);
         fields.put(Tables.FILE.LENGTH.getName(), length);
         fields.put(Tables.FILE.LABEL.getName(), this.name);

@@ -1,7 +1,7 @@
 CREATE TABLE eav_integer (
 
   eav_integer_id VARCHAR(100) NOT NULL,
-
+  application_id VARCHAR(100) NOT NULL,
   collection_id  VARCHAR(100) NOT NULL,
   attribute_id   VARCHAR(100) NOT NULL,
   document_id    VARCHAR(100) NOT NULL,
@@ -9,6 +9,7 @@ CREATE TABLE eav_integer (
   eav_value      INT(11),
 
   INDEX (collection_id),
+  INDEX (application_id),
   INDEX (attribute_id),
   INDEX (document_id),
   INDEX (attribute_type),

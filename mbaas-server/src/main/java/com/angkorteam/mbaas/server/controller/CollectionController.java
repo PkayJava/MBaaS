@@ -61,7 +61,6 @@ public class CollectionController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CollectionCreateResponse> create(
-            HttpServletRequest request,
             Identity identity,
             @RequestBody CollectionCreateRequest requestBody
     ) throws SQLException {
@@ -115,7 +114,7 @@ public class CollectionController {
             return ResponseEntity.ok(response);
         }
 
-        CollectionFunction.createCollection(context, jdbcTemplate, userRecord.getUserId(), requestBody);
+        CollectionFunction.createCollection(context, jdbcTemplate, identity.getApplicationId(), userRecord.getUserId(), requestBody);
 
         CollectionCreateResponse response = new CollectionCreateResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());
@@ -132,12 +131,9 @@ public class CollectionController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CollectionAttributeCreateResponse> createAttribute(
-            HttpServletRequest request,
-            @RequestHeader(name = "client_id", required = false) String clientId,
-            @RequestHeader(name = "X-MBAAS-MOBILE", required = false) String session,
+            Identity identity,
             @RequestBody CollectionAttributeCreateRequest requestBody
     ) {
-        LOGGER.info("{} client_id=>{} session=>{} body=>{}", request.getRequestURL(), clientId, session, gson.toJson(requestBody));
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -157,10 +153,10 @@ public class CollectionController {
             if (collectionRecord.getLocked() || collectionRecord.getSystem()) {
                 errorMessages.put("collectionName", "you are not allow to create its attribute");
             } else {
-                if (permission.isAdministratorUser(session)
-                        || permission.isBackOfficeUser(session)
-                        || permission.isCollectionOwner(session, requestBody.getCollectionName())
-                        || permission.hasCollectionPermission(session, requestBody.getCollectionName(), CollectionPermissionEnum.Attribute.getLiteral())
+                if (permission.isAdministratorUser(identity.getMobileId())
+                        || permission.isBackOfficeUser(identity.getMobileId())
+                        || permission.isCollectionOwner(identity.getMobileId(), requestBody.getCollectionName())
+                        || permission.hasCollectionPermission(identity.getMobileId(), requestBody.getCollectionName(), CollectionPermissionEnum.Attribute.getLiteral())
                         ) {
                 } else {
                     errorMessages.put("collectionName", "you are not allow to create its attribute");
@@ -201,7 +197,7 @@ public class CollectionController {
             return ResponseEntity.ok(response);
         }
 
-        AttributeFunction.createAttribute(context, jdbcTemplate, UUID.randomUUID().toString(), requestBody);
+        AttributeFunction.createAttribute(context, jdbcTemplate, identity.getApplicationId(), UUID.randomUUID().toString(), requestBody);
 
         CollectionAttributeCreateResponse response = new CollectionAttributeCreateResponse();
         response.getData().setCollectionName(requestBody.getCollectionName());

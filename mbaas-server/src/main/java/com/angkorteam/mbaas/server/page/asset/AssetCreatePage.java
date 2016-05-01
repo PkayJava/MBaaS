@@ -109,6 +109,7 @@ public class AssetCreatePage extends MasterPage {
         Map<String, Object> fields = new HashMap<>();
         requestBody.setDocument(fields);
         fields.put(Tables.ASSET.PATH.getName(), path);
+        fields.put(Tables.ASSET.APPLICATION_ID.getName(), getSession().getApplicationId());
         fields.put(Tables.ASSET.MIME.getName(), mime);
         fields.put(Tables.ASSET.EXTENSION.getName(), extension);
         fields.put(Tables.ASSET.LENGTH.getName(), length);

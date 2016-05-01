@@ -55,7 +55,7 @@ public class CollectionCreatePage extends MasterPage {
     private void saveButtonOnSubmit(Button button) {
         CollectionCreateRequest requestBody = new CollectionCreateRequest();
         requestBody.setCollectionName(this.name);
-        CollectionFunction.createCollection(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), requestBody);
+        CollectionFunction.createCollection(getDSLContext(), getJdbcTemplate(), getSession().getApplicationId(), getSession().getUserId(), requestBody);
         setResponsePage(CollectionManagementPage.class);
     }
 }

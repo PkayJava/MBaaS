@@ -159,6 +159,7 @@ public class QueryCreatePage extends MasterPage {
             QueryParameterRecord queryParamRecord = context.newRecord(queryParameterTable);
             queryParamRecord.setQueryId(queryRecord.getQueryId());
             queryParamRecord.setQueryParameterId((UUID.randomUUID().toString()));
+            queryParamRecord.setApplicationId(getSession().getApplicationId());
             queryParamRecord.setName(queryParameter);
             queryParamRecord.store();
         }

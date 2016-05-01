@@ -151,6 +151,7 @@ public class CollectionRolePrivacyManagementPage extends MasterPage implements A
         CollectionRolePrivacyRecord collectionRolePrivacyRecord = context.newRecord(collectionRolePrivacyTable);
         collectionRolePrivacyRecord.setCollectionRolePrivacyId(UUID.randomUUID().toString());
         collectionRolePrivacyRecord.setRoleId(this.role.getRoleId());
+        collectionRolePrivacyRecord.setApplicationId(getSession().getApplicationId());
         collectionRolePrivacyRecord.setCollectionId(this.collectionId);
         Integer permission = 0;
         if (this.attribute) {

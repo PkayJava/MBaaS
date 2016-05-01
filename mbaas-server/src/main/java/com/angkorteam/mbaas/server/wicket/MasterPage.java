@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
+import com.angkorteam.mbaas.server.function.ApplicationFunction;
 import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.page.application.ApplicationCreatePage;
 import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
@@ -55,6 +56,9 @@ import com.angkorteam.mbaas.server.page.setting.SettingManagementPage;
 import com.angkorteam.mbaas.server.page.setting.SettingModifyPage;
 import com.angkorteam.mbaas.server.page.user.*;
 import com.angkorteam.mbaas.server.service.PusherClient;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -63,6 +67,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.file.File;
 import org.apache.wicket.util.string.StringValue;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -70,8 +75,15 @@ import org.springframework.mail.MailSender;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 3/10/16.
@@ -543,11 +555,14 @@ public abstract class MasterPage extends AdminLTEPage {
     }
 
     private void backupLinkOnClick(Link link) {
-        System.out.println("Backup");
+        try {
+            ApplicationFunction.backup(getJdbcTemplate(), getSession().getApplicationId());
+        } catch (IOException e) {
+        }
     }
 
     private void importLinkOnClick(Link link) {
-        System.out.println("Backup");
+        System.out.println("Import");
     }
 
     private void logoutLinkOnClick(Link link) {

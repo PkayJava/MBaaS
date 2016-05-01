@@ -26,7 +26,7 @@ public class UserAttributeFunction {
         UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
         requestBody.setCollectionName(Tables.USER.getName());
         String attributeId = UUID.randomUUID().toString();
-        AttributeFunction.createAttribute(context, jdbcTemplate, attributeId, requestBody);
+        AttributeFunction.createAttribute(context, jdbcTemplate, "-1", attributeId, requestBody);
         UserPrivacyRecord userPrivacyRecord = context.newRecord(userPrivacyTable);
         String uuid = UUID.randomUUID().toString();
         userPrivacyRecord.setUserPrivacyId(uuid);

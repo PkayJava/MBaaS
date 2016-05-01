@@ -150,6 +150,7 @@ public class CollectionUserPrivacyManagementPage extends MasterPage implements A
         CollectionUserPrivacyRecord collectionUserPrivacyRecord = context.newRecord(collectionUserPrivacyTable);
         collectionUserPrivacyRecord.setCollectionUserPrivacyId(UUID.randomUUID().toString());
         collectionUserPrivacyRecord.setUserId(this.user.getUserId());
+        collectionUserPrivacyRecord.setApplicationId(getSession().getApplicationId());
         collectionUserPrivacyRecord.setCollectionId(this.collectionId);
         Integer permission = 0;
         if (this.attribute) {

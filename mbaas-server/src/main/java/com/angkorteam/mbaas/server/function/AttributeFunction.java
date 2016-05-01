@@ -31,7 +31,7 @@ public class AttributeFunction {
         attributeRecord.delete();
     }
 
-    public static boolean createAttribute(DSLContext context, JdbcTemplate jdbcTemplate, String attributeId, CollectionAttributeCreateRequest requestBody) {
+    public static boolean createAttribute(DSLContext context, JdbcTemplate jdbcTemplate, String applicationId, String attributeId, CollectionAttributeCreateRequest requestBody) {
 
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -66,6 +66,7 @@ public class AttributeFunction {
             }
             extra = extra | AttributeExtraEnum.EXPOSED;
             attributeRecord.setExtra(extra);
+            attributeRecord.setApplicationId(applicationId);
             attributeRecord.setCollectionId(collectionRecord.getCollectionId());
             attributeRecord.setName(requestBody.getAttributeName());
             attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());

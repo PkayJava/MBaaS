@@ -150,6 +150,7 @@ public class QueryUserPrivacyManagementPage extends MasterPage implements Action
         QueryUserPrivacyRecord queryUserPrivacyRecord = context.newRecord(queryUserPrivacyTable);
         queryUserPrivacyRecord.setUserId(this.user.getUserId());
         queryUserPrivacyRecord.setQueryUserPrivacyId(UUID.randomUUID().toString());
+        queryUserPrivacyRecord.setApplicationId(getSession().getApplicationId());
         queryUserPrivacyRecord.setQueryId(this.queryId);
         Integer permission = 0;
         if (this.modify) {

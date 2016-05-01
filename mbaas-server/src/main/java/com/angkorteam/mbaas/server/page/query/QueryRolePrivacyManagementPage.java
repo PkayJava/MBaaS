@@ -150,6 +150,7 @@ public class QueryRolePrivacyManagementPage extends MasterPage implements Action
         QueryRolePrivacyRecord queryRolePrivacyRecord = context.newRecord(queryRolePrivacyTable);
         queryRolePrivacyRecord.setQueryRolePrivacyId(UUID.randomUUID().toString());
         queryRolePrivacyRecord.setRoleId(this.role.getRoleId());
+        queryRolePrivacyRecord.setApplicationId(getSession().getApplicationId());
         queryRolePrivacyRecord.setQueryId(this.queryId);
         Integer permission = 0;
         if (this.modify) {

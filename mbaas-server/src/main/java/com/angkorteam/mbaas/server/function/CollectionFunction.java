@@ -43,7 +43,7 @@ public class CollectionFunction {
         }
     }
 
-    public static void createCollection(DSLContext context, JdbcTemplate jdbcTemplate, String ownerUserId, CollectionCreateRequest requestBody) {
+    public static void createCollection(DSLContext context, JdbcTemplate jdbcTemplate, String applicationId, String ownerUserId, CollectionCreateRequest requestBody) {
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         AttributeTable attributeTables = Tables.ATTRIBUTE.as("attributeTables");
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -94,6 +94,7 @@ public class CollectionFunction {
         collectionRecord.setName(requestBody.getCollectionName());
         collectionRecord.setSystem(false);
         collectionRecord.setLocked(true);
+        collectionRecord.setApplicationId(applicationId);
         collectionRecord.setOwnerUserId(ownerUserId);
         collectionRecord.store();
 
@@ -104,6 +105,7 @@ public class CollectionFunction {
             attributeRecord.setName(primaryName);
             attributeRecord.setExtra(AttributeExtraEnum.PRIMARY | AttributeExtraEnum.AUTO_INCREMENT | AttributeExtraEnum.EXPOSED);
             attributeRecord.setVisibility(VisibilityEnum.Shown.getLiteral());
+            attributeRecord.setApplicationId(applicationId);
             attributeRecord.setAttributeType(AttributeTypeEnum.String.getLiteral());
             attributeRecord.setSystem(true);
             attributeRecord.setEav(false);
@@ -117,6 +119,7 @@ public class CollectionFunction {
             attributeRecord.setName(configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC));
             attributeRecord.setExtra(0);
             attributeRecord.setSystem(true);
+            attributeRecord.setApplicationId(applicationId);
             attributeRecord.setEav(false);
             attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
             attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
@@ -132,6 +135,7 @@ public class CollectionFunction {
             attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
             attributeRecord.setAttributeType(AttributeTypeEnum.DateTime.getLiteral());
             attributeRecord.setSystem(true);
+            attributeRecord.setApplicationId(applicationId);
             attributeRecord.setEav(false);
             attributeRecord.store();
         }
@@ -145,6 +149,7 @@ public class CollectionFunction {
             attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
             attributeRecord.setAttributeType(AttributeTypeEnum.Boolean.getLiteral());
             attributeRecord.setSystem(true);
+            attributeRecord.setApplicationId(applicationId);
             attributeRecord.setEav(false);
             attributeRecord.store();
         }
@@ -157,6 +162,7 @@ public class CollectionFunction {
             attributeRecord.setExtra(0);
             attributeRecord.setSystem(true);
             attributeRecord.setEav(false);
+            attributeRecord.setApplicationId(applicationId);
             attributeRecord.setAttributeType(AttributeTypeEnum.String.getLiteral());
             attributeRecord.store();
         }
@@ -168,6 +174,7 @@ public class CollectionFunction {
             attributeRecord.setCollectionId(collectionRecord.getCollectionId());
             attributeRecord.setName(attribute.getName());
             attributeRecord.setSystem(false);
+            attributeRecord.setApplicationId(applicationId);
             attributeRecord.setEav(false);
             if (attribute.isNullable()) {
                 attributeRecord.setExtra(AttributeExtraEnum.NULLABLE | AttributeExtraEnum.EXPOSED);
