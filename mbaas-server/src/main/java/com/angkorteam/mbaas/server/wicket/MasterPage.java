@@ -528,7 +528,7 @@ public abstract class MasterPage extends AdminLTEPage {
         }
 
         if (getSession().isBackOffice() && getApplicationQuantity() <= 0) {
-            if (getPage() instanceof ApplicationCreatePage) {
+            if (getPage() instanceof ApplicationCreatePage || getPage() instanceof RestorePage) {
             } else {
                 setResponsePage(ApplicationCreatePage.class);
             }

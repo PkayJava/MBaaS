@@ -7,6 +7,8 @@ import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
@@ -19,10 +21,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -31,6 +30,8 @@ import java.util.zip.ZipOutputStream;
  * Created by socheat on 5/1/16.
  */
 public class ApplicationFunction {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationFunction.class);
 
     private static final DateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final NumberFormat ROUTINE = new DecimalFormat("000");
@@ -191,11 +192,48 @@ public class ApplicationFunction {
         }
     }
 
-    public static void restore(File backup, String userId) {
-        File working = new File(FileUtils.getTempDirectory(), "MBaaS_" + System.currentTimeMillis());
-        working.mkdirs();
-        unzipFunction(backup.getAbsolutePath(), working.getAbsolutePath());
-        FileUtils.deleteQuietly(backup);
+    public static void restore(JdbcTemplate jdbcTemplate, File backup, String userId) {
+        try {
+            File working = new File(FileUtils.getTempDirectory(), "MBaaS_" + System.currentTimeMillis());
+            working.mkdirs();
+            unzipFunction(backup.getAbsolutePath(), working.getAbsolutePath());
+            Set<String> files = new TreeSet<>();
+            List<String> resources = new ArrayList<>();
+            for (String file : working.list()) {
+                if (file.endsWith(".sql")) {
+                    files.add(file);
+                } else if (file.endsWith(".zip")) {
+                    resources.add(file);
+                }
+            }
+            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+            String repo = configuration.getString(Constants.RESOURCE_REPO);
+            for (String zip : resources) {
+                unzipFunction(new File(working, zip).getAbsolutePath(), repo);
+            }
+            for (String dbs : files) {
+                if (dbs.contains("_insert_")) {
+                    List<String> lines = FileUtils.readLines(new File(working, dbs));
+                    for (String db : lines) {
+                        if (!"".equals(db)) {
+                            String newDb = db.replace("[[owner_user_id]]", userId);
+                            jdbcTemplate.execute(newDb);
+                        }
+                    }
+                } else if (dbs.contains("_ddl_")) {
+                    String db = FileUtils.readFileToString(new File(working, dbs));
+                    if (!"".equals(db)) {
+                        jdbcTemplate.execute(db);
+                    }
+                }
+            }
+            FileUtils.deleteQuietly(backup);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     private static void unzipFunction(String zipFile, String destinationFolder) {
@@ -218,18 +256,17 @@ public class ApplicationFunction {
                 String entryName = entry.getName();
                 File file = new File(destinationFolder + File.separator + entryName);
 
-                System.out.println("Unzip file " + entryName + " to " + file.getAbsolutePath());
-
                 // create the directories of the zip directory
                 if (entry.isDirectory()) {
                     File newDir = new File(file.getAbsolutePath());
                     if (!newDir.exists()) {
                         boolean success = newDir.mkdirs();
                         if (success == false) {
-                            System.out.println("Problem creating Folder");
+                            LOGGER.info("Problem creating Folder");
                         }
                     }
                 } else {
+                    file.getParentFile().mkdirs();
                     FileOutputStream fOutput = new FileOutputStream(file);
                     int count = 0;
                     while ((count = zipInput.read(buffer)) > 0) {

@@ -59,7 +59,7 @@ public class RestorePage extends MasterPage {
         FileUpload file = this.backup.get(0);
         try {
             File backup = file.writeToTempFile();
-            ApplicationFunction.restore(backup, getSession().getUserId());
+            ApplicationFunction.restore(getJdbcTemplate(), backup, getSession().getUserId());
             setResponsePage(ApplicationManagementPage.class);
         } catch (Exception e) {
         }
