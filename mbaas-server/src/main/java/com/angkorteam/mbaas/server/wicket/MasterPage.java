@@ -10,6 +10,8 @@ import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.function.ApplicationFunction;
 import com.angkorteam.mbaas.server.function.HttpFunction;
+import com.angkorteam.mbaas.server.page.LoginPage;
+import com.angkorteam.mbaas.server.page.RestorePage;
 import com.angkorteam.mbaas.server.page.application.ApplicationCreatePage;
 import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
 import com.angkorteam.mbaas.server.page.application.ApplicationModifyPage;
@@ -56,9 +58,6 @@ import com.angkorteam.mbaas.server.page.setting.SettingManagementPage;
 import com.angkorteam.mbaas.server.page.setting.SettingModifyPage;
 import com.angkorteam.mbaas.server.page.user.*;
 import com.angkorteam.mbaas.server.service.PusherClient;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -70,12 +69,10 @@ import org.apache.wicket.request.IRequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceStreamRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.ContentDisposition;
-import org.apache.wicket.util.file.File;
 import org.apache.wicket.util.file.Files;
 import org.apache.wicket.util.resource.FileResourceStream;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.string.StringValue;
-import org.apache.wicket.util.string.Strings;
 import org.apache.wicket.util.time.Duration;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -83,15 +80,10 @@ import org.springframework.mail.MailSender;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by socheat on 3/10/16.
@@ -233,10 +225,10 @@ public abstract class MasterPage extends AdminLTEPage {
             backupLink.setOnClick(this::backupLinkOnClick);
             backupLink.setVisible(getSession().getApplicationId() != null && !"".equals(getSession().getApplicationId()));
 
-            Link<Void> importLink = new Link<>("importLink");
-            add(importLink);
-            importLink.setOnClick(this::importLinkOnClick);
-            importLink.setVisible(getSession().isSignedIn());
+            Link<Void> restoreLink = new Link<>("restoreLink");
+            add(restoreLink);
+            restoreLink.setOnClick(this::restoreLinkOnClick);
+            restoreLink.setVisible(getSession().isSignedIn());
         }
 
         {
@@ -564,7 +556,7 @@ public abstract class MasterPage extends AdminLTEPage {
 
     private void backupLinkOnClick(Link link) {
         try {
-            java.io.File mbaas = ApplicationFunction.backup(getJdbcTemplate(), getSession().getApplicationId());
+            File mbaas = ApplicationFunction.backup(getJdbcTemplate(), getSession().getApplicationId(), getSession().getUserId());
 
             IResourceStream resourceStream = new FileResourceStream(
                     new org.apache.wicket.util.file.File(mbaas));
@@ -582,12 +574,13 @@ public abstract class MasterPage extends AdminLTEPage {
         }
     }
 
-    private void importLinkOnClick(Link link) {
-        System.out.println("Import");
+    private void restoreLinkOnClick(Link link) {
+        setResponsePage(RestorePage.class);
     }
 
     private void logoutLinkOnClick(Link link) {
         getSession().invalidateNow();
+        setResponsePage(LoginPage.class);
     }
 
     @Override
