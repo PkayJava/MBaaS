@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.page;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.configuration.Constants;
+import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.server.function.ApplicationFunction;
 import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -13,6 +14,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jooq.DSLContext;
 
 import java.io.File;
 import java.util.List;
@@ -63,5 +66,12 @@ public class RestorePage extends MasterPage {
             setResponsePage(ApplicationManagementPage.class);
         } catch (Exception e) {
         }
+        DSLContext context = getDSLContext();
+        int count = context.selectCount().from(Tables.APPLICATION).where(Tables.APPLICATION.OWNER_USER_ID.eq(getSession().getUserId())).fetchOneInto(int.class);
+        if (count == 1) {
+            String applicationId = context.select(Tables.APPLICATION.APPLICATION_ID).from(Tables.APPLICATION).limit(1).fetchOneInto(String.class);
+            getSession().setApplicationId(applicationId);
+        }
+        setResponsePage(DashboardPage.class);
     }
 }
