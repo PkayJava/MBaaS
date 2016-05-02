@@ -33,7 +33,7 @@ allprojects {
         springsecurityVersion = '4.0.4.RELEASE'
         servletVersion = '3.1.0'
         retrofitVersion = '2.0.1'
-        sigarVersion = '1.7.2.1'
+        sigarVersion = '1.6.4'
         reflectionsVersion = '0.9.10'
         jasyptVersion = '1.9.2'
         commonscodecVersion = '1.10'

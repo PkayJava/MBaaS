@@ -62,7 +62,7 @@ dependencies {
 
     compile 'mysql:mysql-connector-java:' + mysqlVersion
 
-    // compile 'sigar:sigar:' + sigarVersion
+    compile 'hyperic-sigar:sigar-java:' + sigarVersion
     compile 'org.reflections:reflections:' + reflectionsVersion
     compile 'org.jasypt:jasypt:' + jasyptVersion
     compile 'commons-codec:commons-codec:' + commonscodecVersion

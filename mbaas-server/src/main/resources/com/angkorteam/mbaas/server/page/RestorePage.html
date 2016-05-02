@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<wicket:extend>
+    <div class="box box-primary">
+        <form role="form" wicket:id="form">
+            <div class="box-body">
+                <div class="form-group">
+                    <label wicket:for="backupField">Backup File</label>
+                    <input wicket:id="backupField" type="file"/>
+                    <span wicket:id="backupFeedback" class="help-block"/>
+                </div>
+            </div>
+
+            <div class="box-footer">
+                <wicket:link>
+                    <a class="btn btn-primary" href="DashboardPage.html">Close</a>
+                </wicket:link>
+                <button wicket:id="restoreButton" type="submit" class="btn btn-primary">Restore</button>
+            </div>
+        </form>
+    </div>
+</wicket:extend>
+</body>
+</html>

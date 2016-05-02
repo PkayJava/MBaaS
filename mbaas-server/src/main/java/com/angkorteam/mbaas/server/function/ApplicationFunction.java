@@ -2,17 +2,14 @@ package com.angkorteam.mbaas.server.function;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
-import org.apache.commons.compress.compressors.CompressorOutputStream;
-import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.wicket.util.file.File;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -37,25 +35,24 @@ public class ApplicationFunction {
     private static final DateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final NumberFormat ROUTINE = new DecimalFormat("000");
 
-    public static java.io.File backup(JdbcTemplate jdbcTemplate, String applicationId) throws IOException {
+    public static File backup(JdbcTemplate jdbcTemplate, String applicationId, String userId) throws IOException {
         List<String> tables = new ArrayList<>();
         tables.add(Tables.APPLICATION.getName());
-        tables.add(Tables.APPLICATION_ROLE.getName());
         tables.add(Tables.COLLECTION.getName());
+        tables.add(Tables.CLIENT.getName());
+        tables.add(Tables.QUERY.getName());
+        tables.add(Tables.JOB.getName());
+        tables.add(Tables.JAVASCRIPT.getName());
+        tables.add(Tables.APPLICATION_ROLE.getName());
         tables.add(Tables.COLLECTION_ROLE_PRIVACY.getName());
         tables.add(Tables.COLLECTION_USER_PRIVACY.getName());
         tables.add(Tables.ATTRIBUTE.getName());
         tables.add(Tables.DOCUMENT_ROLE_PRIVACY.getName());
-        "".intern();
         tables.add(Tables.DOCUMENT_USER_PRIVACY.getName());
         tables.add(Tables.MOBILE.getName());
-        tables.add(Tables.CLIENT.getName());
-        tables.add(Tables.QUERY.getName());
         tables.add(Tables.QUERY_PARAMETER.getName());
         tables.add(Tables.QUERY_USER_PRIVACY.getName());
         tables.add(Tables.QUERY_ROLE_PRIVACY.getName());
-        tables.add(Tables.JOB.getName());
-        tables.add(Tables.JAVASCRIPT.getName());
         tables.add(Tables.EAV_BOOLEAN.getName());
         tables.add(Tables.EAV_CHARACTER.getName());
         tables.add(Tables.EAV_VARCHAR.getName());
@@ -73,9 +70,10 @@ public class ApplicationFunction {
         for (String table : tables) {
             routine++;
             List<Map<String, Object>> documents = jdbcTemplate.queryForList("SELECT * FROM " + table + " WHERE application_id = ?", applicationId);
-            File tableFile = new File(working, ROUTINE.format(routine) + "_" + table + ".sql");
+            File tableFile = new File(working, ROUTINE.format(routine) + "_insert_" + table + ".sql");
             FileUtils.touch(tableFile);
             for (Map<String, Object> document : documents) {
+                modifyOwnerUserId(document, userId);
                 FileUtils.write(tableFile, insert(table, document) + "\n\r", true);
             }
         }
@@ -87,13 +85,14 @@ public class ApplicationFunction {
             // file
             routine++;
             List<Map<String, Object>> documents = jdbcTemplate.queryForList("SELECT * FROM " + Tables.FILE.getName() + " WHERE application_id = ?", applicationId);
-            File fileFile = new File(working, ROUTINE.format(routine) + "_" + Tables.FILE.getName() + ".sql");
+            File fileFile = new File(working, ROUTINE.format(routine) + "_insert_" + Tables.FILE.getName() + ".sql");
             FileUtils.touch(fileFile);
             File repo = new File(resourceRepo, "file");
             FileOutputStream fos = new FileOutputStream(new File(working, "file.zip"));
             ZipOutputStream zos = new ZipOutputStream(fos);
             byte[] buffer = new byte[1024];
             for (Map<String, Object> document : documents) {
+                modifyOwnerUserId(document, userId);
                 String path = (String) document.get(Tables.FILE.PATH.getName());
                 String name = (String) document.get(Tables.FILE.NAME.getName());
                 FileUtils.write(fileFile, insert(Tables.FILE.getName(), document) + "\n\r", true);
@@ -114,13 +113,14 @@ public class ApplicationFunction {
             // asset
             routine++;
             List<Map<String, Object>> documents = jdbcTemplate.queryForList("SELECT * FROM " + Tables.ASSET.getName() + " WHERE application_id = ?", applicationId);
-            File assetFile = new File(working, ROUTINE.format(routine) + "_" + Tables.ASSET.getName() + ".sql");
+            File assetFile = new File(working, ROUTINE.format(routine) + "_insert_" + Tables.ASSET.getName() + ".sql");
             FileUtils.touch(assetFile);
             File repo = new File(resourceRepo, "asset");
             FileOutputStream fos = new FileOutputStream(new File(working, "asset.zip"));
             ZipOutputStream zos = new ZipOutputStream(fos);
             byte[] buffer = new byte[1024];
             for (Map<String, Object> document : documents) {
+                modifyOwnerUserId(document, userId);
                 String path = (String) document.get(Tables.ASSET.PATH.getName());
                 String name = (String) document.get(Tables.ASSET.NAME.getName());
                 FileUtils.write(assetFile, insert(Tables.ASSET.getName(), document) + "\n\r", true);
@@ -141,14 +141,15 @@ public class ApplicationFunction {
             routine++;
             Map<String, Object> structure = jdbcTemplate.queryForMap("SHOW CREATE TABLE " + table);
             String ddl = (String) structure.get("Create Table");
-            File ddlFile = new File(working, ROUTINE.format(routine) + "_" + table + "_ddl.sql");
+            File ddlFile = new File(working, ROUTINE.format(routine) + "_ddl_" + table + ".sql");
             FileUtils.touch(ddlFile);
             FileUtils.write(ddlFile, ddl + "\n\r", true);
             routine++;
             List<Map<String, Object>> documents = jdbcTemplate.queryForList("SELECT * FROM " + table);
-            File tableFile = new File(working, ROUTINE.format(routine) + "_" + table + ".sql");
+            File tableFile = new File(working, ROUTINE.format(routine) + "_insert_" + table + ".sql");
             FileUtils.touch(tableFile);
             for (Map<String, Object> document : documents) {
+                modifyOwnerUserId(document, userId);
                 FileUtils.write(tableFile, insert(table, document) + "\n\r", true);
             }
         }
@@ -158,7 +159,7 @@ public class ApplicationFunction {
             FileOutputStream fos = new FileOutputStream(mbaas);
             ZipOutputStream zos = new ZipOutputStream(fos);
             byte[] buffer = new byte[1024];
-            for (java.io.File file : working.listFiles()) {
+            for (File file : working.listFiles()) {
                 ZipEntry entry = new ZipEntry(file.getName());
                 zos.putNextEntry(entry);
                 FileInputStream in = new FileInputStream(file);
@@ -175,7 +176,81 @@ public class ApplicationFunction {
         }
     }
 
-    public static void restore() {
+    private static void modifyOwnerUserId(Map<String, Object> document, String userId) {
+        String ownerUserId = (String) document.get("owner_user_id");
+        if (ownerUserId != null) {
+            if (ownerUserId.equals(userId)) {
+                document.put("owner_user_id", "[[owner_user_id]]");
+            }
+        }
+        String tempUserId = (String) document.get("user_id");
+        if (tempUserId != null) {
+            if (tempUserId.equals(userId)) {
+                document.put("user_id", "[[owner_user_id]]");
+            }
+        }
+    }
+
+    public static void restore(File backup, String userId) {
+        File working = new File(FileUtils.getTempDirectory(), "MBaaS_" + System.currentTimeMillis());
+        working.mkdirs();
+        unzipFunction(backup.getAbsolutePath(), working.getAbsolutePath());
+        FileUtils.deleteQuietly(backup);
+    }
+
+    private static void unzipFunction(String zipFile, String destinationFolder) {
+        File directory = new File(destinationFolder);
+
+        // if the output directory doesn't exist, create it
+        if (!directory.exists())
+            directory.mkdirs();
+
+        // buffer for read and write data to file
+        byte[] buffer = new byte[2048];
+
+        try {
+            FileInputStream fInput = new FileInputStream(zipFile);
+            ZipInputStream zipInput = new ZipInputStream(fInput);
+
+            ZipEntry entry = zipInput.getNextEntry();
+
+            while (entry != null) {
+                String entryName = entry.getName();
+                File file = new File(destinationFolder + File.separator + entryName);
+
+                System.out.println("Unzip file " + entryName + " to " + file.getAbsolutePath());
+
+                // create the directories of the zip directory
+                if (entry.isDirectory()) {
+                    File newDir = new File(file.getAbsolutePath());
+                    if (!newDir.exists()) {
+                        boolean success = newDir.mkdirs();
+                        if (success == false) {
+                            System.out.println("Problem creating Folder");
+                        }
+                    }
+                } else {
+                    FileOutputStream fOutput = new FileOutputStream(file);
+                    int count = 0;
+                    while ((count = zipInput.read(buffer)) > 0) {
+                        // write 'count' bytes to the file output stream
+                        fOutput.write(buffer, 0, count);
+                    }
+                    fOutput.close();
+                }
+                // close ZipEntry and take the next one
+                zipInput.closeEntry();
+                entry = zipInput.getNextEntry();
+            }
+
+            // close the last ZipEntry
+            zipInput.closeEntry();
+
+            zipInput.close();
+            fInput.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     protected static String insert(String tableName, Map<String, Object> document) {

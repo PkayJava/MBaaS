@@ -4,27 +4,14 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.records.CpuRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.DiskRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.MemRecord;
-import com.angkorteam.mbaas.server.MBaaS;
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.hyperic.sigar.*;
 import org.jooq.DSLContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Khauv Socheat on 4/20/2016.
@@ -37,6 +24,12 @@ public class PerformanceBackground {
 
     private boolean error = false;
 
+    private final Map<String, Long> writes = new HashMap<>();
+    private final Map<String, Long> reads = new HashMap<>();
+
+    @Autowired
+    private Sigar sigar;
+
     @Scheduled(cron = "* * * * * *")
     public void collect() throws IOException {
         if (error) {
@@ -44,51 +37,62 @@ public class PerformanceBackground {
         }
         try {
             {
-                CommandLine commandLine = CommandLine.parse("/usr/bin/iostat -m");
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
-                DefaultExecutor executor = new DefaultExecutor();
-                executor.setStreamHandler(streamHandler);
-                executor.execute(commandLine);
-                List<String> lines = IOUtils.readLines(new ByteArrayInputStream(outputStream.toByteArray()));
-                CpuInfo cpuInfo = parseCpuInfo(lines);
+                CpuPerc cpuPerc = sigar.getCpuPerc();
                 CpuRecord cpuRecord = context.newRecord(Tables.CPU);
-                cpuRecord.setUser(cpuInfo.getUser());
-                cpuRecord.setSteal(cpuInfo.getSteal());
-                cpuRecord.setNice(cpuInfo.getNice());
-                cpuRecord.setIowait(cpuInfo.getIowait());
-                cpuRecord.setSystem(cpuInfo.getSystem());
-                cpuRecord.setIdle(cpuInfo.getIdle());
+                cpuRecord.setUser(Double.valueOf(CpuPerc.format(cpuPerc.getUser())));
+                cpuRecord.setNice(Double.valueOf(CpuPerc.format(cpuPerc.getNice())));
+                cpuRecord.setSystem(Double.valueOf(CpuPerc.format(cpuPerc.getSys())));
+                cpuRecord.setIdle(Double.valueOf(CpuPerc.format(cpuPerc.getIdle())));
                 cpuRecord.setDateCreated(new Date());
                 cpuRecord.setCpuId(UUID.randomUUID().toString());
                 cpuRecord.store();
-                List<DiskInfo> diskInfos = parseDiskInfo(lines);
-                for (DiskInfo diskInfo : diskInfos) {
-                    DiskRecord diskRecord = context.newRecord(Tables.DISK);
-                    diskRecord.setDevice(diskInfo.getDevice());
-                    diskRecord.setWrite(diskInfo.getWrite());
-                    diskRecord.setRead(diskInfo.getRead());
-                    diskRecord.setDiskId(UUID.randomUUID().toString());
-                    diskRecord.setDateCreated(new Date());
-                    diskRecord.store();
+
+                for (FileSystem system : sigar.getFileSystemList()) {
+                    if (system.getType() == 2) {
+                        String key = system.getDirName() + " [" + system.getDevName() + "]";
+                        FileSystemUsage usage = sigar.getFileSystemUsage(system.getDirName());
+                        if (!writes.containsKey(system.getDirName())) {
+                            writes.put(key, usage.getDiskWriteBytes());
+                        }
+                        if (!reads.containsKey(system.getDirName())) {
+                            reads.put(key, usage.getDiskReadBytes());
+                        }
+                        long lastReadBytes = usage.getDiskReadBytes();
+                        long lastWriteBytes = usage.getDiskWriteBytes();
+                        double writeBytes = lastWriteBytes - writes.get(key);
+                        double readBytes = lastReadBytes - reads.get(key);
+                        DiskRecord diskRecord = context.newRecord(Tables.DISK);
+                        diskRecord.setDiskId(UUID.randomUUID().toString());
+                        diskRecord.setDevice(key);
+                        diskRecord.setWrite(writeBytes);
+                        diskRecord.setRead(readBytes);
+                        diskRecord.setDateCreated(new Date());
+                        diskRecord.store();
+                        writes.put(key, lastWriteBytes);
+                        reads.put(key, lastReadBytes);
+                    }
                 }
             }
             {
-                CommandLine commandLine = CommandLine.parse("/usr/bin/free -m");
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
-                DefaultExecutor executor = new DefaultExecutor();
-                executor.setStreamHandler(streamHandler);
-                executor.execute(commandLine);
-                List<String> lines = IOUtils.readLines(new ByteArrayInputStream(outputStream.toByteArray()));
-                List<MemInfo> memInfos = parseMemInfo(lines);
-                for (MemInfo memInfo : memInfos) {
+                Mem mem = sigar.getMem();
+                MemRecord memRecord = context.newRecord(Tables.MEM);
+                memRecord.setMemId(UUID.randomUUID().toString());
+                memRecord.setDevice("Memory");
+                memRecord.setTotal((mem.getTotal() / 1024d / 1024d));
+                memRecord.setUsed((mem.getUsed() / 1024d / 1024d));
+                memRecord.setFree((mem.getFree() / 1024d / 1024d));
+                memRecord.setDateCreated(new Date());
+                memRecord.store();
+            }
+            {
+                Swap swap = sigar.getSwap();
+                if (swap != null) {
                     MemRecord memRecord = context.newRecord(Tables.MEM);
                     memRecord.setMemId(UUID.randomUUID().toString());
-                    memRecord.setDevice(memInfo.getDevice());
-                    memRecord.setTotal(memInfo.getTotal());
-                    memRecord.setUsed(memInfo.getUsed());
-                    memRecord.setFree(memInfo.getFree());
+                    memRecord.setDevice("Memory");
+                    memRecord.setTotal((swap.getTotal() / 1024d / 1024d));
+                    memRecord.setUsed((swap.getUsed() / 1024d / 1024d));
+                    memRecord.setFree((swap.getFree() / 1024d / 1024d));
                     memRecord.setDateCreated(new Date());
                     memRecord.store();
                 }

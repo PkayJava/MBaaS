@@ -114,6 +114,8 @@
         <property name="caseSensitive" value="false"/>
     </bean>
 
+    <bean id="sigar" class="com.angkorteam.mbaas.server.factory.SigarFactoryBean"/>
+
     <bean id="identityResolver" class="com.angkorteam.mbaas.server.spring.IdentityHandlerMethodArgumentResolver">
         <property name="context" ref="context"/>
     </bean>
