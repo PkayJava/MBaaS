@@ -229,9 +229,9 @@ public class ApplicationFunction {
             }
             FileUtils.deleteQuietly(backup);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.info(e.getMessage());
         } catch (Throwable e) {
-            e.printStackTrace();
+            LOGGER.info(e.getMessage());
             throw e;
         }
     }
@@ -286,7 +286,7 @@ public class ApplicationFunction {
             zipInput.close();
             fInput.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.info(e.getMessage());
         }
     }
 
