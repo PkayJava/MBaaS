@@ -30,6 +30,13 @@ public class PerformanceBackground {
     @Autowired
     private Sigar sigar;
 
+    public static Double format(double val) {
+        String p = String.valueOf(val * 100.0D);
+        int ix = p.indexOf(".") + 1;
+        String percent = p.substring(0, ix) + p.substring(ix, ix + 1);
+        return Double.valueOf(percent);
+    }
+
     @Scheduled(cron = "* * * * * *")
     public void collect() throws IOException {
         if (error) {
@@ -39,10 +46,10 @@ public class PerformanceBackground {
             {
                 CpuPerc cpuPerc = sigar.getCpuPerc();
                 CpuRecord cpuRecord = context.newRecord(Tables.CPU);
-                cpuRecord.setUser(Double.valueOf(CpuPerc.format(cpuPerc.getUser())));
-                cpuRecord.setNice(Double.valueOf(CpuPerc.format(cpuPerc.getNice())));
-                cpuRecord.setSystem(Double.valueOf(CpuPerc.format(cpuPerc.getSys())));
-                cpuRecord.setIdle(Double.valueOf(CpuPerc.format(cpuPerc.getIdle())));
+                cpuRecord.setUser(format(cpuPerc.getUser()));
+                cpuRecord.setNice(format(cpuPerc.getNice()));
+                cpuRecord.setSystem(format(cpuPerc.getSys()));
+                cpuRecord.setIdle(format(cpuPerc.getIdle()));
                 cpuRecord.setDateCreated(new Date());
                 cpuRecord.setCpuId(UUID.randomUUID().toString());
                 cpuRecord.store();

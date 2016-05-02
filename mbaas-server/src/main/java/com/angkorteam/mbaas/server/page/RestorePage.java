@@ -60,7 +60,6 @@ public class RestorePage extends MasterPage {
         try {
             File backup = file.writeToTempFile();
             ApplicationFunction.restore(backup, getSession().getUserId());
-            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             setResponsePage(ApplicationManagementPage.class);
         } catch (Exception e) {
         }
