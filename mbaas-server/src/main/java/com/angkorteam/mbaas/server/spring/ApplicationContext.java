@@ -15,6 +15,7 @@ import org.apache.wicket.WicketRuntimeException;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
 import org.flywaydb.core.internal.dbsupport.DbSupportFactory;
+import org.flywaydb.core.internal.dbsupport.Schema;
 import org.flywaydb.core.internal.dbsupport.Table;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
@@ -336,7 +337,8 @@ public class ApplicationContext implements ServletContextListener {
             Connection connection = dataSource.getConnection();
             DatabaseMetaData databaseMetaData = connection.getMetaData();
             DbSupport databaseSupport = DbSupportFactory.createDbSupport(connection, true);
-            for (Table table : databaseSupport.getSchema(databaseSupport.getCurrentSchemaName()).allTables()) {
+            Schema schema = databaseSupport.getSchema(databaseSupport.getCurrentSchemaName());
+            for (Table table : schema.allTables()) {
                 CollectionRecord collectionRecord = collectionRecords.get(table.getName());
                 if (collectionRecord == null) {
                     collectionRecord = context.newRecord(collectionTable);
@@ -364,7 +366,12 @@ public class ApplicationContext implements ServletContextListener {
                     attributeRecords.put(attributeRecord.getName(), attributeRecord);
                 }
                 List<String> physicalName = new ArrayList<>();
-                ResultSet columns = databaseMetaData.getColumns(null, null, table.getName(), null);
+                ResultSet columns = null;
+                if (databaseSupport.catalogIsSchema()) {
+                    columns = databaseMetaData.getColumns(schema.getName(), null, table.getName(), null);
+                } else {
+                    columns = databaseMetaData.getColumns(null, schema.getName(), table.getName(), null);
+                }
                 while (columns.next()) {
                     String columnName = columns.getString(ColumnEnum.COLUMN_NAME.getLiteral());
                     if (!attributeRecords.containsKey(columnName)) {
