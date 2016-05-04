@@ -60,7 +60,6 @@ public class JavascriptController {
     )
     public ResponseEntity<JavaScriptExecuteResponse> executeJson(
             HttpServletRequest req,
-            HttpServletResponse resp,
             Identity identity,
             @PathVariable("script") String script,
             @RequestBody(required = false) Map<String, Object> requestBody
@@ -69,6 +68,10 @@ public class JavascriptController {
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.PATH.eq(script)).fetchOneInto(javascriptTable);
 
         if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(javascriptRecord.getSecurity())) {
+            return returnMethodNotAllowed();
+        }
+
+        if (!javascriptRecord.getApplicationId().equals(identity.getApplicationId())) {
             return returnMethodNotAllowed();
         }
 
@@ -127,6 +130,10 @@ public class JavascriptController {
         JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.PATH.eq(script)).fetchOneInto(javascriptTable);
 
         if (javascriptRecord == null || javascriptRecord.getScript() == null || "".equals(javascriptRecord.getScript()) || SecurityEnum.Denied.getLiteral().equals(javascriptRecord.getSecurity())) {
+            return returnMethodNotAllowed();
+        }
+
+        if (!javascriptRecord.getApplicationId().equals(identity.getApplicationId())) {
             return returnMethodNotAllowed();
         }
 
