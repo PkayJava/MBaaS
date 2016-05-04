@@ -1,11 +1,14 @@
 package com.angkorteam.mbaas.server.controller;
 
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.*;
-import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.plain.Identity;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.ClientTable;
+import com.angkorteam.mbaas.model.entity.tables.MobileTable;
+import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.request.security.SecurityLoginRequest;
 import com.angkorteam.mbaas.plain.request.security.SecurityLogoutRequest;
 import com.angkorteam.mbaas.plain.request.security.SecuritySignUpRequest;
@@ -16,7 +19,6 @@ import com.angkorteam.mbaas.plain.response.security.SecuritySignUpResponse;
 import com.angkorteam.mbaas.server.MBaaS;
 import com.angkorteam.mbaas.server.function.UserFunction;
 import com.google.gson.Gson;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
@@ -32,11 +34,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Created by Khauv Socheat on 2/14/2016.
@@ -64,16 +62,11 @@ public class SecurityController {
     )
     public ResponseEntity<SecuritySignUpResponse> signup(
             HttpServletRequest request,
-            Identity identity,
             @RequestBody SecuritySignUpRequest requestBody
     ) {
         Map<String, String> errorMessages = new LinkedHashMap<>();
 
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-
         UserTable userTable = Tables.USER.as("userTable");
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         ClientTable clientTable = Tables.CLIENT.as("clientTable");
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
 
