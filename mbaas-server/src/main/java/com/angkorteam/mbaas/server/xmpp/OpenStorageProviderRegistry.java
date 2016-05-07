@@ -10,7 +10,7 @@ public class OpenStorageProviderRegistry extends org.apache.vysper.storage.OpenS
 
     public OpenStorageProviderRegistry(final DSLContext context, final JdbcTemplate jdbcTemplate) {
         add(new AccountManagement(context, jdbcTemplate));
-        add(new OfflineStorageProvider());
+        add(new OfflineStorageProvider(context, jdbcTemplate));
         add(new PrivateDataPersistenceManager());
         add(new RosterManager(context, jdbcTemplate));
         add(new UserAuthorization(context, jdbcTemplate));

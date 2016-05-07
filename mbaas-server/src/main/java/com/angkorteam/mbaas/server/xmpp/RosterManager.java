@@ -102,8 +102,7 @@ public class RosterManager implements org.apache.vysper.xmpp.modules.roster.pers
         if (friendRecord == null) {
             throw new RosterException("RosterManager.getContact owner " + owner.getNode() + " buddy " + buddy.getNode());
         }
-        Entity entity = new EntityImpl(buddy.getNode(), null, null);
-        RosterItem rosterItem = new RosterItem(entity, SubscriptionType.valueOf(friendRecord.getSubscription()), AskSubscriptionType.valueOf(friendRecord.getAskSubscription()));
+        RosterItem rosterItem = new RosterItem(buddy, SubscriptionType.valueOf(friendRecord.getSubscription()), AskSubscriptionType.valueOf(friendRecord.getAskSubscription()));
         return rosterItem;
     }
 
