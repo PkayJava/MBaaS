@@ -14,19 +14,5 @@ import org.jooq.util.derby.sys.Sys;
 public class Test {
 
     public static void main(String args[]) throws Exception {
-        Sigar sigar = new Sigar();
-        while (true) {
-            Thread.sleep(1000);
-            for (FileSystem system : sigar.getFileSystemList()) {
-                if (system.getType() == 2) {
-                    FileSystemUsage usage = sigar.getFileSystemUsage(system.getDirName());
-                    System.out.println(system.getDevName());
-                    System.out.println(system.getDirName());
-                }
-            }
-        }
-        //sigar.close();
-        // System.out.println(cpuPerc.getIdle() + cpuPerc.getCombined() + cpuPerc.getIrq() + cpuPerc.getNice() + cpuPerc.getSoftIrq() + cpuPerc.getStolen() + cpuPerc.getSys() + cpuPerc.getUser() + cpuPerc.getWait());
-        //Runner.main(args);
     }
 }

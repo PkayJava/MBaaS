@@ -7,10 +7,13 @@ import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.*;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.service.PusherClient;
+import com.angkorteam.mbaas.server.xmpp.OpenStorageProviderRegistry;
 import okhttp3.OkHttpClient;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
+import org.apache.vysper.mina.TCPEndpoint;
+import org.apache.vysper.xmpp.server.XMPPServer;
 import org.apache.wicket.WicketRuntimeException;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
@@ -44,6 +47,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -85,6 +89,8 @@ public class ApplicationContext implements ServletContextListener {
 
     private JavascriptServiceFactoryBean.JavascriptService javascriptService;
 
+    private XMPPServer xmppServer;
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
@@ -117,13 +123,37 @@ public class ApplicationContext implements ServletContextListener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        LOGGER.info("thread internal pool");
+        LOGGER.info("initializing thread internal pool");
         this.executor = initExecutor();
         this.scheduler = initScheduler();
         this.javascriptService = initJavascriptService(context, jdbcTemplate, scheduler);
 
+        LOGGER.info("initializing xmpp service");
+        this.xmppServer = initXMPPServer(this.context, this.jdbcTemplate);
+
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
+    }
+
+    protected XMPPServer initXMPPServer(final DSLContext context, final JdbcTemplate jdbcTemplate) {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        XMPPServer xmppServer = new XMPPServer("angkorteam.com.kh");
+        File home = new File(System.getProperty("user.home"), ".xml");
+        try {
+            xmppServer.setTLSCertificateInfo(new File(home, configuration.getString(Constants.XMPP_KEYSTORE_FILE)), configuration.getString(Constants.XMPP_KEYSTORE_PASSWORD));
+        } catch (FileNotFoundException e) {
+            LOGGER.info(e.getMessage());
+            throw new RuntimeException(e);
+        }
+        xmppServer.setStorageProviderRegistry(new OpenStorageProviderRegistry(context, jdbcTemplate));
+        xmppServer.addEndpoint(new TCPEndpoint());
+        try {
+            xmppServer.start();
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return xmppServer;
     }
 
     protected JavascriptServiceFactoryBean.JavascriptService initJavascriptService(DSLContext context, JdbcTemplate jdbcTemplate, TaskScheduler scheduler) {
@@ -591,6 +621,9 @@ public class ApplicationContext implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
+        if (this.xmppServer != null) {
+            this.xmppServer.stop();
+        }
         if (this.executor != null) {
             this.executor.shutdown();
         }
@@ -601,7 +634,7 @@ public class ApplicationContext implements ServletContextListener {
             try {
                 this.dataSource.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOGGER.info(e.getMessage());
             }
         }
     }

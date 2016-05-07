@@ -18,7 +18,6 @@ allprojects {
         maven { url "http://pkayjava.ddns.net:8081/repository/maven-public/" }
         mavenCentral()
     }
-
     ext {
         commonsconfigurationVersion = '1.10'
         commonslang3Version = '3.4'
@@ -52,5 +51,7 @@ allprojects {
         mysqlVersion = '5.1.38'
         unirestVersion = '1.4.9'
         commonscompressVersion = '1.11'
+        vysperVersion = '0.7'
     }
+
 }
