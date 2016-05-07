@@ -13,6 +13,11 @@ import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.vysper.mina.TCPEndpoint;
+import org.apache.vysper.storage.StorageProvider;
+import org.apache.vysper.storage.inmemory.MemoryStorageProviderRegistry;
+import org.apache.vysper.xmpp.addressing.EntityImpl;
+import org.apache.vysper.xmpp.authorization.AccountManagement;
+import org.apache.vysper.xmpp.authorization.SimpleUserAuthorization;
 import org.apache.vysper.xmpp.server.XMPPServer;
 import org.apache.wicket.WicketRuntimeException;
 import org.flywaydb.core.Flyway;
@@ -137,7 +142,8 @@ public class ApplicationContext implements ServletContextListener {
 
     protected XMPPServer initXMPPServer(final DSLContext context, final JdbcTemplate jdbcTemplate) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        XMPPServer xmppServer = new XMPPServer("angkorteam.com.kh");
+        String address = configuration.getString(Constants.XMPP_ADDRESS);
+        XMPPServer xmppServer = new XMPPServer(address);
         File home = new File(System.getProperty("user.home"), ".xml");
         try {
             xmppServer.setTLSCertificateInfo(new File(home, configuration.getString(Constants.XMPP_KEYSTORE_FILE)), configuration.getString(Constants.XMPP_KEYSTORE_PASSWORD));
@@ -145,7 +151,20 @@ public class ApplicationContext implements ServletContextListener {
             LOGGER.info(e.getMessage());
             throw new RuntimeException(e);
         }
-        xmppServer.setStorageProviderRegistry(new OpenStorageProviderRegistry(context, jdbcTemplate));
+        boolean memory = false;
+        if (!memory) {
+            xmppServer.setStorageProviderRegistry(new OpenStorageProviderRegistry(context, jdbcTemplate));
+        } else {
+            MemoryStorageProviderRegistry registry = new MemoryStorageProviderRegistry();
+            SimpleUserAuthorization authorization = (SimpleUserAuthorization) registry.retrieve(AccountManagement.class);
+            authorization.addUser(new EntityImpl("admin", "angkorteam.com.kh", null), "123123a");
+            authorization.addUser(new EntityImpl("backoffice", "angkorteam.com.kh", null), "123123a");
+            authorization.addUser(new EntityImpl("a", "angkorteam.com.kh", null), "123123a");
+            authorization.addUser(new EntityImpl("b", "angkorteam.com.kh", null), "123123a");
+            authorization.addUser(new EntityImpl("c", "angkorteam.com.kh", null), "123123a");
+            authorization.addUser(new EntityImpl("d", "angkorteam.com.kh", null), "123123a");
+            xmppServer.setStorageProviderRegistry(registry);
+        }
         xmppServer.addEndpoint(new TCPEndpoint());
         try {
             xmppServer.start();

@@ -13,16 +13,19 @@ public class VcardTempPersistenceManager implements org.apache.vysper.xmpp.modul
 
     @Override
     public boolean isAvailable() {
+        LOGGER.info("VcardTempPersistenceManager.isAvailable");
         return false;
     }
 
     @Override
     public String getVcard(Entity entity) {
+        LOGGER.info("VcardTempPersistenceManager.getVcard");
         return null;
     }
 
     @Override
     public boolean setVcard(Entity entity, String xml) {
+        LOGGER.info("VcardTempPersistenceManager.setVcard");
         return false;
     }
 }

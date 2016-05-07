@@ -16,11 +16,13 @@ public class PrivateDataPersistenceManager implements org.apache.vysper.xmpp.mod
 
     @Override
     public boolean isAvailable() {
+        LOGGER.info("PrivateDataPersistenceManager.isAvailable");
         return false;
     }
 
     @Override
     public String getPrivateData(Entity entity, String key) {
+        LOGGER.info("PrivateDataPersistenceManager.getPrivateData");
         LOGGER.info("domain {}", entity.getDomain());
         LOGGER.info("node {}", entity.getNode());
         LOGGER.info("resource {}", entity.getResource());
@@ -35,6 +37,7 @@ public class PrivateDataPersistenceManager implements org.apache.vysper.xmpp.mod
 
     @Override
     public boolean setPrivateData(Entity entity, String key, String xml) {
+        LOGGER.info("PrivateDataPersistenceManager.setPrivateData");
         LOGGER.info("domain {}", entity.getDomain());
         LOGGER.info("node {}", entity.getNode());
         LOGGER.info("resource {}", entity.getResource());
