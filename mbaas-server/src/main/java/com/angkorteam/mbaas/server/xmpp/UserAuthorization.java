@@ -1,15 +1,19 @@
 package com.angkorteam.mbaas.server.xmpp;
 
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.MobileTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.vysper.xmpp.addressing.Entity;
+import org.joda.time.DateTime;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.CredentialsExpiredException;
 
 /**
  * Created by socheat on 5/6/16.
@@ -41,7 +45,20 @@ public class UserAuthorization implements org.apache.vysper.xmpp.authorization.U
         }
         LOGGER.info("UserAuthorization.verifyCredentials owner {}", login);
         UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(login)).and(userTable.PASSWORD.eq(DSL.md5(passwordCleartext))).fetchOneInto(userTable);
-        return userRecord != null;
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(login)).fetchOneInto(userTable);
+        if (userRecord == null) {
+            return false;
+        }
+        MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
+        MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.OWNER_USER_ID.eq(userRecord.getUserId())).and(mobileTable.ACCESS_TOKEN.eq(passwordCleartext)).fetchOneInto(mobileTable);
+        if (mobileRecord == null) {
+            return false;
+        }
+        DateTime dateTime = new DateTime(mobileRecord.getAccessTokenIssuedDate());
+        dateTime = dateTime.plusSeconds(mobileRecord.getTimeToLive());
+        if (dateTime.isBeforeNow()) {
+            return false;
+        }
+        return true;
     }
 }

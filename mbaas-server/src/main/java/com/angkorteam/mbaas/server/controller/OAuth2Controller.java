@@ -111,7 +111,7 @@ public class OAuth2Controller {
             mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
             mobileRecord.setDateCreated(new Date());
             mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
-            mobileRecord.setDateTokenIssued(new Date());
+            mobileRecord.setAccessTokenIssuedDate(new Date());
             String accessToken = UUID.randomUUID().toString();
             while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
                 accessToken = UUID.randomUUID().toString();
@@ -125,7 +125,7 @@ public class OAuth2Controller {
             mobileRecord.setOwnerUserId(authorizationRecord.getOwnerUserId());
             mobileRecord.setClientIp(request.getRemoteAddr());
             mobileRecord.setGrantType(GrantTypeEnum.Authorization.getLiteral());
-            mobileRecord.setDateTokenIssued(new Date());
+            mobileRecord.setAccessTokenIssuedDate(new Date());
             mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
             String accessToken = UUID.randomUUID().toString();
             while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
@@ -206,7 +206,7 @@ public class OAuth2Controller {
         mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
         mobileRecord.setDateCreated(new Date());
         mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
-        mobileRecord.setDateTokenIssued(new Date());
+        mobileRecord.setAccessTokenIssuedDate(new Date());
         String accessToken = UUID.randomUUID().toString();
         while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
             accessToken = UUID.randomUUID().toString();
@@ -281,7 +281,7 @@ public class OAuth2Controller {
         mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
         mobileRecord.setDateCreated(new Date());
         mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
-        mobileRecord.setDateTokenIssued(new Date());
+        mobileRecord.setAccessTokenIssuedDate(new Date());
         String accessToken = UUID.randomUUID().toString();
         while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
             accessToken = UUID.randomUUID().toString();
@@ -331,7 +331,7 @@ public class OAuth2Controller {
         mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
         mobileRecord.setDateCreated(new Date());
         mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
-        mobileRecord.setDateTokenIssued(new Date());
+        mobileRecord.setAccessTokenIssuedDate(new Date());
         String accessToken = UUID.randomUUID().toString();
         while (context.selectCount().from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(int.class) > 0) {
             accessToken = UUID.randomUUID().toString();
@@ -368,7 +368,7 @@ public class OAuth2Controller {
             if (mobileRecord == null) {
                 errorMessages.put("accessToken", "error");
             } else {
-                DateTime dateTime = new DateTime(mobileRecord.getDateTokenIssued());
+                DateTime dateTime = new DateTime(mobileRecord.getAccessTokenIssuedDate());
                 dateTime = dateTime.plusSeconds(mobileRecord.getTimeToLive());
                 if (dateTime.isBeforeNow()) {
                     OAuth2TokenResponse response = new OAuth2TokenResponse();
@@ -424,7 +424,7 @@ public class OAuth2Controller {
             accessToken = UUID.randomUUID().toString();
         }
         mobileRecord.setAccessToken(accessToken);
-        mobileRecord.setDateTokenIssued(new Date());
+        mobileRecord.setAccessTokenIssuedDate(new Date());
         mobileRecord.update();
 
         OAuth2RefreshResponse response = new OAuth2RefreshResponse();

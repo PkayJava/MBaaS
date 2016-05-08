@@ -125,7 +125,7 @@ public class DeviceController {
             } else {
                 mobileRecord.setAccessToken(UUID.randomUUID().toString());
             }
-            mobileRecord.setDateTokenIssued(new Date());
+            mobileRecord.setAccessTokenIssuedDate(new Date());
             mobileRecord.setApplicationId(applicationRecord.getApplicationId());
             mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
             mobileRecord.setClientIp(request.getRemoteAddr());
@@ -148,7 +148,7 @@ public class DeviceController {
                 mobileRecord.setApplicationId(applicationRecord.getApplicationId());
                 mobileRecord.setAccessToken(UUID.randomUUID().toString());
                 mobileRecord.setTimeToLive(configuration.getInt(Constants.ACCESS_TOKEN_TIME_TO_LIVE));
-                mobileRecord.setDateTokenIssued(new Date());
+                mobileRecord.setAccessTokenIssuedDate(new Date());
                 mobileRecord.setClientId(clientRecord.getClientId());
                 mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
                 mobileRecord.setClientIp(request.getRemoteAddr());
@@ -166,7 +166,7 @@ public class DeviceController {
                 } else {
                     mobileRecord.setAccessToken(UUID.randomUUID().toString());
                 }
-                mobileRecord.setDateTokenIssued(new Date());
+                mobileRecord.setAccessTokenIssuedDate(new Date());
                 mobileRecord.setApplicationId(applicationRecord.getApplicationId());
                 mobileRecord.setClientId(clientRecord.getClientId());
                 mobileRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));

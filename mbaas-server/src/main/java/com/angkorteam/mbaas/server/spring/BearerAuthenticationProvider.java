@@ -54,7 +54,7 @@ public class BearerAuthenticationProvider implements org.springframework.securit
         mobileRecord.setClientIp(clientId);
         mobileRecord.update();
 
-        DateTime dateTime = new DateTime(mobileRecord.getDateTokenIssued());
+        DateTime dateTime = new DateTime(mobileRecord.getAccessTokenIssuedDate());
         dateTime = dateTime.plusSeconds(mobileRecord.getTimeToLive());
         if (dateTime.isBeforeNow()) {
             throw new CredentialsExpiredException("bearer " + accessToken + " is expired");
