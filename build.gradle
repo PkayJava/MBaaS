@@ -52,6 +52,7 @@ allprojects {
         unirestVersion = '1.4.9'
         commonscompressVersion = '1.11'
         vysperVersion = '0.7'
+        nettyVersion = '4.0.36.Final'
     }
 
 }

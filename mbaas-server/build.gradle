@@ -88,6 +88,7 @@ dependencies {
     compile 'com.mashape.unirest:unirest-java:' + unirestVersion
     compile 'org.apache.commons:commons-compress:' + commonscompressVersion
     compile 'org.apache.vysper:vysper-core:' + vysperVersion
+    compile 'io.netty:netty-all:' + nettyVersion
 
 }
 
