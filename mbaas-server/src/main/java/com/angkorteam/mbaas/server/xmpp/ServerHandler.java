@@ -10,6 +10,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
-        System.out.println(msg);
+        System.out.println("[RELIEVED] - " + msg);
     }
 }
