@@ -135,7 +135,10 @@ public class OAuth2Controller {
             mobileRecord.update();
         }
 
+        UserTable userTable = Tables.USER.as("userTable");
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
         OAuth2AuthorizeResponse response = new OAuth2AuthorizeResponse();
+        response.setLogin(userRecord.getLogin());
         response.setAccessToken(mobileRecord.getAccessToken());
         response.setRefreshToken(mobileRecord.getMobileId());
         response.setExpiresIn(mobileRecord.getTimeToLive());

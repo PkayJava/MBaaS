@@ -10,6 +10,10 @@ import com.google.gson.annotations.SerializedName;
 public class OAuth2AuthorizeResponse extends Response<String> {
 
     @Expose
+    @SerializedName("login")
+    private String login;
+
+    @Expose
     @SerializedName("access_token")
     private String accessToken;
 
@@ -24,6 +28,14 @@ public class OAuth2AuthorizeResponse extends Response<String> {
     @Expose
     @SerializedName("refresh_token")
     private String refreshToken;
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
 
     public String getAccessToken() {
         return accessToken;
