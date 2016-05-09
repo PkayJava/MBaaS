@@ -89,7 +89,6 @@ dependencies {
     compile 'org.apache.commons:commons-compress:' + commonscompressVersion
     compile 'org.apache.vysper:vysper-core:' + vysperVersion
     compile 'io.netty:netty-all:' + nettyVersion
-
 }
 
 mainClassName = 'com.angkorteam.mbaas.server.Start'

@@ -1,10 +1,13 @@
 package com.angkorteam.mbaas.server.wicket;
 
+import com.angkorteam.mbaas.server.xmpp.ServerHandler;
 import com.angkorteam.mbaas.server.xmpp.ServerInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+import java.util.Scanner;
 
 /**
  * Created by socheat on 5/8/16.
@@ -19,7 +22,12 @@ public class ServerNetty {
             b.group(bossGroup, workGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ServerInitializer());
-            b.bind(5222).sync().channel().closeFuture().sync();
+            b.bind(5222).sync().channel();
+            Scanner scanner = new Scanner(System.in);
+            while (true) {
+                String message = scanner.nextLine();
+                ServerHandler.CHANNELS.writeAndFlush(message);
+            }
         } finally {
             bossGroup.shutdownGracefully();
             workGroup.shutdownGracefully();
