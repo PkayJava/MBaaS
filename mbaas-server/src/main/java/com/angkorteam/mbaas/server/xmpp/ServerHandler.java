@@ -18,18 +18,19 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
     public static final char SEPARATOR = ' ';
 
     public static final String COMMAND_CHAT = "CHAT";
+
     public static final String COMMAND_AUTHENTICATE_REQUEST = "AUTHENTICATE_REQUEST";
-    public static final String COMMAND_AUTHENTICATE_RESPONSE = "CHAT";
+    public static final String COMMAND_AUTHENTICATE_RESPONSE = "AUTHENTICATE_RESPONSE";
 
-    public static final String COMMAND_GROUP_INITIATE = "CHAT";
-    public static final String COMMAND_GROUP_INVITE = "CHAT";
-    public static final String COMMAND_GROUP_JOIN = "CHAT";
-    public static final String COMMAND_GROUP_LEAVE = "CHAT";
+    public static final String COMMAND_GROUP_INITIATE = "GROUP_INITIATE";
+    public static final String COMMAND_GROUP_INVITE = "GROUP_INVITE";
+    public static final String COMMAND_GROUP_JOIN = "GROUP_JOIN";
+    public static final String COMMAND_GROUP_LEAVE = "GROUP_LEAVE";
 
-    public static final String COMMAND_FRIEND_REQUEST = "FRIQ";
-    public static final String COMMAND_FRIEND_REMOVE = "FRIR";
-    public static final String COMMAND_FRIEND_REJECT = "FRIR";
-    public static final String COMMAND_FRIEND_BLOCK = "FRIR";
+    public static final String COMMAND_FRIEND_REQUEST = "FRIEND_REQUEST";
+    public static final String COMMAND_FRIEND_REMOVE = "FRIEND_REMOVE";
+    public static final String COMMAND_FRIEND_REJECT = "FRIEND_REJECT";
+    public static final String COMMAND_FRIEND_BLOCK = "FRIEND_BLOCK";
 
     public static ChannelGroup CLIENTS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
