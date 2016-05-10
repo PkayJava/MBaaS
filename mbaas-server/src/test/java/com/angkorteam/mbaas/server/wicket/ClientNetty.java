@@ -24,7 +24,7 @@ public class ClientNetty {
             clientBootstrap.group(group);
             clientBootstrap.channel(NioSocketChannel.class);
             clientBootstrap.handler(new ClientInitializer());
-            Channel channel = clientBootstrap.connect("192.168.1.115", 5222).sync().channel();
+            Channel channel = clientBootstrap.connect("192.168.1.s", 5222).sync().channel();
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
                 channel.writeAndFlush(reader.readLine() + "\r\n");

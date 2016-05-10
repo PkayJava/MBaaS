@@ -3,6 +3,7 @@ CREATE TABLE user (
   user_id                           VARCHAR(100) NOT NULL,
   login                             VARCHAR(255) NOT NULL,
   password                          VARCHAR(255) NOT NULL,
+  full_name                         VARCHAR(255) NOT NULL,
 
   role_id                           VARCHAR(255) NOT NULL,
 
@@ -33,6 +34,7 @@ CREATE TABLE user (
   optimistic                        INT(11)               DEFAULT 0,
 
   UNIQUE KEY (login),
+  INDEX (full_name),
   INDEX (password),
   INDEX (role_id),
   INDEX (system),

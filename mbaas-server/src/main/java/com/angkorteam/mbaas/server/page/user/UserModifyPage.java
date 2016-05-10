@@ -26,6 +26,7 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -52,6 +53,10 @@ public class UserModifyPage extends MasterPage {
 
     private String login;
     private Label loginLabel;
+
+    private String fullName;
+    private TextField<String> fullNameField;
+    private TextFeedbackPanel fullNameFeedback;
 
     private RolePojo role;
     private DropDownChoice<RolePojo> roleField;
@@ -85,7 +90,6 @@ public class UserModifyPage extends MasterPage {
         this.collectionId = this.collection.getCollectionId();
         this.fields = new HashMap<>();
         AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
 
         List<AttributePojo> attributes = context.select(attributeTable.fields())
                 .from(attributeTable)
@@ -190,6 +194,14 @@ public class UserModifyPage extends MasterPage {
 
         UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(userId)).fetchOneInto(userTable);
 
+        this.fullName = userRecord.getFullName();
+        this.fullNameField = new TextField<>("fullNameField", new PropertyModel<>(this, "fullName"));
+        this.fullNameField.setRequired(true);
+        this.fullNameField.setLabel(JooqUtils.lookup("fullName", this));
+        this.form.add(fullNameField);
+        this.fullNameFeedback = new TextFeedbackPanel("fullNameFeedback", this.fullNameField);
+        this.form.add(fullNameFeedback);
+
         this.optimistic = userRecord.getOptimistic();
 
         this.login = userRecord.getLogin();
@@ -222,6 +234,7 @@ public class UserModifyPage extends MasterPage {
         CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
 
         DocumentModifyRequest requestBody = new DocumentModifyRequest();
+        this.fields.put(Tables.USER.FULL_NAME.getName(), this.fullName);
         this.fields.put(Tables.USER.ROLE_ID.getName(), this.role.getRoleId());
         requestBody.setDocument(this.fields);
 

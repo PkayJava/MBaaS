@@ -56,6 +56,7 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("fullName", this), "fullName", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("login", this), "login", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("roleName", this), "roleName", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("status", this), "status", provider));

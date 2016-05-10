@@ -7,13 +7,16 @@ import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.*;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.service.PusherClient;
-import com.angkorteam.mbaas.server.xmpp.OpenStorageProviderRegistry;
+import com.angkorteam.mbaas.server.xmpp.ServerInitializer;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import okhttp3.OkHttpClient;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.vysper.mina.TCPEndpoint;
-import org.apache.vysper.storage.StorageProvider;
 import org.apache.vysper.storage.inmemory.MemoryStorageProviderRegistry;
 import org.apache.vysper.xmpp.addressing.EntityImpl;
 import org.apache.vysper.xmpp.authorization.AccountManagement;
@@ -94,7 +97,9 @@ public class ApplicationContext implements ServletContextListener {
 
     private JavascriptServiceFactoryBean.JavascriptService javascriptService;
 
-    private XMPPServer xmppServer;
+    private EventLoopGroup bossGroup;
+
+    private EventLoopGroup workGroup;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -131,48 +136,37 @@ public class ApplicationContext implements ServletContextListener {
         LOGGER.info("initializing thread internal pool");
         this.executor = initExecutor();
         this.scheduler = initScheduler();
-        this.javascriptService = initJavascriptService(context, jdbcTemplate, scheduler);
+        this.javascriptService = initJavascriptService(this.context, this.jdbcTemplate, this.scheduler);
 
-        LOGGER.info("initializing xmpp service");
-        this.xmppServer = initXMPPServer(this.context, this.jdbcTemplate);
+        LOGGER.info("initializing chat service");
+        this.bossGroup = initBossGroup();
+        this.workGroup = initWorkGroup();
+        initChatService(this.bossGroup, this.workGroup, this.context, this.jdbcTemplate);
 
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
     }
 
-    protected XMPPServer initXMPPServer(final DSLContext context, final JdbcTemplate jdbcTemplate) {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String address = configuration.getString(Constants.XMPP_ADDRESS);
-        XMPPServer xmppServer = new XMPPServer(address);
-        File home = new File(System.getProperty("user.home"), ".xml");
+    protected void initChatService(EventLoopGroup bossGroup, EventLoopGroup workGroup, DSLContext context, JdbcTemplate jdbcTemplate) {
+        ServerBootstrap serverBootstrap = new ServerBootstrap();
+        serverBootstrap.group(bossGroup, workGroup);
+        serverBootstrap.channel(NioServerSocketChannel.class);
+        serverBootstrap.childHandler(new ServerInitializer(context, jdbcTemplate));
         try {
-            xmppServer.setTLSCertificateInfo(new File(home, configuration.getString(Constants.XMPP_KEYSTORE_FILE)), configuration.getString(Constants.XMPP_KEYSTORE_PASSWORD));
-        } catch (FileNotFoundException e) {
-            LOGGER.info(e.getMessage());
-            throw new RuntimeException(e);
+            serverBootstrap.bind(5222).sync();
+        } catch (InterruptedException e) {
+            throw new WicketRuntimeException(e);
         }
-        boolean memory = false;
-        if (!memory) {
-            xmppServer.setStorageProviderRegistry(new OpenStorageProviderRegistry(context, jdbcTemplate));
-        } else {
-            MemoryStorageProviderRegistry registry = new MemoryStorageProviderRegistry();
-            SimpleUserAuthorization authorization = (SimpleUserAuthorization) registry.retrieve(AccountManagement.class);
-            authorization.addUser(new EntityImpl("admin", "angkorteam.com.kh", null), "123123a");
-            authorization.addUser(new EntityImpl("backoffice", "angkorteam.com.kh", null), "123123a");
-            authorization.addUser(new EntityImpl("a", "angkorteam.com.kh", null), "123123a");
-            authorization.addUser(new EntityImpl("b", "angkorteam.com.kh", null), "123123a");
-            authorization.addUser(new EntityImpl("c", "angkorteam.com.kh", null), "123123a");
-            authorization.addUser(new EntityImpl("d", "angkorteam.com.kh", null), "123123a");
-            xmppServer.setStorageProviderRegistry(registry);
-        }
-        xmppServer.addEndpoint(new TCPEndpoint());
-        try {
-            xmppServer.start();
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
-            throw new RuntimeException(e);
-        }
-        return xmppServer;
+    }
+
+    protected EventLoopGroup initBossGroup() {
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        return bossGroup;
+    }
+
+    protected EventLoopGroup initWorkGroup() {
+        EventLoopGroup workGroup = new NioEventLoopGroup();
+        return workGroup;
     }
 
     protected JavascriptServiceFactoryBean.JavascriptService initJavascriptService(DSLContext context, JdbcTemplate jdbcTemplate, TaskScheduler scheduler) {
@@ -296,6 +290,7 @@ public class ApplicationContext implements ServletContextListener {
             adminRecord.setCredentialsNonExpired(true);
             adminRecord.setStatus(UserStatusEnum.Active.getLiteral());
             adminRecord.setLogin(configuration.getString(Constants.USER_ADMIN));
+            adminRecord.setFullName(configuration.getString(Constants.USER_ADMIN));
             adminRecord.setPassword(configuration.getString(Constants.USER_ADMIN_PASSWORD));
             adminRecord.setRoleId(roleRecord.getRoleId());
             adminRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
@@ -315,6 +310,7 @@ public class ApplicationContext implements ServletContextListener {
             anonymousRecord.setCredentialsNonExpired(true);
             anonymousRecord.setStatus(UserStatusEnum.Active.getLiteral());
             anonymousRecord.setLogin(configuration.getString(Constants.USER_ANONYMOUS));
+            anonymousRecord.setFullName(configuration.getString(Constants.USER_ANONYMOUS));
             anonymousRecord.setPassword(configuration.getString(Constants.USER_ANONYMOUS_PASSWORD));
             anonymousRecord.setRoleId(roleRecord.getRoleId());
             anonymousRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
@@ -334,6 +330,7 @@ public class ApplicationContext implements ServletContextListener {
             backofficeRecord.setCredentialsNonExpired(true);
             backofficeRecord.setStatus(UserStatusEnum.Active.getLiteral());
             backofficeRecord.setLogin(configuration.getString(Constants.USER_BACKOFFICE));
+            backofficeRecord.setFullName(configuration.getString(Constants.USER_BACKOFFICE));
             backofficeRecord.setPassword(configuration.getString(Constants.USER_BACKOFFICE_PASSWORD));
             backofficeRecord.setRoleId(roleRecord.getRoleId());
             backofficeRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
@@ -640,8 +637,11 @@ public class ApplicationContext implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-        if (this.xmppServer != null) {
-            this.xmppServer.stop();
+        if (this.bossGroup != null) {
+            this.bossGroup.shutdownGracefully();
+        }
+        if (this.workGroup != null) {
+            this.workGroup.shutdownGracefully();
         }
         if (this.executor != null) {
             this.executor.shutdown();

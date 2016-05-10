@@ -42,6 +42,10 @@ import java.util.UUID;
 @Mount("/user/create")
 public class UserCreatePage extends MasterPage {
 
+    private String fullName;
+    private TextField<String> fullNameField;
+    private TextFeedbackPanel fullNameFeedback;
+
     private String login;
     private TextField<String> loginField;
     private TextFeedbackPanel loginFeedback;
@@ -80,6 +84,13 @@ public class UserCreatePage extends MasterPage {
         add(this.form);
 
         RoleTable roleTable = Tables.ROLE.as("roleTable");
+
+        this.fullNameField = new TextField<>("fullNameField", new PropertyModel<>(this, "fullName"));
+        this.fullNameField.setRequired(true);
+        this.fullNameField.setLabel(JooqUtils.lookup("fullName", this));
+        this.form.add(fullNameField);
+        this.fullNameFeedback = new TextFeedbackPanel("fullNameFeedback", this.fullNameField);
+        this.form.add(fullNameFeedback);
 
         this.loginField = new TextField<>("loginField", new PropertyModel<>(this, "login"));
         this.loginField.setRequired(true);
@@ -142,6 +153,7 @@ public class UserCreatePage extends MasterPage {
         DocumentCreateRequest requestBody = new DocumentCreateRequest();
         requestBody.setDocument(fields);
         fields.put(Tables.USER.LOGIN.getName(), this.login);
+        fields.put(Tables.USER.FULL_NAME.getName(), this.fullName);
         fields.put(Tables.USER.PASSWORD.getName(), this.password);
         fields.put(Tables.USER.ROLE_ID.getName(), this.role.getRoleId());
         String documentId = UUID.randomUUID().toString();

@@ -8,6 +8,6 @@ CREATE TABLE participant (
   INDEX (conversation_id),
   INDEX (user_id),
   INDEX (date_created),
-  UNIQUE (user_id, conversation_id),
+  UNIQUE KEY (user_id, conversation_id),
   PRIMARY KEY (participant_id)
 );

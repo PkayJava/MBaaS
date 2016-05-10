@@ -93,6 +93,10 @@ public class UserProvider extends JooqProvider {
         return this.userTable.USER_ID;
     }
 
+    public Field<String> getFullName() {
+        return this.userTable.FULL_NAME;
+    }
+
     public Field<String> getRoleName() {
         return this.roleTable.NAME;
     }

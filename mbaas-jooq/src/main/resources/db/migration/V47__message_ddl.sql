@@ -15,7 +15,6 @@ CREATE TABLE message (
   INDEX (message),
   INDEX (`read`),
   INDEX (date_created),
-  INDEX (date_created),
   PRIMARY KEY (message_id)
 
 );
