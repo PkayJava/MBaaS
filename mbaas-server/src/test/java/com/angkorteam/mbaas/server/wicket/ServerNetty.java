@@ -22,11 +22,11 @@ public class ServerNetty {
             b.group(bossGroup, workGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ServerInitializer());
-            b.bind(5222).sync().channel();
+            b.bind(5222).sync();
             Scanner scanner = new Scanner(System.in);
             while (true) {
                 String message = scanner.nextLine();
-                ServerHandler.CHANNELS.writeAndFlush(message);
+                ServerHandler.CLIENTS.writeAndFlush(message);
             }
         } finally {
             bossGroup.shutdownGracefully();

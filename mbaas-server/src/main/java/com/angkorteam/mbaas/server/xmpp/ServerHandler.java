@@ -7,36 +7,63 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.io.File;
+import java.util.UUID;
+
 /**
  * Created by socheat on 5/8/16.
  */
 public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
-    public static ChannelGroup CHANNELS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    public static final char SEPARATOR = ' ';
+
+    public static final String COMMAND_CHAT = "CHAT";
+    public static final String COMMAND_AUTHENTICATE_REQUEST = "AUTHENTICATE_REQUEST";
+    public static final String COMMAND_AUTHENTICATE_RESPONSE = "CHAT";
+
+    public static final String COMMAND_GROUP_INITIATE = "CHAT";
+    public static final String COMMAND_GROUP_INVITE = "CHAT";
+    public static final String COMMAND_GROUP_JOIN = "CHAT";
+    public static final String COMMAND_GROUP_LEAVE = "CHAT";
+
+    public static final String COMMAND_FRIEND_REQUEST = "FRIQ";
+    public static final String COMMAND_FRIEND_REMOVE = "FRIR";
+    public static final String COMMAND_FRIEND_REJECT = "FRIR";
+    public static final String COMMAND_FRIEND_BLOCK = "FRIR";
+
+    public static ChannelGroup CLIENTS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     private boolean authenticated;
 
     private String login;
 
+    private String userId;
+
+    private String mobileId;
+
+    public ServerHandler() {
+    }
+
     @Override
-    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        Channel channel = ctx.channel();
-        for (Channel client : CHANNELS) {
-            client.writeAndFlush("[SERVER] - " + channel.remoteAddress() + " has joined");
+    public void handlerAdded(ChannelHandlerContext context) throws Exception {
+        Channel channel = context.channel();
+        CLIENTS.add(channel);
+        context.writeAndFlush(COMMAND_AUTHENTICATE_REQUEST);
+    }
+
+    @Override
+    public void handlerRemoved(ChannelHandlerContext context) throws Exception {
+    }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext context, String msg) throws Exception {
+        if (!authenticated) {
+
         }
-        channel.writeAndFlush("test").sync().channel();
-        System.out.println("sssssssssssss");
-        channel.pipeline().get("handler");
-        CHANNELS.add(channel);
     }
 
-    @Override
-    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-    }
-
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
-        System.out.println("[RELIEVED] - " + msg);
+    private String[] parseCommand(String msg) {
+        return null;
     }
 
     private ServerHandler getServerHandler(Channel channel) {
