@@ -37,12 +37,12 @@ public class ClientHandler extends SimpleChannelInboundHandler<String> {
         int i = 0;
         while (i < msg.length()) {
             Character character = msg.charAt(i);
+            i++;
             if (character == ' ') {
                 break;
             } else {
                 buffer.append(character);
             }
-            i++;
         }
         String command = buffer.toString();
         if (COMMAND_OKAY.equals(command)) {

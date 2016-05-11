@@ -1,9 +1,12 @@
 package com.angkorteam.mbaas.server.socket;
 
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.ConversationTable;
 import com.angkorteam.mbaas.model.entity.tables.MobileTable;
+import com.angkorteam.mbaas.model.entity.tables.ParticipantTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.ParticipantRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
@@ -11,6 +14,9 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created by socheat on 5/8/16.
@@ -68,15 +74,15 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
     @Override
     protected void channelRead0(ChannelHandlerContext context, String msg) throws Exception {
         StringBuffer buffer = new StringBuffer();
-        int i = 0;
-        while (i < msg.length()) {
-            Character character = msg.charAt(i);
+        int index = 0;
+        while (index < msg.length()) {
+            Character character = msg.charAt(index);
+            index++;
             if (character == ' ') {
                 break;
             } else {
                 buffer.append(character);
             }
-            i++;
         }
         String command = buffer.toString();
         if (COMMAND_GROUP_INITIATE.equals(command)) {
@@ -84,6 +90,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         } else if (COMMAND_GROUP_INVITE.equals(command)) {
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_GROUP_JOIN.equals(command)) {
+            groupJoin(this.userId, msg.substring(index));
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_GROUP_LEAVE.equals(command)) {
             context.writeAndFlush(COMMAND_OKAY);
@@ -123,8 +130,17 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         }
     }
 
-    private String[] parseCommand(String msg) {
-        return null;
+    protected void groupJoin(String userId, String conversionId) {
+        ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
+        int joined = this.context.selectCount().from(participantTable).where(participantTable.USER_ID.eq(userId)).and(participantTable.CONVERSATION_ID.eq(conversionId)).fetchOneInto(int.class);
+        if (joined <= 0) {
+            ParticipantRecord participantRecord = this.context.newRecord(participantTable);
+            participantRecord.setParticipantId(UUID.randomUUID().toString());
+            participantRecord.setConversationId(conversionId);
+            participantRecord.setUserId(userId);
+            participantRecord.setDateCreated(new Date());
+            participantRecord.store();
+        }
     }
 
     private ServerHandler getServerHandler(Channel channel) {
