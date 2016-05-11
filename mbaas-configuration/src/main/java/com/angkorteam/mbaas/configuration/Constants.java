@@ -98,10 +98,6 @@ public class Constants {
 
     public static final String APP_VERSION = "app.version";
 
-    public static final String XMPP_KEYSTORE_FILE = "xmpp.keystore.file";
-    public static final String XMPP_KEYSTORE_PASSWORD = "xmpp.keystore.password";
-    public static final String XMPP_ADDRESS = "xmpp.address";
-
     private static XMLPropertiesConfiguration configuration;
     private static long lastModified = -1;
 

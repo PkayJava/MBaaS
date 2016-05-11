@@ -83,10 +83,6 @@
 
     <entry key="push.server.url">http://192.168.1.110:6080/ag-push</entry>
 
-    <entry key="xmpp.keystore.file">keystore.jks</entry>
-    <entry key="xmpp.keystore.password">123123a</entry>
-    <entry key="xmpp.address">pkayjava.ddns.net</entry>
-
     <entry key="executor.pool_size">10</entry>
     <entry key="executor.queue_capacity">500</entry>
 

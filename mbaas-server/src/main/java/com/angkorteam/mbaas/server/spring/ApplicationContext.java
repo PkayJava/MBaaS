@@ -6,7 +6,7 @@ import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.*;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
-import com.angkorteam.mbaas.server.service.PusherClient;
+import com.angkorteam.mbaas.server.service.*;
 import com.angkorteam.mbaas.server.socket.ServerInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
@@ -41,8 +41,12 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Body;
+import retrofit2.http.Header;
+import retrofit2.http.Path;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -206,15 +210,40 @@ public class ApplicationContext implements ServletContextListener {
 
     protected PusherClient initPusherClient(OkHttpClient httpClient) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String pushAddress = configuration.getString(Constants.PUSH_SERVER_URL);
-        String httpAddress = pushAddress.endsWith("/") ? pushAddress : pushAddress + "/";
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(httpAddress)
-                .client(httpClient)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        PusherClient pusherClient = retrofit.create(PusherClient.class);
-        return pusherClient;
+        String pushAddress = configuration.getString(Constants.PUSH_SERVER_URL, "");
+        if (!"".equals(pushAddress)) {
+            String httpAddress = pushAddress.endsWith("/") ? pushAddress : pushAddress + "/";
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(httpAddress)
+                    .client(httpClient)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            PusherClient pusherClient = retrofit.create(PusherClient.class);
+            return pusherClient;
+        } else {
+            PusherClient pusherClient = new PusherClient() {
+                @Override
+                public Call<PusherDTOResponse> register(@Header("authorization") String authorization, @Body PusherDTORequest request) {
+                    return null;
+                }
+
+                @Override
+                public Call<RevokerDTOResponse> unregister(@Header("authorization") String authorization, @Path("deviceToken") String deviceToken) {
+                    return null;
+                }
+
+                @Override
+                public Call<MetricsDTOResponse> sendMetrics(@Header("authorization") String authorization, @Path("messageId") String messageId) {
+                    return null;
+                }
+
+                @Override
+                public Call<MessageDTOResponse> send(@Header("authorization") String authorization, @Body MessageDTORequest request) {
+                    return null;
+                }
+            };
+            return pusherClient;
+        }
     }
 
     protected void initNashorn(DSLContext context) {
