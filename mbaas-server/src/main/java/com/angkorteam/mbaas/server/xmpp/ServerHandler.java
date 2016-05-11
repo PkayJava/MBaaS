@@ -5,9 +5,7 @@ import com.angkorteam.mbaas.model.entity.tables.MobileTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -26,8 +24,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     public static final String COMMAND_CHAT = "CHAT";
 
-    public static final String COMMAND_AUTHENTICATE_REQUEST = "AUTHENTICATE_REQUEST";
-    public static final String COMMAND_AUTHENTICATE_RESPONSE = "AUTHENTICATE_RESPONSE";
+    public static final String COMMAND_AUTHENTICATE = "AUTHENTICATE";
 
     public static final String COMMAND_GROUP_INITIATE = "GROUP_INITIATE";
     public static final String COMMAND_GROUP_INVITE = "GROUP_INVITE";
@@ -39,11 +36,14 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
     public static final String COMMAND_FRIEND_REJECT = "FRIEND_REJECT";
     public static final String COMMAND_FRIEND_BLOCK = "FRIEND_BLOCK";
 
+    public static final String COMMAND_OKAY = "OK";
+    public static final String COMMAND_ERROR = "ERROR";
+
     public static ChannelGroup CLIENTS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     private boolean authenticated;
 
-    private String login;
+    private String fullName;
 
     private String userId;
 
@@ -62,7 +62,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
     public void handlerAdded(ChannelHandlerContext context) throws Exception {
         Channel channel = context.channel();
         CLIENTS.add(channel);
-        context.writeAndFlush(COMMAND_AUTHENTICATE_REQUEST);
     }
 
     @Override
@@ -71,25 +70,59 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext context, String msg) throws Exception {
-        if (!authenticated) {
+        StringBuffer buffer = new StringBuffer();
+        int i = 0;
+        while (i < msg.length()) {
+            Character character = msg.charAt(i);
+            if (character == ' ') {
+                break;
+            } else {
+                buffer.append(character);
+            }
+            i++;
+        }
+        String command = buffer.toString();
+        if (COMMAND_GROUP_INITIATE.equals(command)) {
+            context.writeAndFlush(COMMAND_OKAY);
+        } else if (COMMAND_GROUP_INVITE.equals(command)) {
+            context.writeAndFlush(COMMAND_OKAY);
+        } else if (COMMAND_GROUP_JOIN.equals(command)) {
+            context.writeAndFlush(COMMAND_OKAY);
+        } else if (COMMAND_GROUP_LEAVE.equals(command)) {
+            context.writeAndFlush(COMMAND_OKAY);
+        } else if (COMMAND_FRIEND_REQUEST.equals(command)) {
+            context.writeAndFlush(COMMAND_OKAY);
+        } else if (COMMAND_FRIEND_REMOVE.equals(command)) {
+            context.writeAndFlush(COMMAND_OKAY);
+        } else if (COMMAND_FRIEND_REJECT.equals(command)) {
+            context.writeAndFlush(COMMAND_OKAY);
+        } else if (COMMAND_FRIEND_BLOCK.equals(command)) {
+            context.writeAndFlush(COMMAND_OKAY);
+        } else if (COMMAND_CHAT.equals(command)) {
+            context.writeAndFlush(COMMAND_OKAY);
+        } else if (COMMAND_AUTHENTICATE.equals(command)) {
             String accessToken = null;
             MobileRecord mobileRecord = null;
-            if (msg.length() > (COMMAND_AUTHENTICATE_RESPONSE.length() + 1) && msg.startsWith(COMMAND_AUTHENTICATE_RESPONSE + " ")) {
-                accessToken = msg.substring(COMMAND_AUTHENTICATE_RESPONSE.length() + 1);
+            if (msg.length() > (COMMAND_AUTHENTICATE.length() + 1) && msg.startsWith(COMMAND_AUTHENTICATE + " ")) {
+                accessToken = msg.substring(COMMAND_AUTHENTICATE.length() + 1);
             }
             if (accessToken != null && !"".equals(accessToken)) {
                 MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
                 mobileRecord = this.context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(mobileTable);
             }
-            if (mobileRecord == mobileRecord) {
-                context.close();
+            if (mobileRecord == null) {
+                context.writeAndFlush(COMMAND_ERROR).addListener(ChannelFutureListener.CLOSE);
+            } else {
+                UserTable userTable = Tables.USER.as("userTable");
+                UserRecord userRecord = this.context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
+                this.authenticated = true;
+                this.mobileId = mobileRecord.getMobileId();
+                this.userId = mobileRecord.getOwnerUserId();
+                this.fullName = userRecord.getFullName();
+                context.writeAndFlush(COMMAND_OKAY);
             }
-            UserTable userTable = Tables.USER.as("userTable");
-            UserRecord userRecord = this.context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
-            this.authenticated = true;
-            this.mobileId = mobileRecord.getMobileId();
-            this.userId = mobileRecord.getOwnerUserId();
-            this.login = userRecord.getLogin();
+        } else {
+            context.writeAndFlush(COMMAND_ERROR);
         }
     }
 
