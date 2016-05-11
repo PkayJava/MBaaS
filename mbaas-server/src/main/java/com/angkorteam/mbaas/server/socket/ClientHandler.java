@@ -1,11 +1,5 @@
-package com.angkorteam.mbaas.server.xmpp;
+package com.angkorteam.mbaas.server.socket;
 
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.MobileTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 

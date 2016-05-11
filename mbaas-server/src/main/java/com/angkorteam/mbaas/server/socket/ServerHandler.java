@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.xmpp;
+package com.angkorteam.mbaas.server.socket;
 
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.MobileTable;
@@ -11,9 +11,6 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.io.File;
-import java.util.UUID;
 
 /**
  * Created by socheat on 5/8/16.
