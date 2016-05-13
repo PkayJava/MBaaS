@@ -632,12 +632,14 @@ public class ApplicationContext implements ServletContextListener {
         BasicDataSource dataSource = new BasicDataSource();
         String itest = System.getProperty("itest");
         if (itest == null || "".equals(itest)) {
-            dataSource.setDriverClassName(configuration.getString(Constants.APP_JDBC_DRIVER));
+            String jdbcDriver = configuration.getString(Constants.APP_JDBC_DRIVER);
+            dataSource.setDriverClassName(jdbcDriver);
             dataSource.setUsername(configuration.getString(Constants.APP_JDBC_USERNAME));
             dataSource.setPassword(configuration.getString(Constants.APP_JDBC_PASSWORD));
             dataSource.setUrl(configuration.getString(Constants.APP_JDBC_URL));
         } else {
-            dataSource.setDriverClassName(configuration.getString(Constants.TEST_JDBC_DRIVER));
+            String jdbcDriver = configuration.getString(Constants.TEST_JDBC_DRIVER);
+            dataSource.setDriverClassName(jdbcDriver);
             dataSource.setUsername(configuration.getString(Constants.TEST_JDBC_USERNAME));
             dataSource.setPassword(configuration.getString(Constants.TEST_JDBC_PASSWORD));
             dataSource.setUrl(configuration.getString(Constants.TEST_JDBC_URL));
