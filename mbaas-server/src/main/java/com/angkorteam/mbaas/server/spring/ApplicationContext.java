@@ -18,6 +18,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.WicketRuntimeException;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
 import org.flywaydb.core.internal.dbsupport.DbSupportFactory;
 import org.flywaydb.core.internal.dbsupport.Schema;
@@ -623,7 +624,12 @@ public class ApplicationContext implements ServletContextListener {
         }
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);
-        flyway.migrate();
+        try {
+            flyway.migrate();
+        } catch (FlywayException e) {
+            LOGGER.info(e.getMessage());
+            throw e;
+        }
         return flyway;
     }
 
