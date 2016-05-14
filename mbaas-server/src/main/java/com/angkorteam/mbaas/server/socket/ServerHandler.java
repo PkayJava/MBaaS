@@ -307,7 +307,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
             for (Channel channel : CLIENTS) {
                 ServerHandler handler = getServerHandler(channel);
                 if (handler.ownerUserId.equals(participantRecord.getUserId())) {
-                    channel.writeAndFlush(COMMAND_MESSAGE_NOTIFICATION + SEPARATOR + message);
+                    channel.writeAndFlush(COMMAND_MESSAGE_NOTIFICATION + SEPARATOR + this.ownerUserId + SEPARATOR + message);
                 }
             }
         }
