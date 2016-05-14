@@ -11,6 +11,8 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.*;
@@ -19,6 +21,8 @@ import java.util.*;
  * Created by socheat on 5/8/16.
  */
 public class ServerHandler extends SimpleChannelInboundHandler<String> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerHandler.class);
 
     public static final char SEPARATOR = ' ';
 
@@ -71,6 +75,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext context, String msg) throws Exception {
+        LOGGER.info("remote address {} msg {}", context.channel().remoteAddress(), msg);
         StringBuffer buffer = new StringBuffer();
         int index = 0;
         while (index < msg.length()) {
