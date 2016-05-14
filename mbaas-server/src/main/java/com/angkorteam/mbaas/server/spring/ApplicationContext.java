@@ -138,16 +138,16 @@ public class ApplicationContext implements ServletContextListener {
         this.scheduler = initScheduler();
         this.javascriptService = initJavascriptService(this.context, this.jdbcTemplate, this.scheduler);
 
-        LOGGER.info("initializing chat service");
+        LOGGER.info("initializing communication service");
         this.bossGroup = initBossGroup();
         this.workGroup = initWorkGroup();
-        initChatService(this.bossGroup, this.workGroup, this.context, this.jdbcTemplate);
+        initCommunicationService(this.bossGroup, this.workGroup, this.context, this.jdbcTemplate);
 
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
     }
 
-    protected void initChatService(EventLoopGroup bossGroup, EventLoopGroup workGroup, DSLContext context, JdbcTemplate jdbcTemplate) {
+    protected void initCommunicationService(EventLoopGroup bossGroup, EventLoopGroup workGroup, DSLContext context, JdbcTemplate jdbcTemplate) {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workGroup);
         serverBootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
