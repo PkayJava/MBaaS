@@ -10,12 +10,10 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by socheat on 5/8/16.
@@ -78,7 +76,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         while (index < msg.length()) {
             Character character = msg.charAt(index);
             index++;
-            if (character == ' ') {
+            if (character == SEPARATOR) {
                 break;
             } else {
                 buffer.append(character);
@@ -86,10 +84,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         }
         String command = buffer.toString();
         if (COMMAND_GROUP_INITIATE.equals(command)) {
+            String userId = msg.substring(index);
+            groupInitiate(userId);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_GROUP_INVITE.equals(command)) {
             String extra = msg.substring(index);
-            String[] extras = StringUtils.split(extra, ' ');
+            String[] extras = StringUtils.split(extra, SEPARATOR);
             String conversationId = extras[0];
             List<String> userIds = new ArrayList<>();
             for (int i = 1; i < extras.length; i++) {
@@ -127,7 +127,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_CHAT.equals(command)) {
             String extra = msg.substring(index);
-            int i = extra.indexOf(' ');
+            int i = extra.indexOf(SEPARATOR);
             String conversationId = extra.substring(0, i);
             String message = extra.substring(i + 1);
             chat(conversationId, message);
@@ -157,6 +157,30 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
             context.writeAndFlush(COMMAND_ERROR);
         }
     }
+
+    protected void groupInitiate(String userId) {
+        ConversationTable conversationTable = Tables.CONVERSATION.as("conversationTable");
+        ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
+        List<String> tempConversionIds = this.context.select(DSL.max(participantTable.CONVERSATION_ID)).from(participantTable).where(participantTable.USER_ID.in(this.userId, userId)).groupBy(participantTable.CONVERSATION_ID).having(DSL.count(participantTable.CONVERSATION_ID).greaterOrEqual(2)).fetchInto(String.class);
+        int conversion = this.context.selectCount().from(conversationTable).where(conversationTable.CONVERSATION_ID.in(tempConversionIds)).groupBy(conversationTable.CONVERSATION_ID).having(DSL.count(conversationTable.CONVERSATION_ID).eq(2)).fetchOneInto(int.class);
+        if (conversion <= 0) {
+            String conversationId = UUID.randomUUID().toString();
+            ConversationRecord conversationRecord = this.context.newRecord(conversationTable);
+            conversationRecord.setDateCreated(new Date());
+            conversationRecord.setConversationId(conversationId);
+            conversationRecord.store();
+            List<String> userIds = Arrays.asList(this.userId, userId);
+            for (String id : userIds) {
+                ParticipantRecord participantRecord = this.context.newRecord(participantTable);
+                participantRecord.setParticipantId(UUID.randomUUID().toString());
+                participantRecord.setConversationId(conversationId);
+                participantRecord.setDateCreated(new Date());
+                participantRecord.setUserId(id);
+                participantRecord.store();
+            }
+        }
+    }
+
 
     protected void friendRequest(String userId) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
