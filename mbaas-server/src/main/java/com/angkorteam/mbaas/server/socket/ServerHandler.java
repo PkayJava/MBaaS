@@ -167,9 +167,13 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         ConversationTable conversationTable = Tables.CONVERSATION.as("conversationTable");
         ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
         List<String> tempConversionIds = this.context.select(DSL.max(participantTable.CONVERSATION_ID)).from(participantTable).where(participantTable.USER_ID.in(this.ownerUserId, groupInitiate.getUserId())).groupBy(participantTable.CONVERSATION_ID).having(DSL.count(participantTable.CONVERSATION_ID).greaterOrEqual(2)).fetchInto(String.class);
-        ConversationRecord conversationRecord = this.context.select(conversationTable.fields()).from(conversationTable).where(conversationTable.CONVERSATION_ID.in(tempConversionIds)).groupBy(conversationTable.CONVERSATION_ID).having(DSL.count(conversationTable.CONVERSATION_ID).eq(2)).fetchOneInto(conversationTable);
+        String conversationId = this.context.select(participantTable.CONVERSATION_ID).from(participantTable).where(participantTable.CONVERSATION_ID.in(tempConversionIds)).groupBy(participantTable.CONVERSATION_ID).having(DSL.count(conversationTable.CONVERSATION_ID).eq(2)).fetchOneInto(String.class);
+        ConversationRecord conversationRecord = null;
+        if (conversationId != null && !"".equals(conversationId)) {
+            conversationRecord = this.context.select(conversationTable.fields()).from(conversationTable).where(conversationTable.CONVERSATION_ID.eq(conversationId)).fetchOneInto(conversationTable);
+        }
         if (conversationRecord == null) {
-            String conversationId = UUID.randomUUID().toString();
+            conversationId = UUID.randomUUID().toString();
             conversationRecord = this.context.newRecord(conversationTable);
             conversationRecord.setDateCreated(new Date());
             conversationRecord.setConversationId(conversationId);
