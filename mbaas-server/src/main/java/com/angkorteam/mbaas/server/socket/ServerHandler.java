@@ -140,9 +140,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         } else if (COMMAND_AUTHENTICATE.equals(command)) {
             String accessToken = msg.substring(index);
             MobileRecord mobileRecord = null;
-            if (msg.length() > (COMMAND_AUTHENTICATE.length() + 1) && msg.startsWith(COMMAND_AUTHENTICATE + " ")) {
-                accessToken = msg.substring(COMMAND_AUTHENTICATE.length() + 1);
-            }
             if (accessToken != null && !"".equals(accessToken)) {
                 MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
                 mobileRecord = this.context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(mobileTable);
