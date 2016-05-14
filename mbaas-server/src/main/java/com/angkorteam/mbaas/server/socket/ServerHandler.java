@@ -3,6 +3,8 @@ package com.angkorteam.mbaas.server.socket;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
+import com.angkorteam.mbaas.server.socket.command.*;
+import com.google.gson.Gson;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -59,9 +61,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ServerHandler(final DSLContext context, final JdbcTemplate jdbcTemplate) {
+    private final Gson gson;
+
+    public ServerHandler(final DSLContext context, final JdbcTemplate jdbcTemplate, final Gson gson) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
+        this.gson = gson;
     }
 
     @Override
@@ -89,64 +94,54 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
             }
         }
         String command = buffer.toString();
+        String json = msg.substring(index);
         if (COMMAND_GROUP_INITIATE.equals(command)) {
-            String userId = msg.substring(index);
-            groupInitiate(userId);
+            GroupInitiate groupInitiate = this.gson.fromJson(json, GroupInitiate.class);
+            groupInitiate(groupInitiate);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_GROUP_INVITE.equals(command)) {
-            String extra = msg.substring(index);
-            String[] extras = StringUtils.split(extra, SEPARATOR);
-            String conversationId = extras[0];
-            List<String> userIds = new ArrayList<>();
-            for (int i = 1; i < extras.length; i++) {
-                userIds.add(extras[i]);
-            }
-            groupInvite(conversationId, userIds);
+            GroupInvite groupInvite = this.gson.fromJson(json, GroupInvite.class);
+            groupInvite(groupInvite);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_GROUP_JOIN.equals(command)) {
-            String conversationId = msg.substring(index);
-            groupJoin(conversationId);
+            GroupJoin groupJoin = this.gson.fromJson(json, GroupJoin.class);
+            groupJoin(groupJoin);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_GROUP_LEAVE.equals(command)) {
-            String conversationId = msg.substring(index);
-            groupLeave(conversationId);
+            GroupLeave groupLeave = this.gson.fromJson(json, GroupLeave.class);
+            groupLeave(groupLeave);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_FRIEND_REQUEST.equals(command)) {
-            String userId = msg.substring(index);
-            friendRequest(userId);
+            FriendRequest friendRequest = this.gson.fromJson(json, FriendRequest.class);
+            friendRequest(friendRequest);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_FRIEND_REMOVE.equals(command)) {
-            String userId = msg.substring(index);
-            friendRemove(userId);
+            FriendRemove friendRemove = this.gson.fromJson(json, FriendRemove.class);
+            friendRemove(friendRemove);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_FRIEND_REJECT.equals(command)) {
-            String userId = msg.substring(index);
-            friendReject(userId);
+            FriendReject friendReject = this.gson.fromJson(json, FriendReject.class);
+            friendReject(friendReject);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_FRIEND_BLOCK.equals(command)) {
-            String userId = msg.substring(index);
-            friendBlock(userId);
+            FriendBlock friendBlock = this.gson.fromJson(json, FriendBlock.class);
+            friendBlock(friendBlock);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_FRIEND_APPROVE.equals(command)) {
-            String userId = msg.substring(index);
-            friendApprove(userId);
+            FriendApprove friendApprove = this.gson.fromJson(json, FriendApprove.class);
+            friendApprove(friendApprove);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_MESSAGE_GROUP.equals(command)) {
-            String extra = msg.substring(index);
-            int i = extra.indexOf(SEPARATOR);
-            String conversationId = extra.substring(0, i);
-            String message = extra.substring(i + 1);
-            messageGroup(conversationId, message);
+            MessageGroup messageGroup = this.gson.fromJson(json, MessageGroup.class);
+            messageGroup(messageGroup);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_MESSAGE_PRIVATE.equals(command)) {
-            String extra = msg.substring(index);
-            int i = extra.indexOf(SEPARATOR);
-            String userId = extra.substring(0, i);
-            String message = extra.substring(i + 1);
-            messagePrivate(userId, message);
+            MessagePrivate messagePrivate = this.gson.fromJson(json, MessagePrivate.class);
+            messagePrivate(messagePrivate);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_AUTHENTICATE.equals(command)) {
-            String accessToken = msg.substring(index);
+            Authenticate authenticate = this.gson.fromJson(json, Authenticate.class);
+            String accessToken = authenticate.getAccessToken();
             MobileRecord mobileRecord = null;
             if (accessToken != null && !"".equals(accessToken)) {
                 MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
@@ -168,10 +163,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         }
     }
 
-    protected String groupInitiate(String userId) {
+    protected String groupInitiate(GroupInitiate groupInitiate) {
         ConversationTable conversationTable = Tables.CONVERSATION.as("conversationTable");
         ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
-        List<String> tempConversionIds = this.context.select(DSL.max(participantTable.CONVERSATION_ID)).from(participantTable).where(participantTable.USER_ID.in(this.ownerUserId, userId)).groupBy(participantTable.CONVERSATION_ID).having(DSL.count(participantTable.CONVERSATION_ID).greaterOrEqual(2)).fetchInto(String.class);
+        List<String> tempConversionIds = this.context.select(DSL.max(participantTable.CONVERSATION_ID)).from(participantTable).where(participantTable.USER_ID.in(this.ownerUserId, groupInitiate.getUserId())).groupBy(participantTable.CONVERSATION_ID).having(DSL.count(participantTable.CONVERSATION_ID).greaterOrEqual(2)).fetchInto(String.class);
         ConversationRecord conversationRecord = this.context.select(conversationTable.fields()).from(conversationTable).where(conversationTable.CONVERSATION_ID.in(tempConversionIds)).groupBy(conversationTable.CONVERSATION_ID).having(DSL.count(conversationTable.CONVERSATION_ID).eq(2)).fetchOneInto(conversationTable);
         if (conversationRecord == null) {
             String conversationId = UUID.randomUUID().toString();
@@ -179,7 +174,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
             conversationRecord.setDateCreated(new Date());
             conversationRecord.setConversationId(conversationId);
             conversationRecord.store();
-            List<String> userIds = Arrays.asList(this.ownerUserId, userId);
+            List<String> userIds = Arrays.asList(this.ownerUserId, groupInitiate.getUserId());
             for (String id : userIds) {
                 ParticipantRecord participantRecord = this.context.newRecord(participantTable);
                 participantRecord.setParticipantId(UUID.randomUUID().toString());
@@ -195,99 +190,99 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
     }
 
 
-    protected void friendRequest(String userId) {
+    protected void friendRequest(FriendRequest friendRequest) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
-        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(userId)).fetchOneInto(friendTable);
+        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(friendRequest.getUserId())).fetchOneInto(friendTable);
         if (forward == null) {
             forward = this.context.newRecord(friendTable);
             forward.setUserId(this.ownerUserId);
-            forward.setFriendUserId(userId);
+            forward.setFriendUserId(friendRequest.getUserId());
             forward.setSubscription("Sent");
             forward.store();
         } else {
             forward.setUserId(this.ownerUserId);
-            forward.setFriendUserId(userId);
+            forward.setFriendUserId(friendRequest.getUserId());
             forward.setSubscription("Sent");
             forward.update();
         }
 
-        FriendRecord backward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(userId)).and(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).fetchOneInto(friendTable);
+        FriendRecord backward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(friendRequest.getUserId())).and(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).fetchOneInto(friendTable);
         if (backward == null) {
             backward = this.context.newRecord(friendTable);
             backward.setUserId(this.ownerUserId);
-            backward.setFriendUserId(userId);
+            backward.setFriendUserId(friendRequest.getUserId());
             backward.setSubscription("Confirm");
             backward.store();
         } else {
             backward.setUserId(this.ownerUserId);
-            backward.setFriendUserId(userId);
+            backward.setFriendUserId(friendRequest.getUserId());
             backward.setSubscription("Confirm");
             backward.update();
         }
     }
 
-    protected void friendRemove(String userId) {
+    protected void friendRemove(FriendRemove friendRemove) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
-        this.context.delete(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(userId)).execute();
-        this.context.delete(friendTable).where(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).and(friendTable.USER_ID.eq(userId)).execute();
+        this.context.delete(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(friendRemove.getUserId())).execute();
+        this.context.delete(friendTable).where(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).and(friendTable.USER_ID.eq(friendRemove.getUserId())).execute();
     }
 
-    protected void friendReject(String userId) {
+    protected void friendReject(FriendReject friendReject) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
-        this.context.delete(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(userId)).execute();
-        this.context.delete(friendTable).where(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).and(friendTable.USER_ID.eq(userId)).execute();
+        this.context.delete(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(friendReject.getUserId())).execute();
+        this.context.delete(friendTable).where(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).and(friendTable.USER_ID.eq(friendReject.getUserId())).execute();
     }
 
-    protected void friendApprove(String userId) {
+    protected void friendApprove(FriendApprove friendApprove) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
-        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(userId)).fetchOneInto(friendTable);
+        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(friendApprove.getUserId())).fetchOneInto(friendTable);
         if (forward == null) {
             forward = this.context.newRecord(friendTable);
             forward.setUserId(this.ownerUserId);
-            forward.setFriendUserId(userId);
+            forward.setFriendUserId(friendApprove.getUserId());
             forward.setSubscription("Approved");
             forward.store();
         } else {
             forward.setUserId(this.ownerUserId);
-            forward.setFriendUserId(userId);
+            forward.setFriendUserId(friendApprove.getUserId());
             forward.setSubscription("Approved");
             forward.update();
         }
 
-        FriendRecord backward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(userId)).and(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).fetchOneInto(friendTable);
+        FriendRecord backward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(friendApprove.getUserId())).and(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).fetchOneInto(friendTable);
         if (backward == null) {
             backward = this.context.newRecord(friendTable);
             backward.setUserId(this.ownerUserId);
-            backward.setFriendUserId(userId);
+            backward.setFriendUserId(friendApprove.getUserId());
             backward.setSubscription("Approved");
             backward.store();
         } else {
             backward.setUserId(this.ownerUserId);
-            backward.setFriendUserId(userId);
+            backward.setFriendUserId(friendApprove.getUserId());
             backward.setSubscription("Approved");
             backward.update();
         }
     }
 
-    protected void friendBlock(String userId) {
+    protected void friendBlock(FriendBlock friendBlock) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
-        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(userId)).fetchOneInto(friendTable);
+        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(friendBlock.getUserId())).fetchOneInto(friendTable);
         if (forward == null) {
             forward = this.context.newRecord(friendTable);
             forward.setUserId(this.ownerUserId);
-            forward.setFriendUserId(userId);
+            forward.setFriendUserId(friendBlock.getUserId());
             forward.setSubscription("Blocked");
             forward.store();
         } else {
             forward.setUserId(this.ownerUserId);
-            forward.setFriendUserId(userId);
+            forward.setFriendUserId(friendBlock.getUserId());
             forward.setSubscription("Blocked");
             forward.update();
         }
     }
 
-    protected void messageGroup(String conversationId, String message) {
-        message(conversationId, message);
+    protected void messageGroup(MessageGroup messageGroup) {
+        message(messageGroup.getConversationId(), messageGroup.getMessage());
     }
 
     protected void message(String conversationId, String message) {
@@ -313,35 +308,37 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         }
     }
 
-    protected void messagePrivate(String userId, String message) {
-        String conversationId = groupInitiate(userId);
-        message(conversationId, message);
+    protected void messagePrivate(MessagePrivate messagePrivate) {
+        GroupInitiate groupInitiate = new GroupInitiate();
+        groupInitiate.setUserId(messagePrivate.getUserId());
+        String conversationId = groupInitiate(groupInitiate);
+        message(conversationId, messagePrivate.getMessage());
     }
 
-    protected void groupInvite(String conversationId, List<String> userIds) {
+    protected void groupInvite(GroupInvite groupInvite) {
         ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
-        int joined = this.context.selectCount().from(participantTable).where(participantTable.USER_ID.eq(this.ownerUserId)).and(participantTable.CONVERSATION_ID.eq(conversationId)).fetchOneInto(int.class);
+        int joined = this.context.selectCount().from(participantTable).where(participantTable.USER_ID.eq(this.ownerUserId)).and(participantTable.CONVERSATION_ID.eq(groupInvite.getConversationId())).fetchOneInto(int.class);
         if (joined > 0) {
-            for (String userId : userIds) {
-                groupJoin(userId, conversationId);
+            for (String userId : groupInvite.getUserId()) {
+                groupJoin(userId, groupInvite.getConversationId());
             }
         }
     }
 
-    protected void groupLeave(String conversationId) {
+    protected void groupLeave(GroupLeave groupLeave) {
         ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
-        this.context.delete(participantTable).where(participantTable.CONVERSATION_ID.eq(conversationId)).and(participantTable.USER_ID.eq(this.ownerUserId)).execute();
-        int joined = this.context.selectCount().from(participantTable).where(participantTable.CONVERSATION_ID.eq(conversationId)).fetchOneInto(int.class);
+        this.context.delete(participantTable).where(participantTable.CONVERSATION_ID.eq(groupLeave.getConversationId())).and(participantTable.USER_ID.eq(this.ownerUserId)).execute();
+        int joined = this.context.selectCount().from(participantTable).where(participantTable.CONVERSATION_ID.eq(groupLeave.getConversationId())).fetchOneInto(int.class);
         if (joined <= 0) {
             ConversationTable conversationTable = Tables.CONVERSATION.as("conversationTable");
-            this.context.delete(conversationTable).where(conversationTable.CONVERSATION_ID.eq(conversationId)).execute();
+            this.context.delete(conversationTable).where(conversationTable.CONVERSATION_ID.eq(groupLeave.getConversationId())).execute();
             MessageTable messageTable = Tables.MESSAGE.as("messageTable");
-            this.context.delete(messageTable).where(messageTable.CONVERSATION_ID.eq(conversationId)).execute();
+            this.context.delete(messageTable).where(messageTable.CONVERSATION_ID.eq(groupLeave.getConversationId())).execute();
         }
     }
 
-    protected void groupJoin(String conversationId) {
-        groupJoin(this.ownerUserId, conversationId);
+    protected void groupJoin(GroupJoin groupJoin) {
+        groupJoin(this.ownerUserId, groupJoin.getConversationId());
     }
 
     protected void groupJoin(String userId, String conversationId) {

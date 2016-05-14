@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.plain.enums.*;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.service.*;
 import com.angkorteam.mbaas.server.socket.ServerInitializer;
+import com.google.gson.Gson;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
@@ -38,6 +39,7 @@ import org.jooq.impl.DefaultConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.http.converter.json.GsonFactoryBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -101,9 +103,12 @@ public class ApplicationContext implements ServletContextListener {
 
     private EventLoopGroup workGroup;
 
+    private Gson gson;
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
+        this.gson = initGson();
         LOGGER.info("initializing mail sender");
         this.mailSender = initMailSender();
         LOGGER.info("initializing database connection");
@@ -141,21 +146,34 @@ public class ApplicationContext implements ServletContextListener {
         LOGGER.info("initializing communication service");
         this.bossGroup = initBossGroup();
         this.workGroup = initWorkGroup();
-        initCommunicationService(this.bossGroup, this.workGroup, this.context, this.jdbcTemplate);
+        initCommunicationService(this.bossGroup, this.workGroup, this.context, this.jdbcTemplate, this.gson);
 
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
     }
 
-    protected void initCommunicationService(EventLoopGroup bossGroup, EventLoopGroup workGroup, DSLContext context, JdbcTemplate jdbcTemplate) {
+    protected Gson initGson() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        GsonFactoryBean factoryBean = new GsonFactoryBean();
+        factoryBean.setBase64EncodeByteArrays(false);
+        factoryBean.setDisableHtmlEscaping(true);
+        factoryBean.setPrettyPrinting(false);
+        factoryBean.setSerializeNulls(false);
+        factoryBean.setDateFormatPattern(configuration.getString(Constants.PATTERN_DATETIME));
+        factoryBean.afterPropertiesSet();
+        return factoryBean.getObject();
+    }
+
+    protected void initCommunicationService(EventLoopGroup bossGroup, EventLoopGroup workGroup, DSLContext context, JdbcTemplate jdbcTemplate, Gson gson) {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workGroup);
         serverBootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         serverBootstrap.channel(NioServerSocketChannel.class);
-        serverBootstrap.childHandler(new ServerInitializer(context, jdbcTemplate));
+        serverBootstrap.childHandler(new ServerInitializer(context, jdbcTemplate, gson));
         try {
             serverBootstrap.bind(5222).sync();
         } catch (InterruptedException e) {
+            LOGGER.info(e.getMessage());
             throw new WicketRuntimeException(e);
         }
     }
@@ -782,5 +800,9 @@ public class ApplicationContext implements ServletContextListener {
 
     public final JavascriptServiceFactoryBean.JavascriptService getJavascriptService() {
         return this.javascriptService;
+    }
+
+    public final Gson getGson() {
+        return this.gson;
     }
 }

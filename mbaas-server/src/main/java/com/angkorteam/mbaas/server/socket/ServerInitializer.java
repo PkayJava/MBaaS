@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.socket;
 
+import com.google.gson.Gson;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -19,9 +20,12 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ServerInitializer(final DSLContext context, final JdbcTemplate jdbcTemplate) {
+    private final Gson gson;
+
+    public ServerInitializer(final DSLContext context, final JdbcTemplate jdbcTemplate, final Gson gson) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
+        this.gson = gson;
     }
 
     @Override
@@ -29,6 +33,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         ChannelPipeline pipeline = channel.pipeline();
         pipeline.addLast("decoder", new StringDecoder(Charset.forName("UTF-8")));
         pipeline.addLast("encoder", new StringEncoder(Charset.forName("UTF-8")));
-        pipeline.addLast("handler", new ServerHandler(this.context, this.jdbcTemplate));
+        pipeline.addLast("handler", new ServerHandler(this.context, this.jdbcTemplate, this.gson));
     }
 }
