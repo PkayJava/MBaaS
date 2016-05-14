@@ -10,7 +10,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<String> {
 
     public static final char SEPARATOR = ' ';
 
-    public static final String COMMAND_CHAT = "CHAT";
+    public static final String COMMAND_MESSAGE_PRIVATE = "MESSAGE_PRIVATE";
+    public static final String COMMAND_MESSAGE_GROUP = "MESSAGE_GROUP";
+    public static final String COMMAND_MESSAGE_NOTIFICATION = "MESSAGE_NOTIFICATION";
 
     public static final String COMMAND_AUTHENTICATE = "AUTHENTICATE";
 
@@ -20,6 +22,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<String> {
     public static final String COMMAND_GROUP_LEAVE = "GROUP_LEAVE";
 
     public static final String COMMAND_FRIEND_REQUEST = "FRIEND_REQUEST";
+    public static final String COMMAND_FRIEND_APPROVE = "FRIEND_APPROVE";
     public static final String COMMAND_FRIEND_REMOVE = "FRIEND_REMOVE";
     public static final String COMMAND_FRIEND_REJECT = "FRIEND_REJECT";
     public static final String COMMAND_FRIEND_BLOCK = "FRIEND_BLOCK";
@@ -33,24 +36,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext context, String msg) throws Exception {
-        StringBuffer buffer = new StringBuffer();
-        int i = 0;
-        while (i < msg.length()) {
-            Character character = msg.charAt(i);
-            i++;
-            if (character == ' ') {
-                break;
-            } else {
-                buffer.append(character);
-            }
-        }
-        String command = buffer.toString();
-        if (COMMAND_OKAY.equals(command)) {
-            context.writeAndFlush(COMMAND_OKAY);
-        } else if (COMMAND_ERROR.equals(command)) {
-            context.writeAndFlush(COMMAND_OKAY);
-        } else {
-            context.writeAndFlush(COMMAND_ERROR);
-        }
+
     }
 }
