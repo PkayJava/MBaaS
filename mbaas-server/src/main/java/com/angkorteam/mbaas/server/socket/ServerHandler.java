@@ -138,7 +138,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
             chat(conversationId, message);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_AUTHENTICATE.equals(command)) {
-            String accessToken = null;
+            String accessToken = msg.substring(index);
             MobileRecord mobileRecord = null;
             if (msg.length() > (COMMAND_AUTHENTICATE.length() + 1) && msg.startsWith(COMMAND_AUTHENTICATE + " ")) {
                 accessToken = msg.substring(COMMAND_AUTHENTICATE.length() + 1);
