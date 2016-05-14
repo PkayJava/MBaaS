@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server.socket;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.server.service.MessageDTORequest;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -26,7 +25,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     public static final char SEPARATOR = ' ';
 
-    public static final String COMMAND_CHAT = "CHAT";
+    public static final String COMMAND_MESSAGE_PRIVATE = "MESSAGE_PRIVATE";
+    public static final String COMMAND_MESSAGE_GROUP = "MESSAGE_GROUP";
+    public static final String COMMAND_MESSAGE_NOTIFICATION = "MESSAGE_NOTIFICATION";
 
     public static final String COMMAND_AUTHENTICATE = "AUTHENTICATE";
 
@@ -50,7 +51,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     private String fullName;
 
-    private String userId;
+    private String ownerUserId;
 
     private String mobileId;
 
@@ -130,12 +131,19 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
             String userId = msg.substring(index);
             friendApprove(userId);
             context.writeAndFlush(COMMAND_OKAY);
-        } else if (COMMAND_CHAT.equals(command)) {
+        } else if (COMMAND_MESSAGE_GROUP.equals(command)) {
             String extra = msg.substring(index);
             int i = extra.indexOf(SEPARATOR);
             String conversationId = extra.substring(0, i);
             String message = extra.substring(i + 1);
-            chat(conversationId, message);
+            messageGroup(conversationId, message);
+            context.writeAndFlush(COMMAND_OKAY);
+        } else if (COMMAND_MESSAGE_PRIVATE.equals(command)) {
+            String extra = msg.substring(index);
+            int i = extra.indexOf(SEPARATOR);
+            String userId = extra.substring(0, i);
+            String message = extra.substring(i + 1);
+            messagePrivate(userId, message);
             context.writeAndFlush(COMMAND_OKAY);
         } else if (COMMAND_AUTHENTICATE.equals(command)) {
             String accessToken = msg.substring(index);
@@ -151,7 +159,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                 UserRecord userRecord = this.context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
                 this.authenticated = true;
                 this.mobileId = mobileRecord.getMobileId();
-                this.userId = mobileRecord.getOwnerUserId();
+                this.ownerUserId = mobileRecord.getOwnerUserId();
                 this.fullName = userRecord.getFullName();
                 context.writeAndFlush(COMMAND_OKAY);
             }
@@ -160,18 +168,18 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         }
     }
 
-    protected void groupInitiate(String userId) {
+    protected String groupInitiate(String userId) {
         ConversationTable conversationTable = Tables.CONVERSATION.as("conversationTable");
         ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
-        List<String> tempConversionIds = this.context.select(DSL.max(participantTable.CONVERSATION_ID)).from(participantTable).where(participantTable.USER_ID.in(this.userId, userId)).groupBy(participantTable.CONVERSATION_ID).having(DSL.count(participantTable.CONVERSATION_ID).greaterOrEqual(2)).fetchInto(String.class);
-        int conversion = this.context.selectCount().from(conversationTable).where(conversationTable.CONVERSATION_ID.in(tempConversionIds)).groupBy(conversationTable.CONVERSATION_ID).having(DSL.count(conversationTable.CONVERSATION_ID).eq(2)).fetchOneInto(int.class);
-        if (conversion <= 0) {
+        List<String> tempConversionIds = this.context.select(DSL.max(participantTable.CONVERSATION_ID)).from(participantTable).where(participantTable.USER_ID.in(this.ownerUserId, userId)).groupBy(participantTable.CONVERSATION_ID).having(DSL.count(participantTable.CONVERSATION_ID).greaterOrEqual(2)).fetchInto(String.class);
+        ConversationRecord conversationRecord = this.context.select(conversationTable.fields()).from(conversationTable).where(conversationTable.CONVERSATION_ID.in(tempConversionIds)).groupBy(conversationTable.CONVERSATION_ID).having(DSL.count(conversationTable.CONVERSATION_ID).eq(2)).fetchOneInto(conversationTable);
+        if (conversationRecord == null) {
             String conversationId = UUID.randomUUID().toString();
-            ConversationRecord conversationRecord = this.context.newRecord(conversationTable);
+            conversationRecord = this.context.newRecord(conversationTable);
             conversationRecord.setDateCreated(new Date());
             conversationRecord.setConversationId(conversationId);
             conversationRecord.store();
-            List<String> userIds = Arrays.asList(this.userId, userId);
+            List<String> userIds = Arrays.asList(this.ownerUserId, userId);
             for (String id : userIds) {
                 ParticipantRecord participantRecord = this.context.newRecord(participantTable);
                 participantRecord.setParticipantId(UUID.randomUUID().toString());
@@ -180,35 +188,38 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                 participantRecord.setUserId(id);
                 participantRecord.store();
             }
+            return conversationId;
+        } else {
+            return conversationRecord.getConversationId();
         }
     }
 
 
     protected void friendRequest(String userId) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
-        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.userId)).and(friendTable.FRIEND_USER_ID.eq(userId)).fetchOneInto(friendTable);
+        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(userId)).fetchOneInto(friendTable);
         if (forward == null) {
             forward = this.context.newRecord(friendTable);
-            forward.setUserId(this.userId);
+            forward.setUserId(this.ownerUserId);
             forward.setFriendUserId(userId);
             forward.setSubscription("Sent");
             forward.store();
         } else {
-            forward.setUserId(this.userId);
+            forward.setUserId(this.ownerUserId);
             forward.setFriendUserId(userId);
             forward.setSubscription("Sent");
             forward.update();
         }
 
-        FriendRecord backward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(userId)).and(friendTable.FRIEND_USER_ID.eq(this.userId)).fetchOneInto(friendTable);
+        FriendRecord backward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(userId)).and(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).fetchOneInto(friendTable);
         if (backward == null) {
             backward = this.context.newRecord(friendTable);
-            backward.setUserId(this.userId);
+            backward.setUserId(this.ownerUserId);
             backward.setFriendUserId(userId);
             backward.setSubscription("Confirm");
             backward.store();
         } else {
-            backward.setUserId(this.userId);
+            backward.setUserId(this.ownerUserId);
             backward.setFriendUserId(userId);
             backward.setSubscription("Confirm");
             backward.update();
@@ -217,41 +228,41 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     protected void friendRemove(String userId) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
-        this.context.delete(friendTable).where(friendTable.USER_ID.eq(this.userId)).and(friendTable.FRIEND_USER_ID.eq(userId)).execute();
-        this.context.delete(friendTable).where(friendTable.FRIEND_USER_ID.eq(this.userId)).and(friendTable.USER_ID.eq(userId)).execute();
+        this.context.delete(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(userId)).execute();
+        this.context.delete(friendTable).where(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).and(friendTable.USER_ID.eq(userId)).execute();
     }
 
     protected void friendReject(String userId) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
-        this.context.delete(friendTable).where(friendTable.USER_ID.eq(this.userId)).and(friendTable.FRIEND_USER_ID.eq(userId)).execute();
-        this.context.delete(friendTable).where(friendTable.FRIEND_USER_ID.eq(this.userId)).and(friendTable.USER_ID.eq(userId)).execute();
+        this.context.delete(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(userId)).execute();
+        this.context.delete(friendTable).where(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).and(friendTable.USER_ID.eq(userId)).execute();
     }
 
     protected void friendApprove(String userId) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
-        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.userId)).and(friendTable.FRIEND_USER_ID.eq(userId)).fetchOneInto(friendTable);
+        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(userId)).fetchOneInto(friendTable);
         if (forward == null) {
             forward = this.context.newRecord(friendTable);
-            forward.setUserId(this.userId);
+            forward.setUserId(this.ownerUserId);
             forward.setFriendUserId(userId);
             forward.setSubscription("Approved");
             forward.store();
         } else {
-            forward.setUserId(this.userId);
+            forward.setUserId(this.ownerUserId);
             forward.setFriendUserId(userId);
             forward.setSubscription("Approved");
             forward.update();
         }
 
-        FriendRecord backward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(userId)).and(friendTable.FRIEND_USER_ID.eq(this.userId)).fetchOneInto(friendTable);
+        FriendRecord backward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(userId)).and(friendTable.FRIEND_USER_ID.eq(this.ownerUserId)).fetchOneInto(friendTable);
         if (backward == null) {
             backward = this.context.newRecord(friendTable);
-            backward.setUserId(this.userId);
+            backward.setUserId(this.ownerUserId);
             backward.setFriendUserId(userId);
             backward.setSubscription("Approved");
             backward.store();
         } else {
-            backward.setUserId(this.userId);
+            backward.setUserId(this.ownerUserId);
             backward.setFriendUserId(userId);
             backward.setSubscription("Approved");
             backward.update();
@@ -260,22 +271,26 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     protected void friendBlock(String userId) {
         FriendTable friendTable = Tables.FRIEND.as("friendTable");
-        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.userId)).and(friendTable.FRIEND_USER_ID.eq(userId)).fetchOneInto(friendTable);
+        FriendRecord forward = this.context.select(friendTable.fields()).from(friendTable).where(friendTable.USER_ID.eq(this.ownerUserId)).and(friendTable.FRIEND_USER_ID.eq(userId)).fetchOneInto(friendTable);
         if (forward == null) {
             forward = this.context.newRecord(friendTable);
-            forward.setUserId(this.userId);
+            forward.setUserId(this.ownerUserId);
             forward.setFriendUserId(userId);
             forward.setSubscription("Blocked");
             forward.store();
         } else {
-            forward.setUserId(this.userId);
+            forward.setUserId(this.ownerUserId);
             forward.setFriendUserId(userId);
             forward.setSubscription("Blocked");
             forward.update();
         }
     }
 
-    protected void chat(String conversationId, String message) {
+    protected void messageGroup(String conversationId, String message) {
+        message(conversationId, message);
+    }
+
+    protected void message(String conversationId, String message) {
         ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
         List<ParticipantRecord> participantRecords = this.context.select(participantTable.fields()).from(participantTable).where(participantTable.CONVERSATION_ID.eq(conversationId)).fetchInto(participantTable);
         MessageTable messageTable = Tables.MESSAGE.as("messageTable");
@@ -286,15 +301,26 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
             messageRecord.setRead(false);
             messageRecord.setBody(message);
             messageRecord.setConversationId(conversationId);
-            messageRecord.setSenderUserId(this.userId);
+            messageRecord.setSenderUserId(this.ownerUserId);
             messageRecord.setReceiverUserId(participantRecord.getUserId());
             messageRecord.store();
+            for (Channel channel : CLIENTS) {
+                ServerHandler handler = getServerHandler(channel);
+                if (handler.ownerUserId.equals(participantRecord.getUserId())) {
+                    channel.writeAndFlush(COMMAND_MESSAGE_NOTIFICATION + SEPARATOR + message);
+                }
+            }
         }
+    }
+
+    protected void messagePrivate(String userId, String message) {
+        String conversationId = groupInitiate(userId);
+        message(conversationId, message);
     }
 
     protected void groupInvite(String conversationId, List<String> userIds) {
         ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
-        int joined = this.context.selectCount().from(participantTable).where(participantTable.USER_ID.eq(this.userId)).and(participantTable.CONVERSATION_ID.eq(conversationId)).fetchOneInto(int.class);
+        int joined = this.context.selectCount().from(participantTable).where(participantTable.USER_ID.eq(this.ownerUserId)).and(participantTable.CONVERSATION_ID.eq(conversationId)).fetchOneInto(int.class);
         if (joined > 0) {
             for (String userId : userIds) {
                 groupJoin(userId, conversationId);
@@ -304,7 +330,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     protected void groupLeave(String conversationId) {
         ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
-        this.context.delete(participantTable).where(participantTable.CONVERSATION_ID.eq(conversationId)).and(participantTable.USER_ID.eq(this.userId)).execute();
+        this.context.delete(participantTable).where(participantTable.CONVERSATION_ID.eq(conversationId)).and(participantTable.USER_ID.eq(this.ownerUserId)).execute();
         int joined = this.context.selectCount().from(participantTable).where(participantTable.CONVERSATION_ID.eq(conversationId)).fetchOneInto(int.class);
         if (joined <= 0) {
             ConversationTable conversationTable = Tables.CONVERSATION.as("conversationTable");
@@ -315,7 +341,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
     }
 
     protected void groupJoin(String conversationId) {
-        groupJoin(this.userId, conversationId);
+        groupJoin(this.ownerUserId, conversationId);
     }
 
     protected void groupJoin(String userId, String conversationId) {
