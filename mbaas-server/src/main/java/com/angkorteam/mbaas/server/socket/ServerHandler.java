@@ -98,47 +98,69 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         if (COMMAND_GROUP_INITIATE.equals(command)) {
             GroupInitiate groupInitiate = this.gson.fromJson(json, GroupInitiate.class);
             groupInitiate(groupInitiate);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(groupInitiate.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_GROUP_INVITE.equals(command)) {
             GroupInvite groupInvite = this.gson.fromJson(json, GroupInvite.class);
             groupInvite(groupInvite);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(groupInvite.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_GROUP_JOIN.equals(command)) {
             GroupJoin groupJoin = this.gson.fromJson(json, GroupJoin.class);
             groupJoin(groupJoin);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(groupJoin.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_GROUP_LEAVE.equals(command)) {
             GroupLeave groupLeave = this.gson.fromJson(json, GroupLeave.class);
             groupLeave(groupLeave);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(groupLeave.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_FRIEND_REQUEST.equals(command)) {
             FriendRequest friendRequest = this.gson.fromJson(json, FriendRequest.class);
             friendRequest(friendRequest);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(friendRequest.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_FRIEND_REMOVE.equals(command)) {
             FriendRemove friendRemove = this.gson.fromJson(json, FriendRemove.class);
             friendRemove(friendRemove);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(friendRemove.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_FRIEND_REJECT.equals(command)) {
             FriendReject friendReject = this.gson.fromJson(json, FriendReject.class);
             friendReject(friendReject);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(friendReject.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_FRIEND_BLOCK.equals(command)) {
             FriendBlock friendBlock = this.gson.fromJson(json, FriendBlock.class);
             friendBlock(friendBlock);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(friendBlock.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_FRIEND_APPROVE.equals(command)) {
             FriendApprove friendApprove = this.gson.fromJson(json, FriendApprove.class);
             friendApprove(friendApprove);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(friendApprove.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_MESSAGE_GROUP.equals(command)) {
             MessageGroup messageGroup = this.gson.fromJson(json, MessageGroup.class);
             messageGroup(messageGroup);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(messageGroup.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_MESSAGE_PRIVATE.equals(command)) {
             MessagePrivate messagePrivate = this.gson.fromJson(json, MessagePrivate.class);
             messagePrivate(messagePrivate);
-            context.writeAndFlush(COMMAND_OKAY);
+            Command socketResponse = new Command();
+            socketResponse.setUuid(messagePrivate.getUuid());
+            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_AUTHENTICATE.equals(command)) {
             Authenticate authenticate = this.gson.fromJson(json, Authenticate.class);
             String accessToken = authenticate.getAccessToken();
@@ -148,7 +170,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                 mobileRecord = this.context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(mobileTable);
             }
             if (mobileRecord == null) {
-                context.writeAndFlush(COMMAND_ERROR).addListener(ChannelFutureListener.CLOSE);
+                Command socketResponse = new Command();
+                socketResponse.setUuid(authenticate.getUuid());
+                context.writeAndFlush(COMMAND_ERROR + SEPARATOR + this.gson.toJson(socketResponse)).addListener(ChannelFutureListener.CLOSE);
             } else {
                 UserTable userTable = Tables.USER.as("userTable");
                 UserRecord userRecord = this.context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(mobileRecord.getOwnerUserId())).fetchOneInto(userTable);
@@ -156,7 +180,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                 this.mobileId = mobileRecord.getMobileId();
                 this.ownerUserId = mobileRecord.getOwnerUserId();
                 this.fullName = userRecord.getFullName();
-                context.writeAndFlush(COMMAND_OKAY);
+                Command socketResponse = new Command();
+                socketResponse.setUuid(authenticate.getUuid());
+                context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
             }
         } else {
             context.writeAndFlush(COMMAND_ERROR);
@@ -286,10 +312,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
     }
 
     protected void messageGroup(MessageGroup messageGroup) {
-        message(messageGroup.getConversationId(), messageGroup.getMessage());
+        message(messageGroup.getUuid(), messageGroup.getConversationId(), messageGroup.getMessage());
     }
 
-    protected void message(String conversationId, String message) {
+    protected void message(String uuid, String conversationId, String message) {
         ParticipantTable participantTable = Tables.PARTICIPANT.as("participantTable");
         List<ParticipantRecord> participantRecords = this.context.select(participantTable.fields()).from(participantTable).where(participantTable.CONVERSATION_ID.eq(conversationId)).fetchInto(participantTable);
         MessageTable messageTable = Tables.MESSAGE.as("messageTable");
@@ -309,6 +335,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                     MessageNotification messageNotification = new MessageNotification();
                     messageNotification.setUserId(this.ownerUserId);
                     messageNotification.setMessage(message);
+                    messageNotification.setUuid(uuid);
                     channel.writeAndFlush(COMMAND_MESSAGE_NOTIFICATION + SEPARATOR + this.gson.toJson(messageNotification));
                 }
             }
@@ -319,7 +346,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         GroupInitiate groupInitiate = new GroupInitiate();
         groupInitiate.setUserId(messagePrivate.getUserId());
         String conversationId = groupInitiate(groupInitiate);
-        message(conversationId, messagePrivate.getMessage());
+        message(messagePrivate.getUuid(), conversationId, messagePrivate.getMessage());
     }
 
     protected void groupInvite(GroupInvite groupInvite) {
