@@ -157,10 +157,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
             context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
         } else if (COMMAND_MESSAGE_PRIVATE.equals(command)) {
             MessagePrivate messagePrivate = this.gson.fromJson(json, MessagePrivate.class);
-            messagePrivate(messagePrivate);
-            Command socketResponse = new Command();
-            socketResponse.setUuid(messagePrivate.getUuid());
-            context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
+            if (!messagePrivate.getUserId().equals(this.ownerUserId)) {
+                messagePrivate(messagePrivate);
+                Command socketResponse = new Command();
+                socketResponse.setUuid(messagePrivate.getUuid());
+                context.writeAndFlush(COMMAND_OKAY + SEPARATOR + this.gson.toJson(socketResponse));
+            }
         } else if (COMMAND_AUTHENTICATE.equals(command)) {
             Authenticate authenticate = this.gson.fromJson(json, Authenticate.class);
             String accessToken = authenticate.getAccessToken();
