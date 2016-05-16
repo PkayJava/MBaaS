@@ -53,7 +53,7 @@ public class DeviceController {
     @Autowired
     private DSLContext context;
 
-    @Autowired
+    @Autowired(required = false)
     private PusherClient pusherClient;
 
     @Autowired
@@ -179,22 +179,23 @@ public class DeviceController {
             }
         }
 
-        String credential = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
+        if (pusherClient != null) {
+            String credential = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
+            PusherDTORequest dto = new PusherDTORequest();
+            dto.setDeviceToken(requestBody.getDeviceToken());
+            dto.setDeviceType(requestBody.getDeviceType());
+            dto.setAlias(requestBody.getAlias());
+            dto.setOperatingSystem(requestBody.getOperatingSystem());
+            dto.setOsVersion(requestBody.getOsVersion());
+            dto.setCategories(requestBody.getCategories());
 
-        PusherDTORequest dto = new PusherDTORequest();
-        dto.setDeviceToken(requestBody.getDeviceToken());
-        dto.setDeviceType(requestBody.getDeviceType());
-        dto.setAlias(requestBody.getAlias());
-        dto.setOperatingSystem(requestBody.getOperatingSystem());
-        dto.setOsVersion(requestBody.getOsVersion());
-        dto.setCategories(requestBody.getCategories());
-
-        Call<PusherDTOResponse> responseCall = pusherClient.register(credential, dto);
-        Response<PusherDTOResponse> responseBody = null;
-        try {
-            responseBody = responseCall.execute();
-        } catch (Throwable e) {
-            System.out.println(e.getMessage());
+            Call<PusherDTOResponse> responseCall = pusherClient.register(credential, dto);
+            Response<PusherDTOResponse> responseBody = null;
+            try {
+                responseBody = responseCall.execute();
+            } catch (Throwable e) {
+                System.out.println(e.getMessage());
+            }
         }
 
         DeviceRegisterResponse response = new DeviceRegisterResponse();
@@ -252,13 +253,14 @@ public class DeviceController {
         }
 
         mobileRecord.delete();
-
-        String credential = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
-        Call<RevokerDTOResponse> responseCall = pusherClient.unregister(credential, mobileRecord.getDeviceToken());
-        Response<RevokerDTOResponse> responseBody = null;
-        try {
-            responseBody = responseCall.execute();
-        } catch (Throwable e) {
+        if (pusherClient != null) {
+            String credential = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
+            Call<RevokerDTOResponse> responseCall = pusherClient.unregister(credential, mobileRecord.getDeviceToken());
+            Response<RevokerDTOResponse> responseBody = null;
+            try {
+                responseBody = responseCall.execute();
+            } catch (Throwable e) {
+            }
         }
 
         DeviceUnregisterResponse response = new DeviceUnregisterResponse();
@@ -299,12 +301,14 @@ public class DeviceController {
             return ResponseEntity.ok(response);
         }
 
-        String credential = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
-        Call<MetricsDTOResponse> responseCall = this.pusherClient.sendMetrics(credential, messageId);
-        Response<MetricsDTOResponse> responseBody = null;
-        try {
-            responseBody = responseCall.execute();
-        } catch (Throwable e) {
+        if (pusherClient != null) {
+            String credential = "Basic " + Base64.encodeBase64String((clientRecord.getPushVariantId() + ":" + clientRecord.getPushSecret()).getBytes());
+            Call<MetricsDTOResponse> responseCall = this.pusherClient.sendMetrics(credential, messageId);
+            Response<MetricsDTOResponse> responseBody = null;
+            try {
+                responseBody = responseCall.execute();
+            } catch (Throwable e) {
+            }
         }
 
         DeviceMetricsResponse response = new DeviceMetricsResponse();

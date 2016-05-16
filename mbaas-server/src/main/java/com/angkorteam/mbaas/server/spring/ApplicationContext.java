@@ -243,28 +243,7 @@ public class ApplicationContext implements ServletContextListener {
             PusherClient pusherClient = retrofit.create(PusherClient.class);
             return pusherClient;
         } else {
-            PusherClient pusherClient = new PusherClient() {
-                @Override
-                public Call<PusherDTOResponse> register(@Header("authorization") String authorization, @Body PusherDTORequest request) {
-                    return null;
-                }
-
-                @Override
-                public Call<RevokerDTOResponse> unregister(@Header("authorization") String authorization, @Path("deviceToken") String deviceToken) {
-                    return null;
-                }
-
-                @Override
-                public Call<MetricsDTOResponse> sendMetrics(@Header("authorization") String authorization, @Path("messageId") String messageId) {
-                    return null;
-                }
-
-                @Override
-                public Call<MessageDTOResponse> send(@Header("authorization") String authorization, @Body MessageDTORequest request) {
-                    return null;
-                }
-            };
-            return pusherClient;
+            return null;
         }
     }
 
