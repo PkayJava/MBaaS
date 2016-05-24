@@ -53,7 +53,7 @@ public class JobModifyPage extends MasterPage {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
         Map<String, Object> jobRecord = null;
-        jobRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JOB + " WHERE " + Jdbc.Job.JOB_ID + " = ?" + this.jobId);
+        jobRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JOB + " WHERE " + Jdbc.Job.JOB_ID + " = ?", this.jobId);
 
         this.name = (String) jobRecord.get(Jdbc.Job.NAME);
         this.nameLabel = new Label("nameLabel", new PropertyModel<>(this, "name"));

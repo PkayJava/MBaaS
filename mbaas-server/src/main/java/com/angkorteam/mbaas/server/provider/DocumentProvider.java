@@ -78,7 +78,7 @@ public class DocumentProvider extends JooqProvider {
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         String jdbcColumnOwnerUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_APPLICATION_USER_ID);
-        this.from = table.innerJoin(this.userTable).on(DSL.field(this.collectionName + "." + jdbcColumnOwnerUserId, String.class).eq(userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.from = table.innerJoin(this.userTable).on(DSL.field(this.collectionName + "." + jdbcColumnOwnerUserId, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
     }
 
     @Override
@@ -88,7 +88,7 @@ public class DocumentProvider extends JooqProvider {
     }
 
     public Field<String> getOwner() {
-        return this.userTable.field(Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
     }
 
     @Override

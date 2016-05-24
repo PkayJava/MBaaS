@@ -26,35 +26,35 @@ public class QueryProvider extends JooqProvider {
         this.applicationCode = applicationCode;
         this.queryTable = DSL.table(Jdbc.QUERY).as("queryTable");
         this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
-        this.from = this.queryTable.join(this.userTable).on(this.queryTable.field(Jdbc.Query.APPLICATION_USER_ID, String.class).eq(this.userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.from = this.queryTable.join(this.userTable).on(DSL.field(this.queryTable.getName() + "." + Jdbc.Query.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
     }
 
     public Field<String> getQueryId() {
-        return this.queryTable.field(Jdbc.Query.QUERY_ID, String.class);
+        return DSL.field(this.queryTable.getName() + "." + Jdbc.Query.QUERY_ID, String.class);
     }
 
     public Field<String> getName() {
-        return this.queryTable.field(Jdbc.Query.NAME, String.class);
+        return DSL.field(this.queryTable.getName() + "." + Jdbc.Query.NAME, String.class);
     }
 
     public Field<String> getDescription() {
-        return this.queryTable.field(Jdbc.Query.DESCRIPTION, String.class);
+        return DSL.field(this.queryTable.getName() + "." + Jdbc.Query.DESCRIPTION, String.class);
     }
 
     public Field<Date> getDateCreated() {
-        return this.queryTable.field(Jdbc.Query.DATE_CREATED, Date.class);
+        return DSL.field(this.queryTable.getName() + "." + Jdbc.Query.DATE_CREATED, Date.class);
     }
 
     public Field<String> getSecurity() {
-        return this.queryTable.field(Jdbc.Query.SECURITY, String.class);
+        return DSL.field(this.queryTable.getName() + "." + Jdbc.Query.SECURITY, String.class);
     }
 
     public Field<String> getApplicationUser() {
-        return this.userTable.field(Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
     }
 
     public Field<String> getApplicationUserId() {
-        return this.userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
     }
 
     @Override

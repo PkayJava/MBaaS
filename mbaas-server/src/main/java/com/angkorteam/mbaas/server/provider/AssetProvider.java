@@ -32,7 +32,7 @@ public class AssetProvider extends JooqProvider {
         this.applicationUserId = applicationUserId;
         this.assetTable = DSL.table(Jdbc.ASSET).as("assetTable");
         this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
-        this.from = assetTable.join(userTable).on(assetTable.field(Jdbc.Asset.APPLICATION_USER_ID, String.class).eq(userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.from = this.assetTable.join(this.userTable).on(DSL.field(this.assetTable.getName() + "." + Jdbc.Asset.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
     }
 
     @Override
@@ -42,23 +42,23 @@ public class AssetProvider extends JooqProvider {
     }
 
     public Field<String> getAssetId() {
-        return this.assetTable.field(Jdbc.Asset.ASSET_ID, String.class);
+        return DSL.field(this.assetTable.getName() + "." + Jdbc.Asset.ASSET_ID, String.class);
     }
 
     public Field<String> getApplicationUser() {
-        return this.userTable.field(Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
     }
 
     public Field<Integer> getLength() {
-        return this.assetTable.field(Jdbc.Asset.LENGTH, Integer.class);
+        return DSL.field(this.assetTable.getName() + "." + Jdbc.Asset.LENGTH, Integer.class);
     }
 
     public Field<String> getMime() {
-        return this.assetTable.field(Jdbc.Asset.MIME, String.class);
+        return DSL.field(this.assetTable.getName() + "." + Jdbc.Asset.MIME, String.class);
     }
 
     public Field<String> getName() {
-        return this.assetTable.field(Jdbc.Asset.LABEL, String.class);
+        return DSL.field(this.assetTable.getName() + "." + Jdbc.Asset.LABEL, String.class);
     }
 
     @Override

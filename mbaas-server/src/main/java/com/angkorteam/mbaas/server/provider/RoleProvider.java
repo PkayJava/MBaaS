@@ -27,19 +27,19 @@ public class RoleProvider extends JooqProvider {
     }
 
     public Field<String> getRoleId() {
-        return this.roleTable.field(Jdbc.Role.ROLE_ID, String.class);
+        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.ROLE_ID, String.class);
     }
 
     public Field<Boolean> getSystem() {
-        return this.roleTable.field(Jdbc.Role.SYSTEM, Boolean.class);
+        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.SYSTEM, Boolean.class);
     }
 
     public Field<String> getName() {
-        return this.roleTable.field(Jdbc.Role.NAME, String.class);
+        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.NAME, String.class);
     }
 
     public Field<String> getDescription() {
-        return this.roleTable.field(Jdbc.Role.DESCRIPTION, String.class);
+        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.DESCRIPTION, String.class);
     }
 
     @Override

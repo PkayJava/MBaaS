@@ -23,8 +23,8 @@ public class DesktopProvider extends JooqProvider {
     private TableLike<?> from;
 
     public DesktopProvider() {
-        this.from = desktopTable.join(mbaasUserTable).on(desktopTable.MBAAS_USER_ID.eq(mbaasUserTable.MBAAS_USER_ID));
-        setSort("dateSeen", SortOrder.DESCENDING);
+        this.from = this.desktopTable.join(this.mbaasUserTable).on(this.desktopTable.MBAAS_USER_ID.eq(this.mbaasUserTable.MBAAS_USER_ID));
+        setSort(this.desktopTable.DATE_SEEN.getName(), SortOrder.DESCENDING);
     }
 
     public Field<String> getLogin() {

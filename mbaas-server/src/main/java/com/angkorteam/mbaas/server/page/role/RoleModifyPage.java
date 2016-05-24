@@ -57,7 +57,7 @@ public class RoleModifyPage extends MasterPage {
         this.name = (String) roleRecord.get(Jdbc.Role.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
-        this.nameField.add(new RoleNameValidator(this.roleId));
+        this.nameField.add(new RoleNameValidator(getSession().getApplicationCode(), this.roleId));
         this.nameField.setLabel(JooqUtils.lookup("name", this));
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
 

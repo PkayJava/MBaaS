@@ -93,7 +93,7 @@ public class TimeOTPPage extends MasterPage {
         this.api = HttpFunction.getHttpAddress(request) + "/api/qr?secret=" + secret + "||" + hash + "||" + getSession().getApplicationCode();
 
         if (!granted) {
-            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.TOTP_SECRET + " ?, " + Jdbc.ApplicationUser.TOTP_HASH + " = ?, " + Jdbc.ApplicationUser.TOTP_STATUS + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", secret, hash, UserTotpStatusEnum.Denied.getLiteral(), getSession().getApplicationUserId());
+            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.TOTP_SECRET + " = ?, " + Jdbc.ApplicationUser.TOTP_HASH + " = ?, " + Jdbc.ApplicationUser.TOTP_STATUS + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", secret, hash, UserTotpStatusEnum.Denied.getLiteral(), getSession().getApplicationUserId());
         }
 
         this.otpField.setVisible(!granted);

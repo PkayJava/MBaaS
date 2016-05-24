@@ -168,11 +168,6 @@ public abstract class MasterPage extends AdminLTEPage {
             add(logoutLink);
             logoutLink.setOnClick(this::logoutLinkOnClick);
             logoutLink.setVisible(getSession().isSignedIn());
-
-            Link<Void> backupLink = new Link<>("backupLink");
-            add(backupLink);
-            backupLink.setOnClick(this::backupLinkOnClick);
-            backupLink.setVisible(getSession().isSignedIn());
         }
 
         {
@@ -377,8 +372,10 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuAssetClass = "";
         }
         if (getPage() instanceof SessionMobilePage) {
+            this.menuSessionClass = "treeview active";
             this.mmenuMobileClass = "active";
         } else {
+            this.menuSessionClass = "treeview";
             this.mmenuMobileClass = "";
         }
         if (getPage() instanceof JavascriptManagementPage || getPage() instanceof JavascriptCreatePage || getPage() instanceof JavascriptModifyPage) {
@@ -391,14 +388,6 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             this.mmenuJobClass = "";
         }
-
-        // TODO
-//        if (getSession().isBackOffice() && getApplicationQuantity() <= 0) {
-//            if (getPage() instanceof ApplicationCreatePage || getPage() instanceof RestorePage) {
-//            } else {
-//                setResponsePage(ApplicationCreatePage.class);
-//            }
-//        }
     }
 
     public String getCurrentApplicationName() {
@@ -413,27 +402,6 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             return "Select One Application";
         }
-    }
-
-    private void backupLinkOnClick(Link link) {
-        // TODO
-//        try {
-//            File mbaas = ApplicationFunction.backup(getJdbcTemplate(), getSession().getApplicationId(), getSession().getUserId());
-//
-//            IResourceStream resourceStream = new FileResourceStream(
-//                    new org.apache.wicket.util.file.File(mbaas));
-//            getRequestCycle().scheduleRequestHandlerAfterCurrent(
-//                    new ResourceStreamRequestHandler(resourceStream) {
-//                        @Override
-//                        public void respond(IRequestCycle requestCycle) {
-//                            super.respond(requestCycle);
-//                            Files.remove(mbaas);
-//                        }
-//                    }.setFileName(mbaas.getName())
-//                            .setContentDisposition(ContentDisposition.ATTACHMENT)
-//                            .setCacheDuration(Duration.NONE));
-//        } catch (IOException e) {
-//        }
     }
 
     public final String getApplicationCode() {

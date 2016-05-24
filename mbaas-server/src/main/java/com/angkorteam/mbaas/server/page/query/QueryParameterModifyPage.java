@@ -17,6 +17,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,7 +108,7 @@ public class QueryParameterModifyPage extends MasterPage {
             if (!entry.getKey().endsWith("SubType")) {
                 Map<String, Object> wheres = new HashMap<>();
                 wheres.put(Jdbc.QueryParameter.QUERY_ID, this.queryId);
-                wheres.put(Jdbc.QueryParameter.NAME, entry.getValue());
+                wheres.put(Jdbc.QueryParameter.NAME, entry.getKey());
                 Map<String, Object> fields = new HashMap<>();
                 fields.put(Jdbc.QueryParameter.TYPE, entry.getValue());
                 fields.put(Jdbc.QueryParameter.SUB_TYPE, this.fields.get(entry.getKey() + "SubType"));

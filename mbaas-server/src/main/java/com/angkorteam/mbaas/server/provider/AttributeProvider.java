@@ -32,27 +32,27 @@ public class AttributeProvider extends JooqProvider {
     }
 
     public Field<String> getName() {
-        return this.attributeTable.field(Jdbc.Attribute.NAME, String.class);
+        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.NAME, String.class);
     }
 
     public Field<String> getAttributeId() {
-        return this.attributeTable.field(Jdbc.Attribute.ATTRIBUTE_ID, String.class);
+        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.ATTRIBUTE_ID, String.class);
     }
 
     public Field<String> getAttributeType() {
-        return this.attributeTable.field(Jdbc.Attribute.ATTRIBUTE_TYPE, String.class);
+        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.ATTRIBUTE_TYPE, String.class);
     }
 
     public Field<Boolean> getSystem() {
-        return this.attributeTable.field(Jdbc.Attribute.SYSTEM, Boolean.class);
+        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.SYSTEM, Boolean.class);
     }
 
     public Field<Integer> getExtra() {
-        return this.attributeTable.field(Jdbc.Attribute.EXTRA, Integer.class);
+        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.EXTRA, Integer.class);
     }
 
     public Field<String> getVisibility() {
-        return this.attributeTable.field(Jdbc.Attribute.VISIBILITY, String.class);
+        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.VISIBILITY, String.class);
     }
 
     @Override

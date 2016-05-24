@@ -26,7 +26,7 @@ public class UserProvider extends JooqProvider {
         this.applicationCode = applicationCode;
         this.userTable = DSL.table("application_user").as("userTable");
         this.roleTable = DSL.table("role").as("roleTable");
-        this.from = userTable.join(roleTable).on(userTable.field(Jdbc.ApplicationUser.ROLE_ID, String.class).eq(roleTable.field(Jdbc.ApplicationUser.ROLE_ID, String.class)));
+        this.from = this.userTable.join(this.roleTable).on(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.ROLE_ID, String.class).eq(DSL.field(this.roleTable.getName() + "." + Jdbc.ApplicationUser.ROLE_ID, String.class)));
     }
 
     @Override
@@ -36,31 +36,31 @@ public class UserProvider extends JooqProvider {
     }
 
     public Field<String> getLogin() {
-        return this.userTable.field(Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
     }
 
     public Field<String> getApplicationUserId() {
-        return this.userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
     }
 
     public Field<String> getFullName() {
-        return this.userTable.field(Jdbc.ApplicationUser.FULL_NAME, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.FULL_NAME, String.class);
     }
 
     public Field<String> getRoleName() {
-        return this.roleTable.field(Jdbc.Role.NAME, String.class);
+        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.NAME, String.class);
     }
 
     public Field<String> getRoleId() {
-        return this.roleTable.field(Jdbc.Role.ROLE_ID, String.class);
+        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.ROLE_ID, String.class);
     }
 
     public Field<String> getStatus() {
-        return this.userTable.field(Jdbc.ApplicationUser.STATUS, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.STATUS, String.class);
     }
 
     public Field<Boolean> getSystem() {
-        return this.userTable.field(Jdbc.ApplicationUser.SYSTEM, Boolean.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.SYSTEM, Boolean.class);
     }
 
     @Override

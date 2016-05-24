@@ -26,51 +26,51 @@ public class JobProvider extends JooqProvider {
         this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
         this.jobTable = DSL.table(Jdbc.JOB).as("jobTable");
         this.applicationCode = applicationCode;
-        this.from = this.jobTable.join(this.userTable).on(this.jobTable.field(Jdbc.Job.APPLICATION_USER_ID, String.class).eq(this.userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.from = this.jobTable.join(this.userTable).on(DSL.field(this.jobTable.getName() + "." + Jdbc.Job.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
     }
 
     public Field<String> getJobId() {
-        return this.jobTable.field(Jdbc.Job.JOB_ID, String.class);
+        return DSL.field(this.jobTable.getName() + "." + Jdbc.Job.JOB_ID, String.class);
     }
 
     public Field<String> getApplicationUser() {
-        return this.userTable.field(Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
     }
 
     public Field<String> getApplicationUserId() {
-        return this.userTable.field(Jdbc.Job.APPLICATION_USER_ID, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.Job.APPLICATION_USER_ID, String.class);
     }
 
     public Field<String> getSecurity() {
-        return this.jobTable.field(Jdbc.Job.SECURITY, String.class);
+        return DSL.field(this.jobTable.getName() + "." + Jdbc.Job.SECURITY, String.class);
     }
 
     public Field<Double> getConsume() {
-        return this.jobTable.field(Jdbc.Job.CONSUME, Double.class);
+        return DSL.field(this.jobTable.getName() + "." + Jdbc.Job.CONSUME, Double.class);
     }
 
     public Field<String> getName() {
-        return this.jobTable.field(Jdbc.Job.NAME, String.class);
+        return DSL.field(this.jobTable.getName() + "." + Jdbc.Job.NAME, String.class);
     }
 
     public Field<String> getCron() {
-        return this.jobTable.field(Jdbc.Job.CRON, String.class);
+        return DSL.field(this.jobTable.getName() + "." + Jdbc.Job.CRON, String.class);
     }
 
     public Field<String> getErrorMessage() {
-        return this.jobTable.field(Jdbc.Job.ERROR_MESSAGE, String.class);
+        return DSL.field(this.jobTable.getName() + "." + Jdbc.Job.ERROR_MESSAGE, String.class);
     }
 
     public Field<String> getErrorClass() {
-        return this.jobTable.field(Jdbc.Job.ERROR_CLASS, String.class);
+        return DSL.field(this.jobTable.getName() + "." + Jdbc.Job.ERROR_CLASS, String.class);
     }
 
     public Field<Date> getDateLastExecuted() {
-        return this.jobTable.field(Jdbc.Job.DATE_LAST_EXECUTED, Date.class);
+        return DSL.field(this.jobTable.getName() + "." + Jdbc.Job.DATE_LAST_EXECUTED, Date.class);
     }
 
     public Field<Date> getDateCreated() {
-        return this.jobTable.field(Jdbc.Job.DATE_CREATED, Date.class);
+        return DSL.field(this.jobTable.getName() + "." + Jdbc.Job.DATE_CREATED, Date.class);
     }
 
     @Override

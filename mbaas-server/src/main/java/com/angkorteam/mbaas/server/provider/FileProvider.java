@@ -25,7 +25,7 @@ public class FileProvider extends JooqProvider {
         this.applicationCode = applicationCode;
         this.fileTable = DSL.table(Jdbc.FILE).as("fileTable");
         this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
-        this.from = this.fileTable.join(this.userTable).on(this.fileTable.field(Jdbc.File.APPLICATION_USER_ID, String.class).eq(userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.from = this.fileTable.join(this.userTable).on(DSL.field(this.fileTable.getName() + "." + Jdbc.File.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
     }
 
     @Override
@@ -35,23 +35,23 @@ public class FileProvider extends JooqProvider {
     }
 
     public Field<String> getFileId() {
-        return this.fileTable.field(Jdbc.File.FILE_ID, String.class);
+        return DSL.field(this.fileTable.getName() + "." + Jdbc.File.FILE_ID, String.class);
     }
 
     public Field<String> getApplicationUser() {
-        return this.userTable.field(Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
     }
 
     public Field<Integer> getLength() {
-        return this.fileTable.field(Jdbc.File.LENGTH, Integer.class);
+        return DSL.field(this.fileTable.getName() + "." + Jdbc.File.LENGTH, Integer.class);
     }
 
     public Field<String> getMime() {
-        return this.fileTable.field(Jdbc.File.MIME, String.class);
+        return DSL.field(this.fileTable.getName() + "." + Jdbc.File.MIME, String.class);
     }
 
     public Field<String> getName() {
-        return this.fileTable.field(Jdbc.File.LABEL, String.class);
+        return DSL.field(this.fileTable.getName() + "." + Jdbc.File.LABEL, String.class);
     }
 
     @Override
