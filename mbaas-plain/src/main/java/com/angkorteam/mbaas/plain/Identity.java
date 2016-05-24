@@ -7,9 +7,13 @@ import java.io.Serializable;
  */
 public interface Identity extends Serializable {
 
-    String getUserId();
-
     String getApplicationId();
+
+    String getApplicationCode();
+
+    String getApplicationUserId();
+
+    String getMBaasId();
 
     String getClientId();
 

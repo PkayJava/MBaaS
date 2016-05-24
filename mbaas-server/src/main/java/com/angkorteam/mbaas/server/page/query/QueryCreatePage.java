@@ -4,14 +4,10 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.SQL
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.QueryParameterTable;
-import com.angkorteam.mbaas.model.entity.tables.QueryTable;
-import com.angkorteam.mbaas.model.entity.tables.records.QueryParameterRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
+import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.enums.SubTypeEnum;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
-import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.QueryNameValidator;
 import com.angkorteam.mbaas.server.validator.QueryReturnSubTypeValidator;
 import com.angkorteam.mbaas.server.validator.QueryScriptValidator;
@@ -24,7 +20,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -33,7 +30,7 @@ import java.util.regex.Pattern;
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/query/create")
 public class QueryCreatePage extends MasterPage {
 
@@ -75,7 +72,7 @@ public class QueryCreatePage extends MasterPage {
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
-        this.nameField.add(new QueryNameValidator());
+        this.nameField.add(new QueryNameValidator(getSession().getApplicationCode()));
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
@@ -124,29 +121,26 @@ public class QueryCreatePage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        QueryTable queryTable = Tables.QUERY.as("queryTable");
-
-        String uuid = UUID.randomUUID().toString();
-
-        QueryRecord queryRecord = context.newRecord(queryTable);
-
-        queryRecord.setQueryId(uuid);
-        queryRecord.setName(this.name);
-        queryRecord.setSecurity(SecurityEnum.Denied.getLiteral());
-        queryRecord.setScript(this.script);
-        queryRecord.setOwnerUserId(getSession().getUserId());
-        queryRecord.setDateCreated(new Date());
-        queryRecord.setDescription(this.description);
-        queryRecord.setApplicationId(getSession().getApplicationId());
-        queryRecord.setReturnType(this.returnType);
-        queryRecord.setReturnSubType(this.returnSubType);
-        queryRecord.store();
+        String queryId = UUID.randomUUID().toString();
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Query.QUERY_ID, queryId);
+        fields.put(Jdbc.Query.NAME, this.name);
+        fields.put(Jdbc.Query.SECURITY, SecurityEnum.Denied.getLiteral());
+        fields.put(Jdbc.Query.SCRIPT, this.script);
+        fields.put(Jdbc.Query.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.Query.APPLICATION_CODE, getApplicationCode());
+        fields.put(Jdbc.Query.DATE_CREATED, new Date());
+        fields.put(Jdbc.Query.DESCRIPTION, this.description);
+        fields.put(Jdbc.Query.RETURN_TYPE, this.returnType);
+        fields.put(Jdbc.Query.RETURN_SUB_TYPE, this.returnSubType);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.QUERY);
+        jdbcInsert.execute(fields);
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         Pattern pattern = Pattern.compile(configuration.getString(Constants.PATTERN_QUERY_PARAMETER_NAME));
         Matcher matcher = pattern.matcher(this.script);
-        QueryParameterTable queryParameterTable = Tables.QUERY_PARAMETER.as("queryParameterTable");
         List<String> queryParameters = new LinkedList<>();
         while (matcher.find()) {
             String parameterName = matcher.group().substring(1);
@@ -155,20 +149,22 @@ public class QueryCreatePage extends MasterPage {
             }
         }
 
+        jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.QUERY_PARAMETER);
         for (String queryParameter : queryParameters) {
-            QueryParameterRecord queryParamRecord = context.newRecord(queryParameterTable);
-            queryParamRecord.setQueryId(queryRecord.getQueryId());
-            queryParamRecord.setQueryParameterId((UUID.randomUUID().toString()));
-            queryParamRecord.setApplicationId(getSession().getApplicationId());
-            queryParamRecord.setName(queryParameter);
-            queryParamRecord.store();
+            fields = new HashMap<>();
+            fields.put(Jdbc.QueryParameter.QUERY_PARAMETER_ID, UUID.randomUUID().toString());
+            fields.put(Jdbc.QueryParameter.QUERY_ID, queryId);
+            fields.put(Jdbc.QueryParameter.APPLICATION_CODE, getSession().getApplicationCode());
+            fields.put(Jdbc.QueryParameter.NAME, queryParameter);
+            jdbcInsert.execute(fields);
         }
 
         if (queryParameters.isEmpty()) {
             setResponsePage(QueryManagementPage.class);
         } else {
             PageParameters parameters = new PageParameters();
-            parameters.add("queryId", queryRecord.getQueryId());
+            parameters.add("queryId", queryId);
             setResponsePage(QueryParameterModifyPage.class, parameters);
         }
     }

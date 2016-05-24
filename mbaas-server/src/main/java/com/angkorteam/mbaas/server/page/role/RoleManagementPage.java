@@ -5,8 +5,7 @@ import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
 import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.provider.RoleProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -16,7 +15,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +39,7 @@ public class RoleManagementPage extends MasterPage implements ActionFilteredJooq
     protected void onInitialize() {
         super.onInitialize();
 
-        RoleProvider provider = new RoleProvider();
+        RoleProvider provider = new RoleProvider(getSession().getApplicationCode());
         provider.selectField(String.class, "roleId");
         provider.selectField(Boolean.class, "system");
 
@@ -67,12 +66,11 @@ public class RoleManagementPage extends MasterPage implements ActionFilteredJooq
         String roleId = (String) model.get("roleId");
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
-            parameters.add("id", roleId);
+            parameters.add("roleId", roleId);
             setResponsePage(RoleModifyPage.class, parameters);
         } else if ("Delete".equals(link)) {
-            DSLContext context = getDSLContext();
-            RoleTable roleTable = Tables.ROLE.as("roleTable");
-            context.delete(roleTable).where(roleTable.ROLE_ID.eq(roleId)).execute();
+            JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+            jdbcTemplate.update("DELETE FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", roleId);
         }
     }
 

@@ -3,13 +3,11 @@ package com.angkorteam.mbaas.server.page.profile;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
 import com.angkorteam.mbaas.plain.enums.UserTotpStatusEnum;
 import com.angkorteam.mbaas.plain.security.otp.Totp;
 import com.angkorteam.mbaas.plain.security.otp.api.Base32;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -19,15 +17,16 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.model.PropertyModel;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Created by socheat on 4/3/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice", "registered"})
+@AuthorizeInstantiation({"administrator", "registered"})
 @Mount("/profile/otp")
 public class TimeOTPPage extends MasterPage {
 
@@ -74,15 +73,16 @@ public class TimeOTPPage extends MasterPage {
     protected void onBeforeRender() {
         super.onBeforeRender();
 
-        DSLContext context = getDSLContext();
-        UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(getSession().getUserId())).fetchOneInto(userTable);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        Map<String, Object> userRecord = null;
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", getSession().getApplicationUserId());
 
         boolean granted = false;
-        if (userRecord.getTotpSecret() != null
-                && !"".equals(userRecord.getTotpSecret())
-                && AuthenticationEnum.TOTP.getLiteral().equals(userRecord.getAuthentication())
-                && UserTotpStatusEnum.Granted.getLiteral().equals(userRecord.getTotpStatus())) {
+        String totpSecret = (String) userRecord.get(Jdbc.ApplicationUser.TOTP_SECRET);
+        if (totpSecret != null
+                && !"".equals(totpSecret)
+                && AuthenticationEnum.TOTP.getLiteral().equals(userRecord.get(Jdbc.ApplicationUser.AUTHENTICATION))
+                && UserTotpStatusEnum.Granted.getLiteral().equals(userRecord.get(Jdbc.ApplicationUser.TOTP_STATUS))) {
             granted = true;
         }
 
@@ -90,13 +90,10 @@ public class TimeOTPPage extends MasterPage {
 
         String secret = UUID.randomUUID().toString();
         String hash = Base32.random();
-        this.api = HttpFunction.getHttpAddress(request) + "/api/qr?secret=" + secret + "||" + hash;
+        this.api = HttpFunction.getHttpAddress(request) + "/api/qr?secret=" + secret + "||" + hash + "||" + getSession().getApplicationCode();
 
         if (!granted) {
-            userRecord.setTotpSecret(secret);
-            userRecord.setTotpHash(hash);
-            userRecord.setTotpStatus(UserTotpStatusEnum.Denied.getLiteral());
-            userRecord.update();
+            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.TOTP_SECRET + " ?, " + Jdbc.ApplicationUser.TOTP_HASH + " = ?, " + Jdbc.ApplicationUser.TOTP_STATUS + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", secret, hash, UserTotpStatusEnum.Denied.getLiteral(), getSession().getApplicationUserId());
         }
 
         this.otpField.setVisible(!granted);
@@ -106,14 +103,12 @@ public class TimeOTPPage extends MasterPage {
     }
 
     private void verifyButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(getSession().getUserId())).fetchOneInto(userTable);
-        Totp totp = new Totp(StringUtils.split(userRecord.getTotpSecret(), "||")[1]);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        Map<String, Object> userRecord = null;
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", getSession().getApplicationUserId());
+        Totp totp = new Totp(StringUtils.split((String) userRecord.get(Jdbc.ApplicationUser.TOTP_SECRET), "||")[1]);
         if (totp.verify(String.valueOf(this.otp))) {
-            userRecord.setTotpStatus(UserTotpStatusEnum.Granted.getLiteral());
-            userRecord.setAuthentication(AuthenticationEnum.TOTP.getLiteral());
-            userRecord.update();
+            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.TOTP_STATUS + " = ?, " + Jdbc.ApplicationUser.AUTHENTICATION + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", UserTotpStatusEnum.Granted.getLiteral(), AuthenticationEnum.TOTP.getLiteral(), getSession().getApplicationUserId());
             setResponsePage(InformationPage.class);
         } else {
             this.otpField.error("invalid");
@@ -121,13 +116,10 @@ public class TimeOTPPage extends MasterPage {
     }
 
     private void revokeButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(getSession().getUserId())).fetchOneInto(userTable);
-        userRecord.setTotpSecret(null);
-        userRecord.setTotpStatus(UserTotpStatusEnum.Denied.getLiteral());
-        userRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
-        userRecord.update();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        Map<String, Object> userRecord = null;
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", getSession().getApplicationUserId());
+        jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.TOTP_SECRET + " = ?, " + Jdbc.ApplicationUser.TOTP_STATUS + " = ?, " + Jdbc.ApplicationUser.AUTHENTICATION + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", null, UserTotpStatusEnum.Denied.getLiteral(), AuthenticationEnum.None.getLiteral(), getSession().getApplicationUserId());
         setResponsePage(InformationPage.class);
     }
 

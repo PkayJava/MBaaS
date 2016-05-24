@@ -5,6 +5,8 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.*;
+import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.service.*;
 import com.angkorteam.mbaas.server.socket.ServerInitializer;
@@ -24,8 +26,6 @@ import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
 import org.flywaydb.core.internal.dbsupport.DbSupportFactory;
-import org.flywaydb.core.internal.dbsupport.Schema;
-import org.flywaydb.core.internal.dbsupport.Table;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jooq.Configuration;
@@ -46,12 +46,8 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.Body;
-import retrofit2.http.Header;
-import retrofit2.http.Path;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -76,6 +72,10 @@ public class ApplicationContext implements ServletContextListener {
     public static final String KEY = ApplicationContext.class.getName();
 
     private BasicDataSource dataSource;
+
+    private DbSupport dbSupport;
+
+    private ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource;
 
     private Configuration configuration;
 
@@ -111,37 +111,38 @@ public class ApplicationContext implements ServletContextListener {
         this.gson = initGson();
         LOGGER.info("initializing mail sender");
         this.mailSender = initMailSender();
-        LOGGER.info("initializing database connection");
+        LOGGER.info("initializing mbaas data source");
         this.dataSource = initDataSource();
-        LOGGER.info("initializing database structure");
-        this.flyway = initFlyway(dataSource);
         LOGGER.info("initializing data access object layer");
-        this.configuration = initConfiguration(dataSource);
-        this.jdbcTemplate = initJdbcTemplate(dataSource);
-        this.context = initDSLContext(configuration);
+        this.configuration = initConfiguration(this.dataSource);
+        this.dbSupport = initDbSupport(this.dataSource);
+        this.jdbcTemplate = initJdbcTemplate(this.dataSource);
+        LOGGER.info("initializing application data source");
+        this.applicationDataSource = initApplicationDataSource();
+        LOGGER.info("initializing database structure");
+        this.flyway = initFlyway(this.dataSource);
+        this.context = initDSLContext(this.configuration);
         this.httpClient = initHttpClient();
         this.pusherClient = initPusherClient(this.httpClient);
         LOGGER.info("initializing string encryptors");
         this.stringEncryptor = initStringEncryptor();
         LOGGER.info("initializing default role");
-        initRole(context);
+        initMBaaSRole(this.context);
         LOGGER.info("initializing default user");
-        initUser(context, jdbcTemplate);
-        LOGGER.info("initializing system collections, attributes, indexes");
-        initDDL(context, dataSource);
+        initMBaaSUser(this.context, this.jdbcTemplate);
         LOGGER.info("initializing nashorn security");
-        initNashorn(context);
+        initNashorn(this.context);
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         String resourceRepo = configuration.getString(Constants.RESOURCE_REPO);
         try {
             FileUtils.forceMkdir(new File(resourceRepo));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new WicketRuntimeException(e);
         }
         LOGGER.info("initializing thread internal pool");
         this.executor = initExecutor();
         this.scheduler = initScheduler();
-        this.javascriptService = initJavascriptService(this.context, this.jdbcTemplate, this.scheduler);
+        this.javascriptService = initJavascriptService(this.context, this.applicationDataSource, this.scheduler);
 
         LOGGER.info("initializing communication service");
         this.bossGroup = initBossGroup();
@@ -162,6 +163,21 @@ public class ApplicationContext implements ServletContextListener {
         factoryBean.setDateFormatPattern(configuration.getString(Constants.PATTERN_DATETIME));
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();
+    }
+
+    protected DbSupport initDbSupport(DataSource dataSource) {
+        try {
+            Connection connection = dataSource.getConnection();
+            DbSupport databaseSupport = DbSupportFactory.createDbSupport(connection, true);
+            return databaseSupport;
+        } catch (SQLException e) {
+            throw new WicketRuntimeException(e);
+        }
+    }
+
+    protected ApplicationDataSourceFactoryBean.ApplicationDataSource initApplicationDataSource() {
+        ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource = new ApplicationDataSourceFactoryBean.ApplicationDataSource();
+        return applicationDataSource;
     }
 
     protected void initCommunicationService(EventLoopGroup bossGroup, EventLoopGroup workGroup, DSLContext context, JdbcTemplate jdbcTemplate, Gson gson) {
@@ -188,12 +204,16 @@ public class ApplicationContext implements ServletContextListener {
         return workGroup;
     }
 
-    protected JavascriptServiceFactoryBean.JavascriptService initJavascriptService(DSLContext context, JdbcTemplate jdbcTemplate, TaskScheduler scheduler) {
-        JavascriptServiceFactoryBean.JavascriptService javascriptService = new JavascriptServiceFactoryBean.JavascriptService(context, jdbcTemplate, scheduler);
-        JobTable jobTable = Tables.JOB.as("jobTable");
-        List<JobRecord> jobRecords = context.select(jobTable.fields()).from(jobTable).fetchInto(jobTable);
-        for (JobRecord jobRecord : jobRecords) {
-            javascriptService.schedule(jobRecord.getJobId());
+    protected JavascriptServiceFactoryBean.JavascriptService initJavascriptService(DSLContext context, ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource, TaskScheduler scheduler) {
+        JavascriptServiceFactoryBean.JavascriptService javascriptService = new JavascriptServiceFactoryBean.JavascriptService(context, applicationDataSource, scheduler);
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        List<ApplicationRecord> applicationRecords = context.select(applicationTable.fields()).from(applicationTable).fetchInto(applicationTable);
+        for (ApplicationRecord applicationRecord : applicationRecords) {
+            JdbcTemplate jdbcTemplate = applicationDataSource.getJdbcTemplate(applicationRecord.getCode());
+            List<String> jobIds = jdbcTemplate.queryForList("SELECT " + Jdbc.Job.JOB_ID + " FROM " + Jdbc.JOB, String.class);
+            for (String jobId : jobIds) {
+                javascriptService.schedule(applicationRecord.getCode(), jobId);
+            }
         }
         return javascriptService;
     }
@@ -296,322 +316,69 @@ public class ApplicationContext implements ServletContextListener {
         }
     }
 
-    protected void initUser(DSLContext context, JdbcTemplate jdbcTemplate) {
+    protected void initMBaaSUser(DSLContext context, JdbcTemplate jdbcTemplate) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        UserTable userTable = Tables.USER.as("userTable");
-        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        MbaasUserTable mbaasUserTable = Tables.MBAAS_USER.as("mbaasUserTable");
+        MbaasRoleTable mbaasRoleTable = Tables.MBAAS_ROLE.as("mbaasRoleTable");
 
-        UserRecord adminRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
+        MbaasUserRecord adminRecord = context.select(mbaasUserTable.fields()).from(mbaasUserTable).where(mbaasUserTable.LOGIN.eq(configuration.getString(Constants.USER_MBAAS_ADMIN))).fetchOneInto(mbaasUserTable);
         if (adminRecord == null) {
             String uuid = UUID.randomUUID().toString();
-            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_ADMIN_ROLE)))).fetchOneInto(roleTable);
-            adminRecord = context.newRecord(userTable);
-            adminRecord.setUserId(uuid);
+            MbaasRoleRecord mbaasRoleRecord = context.select(mbaasRoleTable.fields()).from(mbaasRoleTable).where(mbaasRoleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_MBAAS_ADMIN_ROLE)))).fetchOneInto(mbaasRoleTable);
+            adminRecord = context.newRecord(mbaasUserTable);
+            adminRecord.setMbaasUserId(uuid);
             adminRecord.setAccountNonExpired(true);
             adminRecord.setSystem(true);
             adminRecord.setAccountNonLocked(true);
             adminRecord.setCredentialsNonExpired(true);
             adminRecord.setStatus(UserStatusEnum.Active.getLiteral());
-            adminRecord.setLogin(configuration.getString(Constants.USER_ADMIN));
-            adminRecord.setFullName(configuration.getString(Constants.USER_ADMIN));
-            adminRecord.setPassword(configuration.getString(Constants.USER_ADMIN_PASSWORD));
-            adminRecord.setRoleId(roleRecord.getRoleId());
+            adminRecord.setLogin(configuration.getString(Constants.USER_MBAAS_ADMIN));
+            adminRecord.setFullName(configuration.getString(Constants.USER_MBAAS_ADMIN));
+            adminRecord.setPassword(configuration.getString(Constants.USER_MBAAS_ADMIN_PASSWORD));
+            adminRecord.setMbaasRoleId(mbaasRoleRecord.getMbaasRoleId());
             adminRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
             adminRecord.store();
-            context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_ADMIN_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
+            context.update(mbaasUserTable).set(mbaasUserTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_MBAAS_ADMIN_PASSWORD))).where(mbaasUserTable.MBAAS_USER_ID.eq(uuid)).execute();
         }
 
-        UserRecord anonymousRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ANONYMOUS))).fetchOneInto(userTable);
-        if (anonymousRecord == null) {
+        MbaasUserRecord systemRecord = context.select(mbaasUserTable.fields()).from(mbaasUserTable).where(mbaasUserTable.LOGIN.eq(configuration.getString(Constants.USER_MBAAS_SYSTEM))).fetchOneInto(mbaasUserTable);
+        if (systemRecord == null) {
             String uuid = UUID.randomUUID().toString();
-            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_ANONYMOUS_ROLE)))).fetchOneInto(roleTable);
-            anonymousRecord = context.newRecord(userTable);
-            anonymousRecord.setUserId(uuid);
-            anonymousRecord.setSystem(true);
-            anonymousRecord.setAccountNonExpired(true);
-            anonymousRecord.setAccountNonLocked(true);
-            anonymousRecord.setCredentialsNonExpired(true);
-            anonymousRecord.setStatus(UserStatusEnum.Active.getLiteral());
-            anonymousRecord.setLogin(configuration.getString(Constants.USER_ANONYMOUS));
-            anonymousRecord.setFullName(configuration.getString(Constants.USER_ANONYMOUS));
-            anonymousRecord.setPassword(configuration.getString(Constants.USER_ANONYMOUS_PASSWORD));
-            anonymousRecord.setRoleId(roleRecord.getRoleId());
-            anonymousRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
-            anonymousRecord.store();
-            context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_ANONYMOUS_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
-        }
-
-        UserRecord backofficeRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_BACKOFFICE))).fetchOneInto(userTable);
-        if (backofficeRecord == null) {
-            String uuid = UUID.randomUUID().toString();
-            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_BACKOFFICE_ROLE)))).fetchOneInto(roleTable);
-            backofficeRecord = context.newRecord(userTable);
-            backofficeRecord.setUserId(uuid);
-            backofficeRecord.setSystem(true);
-            backofficeRecord.setAccountNonExpired(true);
-            backofficeRecord.setAccountNonLocked(true);
-            backofficeRecord.setCredentialsNonExpired(true);
-            backofficeRecord.setStatus(UserStatusEnum.Active.getLiteral());
-            backofficeRecord.setLogin(configuration.getString(Constants.USER_BACKOFFICE));
-            backofficeRecord.setFullName(configuration.getString(Constants.USER_BACKOFFICE));
-            backofficeRecord.setPassword(configuration.getString(Constants.USER_BACKOFFICE_PASSWORD));
-            backofficeRecord.setRoleId(roleRecord.getRoleId());
-            backofficeRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
-            backofficeRecord.store();
-            context.update(userTable).set(userTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_BACKOFFICE_PASSWORD))).where(userTable.USER_ID.eq(uuid)).execute();
+            MbaasRoleRecord mbaasRoleRecord = context.select(mbaasRoleTable.fields()).from(mbaasRoleTable).where(mbaasRoleTable.NAME.eq(configuration.getString(configuration.getString(Constants.USER_MBAAS_SYSTEM_ROLE)))).fetchOneInto(mbaasRoleTable);
+            systemRecord = context.newRecord(mbaasUserTable);
+            systemRecord.setMbaasUserId(uuid);
+            systemRecord.setSystem(true);
+            systemRecord.setAccountNonExpired(true);
+            systemRecord.setAccountNonLocked(true);
+            systemRecord.setCredentialsNonExpired(true);
+            systemRecord.setStatus(UserStatusEnum.Active.getLiteral());
+            systemRecord.setLogin(configuration.getString(Constants.USER_MBAAS_SYSTEM));
+            systemRecord.setFullName(configuration.getString(Constants.USER_MBAAS_SYSTEM));
+            systemRecord.setPassword(configuration.getString(Constants.USER_MBAAS_SYSTEM_PASSWORD));
+            systemRecord.setMbaasRoleId(mbaasRoleRecord.getMbaasRoleId());
+            systemRecord.setAuthentication(AuthenticationEnum.None.getLiteral());
+            systemRecord.store();
+            context.update(mbaasUserTable).set(mbaasUserTable.PASSWORD, DSL.md5(configuration.getString(Constants.USER_MBAAS_SYSTEM_PASSWORD))).where(mbaasUserTable.MBAAS_USER_ID.eq(uuid)).execute();
         }
     }
 
-    protected void initRole(DSLContext context) {
+    protected void initMBaaSRole(DSLContext context) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         Map<String, String> roles = new HashMap<>();
-        roles.put(configuration.getString(Constants.ROLE_ADMINISTRATOR), configuration.getString(Constants.ROLE_ADMINISTRATOR_DESCRIPTION));
-        roles.put(configuration.getString(Constants.ROLE_BACKOFFICE), configuration.getString(Constants.ROLE_BACKOFFICE_DESCRIPTION));
-        roles.put(configuration.getString(Constants.ROLE_REGISTERED), configuration.getString(Constants.ROLE_REGISTERED_DESCRIPTION));
-        roles.put(configuration.getString(Constants.ROLE_ANONYMOUS), configuration.getString(Constants.ROLE_ANONYMOUS_DESCRIPTION));
-        roles.put(configuration.getString(Constants.ROLE_OAUTH2_AUTHORIZATION), configuration.getString(Constants.ROLE_OAUTH2_AUTHORIZATION_DESCRIPTION));
-        roles.put(configuration.getString(Constants.ROLE_OAUTH2_CLIENT), configuration.getString(Constants.ROLE_OAUTH2_CLIENT_DESCRIPTION));
-        roles.put(configuration.getString(Constants.ROLE_OAUTH2_IMPLICIT), configuration.getString(Constants.ROLE_OAUTH2_IMPLICIT_DESCRIPTION));
-        roles.put(configuration.getString(Constants.ROLE_OAUTH2_PASSWORD), configuration.getString(Constants.ROLE_OAUTH2_PASSWORD_DESCRIPTION));
-
-        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        roles.put(configuration.getString(Constants.ROLE_MBAAS_ADMINISTRATOR), configuration.getString(Constants.ROLE_MBAAS_ADMINISTRATOR_DESCRIPTION));
+        roles.put(configuration.getString(Constants.ROLE_MBAAS_SYSTEM), configuration.getString(Constants.ROLE_MBAAS_SYSTEM_DESCRIPTION));
+        MbaasRoleTable mbaasRoleTable = Tables.MBAAS_ROLE.as("mbaasRoleTable");
         for (Map.Entry<String, String> role : roles.entrySet()) {
-            RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(role.getKey())).fetchOneInto(roleTable);
-            if (roleRecord == null) {
-                roleRecord = context.newRecord(roleTable);
-                roleRecord.setRoleId(UUID.randomUUID().toString());
-                roleRecord.setName(role.getKey());
-                roleRecord.setDescription(role.getValue());
-                roleRecord.setSystem(true);
-                roleRecord.store();
+            MbaasRoleRecord mbaasRoleRecord = context.select(mbaasRoleTable.fields()).from(mbaasRoleTable).where(mbaasRoleTable.NAME.eq(role.getKey())).fetchOneInto(mbaasRoleTable);
+            if (mbaasRoleRecord == null) {
+                mbaasRoleRecord = context.newRecord(mbaasRoleTable);
+                mbaasRoleRecord.setMbaasRoleId(UUID.randomUUID().toString());
+                mbaasRoleRecord.setName(role.getKey());
+                mbaasRoleRecord.setDescription(role.getValue());
+                mbaasRoleRecord.setSystem(true);
+                mbaasRoleRecord.store();
             }
         }
-    }
-
-    protected void initDDL(DSLContext context, DataSource dataSource) {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        UserTable userTable = Tables.USER.as("userTable");
-
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.LOGIN.eq(configuration.getString(Constants.USER_ADMIN))).fetchOneInto(userTable);
-
-        Map<String, CollectionRecord> collectionRecords = new LinkedHashMap<>();
-        for (CollectionRecord collectionRecord : context.select(collectionTable.fields()).from(collectionTable).fetchInto(collectionTable)) {
-            collectionRecords.put(collectionRecord.getName(), collectionRecord);
-        }
-
-        try {
-            Connection connection = dataSource.getConnection();
-            DatabaseMetaData databaseMetaData = connection.getMetaData();
-            DbSupport databaseSupport = DbSupportFactory.createDbSupport(connection, true);
-            Schema schema = databaseSupport.getSchema(databaseSupport.getCurrentSchemaName());
-            for (Table table : schema.allTables()) {
-                CollectionRecord collectionRecord = collectionRecords.get(table.getName());
-                if (collectionRecord == null) {
-                    collectionRecord = context.newRecord(collectionTable);
-                    collectionRecord.setCollectionId(UUID.randomUUID().toString());
-                    collectionRecord.setName(table.getName());
-                    collectionRecord.setSystem(true);
-                    collectionRecord.setOwnerUserId(userRecord.getUserId());
-                    collectionRecord.setApplicationId("-1");
-                    collectionRecord.store();
-                }
-                List<AttributeRecord> temporaryAttributeRecords = context.select(attributeTable.fields()).from(attributeTable)
-                        .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                        .fetchInto(attributeTable);
-                Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
-                for (AttributeRecord attributeRecord : temporaryAttributeRecords) {
-                    int extra = attributeRecord.getExtra();
-                    if (AttributeExtraEnum.PRIMARY == (extra & AttributeExtraEnum.PRIMARY)) {
-                        extra = extra - AttributeExtraEnum.PRIMARY;
-                    }
-                    if (AttributeExtraEnum.INDEX == (extra & AttributeExtraEnum.INDEX)) {
-                        extra = extra - AttributeExtraEnum.INDEX;
-                    }
-                    attributeRecord.setExtra(extra);
-                    attributeRecord.update();
-                    attributeRecords.put(attributeRecord.getName(), attributeRecord);
-                }
-                List<String> physicalName = new ArrayList<>();
-                ResultSet columns = null;
-                if (databaseSupport.catalogIsSchema()) {
-                    columns = databaseMetaData.getColumns(schema.getName(), null, table.getName(), null);
-                } else {
-                    columns = databaseMetaData.getColumns(null, schema.getName(), table.getName(), null);
-                }
-                while (columns.next()) {
-                    String columnName = columns.getString(ColumnEnum.COLUMN_NAME.getLiteral());
-                    if (!attributeRecords.containsKey(columnName)) {
-                        int extra = 0;
-                        AttributeRecord attributeRecord = context.newRecord(attributeTable);
-                        attributeRecord.setApplicationId("-1");
-                        attributeRecord.setAttributeId(UUID.randomUUID().toString());
-                        attributeRecord.setCollectionId(collectionRecord.getCollectionId());
-                        attributeRecord.setName(columnName);
-                        if (columns.getBoolean(ColumnEnum.NULLABLE.getLiteral())) {
-                            extra = extra | AttributeExtraEnum.NULLABLE;
-                        }
-                        if (columnName.equals(collectionRecord.getName() + "_id")) {
-                            extra = extra | AttributeExtraEnum.AUTO_INCREMENT;
-                            attributeRecord.setVisibility(VisibilityEnum.Shown.getLiteral());
-                        } else {
-                            attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
-                        }
-                        extra = extra | AttributeExtraEnum.EXPOSED;
-                        attributeRecord.setSystem(true);
-                        attributeRecord.setEav(false);
-                        attributeRecord.setExtra(extra);
-
-                        int dataType = columns.getInt(ColumnEnum.DATA_TYPE.getLiteral());
-                        int columnSize = columns.getInt(ColumnEnum.COLUMN_SIZE.getLiteral());
-                        String typeName = columns.getString(ColumnEnum.TYPE_NAME.getLiteral());
-
-                        String errorMessage = "collection " + table.getName() + ", attribute " + columnName + " dataType " + dataType + ",  typeName " + typeName + ", columnSize " + columnSize;
-
-                        boolean handled = false;
-
-                        if (dataType == Types.BIT) {
-                            if ("BIT".equals(typeName)) {
-                                if (columnSize == 1) {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Boolean.getLiteral());
-                                    handled = true;
-                                } else {
-                                    attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                    handled = true;
-                                }
-                            } else if ("TINYINT".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.TINYINT) {
-                            if ("TINYINT".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.SMALLINT) {
-                            if ("SMALLINT".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.BOOLEAN) {
-                            attributeRecord.setAttributeType(AttributeTypeEnum.Boolean.getLiteral());
-                        } else if (dataType == Types.INTEGER) {
-                            if ("INT".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                handled = true;
-                            } else if ("MEDIUMINT".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.BIGINT) {
-                            if ("BIGINT".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Integer.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.REAL) {
-                            if ("FLOAT".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Float.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.DOUBLE) {
-                            if ("DOUBLE".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Double.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.DECIMAL) {
-                            if ("DECIMAL".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Double.getLiteral());
-                                handled = true;
-                            }
-                        } else if ((dataType == Types.CHAR && "CHAR".equals(typeName)) || (dataType == Types.VARCHAR && "VARCHAR".equals(typeName))) {
-                            if (columnSize > 255) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Text.getLiteral());
-                                handled = true;
-                            } else if (columnSize > 1) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.String.getLiteral());
-                                handled = true;
-                            } else {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Character.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.TIMESTAMP) {
-                            if ("DATETIME".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.DateTime.getLiteral());
-                                handled = true;
-                            } else if ("TIMESTAMP".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.DateTime.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.DATE) {
-                            if ("DATE".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Date.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.TIME) {
-                            if ("TIME".equals(typeName)) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Time.getLiteral());
-                                handled = true;
-                            }
-                        } else if (dataType == Types.LONGVARCHAR) {
-                            if (typeName.equals("TEXT")) {
-                                attributeRecord.setAttributeType(AttributeTypeEnum.Text.getLiteral());
-                                handled = true;
-                            }
-                        }
-                        if (!handled) {
-                            throw new WicketRuntimeException(errorMessage);
-                        }
-                        attributeRecord.store();
-                    } else {
-                        if (attributeRecords.get(columnName).getEav()) {
-                            throw new WicketRuntimeException(table.getName() + " attribute " + columnName + " is already exists but it is EAV attribute");
-                        }
-                    }
-                    physicalName.add(columnName);
-                }
-                for (Map.Entry<String, AttributeRecord> entry : attributeRecords.entrySet()) {
-                    if (!physicalName.contains(entry.getKey()) && !entry.getValue().getEav()) {
-                        context.delete(attributeTable).where(attributeTable.ATTRIBUTE_ID.eq(entry.getValue().getAttributeId())).execute();
-                    }
-                }
-                {
-                    ResultSet resultSet = databaseMetaData.getPrimaryKeys(null, null, table.getName());
-                    while (resultSet.next()) {
-                        String columnName = resultSet.getString(PrimaryKeyEnum.COLUMN_NAME.getLiteral());
-                        AttributeRecord attributeRecord = context.select(attributeTable.fields()).from(attributeTable)
-                                .where(attributeTable.NAME.eq(columnName))
-                                .and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                                .fetchOneInto(attributeTable);
-                        int extra = attributeRecord.getExtra() | AttributeExtraEnum.PRIMARY;
-                        attributeRecord.setExtra(extra);
-                        attributeRecord.update();
-                    }
-                }
-                {
-                    ResultSet resultSet = databaseMetaData.getIndexInfo(null, null, table.getName(), false, false);
-                    while (resultSet.next()) {
-                        String indexName = resultSet.getString(IndexInfoEnum.INDEX_NAME.getLiteral());
-                        if ("PRIMARY".equals(indexName)) {
-                            continue;
-                        }
-
-                        String columnName = resultSet.getString(IndexInfoEnum.COLUMN_NAME.getLiteral());
-                        AttributeRecord attributeRecord = context.select(attributeTable.fields()).from(attributeTable)
-                                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                                .and(attributeTable.NAME.eq(columnName))
-                                .fetchOneInto(attributeTable);
-                        int extra = attributeRecord.getExtra();
-                        attributeRecord.setExtra(extra | AttributeExtraEnum.INDEX);
-                        attributeRecord.update();
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new WicketRuntimeException(e);
-        }
-        context.update(collectionTable).set(collectionTable.LOCKED, false).execute();
     }
 
     public static ApplicationContext get(ServletContext servletContext) {
@@ -777,8 +544,16 @@ public class ApplicationContext implements ServletContextListener {
         return scheduler;
     }
 
+    public final DbSupport getDbSupport() {
+        return this.dbSupport;
+    }
+
     public final JavascriptServiceFactoryBean.JavascriptService getJavascriptService() {
         return this.javascriptService;
+    }
+
+    public final ApplicationDataSourceFactoryBean.ApplicationDataSource getApplicationDataSource() {
+        return this.applicationDataSource;
     }
 
     public final Gson getGson() {

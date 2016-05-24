@@ -3,21 +3,10 @@ package com.angkorteam.mbaas.server.page.asset;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AssetTable;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
-import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
-import com.angkorteam.mbaas.server.function.DocumentFunction;
-import com.angkorteam.mbaas.server.template.TextFieldPanel;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,9 +16,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.PropertyModel;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.io.File;
 import java.util.*;
@@ -37,7 +26,7 @@ import java.util.*;
 /**
  * Created by socheat on 3/11/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice", "registered"})
+@AuthorizeInstantiation({"administrator", "registered"})
 @Mount("/asset/create")
 public class AssetCreatePage extends MasterPage {
 
@@ -48,8 +37,6 @@ public class AssetCreatePage extends MasterPage {
     private List<FileUpload> asset;
     private FileUploadField assetField;
     private TextFeedbackPanel assetFeedback;
-
-    private String collectionId;
 
     private Button saveButton;
 
@@ -63,7 +50,6 @@ public class AssetCreatePage extends MasterPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        DSLContext context = getDSLContext();
 
         this.form = new Form<>("form");
         add(this.form);
@@ -81,10 +67,6 @@ public class AssetCreatePage extends MasterPage {
         this.assetFeedback = new TextFeedbackPanel("assetFeedback", this.assetField);
         this.form.add(assetFeedback);
 
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.ASSET.getName())).fetchOneInto(collectionTable);
-        this.collectionId = collectionRecord.getCollectionId();
-
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(saveButton);
@@ -97,39 +79,36 @@ public class AssetCreatePage extends MasterPage {
         String patternFolder = configuration.getString(Constants.PATTERN_FOLDER);
         String repo = configuration.getString(Constants.RESOURCE_REPO);
         String assetRepo = DateFormatUtils.format(new Date(), patternFolder);
-
-        long length = asset.getSize();
-        String path = assetRepo;
-        String mime = asset.getContentType();
+        File container = new File(repo + "/" + getApplicationCode() + "/asset" + assetRepo);
         String extension = StringUtils.lowerCase(FilenameUtils.getExtension(asset.getClientFileName()));
-
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        CollectionRecord collectionRecord = getDSLContext().select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
-        DocumentCreateRequest requestBody = new DocumentCreateRequest();
-        Map<String, Object> fields = new HashMap<>();
-        requestBody.setDocument(fields);
-        fields.put(Tables.ASSET.PATH.getName(), path);
-        fields.put(Tables.ASSET.APPLICATION_ID.getName(), getSession().getApplicationId());
-        fields.put(Tables.ASSET.MIME.getName(), mime);
-        fields.put(Tables.ASSET.EXTENSION.getName(), extension);
-        fields.put(Tables.ASSET.LENGTH.getName(), length);
-        fields.put(Tables.ASSET.LABEL.getName(), this.name);
-        String documentId = UUID.randomUUID().toString();
-        DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), documentId, collectionRecord.getName(), requestBody);
-        String name = documentId + "_" + this.name;
-
-        AssetTable assetTable = Tables.ASSET.as("assetTable");
-        DSLContext context = getDSLContext();
-        context.update(assetTable).set(assetTable.NAME, name).where(assetTable.ASSET_ID.eq(documentId)).execute();
-
-        File container = new File(repo + "/asset" + assetRepo);
+        String assetId = UUID.randomUUID().toString();
+        String name = assetId + "_" + this.name + "." + extension;
         container.mkdirs();
-
         try {
             asset.writeTo(new File(container, name));
         } catch (Exception e) {
         }
 
+        long length = asset.getSize();
+        String path = assetRepo;
+        String mime = asset.getContentType();
+        String label = this.name;
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Asset.ASSET_ID, assetId);
+        fields.put(Jdbc.Asset.APPLICATION_CODE, getApplicationCode());
+        fields.put(Jdbc.Asset.PATH, path);
+        fields.put(Jdbc.Asset.MIME, mime);
+        fields.put(Jdbc.Asset.EXTENSION, extension);
+        fields.put(Jdbc.Asset.LENGTH, length);
+        fields.put(Jdbc.Asset.LABEL, label);
+        fields.put(Jdbc.Asset.NAME, name);
+        fields.put(Jdbc.Asset.DATE_CREATED, new Date());
+        fields.put(Jdbc.Asset.APPLICATION_USER_ID, getSession().getApplicationUserId());
+
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.ASSET);
+        jdbcInsert.execute(fields);
         setResponsePage(AssetManagementPage.class);
     }
 }

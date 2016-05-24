@@ -5,16 +5,10 @@ import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
 import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
-import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
-import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
 import com.angkorteam.mbaas.server.page.document.DocumentManagementPage;
 import com.angkorteam.mbaas.server.provider.AttributeProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
@@ -25,7 +19,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
@@ -35,17 +28,16 @@ import java.util.Map;
 /**
  * Created by socheat on 3/7/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/attribute/management")
 public class AttributeManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     private String collectionId;
-
-    private CollectionPojo collection;
+    private String collectionName;
 
     @Override
     public String getPageHeader() {
-        return "Collection Attribute Management :: " + this.collection.getName();
+        return "Collection Attribute Management :: " + this.collectionName;
     }
 
     @Override
@@ -54,11 +46,13 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
 
         this.collectionId = getPageParameters().get("collectionId").toString();
 
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        DSLContext context = getDSLContext();
-        this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
-        AttributeProvider provider = new AttributeProvider(this.collectionId);
+        Map<String, Object> collectionRecord = null;
+        collectionRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.COLLECTION_ID + " = ?", this.collectionId);
+        this.collectionName = (String) collectionRecord.get(Jdbc.Collection.NAME);
+
+        AttributeProvider provider = new AttributeProvider(getSession().getApplicationCode(), this.collectionId);
         provider.selectField(Boolean.class, "system");
         provider.selectField(String.class, "attributeId");
 
@@ -91,41 +85,24 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
     }
 
     @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        DSLContext context = getDSLContext();
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collection.getCollectionId())).fetchOneInto(collectionTable);
-        if (getSession().isBackOffice() && !collectionRecord.getOwnerUserId().equals(getSession().getUserId())) {
-            setResponsePage(CollectionManagementPage.class);
-        }
-    }
-
-    @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
-        DSLContext context = getDSLContext();
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        String attributeId = (String) object.get("attributeId");
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         if ("Delete".equals(link)) {
-            CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-
-            String attributeId = (String) object.get("attributeId");
-
-            AttributeRecord attributeRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.ATTRIBUTE_ID.eq(attributeId)).fetchOneInto(attributeTable);
-            CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
-
-            JdbcTemplate jdbcTemplate = getJdbcTemplate();
+            Map<String, Object> attributeRecord = null;
+            attributeRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.ATTRIBUTE_ID + " = ?", attributeId);
+            Map<String, Object> collectionRecord = null;
+            collectionRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.COLLECTION_ID + " = ?", collectionId);
             CollectionAttributeDeleteRequest requestBody = new CollectionAttributeDeleteRequest();
-            requestBody.setAttributeName(attributeRecord.getName());
-            requestBody.setCollectionName(collectionRecord.getName());
-            AttributeFunction.deleteAttribute(context, jdbcTemplate, requestBody);
+            requestBody.setAttributeName((String) attributeRecord.get(Jdbc.Attribute.NAME));
+            requestBody.setCollectionName((String) collectionRecord.get(Jdbc.Collection.NAME));
+            AttributeFunction.deleteAttribute(jdbcTemplate, requestBody);
         }
         if ("Hide".equals(link)) {
-            String attributeId = (String) object.get("attributeId");
-            context.update(attributeTable).set(attributeTable.VISIBILITY, VisibilityEnum.Hided.getLiteral()).where(attributeTable.ATTRIBUTE_ID.eq(attributeId)).execute();
+            jdbcTemplate.update("UPDATE " + Jdbc.ATTRIBUTE + " SET " + Jdbc.Attribute.VISIBILITY + " = ?", VisibilityEnum.Hided.getLiteral(), attributeId);
         }
         if ("Show".equals(link)) {
-            String attributeId = (String) object.get("attributeId");
-            context.update(attributeTable).set(attributeTable.VISIBILITY, VisibilityEnum.Shown.getLiteral()).where(attributeTable.ATTRIBUTE_ID.eq(attributeId)).execute();
+            jdbcTemplate.update("UPDATE " + Jdbc.ATTRIBUTE + " SET " + Jdbc.Attribute.VISIBILITY + " = ?", VisibilityEnum.Shown.getLiteral(), attributeId);
         }
     }
 

@@ -23,6 +23,10 @@ import org.jooq.DSLContext;
 @Mount("/login")
 public class LoginPage extends AdminLTEPage {
 
+    private String secret;
+    private TextField<String> secretField;
+    private TextFeedbackPanel secretFeedback;
+
     private String login;
     private TextField<String> loginField;
     private TextFeedbackPanel loginFeedback;
@@ -39,8 +43,17 @@ public class LoginPage extends AdminLTEPage {
     protected void onInitialize() {
         super.onInitialize();
 
+        this.secret = "d54ba28a-cad7-4f64-a3b5-7a3f6b43864e";
+
         this.form = new Form<>("form");
         add(this.form);
+
+        this.secretField = new TextField<>("secretField", new PropertyModel<>(this, "secret"));
+        this.secretField.setRequired(true);
+        this.secretField.setLabel(JooqUtils.lookup("secret", this));
+        this.form.add(this.secretField);
+        this.secretFeedback = new TextFeedbackPanel("secretFeedback", this.secretField);
+        this.form.add(this.secretFeedback);
 
         this.loginField = new TextField<>("loginField", new PropertyModel<>(this, "login"));
         this.loginField.setRequired(true);
@@ -67,7 +80,7 @@ public class LoginPage extends AdminLTEPage {
     }
 
     private void loginButtonOnSubmit(Button button) {
-        boolean signin = getSession().signIn(this.login, this.password);
+        boolean signin = getSession().applicationSignIn(this.secret, this.login, this.password);
         if (signin) {
             setResponsePage(getApplication().getHomePage());
         } else {

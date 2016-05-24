@@ -1,17 +1,13 @@
 package com.angkorteam.mbaas.server.page.query;
 
+import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.SQLTextArea;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.QueryParameterTable;
-import com.angkorteam.mbaas.model.entity.tables.QueryTable;
-import com.angkorteam.mbaas.model.entity.tables.records.QueryParameterRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
 import com.angkorteam.mbaas.plain.enums.SubTypeEnum;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
-import com.angkorteam.mbaas.server.page.job.JobManagementPage;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.QueryNameValidator;
 import com.angkorteam.mbaas.server.validator.QueryReturnSubTypeValidator;
 import com.angkorteam.mbaas.server.validator.QueryScriptValidator;
@@ -24,7 +20,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -38,7 +35,6 @@ import java.util.regex.Pattern;
 public class QueryModifyPage extends MasterPage {
 
     private String queryId;
-    private Integer optimistic;
 
     private String name;
     private TextField<String> nameField;
@@ -74,16 +70,15 @@ public class QueryModifyPage extends MasterPage {
         super.onInitialize();
 
         this.queryId = getPageParameters().get("queryId").toString();
-        DSLContext context = getDSLContext();
-        QueryTable queryTable = Tables.QUERY.as("queryTable");
-        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.QUERY_ID.eq(this.queryId)).fetchOneInto(queryTable);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+
+        Map<String, Object> queryRecord = null;
+        queryRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.QUERY + " WHERE " + Jdbc.Query.QUERY_ID + " = ?", this.queryId);
 
         this.form = new Form<>("form");
         add(this.form);
 
-        this.optimistic = queryRecord.getOptimistic();
-
-        this.name = queryRecord.getName();
+        this.name = (String) queryRecord.get(Jdbc.Query.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
         this.nameField.add(new QueryNameValidator(this.queryId));
@@ -91,14 +86,14 @@ public class QueryModifyPage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        this.description = queryRecord.getDescription();
+        this.description = (String) queryRecord.get(Jdbc.Query.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
         this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.script = queryRecord.getScript();
+        this.script = (String) queryRecord.get(Jdbc.Query.SCRIPT);
         this.scriptField = new SQLTextArea("scriptField", new PropertyModel<>(this, "script"));
         this.scriptField.setRequired(true);
         this.scriptField.add(new QueryScriptValidator());
@@ -112,7 +107,7 @@ public class QueryModifyPage extends MasterPage {
                 returnTypes.add(typeEnum.getLiteral());
             }
         }
-        this.returnType = queryRecord.getReturnType();
+        this.returnType = (String) queryRecord.get(Jdbc.Query.RETURN_TYPE);
         this.returnTypeField = new DropDownChoice<>("returnTypeField", new PropertyModel<>(this, "returnType"), returnTypes);
         this.returnTypeField.setRequired(true);
         this.form.add(this.returnTypeField);
@@ -125,7 +120,7 @@ public class QueryModifyPage extends MasterPage {
                 returnSubTypes.add(typeEnum.getLiteral());
             }
         }
-        this.returnSubType = queryRecord.getReturnSubType();
+        this.returnSubType = (String) queryRecord.get(Jdbc.Query.RETURN_SUB_TYPE);
         this.returnSubTypeField = new DropDownChoice<>("returnSubTypeField", new PropertyModel<>(this, "returnSubType"), returnSubTypes);
         this.form.add(this.returnSubTypeField);
         this.returnSubTypeFeedback = new TextFeedbackPanel("returnSubTypeFeedback", this.returnSubTypeField);
@@ -142,23 +137,11 @@ public class QueryModifyPage extends MasterPage {
         this.form.add(this.saveAndContinueButton);
     }
 
-    @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        DSLContext context = getDSLContext();
-        QueryTable queryTable = Tables.QUERY.as("queryTable");
-        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.QUERY_ID.eq(this.queryId)).fetchOneInto(queryTable);
-        if (getSession().isBackOffice() && !queryRecord.getOwnerUserId().equals(getSession().getUserId())) {
-            setResponsePage(QueryManagementPage.class);
-        }
-    }
-
     private void saveButtonOnSubmit(Button button) {
         saveQuery();
-        DSLContext context = getDSLContext();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
-        int count = context.selectCount().from(Tables.QUERY_PARAMETER).where(Tables.QUERY_PARAMETER.QUERY_ID.eq(this.queryId)).and(Tables.QUERY_PARAMETER.TYPE.isNull()).fetchOneInto(int.class);
-
+        int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.QUERY_PARAMETER + " WHERE " + Jdbc.QueryParameter.QUERY_ID + " = ? AND " + Jdbc.QueryParameter.TYPE + " IS NULL ", int.class, this.queryId);
         if (count == 0) {
             setResponsePage(QueryManagementPage.class);
         } else {
@@ -179,23 +162,23 @@ public class QueryModifyPage extends MasterPage {
     }
 
     private void saveQuery() {
-        DSLContext context = getDSLContext();
-        QueryTable queryTable = Tables.QUERY.as("queryTable");
-        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.QUERY_ID.eq(this.queryId)).fetchOneInto(queryTable);
+        Map<String, Object> wheres = new HashMap<>();
+        wheres.put(Jdbc.Query.QUERY_ID, this.queryId);
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Query.NAME, this.name);
+        fields.put(Jdbc.Query.SCRIPT, this.script);
+        fields.put(Jdbc.Query.DESCRIPTION, this.description);
+        fields.put(Jdbc.Query.RETURN_TYPE, this.returnType);
+        fields.put(Jdbc.Query.RETURN_SUB_TYPE, this.returnSubType);
 
-        queryRecord.setName(this.name);
-        queryRecord.setScript(this.script);
-        queryRecord.setDescription(this.description);
-        queryRecord.setOptimistic(this.optimistic);
-        queryRecord.setReturnType(this.returnType);
-        queryRecord.setReturnSubType(this.returnSubType);
-        queryRecord.update();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
+        jdbcUpdate.withTableName(Jdbc.QUERY);
+        jdbcUpdate.execute(fields, wheres);
 
-        QueryParameterTable queryParameterTable = Tables.QUERY_PARAMETER.as("queryParameterTable");
-
-        Map<String, QueryParameterRecord> queryParameterRecords = new LinkedHashMap<>();
-        for (QueryParameterRecord queryParameterRecord : context.select(queryParameterTable.fields()).from(queryParameterTable).where(queryParameterTable.QUERY_ID.eq(this.queryId)).fetchInto(queryParameterTable)) {
-            queryParameterRecords.put(queryParameterRecord.getName(), queryParameterRecord);
+        Map<String, Map<String, Object>> queryParameterRecords = new LinkedHashMap<>();
+        for (Map<String, Object> queryParameterRecord : jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.QUERY_PARAMETER + " WHERE " + Jdbc.QueryParameter.QUERY_ID + " = ?", this.queryId)) {
+            queryParameterRecords.put((String) queryParameterRecord.get(Jdbc.QueryParameter.NAME), queryParameterRecord);
         }
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
@@ -210,21 +193,25 @@ public class QueryModifyPage extends MasterPage {
         }
 
         List<String> params = new LinkedList<>();
-        for (Map.Entry<String, QueryParameterRecord> queryParameterRecord : queryParameterRecords.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> queryParameterRecord : queryParameterRecords.entrySet()) {
             if (!queryParameters.contains(queryParameterRecord.getKey())) {
-                queryParameterRecord.getValue().delete();
+                String queryParameterId = (String) queryParameterRecord.getValue().get(Jdbc.QueryParameter.QUERY_PARAMETER_ID);
+                jdbcTemplate.update("DELETE FROM " + Jdbc.QUERY_PARAMETER + " WHERE " + Jdbc.QueryParameter.QUERY_PARAMETER_ID + " = ?", queryParameterId);
             } else {
                 params.add(queryParameterRecord.getKey());
             }
         }
 
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.QUERY_PARAMETER);
         for (String queryParameter : queryParameters) {
             if (!params.contains(queryParameter)) {
-                QueryParameterRecord queryParamRecord = context.newRecord(queryParameterTable);
-                queryParamRecord.setQueryId(queryRecord.getQueryId());
-                queryParamRecord.setQueryParameterId((UUID.randomUUID().toString()));
-                queryParamRecord.setName(queryParameter);
-                queryParamRecord.store();
+                Map<String, Object> pFields = new HashMap<>();
+                pFields.put(Jdbc.QueryParameter.QUERY_PARAMETER_ID, UUID.randomUUID().toString());
+                pFields.put(Jdbc.QueryParameter.QUERY_ID, this.queryId);
+                pFields.put(Jdbc.QueryParameter.APPLICATION_CODE, getSession().getApplicationCode());
+                pFields.put(Jdbc.QueryParameter.NAME, queryParameter);
+                jdbcInsert.execute(pFields);
             }
         }
     }

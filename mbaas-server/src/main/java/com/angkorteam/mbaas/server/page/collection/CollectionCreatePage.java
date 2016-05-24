@@ -16,7 +16,7 @@ import org.apache.wicket.model.PropertyModel;
  * Created by socheat on 3/3/16.
  */
 @Mount("/collection/create")
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 public class CollectionCreatePage extends MasterPage {
 
     private String name;
@@ -40,7 +40,7 @@ public class CollectionCreatePage extends MasterPage {
         add(this.form);
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
-        this.nameField.add(new CollectionNameValidator());
+        this.nameField.add(new CollectionNameValidator(getSession().getApplicationCode()));
         this.nameField.setRequired(true);
         this.form.add(this.nameField);
 
@@ -55,7 +55,7 @@ public class CollectionCreatePage extends MasterPage {
     private void saveButtonOnSubmit(Button button) {
         CollectionCreateRequest requestBody = new CollectionCreateRequest();
         requestBody.setCollectionName(this.name);
-        CollectionFunction.createCollection(getDSLContext(), getJdbcTemplate(), getSession().getApplicationId(), getSession().getUserId(), requestBody);
+        CollectionFunction.createCollection(getApplicationJdbcTemplate(), getSession().getApplicationCode(), getSession().getApplicationUserId(), requestBody);
         setResponsePage(CollectionManagementPage.class);
     }
 }

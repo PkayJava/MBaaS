@@ -3,13 +3,8 @@ package com.angkorteam.mbaas.server.page.client;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
-import com.angkorteam.mbaas.model.entity.tables.ClientTable;
-import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
-import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.ClientNameValidator;
 import com.angkorteam.mbaas.server.validator.PushClientValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -18,10 +13,12 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -65,11 +62,6 @@ public class ClientCreatePage extends MasterPage {
     protected void onInitialize() {
         super.onInitialize();
 
-        this.applicationId = getPageParameters().get("applicationId").toString("");
-        if ("".equals(this.applicationId)) {
-            this.applicationId = getSession().getApplicationId();
-        }
-
         this.form = new Form<>("form");
         add(this.form);
 
@@ -107,51 +99,26 @@ public class ClientCreatePage extends MasterPage {
         this.form.add(this.saveButton);
         this.form.add(new PushClientValidator(this.pushVariantIdField, this.pushSecretField));
 
-        PageParameters parameters = new PageParameters();
-        parameters.add("applicationId", this.applicationId);
-        BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", ClientManagementPage.class, parameters);
+        BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", ClientManagementPage.class);
         this.form.add(closeLink);
     }
 
-    @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        DSLContext context = getDSLContext();
-        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
-        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(this.applicationId)).fetchOneInto(applicationTable);
-        if (getSession().isBackOffice() && !applicationRecord.getOwnerUserId().equals(getSession().getUserId())) {
-            PageParameters parameters = new PageParameters();
-            parameters.add("applicationId", this.applicationId);
-            setResponsePage(ClientManagementPage.class, parameters);
-        }
-    }
-
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        ClientTable clientTable = Tables.CLIENT.as("clientTable");
-        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
-
-        this.applicationId = getPageParameters().get("applicationId").toString();
-        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(this.applicationId)).fetchOneInto(applicationTable);
-
-        ClientRecord clientRecord = context.newRecord(clientTable);
-        clientRecord.setDateCreated(new Date());
-        clientRecord.setOwnerUserId(getSession().getUserId());
-        clientRecord.setApplicationId(this.applicationId);
-        clientRecord.setApplicationUserId(applicationRecord.getOwnerUserId());
-        clientRecord.setClientSecret(UUID.randomUUID().toString());
-        clientRecord.setClientId(UUID.randomUUID().toString());
-        clientRecord.setSecurity(SecurityEnum.Denied.getLiteral());
-        clientRecord.setName(this.name);
-        clientRecord.setDescription(this.description);
-        clientRecord.setPushGcmSenderId(this.pushGcmSenderId);
-        clientRecord.setPushSecret(this.pushSecret);
-        clientRecord.setPushVariantId(this.pushVariantId);
-        clientRecord.store();
-
-        PageParameters parameters = new PageParameters();
-        parameters.add("applicationId", this.applicationId);
-
-        setResponsePage(ClientManagementPage.class, parameters);
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Client.CLIENT_ID, UUID.randomUUID().toString());
+        fields.put(Jdbc.Client.DATE_CREATED, new Date());
+        fields.put(Jdbc.Client.APPLICATION_CODE, getSession().getApplicationCode());
+        fields.put(Jdbc.Client.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.Client.CLIENT_SECRET, UUID.randomUUID().toString());
+        fields.put(Jdbc.Client.SECURITY, SecurityEnum.Denied.getLiteral());
+        fields.put(Jdbc.Client.NAME, this.name);
+        fields.put(Jdbc.Client.DESCRIPTION, this.description);
+        fields.put(Jdbc.Client.PUSH_GCM_SENDER_ID, this.pushGcmSenderId);
+        fields.put(Jdbc.Client.PUSH_SECRET, this.pushSecret);
+        fields.put(Jdbc.Client.PUSH_VARIANT_ID, this.pushVariantId);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.execute(fields);
+        setResponsePage(ClientManagementPage.class);
     }
 }

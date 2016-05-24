@@ -4,25 +4,21 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.Jav
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.JobTable;
-import com.angkorteam.mbaas.model.entity.tables.records.JobRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
-import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
-import com.angkorteam.mbaas.server.validator.ClientNameValidator;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.JobCronValidator;
 import com.angkorteam.mbaas.server.validator.JobNameValidator;
-import com.angkorteam.mbaas.server.validator.PushClientValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -60,7 +56,7 @@ public class JobCreatePage extends MasterPage {
         add(this.form);
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
-        this.nameField.add(new JobNameValidator());
+        this.nameField.add(new JobNameValidator(getSession().getApplicationCode()));
         this.nameField.setRequired(true);
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
@@ -86,19 +82,21 @@ public class JobCreatePage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        JobTable jobTable = Tables.JOB.as("jobTable");
-        JobRecord jobRecord = context.newRecord(jobTable);
-        jobRecord.setJobId(UUID.randomUUID().toString());
-        jobRecord.setDateCreated(new Date());
-        jobRecord.setCron(this.cron);
-        jobRecord.setApplicationId(getSession().getApplicationId());
-        jobRecord.setJavascript(this.javascript);
-        jobRecord.setName(this.name);
-        jobRecord.setOwnerUserId(getSession().getUserId());
-        jobRecord.setSecurity(SecurityEnum.Denied.getLiteral());
-        jobRecord.store();
-        getJavascriptService().schedule(jobRecord.getJobId());
+        String jobId = UUID.randomUUID().toString();
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Job.JOB_ID, jobId);
+        fields.put(Jdbc.Job.DATE_CREATED, new Date());
+        fields.put(Jdbc.Job.CRON, this.cron);
+        fields.put(Jdbc.Job.APPLICATION_CODE, getSession().getApplicationCode());
+        fields.put(Jdbc.Job.JAVASCRIPT, this.javascript);
+        fields.put(Jdbc.Job.NAME, this.name);
+        fields.put(Jdbc.Job.SECURITY, SecurityEnum.Denied.getLiteral());
+        fields.put(Jdbc.Job.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.JOB);
+        jdbcInsert.execute(fields);
+        getJavascriptService().schedule(getSession().getApplicationCode(), jobId);
         setResponsePage(JobManagementPage.class);
     }
 }

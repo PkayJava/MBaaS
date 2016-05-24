@@ -4,10 +4,10 @@ import com.angkorteam.framework.extension.jooq.IDSLContext;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.server.Scope;
+import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
-import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
-import com.angkorteam.mbaas.server.page.profile.InformationPage;
+import com.angkorteam.mbaas.server.page.mbaas.MBaaSDashboardPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -17,7 +17,8 @@ import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSessio
 import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.resource.DynamicJQueryResourceReference;
-import org.apache.wicket.util.time.Duration;
+import org.flywaydb.core.internal.dbsupport.DbSupport;
+import org.flywaydb.core.internal.dbsupport.Schema;
 import org.jooq.DSLContext;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -50,18 +51,25 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
      */
     @Override
     public Class<? extends WebPage> getHomePage() {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String roleRegistered = configuration.getString(Constants.ROLE_REGISTERED);
         Session session = (Session) Session.get();
-        if (session == null || !session.isSignedIn()) {
-            return DashboardPage.class;
+        if (session.isSignedIn()) {
+
         } else {
-            if (session.getRoles().hasRole(roleRegistered)) {
-                return InformationPage.class;
-            } else {
-                return DashboardPage.class;
-            }
         }
+        return MBaaSDashboardPage.class;
+//        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+//        String roleRegistered = null;
+////        roleRegistered = configuration.getString(Constants.ROLE_REGISTERED);
+//
+//        if (session == null || !session.isSignedIn()) {
+//            return MBaaSDashboardPage.class;
+//        } else {
+//            if (session.getRoles().hasRole(roleRegistered)) {
+//                return InformationPage.class;
+//            } else {
+//                return MBaaSDashboardPage.class;
+//            }
+//        }
     }
 
     /**
@@ -102,15 +110,41 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
         }
     }
 
+    public final ApplicationDataSourceFactoryBean.ApplicationDataSource getApplicationDataSource() {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        return applicationContext.getApplicationDataSource();
+    }
+
     @Override
     public final DSLContext getDSLContext() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
         return applicationContext.getDSLContext();
     }
 
+    public final DSLContext getDSLContext(String applicationCode) {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        return applicationContext.getApplicationDataSource().getDSLContext(applicationCode);
+    }
+
     public final JdbcTemplate getJdbcTemplate() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
         return applicationContext.getJdbcTemplate();
+    }
+
+    public final JdbcTemplate getJdbcTemplate(String applicationCode) {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        return applicationContext.getApplicationDataSource().getJdbcTemplate(applicationCode);
+    }
+
+    public final DbSupport getDbSupport() {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+        return applicationContext.getDbSupport();
+    }
+
+    public final Schema getSchema(String applicationCode) {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        return applicationContext.getApplicationDataSource().getDbSchema(applicationCode);
     }
 
     public final MailSender getMailSender() {

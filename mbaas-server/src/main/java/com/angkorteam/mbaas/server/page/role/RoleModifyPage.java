@@ -2,9 +2,7 @@ package com.angkorteam.mbaas.server.page.role;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.RoleTable;
-import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.RoleNameValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -14,7 +12,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.Map;
 
 /**
  * Created by socheat on 3/1/16.
@@ -24,7 +24,6 @@ import org.jooq.DSLContext;
 public class RoleModifyPage extends MasterPage {
 
     private String roleId;
-    private Integer optimistic;
 
     private String name;
     private TextField<String> nameField;
@@ -48,21 +47,21 @@ public class RoleModifyPage extends MasterPage {
         super.onInitialize();
 
         PageParameters parameters = getPageParameters();
-        this.roleId = parameters.get("id").toString();
+        this.roleId = parameters.get("roleId").toString();
 
-        DSLContext context = getDSLContext();
-        RoleTable roleTable = RoleTable.ROLE.as("roleTable");
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
-        RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(this.roleId)).fetchOneInto(roleTable);
+        Map<String, Object> roleRecord = null;
+        roleRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.roleId);
 
-        this.name = roleRecord.getName();
+        this.name = (String) roleRecord.get(Jdbc.Role.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
         this.nameField.add(new RoleNameValidator(this.roleId));
         this.nameField.setLabel(JooqUtils.lookup("name", this));
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
 
-        this.description = roleRecord.getDescription();
+        this.description = (String) roleRecord.get(Jdbc.Role.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
         this.descriptionField.setLabel(JooqUtils.lookup("description", this));
@@ -84,14 +83,8 @@ public class RoleModifyPage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        RoleTable roleTable = Tables.ROLE.as("roleTable");
-
-        RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(this.roleId)).fetchOneInto(roleTable);
-        roleRecord.setName(this.name);
-        roleRecord.setDescription(this.description);
-        roleRecord.update();
-
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        jdbcTemplate.update("UPDATE " + Jdbc.ROLE + " SET " + Jdbc.Role.NAME + " = ?, " + Jdbc.Role.DESCRIPTION + " = ? WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.name, this.description, this.roleId);
         setResponsePage(RoleManagementPage.class);
     }
 

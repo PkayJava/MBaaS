@@ -1,14 +1,13 @@
 package com.angkorteam.mbaas.server.function;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,7 +26,7 @@ public class CommonFunction {
      * @param resultDocument
      * @return
      */
-    public static boolean checkDataTypes(Map<String, AttributeRecord> attributeRecords, Map<String, Object> externalDocument, Map<String, Object> resultDocument) {
+    public static boolean checkDataTypes(Map<String, Map<String, Object>> attributeRecords, Map<String, Object> externalDocument, Map<String, Object> resultDocument) {
         if (externalDocument != null && !externalDocument.isEmpty()) {
             XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             DateFormat patternDatetime = new SimpleDateFormat(configuration.getString(Constants.PATTERN_DATETIME));
@@ -36,9 +35,9 @@ public class CommonFunction {
             for (Map.Entry<String, Object> item : externalDocument.entrySet()) {
                 if (attributeRecords.containsKey(item.getKey())) {
                     Object value = item.getValue();
-                    AttributeRecord attributeRecord = attributeRecords.get(item.getKey());
+                    Map<String, Object> attributeRecord = attributeRecords.get(item.getKey());
                     AttributeTypeEnum externalType = AttributeTypeEnum.parseExternalAttributeType(item.getValue());
-                    AttributeTypeEnum internalType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
+                    AttributeTypeEnum internalType = AttributeTypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
                     if (internalType == AttributeTypeEnum.Boolean) {
                         if (externalType != AttributeTypeEnum.Boolean) {
                             return false;
@@ -227,7 +226,7 @@ public class CommonFunction {
      * @param externalAttributes
      * @return
      */
-    public static boolean ensureAttributes(Map<String, AttributeRecord> attributeRecords, Map<String, Object> externalAttributes) {
+    public static boolean ensureAttributes(Map<String, Map<String, Object>> attributeRecords, Map<String, Object> externalAttributes) {
         if (externalAttributes != null && !externalAttributes.isEmpty()) {
             for (Map.Entry<String, Object> item : externalAttributes.entrySet()) {
                 if (!attributeRecords.containsKey(item.getKey())) {
@@ -263,114 +262,132 @@ public class CommonFunction {
         }
     }
 
-    public static void saveEavAttributes(String collectionId, String documentId, DSLContext context, Map<String, AttributeRecord> attributeRecords, Map<String, Object> eavAttributes) {
+    public static void saveEavAttributes(JdbcTemplate jdbcTemplate, String collectionId, String documentId, Map<String, Map<String, Object>> attributeRecords, Map<String, Object> eavAttributes) {
         if (eavAttributes != null && !eavAttributes.isEmpty()) {
             for (Map.Entry<String, Object> item : eavAttributes.entrySet()) {
-                AttributeRecord attributeRecord = attributeRecords.get(item.getKey());
-                AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
+                Map<String, Object> attributeRecord = attributeRecords.get(item.getKey());
+                AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
                 String uuid = UUID.randomUUID().toString();
                 // eav time
                 if (attributeType == AttributeTypeEnum.Time) {
-                    EavTimeRecord record = context.newRecord(Tables.EAV_TIME);
-                    record.setEavTimeId(uuid);
-                    record.setAttributeId(attributeRecord.getAttributeId());
-                    record.setCollectionId(collectionId);
-                    record.setDocumentId(documentId);
-                    record.setAttributeType(attributeType.getLiteral());
-                    record.setEavValue((Date) item.getValue());
-                    record.store();
+                    Map<String, Object> fields = new HashMap<>();
+                    fields.put(Jdbc.EavTime.EAV_TIME_ID, uuid);
+                    fields.put(Jdbc.EavTime.ATTRIBUTE_ID, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
+                    fields.put(Jdbc.EavTime.COLLECTION_ID, collectionId);
+                    fields.put(Jdbc.EavTime.DOCUMENT_ID, documentId);
+                    fields.put(Jdbc.EavTime.ATTRIBUTE_TYPE, attributeType.getLiteral());
+                    fields.put(Jdbc.EavTime.EAV_VALUE, item.getValue());
+                    SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+                    jdbcInsert.withTableName(Jdbc.EAV_TIME);
+                    jdbcInsert.execute(fields);
                 }
                 // eav date
                 if (attributeType == AttributeTypeEnum.Date) {
-                    EavDateRecord record = context.newRecord(Tables.EAV_DATE);
-                    record.setEavDateId(uuid);
-                    record.setAttributeId(attributeRecord.getAttributeId());
-                    record.setCollectionId(collectionId);
-                    record.setDocumentId(documentId);
-                    record.setAttributeType(attributeType.getLiteral());
-                    record.setEavValue((Date) item.getValue());
-                    record.store();
+                    Map<String, Object> fields = new HashMap<>();
+                    fields.put(Jdbc.EavDate.EAV_DATE_ID, uuid);
+                    fields.put(Jdbc.EavDate.ATTRIBUTE_ID, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
+                    fields.put(Jdbc.EavDate.COLLECTION_ID, collectionId);
+                    fields.put(Jdbc.EavDate.DOCUMENT_ID, documentId);
+                    fields.put(Jdbc.EavDate.ATTRIBUTE_TYPE, attributeType.getLiteral());
+                    fields.put(Jdbc.EavDate.EAV_VALUE, item.getValue());
+                    SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+                    jdbcInsert.withTableName(Jdbc.EAV_DATE);
+                    jdbcInsert.execute(fields);
                 }
                 // eav datetime
                 if (attributeType == AttributeTypeEnum.DateTime) {
-                    EavDateTimeRecord record = context.newRecord(Tables.EAV_DATE_TIME);
-                    record.setEavDateTimeId(uuid);
-                    record.setAttributeId(attributeRecord.getAttributeId());
-                    record.setCollectionId(collectionId);
-                    record.setDocumentId(documentId);
-                    record.setAttributeType(attributeType.getLiteral());
-                    record.setEavValue((Date) item.getValue());
-                    record.store();
+                    Map<String, Object> fields = new HashMap<>();
+                    fields.put(Jdbc.EavDateTime.EAV_DATE_TIME_ID, uuid);
+                    fields.put(Jdbc.EavDateTime.ATTRIBUTE_ID, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
+                    fields.put(Jdbc.EavDateTime.COLLECTION_ID, collectionId);
+                    fields.put(Jdbc.EavDateTime.DOCUMENT_ID, documentId);
+                    fields.put(Jdbc.EavDateTime.ATTRIBUTE_TYPE, attributeType.getLiteral());
+                    fields.put(Jdbc.EavDateTime.EAV_VALUE, item.getValue());
+                    SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+                    jdbcInsert.withTableName(Jdbc.EAV_DATE_TIME);
+                    jdbcInsert.execute(fields);
                 }
                 // eav varchar
                 if (attributeType == AttributeTypeEnum.String) {
-                    EavVarcharRecord record = context.newRecord(Tables.EAV_VARCHAR);
-                    record.setEavVarcharId(uuid);
-                    record.setAttributeId(attributeRecord.getAttributeId());
-                    record.setAttributeType(attributeType.getLiteral());
-                    record.setCollectionId(collectionId);
-                    record.setDocumentId(documentId);
-                    record.setEavValue(String.valueOf(item.getValue()));
-                    record.store();
+                    Map<String, Object> fields = new HashMap<>();
+                    fields.put(Jdbc.EavVarchar.EAV_VARCHAR_ID, uuid);
+                    fields.put(Jdbc.EavVarchar.ATTRIBUTE_ID, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
+                    fields.put(Jdbc.EavVarchar.COLLECTION_ID, collectionId);
+                    fields.put(Jdbc.EavVarchar.DOCUMENT_ID, documentId);
+                    fields.put(Jdbc.EavVarchar.ATTRIBUTE_TYPE, attributeType.getLiteral());
+                    fields.put(Jdbc.EavVarchar.EAV_VALUE, item.getValue());
+                    SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+                    jdbcInsert.withTableName(Jdbc.EAV_VARCHAR);
+                    jdbcInsert.execute(fields);
                 }
                 // eav character
                 if (attributeType == AttributeTypeEnum.Character) {
-                    EavCharacterRecord record = context.newRecord(Tables.EAV_CHARACTER);
-                    record.setEavCharacterId(uuid);
-                    record.setAttributeId(attributeRecord.getAttributeId());
-                    record.setAttributeType(attributeType.getLiteral());
-                    record.setCollectionId(collectionId);
-                    record.setDocumentId(documentId);
-                    record.setEavValue(String.valueOf(item.getValue()));
-                    record.store();
+                    Map<String, Object> fields = new HashMap<>();
+                    fields.put(Jdbc.EavCharacter.EAV_CHARACTER_ID, uuid);
+                    fields.put(Jdbc.EavCharacter.ATTRIBUTE_ID, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
+                    fields.put(Jdbc.EavCharacter.COLLECTION_ID, collectionId);
+                    fields.put(Jdbc.EavCharacter.DOCUMENT_ID, documentId);
+                    fields.put(Jdbc.EavCharacter.ATTRIBUTE_TYPE, attributeType.getLiteral());
+                    fields.put(Jdbc.EavCharacter.EAV_VALUE, item.getValue());
+                    SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+                    jdbcInsert.withTableName(Jdbc.EAV_CHARACTER);
+                    jdbcInsert.execute(fields);
                 }
                 // eav decimal
                 if (attributeType == AttributeTypeEnum.Float
                         || attributeType == AttributeTypeEnum.Double) {
-                    EavDecimalRecord record = context.newRecord(Tables.EAV_DECIMAL);
-                    record.setEavDecimalId(uuid);
-                    record.setAttributeId(attributeRecord.getAttributeId());
-                    record.setCollectionId(collectionId);
-                    record.setDocumentId(documentId);
-                    record.setAttributeType(attributeType.getLiteral());
-                    record.setEavValue(((Number) item.getValue()).doubleValue());
-                    record.store();
+                    Map<String, Object> fields = new HashMap<>();
+                    fields.put(Jdbc.EavDecimal.EAV_DECIMAL_ID, uuid);
+                    fields.put(Jdbc.EavDecimal.ATTRIBUTE_ID, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
+                    fields.put(Jdbc.EavDecimal.COLLECTION_ID, collectionId);
+                    fields.put(Jdbc.EavDecimal.DOCUMENT_ID, documentId);
+                    fields.put(Jdbc.EavDecimal.ATTRIBUTE_TYPE, attributeType.getLiteral());
+                    fields.put(Jdbc.EavDecimal.EAV_VALUE, ((Number) item.getValue()).doubleValue());
+                    SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+                    jdbcInsert.withTableName(Jdbc.EAV_DECIMAL);
+                    jdbcInsert.execute(fields);
                 }
                 // eav boolean
                 if (attributeType == AttributeTypeEnum.Boolean) {
-                    EavBooleanRecord record = context.newRecord(Tables.EAV_BOOLEAN);
-                    record.setEavBooleanId(uuid);
-                    record.setAttributeId(attributeRecord.getAttributeId());
-                    record.setAttributeType(attributeType.getLiteral());
-                    record.setCollectionId(collectionId);
-                    record.setDocumentId(documentId);
-                    record.setEavValue((Boolean) item.getValue());
-                    record.store();
+                    Map<String, Object> fields = new HashMap<>();
+                    fields.put(Jdbc.EavBoolean.EAV_BOOLEAN_ID, uuid);
+                    fields.put(Jdbc.EavBoolean.ATTRIBUTE_ID, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
+                    fields.put(Jdbc.EavBoolean.COLLECTION_ID, collectionId);
+                    fields.put(Jdbc.EavBoolean.DOCUMENT_ID, documentId);
+                    fields.put(Jdbc.EavBoolean.ATTRIBUTE_TYPE, attributeType.getLiteral());
+                    fields.put(Jdbc.EavBoolean.EAV_VALUE, item.getValue());
+                    SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+                    jdbcInsert.withTableName(Jdbc.EAV_BOOLEAN);
+                    jdbcInsert.execute(fields);
                 }
                 // eav integer
                 if (attributeType == AttributeTypeEnum.Byte
                         || attributeType == AttributeTypeEnum.Short
                         || attributeType == AttributeTypeEnum.Integer
                         || attributeType == AttributeTypeEnum.Long) {
-                    EavIntegerRecord record = context.newRecord(Tables.EAV_INTEGER);
-                    record.setEavIntegerId(uuid);
-                    record.setAttributeId(attributeRecord.getAttributeId());
-                    record.setAttributeType(attributeType.getLiteral());
-                    record.setCollectionId(collectionId);
-                    record.setDocumentId(documentId);
-                    record.setEavValue(((Number) item.getValue()).intValue());
-                    record.store();
+                    Map<String, Object> fields = new HashMap<>();
+                    fields.put(Jdbc.EavInteger.EAV_INTEGER_ID, uuid);
+                    fields.put(Jdbc.EavInteger.ATTRIBUTE_ID, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
+                    fields.put(Jdbc.EavInteger.COLLECTION_ID, collectionId);
+                    fields.put(Jdbc.EavInteger.DOCUMENT_ID, documentId);
+                    fields.put(Jdbc.EavInteger.ATTRIBUTE_TYPE, attributeType.getLiteral());
+                    fields.put(Jdbc.EavInteger.EAV_VALUE, ((Number) item.getValue()).intValue());
+                    SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+                    jdbcInsert.withTableName(Jdbc.EAV_INTEGER);
+                    jdbcInsert.execute(fields);
                 }
                 // eav text
                 if (attributeType == AttributeTypeEnum.Text) {
-                    EavTextRecord record = context.newRecord(Tables.EAV_TEXT);
-                    record.setEavTextId(uuid);
-                    record.setAttributeId(attributeRecord.getAttributeId());
-                    record.setAttributeType(attributeType.getLiteral());
-                    record.setCollectionId(collectionId);
-                    record.setDocumentId(documentId);
-                    record.setEavValue((String) item.getValue());
-                    record.store();
+                    Map<String, Object> fields = new HashMap<>();
+                    fields.put(Jdbc.EavText.EAV_TEXT_ID, uuid);
+                    fields.put(Jdbc.EavText.ATTRIBUTE_ID, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
+                    fields.put(Jdbc.EavText.COLLECTION_ID, collectionId);
+                    fields.put(Jdbc.EavText.DOCUMENT_ID, documentId);
+                    fields.put(Jdbc.EavText.ATTRIBUTE_TYPE, attributeType.getLiteral());
+                    fields.put(Jdbc.EavText.EAV_VALUE, item.getValue());
+                    SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+                    jdbcInsert.withTableName(Jdbc.EAV_TEXT);
+                    jdbcInsert.execute(fields);
                 }
             }
         }
@@ -378,12 +395,14 @@ public class CommonFunction {
 
     public static List<String> splitNoneWhite(String string) {
         List<String> split = new ArrayList<>();
-        for (String item : StringUtils.split(string, ',')) {
-            if (item != null && !"".equals(item)) {
-                String trimmed = item.trim();
-                if (!"".equals(trimmed)) {
-                    if (!split.contains(trimmed)) {
-                        split.add(trimmed);
+        if (string != null && !"".equals(string)) {
+            for (String item : StringUtils.split(string, ',')) {
+                if (item != null && !"".equals(item)) {
+                    String trimmed = item.trim();
+                    if (!"".equals(trimmed)) {
+                        if (!split.contains(trimmed)) {
+                            split.add(trimmed);
+                        }
                     }
                 }
             }

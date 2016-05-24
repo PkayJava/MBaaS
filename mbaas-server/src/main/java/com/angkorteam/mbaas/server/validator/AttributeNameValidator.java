@@ -2,11 +2,12 @@ package com.angkorteam.mbaas.server.validator;
 
 import com.angkorteam.framework.extension.share.validation.JooqValidator;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
+import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.wicket.Application;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.ValidationError;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.regex.Pattern;
 
@@ -15,17 +16,21 @@ import java.util.regex.Pattern;
  */
 public class AttributeNameValidator extends JooqValidator<String> {
 
+    private final String applicationCode;
+
     private String collectionId;
 
     private String attributeId;
 
-    public AttributeNameValidator(String collectionId) {
+    public AttributeNameValidator(String applicationCode, String collectionId) {
         this.collectionId = collectionId;
+        this.applicationCode = applicationCode;
     }
 
-    public AttributeNameValidator(String collectionId, String attributeId) {
+    public AttributeNameValidator(String applicationCode, String collectionId, String attributeId) {
         this.collectionId = collectionId;
         this.attributeId = attributeId;
+        this.applicationCode = applicationCode;
     }
 
     @Override
@@ -36,14 +41,13 @@ public class AttributeNameValidator extends JooqValidator<String> {
             if (!patternAttributeName.matcher(name).matches()) {
                 validatable.error(new ValidationError(this, "format"));
             } else {
-                AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
-                DSLContext context = getDSLContext();
+                Application application = ApplicationUtils.getApplication();
+                JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
                 int count = 0;
                 if (attributeId == null || "".equals(attributeId)) {
-                    count = context.selectCount().from(attributeTable).where(attributeTable.NAME.eq(name)).and(attributeTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(int.class);
+                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.NAME + " = ? AND " + Jdbc.Attribute.COLLECTION_ID + " = ?", int.class, name, this.collectionId);
                 } else {
-                    count = context.selectCount().from(attributeTable).where(attributeTable.NAME.eq(name)).and(attributeTable.COLLECTION_ID.eq(this.collectionId)).and(attributeTable.ATTRIBUTE_ID.ne(attributeId)).fetchOneInto(int.class);
+                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.NAME + " = ? AND " + Jdbc.Attribute.COLLECTION_ID + " = ? AND " + Jdbc.Attribute.ATTRIBUTE_ID + " != ?", int.class, name, this.collectionId, this.attributeId);
                 }
                 if (count > 0) {
                     validatable.error(new ValidationError(this, "duplicated"));

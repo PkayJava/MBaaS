@@ -2,11 +2,11 @@ package com.angkorteam.mbaas.server.validator;
 
 import com.angkorteam.framework.extension.share.validation.JooqValidator;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
+import com.angkorteam.mbaas.server.wicket.Application;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.ValidationError;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.regex.Pattern;
 
@@ -15,12 +15,16 @@ import java.util.regex.Pattern;
  */
 public class JavascriptPathValidator extends JooqValidator<String> {
 
+    private final String applicationCode;
+
     private String javascriptId;
 
-    public JavascriptPathValidator() {
+    public JavascriptPathValidator(String applicationCode) {
+        this.applicationCode = applicationCode;
     }
 
-    public JavascriptPathValidator(String javascriptId) {
+    public JavascriptPathValidator(String applicationCode, String javascriptId) {
+        this.applicationCode = applicationCode;
         this.javascriptId = javascriptId;
     }
 
@@ -32,13 +36,13 @@ public class JavascriptPathValidator extends JooqValidator<String> {
             if (!patternNaming.matcher(path).matches()) {
                 validatable.error(new ValidationError(this, "format"));
             } else {
-                JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
-                DSLContext context = getDSLContext();
+                Application application = ApplicationUtils.getApplication();
+                JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
                 int count = 0;
                 if (javascriptId == null || "".equals(javascriptId)) {
-                    count = context.selectCount().from(javascriptTable).where(javascriptTable.PATH.eq(path)).fetchOneInto(int.class);
+                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM javascript WHERE path = ?", int.class, path);
                 } else {
-                    count = context.selectCount().from(javascriptTable).where(javascriptTable.PATH.eq(path)).and(javascriptTable.JAVASCRIPT_ID.ne(this.javascriptId)).fetchOneInto(int.class);
+                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM javascript WHERE path = ? AND javascript_id != ?", int.class, path, this.javascriptId);
                 }
                 if (count > 0) {
                     validatable.error(new ValidationError(this, "duplicated"));

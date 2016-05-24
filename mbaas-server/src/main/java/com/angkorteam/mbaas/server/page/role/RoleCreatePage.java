@@ -2,9 +2,7 @@ package com.angkorteam.mbaas.server.page.role;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.RoleTable;
-import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.RoleNameValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -13,8 +11,11 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -47,7 +48,7 @@ public class RoleCreatePage extends MasterPage {
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
-        this.nameField.add(new RoleNameValidator());
+        this.nameField.add(new RoleNameValidator(getSession().getApplicationCode()));
         this.nameField.setLabel(JooqUtils.lookup("name", this));
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
 
@@ -72,15 +73,17 @@ public class RoleCreatePage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
-        RoleRecord roleRecord = context.newRecord(roleTable);
-        roleRecord.setRoleId(UUID.randomUUID().toString());
-        roleRecord.setSystem(false);
-        roleRecord.setName(this.name);
-        roleRecord.setDescription(this.description);
-        roleRecord.store();
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Role.ROLE_ID, UUID.randomUUID().toString());
+        fields.put(Jdbc.Role.SYSTEM, false);
+        fields.put(Jdbc.Role.DESCRIPTION, this.description);
+        fields.put(Jdbc.Role.NAME, this.name);
+
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.ROLE);
+        jdbcInsert.execute(fields);
 
         setResponsePage(RoleManagementPage.class);
     }

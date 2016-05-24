@@ -2,19 +2,10 @@ package com.angkorteam.mbaas.server.page.user;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.RoleTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
-import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
-import com.angkorteam.mbaas.server.function.DocumentFunction;
+import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
+import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
-import com.angkorteam.mbaas.server.template.TextFieldPanel;
 import com.angkorteam.mbaas.server.validator.UserLoginValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -25,12 +16,11 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.validation.EqualPasswordInputValidator;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.PropertyModel;
-import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -58,12 +48,9 @@ public class UserCreatePage extends MasterPage {
     private TextField<String> retypePasswordField;
     private TextFeedbackPanel retypePasswordFeedback;
 
-    private RolePojo role;
-    private DropDownChoice<RolePojo> roleField;
+    private Map<String, Object> role;
+    private DropDownChoice<Map<String, Object>> roleField;
     private TextFeedbackPanel roleFeedback;
-
-    private String collectionId;
-    private Map<String, Object> fields;
 
     private Button saveButton;
 
@@ -77,13 +64,11 @@ public class UserCreatePage extends MasterPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        DSLContext context = getDSLContext();
-        this.fields = new LinkedHashMap<>();
 
         this.form = new Form<>("form");
         add(this.form);
 
-        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
         this.fullNameField = new TextField<>("fullNameField", new PropertyModel<>(this, "fullName"));
         this.fullNameField.setRequired(true);
@@ -94,12 +79,11 @@ public class UserCreatePage extends MasterPage {
 
         this.loginField = new TextField<>("loginField", new PropertyModel<>(this, "login"));
         this.loginField.setRequired(true);
-        this.loginField.add(new UserLoginValidator());
+        this.loginField.add(new UserLoginValidator(getSession().getApplicationCode()));
         this.loginField.setLabel(JooqUtils.lookup("login", this));
         this.form.add(loginField);
         this.loginFeedback = new TextFeedbackPanel("loginFeedback", this.loginField);
         this.form.add(loginFeedback);
-
 
         this.passwordField = new PasswordTextField("passwordField", new PropertyModel<>(this, "password"));
         this.passwordField.setLabel(JooqUtils.lookup("password", this));
@@ -115,7 +99,7 @@ public class UserCreatePage extends MasterPage {
 
         this.form.add(new EqualPasswordInputValidator(this.passwordField, this.retypePasswordField));
 
-        List<RolePojo> roles = context.select(roleTable.fields()).from(roleTable).fetchInto(RolePojo.class);
+        List<Map<String, Object>> roles = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE);
         this.roleField = new DropDownChoice<>("roleField", new PropertyModel<>(this, "role"), roles, new RoleChoiceRenderer());
         this.roleField.setRequired(true);
         this.roleField.setLabel(JooqUtils.lookup("role", this));
@@ -123,45 +107,30 @@ public class UserCreatePage extends MasterPage {
         this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);
         this.form.add(roleFeedback);
 
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.USER.getName())).fetchOneInto(collectionTable);
-        this.collectionId = collectionRecord.getCollectionId();
-
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
-        List<AttributePojo> attributes = context.select(attributeTable.fields())
-                .from(attributeTable)
-                .where(attributeTable.COLLECTION_ID.eq(collectionId))
-                .and(attributeTable.SYSTEM.eq(false))
-                .fetchInto(AttributePojo.class);
-
-        RepeatingView fields = new RepeatingView("fields");
-        for (AttributePojo attribute : attributes) {
-            TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
-            fields.add(fieldPanel);
-        }
-        this.form.add(fields);
-
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(saveButton);
     }
 
     private void saveButtonOnSubmit(Button button) {
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        CollectionRecord collectionRecord = getDSLContext().select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
-        DocumentCreateRequest requestBody = new DocumentCreateRequest();
-        requestBody.setDocument(fields);
-        fields.put(Tables.USER.LOGIN.getName(), this.login);
-        fields.put(Tables.USER.FULL_NAME.getName(), this.fullName);
-        fields.put(Tables.USER.PASSWORD.getName(), this.password);
-        fields.put(Tables.USER.ROLE_ID.getName(), this.role.getRoleId());
-        String documentId = UUID.randomUUID().toString();
-        DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), documentId, collectionRecord.getName(), requestBody);
-        DSLContext context = getDSLContext();
-        UserTable userTable = Tables.USER.as("userTable");
-        context.update(userTable).set(userTable.PASSWORD, DSL.md5(password)).where(userTable.USER_ID.eq(documentId)).execute();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.APPLICATION_USER);
+        Map<String, Object> user = new HashMap<>();
+        String applicationUserId = UUID.randomUUID().toString();
+        user.put(Jdbc.ApplicationUser.APPLICATION_USER_ID, applicationUserId);
+        user.put(Jdbc.ApplicationUser.ACCOUNT_NON_EXPIRED, true);
+        user.put(Jdbc.ApplicationUser.SYSTEM, false);
+        user.put(Jdbc.ApplicationUser.ACCOUNT_NON_LOCKED, true);
+        user.put(Jdbc.ApplicationUser.CREDENTIALS_NON_EXPIRED, true);
+        user.put(Jdbc.ApplicationUser.STATUS, UserStatusEnum.Active.getLiteral());
+        user.put(Jdbc.ApplicationUser.LOGIN, this.login);
+        user.put(Jdbc.ApplicationUser.FULL_NAME, this.fullName);
+        user.put(Jdbc.ApplicationUser.PASSWORD, this.password);
+        user.put(Jdbc.ApplicationUser.ROLE_ID, role.get(Jdbc.Role.ROLE_ID));
+        user.put(Jdbc.ApplicationUser.AUTHENTICATION, AuthenticationEnum.None.getLiteral());
+        jdbcInsert.execute(user);
+        jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.PASSWORD + " = MD5(?) WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", this.password, applicationUserId);
         setResponsePage(UserManagementPage.class);
     }
-
 }

@@ -18,7 +18,7 @@ public class MBaaS {
 
     public final Database Database;
 
-    public final Permission Permission;
+//    public final Permission Permission;
 
     private final Request request;
 
@@ -30,7 +30,7 @@ public class MBaaS {
         this.Console = new Console(LOGGER);
         this.Identity = identity;
         this.Database = new Database(context, identity, jdbcTemplate, this);
-        this.Permission = new Permission(this, identity, context, jdbcTemplate);
+//        this.Permission = new Permission(this, identity, context, jdbcTemplate);
         this.request = request;
         this.Http = new Http();
     }

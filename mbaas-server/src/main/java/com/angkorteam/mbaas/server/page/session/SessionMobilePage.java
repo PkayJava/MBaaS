@@ -6,7 +6,7 @@ import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooq
 import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
-import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.provider.MobileProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -15,7 +15,7 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/14/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/session/mobile")
 public class SessionMobilePage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -37,7 +37,7 @@ public class SessionMobilePage extends MasterPage implements ActionFilteredJooqC
     protected void onInitialize() {
         super.onInitialize();
 
-        MobileProvider provider = new MobileProvider();
+        MobileProvider provider = new MobileProvider(getSession().getApplicationCode());
         provider.selectField(Boolean.class, "mobileId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
@@ -45,7 +45,6 @@ public class SessionMobilePage extends MasterPage implements ActionFilteredJooqC
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("mobileId", this), "mobileId", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("application", this), "application", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("client", this), "client", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("login", this), "login", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
@@ -72,10 +71,10 @@ public class SessionMobilePage extends MasterPage implements ActionFilteredJooqC
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         if ("Delete".equals(link)) {
             String mobileId = (String) object.get("mobileId");
-            DSLContext context = getDSLContext();
-            context.delete(Tables.MOBILE).where(Tables.MOBILE.MOBILE_ID.eq(mobileId)).execute();
+            jdbcTemplate.update("DELETE FROM " + Jdbc.MOBILE + " WHERE " + Jdbc.Mobile.MOBILE_ID + " = ?", mobileId);
             return;
         }
     }

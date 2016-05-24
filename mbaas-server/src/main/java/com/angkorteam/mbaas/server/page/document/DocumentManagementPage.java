@@ -3,19 +3,15 @@ package com.angkorteam.mbaas.server.page.document;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.table.filter.*;
+import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
+import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
-import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
 import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
-import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
 import com.angkorteam.mbaas.server.provider.DocumentProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -28,7 +24,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.Filte
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,52 +33,48 @@ import java.util.Map;
 /**
  * Created by socheat on 3/3/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/document/management")
 public class DocumentManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
-    private CollectionPojo collection;
-    private DropDownChoice<CollectionPojo> collectionField;
+    private Map<String, Object> collection;
+    private DropDownChoice<Map<String, Object>> collectionField;
     private TextFeedbackPanel collectionFeedback;
 
     private DocumentProvider provider;
 
     @Override
     public String getPageHeader() {
-        return "Document Management :: " + collection.getName();
+        return "Document Management :: " + collection.get(Jdbc.Collection.NAME);
     }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        DSLContext context = getDSLContext();
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
 
         String collectionId = getPageParameters().get("collectionId").toString();
 
-        this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        List<AttributeRecord> attributeRecords = context.select(attributeTable.fields())
-                .from(attributeTable)
-                .where(attributeTable.COLLECTION_ID.eq(collection.getCollectionId()))
-                .and(attributeTable.VISIBILITY.eq(VisibilityEnum.Shown.getLiteral()))
-                .fetchInto(attributeTable);
+        this.collection = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.COLLECTION_ID + " = ?", collectionId);
+        String collectionName = (String) this.collection.get(Jdbc.Collection.NAME);
 
-        this.provider = new DocumentProvider(this.collection.getCollectionId());
+        List<Map<String, Object>> attributeRecords = jdbcTemplate.queryForList("SELECT  * FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ? AND " + Jdbc.Attribute.VISIBILITY + " = ?", collectionId, VisibilityEnum.Shown.getLiteral());
+
+        this.provider = new DocumentProvider(getSession().getApplicationCode(), collectionId, collectionName);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(collection.getName() + "_id", this), collection.getName() + "_id", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(collectionName + "_id", this), collectionName + "_id", provider));
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String jdbcColumnOwnerUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID);
-        for (AttributeRecord attributeRecord : attributeRecords) {
-            if (attributeRecord.getName().equals(jdbcColumnOwnerUserId) || attributeRecord.getName().equals(collection.getName() + "_id")) {
+        String jdbcColumnOwnerApplicationUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_APPLICATION_USER_ID);
+        for (Map<String, Object> attributeRecord : attributeRecords) {
+            if (attributeRecord.get(Jdbc.Attribute.NAME).equals(jdbcColumnOwnerApplicationUserId) || attributeRecord.get(Jdbc.Attribute.NAME).equals(collectionName + "_id")) {
                 continue;
             }
-            AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
+            AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
             ProviderUtils.addColumn(provider, columns, attributeRecord, attributeType, this);
         }
 
@@ -94,7 +86,7 @@ public class DocumentManagementPage extends MasterPage implements ActionFiltered
         filterForm.add(dataTable);
 
         PageParameters parameters = new PageParameters();
-        parameters.add("collectionId", collection.getCollectionId());
+        parameters.add("collectionId", collectionId);
         BookmarkablePageLink<Void> newDocumentLink = new BookmarkablePageLink<>("newDocumentLink", DocumentCreatePage.class, parameters);
         add(newDocumentLink);
 
@@ -106,25 +98,15 @@ public class DocumentManagementPage extends MasterPage implements ActionFiltered
     }
 
     @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        DSLContext context = getDSLContext();
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collection.getCollectionId())).fetchOneInto(collectionTable);
-        if (getSession().isBackOffice() && !collectionRecord.getOwnerUserId().equals(getSession().getUserId())) {
-            setResponsePage(CollectionManagementPage.class);
-        }
-    }
-
-    @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         if ("Delete".equals(link)) {
-            String documentId = (String) object.get(this.collection.getName() + "_id");
-            DocumentFunction.deleteDocument(getDSLContext(), getJdbcTemplate(), this.collection.getName(), documentId);
+            String documentId = (String) object.get(this.collection.get(Jdbc.Collection.NAME) + "_id");
+            DocumentFunction.deleteDocument(jdbcTemplate, (String) this.collection.get(Jdbc.Collection.NAME), documentId);
         }
         if ("Edit".equals(link)) {
-            String collectionId = this.collection.getCollectionId();
-            String documentId = (String) object.get(this.collection.getName() + "_id");
+            String collectionId = (String) this.collection.get(Jdbc.Collection.COLLECTION_ID);
+            String documentId = (String) object.get(this.collection.get(Jdbc.Collection.NAME) + "_id");
             PageParameters parameters = new PageParameters();
             parameters.add("collectionId", collectionId);
             parameters.add("documentId", documentId);

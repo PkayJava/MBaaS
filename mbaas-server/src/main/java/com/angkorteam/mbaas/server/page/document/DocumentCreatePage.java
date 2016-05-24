@@ -2,16 +2,9 @@ package com.angkorteam.mbaas.server.page.document;
 
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
-import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
 import com.angkorteam.mbaas.server.template.TextFieldPanel;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -19,7 +12,7 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,11 +23,11 @@ import java.util.UUID;
  * Created by socheat on 3/7/16.
  */
 @Mount("/document/create")
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 public class DocumentCreatePage extends MasterPage {
 
     private String collectionId;
-    private CollectionPojo collection;
+    private Map<String, Object> collection;
 
     private Map<String, Object> fields;
 
@@ -42,7 +35,7 @@ public class DocumentCreatePage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Create New Document :: " + this.collection.getName();
+        return "Create New Document :: " + this.collection.get(Jdbc.Collection.NAME);
     }
 
     @Override
@@ -51,21 +44,15 @@ public class DocumentCreatePage extends MasterPage {
         this.fields = new HashMap<>();
         this.collectionId = getPageParameters().get("collectionId").toString();
 
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        DSLContext context = getDSLContext();
-        this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        this.collection = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.COLLECTION_ID + " = ?", this.collectionId);
 
-        List<AttributePojo> attributes = context.select(attributeTable.fields())
-                .from(attributeTable)
-                .where(attributeTable.COLLECTION_ID.eq(collectionId))
-                .and(attributeTable.SYSTEM.eq(false))
-                .fetchInto(AttributePojo.class);
+        List<Map<String, Object>> attributes = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ? AND " + Jdbc.Attribute.SYSTEM + " = ?", this.collectionId, false);
 
         RepeatingView fields = new RepeatingView("fields");
-        for (AttributePojo attribute : attributes) {
-            TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), attribute, this.fields);
+        for (Map<String, Object> attribute : attributes) {
+            TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), (String) attribute.get(Jdbc.Attribute.ATTRIBUTE_TYPE), (String) attribute.get(Jdbc.Attribute.NAME), this.fields);
             fields.add(fieldPanel);
         }
 
@@ -84,24 +71,12 @@ public class DocumentCreatePage extends MasterPage {
         this.form.add(saveButton);
     }
 
-    @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        DSLContext context = getDSLContext();
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collection.getCollectionId())).fetchOneInto(collectionTable);
-        if (getSession().isBackOffice() && !collectionRecord.getOwnerUserId().equals(getSession().getUserId())) {
-            setResponsePage(CollectionManagementPage.class);
-        }
-    }
-
     private void saveButtonOnSubmit(Button button) {
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        CollectionRecord collectionRecord = getDSLContext().select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         DocumentCreateRequest requestBody = new DocumentCreateRequest();
         requestBody.setDocument(fields);
         String documentId = UUID.randomUUID().toString();
-        DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), documentId, collectionRecord.getName(), requestBody);
+        DocumentFunction.insertDocument(jdbcTemplate, getSession().getApplicationUserId(), documentId, this.collectionId, (String) this.collection.get(Jdbc.Collection.NAME), requestBody);
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", collectionId);
         setResponsePage(DocumentManagementPage.class, parameters);

@@ -3,10 +3,8 @@ package com.angkorteam.mbaas.server.page.javascript;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.JavascriptTextArea;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
-import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.JavascriptPathValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -14,15 +12,18 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/javascript/create")
 public class JavascriptCreatePage extends MasterPage {
 
@@ -58,7 +59,7 @@ public class JavascriptCreatePage extends MasterPage {
 
         this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "pathText"));
         this.pathField.setRequired(true);
-        this.pathField.add(new JavascriptPathValidator());
+        this.pathField.add(new JavascriptPathValidator(getSession().getApplicationCode()));
         this.form.add(this.pathField);
         this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
         this.form.add(this.pathFeedback);
@@ -81,23 +82,19 @@ public class JavascriptCreatePage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
-
-        String uuid = UUID.randomUUID().toString();
-
-        JavascriptRecord javascriptRecord = context.newRecord(javascriptTable);
-
-        javascriptRecord.setJavascriptId(uuid);
-        javascriptRecord.setSecurity(SecurityEnum.Denied.getLiteral());
-        javascriptRecord.setPath(this.pathText);
-        javascriptRecord.setScript(this.script);
-        javascriptRecord.setApplicationId(getSession().getApplicationId());
-        javascriptRecord.setOwnerUserId(getSession().getUserId());
-        javascriptRecord.setDateCreated(new Date());
-        javascriptRecord.setDescription(this.description);
-        javascriptRecord.store();
-
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Javascript.JAVASCRIPT_ID, UUID.randomUUID().toString());
+        fields.put(Jdbc.Javascript.SECURITY, SecurityEnum.Denied.getLiteral());
+        fields.put(Jdbc.Javascript.PATH, this.pathText);
+        fields.put(Jdbc.Javascript.SCRIPT, this.script);
+        fields.put(Jdbc.Javascript.DATE_CREATED, new Date());
+        fields.put(Jdbc.Javascript.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.Javascript.APPLICATION_CODE, getSession().getApplicationCode());
+        fields.put(Jdbc.Javascript.DESCRIPTION, this.description);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.JAVASCRIPT);
+        jdbcInsert.execute(fields);
         setResponsePage(JavascriptManagementPage.class);
     }
 

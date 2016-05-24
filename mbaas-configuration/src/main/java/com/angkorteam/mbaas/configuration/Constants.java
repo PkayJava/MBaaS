@@ -36,17 +36,18 @@ public class Constants {
 
     public static final String JDBC_COLUMN_OPTIMISTIC = "jdbc.column.optimistic";
     public static final String JDBC_COLUMN_DELETED = "jdbc.column.deleted";
-    public static final String JDBC_COLUMN_OWNER_USER_ID = "jdbc.column.owner_user_id";
+    public static final String JDBC_COLUMN_OWNER_APPLICATION_USER_ID = "jdbc.column.owner_application_user_id";
     public static final String JDBC_COLUMN_DATE_CREATED = "jdbc.column.date_created";
+
+    public static final String ROLE_MBAAS_ADMINISTRATOR = "role.mbaas.administrator";
+    public static final String ROLE_MBAAS_ADMINISTRATOR_DESCRIPTION = "role.mbaas.administrator.description";
+    public static final String ROLE_MBAAS_SYSTEM = "role.mbaas.system";
+    public static final String ROLE_MBAAS_SYSTEM_DESCRIPTION = "role.mbaas.system.description";
 
     public static final String ROLE_ADMINISTRATOR = "role.administrator";
     public static final String ROLE_ADMINISTRATOR_DESCRIPTION = "role.administrator.description";
-    public static final String ROLE_BACKOFFICE = "role.backoffice";
-    public static final String ROLE_BACKOFFICE_DESCRIPTION = "role.backoffice.description";
     public static final String ROLE_REGISTERED = "role.registered";
     public static final String ROLE_REGISTERED_DESCRIPTION = "role.registered.description";
-    public static final String ROLE_ANONYMOUS = "role.anonymous";
-    public static final String ROLE_ANONYMOUS_DESCRIPTION = "role.anonymous.description";
     public static final String ROLE_OAUTH2_AUTHORIZATION = "role.oauth2.authorization";
     public static final String ROLE_OAUTH2_AUTHORIZATION_DESCRIPTION = "role.oauth2.authorization.description";
     public static final String ROLE_OAUTH2_IMPLICIT = "role.oauth2.implicit";
@@ -56,15 +57,15 @@ public class Constants {
     public static final String ROLE_OAUTH2_CLIENT = "role.oauth2.client";
     public static final String ROLE_OAUTH2_CLIENT_DESCRIPTION = "role.oauth2.client.description";
 
+    public static final String USER_MBAAS_ADMIN = "user.mbaas.admin";
+    public static final String USER_MBAAS_ADMIN_ROLE = "user.mbaas.admin.role";
+    public static final String USER_MBAAS_ADMIN_PASSWORD = "user.mbaas.admin.password";
+    public static final String USER_MBAAS_SYSTEM = "user.mbaas.system";
+    public static final String USER_MBAAS_SYSTEM_ROLE = "user.mbaas.system.role";
+    public static final String USER_MBAAS_SYSTEM_PASSWORD = "user.mbaas.system.password";
     public static final String USER_ADMIN = "user.admin";
     public static final String USER_ADMIN_ROLE = "user.admin.role";
     public static final String USER_ADMIN_PASSWORD = "user.admin.password";
-    public static final String USER_ANONYMOUS = "user.anonymous";
-    public static final String USER_ANONYMOUS_ROLE = "user.anonymous.role";
-    public static final String USER_ANONYMOUS_PASSWORD = "user.anonymous.password";
-    public static final String USER_BACKOFFICE = "user.backoffice";
-    public static final String USER_BACKOFFICE_ROLE = "user.backoffice.role";
-    public static final String USER_BACKOFFICE_PASSWORD = "user.backoffice.password";
 
     public static final String PATTERN_DATETIME = "pattern.datetime";
     public static final String PATTERN_TIME = "pattern.time";

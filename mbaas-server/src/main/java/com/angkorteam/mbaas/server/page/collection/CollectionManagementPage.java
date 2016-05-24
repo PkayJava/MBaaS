@@ -6,9 +6,6 @@ import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooq
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.plain.request.collection.CollectionDeleteRequest;
-import com.angkorteam.mbaas.server.function.CollectionFunction;
-import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
-import com.angkorteam.mbaas.server.page.document.DocumentManagementPage;
 import com.angkorteam.mbaas.server.provider.CollectionProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -28,7 +25,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/1/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/collection/management")
 public class CollectionManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -41,14 +38,9 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
     protected void onInitialize() {
         super.onInitialize();
 
-        CollectionProvider provider = null;
-        if (getSession().isAdministrator()) {
-            provider = new CollectionProvider();
-        } else {
-            provider = new CollectionProvider(getSession().getUserId());
-        }
+        CollectionProvider provider = new CollectionProvider(getSession().getApplicationCode());
         provider.selectField(String.class, "collectionId");
-        provider.selectField(String.class, "ownerUserId");
+        provider.selectField(String.class, "applicationUserId");
         provider.selectField(Boolean.class, "system");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
@@ -56,11 +48,8 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
-        columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("document", this), "document", provider));
-        if (getSession().isAdministrator()) {
-            columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
-        }
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Role Privacy", "User Privacy", "Attribute", "Delete"));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("applicationUser", this), "applicationUser", provider));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Attribute", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -72,37 +61,24 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
+        String collectionId = (String) object.get("collectionId");
         if ("name".equals(link)) {
-            String collectionId = (String) object.get("collectionId");
             PageParameters parameters = new PageParameters();
             parameters.add("collectionId", collectionId);
-            setResponsePage(DocumentManagementPage.class, parameters);
+//            setResponsePage(DocumentManagementPage.class, parameters);
         }
         if ("Delete".equals(link)) {
             DSLContext context = getDSLContext();
             JdbcTemplate jdbcTemplate = getJdbcTemplate();
             CollectionDeleteRequest requestBody = new CollectionDeleteRequest();
             requestBody.setCollectionName((String) object.get("name"));
-            CollectionFunction.deleteCollection(context, jdbcTemplate, requestBody);
+//            CollectionFunction.deleteCollection(context, jdbcTemplate, requestBody);
             setResponsePage(CollectionManagementPage.class);
         }
         if ("Attribute".equals(link)) {
-            String collectionId = (String) object.get("collectionId");
             PageParameters parameters = new PageParameters();
             parameters.add("collectionId", collectionId);
-            setResponsePage(AttributeManagementPage.class, parameters);
-        }
-        if ("Role Privacy".equals(link)) {
-            String collectionId = (String) object.get("collectionId");
-            PageParameters parameters = new PageParameters();
-            parameters.add("collectionId", collectionId);
-            setResponsePage(CollectionRolePrivacyManagementPage.class, parameters);
-        }
-        if ("User Privacy".equals(link)) {
-            String collectionId = (String) object.get("collectionId");
-            PageParameters parameters = new PageParameters();
-            parameters.add("collectionId", collectionId);
-            setResponsePage(CollectionUserPrivacyManagementPage.class, parameters);
+//            setResponsePage(AttributeManagementPage.class, parameters);
         }
     }
 

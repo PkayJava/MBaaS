@@ -2,7 +2,6 @@ package com.angkorteam.mbaas.server.template;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
-import com.angkorteam.mbaas.model.entity.tables.pojos.QueryParameterPojo;
 import com.angkorteam.mbaas.server.validator.SubTypeValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import org.apache.wicket.markup.html.basic.Label;
@@ -28,10 +27,10 @@ public class QueryParameterSelectFieldPanel extends Panel {
 
     private Form<Void> form;
 
-    public QueryParameterSelectFieldPanel(String id, Form<Void> form, QueryParameterPojo queryParameter, List<String> types, List<String> subTypes, Map<String, String> modelObject) {
+    public QueryParameterSelectFieldPanel(String id, Form<Void> form, Map<String, Object> queryParameterRecord, List<String> types, List<String> subTypes, Map<String, String> modelObject) {
         super(id);
         this.form = form;
-        this.name = queryParameter.getName();
+        this.name = (String) queryParameterRecord.get("name");
         this.fields = modelObject;
         this.types = types;
         this.subTypes = subTypes;

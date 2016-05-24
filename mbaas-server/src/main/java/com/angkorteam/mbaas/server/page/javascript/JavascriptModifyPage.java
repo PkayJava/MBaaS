@@ -1,12 +1,10 @@
 package com.angkorteam.mbaas.server.page.javascript;
 
+import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.JavascriptTextArea;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.JavascriptTable;
-import com.angkorteam.mbaas.model.entity.tables.records.JavascriptRecord;
-import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.JavascriptPathValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -15,12 +13,15 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/javascript/modify")
 public class JavascriptModifyPage extends MasterPage {
 
@@ -53,29 +54,30 @@ public class JavascriptModifyPage extends MasterPage {
         super.onInitialize();
 
         this.javascriptId = getPageParameters().get("javascriptId").toString();
-        DSLContext context = getDSLContext();
-        JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
-        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+
+        Map<String, Object> javascriptRecord = null;
+        javascriptRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JAVASCRIPT + " WHERE " + Jdbc.Javascript.JAVASCRIPT_ID + " = ?", this.javascriptId);
 
         this.form = new Form<>("form");
         add(this.form);
 
-        this.pathText = javascriptRecord.getPath();
+        this.pathText = (String) javascriptRecord.get(Jdbc.Javascript.PATH);
         this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "pathText"));
         this.pathField.setRequired(true);
-        this.pathField.add(new JavascriptPathValidator(this.javascriptId));
+        this.pathField.add(new JavascriptPathValidator(getSession().getApplicationCode(), this.javascriptId));
         this.form.add(this.pathField);
         this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
         this.form.add(this.pathFeedback);
 
-        this.description = javascriptRecord.getDescription();
+        this.description = (String) javascriptRecord.get(Jdbc.Javascript.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
         this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.script = javascriptRecord.getScript();
+        this.script = (String) javascriptRecord.get(Jdbc.Javascript.SCRIPT);
         this.scriptField = new JavascriptTextArea("scriptField", new PropertyModel<>(this, "script"));
         this.scriptField.setRequired(true);
         this.form.add(this.scriptField);
@@ -91,45 +93,33 @@ public class JavascriptModifyPage extends MasterPage {
         this.form.add(this.saveAndContinueButton);
     }
 
-    @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        DSLContext context = getDSLContext();
-        JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
-        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
-        if (getSession().isBackOffice() && !javascriptRecord.getOwnerUserId().equals(getSession().getUserId())) {
-            setResponsePage(JavascriptManagementPage.class);
-        }
-    }
-
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
-
-        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
-
-        javascriptRecord.setPath(this.pathText);
-        javascriptRecord.setScript(this.script);
-        javascriptRecord.setDescription(this.description);
-        javascriptRecord.update();
-
+        Map<String, Object> wheres = new HashMap<>();
+        wheres.put(Jdbc.Javascript.JAVASCRIPT_ID, this.javascriptId);
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Javascript.PATH, this.pathText);
+        fields.put(Jdbc.Javascript.SCRIPT, this.script);
+        fields.put(Jdbc.Javascript.DESCRIPTION, this.description);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
+        jdbcUpdate.withTableName(Jdbc.JAVASCRIPT);
+        jdbcUpdate.execute(fields, wheres);
         setResponsePage(JavascriptManagementPage.class);
     }
 
     private void saveAndContinueButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        JavascriptTable javascriptTable = Tables.JAVASCRIPT.as("javascriptTable");
-
-        JavascriptRecord javascriptRecord = context.select(javascriptTable.fields()).from(javascriptTable).where(javascriptTable.JAVASCRIPT_ID.eq(this.javascriptId)).fetchOneInto(javascriptTable);
-
-        javascriptRecord.setPath(this.pathText);
-        javascriptRecord.setScript(this.script);
-        javascriptRecord.setDescription(this.description);
-        javascriptRecord.update();
-
+        Map<String, Object> wheres = new HashMap<>();
+        wheres.put(Jdbc.Javascript.JAVASCRIPT_ID, this.javascriptId);
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Javascript.PATH, this.pathText);
+        fields.put(Jdbc.Javascript.SCRIPT, this.script);
+        fields.put(Jdbc.Javascript.DESCRIPTION, this.description);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
+        jdbcUpdate.withTableName(Jdbc.JAVASCRIPT);
+        jdbcUpdate.execute(fields, wheres);
         PageParameters parameters = new PageParameters();
         parameters.add("javascriptId", this.javascriptId);
-
         setResponsePage(JavascriptModifyPage.class, parameters);
     }
 

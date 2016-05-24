@@ -3,14 +3,10 @@ package com.angkorteam.mbaas.server.page.attribute;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
-import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
 import com.angkorteam.mbaas.server.validator.AttributeNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -20,23 +16,19 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by socheat on 3/8/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/attribute/create")
 public class AttributeCreatePage extends MasterPage {
 
     private String collectionId;
-    private CollectionPojo collection;
+    private String collectionName;
 
     private String name;
     private TextField<String> nameField;
@@ -59,27 +51,27 @@ public class AttributeCreatePage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Create New Collection Attribute :: " + this.collection.getName();
+        return "Create New Collection Attribute :: " + this.collectionName;
     }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
 
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-
-        DSLContext context = getDSLContext();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
         this.collectionId = getPageParameters().get("collectionId").toString();
 
-        this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
+        Map<String, Object> collectionRecord = null;
+        collectionRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.COLLECTION_ID + " = ?", this.collectionId);
+        this.collectionName = (String) collectionRecord.get(Jdbc.Collection.NAME);
 
         this.form = new Form<>("form");
         add(this.form);
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
-        this.nameField.add(new AttributeNameValidator(this.collectionId));
+        this.nameField.add(new AttributeNameValidator(getSession().getApplicationCode(), this.collectionId));
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
@@ -114,36 +106,20 @@ public class AttributeCreatePage extends MasterPage {
 
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collectionId);
-        BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<Void>("closeLink", AttributeManagementPage.class, parameters);
+        BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", AttributeManagementPage.class, parameters);
         this.form.add(closeLink);
     }
 
-    @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        DSLContext context = getDSLContext();
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collection.getCollectionId())).fetchOneInto(collectionTable);
-        if (getSession().isBackOffice() && !collectionRecord.getOwnerUserId().equals(getSession().getUserId())) {
-            setResponsePage(CollectionManagementPage.class);
-        }
-    }
-
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        JdbcTemplate jdbcTemplate = getJdbcTemplate();
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
-
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         CollectionAttributeCreateRequest requestBody = new CollectionAttributeCreateRequest();
         requestBody.setAttributeName(this.name);
         requestBody.setNullable("Yes".equals(this.nullable));
         requestBody.setEav("Yes".equals(this.eav));
         requestBody.setAttributeType(AttributeTypeEnum.valueOf(this.attributeType).getLiteral());
-        requestBody.setCollectionName(collectionRecord.getName());
+        requestBody.setCollectionName(this.collectionName);
 
-        AttributeFunction.createAttribute(context, jdbcTemplate, getSession().getApplicationId(), UUID.randomUUID().toString(), requestBody);
+        AttributeFunction.createAttribute(getApplicationSchema(), jdbcTemplate, getSession().getApplicationCode(), UUID.randomUUID().toString(), requestBody);
 
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collectionId);

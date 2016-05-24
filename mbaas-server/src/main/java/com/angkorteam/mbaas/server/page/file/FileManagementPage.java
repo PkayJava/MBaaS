@@ -2,22 +2,15 @@ package com.angkorteam.mbaas.server.page.file;
 
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.table.filter.*;
+import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
+import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.FileTable;
-import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.FileRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.provider.FileProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.ProviderUtils;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
@@ -26,11 +19,10 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.Filte
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,37 +42,17 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
     protected void onInitialize() {
         super.onInitialize();
 
-        DSLContext context = getDSLContext();
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        CollectionRecord collectionRecord = context.select(collectionTable.fields())
-                .from(collectionTable)
-                .where(collectionTable.NAME.eq(Tables.FILE.getName()))
-                .fetchOneInto(collectionTable);
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
-        List<AttributeRecord> attributeRecords = context.select(attributeTable.fields())
-                .from(attributeTable)
-                .where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId()))
-                .fetchInto(attributeTable);
-
-        FileProvider provider = new FileProvider();
+        FileProvider provider = new FileProvider(getSession().getApplicationCode());
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("fileId", this), "fileId", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("applicationUser", this), "applicationUser", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", provider));
         columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("length", this), "length", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("mime", this), "mime", provider));
-        for (AttributeRecord attributeRecord : attributeRecords) {
-            if (attributeRecord.getSystem()) {
-                continue;
-            }
-            AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
-            ProviderUtils.addColumn(provider, columns, attributeRecord, attributeType, this);
-        }
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "View", "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 17);
@@ -93,16 +65,18 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
-        DSLContext context = getDSLContext();
-        FileTable fileTable = Tables.FILE.as("fileTable");
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         String fileId = (String) object.get("fileId");
         if ("Delete".equals(link)) {
-            FileRecord fileRecord = context.select(fileTable.fields()).from(fileTable).where(fileTable.FILE_ID.eq(fileId)).fetchOneInto(fileTable);
+            Map<String, Object> fileRecord = null;
+            fileRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.FILE + " WHERE " + Jdbc.File.FILE_ID + " = ?", fileId);
             XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             String repo = configuration.getString(Constants.RESOURCE_REPO);
-            File file = new File(repo + "/file" + fileRecord.getPath() + "/" + fileRecord.getName());
+            String path = (String) fileRecord.get(Jdbc.File.PATH);
+            String name = (String) fileRecord.get(Jdbc.File.NAME);
+            File file = new File(repo + "/" + getSession().getApplicationCode() + "/file" + path + "/" + name);
             FileUtils.deleteQuietly(file);
-            context.delete(fileTable).where(fileTable.FILE_ID.eq(fileId)).execute();
+            jdbcTemplate.update("DELETE FROM " + Jdbc.FILE + " WHERE " + Jdbc.File.FILE_ID + " = ?", fileId);
             return;
         }
         if ("Edit".equals(link)) {
@@ -112,9 +86,10 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
             return;
         }
         if ("View".equals(link)) {
-            FileRecord fileRecord = context.select(fileTable.fields()).from(fileTable).where(fileTable.FILE_ID.eq(fileId)).fetchOneInto(fileTable);
+            Map<String, Object> fileRecord = null;
+            fileRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.FILE + " WHERE " + Jdbc.File.FILE_ID + " = ?", fileId);
             StringBuffer address = new StringBuffer();
-            address.append(getHttpAddress()).append("/api/resource/file").append(fileRecord.getPath()).append("/").append(fileRecord.getName());
+            address.append(getHttpAddress()).append("/api/resource/").append(getSession().getApplicationCode()).append("/file").append(fileRecord.get(Jdbc.File.PATH)).append("/").append(fileRecord.get(Jdbc.File.NAME));
             RedirectPage page = new RedirectPage(address);
             setResponsePage(page);
             return;

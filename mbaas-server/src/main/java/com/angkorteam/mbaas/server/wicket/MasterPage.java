@@ -7,14 +7,10 @@ import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
+import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
-import com.angkorteam.mbaas.server.function.ApplicationFunction;
 import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.page.LoginPage;
-import com.angkorteam.mbaas.server.page.RestorePage;
-import com.angkorteam.mbaas.server.page.application.ApplicationCreatePage;
-import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
-import com.angkorteam.mbaas.server.page.application.ApplicationModifyPage;
 import com.angkorteam.mbaas.server.page.asset.AssetCreatePage;
 import com.angkorteam.mbaas.server.page.asset.AssetManagementPage;
 import com.angkorteam.mbaas.server.page.asset.AssetModifyPage;
@@ -25,8 +21,6 @@ import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
 import com.angkorteam.mbaas.server.page.client.ClientModifyPage;
 import com.angkorteam.mbaas.server.page.collection.CollectionCreatePage;
 import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
-import com.angkorteam.mbaas.server.page.collection.CollectionRolePrivacyManagementPage;
-import com.angkorteam.mbaas.server.page.collection.CollectionUserPrivacyManagementPage;
 import com.angkorteam.mbaas.server.page.document.DocumentCreatePage;
 import com.angkorteam.mbaas.server.page.document.DocumentManagementPage;
 import com.angkorteam.mbaas.server.page.document.DocumentModifyPage;
@@ -39,51 +33,38 @@ import com.angkorteam.mbaas.server.page.javascript.JavascriptModifyPage;
 import com.angkorteam.mbaas.server.page.job.JobCreatePage;
 import com.angkorteam.mbaas.server.page.job.JobManagementPage;
 import com.angkorteam.mbaas.server.page.job.JobModifyPage;
-import com.angkorteam.mbaas.server.page.nashorn.NashornManagementPage;
 import com.angkorteam.mbaas.server.page.profile.InformationPage;
 import com.angkorteam.mbaas.server.page.profile.PasswordPage;
 import com.angkorteam.mbaas.server.page.profile.TimeOTPPage;
 import com.angkorteam.mbaas.server.page.profile.TwoMailPage;
-import com.angkorteam.mbaas.server.page.query.*;
-import com.angkorteam.mbaas.server.page.resource.ResourceCreatePage;
-import com.angkorteam.mbaas.server.page.resource.ResourceManagementPage;
-import com.angkorteam.mbaas.server.page.resource.ResourceModifyPage;
+import com.angkorteam.mbaas.server.page.query.QueryCreatePage;
+import com.angkorteam.mbaas.server.page.query.QueryManagementPage;
+import com.angkorteam.mbaas.server.page.query.QueryModifyPage;
+import com.angkorteam.mbaas.server.page.query.QueryParameterModifyPage;
 import com.angkorteam.mbaas.server.page.role.RoleCreatePage;
 import com.angkorteam.mbaas.server.page.role.RoleManagementPage;
 import com.angkorteam.mbaas.server.page.role.RoleModifyPage;
-import com.angkorteam.mbaas.server.page.session.SessionDesktopPage;
 import com.angkorteam.mbaas.server.page.session.SessionMobilePage;
-import com.angkorteam.mbaas.server.page.setting.SettingCreatePage;
-import com.angkorteam.mbaas.server.page.setting.SettingManagementPage;
-import com.angkorteam.mbaas.server.page.setting.SettingModifyPage;
-import com.angkorteam.mbaas.server.page.user.*;
+import com.angkorteam.mbaas.server.page.user.UserCreatePage;
+import com.angkorteam.mbaas.server.page.user.UserManagementPage;
+import com.angkorteam.mbaas.server.page.user.UserModifyPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.IRequestCycle;
-import org.apache.wicket.request.handler.resource.ResourceStreamRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.ContentDisposition;
-import org.apache.wicket.util.file.Files;
-import org.apache.wicket.util.resource.FileResourceStream;
-import org.apache.wicket.util.resource.IResourceStream;
-import org.apache.wicket.util.string.StringValue;
-import org.apache.wicket.util.time.Duration;
+import org.flywaydb.core.internal.dbsupport.DbSupport;
+import org.flywaydb.core.internal.dbsupport.Schema;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by socheat on 3/10/16.
@@ -93,17 +74,12 @@ public abstract class MasterPage extends AdminLTEPage {
     private Label pageHeaderLabel;
     private Label pageDescriptionLabel;
 
-    private String menuGeneralClass = "treeview";
     private String menuProfileClass = "treeview";
     private String menuSecurityClass = "treeview";
     private String menuDataClass = "treeview";
     private String menuStorageClass = "treeview";
     private String menuSessionClass = "treeview";
     private String menuPluginClass = "treeview";
-
-    private String mmenuApplicationClass = "";
-    private String mmenuSettingClass = "";
-    private String mmenuLocalizationClass = "";
 
     private String mmenuInformationClass = "";
     private String mmenuOneTimePasswordClass = "";
@@ -112,7 +88,6 @@ public abstract class MasterPage extends AdminLTEPage {
 
     private String mmenuUserClass = "";
     private String mmenuRoleClass = "";
-    private String mmenuNashornClass = "";
 
     private String mmenuCollectionClass = "";
     private String mmenuQueryClass = "";
@@ -120,7 +95,6 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuFileClass = "";
     private String mmenuAssetClass = "";
 
-    private String mmenuDesktopClass = "";
     private String mmenuMobileClass = "";
 
     private String mmenuJavascriptClass;
@@ -168,7 +142,8 @@ public abstract class MasterPage extends AdminLTEPage {
 
         DesktopRecord desktopRecord = context.select(desktopTable.fields()).from(desktopTable).where(desktopTable.SESSION_ID.eq(session.getId())).fetchOneInto(desktopTable);
         if (desktopRecord != null) {
-            desktopRecord.setOwnerUserId(session.getUserId());
+            desktopRecord.setMbaasUserId(session.getMbaasUserId());
+            desktopRecord.setApplicationUserId(session.getApplicationUserId());
             desktopRecord.setDateSeen(new Date());
             desktopRecord.setClientIp(getSession().getClientInfo().getProperties().getRemoteAddress());
             desktopRecord.setUserAgent(getSession().getClientInfo().getUserAgent());
@@ -178,41 +153,15 @@ public abstract class MasterPage extends AdminLTEPage {
         BookmarkablePageLink<Void> dashboardPageLink = new BookmarkablePageLink<>("dashboardPageLink", getApplication().getHomePage());
         add(dashboardPageLink);
 
-        StringValue switchApplicationId = getPageParameters().get("switchApplicationId");
-        if (switchApplicationId != null && !switchApplicationId.toString("").equals("")) {
-            getSession().setApplicationId(switchApplicationId.toString());
-        }
-
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
 
-        Label labelDashboard = new Label("labelDashboard", "Mobile BaaS");
+        Label labelDashboard = new Label("labelDashboard", "MBaaS");
         dashboardPageLink.add(labelDashboard);
 
         this.pageHeaderLabel = new Label("pageHeaderLabel", new PropertyModel<>(this, "pageHeader"));
         add(this.pageHeaderLabel);
         this.pageDescriptionLabel = new Label("pageDescriptionLabel", new PropertyModel<>(this, "pageDescription"));
         add(this.pageDescriptionLabel);
-
-        {
-            WebMarkupContainer applicationMenu = new WebMarkupContainer("applicationMenu");
-            add(applicationMenu);
-            Label currentApplicationLabel = new Label("currentApplicationLabel", new PropertyModel<>(this, "currentApplicationName"));
-            applicationMenu.add(currentApplicationLabel);
-            List<ApplicationRecord> applicationRecords = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.OWNER_USER_ID.eq(getSession().getUserId())).fetchInto(applicationTable);
-            RepeatingView fields = new RepeatingView("applicationItems");
-            applicationMenu.add(fields);
-            for (ApplicationRecord applicationRecord : applicationRecords) {
-                WebMarkupContainer markupContainer = new WebMarkupContainer(fields.newChildId());
-                PageParameters parameters = new PageParameters();
-                parameters.add("switchApplicationId", applicationRecord.getApplicationId());
-                BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("applicationItemLink", ClientManagementPage.class, parameters);
-                markupContainer.add(link);
-                Label applicationItemLabel = new Label("applicationItemLabel", applicationRecord.getName());
-                link.add(applicationItemLabel);
-                fields.add(markupContainer);
-            }
-            applicationMenu.setVisible(!getSession().isRegistered());
-        }
 
         {
             Link<Void> logoutLink = new Link<>("logoutLink");
@@ -223,24 +172,7 @@ public abstract class MasterPage extends AdminLTEPage {
             Link<Void> backupLink = new Link<>("backupLink");
             add(backupLink);
             backupLink.setOnClick(this::backupLinkOnClick);
-            backupLink.setVisible(getSession().getApplicationId() != null && !"".equals(getSession().getApplicationId()));
-
-            Link<Void> restoreLink = new Link<>("restoreLink");
-            add(restoreLink);
-            restoreLink.setOnClick(this::restoreLinkOnClick);
-            restoreLink.setVisible(getSession().isSignedIn());
-        }
-
-        {
-            this.menuGeneral = new WebMarkupContainer("menuGeneral");
-            this.menuGeneral.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuGeneralClass")));
-            add(this.menuGeneral);
-            WebMarkupContainer mmenuSetting = new WebMarkupContainer("mmenuSetting");
-            mmenuSetting.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuSettingClass")));
-            this.menuGeneral.add(mmenuSetting);
-            WebMarkupContainer mmenuLocalization = new WebMarkupContainer("mmenuLocalization");
-            mmenuLocalization.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuLocalizationClass")));
-            this.menuGeneral.add(mmenuLocalization);
+            backupLink.setVisible(getSession().isSignedIn());
         }
 
         {
@@ -261,6 +193,9 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuProfile.add(mmenuPassword);
         }
 
+        WebMarkupContainer mmenuNashorn = new WebMarkupContainer("mmenuNashorn");
+        mmenuNashorn.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuNashornClass")));
+        this.menuSecurity.add(mmenuNashorn);
         {
             this.menuSecurity = new WebMarkupContainer("menuSecurity");
             this.menuSecurity.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSecurityClass")));
@@ -271,9 +206,6 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuRole = new WebMarkupContainer("mmenuRole");
             mmenuRole.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuRoleClass")));
             this.menuSecurity.add(mmenuRole);
-            WebMarkupContainer mmenuNashorn = new WebMarkupContainer("mmenuNashorn");
-            mmenuNashorn.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuNashornClass")));
-            this.menuSecurity.add(mmenuNashorn);
         }
 
         {
@@ -292,9 +224,6 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuSession = new WebMarkupContainer("menuSession");
             this.menuSession.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSessionClass")));
             add(this.menuSession);
-            WebMarkupContainer mmenuDesktop = new WebMarkupContainer("mmenuDesktop");
-            mmenuDesktop.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuDesktopClass")));
-            this.menuSession.add(mmenuDesktop);
             WebMarkupContainer mmenuMobile = new WebMarkupContainer("mmenuMobile");
             mmenuMobile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMobileClass")));
             this.menuSession.add(mmenuMobile);
@@ -310,10 +239,6 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript");
             mmenuJavascript.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJavascriptClass")));
             this.menuLogicConsole.add(mmenuJavascript);
-
-            WebMarkupContainer mmenuApplication = new WebMarkupContainer("mmenuApplication");
-            mmenuApplication.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuApplicationClass")));
-            this.menuLogicConsole.add(mmenuApplication);
 
             WebMarkupContainer mmenuClient = new WebMarkupContainer("mmenuClient");
             mmenuClient.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuClientClass")));
@@ -337,27 +262,16 @@ public abstract class MasterPage extends AdminLTEPage {
     protected void onBeforeRender() {
         super.onBeforeRender();
         boolean isAdministrator = getSession().isAdministrator();
-        boolean isBackOffice = getSession().isBackOffice();
         boolean isRegistered = getSession().isRegistered();
         this.menuGeneral.setVisible(isAdministrator);
         this.menuSecurity.setVisible(isAdministrator);
         this.menuSession.setVisible(isAdministrator);
-        this.menuLogicConsole.setVisible((getSession().getApplicationId() != null && !"".equals(getSession().getApplicationId()) && (isAdministrator || isBackOffice)));
+        this.menuLogicConsole.setVisible(isAdministrator);
         this.mmenuFile.setVisible(isAdministrator);
-        this.mmenuAsset.setVisible(isAdministrator || isBackOffice || isRegistered);
+        this.mmenuAsset.setVisible(isAdministrator);
         this.menuStorage.setVisible(this.mmenuAsset.isVisible() || this.mmenuFile.isVisible());
 
         // Parent Menu
-        if (getPage() instanceof SettingManagementPage
-                || getPage() instanceof SettingModifyPage
-                || getPage() instanceof SettingCreatePage
-                || getPage() instanceof ResourceManagementPage
-                || getPage() instanceof ResourceModifyPage
-                || getPage() instanceof ResourceCreatePage) {
-            this.menuGeneralClass = "treeview active";
-        } else {
-            this.menuGeneralClass = "treeview";
-        }
 
         if (isRegistered || getPage() instanceof InformationPage || getPage() instanceof TimeOTPPage || getPage() instanceof TwoMailPage || getPage() instanceof PasswordPage) {
             this.menuProfileClass = "treeview active";
@@ -368,14 +282,9 @@ public abstract class MasterPage extends AdminLTEPage {
         if (getPage() instanceof UserManagementPage
                 || getPage() instanceof UserModifyPage
                 || getPage() instanceof UserCreatePage
-                || getPage() instanceof UserAttributeManagementPage
-                || getPage() instanceof UserAttributePermissionModifyPage
-                || getPage() instanceof UserAttributePermissionCreatePage
-                || getPage() instanceof UserAttributeCreatePage
                 || getPage() instanceof RoleManagementPage
                 || getPage() instanceof RoleModifyPage
-                || getPage() instanceof RoleCreatePage
-                || getPage() instanceof NashornManagementPage) {
+                || getPage() instanceof RoleCreatePage) {
             this.menuSecurityClass = "treeview active";
         } else {
             this.menuSecurityClass = "treeview";
@@ -392,12 +301,6 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuStorageClass = "treeview";
         }
 
-        if (getPage() instanceof SessionDesktopPage || getPage() instanceof SessionMobilePage) {
-            this.menuSessionClass = "treeview active";
-        } else {
-            this.menuSessionClass = "treeview";
-        }
-
         if (getPage() instanceof JavascriptManagementPage || getPage() instanceof JavascriptCreatePage || getPage() instanceof JavascriptModifyPage) {
             this.menuPluginClass = "treeview active";
         } else {
@@ -405,29 +308,12 @@ public abstract class MasterPage extends AdminLTEPage {
         }
 
         // Menu
-        if (getPage() instanceof ApplicationManagementPage
-                || getPage() instanceof ApplicationCreatePage
-                || getPage() instanceof ApplicationModifyPage) {
-            this.mmenuApplicationClass = "active";
-        } else {
-            this.mmenuApplicationClass = "";
-        }
         if (getPage() instanceof ClientManagementPage
                 || getPage() instanceof ClientModifyPage
                 || getPage() instanceof ClientCreatePage) {
             this.mmenuClientClass = "active";
         } else {
             this.mmenuClientClass = "";
-        }
-        if (getPage() instanceof SettingManagementPage || getPage() instanceof SettingCreatePage || getPage() instanceof SettingModifyPage) {
-            this.mmenuSettingClass = "active";
-        } else {
-            this.mmenuSettingClass = "";
-        }
-        if (getPage() instanceof ResourceManagementPage || getPage() instanceof ResourceCreatePage || getPage() instanceof ResourceModifyPage) {
-            this.mmenuLocalizationClass = "active";
-        } else {
-            this.mmenuLocalizationClass = "";
         }
         if (getPage() instanceof InformationPage) {
             this.mmenuInformationClass = "active";
@@ -450,10 +336,6 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuPasswordClass = "";
         }
         if (getPage() instanceof UserManagementPage
-                || getPage() instanceof UserAttributeManagementPage
-                || getPage() instanceof UserAttributeCreatePage
-                || getPage() instanceof UserAttributePermissionCreatePage
-                || getPage() instanceof UserAttributePermissionModifyPage
                 || getPage() instanceof UserCreatePage
                 || getPage() instanceof UserModifyPage) {
             this.mmenuUserClass = "active";
@@ -465,15 +347,8 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             this.mmenuRoleClass = "";
         }
-        if (getPage() instanceof NashornManagementPage) {
-            this.mmenuNashornClass = "active";
-        } else {
-            this.mmenuNashornClass = "";
-        }
         if (getPage() instanceof CollectionManagementPage
                 || getPage() instanceof CollectionCreatePage
-                || getPage() instanceof CollectionRolePrivacyManagementPage
-                || getPage() instanceof CollectionUserPrivacyManagementPage
                 || getPage() instanceof DocumentManagementPage
                 || getPage() instanceof DocumentCreatePage
                 || getPage() instanceof DocumentModifyPage
@@ -484,10 +359,9 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuCollectionClass = "";
         }
         if (getPage() instanceof QueryManagementPage
-                || getPage() instanceof QueryUserPrivacyManagementPage
-                || getPage() instanceof QueryRolePrivacyManagementPage
                 || getPage() instanceof QueryCreatePage
-                || getPage() instanceof QueryModifyPage) {
+                || getPage() instanceof QueryModifyPage
+                || getPage() instanceof QueryParameterModifyPage) {
             this.mmenuQueryClass = "active";
         } else {
             this.mmenuQueryClass = "";
@@ -506,11 +380,6 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             this.mmenuAssetClass = "";
         }
-        if (getPage() instanceof SessionDesktopPage) {
-            this.mmenuDesktopClass = "active";
-        } else {
-            this.mmenuDesktopClass = "";
-        }
         if (getPage() instanceof SessionMobilePage) {
             this.mmenuMobileClass = "active";
         } else {
@@ -527,25 +396,21 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuJobClass = "";
         }
 
-        if (getSession().isBackOffice() && getApplicationQuantity() <= 0) {
-            if (getPage() instanceof ApplicationCreatePage || getPage() instanceof RestorePage) {
-            } else {
-                setResponsePage(ApplicationCreatePage.class);
-            }
-        }
-    }
-
-    public int getApplicationQuantity() {
-        DSLContext context = getDSLContext();
-        return context.selectCount().from(Tables.APPLICATION).where(Tables.APPLICATION.OWNER_USER_ID.eq(getSession().getUserId())).fetchOneInto(int.class);
+        // TODO
+//        if (getSession().isBackOffice() && getApplicationQuantity() <= 0) {
+//            if (getPage() instanceof ApplicationCreatePage || getPage() instanceof RestorePage) {
+//            } else {
+//                setResponsePage(ApplicationCreatePage.class);
+//            }
+//        }
     }
 
     public String getCurrentApplicationName() {
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
         DSLContext context = getDSLContext();
         ApplicationRecord applicationRecord = null;
-        if (getSession().getApplicationId() != null && !"".equals(getSession().getApplicationId())) {
-            applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(getSession().getApplicationId())).fetchOneInto(applicationTable);
+        if (getSession().getApplicationCode() != null && !"".equals(getSession().getApplicationCode())) {
+            applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.CODE.eq(getSession().getApplicationCode())).fetchOneInto(applicationTable);
         }
         if (applicationRecord != null) {
             return applicationRecord.getName();
@@ -555,27 +420,29 @@ public abstract class MasterPage extends AdminLTEPage {
     }
 
     private void backupLinkOnClick(Link link) {
-        try {
-            File mbaas = ApplicationFunction.backup(getJdbcTemplate(), getSession().getApplicationId(), getSession().getUserId());
-
-            IResourceStream resourceStream = new FileResourceStream(
-                    new org.apache.wicket.util.file.File(mbaas));
-            getRequestCycle().scheduleRequestHandlerAfterCurrent(
-                    new ResourceStreamRequestHandler(resourceStream) {
-                        @Override
-                        public void respond(IRequestCycle requestCycle) {
-                            super.respond(requestCycle);
-                            Files.remove(mbaas);
-                        }
-                    }.setFileName(mbaas.getName())
-                            .setContentDisposition(ContentDisposition.ATTACHMENT)
-                            .setCacheDuration(Duration.NONE));
-        } catch (IOException e) {
-        }
+        // TODO
+//        try {
+//            File mbaas = ApplicationFunction.backup(getJdbcTemplate(), getSession().getApplicationId(), getSession().getUserId());
+//
+//            IResourceStream resourceStream = new FileResourceStream(
+//                    new org.apache.wicket.util.file.File(mbaas));
+//            getRequestCycle().scheduleRequestHandlerAfterCurrent(
+//                    new ResourceStreamRequestHandler(resourceStream) {
+//                        @Override
+//                        public void respond(IRequestCycle requestCycle) {
+//                            super.respond(requestCycle);
+//                            Files.remove(mbaas);
+//                        }
+//                    }.setFileName(mbaas.getName())
+//                            .setContentDisposition(ContentDisposition.ATTACHMENT)
+//                            .setCacheDuration(Duration.NONE));
+//        } catch (IOException e) {
+//        }
     }
 
-    private void restoreLinkOnClick(Link link) {
-        setResponsePage(RestorePage.class);
+    public final String getApplicationCode() {
+        Session session = getSession();
+        return session.getApplicationCode();
     }
 
     private void logoutLinkOnClick(Link link) {
@@ -593,6 +460,11 @@ public abstract class MasterPage extends AdminLTEPage {
         return application.getDSLContext();
     }
 
+    public final DSLContext getApplicationDSLContext() {
+        Application application = (Application) getApplication();
+        return application.getDSLContext(getSession().getApplicationCode());
+    }
+
     public final String getNavigatorLanguage() {
         return getSession().getClientInfo().getProperties().getNavigatorLanguage();
     }
@@ -600,6 +472,16 @@ public abstract class MasterPage extends AdminLTEPage {
     public final JdbcTemplate getJdbcTemplate() {
         Application application = (Application) getApplication();
         return application.getJdbcTemplate();
+    }
+
+    public final JdbcTemplate getApplicationJdbcTemplate() {
+        Application application = (Application) getApplication();
+        return application.getJdbcTemplate(getSession().getApplicationCode());
+    }
+
+    public final Schema getApplicationSchema() {
+        Application application = (Application) getApplication();
+        return application.getSchema(getSession().getApplicationCode());
     }
 
     public ServletContext getServletContext() {
@@ -620,6 +502,16 @@ public abstract class MasterPage extends AdminLTEPage {
     public PusherClient getPusherClient() {
         Application application = (Application) getApplication();
         return application.getPusherClient();
+    }
+
+    public DbSupport getDbSupport() {
+        Application application = (Application) getApplication();
+        return application.getDbSupport();
+    }
+
+    public ApplicationDataSourceFactoryBean.ApplicationDataSource getApplicationDataSource() {
+        Application application = (Application) getApplication();
+        return application.getApplicationDataSource();
     }
 
     public JavascriptServiceFactoryBean.JavascriptService getJavascriptService() {

@@ -29,34 +29,8 @@
             <wicket:enclosure child="logoutLink">
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
-                    <li class="dropdown notifications-menu" wicket:id="applicationMenu">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-rocket"></i> <wicket:container wicket:id="currentApplicationLabel"></wicket:container>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="header">Your Applications</li>
-                            <li>
-                                <!-- inner menu: contains the actual data -->
-                                <ul class="menu">
-                                    <li wicket:id="applicationItems">
-                                        <a wicket:id="applicationItemLink">
-                                            <i class="fa fa-rocket"></i> <span wicket:id="applicationItemLabel"></span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="footer">
-                                <wicket:link>
-                                    <a href="../page/application/ApplicationManagementPage.html">See All Applications</a>
-                                </wicket:link>
-                            </li>
-                        </ul>
-                    </li>
                     <li>
                         <a wicket:id="backupLink"><i class="fa fa-download"></i> <span>Backup</span></a>
-                    </li>
-                    <li>
-                        <a wicket:id="restoreLink"><i class="fa fa-upload"></i> <span>Restore</span></a>
                     </li>
                     <li>
                         <a wicket:id="logoutLink"><i class="fa fa-sign-out"></i> <span>Logout</span></a>
@@ -77,21 +51,6 @@
             <ul class="sidebar-menu">
                 <!-- Optionally, you can add icons to the links -->
                 <li class="header">Admin Console</li>
-                <li class="treeview" wicket:id="menuGeneral">
-                    <a href="#">
-                        <i class="fa fa-cogs"></i>
-                        <span>General</span>
-                        <i class="fa fa-angle-left pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li wicket:id="mmenuSetting">
-                            <wicket:link><a href="../page/setting/SettingManagementPage.html"><i class="fa fa-tags"></i>Setting</a></wicket:link>
-                        </li>
-                        <li wicket:id="mmenuLocalization">
-                            <wicket:link><a href="../page/resource/ResourceManagementPage.html"><i class="fa fa-font"></i>Localization</a></wicket:link>
-                        </li>
-                    </ul>
-                </li>
                 <li class="treeview" wicket:id="menuProfile">
                     <a href="#">
                         <i class="fa fa-user"></i>
@@ -126,9 +85,6 @@
                         <li wicket:id="mmenuRole">
                             <wicket:link><a href="../page/role/RoleManagementPage.html"><i class="fa fa-key"></i>Role</a></wicket:link>
                         </li>
-                        <li wicket:id="mmenuNashorn">
-                            <wicket:link><a href="../page/nashorn/NashornManagementPage.html"><i class="fa fa-heartbeat"></i>Nashorn</a></wicket:link>
-                        </li>
                     </ul>
                 </li>
                 <li class="treeview" wicket:id="menuStorage">
@@ -153,9 +109,6 @@
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                        <li wicket:id="mmenuDesktop">
-                            <wicket:link><a href="../page/session/SessionDesktopPage.html"><i class="fa fa-desktop"></i>Desktop</a></wicket:link>
-                        </li>
                         <li wicket:id="mmenuMobile">
                             <wicket:link><a href="../page/session/SessionMobilePage.html"><i class="fa fa-mobile"></i>Mobile</a></wicket:link>
                         </li>
@@ -163,9 +116,6 @@
                 </li>
                 <wicket:container wicket:id="menuLogicConsole">
                 <li class="header"><wicket:container wicket:id="currentApplicationConsole"/> Console</li>
-                <li wicket:id="mmenuApplication">
-                    <wicket:link><a href="../page/application/ApplicationManagementPage.html"><i class="fa fa-rocket"></i><span>Application</span></a></wicket:link>
-                </li>
                 <li wicket:id="mmenuClient">
                     <wicket:link><a href="../page/client/ClientManagementPage.html"><i class="fa fa-mobile"></i><span>Client</span></a></wicket:link>
                 </li>

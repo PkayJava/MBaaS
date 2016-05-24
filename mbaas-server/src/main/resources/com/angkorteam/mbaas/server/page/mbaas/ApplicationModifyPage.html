@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<wicket:extend>
+    <div class="box box-primary">
+        <form role="form" wicket:id="form">
+            <div class="box-body">
+                <div class="form-group">
+                    <label>Code</label>
+                    <div wicket:id="codeLabel" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="nameField">Name</label>
+                    <input wicket:id="nameField" type="text" class="form-control"/>
+                    <span wicket:id="nameFeedback" class="help-block"/>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="oauthRolesField">OAuth Role</label>
+                    <input wicket:id="oauthRolesField" type="text" class="form-control"/>
+                    <span wicket:id="oauthRolesFeedback" class="help-block"/>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="descriptionField">Description</label>
+                    <input wicket:id="descriptionField" type="text" class="form-control"/>
+                    <span wicket:id="descriptionFeedback" class="help-block"/>
+                </div>
+
+                <div class="form-group">
+                    <label wicket:for="pushApplicationIdField">Push Application Id</label>
+                    <input wicket:id="pushApplicationIdField" type="text" class="form-control"/>
+                    <span wicket:id="pushApplicationIdFeedback" class="help-block"/>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="pushMasterSecretField">Push Master Secret</label>
+                    <input wicket:id="pushMasterSecretField" type="text" class="form-control"/>
+                    <span wicket:id="pushMasterSecretFeedback" class="help-block"/>
+                </div>
+            </div>
+            <div class="box-footer">
+                <wicket:link>
+                    <a class="btn btn-primary" href="ApplicationManagementPage.html">Close</a>
+                </wicket:link>
+                <button wicket:id="saveButton" type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</wicket:extend>
+</body>
+</html>

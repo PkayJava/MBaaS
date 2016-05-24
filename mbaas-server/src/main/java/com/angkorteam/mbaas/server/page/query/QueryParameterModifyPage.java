@@ -1,17 +1,12 @@
 package com.angkorteam.mbaas.server.page.query;
 
+import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.QueryParameterTable;
-import com.angkorteam.mbaas.model.entity.tables.QueryTable;
-import com.angkorteam.mbaas.model.entity.tables.pojos.QueryParameterPojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.QueryPojo;
-import com.angkorteam.mbaas.model.entity.tables.records.QueryParameterRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.QueryRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.enums.SubTypeEnum;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.template.QueryParameterSelectFieldPanel;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -21,7 +16,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,12 +26,12 @@ import java.util.Map;
 /**
  * Created by socheat on 3/19/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/query/parameter/modify")
 public class QueryParameterModifyPage extends MasterPage {
 
     private String queryId;
-    private QueryPojo queryPojo;
+    private String queryName;
 
     private boolean granted = false;
 
@@ -49,7 +44,7 @@ public class QueryParameterModifyPage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Modify Query Parameter :: " + queryPojo.getName();
+        return "Modify Query Parameter :: " + queryName;
     }
 
     @Override
@@ -59,23 +54,19 @@ public class QueryParameterModifyPage extends MasterPage {
         this.queryId = getPageParameters().get("queryId").toString();
         this.granted = getPageParameters().get("granted").toBoolean(false);
 
-        DSLContext context = getDSLContext();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
         this.form = new Form<>("form");
         add(this.form);
 
-        QueryTable queryTable = Tables.QUERY.as("queryTable");
-        this.queryPojo = context.select(queryTable.fields()).from(queryTable).where(queryTable.QUERY_ID.eq(this.queryId)).fetchOneInto(QueryPojo.class);
 
-        this.query = queryPojo.getName();
+        Map<String, Object> queryRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.QUERY + " WHERE " + Jdbc.Query.QUERY_ID + " = ?", this.queryId);
+
+        this.query = (String) queryRecord.get(Jdbc.Query.NAME);
         this.queryLabel = new Label("queryLabel", new PropertyModel<>(this, "query"));
         this.form.add(this.queryLabel);
 
-        QueryParameterTable queryParameterTable = Tables.QUERY_PARAMETER.as("queryParameterTable");
-        List<QueryParameterPojo> queryParameters = context.select(queryParameterTable.fields())
-                .from(queryParameterTable)
-                .where(queryParameterTable.QUERY_ID.eq(queryId))
-                .fetchInto(QueryParameterPojo.class);
+        List<Map<String, Object>> queryParameters = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.QUERY_PARAMETER + " WHERE " + Jdbc.QueryParameter.QUERY_ID + " = ?", this.queryId);
 
         List<String> types = new ArrayList<>();
         for (TypeEnum typeEnum : TypeEnum.values()) {
@@ -92,11 +83,11 @@ public class QueryParameterModifyPage extends MasterPage {
         }
 
         RepeatingView fields = new RepeatingView("fields");
-        for (QueryParameterPojo queryParameter : queryParameters) {
+        for (Map<String, Object> queryParameter : queryParameters) {
             QueryParameterSelectFieldPanel fieldPanel = new QueryParameterSelectFieldPanel(fields.newChildId(), form, queryParameter, types, subTypes, this.fields);
             fields.add(fieldPanel);
-            this.fields.put(queryParameter.getName(), queryParameter.getType());
-            this.fields.put(queryParameter.getName() + "SubType", queryParameter.getSubType());
+            this.fields.put((String) queryParameter.get(Jdbc.QueryParameter.NAME), (String) queryParameter.get(Jdbc.QueryParameter.TYPE));
+            this.fields.put(queryParameter.get(Jdbc.QueryParameter.NAME) + "SubType", (String) queryParameter.get(Jdbc.QueryParameter.SUB_TYPE));
         }
         this.form.add(fields);
 
@@ -108,32 +99,24 @@ public class QueryParameterModifyPage extends MasterPage {
         this.form.add(saveButton);
     }
 
-    @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        DSLContext context = getDSLContext();
-        QueryTable queryTable = Tables.QUERY.as("queryTable");
-        QueryRecord queryRecord = context.select(queryTable.fields()).from(queryTable).where(queryTable.QUERY_ID.eq(this.queryId)).fetchOneInto(queryTable);
-        if (getSession().isBackOffice() && !queryRecord.getOwnerUserId().equals(getSession().getUserId())) {
-            setResponsePage(QueryManagementPage.class);
-        }
-    }
-
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        QueryParameterTable queryParameterTable = Tables.QUERY_PARAMETER.as("queryParameterTable");
-
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
+        jdbcUpdate.withTableName(Jdbc.QUERY_PARAMETER);
         for (Map.Entry<String, String> entry : this.fields.entrySet()) {
             if (!entry.getKey().endsWith("SubType")) {
-                QueryParameterRecord queryParameterRecord = context.select(queryParameterTable.fields()).from(queryParameterTable).where(queryParameterTable.QUERY_ID.eq(this.queryId)).and(queryParameterTable.NAME.eq(entry.getKey())).fetchOneInto(queryParameterTable);
-                queryParameterRecord.setType(entry.getValue());
-                queryParameterRecord.setSubType(this.fields.get(entry.getKey() + "SubType"));
-                queryParameterRecord.update();
+                Map<String, Object> wheres = new HashMap<>();
+                wheres.put(Jdbc.QueryParameter.QUERY_ID, this.queryId);
+                wheres.put(Jdbc.QueryParameter.NAME, entry.getValue());
+                Map<String, Object> fields = new HashMap<>();
+                fields.put(Jdbc.QueryParameter.TYPE, entry.getValue());
+                fields.put(Jdbc.QueryParameter.SUB_TYPE, this.fields.get(entry.getKey() + "SubType"));
+                jdbcUpdate.execute(fields, wheres);
             }
         }
 
         if (this.granted) {
-            context.update(Tables.QUERY).set(Tables.QUERY.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.QUERY.QUERY_ID.eq(this.queryId)).execute();
+            jdbcTemplate.update("UPDATE " + Jdbc.QUERY + " SET " + Jdbc.Query.SECURITY + " = ? WHERE " + Jdbc.Query.QUERY_ID + " = ?", SecurityEnum.Granted.getLiteral(), this.queryId);
         }
 
         PageParameters parameters = new PageParameters();

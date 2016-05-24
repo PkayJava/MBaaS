@@ -6,8 +6,8 @@ import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooq
 import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
-import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.provider.ClientProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -17,7 +17,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +27,9 @@ import java.util.UUID;
 /**
  * Created by socheat on 3/7/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/client/management")
 public class ClientManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
-
-    private String applicationId;
 
     @Override
     public String getPageHeader() {
@@ -42,13 +40,8 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
     protected void onInitialize() {
         super.onInitialize();
 
-        this.applicationId = getPageParameters().get("applicationId").toString("");
-        if ("".equals(this.applicationId)) {
-            this.applicationId = getSession().getApplicationId();
-        }
-
-        ClientProvider provider = new ClientProvider(this.applicationId);
-        provider.selectField(String.class, "ownerUserId");
+        ClientProvider provider = new ClientProvider(getSession().getApplicationCode());
+        provider.selectField(String.class, "applicationUserId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -57,7 +50,7 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("clientId", this), "clientId", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("clientSecret", this), "clientSecret", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("applicationUser", this), "applicationUser", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
 
@@ -67,40 +60,32 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-
-        PageParameters parameters = new PageParameters();
-        parameters.add("applicationId", applicationId);
-        BookmarkablePageLink<Void> newClientLink = new BookmarkablePageLink<>("newClientLink", ClientCreatePage.class, parameters);
+        BookmarkablePageLink<Void> newClientLink = new BookmarkablePageLink<>("newClientLink", ClientCreatePage.class);
         add(newClientLink);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", ClientManagementPage.class, parameters);
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", ClientManagementPage.class);
         add(refreshLink);
     }
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        String clientId = (String) object.get("clientId");
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
-            parameters.add("applicationId", this.applicationId);
-            parameters.add("clientId", object.get("clientId"));
+            parameters.add("clientId", clientId);
             setResponsePage(ClientModifyPage.class, parameters);
         }
         if ("Grant".equals(link)) {
-            String clientId = (String) object.get("clientId");
-            DSLContext context = getDSLContext();
-            context.update(Tables.CLIENT).set(Tables.CLIENT.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.CLIENT.CLIENT_ID.eq(clientId)).execute();
+            jdbcTemplate.update("UPDATE " + Jdbc.CLIENT + " SET " + Jdbc.Client.SECURITY + " = ? WHERE " + Jdbc.Client.CLIENT_ID + " = ?", SecurityEnum.Granted.getLiteral(), clientId);
             return;
         }
         if ("Deny".equals(link)) {
-            String clientId = (String) object.get("clientId");
-            DSLContext context = getDSLContext();
-            context.update(Tables.CLIENT).set(Tables.CLIENT.SECURITY, SecurityEnum.Denied.getLiteral()).where(Tables.CLIENT.CLIENT_ID.eq(clientId)).execute();
+            jdbcTemplate.update("UPDATE " + Jdbc.CLIENT + " SET " + Jdbc.Client.SECURITY + " = ? WHERE " + Jdbc.Client.CLIENT_ID + " = ?", SecurityEnum.Denied.getLiteral(), clientId);
             return;
         }
         if ("Revoke".equals(link)) {
-            String clientId = (String) object.get("clientId");
-            DSLContext context = getDSLContext();
-            context.update(Tables.CLIENT).set(Tables.CLIENT.CLIENT_SECRET, UUID.randomUUID().toString()).where(Tables.CLIENT.CLIENT_ID.eq(clientId)).execute();
+            jdbcTemplate.update("UPDATE " + Jdbc.CLIENT + " SET " + Jdbc.Client.CLIENT_SECRET + " = ? WHERE " + Jdbc.Client.CLIENT_ID + " = ?", UUID.randomUUID().toString(), clientId);
             return;
         }
     }
@@ -121,9 +106,10 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
             if (getSession().isAdministrator()) {
                 return true;
             } else {
-                if (getSession().getUserId().equals(ownerUserId)) {
-                    return true;
-                }
+                // TODO
+//                if (getSession().getUserId().equals(ownerUserId)) {
+//                    return true;
+//                }
             }
         }
         if ("Grant".equals(link)) {
@@ -132,9 +118,10 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
                 if (getSession().isAdministrator()) {
                     return true;
                 } else {
-                    if (getSession().getUserId().equals(ownerUserId)) {
-                        return true;
-                    }
+                    // TODO
+//                    if (getSession().getUserId().equals(ownerUserId)) {
+//                        return true;
+//                    }
                 }
             }
         }
@@ -144,9 +131,10 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
                 if (getSession().isAdministrator()) {
                     return true;
                 } else {
-                    if (getSession().getUserId().equals(ownerUserId)) {
-                        return true;
-                    }
+                    // TODO
+//                    if (getSession().getUserId().equals(ownerUserId)) {
+//                        return true;
+//                    }
                 }
             }
         }
@@ -154,9 +142,10 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
             if (getSession().isAdministrator()) {
                 return true;
             } else {
-                if (getSession().getUserId().equals(ownerUserId)) {
-                    return true;
-                }
+                // TODO
+//                if (getSession().getUserId().equals(ownerUserId)) {
+//                    return true;
+//                }
             }
         }
         return false;

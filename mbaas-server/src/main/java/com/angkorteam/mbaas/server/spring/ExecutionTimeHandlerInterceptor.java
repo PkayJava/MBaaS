@@ -2,11 +2,12 @@ package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.MobileTable;
-import com.angkorteam.mbaas.model.entity.tables.records.MobileRecord;
+import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.NetworkRecord;
 import com.angkorteam.mbaas.plain.response.UnknownResponse;
 import com.angkorteam.mbaas.server.MBaaS;
+import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.jooq.DSLContext;
@@ -14,12 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by Khauv Socheat on 4/17/2016.
@@ -31,6 +34,8 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
     private Gson gson;
 
     private DSLContext context;
+
+    private ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource;
 
     private final Map<String, Long> executions = new java.util.HashMap<>();
 
@@ -71,16 +76,27 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
         networkRecord.setConsume(consume);
         networkRecord.setRemoteIp(request.getRemoteAddr());
         networkRecord.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT));
+        String applicationSecret = request.getHeader("Application-Secret");
+        ApplicationRecord applicationRecord = null;
+        if (applicationSecret != null && !"".equals(applicationSecret)) {
+            ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+            applicationRecord = this.context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.SECRET.eq(applicationSecret)).fetchOneInto(applicationTable);
+        }
+        JdbcTemplate jdbcTemplate = null;
+        if (applicationRecord != null) {
+            jdbcTemplate = this.applicationDataSource.getJdbcTemplate(applicationRecord.getCode());
+        }
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorization != null && authorization.toUpperCase().startsWith("BEARER ")) {
+        if (jdbcTemplate != null && authorization != null && authorization.toUpperCase().startsWith("BEARER ")) {
             String accessToken = authorization.substring(7);
-            MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
-            MobileRecord mobileRecord = context.select(mobileTable.fields()).from(mobileTable).where(mobileTable.ACCESS_TOKEN.eq(accessToken)).fetchOneInto(mobileTable);
+            Map<String, Object> mobileRecord = null;
+            mobileRecord = jdbcTemplate.queryForMap("SELECT * FROM mobile WHERE access_token = ?", accessToken);
             if (mobileRecord != null) {
-                networkRecord.setMobileId(mobileRecord.getMobileId());
-                networkRecord.setUserId(mobileRecord.getOwnerUserId());
-                networkRecord.setApplicationId(mobileRecord.getApplicationId());
-                networkRecord.setClientId(mobileRecord.getClientId());
+                networkRecord.setMobileId((String) mobileRecord.get("mobile_id"));
+                networkRecord.setMbaasUserId((String) mobileRecord.get("mbaas_user_id"));
+                networkRecord.setApplicationUserId((String) mobileRecord.get("application_user_id"));
+                networkRecord.setApplicationId((String) mobileRecord.get("application_id"));
+                networkRecord.setClientId((String) mobileRecord.get("client_id"));
             }
         }
         networkRecord.store();
@@ -100,5 +116,13 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
 
     public DSLContext getContext() {
         return context;
+    }
+
+    public ApplicationDataSourceFactoryBean.ApplicationDataSource getApplicationDataSource() {
+        return applicationDataSource;
+    }
+
+    public void setApplicationDataSource(ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource) {
+        this.applicationDataSource = applicationDataSource;
     }
 }

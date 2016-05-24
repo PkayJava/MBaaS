@@ -1,15 +1,12 @@
 package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
-import com.angkorteam.mbaas.model.entity.tables.ClientTable;
-import com.angkorteam.mbaas.model.entity.tables.MobileTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.wicket.Application;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
-import org.jooq.Condition;
-import org.jooq.Field;
-import org.jooq.TableLike;
+import org.jooq.*;
+import org.jooq.impl.DSL;
 
 import java.util.Date;
 import java.util.List;
@@ -19,50 +16,56 @@ import java.util.List;
  */
 public class MobileProvider extends JooqProvider {
 
-    private MobileTable mobileTable = Tables.MOBILE.as("mobileTable");
-    private ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
-    private ClientTable clientTable = Tables.CLIENT.as("clientTable");
-    private UserTable userTable = Tables.USER.as("userTable");
+    private Table<?> mobileTable;
+    private Table<?> clientTable;
+    private Table<?> userTable;
 
     private TableLike<?> from;
 
-    public MobileProvider() {
-        this.from = this.mobileTable.leftJoin(this.userTable).on(this.mobileTable.OWNER_USER_ID.eq(this.userTable.USER_ID))
-                .leftJoin(this.clientTable).on(this.mobileTable.CLIENT_ID.eq(this.clientTable.CLIENT_ID))
-                .leftJoin(this.applicationTable).on(this.clientTable.APPLICATION_ID.eq(this.applicationTable.APPLICATION_ID));
-        setSort("dateSeen", SortOrder.DESCENDING);
+    private final String applicationCode;
+
+    public MobileProvider(String applicationCode) {
+        this.applicationCode = applicationCode;
+        this.mobileTable = DSL.table(Jdbc.MOBILE).as("mobileTable");
+        this.clientTable = DSL.table(Jdbc.CLIENT).as("clientTable");
+        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
+        this.from = this.mobileTable.leftJoin(this.userTable).on(this.mobileTable.field(Jdbc.Mobile.APPLICATION_USER_ID, String.class).eq(this.userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)))
+                .leftJoin(this.clientTable).on(this.mobileTable.field(Jdbc.Mobile.CLIENT_ID, String.class).eq(this.clientTable.field(Jdbc.Client.CLIENT_ID, String.class)));
+        setSort(Jdbc.Mobile.DATE_SEEN, SortOrder.DESCENDING);
     }
 
     public Field<String> getLogin() {
-        return this.userTable.LOGIN;
+        return this.userTable.field(Jdbc.ApplicationUser.LOGIN, String.class);
     }
 
     public Field<String> getMobileId() {
-        return this.mobileTable.MOBILE_ID;
-    }
-
-    public Field<String> getApplication() {
-        return this.applicationTable.NAME.as("applicationName");
+        return this.mobileTable.field(Jdbc.Mobile.MOBILE_ID, String.class);
     }
 
     public Field<String> getClient() {
-        return this.clientTable.NAME.as("clientName");
+        return this.clientTable.field(Jdbc.Client.NAME, String.class).as("clientName");
     }
 
     public Field<String> getClientIp() {
-        return this.mobileTable.CLIENT_IP;
+        return this.mobileTable.field(Jdbc.Mobile.CLIENT_IP, String.class);
     }
 
     public Field<String> getUserAgent() {
-        return this.mobileTable.USER_AGENT;
+        return this.mobileTable.field(Jdbc.Mobile.USER_AGENT, String.class);
     }
 
     public Field<Date> getDateCreated() {
-        return this.mobileTable.DATE_CREATED;
+        return this.mobileTable.field(Jdbc.Mobile.DATE_CREATED, Date.class);
     }
 
     public Field<Date> getDateSeen() {
-        return this.mobileTable.DATE_SEEN;
+        return this.mobileTable.field(Jdbc.Mobile.DATE_SEEN, Date.class);
+    }
+
+    @Override
+    protected DSLContext getDSLContext() {
+        Application application = ApplicationUtils.getApplication();
+        return application.getDSLContext(this.applicationCode);
     }
 
     @Override

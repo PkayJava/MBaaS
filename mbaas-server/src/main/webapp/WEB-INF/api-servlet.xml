@@ -35,6 +35,7 @@
     <bean id="interceptor" class="com.angkorteam.mbaas.server.spring.ExecutionTimeHandlerInterceptor">
         <property name="gson" ref="gson"/>
         <property name="context" ref="context"/>
+        <property name="applicationDataSource" ref="applicationDataSource"/>
     </bean>
 
     <mvc:resources mapping="/resource/**" location="file:${resource.repo}/" cache-period="604800">
@@ -103,7 +104,10 @@
 
     <bean id="authenticationProvider" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationProvider">
         <property name="context" ref="context"/>
+        <property name="applicationDataSource" ref="applicationDataSource"/>
     </bean>
+
+    <bean id="applicationDataSource" class="com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean"/>
 
     <!--
     <integration:poller id="poller" default="true" fixed-delay="1000"/>
@@ -124,6 +128,7 @@
 
     <bean id="identityResolver" class="com.angkorteam.mbaas.server.spring.IdentityHandlerMethodArgumentResolver">
         <property name="context" ref="context"/>
+        <property name="applicationDataSource" ref="applicationDataSource"/>
     </bean>
 
     <bean id="serviceActivator" class="com.angkorteam.mbaas.server.service.IMAPServiceActivator"/>
@@ -148,10 +153,10 @@
 
     <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"/>
 
-    <bean id="permission" class="com.angkorteam.mbaas.server.factory.PermissionFactoryBean">
-        <property name="context" ref="context"/>
-        <property name="jdbcTemplate" ref="jdbcTemplate"/>
-    </bean>
+    <!--<bean id="permission" class="com.angkorteam.mbaas.server.factory.PermissionFactoryBean">-->
+        <!--<property name="context" ref="context"/>-->
+        <!--<property name="jdbcTemplate" ref="jdbcTemplate"/>-->
+    <!--</bean>-->
 
     <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationEntryPoint">
         <property name="gson" ref="gson"/>

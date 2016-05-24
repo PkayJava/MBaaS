@@ -100,8 +100,9 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String applicationSecret = request.getHeader("Application-Secret");
 
-        if (authorization == null || !authorization.toUpperCase().startsWith("BEARER ")) {
+        if (applicationSecret == null || "".equals(applicationSecret) || authorization == null || !authorization.toUpperCase().startsWith("BEARER ")) {
             chain.doFilter(request, response);
             return;
         }
@@ -111,8 +112,7 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
 
             BearerAuthenticationToken authRequest = new BearerAuthenticationToken(bearer);
             authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
-            Authentication authResult = authenticationManager
-                    .authenticate(authRequest);
+            Authentication authResult = authenticationManager.authenticate(authRequest);
             authResult.setAuthenticated(true);
 
             SecurityContextHolder.getContext().setAuthentication(authResult);

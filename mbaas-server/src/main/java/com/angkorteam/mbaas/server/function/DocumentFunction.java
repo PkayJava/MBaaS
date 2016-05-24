@@ -1,22 +1,14 @@
 package com.angkorteam.mbaas.server.function;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.EavIntegerTable;
-import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.EavTextRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
+import com.angkorteam.mbaas.server.Jdbc;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
-import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.util.*;
 
@@ -25,20 +17,15 @@ import java.util.*;
  */
 public class DocumentFunction {
 
-    public static void deleteDocument(DSLContext context, JdbcTemplate jdbcTemplate, String collection, String documentId) {
+    public static void deleteDocument(JdbcTemplate jdbcTemplate, String collection, String documentId) {
         jdbcTemplate.update("DELETE FROM `" + collection + "` WHERE " + collection + "_id = ?", documentId);
     }
 
-    public static boolean modifyDocument(DSLContext context, JdbcTemplate jdbcTemplate, String collection, String documentId, DocumentModifyRequest requestBody) {
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+    public static boolean modifyDocument(JdbcTemplate jdbcTemplate, String collectionId, String collectionName, String documentId, DocumentModifyRequest requestBody) {
+        Map<String, Map<String, Object>> attributeRecords = new LinkedHashMap<>();
 
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
-
-        Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
-
-        for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
-            attributeRecords.put(attributeRecord.getName(), attributeRecord);
+        for (Map<String, Object> attributeRecord : jdbcTemplate.queryForList("SELECT * FROM WHERE " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ?", collectionId)) {
+            attributeRecords.put((String) attributeRecord.get(Jdbc.Attribute.NAME), attributeRecord);
         }
 
         // ensureField
@@ -69,43 +56,43 @@ public class DocumentFunction {
                 if (entry.getValue() == null) {
                     continue;
                 }
-                if (!attributeRecords.get(entry.getKey()).getEav()) {
+                if (!(boolean) attributeRecords.get(entry.getKey()).get(Jdbc.Attribute.EAV)) {
                     columns.add(entry.getKey() + " = :" + entry.getKey());
                     values.put(entry.getKey(), entry.getValue());
                 }
             }
             for (String nul : nulls) {
-                if (!attributeRecords.get(nul).getEav()) {
+                if (!(boolean) attributeRecords.get(nul).get(Jdbc.Attribute.EAV)) {
                     columns.add(nul + " = :" + nul);
                     values.put(nul, null);
                 }
             }
-            values.put(collection + "_id", documentId);
+            values.put(collectionName + "_id", documentId);
             NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-            namedParameterJdbcTemplate.update("UPDATE `" + collectionRecord.getName() + "` SET " + StringUtils.join(columns, ", ") + " WHERE " + collection + "_id = :" + collection + "_id", values);
+            namedParameterJdbcTemplate.update("UPDATE `" + collectionName + "` SET " + StringUtils.join(columns, ", ") + " WHERE " + collectionName + "_id = :" + collectionName + "_id", values);
 
             for (Map.Entry<String, Object> entry : goodDocument.entrySet()) {
                 if (entry.getValue() == null) {
                     continue;
                 }
-                AttributeRecord attributeRecord = attributeRecords.get(entry.getKey());
-                if (attributeRecord.getEav()) {
-                    AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
+                Map<String, Object> attributeRecord = attributeRecords.get(entry.getKey());
+                if ((boolean) attributeRecord.get(Jdbc.Attribute.EAV)) {
+                    AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
                     String eavTable = attributeType.getEavTable();
-                    int effect = jdbcTemplate.update("UPDATE " + eavTable + " SET EAV_VALUE = ? WHERE COLLECTION_ID = ? AND ATTRIBUTE_ID = ? AND DOCUMENT_ID = ?", entry.getValue(), collectionRecord.getCollectionId(), attributeRecord.getAttributeId(), documentId);
+                    int effect = jdbcTemplate.update("UPDATE " + eavTable + " SET EAV_VALUE = ? WHERE COLLECTION_ID = ? AND ATTRIBUTE_ID = ? AND DOCUMENT_ID = ?", entry.getValue(), collectionId, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID), documentId);
                     if (effect == 0) {
-                        jdbcTemplate.update("INSERT INTO " + eavTable + "(" + eavTable + "_id,COLLECTION_ID,DOCUMENT_ID,ATTRIBUTE_ID,ATTRIBUTE_TYPE,EAV_VALUE) values(?,?,?,?,?,?)", UUID.randomUUID().toString(), collectionRecord.getCollectionId(), documentId, attributeRecord.getAttributeId(), attributeRecord.getAttributeType(), entry.getValue());
+                        jdbcTemplate.update("INSERT INTO " + eavTable + "(" + eavTable + "_id,COLLECTION_ID,DOCUMENT_ID,ATTRIBUTE_ID,ATTRIBUTE_TYPE,EAV_VALUE) values(?,?,?,?,?,?)", UUID.randomUUID().toString(), collectionId, documentId, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID), attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE), entry.getValue());
                     }
                 }
             }
             for (String nul : nulls) {
-                AttributeRecord attributeRecord = attributeRecords.get(nul);
-                if (attributeRecord.getEav()) {
-                    AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attributeRecord.getAttributeType());
+                Map<String, Object> attributeRecord = attributeRecords.get(nul);
+                if ((boolean) attributeRecord.get(Jdbc.Attribute.EAV)) {
+                    AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
                     String eavTable = attributeType.getEavTable();
-                    int effect = jdbcTemplate.update("UPDATE " + eavTable + " SET EAV_VALUE = ? WHERE COLLECTION_ID = ? AND ATTRIBUTE_ID = ? AND DOCUMENT_ID = ?", null, collectionRecord.getCollectionId(), attributeRecord.getAttributeId(), documentId);
+                    int effect = jdbcTemplate.update("UPDATE " + eavTable + " SET EAV_VALUE = ? WHERE COLLECTION_ID = ? AND ATTRIBUTE_ID = ? AND DOCUMENT_ID = ?", null, collectionId, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID), documentId);
                     if (effect == 0) {
-                        jdbcTemplate.update("INSERT INTO " + eavTable + "(" + eavTable + "_id,COLLECTION_ID,DOCUMENT_ID,ATTRIBUTE_ID,ATTRIBUTE_TYPE,EAV_VALUE) values(?,?,?,?,?,?)", UUID.randomUUID().toString(), collectionRecord.getCollectionId(), documentId, attributeRecord.getAttributeId(), attributeRecord.getAttributeType(), null);
+                        jdbcTemplate.update("INSERT INTO " + eavTable + "(" + eavTable + "_id,COLLECTION_ID,DOCUMENT_ID,ATTRIBUTE_ID,ATTRIBUTE_TYPE,EAV_VALUE) values(?,?,?,?,?,?)", UUID.randomUUID().toString(), collectionId, documentId, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID), attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE), null);
                     }
                 }
             }
@@ -113,16 +100,10 @@ public class DocumentFunction {
         return good;
     }
 
-    public static boolean insertDocument(DSLContext context, JdbcTemplate jdbcTemplate, String ownerUserId, String documentId, String collection, DocumentCreateRequest requestBody) {
-
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(collection)).fetchOneInto(collectionTable);
-
-        Map<String, AttributeRecord> attributeRecords = new LinkedHashMap<>();
-        for (AttributeRecord attributeRecord : context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchInto(attributeTable)) {
-            attributeRecords.put(attributeRecord.getName(), attributeRecord);
+    public static boolean insertDocument(JdbcTemplate jdbcTemplate, String ownerApplicationUserId, String documentId, String collectionId, String collectionName, DocumentCreateRequest requestBody) {
+        Map<String, Map<String, Object>> attributeRecords = new LinkedHashMap<>();
+        for (Map<String, Object> attributeRecord : jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ?", collectionId)) {
+            attributeRecords.put((String) attributeRecord.get(Jdbc.Attribute.NAME), attributeRecord);
         }
 
         // ensureField
@@ -136,9 +117,9 @@ public class DocumentFunction {
         if (good) {
             XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             // ownerUserId column
-            String jdbcColumnOwnerUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID);
-            if (attributeRecords.containsKey(jdbcColumnOwnerUserId)) {
-                goodDocument.put(jdbcColumnOwnerUserId, ownerUserId);
+            String jdbcColumnOwnerApplicationUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_APPLICATION_USER_ID);
+            if (attributeRecords.containsKey(jdbcColumnOwnerApplicationUserId)) {
+                goodDocument.put(jdbcColumnOwnerApplicationUserId, ownerApplicationUserId);
             }
             String jdbcColumnOptimistic = configuration.getString(Constants.JDBC_COLUMN_OPTIMISTIC);
             if (attributeRecords.containsKey(jdbcColumnOptimistic)) {
@@ -153,25 +134,25 @@ public class DocumentFunction {
                 goodDocument.put(jdbcColumnDateCreated, new Date());
             }
 
-            goodDocument.put(collection + "_id", documentId);
+            goodDocument.put(collectionName + "_id", documentId);
 
             List<String> fields = new LinkedList<>();
             List<Object> values = new LinkedList<>();
             Map<String, Object> eavs = new HashMap<>();
             for (Map.Entry<String, Object> item : goodDocument.entrySet()) {
-                AttributeRecord attributeRecord = attributeRecords.get(item.getKey());
-                if (!attributeRecord.getEav()) {
+                Map<String, Object> attributeRecord = attributeRecords.get(item.getKey());
+                if (!(boolean) attributeRecord.get(Jdbc.Attribute.EAV)) {
                     fields.add(item.getKey());
                     values.add(":" + item.getKey());
                 } else {
                     eavs.put(item.getKey(), item.getValue());
                 }
             }
-            String jdbc = "INSERT INTO " + collection + "(" + StringUtils.join(fields, ",") + ") VALUES(" + StringUtils.join(values, ",") + ")";
+            String jdbc = "INSERT INTO " + collectionName + "(" + StringUtils.join(fields, ",") + ") VALUES(" + StringUtils.join(values, ",") + ")";
             NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(jdbcTemplate);
             template.update(jdbc, goodDocument);
             if (!eavs.isEmpty()) {
-                CommonFunction.saveEavAttributes(collectionRecord.getCollectionId(), documentId, context, attributeRecords, eavs);
+                CommonFunction.saveEavAttributes(jdbcTemplate, collectionId, documentId, attributeRecords, eavs);
             }
         }
         return good;

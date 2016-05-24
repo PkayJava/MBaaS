@@ -1,30 +1,31 @@
 package com.angkorteam.mbaas.server.renderer;
 
-import com.angkorteam.mbaas.model.entity.tables.pojos.ClientPojo;
+import com.angkorteam.mbaas.server.Jdbc;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 3/3/16.
  */
-public class ClientChoiceRenderer implements IChoiceRenderer<ClientPojo> {
+public class ClientChoiceRenderer implements IChoiceRenderer<Map<String, Object>> {
 
     @Override
-    public Object getDisplayValue(ClientPojo object) {
-        return object.getName();
+    public Object getDisplayValue(Map<String, Object> object) {
+        return object.get(Jdbc.Client.NAME);
     }
 
     @Override
-    public String getIdValue(ClientPojo object, int index) {
-        return object.getClientId();
+    public String getIdValue(Map<String, Object> object, int index) {
+        return (String) object.get(Jdbc.Client.CLIENT_ID);
     }
 
     @Override
-    public ClientPojo getObject(String id, IModel<? extends List<? extends ClientPojo>> choices) {
-        for (ClientPojo client : choices.getObject()) {
-            if (client.getClientId().equals(id)) {
+    public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
+        for (Map<String, Object> client : choices.getObject()) {
+            if (client.get(Jdbc.Client.CLIENT_ID).equals(id)) {
                 return client;
             }
         }

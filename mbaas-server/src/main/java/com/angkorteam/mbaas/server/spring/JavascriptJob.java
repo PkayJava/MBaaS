@@ -1,9 +1,8 @@
 package com.angkorteam.mbaas.server.spring;
 
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.JobTable;
-import com.angkorteam.mbaas.model.entity.tables.records.JobRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.nashorn.JavaFilter;
 import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.nashorn.MBaaS;
@@ -15,59 +14,60 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by socheat on 4/23/16.
  */
 public final class JavascriptJob implements Runnable {
 
-    private final DSLContext context;
+    private final ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource;
 
-    private final JdbcTemplate jdbcTemplate;
+    private final DSLContext context;
 
     private final String jobId;
 
-    public JavascriptJob(DSLContext context, JdbcTemplate jdbcTemplate, String jobId) {
-        this.jobId = jobId;
-        this.jdbcTemplate = jdbcTemplate;
+    private final String applicationCode;
+
+    public JavascriptJob(DSLContext context, ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource, String applicationCode, String jobId) {
         this.context = context;
+        this.jobId = jobId;
+        this.applicationDataSource = applicationDataSource;
+        this.applicationCode = applicationCode;
     }
 
     @Override
     public final void run() {
-        JobTable jobTable = Tables.JOB.as("jobTable");
-        JobRecord jobRecord = context.select(jobTable.fields()).from(jobTable).where(jobTable.JOB_ID.eq(jobId)).fetchOneInto(jobTable);
-        if (jobRecord == null || jobRecord.getSecurity().equals(SecurityEnum.Denied.getLiteral())) {
+        JdbcTemplate jdbcTemplate = this.applicationDataSource.getJdbcTemplate(this.applicationCode);
+        DSLContext context = this.applicationDataSource.getDSLContext(this.applicationCode);
+        if (jdbcTemplate == null) {
+            return;
+        }
+        Map<String, Object> jobRecord = null;
+        jobRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JOB + " WHERE " + Jdbc.Job.JOB_ID + " = ?", this.jobId);
+        if (jobRecord == null || jobRecord.get(Jdbc.Job.SECURITY).equals(SecurityEnum.Denied.getLiteral())) {
             return;
         }
         long start;
         try {
             NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-            ScriptEngine engine = factory.getScriptEngine(new JavaFilter(context));
+            ScriptEngine engine = factory.getScriptEngine(new JavaFilter(this.context));
             Bindings bindings = engine.createBindings();
             engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
             bindings.put("MBaaS", new MBaaS(context, null, jdbcTemplate, null));
             bindings.put("Context", context);
             JavascripUtils.eval(engine);
-            String javascript = jobRecord.getJavascript();
+            String javascript = (String) jobRecord.get(Jdbc.Job.JAVASCRIPT);
             start = System.currentTimeMillis();
             engine.eval(javascript);
             start = System.currentTimeMillis() - start;
             double consume = ((double) start) / 1000d;
-            jobRecord.setConsume(consume);
-            jobRecord.setErrorClass("");
-            jobRecord.setErrorMessage("");
-            jobRecord.setDateLastExecuted(new Date());
-            jobRecord.update();
+            jdbcTemplate.update("UPDATE " + Jdbc.JOB + " SET " + Jdbc.Job.CONSUME + " = ?, " + Jdbc.Job.ERROR_CLASS + " = ?, " + Jdbc.Job.ERROR_MESSAGE + " = ?, " + Jdbc.Job.DATE_LAST_EXECUTED + " = ? WHERE " + Jdbc.Job.JOB_ID + " = ?", consume, "", "", new Date(), jobRecord.get(Jdbc.Job.JOB_ID));
         } catch (Throwable e) {
             start = System.currentTimeMillis();
             start = System.currentTimeMillis() - start;
             double consume = ((double) start) / 1000d;
-            jobRecord.setConsume(consume);
-            jobRecord.setErrorClass(e.getClass().getSimpleName());
-            jobRecord.setErrorMessage(e.getMessage());
-            jobRecord.setDateLastExecuted(new Date());
-            jobRecord.update();
+            jdbcTemplate.update("UPDATE " + Jdbc.JOB + " SET " + Jdbc.Job.CONSUME + " = ?, " + Jdbc.Job.ERROR_CLASS + " = ?, " + Jdbc.Job.ERROR_MESSAGE + " = ?, " + Jdbc.Job.DATE_LAST_EXECUTED + " = ? WHERE " + Jdbc.Job.JOB_ID + " = ?", consume, "", "", new Date(), jobRecord.get(Jdbc.Job.JOB_ID));
         }
     }
 

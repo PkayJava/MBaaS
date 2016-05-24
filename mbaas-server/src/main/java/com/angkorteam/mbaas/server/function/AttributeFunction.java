@@ -1,46 +1,48 @@
 package com.angkorteam.mbaas.server.function;
 
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
 import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
-import org.jooq.DSLContext;
+import com.angkorteam.mbaas.server.Jdbc;
+import org.flywaydb.core.internal.dbsupport.Schema;
+import org.flywaydb.core.internal.dbsupport.Table;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by socheat on 3/8/16.
  */
 public class AttributeFunction {
 
-    public static void deleteAttribute(DSLContext context, JdbcTemplate jdbcTemplate, CollectionAttributeDeleteRequest requestBody) {
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+    public static void deleteAttribute(JdbcTemplate jdbcTemplate, CollectionAttributeDeleteRequest requestBody) {
+        Map<String, Object> collectionRecord = null;
+        collectionRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.NAME + " = ?", requestBody.getCollectionName());
 
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
-        AttributeRecord attributeRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.NAME.eq(requestBody.getAttributeName())).and(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).fetchOneInto(attributeTable);
+        Map<String, Object> attributeRecord = null;
+        attributeRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.NAME + " = ? AND " + Jdbc.Attribute.COLLECTION_ID + " = ?", requestBody.getAttributeName(), collectionRecord.get(Jdbc.Collection.COLLECTION_ID));
 
-        if (!attributeRecord.getEav()) {
+        if (!(boolean) attributeRecord.get(Jdbc.Attribute.EAV)) {
             jdbcTemplate.execute("ALTER TABLE `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");
         }
-        attributeRecord.delete();
+        jdbcTemplate.update("DELETE FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.ATTRIBUTE_ID + " = ?", attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
     }
 
-    public static boolean createAttribute(DSLContext context, JdbcTemplate jdbcTemplate, String applicationId, String attributeId, CollectionAttributeCreateRequest requestBody) {
-
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
+    public static boolean createAttribute(Schema schema, JdbcTemplate jdbcTemplate, String applicationCode, String attributeId, CollectionAttributeCreateRequest requestBody) {
+        Map<String, Object> collectionRecord = null;
+        collectionRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.NAME + " = ?", requestBody.getCollectionName());
 
         boolean good = collectionRecord != null;
         if (good) {
-            int count = context.selectCount().from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).and(attributeTable.NAME.eq(requestBody.getAttributeName())).fetchOneInto(int.class);
+            Table table = schema.getTable(requestBody.getCollectionName());
+            good = !table.hasColumn(requestBody.getAttributeName());
+        }
+        if (good) {
+            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.Attribute.COLLECTION_ID + " = ? AND " + Jdbc.Attribute.NAME + " = ?", int.class, collectionRecord.get(Jdbc.Collection.COLLECTION_ID), requestBody.getAttributeName());
             good = count <= 0;
         }
         if (good) {
@@ -52,29 +54,30 @@ public class AttributeFunction {
                 String jdbc;
                 if (attributeType == AttributeTypeEnum.Text
                         || attributeType == AttributeTypeEnum.String) {
-                    jdbc = "ALTER TABLE " + collectionRecord.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD FULLTEXT (`" + requestBody.getAttributeName() + "`);";
+                    jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD FULLTEXT (`" + requestBody.getAttributeName() + "`);";
                 } else {
-                    jdbc = "ALTER TABLE " + collectionRecord.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD INDEX (`" + requestBody.getAttributeName() + "`);";
+                    jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD INDEX (`" + requestBody.getAttributeName() + "`);";
                 }
                 jdbcTemplate.execute(jdbc);
             }
 
-            AttributeRecord attributeRecord = context.newRecord(attributeTable);
-            attributeRecord.setAttributeId(attributeId);
             if (requestBody.isNullable()) {
                 extra = extra | AttributeExtraEnum.NULLABLE;
             }
             extra = extra | AttributeExtraEnum.EXPOSED;
-            attributeRecord.setExtra(extra);
-            attributeRecord.setApplicationId(applicationId);
-            attributeRecord.setCollectionId(collectionRecord.getCollectionId());
-            attributeRecord.setName(requestBody.getAttributeName());
-            attributeRecord.setVisibility(VisibilityEnum.Hided.getLiteral());
-            attributeRecord.setAttributeType(AttributeTypeEnum.valueOf(requestBody.getAttributeType()).getLiteral());
-            attributeRecord.setEav(requestBody.isEav());
-            attributeRecord.setSystem(false);
-            attributeRecord.setAttributeType(attributeType.getLiteral());
-            attributeRecord.store();
+            Map<String, Object> fields = new HashMap<>();
+            fields.put(Jdbc.Attribute.ATTRIBUTE_ID, attributeId);
+            fields.put(Jdbc.Attribute.EXTRA, extra);
+            fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
+            fields.put(Jdbc.Attribute.COLLECTION_ID, collectionRecord.get(Jdbc.Collection.COLLECTION_ID));
+            fields.put(Jdbc.Attribute.NAME, requestBody.getAttributeName());
+            fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
+            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, attributeType.getLiteral());
+            fields.put(Jdbc.Attribute.EAV, requestBody.isEav());
+            fields.put(Jdbc.Attribute.SYSTEM, false);
+            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+            jdbcInsert.withTableName(Jdbc.ATTRIBUTE);
+            jdbcInsert.execute(fields);
         }
         return good;
     }

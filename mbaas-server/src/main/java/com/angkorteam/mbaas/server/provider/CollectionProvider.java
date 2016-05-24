@@ -1,11 +1,11 @@
 package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.server.wicket.Session;
-import org.jooq.*;
+import com.angkorteam.mbaas.server.Jdbc;
+import org.jooq.Condition;
+import org.jooq.Field;
+import org.jooq.Table;
+import org.jooq.TableLike;
 import org.jooq.impl.DSL;
 
 import java.util.ArrayList;
@@ -16,60 +16,38 @@ import java.util.List;
  */
 public class CollectionProvider extends JooqProvider {
 
-    private Field<Integer> document;
-
     private TableLike<?> from;
 
-    private CollectionTable collectionTable;
+    private final String applicationCode;
 
-    private UserTable userTable;
+    private Table<?> collectionTable;
+    private Table<?> userTable;
 
-    private String ownerUserId;
-
-    public CollectionProvider() {
-        this(null);
+    public CollectionProvider(String applicationCode) {
+        this.applicationCode = applicationCode;
+        this.collectionTable = DSL.table(Jdbc.COLLECTION).as("collectionTable");
+        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
+        this.from = this.collectionTable.join(this.userTable).on(collectionTable.field(Jdbc.Collection.OWNER_APPLICATION_USER_ID, String.class).eq(userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
     }
 
-    public CollectionProvider(String ownerUserId) {
-        this.ownerUserId = ownerUserId;
-        this.collectionTable = Tables.COLLECTION.as("collectionTable");
-        this.userTable = Tables.USER.as("userTable");
-        {
-            DSLContext context = getDSLContext();
-            List<String> names = context.select(collectionTable.NAME).from(collectionTable).fetchInto(String.class);
-            CaseValueStep<String> choose = DSL.choose(collectionTable.NAME);
-            String first = names.remove(0);
-            CaseWhenStep when = choose.when(first, context.selectCount().from(DSL.table("`" + first + "`")).asField());
-            for (String name : names) {
-                when = when.when(name, context.selectCount().from(DSL.table("`" + name + "`")).asField());
-            }
-            document = when;
-        }
-        this.from = collectionTable.join(userTable).on(collectionTable.OWNER_USER_ID.eq(userTable.USER_ID));
+    public Field<String> getApplicationUser() {
+        return this.userTable.field(Jdbc.ApplicationUser.LOGIN, String.class);
     }
 
-    public Field<String> getOwnerUser() {
-        return this.userTable.LOGIN;
-    }
-
-    public Field<String> getOwnerUserId() {
-        return this.userTable.USER_ID;
-    }
-
-    public Field<Integer> getDocument() {
-        return this.document;
+    public Field<String> getApplicationUserId() {
+        return this.userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
     }
 
     public Field<Boolean> getSystem() {
-        return this.collectionTable.SYSTEM;
+        return this.collectionTable.field(Jdbc.ApplicationUser.SYSTEM, Boolean.class);
     }
 
     public Field<String> getName() {
-        return this.collectionTable.NAME;
+        return this.collectionTable.field(Jdbc.Collection.NAME, String.class);
     }
 
     public Field<String> getCollectionId() {
-        return this.collectionTable.COLLECTION_ID;
+        return this.collectionTable.field(Jdbc.Collection.COLLECTION_ID, String.class);
     }
 
     @Override
@@ -80,12 +58,7 @@ public class CollectionProvider extends JooqProvider {
     @Override
     protected List<Condition> where() {
         List<Condition> where = new ArrayList<>();
-        where.add(this.collectionTable.SYSTEM.eq(false));
-        if (ownerUserId != null) {
-            where.add(this.userTable.USER_ID.eq(ownerUserId));
-        }
-        Session session = (Session) Session.get();
-        where.add(this.collectionTable.APPLICATION_ID.eq(session.getApplicationId()));
+        where.add(this.collectionTable.field(Jdbc.Collection.SYSTEM, Boolean.class).eq(false));
         return where;
     }
 

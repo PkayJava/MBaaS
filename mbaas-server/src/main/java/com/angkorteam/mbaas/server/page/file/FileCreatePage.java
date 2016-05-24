@@ -3,12 +3,7 @@ package com.angkorteam.mbaas.server.page.file;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.FileTable;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
-import com.angkorteam.mbaas.server.function.DocumentFunction;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -22,7 +17,8 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.PropertyModel;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.io.File;
 import java.util.*;
@@ -42,8 +38,6 @@ public class FileCreatePage extends MasterPage {
     private FileUploadField fileField;
     private TextFeedbackPanel fileFeedback;
 
-    private String collectionId;
-
     private Button saveButton;
 
     private Form<Void> form;
@@ -56,7 +50,6 @@ public class FileCreatePage extends MasterPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        DSLContext context = getDSLContext();
         this.form = new Form<>("form");
         add(this.form);
 
@@ -73,10 +66,6 @@ public class FileCreatePage extends MasterPage {
         this.fileFeedback = new TextFeedbackPanel("fileFeedback", this.fileField);
         this.form.add(fileFeedback);
 
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(Tables.FILE.getName())).fetchOneInto(collectionTable);
-        this.collectionId = collectionRecord.getCollectionId();
-
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(saveButton);
@@ -89,38 +78,36 @@ public class FileCreatePage extends MasterPage {
         String patternFolder = configuration.getString(Constants.PATTERN_FOLDER);
         String repo = configuration.getString(Constants.RESOURCE_REPO);
         String fileRepo = DateFormatUtils.format(new Date(), patternFolder);
-
-        long length = file.getSize();
-        String path = fileRepo;
-        String mime = file.getContentType();
+        File container = new File(repo + "/" + getApplicationCode() + "/file" + fileRepo);
         String extension = StringUtils.lowerCase(FilenameUtils.getExtension(file.getClientFileName()));
-
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        CollectionRecord collectionRecord = getDSLContext().select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(collectionTable);
-        DocumentCreateRequest requestBody = new DocumentCreateRequest();
-        Map<String, Object> fields = new HashMap<>();
-        requestBody.setDocument(fields);
-        fields.put(Tables.FILE.PATH.getName(), path);
-        fields.put(Tables.FILE.MIME.getName(), mime);
-        fields.put(Tables.FILE.APPLICATION_ID.getName(), getSession().getApplicationId());
-        fields.put(Tables.FILE.EXTENSION.getName(), extension);
-        fields.put(Tables.FILE.LENGTH.getName(), length);
-        fields.put(Tables.FILE.LABEL.getName(), this.name);
-        final String documentId = UUID.randomUUID().toString();
-        DocumentFunction.insertDocument(getDSLContext(), getJdbcTemplate(), getSession().getUserId(), documentId, collectionRecord.getName(), requestBody);
-        String name = documentId + "_" + this.name;
-
-        FileTable fileTable = Tables.FILE.as("fileTable");
-        DSLContext context = getDSLContext();
-        context.update(fileTable).set(fileTable.NAME, name).where(fileTable.FILE_ID.eq(documentId)).execute();
-
-        File container = new File(repo + "/file" + fileRepo);
+        String fileId = UUID.randomUUID().toString();
+        String name = fileId + "_" + this.name + "." + extension;
         container.mkdirs();
-
         try {
             file.writeTo(new File(container, name));
         } catch (Exception e) {
         }
+
+        long length = file.getSize();
+        String path = fileRepo;
+        String mime = file.getContentType();
+        String label = this.name;
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.File.FILE_ID, fileId);
+        fields.put(Jdbc.File.APPLICATION_CODE, getApplicationCode());
+        fields.put(Jdbc.File.PATH, path);
+        fields.put(Jdbc.File.MIME, mime);
+        fields.put(Jdbc.File.EXTENSION, extension);
+        fields.put(Jdbc.File.LENGTH, length);
+        fields.put(Jdbc.File.LABEL, label);
+        fields.put(Jdbc.File.NAME, name);
+        fields.put(Jdbc.File.DATE_CREATED, new Date());
+        fields.put(Jdbc.File.APPLICATION_USER_ID, getSession().getApplicationUserId());
+
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.FILE);
+        jdbcInsert.execute(fields);
 
         setResponsePage(FileManagementPage.class);
     }

@@ -1,12 +1,11 @@
 package com.angkorteam.mbaas.server.page.profile;
 
+import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.UserEmailAddressValidator;
 import com.angkorteam.mbaas.server.validator.UserMobileNumberValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -16,12 +15,15 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.validator.EmailAddressValidator;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by socheat on 4/2/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice", "registered"})
+@AuthorizeInstantiation({"administrator", "registered"})
 @Mount("/profile/information")
 public class InformationPage extends MasterPage {
 
@@ -46,22 +48,22 @@ public class InformationPage extends MasterPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        DSLContext context = getDSLContext();
-        UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(getSession().getUserId())).fetchOneInto(userTable);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        Map<String, Object> userRecord = null;
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " =?", getSession().getApplicationUserId());
 
         this.form = new Form<>("form");
         add(this.form);
 
-        this.login = userRecord.getLogin();
+        this.login = (String) userRecord.get(Jdbc.ApplicationUser.LOGIN);
         this.loginLabel = new Label("loginLabel", new PropertyModel<>(this, "login"));
         this.form.add(this.loginLabel);
 
-        this.authentication = userRecord.getAuthentication();
+        this.authentication = (String) userRecord.get(Jdbc.ApplicationUser.AUTHENTICATION);
         this.authenticationLabel = new Label("authenticationLabel", new PropertyModel<>(this, "authentication"));
         this.form.add(this.authenticationLabel);
 
-        this.emailAddress = userRecord.getEmailAddress();
+        this.emailAddress = (String) userRecord.get(Jdbc.ApplicationUser.EMAIL_ADDRESS);
         this.emailAddressField = new TextField<>("emailAddressField", new PropertyModel<>(this, "emailAddress"));
         if (AuthenticationEnum.TwoEMail.getLiteral().equals(this.authentication)) {
             this.emailAddressField.setRequired(true);
@@ -71,12 +73,12 @@ public class InformationPage extends MasterPage {
             }
         }
         this.emailAddressField.add(EmailAddressValidator.getInstance());
-        this.emailAddressField.add(new UserEmailAddressValidator(getSession().getUserId()));
+        this.emailAddressField.add(new UserEmailAddressValidator(getSession().getApplicationCode(), getSession().getApplicationUserId()));
         this.form.add(this.emailAddressField);
         this.emailAddressFeedback = new TextFeedbackPanel("emailAddressFeedback", this.emailAddressField);
         this.form.add(this.emailAddressFeedback);
 
-        this.mobileNumber = userRecord.getMobileNumber();
+        this.mobileNumber = (String) userRecord.get(Jdbc.ApplicationUser.MOBILE_NUMBER);
         this.mobileNumberField = new TextField<>("mobileNumberField", new PropertyModel<>(this, "mobileNumber"));
         if (AuthenticationEnum.TwoSMS.getLiteral().equals(this.authentication)) {
             this.mobileNumberField.setRequired(true);
@@ -85,7 +87,7 @@ public class InformationPage extends MasterPage {
                 this.mobileNumberField.setRequired(true);
             }
         }
-        this.mobileNumberField.add(new UserMobileNumberValidator(getSession().getUserId()));
+        this.mobileNumberField.add(new UserMobileNumberValidator(getSession().getApplicationCode(), getSession().getApplicationUserId()));
         this.form.add(this.mobileNumberField);
         this.mobileNumberFeedback = new TextFeedbackPanel("mobileNumberFeedback", this.mobileNumberField);
         this.form.add(this.mobileNumberFeedback);
@@ -96,12 +98,15 @@ public class InformationPage extends MasterPage {
     }
 
     private void updateButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(getSession().getUserId())).fetchOneInto(userTable);
-        userRecord.setEmailAddress(this.emailAddress);
-        userRecord.setMobileNumber(this.mobileNumber);
-        userRecord.update();
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.ApplicationUser.EMAIL_ADDRESS, this.emailAddress);
+        fields.put(Jdbc.ApplicationUser.MOBILE_NUMBER, this.mobileNumber);
+        Map<String, Object> wheres = new HashMap<>();
+        wheres.put(Jdbc.ApplicationUser.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
+        jdbcUpdate.withTableName(Jdbc.APPLICATION_USER);
+        jdbcUpdate.execute(fields, wheres);
         setResponsePage(InformationPage.class);
     }
 }

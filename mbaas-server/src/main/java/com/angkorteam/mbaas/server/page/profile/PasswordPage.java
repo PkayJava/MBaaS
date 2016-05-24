@@ -3,8 +3,7 @@ package com.angkorteam.mbaas.server.page.profile;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.UserPasswordValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -14,13 +13,12 @@ import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.validation.EqualPasswordInputValidator;
 import org.apache.wicket.model.PropertyModel;
-import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Created by socheat on 4/2/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice", "registered"})
+@AuthorizeInstantiation({"administrator", "registered"})
 @Mount("/profile/password")
 public class PasswordPage extends MasterPage {
 
@@ -50,7 +48,7 @@ public class PasswordPage extends MasterPage {
         this.currentPasswordField = new PasswordTextField("currentPasswordField", new PropertyModel<>(this, "currentPassword"));
         this.currentPasswordField.setRequired(true);
         this.currentPasswordField.setLabel(JooqUtils.lookup("currentPassword", this));
-        this.currentPasswordField.add(new UserPasswordValidator(getSession().getUserId()));
+        this.currentPasswordField.add(new UserPasswordValidator(getSession().getApplicationCode(), getSession().getApplicationUserId()));
         this.form.add(this.currentPasswordField);
         this.currentPasswordFeedback = new TextFeedbackPanel("currentPasswordFeedback", this.currentPasswordField);
         this.form.add(this.currentPasswordFeedback);
@@ -77,9 +75,8 @@ public class PasswordPage extends MasterPage {
     }
 
     private void updateButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        UserTable userTable = Tables.USER.as("userTable");
-        context.update(userTable).set(userTable.PASSWORD, DSL.md5(this.newPassword)).where(userTable.USER_ID.eq(getSession().getUserId())).execute();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.PASSWORD + " = MD5(?) WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", this.newPassword, getSession().getApplicationUserId());
     }
 
 }

@@ -1,8 +1,8 @@
 package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.ResourceTable;
-import com.angkorteam.mbaas.model.entity.tables.records.ResourceRecord;
+import com.angkorteam.mbaas.model.entity.tables.LocalizationTable;
+import com.angkorteam.mbaas.model.entity.tables.records.LocalizationRecord;
 import org.apache.wicket.core.request.ClientInfo;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -52,32 +52,32 @@ public abstract class JooqUtils extends AbstractReadOnlyModel<String> {
             Application application = (Application) Application.get();
             DSLContext context = application.getDSLContext();
 
-            ResourceTable resourceTable = Tables.RESOURCE.as("resourceTable");
+            LocalizationTable localizationTable = Tables.LOCALIZATION.as("localizationTable");
 
-            ResourceRecord resourceRecord = context.select(resourceTable.fields()).from(resourceTable).where(resourceTable.KEY.eq(key)).and(resourceTable.PAGE.eq(page)).and(resourceTable.LANGUAGE.eq(language)).limit(1).fetchOneInto(resourceTable);
-            if (resourceRecord != null) {
-                return resourceRecord.getLabel();
+            LocalizationRecord localizationRecord = context.select(localizationTable.fields()).from(localizationTable).where(localizationTable.KEY.eq(key)).and(localizationTable.PAGE.eq(page)).and(localizationTable.LANGUAGE.eq(language)).limit(1).fetchOneInto(localizationTable);
+            if (localizationRecord != null) {
+                return localizationRecord.getLabel();
             }
-            resourceRecord = context.select(resourceTable.fields()).from(resourceTable).where(resourceTable.KEY.eq(key)).and(resourceTable.PAGE.eq(page)).limit(1).fetchOneInto(resourceTable);
-            if (resourceRecord != null) {
-                return resourceRecord.getLabel();
+            localizationRecord = context.select(localizationTable.fields()).from(localizationTable).where(localizationTable.KEY.eq(key)).and(localizationTable.PAGE.eq(page)).limit(1).fetchOneInto(localizationTable);
+            if (localizationRecord != null) {
+                return localizationRecord.getLabel();
             }
-            resourceRecord = context.select(resourceTable.fields()).from(resourceTable).where(resourceTable.KEY.eq(key)).and(resourceTable.LANGUAGE.eq(language)).limit(1).fetchOneInto(resourceTable);
-            if (resourceRecord != null) {
-                return resourceRecord.getLabel();
+            localizationRecord = context.select(localizationTable.fields()).from(localizationTable).where(localizationTable.KEY.eq(key)).and(localizationTable.LANGUAGE.eq(language)).limit(1).fetchOneInto(localizationTable);
+            if (localizationRecord != null) {
+                return localizationRecord.getLabel();
             }
-            resourceRecord = context.select(resourceTable.fields()).from(resourceTable).where(resourceTable.KEY.eq(key)).limit(1).fetchOneInto(resourceTable);
-            if (resourceRecord != null) {
-                return resourceRecord.getLabel();
+            localizationRecord = context.select(localizationTable.fields()).from(localizationTable).where(localizationTable.KEY.eq(key)).limit(1).fetchOneInto(localizationTable);
+            if (localizationRecord != null) {
+                return localizationRecord.getLabel();
             }
 
-            resourceRecord = context.newRecord(resourceTable);
-            resourceRecord.setResourceId(UUID.randomUUID().toString());
-            resourceRecord.setKey(key);
-            resourceRecord.setLabel(key);
-            resourceRecord.setLanguage(language);
-            resourceRecord.setPage(page);
-            resourceRecord.store();
+            localizationRecord = context.newRecord(localizationTable);
+            localizationRecord.setLocalizationId(UUID.randomUUID().toString());
+            localizationRecord.setKey(key);
+            localizationRecord.setLabel(key);
+            localizationRecord.setLanguage(language);
+            localizationRecord.setPage(page);
+            localizationRecord.store();
 
             return key;
         }

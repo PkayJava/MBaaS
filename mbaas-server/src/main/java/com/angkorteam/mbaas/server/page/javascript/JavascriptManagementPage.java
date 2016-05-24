@@ -6,8 +6,8 @@ import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooq
 import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
-import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.provider.JavascriptProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -17,7 +17,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/javascript/management")
 public class JavascriptManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
@@ -39,15 +39,10 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
     protected void onInitialize() {
         super.onInitialize();
 
-        JavascriptProvider provider = null;
-        if (getSession().isAdministrator()) {
-            provider = new JavascriptProvider();
-        } else {
-            provider = new JavascriptProvider(getSession().getUserId());
-        }
+        JavascriptProvider provider = new JavascriptProvider(getSession().getApplicationCode());
 
         provider.selectField(String.class, "javascriptId");
-        provider.selectField(String.class, "ownerUserId");
+        provider.selectField(String.class, "applicationUserId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -55,9 +50,7 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("path", this), "path", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", provider));
-        if (getSession().isAdministrator()) {
-            columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("ownerUser", this), "ownerUser", provider));
-        }
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("applicationUser", this), "applicationUser", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Edit", "Delete"));
@@ -89,6 +82,7 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         String javascriptId = (String) object.get("javascriptId");
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
@@ -97,18 +91,15 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             return;
         }
         if ("Delete".equals(link)) {
-            DSLContext context = getDSLContext();
-            context.delete(Tables.JAVASCRIPT).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
+            jdbcTemplate.update("DELETE FROM " + Jdbc.JAVASCRIPT + " WHERE " + Jdbc.Javascript.JAVASCRIPT_ID + " = ?", javascriptId);
             return;
         }
         if ("Grant".equals(link)) {
-            DSLContext context = getDSLContext();
-            context.update(Tables.JAVASCRIPT).set(Tables.JAVASCRIPT.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
+            jdbcTemplate.update("UPDATE " + Jdbc.JAVASCRIPT + " SET " + Jdbc.Javascript.SECURITY + " = ? WHERE " + Jdbc.Javascript.JAVASCRIPT_ID + " = ?", SecurityEnum.Granted.getLiteral(), javascriptId);
             return;
         }
         if ("Deny".equals(link)) {
-            DSLContext context = getDSLContext();
-            context.update(Tables.JAVASCRIPT).set(Tables.JAVASCRIPT.SECURITY, SecurityEnum.Denied.getLiteral()).where(Tables.JAVASCRIPT.JAVASCRIPT_ID.eq(javascriptId)).execute();
+            jdbcTemplate.update("UPDATE " + Jdbc.JAVASCRIPT + " SET " + Jdbc.Javascript.SECURITY + " = ? WHERE " + Jdbc.Javascript.JAVASCRIPT_ID + " = ?", SecurityEnum.Denied.getLiteral(), javascriptId);
             return;
         }
     }
@@ -124,47 +115,22 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
     }
 
     protected boolean isAccess(String link, Map<String, Object> object) {
-        String ownerUserId = (String) object.get("ownerUserId");
         if ("Edit".equals(link)) {
-            if (getSession().isAdministrator()) {
-                return true;
-            } else {
-                if (getSession().getUserId().equals(ownerUserId)) {
-                    return true;
-                }
-            }
+            return true;
         }
         if ("Delete".equals(link)) {
-            if (getSession().isAdministrator()) {
-                return true;
-            } else {
-                if (getSession().getUserId().equals(ownerUserId)) {
-                    return true;
-                }
-            }
+            return true;
         }
         if ("Grant".equals(link)) {
             String security = (String) object.get("security");
             if (SecurityEnum.Denied.getLiteral().equals(security)) {
-                if (getSession().isAdministrator()) {
-                    return true;
-                } else {
-                    if (getSession().getUserId().equals(ownerUserId)) {
-                        return true;
-                    }
-                }
+                return true;
             }
         }
         if ("Deny".equals(link)) {
             String security = (String) object.get("security");
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
-                if (getSession().isAdministrator()) {
-                    return true;
-                } else {
-                    if (getSession().getUserId().equals(ownerUserId)) {
-                        return true;
-                    }
-                }
+                return true;
             }
         }
         return false;

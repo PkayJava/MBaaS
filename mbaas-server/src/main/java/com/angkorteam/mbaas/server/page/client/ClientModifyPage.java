@@ -1,14 +1,10 @@
 package com.angkorteam.mbaas.server.page.client;
 
+import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
-import com.angkorteam.mbaas.model.entity.tables.ClientTable;
-import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.ClientRecord;
-import com.angkorteam.mbaas.server.page.application.ApplicationManagementPage;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.ClientNameValidator;
 import com.angkorteam.mbaas.server.validator.PushClientValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -18,12 +14,15 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by socheat on 3/8/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/client/modify")
 public class ClientModifyPage extends MasterPage {
 
@@ -61,20 +60,15 @@ public class ClientModifyPage extends MasterPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        DSLContext context = getDSLContext();
-        ClientTable clientTable = Tables.CLIENT.as("clientTable");
-
-        this.applicationId = getPageParameters().get("applicationId").toString("");
-        if ("".equals(this.applicationId)) {
-            this.applicationId = getSession().getApplicationId();
-        }
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         this.clientId = getPageParameters().get("clientId").toString();
-        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(this.clientId)).fetchOneInto(clientTable);
+        Map<String, Object> clientRecord = null;
+        clientRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.CLIENT + " WHERE " + Jdbc.Client.CLIENT_ID + " = ?", this.clientId);
 
         this.form = new Form<>("form");
         add(this.form);
 
-        this.name = clientRecord.getName();
+        this.name = (String) clientRecord.get(Jdbc.Client.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.add(new ClientNameValidator(this.applicationId, this.clientId));
         this.nameField.setRequired(true);
@@ -82,26 +76,26 @@ public class ClientModifyPage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        this.description = clientRecord.getDescription();
+        this.description = (String) clientRecord.get(Jdbc.Client.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
         this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.pushVariantId = clientRecord.getPushVariantId();
+        this.pushVariantId = (String) clientRecord.get(Jdbc.Client.PUSH_VARIANT_ID);
         this.pushVariantIdField = new TextField<>("pushVariantIdField", new PropertyModel<>(this, "pushVariantId"));
         this.form.add(this.pushVariantIdField);
         this.pushVariantIdFeedback = new TextFeedbackPanel("pushVariantIdFeedback", this.pushVariantIdField);
         this.form.add(this.pushVariantIdFeedback);
 
-        this.pushSecret = clientRecord.getPushSecret();
+        this.pushSecret = (String) clientRecord.get(Jdbc.Client.PUSH_SECRET);
         this.pushSecretField = new TextField<>("pushSecretField", new PropertyModel<>(this, "pushSecret"));
         this.form.add(this.pushSecretField);
         this.pushSecretFeedback = new TextFeedbackPanel("pushSecretFeedback", this.pushSecretField);
         this.form.add(this.pushSecretFeedback);
 
-        this.pushGcmSenderId = clientRecord.getPushGcmSenderId();
+        this.pushGcmSenderId = (String) clientRecord.get(Jdbc.Client.PUSH_GCM_SENDER_ID);
         this.pushGcmSenderIdField = new TextField<>("pushGcmSenderIdField", new PropertyModel<>(this, "pushGcmSenderId"));
         this.form.add(this.pushGcmSenderIdField);
         this.pushGcmSenderIdFeedback = new TextFeedbackPanel("pushGcmSenderIdFeedback", this.pushGcmSenderIdField);
@@ -119,35 +113,18 @@ public class ClientModifyPage extends MasterPage {
         this.form.add(new PushClientValidator(this.pushVariantIdField, this.pushSecretField));
     }
 
-    @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        DSLContext context = getDSLContext();
-        ClientTable clientTable = Tables.CLIENT.as("clientTable");
-        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(this.clientId)).fetchOneInto(clientTable);
-        if (getSession().isBackOffice() && !clientRecord.getOwnerUserId().equals(getSession().getUserId())) {
-            PageParameters parameters = new PageParameters();
-            parameters.add("applicationId", this.applicationId);
-            setResponsePage(ClientManagementPage.class, parameters);
-        }
-    }
-
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = getDSLContext();
-        ClientTable clientTable = Tables.CLIENT.as("clientTable");
-
-        ClientRecord clientRecord = context.select(clientTable.fields()).from(clientTable).where(clientTable.CLIENT_ID.eq(this.clientId)).fetchOneInto(clientTable);
-
-        clientRecord.setName(this.name);
-        clientRecord.setDescription(this.description);
-        clientRecord.setPushGcmSenderId(this.pushGcmSenderId);
-        clientRecord.setPushSecret(this.pushSecret);
-        clientRecord.setPushVariantId(this.pushVariantId);
-        clientRecord.update();
-
-        PageParameters parameters = new PageParameters();
-        parameters.add("applicationId", this.applicationId);
-
-        setResponsePage(ClientManagementPage.class, parameters);
+        Map<String, Object> wheres = new HashMap<>();
+        wheres.put(Jdbc.Client.CLIENT_ID, this.clientId);
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Client.NAME, this.name);
+        fields.put(Jdbc.Client.DESCRIPTION, this.description);
+        fields.put(Jdbc.Client.PUSH_GCM_SENDER_ID, this.pushGcmSenderId);
+        fields.put(Jdbc.Client.PUSH_SECRET, this.pushSecret);
+        fields.put(Jdbc.Client.PUSH_VARIANT_ID, this.pushVariantId);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
+        jdbcUpdate.execute(fields, wheres);
+        setResponsePage(ClientManagementPage.class);
     }
 }

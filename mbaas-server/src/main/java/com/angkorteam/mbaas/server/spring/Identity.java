@@ -5,7 +5,11 @@ package com.angkorteam.mbaas.server.spring;
  */
 public final class Identity implements com.angkorteam.mbaas.plain.Identity {
 
-    private final String userId;
+    private final String mbaasUserId;
+
+    private final String applicationCode;
+
+    private final String applicationUserId;
 
     private final String applicationId;
 
@@ -25,8 +29,10 @@ public final class Identity implements com.angkorteam.mbaas.plain.Identity {
 
     private final String SDKVersion;
 
-    public Identity(String userId, String applicationId, String clientId, String clientSecret, String mobileId, String userAgent, String remoteIp, String accessToken, String appVersion, String sdkVersion) {
-        this.userId = userId;
+    public Identity(String mbaasUserId, String applicationUserId, String applicationId, String applicationCode, String clientId, String clientSecret, String mobileId, String userAgent, String remoteIp, String accessToken, String appVersion, String sdkVersion) {
+        this.mbaasUserId = mbaasUserId;
+        this.applicationCode = applicationCode;
+        this.applicationUserId = applicationUserId;
         this.applicationId = applicationId;
         this.clientId = clientId;
         this.mobileId = mobileId;
@@ -44,8 +50,13 @@ public final class Identity implements com.angkorteam.mbaas.plain.Identity {
     }
 
     @Override
-    public String getUserId() {
-        return this.userId;
+    public String getApplicationUserId() {
+        return this.applicationUserId;
+    }
+
+    @Override
+    public String getMBaasId() {
+        return this.mobileId;
     }
 
     @Override
@@ -86,5 +97,14 @@ public final class Identity implements com.angkorteam.mbaas.plain.Identity {
     @Override
     public String getSDKVersion() {
         return this.SDKVersion;
+    }
+
+    @Override
+    public String getApplicationCode() {
+        return applicationCode;
+    }
+
+    public String getMbaasUserId() {
+        return mbaasUserId;
     }
 }

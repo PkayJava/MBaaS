@@ -33,6 +33,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         ChannelPipeline pipeline = channel.pipeline();
         pipeline.addLast("decoder", new StringDecoder(Charset.forName("UTF-8")));
         pipeline.addLast("encoder", new StringEncoder(Charset.forName("UTF-8")));
-        pipeline.addLast("handler", new ServerHandler(this.context, this.jdbcTemplate, this.gson));
+//        pipeline.addLast("handler", new ServerHandler(this.context, this.jdbcTemplate, this.gson));
     }
 }

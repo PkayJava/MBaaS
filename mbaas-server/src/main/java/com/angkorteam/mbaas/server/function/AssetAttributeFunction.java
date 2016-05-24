@@ -30,7 +30,7 @@ public class AssetAttributeFunction {
 //        UserPrivacyTable userPrivacyTable = Tables.USER_PRIVACY.as("userPrivacyTable");
 //        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
 //        AttributeRecord attributeRecord = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).and(attributeTable.NAME.eq(requestBody.getAttributeName())).fetchOneInto(attributeTable);
-        AttributeFunction.deleteAttribute(context, jdbcTemplate, requestBody);
+//        AttributeFunction.deleteAttribute(context, jdbcTemplate, requestBody);
 //        context.delete(userPrivacyTable).where(userPrivacyTable.ATTRIBUTE_ID.eq(attributeRecord.getAttributeId())).execute();
     }
 

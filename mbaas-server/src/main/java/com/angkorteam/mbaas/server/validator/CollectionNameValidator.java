@@ -2,11 +2,13 @@ package com.angkorteam.mbaas.server.validator;
 
 import com.angkorteam.framework.extension.share.validation.JooqValidator;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
+import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.wicket.Application;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.ValidationError;
-import org.jooq.DSLContext;
+import org.flywaydb.core.internal.dbsupport.Schema;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.regex.Pattern;
 
@@ -15,13 +17,17 @@ import java.util.regex.Pattern;
  */
 public class CollectionNameValidator extends JooqValidator<String> {
 
+    private final String applicationCode;
+
     private String collectionId;
 
-    public CollectionNameValidator() {
+    public CollectionNameValidator(String applicationCode) {
+        this.applicationCode = applicationCode;
     }
 
-    public CollectionNameValidator(String collectionId) {
+    public CollectionNameValidator(String applicationCode, String collectionId) {
         this.collectionId = collectionId;
+        this.applicationCode = applicationCode;
     }
 
     @Override
@@ -32,13 +38,18 @@ public class CollectionNameValidator extends JooqValidator<String> {
             if (!patternCollectionName.matcher(name).matches()) {
                 validatable.error(new ValidationError(this, "format"));
             } else {
-                CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-                DSLContext context = getDSLContext();
+                Application application = ApplicationUtils.getApplication();
+                Schema schema = application.getSchema(this.applicationCode);
+                if (schema.getTable(name).exists()) {
+                    validatable.error(new ValidationError(this, "duplicated"));
+                    return;
+                }
+                JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
                 int count = 0;
                 if (collectionId == null || "".equals(collectionId)) {
-                    count = context.selectCount().from(collectionTable).where(collectionTable.NAME.eq(name)).fetchOneInto(int.class);
+                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.NAME + " = ?", int.class, name);
                 } else {
-                    count = context.selectCount().from(collectionTable).where(collectionTable.NAME.eq(name)).and(collectionTable.COLLECTION_ID.ne(this.collectionId)).fetchOneInto(int.class);
+                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.NAME + " = ? AND " + Jdbc.Collection.COLLECTION_ID + " != ?", int.class, name, this.collectionId);
                 }
                 if (count > 0) {
                     validatable.error(new ValidationError(this, "duplicated"));

@@ -3,13 +3,10 @@ package com.angkorteam.mbaas.server.provider;
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
-import com.angkorteam.mbaas.model.entity.tables.ClientTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.server.wicket.Session;
+import com.angkorteam.mbaas.model.entity.tables.MbaasUserTable;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.TableLike;
-import org.jooq.impl.DSL;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,10 +18,9 @@ import java.util.List;
 public class ApplicationProvider extends JooqProvider {
 
     private ApplicationTable applicationTable = ApplicationTable.APPLICATION.as("applicationTable");
-    private UserTable userTable = Tables.USER.as("userTable");
-    private ClientTable clientTable = Tables.CLIENT.as("clientTable");
+    private MbaasUserTable mbaasUserTable = Tables.MBAAS_USER.as("mbaasUserTable");
 
-    private String ownerUserId;
+    private String mbaasUserId;
 
     private TableLike<?> from;
 
@@ -32,18 +28,21 @@ public class ApplicationProvider extends JooqProvider {
         this(null);
     }
 
-    public ApplicationProvider(String ownerUserId) {
-        this.ownerUserId = ownerUserId;
-        this.from = this.applicationTable.join(this.userTable).on(this.applicationTable.OWNER_USER_ID.eq(this.userTable.USER_ID)).leftJoin(this.clientTable).on(this.applicationTable.APPLICATION_ID.eq(this.clientTable.APPLICATION_ID));
-        setGroupBy(this.applicationTable.APPLICATION_ID);
+    public ApplicationProvider(String mbaasUserId) {
+        this.mbaasUserId = mbaasUserId;
+        this.from = this.applicationTable.join(this.mbaasUserTable).on(this.applicationTable.MBAAS_USER_ID.eq(this.mbaasUserTable.MBAAS_USER_ID));
     }
 
-    public Field<String> getOwnerUser() {
-        return this.userTable.LOGIN;
+    public Field<String> getMbaasUserFullName() {
+        return this.mbaasUserTable.FULL_NAME;
     }
 
     public Field<String> getSecurity() {
         return this.applicationTable.SECURITY;
+    }
+
+    public Field<String> getSecret() {
+        return this.applicationTable.SECRET;
     }
 
     public Field<String> getName() {
@@ -70,12 +69,7 @@ public class ApplicationProvider extends JooqProvider {
         return this.applicationTable.APPLICATION_ID;
     }
 
-    public Field<Integer> getClient() {
-        return DSL.count(this.clientTable.CLIENT_ID);
-    }
-
     @Override
-
     protected TableLike<?> from() {
         return from;
     }
@@ -83,8 +77,8 @@ public class ApplicationProvider extends JooqProvider {
     @Override
     protected List<Condition> where() {
         List<Condition> where = new ArrayList<>();
-        if (ownerUserId != null) {
-            where.add(this.userTable.USER_ID.eq(this.ownerUserId));
+        if (this.mbaasUserId != null && !"".equals(this.mbaasUserId)) {
+            where.add(this.mbaasUserTable.MBAAS_USER_ID.eq(this.mbaasUserId));
         }
         return where;
     }

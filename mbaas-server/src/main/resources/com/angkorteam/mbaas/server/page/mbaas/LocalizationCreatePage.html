@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<wicket:extend>
+    <div class="box box-primary">
+        <form role="form" wicket:id="form">
+            <div class="box-body">
+                <div class="form-group">
+                    <label wicket:for="keyField">Key</label>
+                    <input wicket:id="keyField" type="text" class="form-control"/>
+                    <span wicket:id="keyFeedback" class="help-block"/>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="pageField">Page</label>
+                    <input wicket:id="pageField" type="text" class="form-control"/>
+                    <span wicket:id="pageFeedback" class="help-block"/>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="languageField">Language</label>
+                    <input wicket:id="languageField" type="text" class="form-control"/>
+                    <span wicket:id="languageFeedback" class="help-block"/>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="labelField">Label</label>
+                    <input wicket:id="labelField" type="text" class="form-control"/>
+                    <span wicket:id="labelFeedback" class="help-block"/>
+                </div>
+            </div>
+            <div class="box-footer">
+                <wicket:link>
+                    <a class="btn btn-primary" href="LocalizationManagementPage.html">Close</a>
+                </wicket:link>
+                <button wicket:id="saveButton" type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</wicket:extend>
+</body>
+</html>

@@ -2,30 +2,24 @@ package com.angkorteam.mbaas.server.page.user;
 
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.table.filter.*;
-import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
+import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
+import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
-import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.StaticCommon;
 import com.angkorteam.mbaas.server.provider.UserProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import com.angkorteam.mbaas.server.wicket.ProviderUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,16 +34,8 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
     protected void onInitialize() {
         super.onInitialize();
 
-        DSLContext context = getDSLContext();
-        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-        CollectionRecord collectionRecord = context.select(collectionTable.fields())
-                .from(collectionTable)
-                .where(collectionTable.NAME.eq(Tables.USER.getName()))
-                .fetchOneInto(collectionTable);
-        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
-
-        UserProvider provider = new UserProvider();
-        provider.selectField(String.class, "userId");
+        UserProvider provider = new UserProvider(getSession().getApplicationCode());
+        provider.selectField(String.class, "applicationUserId");
         provider.selectField(Boolean.class, "system");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
@@ -77,32 +63,31 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
-        DSLContext context = getDSLContext();
-        UserTable userTable = Tables.USER.as("userTable");
-        String userId = (String) object.get("userId");
+        String applicationUserId = (String) object.get("applicationUserId");
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         if ("Suspend".equals(link)) {
-            context.update(userTable).set(userTable.STATUS, UserStatusEnum.Suspended.getLiteral()).where(userTable.USER_ID.eq(userId)).execute();
+            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.STATUS + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", UserStatusEnum.Suspended.getLiteral(), applicationUserId);
             return;
         }
         if ("Activate".equals(link)) {
-            context.update(userTable).set(userTable.STATUS, UserStatusEnum.Active.getLiteral()).where(userTable.USER_ID.eq(userId)).execute();
+            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.STATUS + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", UserStatusEnum.Active.getLiteral(), applicationUserId);
             return;
         }
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
-            parameters.add("userId", userId);
+            parameters.add("applicationUserId", applicationUserId);
             setResponsePage(UserModifyPage.class, parameters);
             return;
         }
         if ("Change PWD".equals(link)) {
             PageParameters parameters = new PageParameters();
-            parameters.add("userId", userId);
+            parameters.add("applicationUserId", applicationUserId);
             setResponsePage(UserPasswordModifyPage.class, parameters);
             return;
         }
         if ("login".equals(link)) {
             PageParameters parameters = new PageParameters();
-            parameters.add("userId", userId);
+            parameters.add("applicationUserId", applicationUserId);
             setResponsePage(UserModifyPage.class, parameters);
             return;
         }
@@ -110,67 +95,16 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
-        Boolean system = (Boolean) object.get("system");
-        if ("login".equals(link)) {
-            return !system;
-        }
-        if ("Edit".equals(link)) {
-            return !system;
-        }
-        if ("Change PWD".equals(link)) {
-            return true;
-        }
-        if ("Suspend".equals(link)) {
-            return !system;
-        }
-        if ("Activate".equals(link)) {
-            return !system;
-        }
-        return false;
+        return StaticCommon.hasAccess(link, object);
     }
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
-        String status = (String) object.get("status");
-        Boolean system = (Boolean) object.get("system");
-        if ("Suspend".equals(link)) {
-            if (system) {
-                return false;
-            }
-            if (UserStatusEnum.Suspended.getLiteral().equals(status)) {
-                return false;
-            }
-        }
-        if ("Activate".equals(link)) {
-            if (system) {
-                return false;
-            }
-            if (UserStatusEnum.Active.getLiteral().equals(status)) {
-                return false;
-            }
-        }
-        if ("Edit".equals(link)) {
-            if (system) {
-                return false;
-            }
-        }
-        return true;
+        return StaticCommon.hasAccess(link, object);
     }
 
     @Override
     public String onCSSLink(String link, Map<String, Object> object) {
-        if ("Suspend".equals(link)) {
-            return "btn-xs btn-danger";
-        }
-        if ("Activate".equals(link)) {
-            return "btn-xs btn-warning";
-        }
-        if ("Change PWD".equals(link)) {
-            return "btn-xs btn-info";
-        }
-        if ("Edit".equals(link)) {
-            return "btn-xs btn-info";
-        }
-        return "";
+        return StaticCommon.onCSSLink(link, object);
     }
 }

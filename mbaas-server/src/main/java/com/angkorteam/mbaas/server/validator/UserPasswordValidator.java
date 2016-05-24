@@ -1,31 +1,34 @@
 package com.angkorteam.mbaas.server.validator;
 
 import com.angkorteam.framework.extension.share.validation.JooqValidator;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.wicket.Application;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.ValidationError;
-import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Created by socheat on 3/8/16.
  */
 public class UserPasswordValidator extends JooqValidator<String> {
 
-    private String userId;
+    private String applicationUserId;
 
-    public UserPasswordValidator(String userId) {
-        this.userId = userId;
+    private final String applicationCode;
+
+    public UserPasswordValidator(final String applicationCode, String applicationUserId) {
+        this.applicationUserId = applicationUserId;
+        this.applicationCode = applicationCode;
     }
 
     @Override
     public void validate(IValidatable<String> validatable) {
         String password = validatable.getValue();
         if (password != null && !"".equals(password)) {
-            UserTable userTable = Tables.USER.as("userTable");
-            DSLContext context = getDSLContext();
-            int count = context.selectCount().from(userTable).where(userTable.USER_ID.eq(userId)).and(userTable.PASSWORD.eq(DSL.md5(password))).fetchOneInto(int.class);
+            Application application = ApplicationUtils.getApplication();
+            JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ? AND " + Jdbc.ApplicationUser.PASSWORD + " = MD5(?)", int.class, this.applicationUserId, password);
             if (count == 0) {
                 validatable.error(new ValidationError(this, "invalid"));
             }

@@ -1,14 +1,12 @@
 package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.ClientTable;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import org.jooq.Condition;
-import org.jooq.Field;
-import org.jooq.TableLike;
+import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.wicket.Application;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import org.jooq.*;
+import org.jooq.impl.DSL;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,48 +15,56 @@ import java.util.List;
  */
 public class ClientProvider extends JooqProvider {
 
-    private UserTable userTable = Tables.USER.as("userTable");
-    private ClientTable clientTable = Tables.CLIENT.as("clientTable");
+    private Table<?> userTable;
+    private Table<?> clientTable;
 
-    private String applicationId;
+    private final String applicationCode;
 
     private TableLike<?> from;
 
-    public ClientProvider(String applicationId) {
-        this.applicationId = applicationId;
-        this.from = this.clientTable.join(this.userTable).on(this.clientTable.OWNER_USER_ID.eq(this.userTable.USER_ID));
+    public ClientProvider(String applicationCode) {
+        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
+        this.clientTable = DSL.table(Jdbc.CLIENT).as("clientTable");
+        this.applicationCode = applicationCode;
+        this.from = this.clientTable.join(this.userTable).on(this.clientTable.field(Jdbc.Client.APPLICATION_USER_ID, String.class).eq(this.userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
     }
 
     public Field<String> getClientId() {
-        return this.clientTable.CLIENT_ID;
+        return this.clientTable.field(Jdbc.Client.CLIENT_ID, String.class);
     }
 
     public Field<String> getClientSecret() {
-        return this.clientTable.CLIENT_SECRET;
+        return this.clientTable.field(Jdbc.Client.CLIENT_SECRET, String.class);
     }
 
-    public Field<String> getOwnerUser() {
-        return this.userTable.LOGIN;
+    public Field<String> getApplicationUser() {
+        return this.userTable.field(Jdbc.ApplicationUser.LOGIN, String.class);
     }
 
-    public Field<String> getOwnerUserId() {
-        return this.userTable.USER_ID;
+    public Field<String> getApplicationUserId() {
+        return this.userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
     }
 
     public Field<String> getSecurity() {
-        return this.clientTable.SECURITY;
+        return this.clientTable.field(Jdbc.Client.SECURITY, String.class);
     }
 
     public Field<String> getName() {
-        return this.clientTable.NAME;
+        return this.clientTable.field(Jdbc.Client.NAME, String.class);
     }
 
     public Field<Date> getDateCreated() {
-        return this.clientTable.DATE_CREATED;
+        return this.clientTable.field(Jdbc.Client.DATE_CREATED, Date.class);
     }
 
     public Field<String> getDescription() {
-        return this.clientTable.DESCRIPTION;
+        return this.clientTable.field(Jdbc.Client.DESCRIPTION, String.class);
+    }
+
+    @Override
+    protected DSLContext getDSLContext() {
+        Application application = ApplicationUtils.getApplication();
+        return application.getDSLContext(this.applicationCode);
     }
 
     @Override
@@ -69,9 +75,7 @@ public class ClientProvider extends JooqProvider {
 
     @Override
     protected List<Condition> where() {
-        List<Condition> where = new ArrayList<>();
-        where.add(this.clientTable.APPLICATION_ID.eq(this.applicationId));
-        return where;
+        return null;
     }
 
     @Override

@@ -1,8 +1,6 @@
 package com.angkorteam.mbaas.server.template;
 
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
-import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.QueryParameterPojo;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import org.apache.wicket.datetime.markup.html.form.DateTextField;
@@ -10,7 +8,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.validation.validator.RangeValidator;
 import org.apache.wicket.validation.validator.StringValidator;
 
 import java.util.Date;
@@ -21,23 +18,16 @@ import java.util.Map;
  */
 public class TextFieldPanel extends Panel {
 
-    private String type;
+    private final String type;
 
-    private String name;
+    private final String name;
 
-    private Map<String, Object> fields;
+    private final Map<String, Object> fields;
 
-    public TextFieldPanel(String id, AttributePojo attribute, Map<String, Object> modelObject) {
+    public TextFieldPanel(String id, String type, String name, Map<String, Object> modelObject) {
         super(id);
-        this.type = attribute.getAttributeType();
-        this.name = attribute.getName();
-        this.fields = modelObject;
-    }
-
-    public TextFieldPanel(String id, QueryParameterPojo queryParameter, Map<String, Object> modelObject) {
-        super(id);
-        this.type = queryParameter.getType();
-        this.name = queryParameter.getName();
+        this.type = type;
+        this.name = name;
         this.fields = modelObject;
     }
 

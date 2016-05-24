@@ -1,8 +1,6 @@
 package com.angkorteam.mbaas.server.factory;
 
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.JobTable;
-import com.angkorteam.mbaas.model.entity.tables.records.JobRecord;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.angkorteam.mbaas.server.spring.JavascriptJob;
 import com.angkorteam.mbaas.server.spring.JavascriptTrigger;
@@ -12,12 +10,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.servlet.ServletContext;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 4/23/16.
@@ -58,27 +55,28 @@ public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServi
 
         private final List<String> jobs = new ArrayList<>();
 
-        private final DSLContext context;
-
         private final TaskScheduler scheduler;
 
-        private final JdbcTemplate jdbcTemplate;
+        private final ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource;
 
-        public JavascriptService(DSLContext context, JdbcTemplate jdbcTemplate, TaskScheduler scheduler) {
-            this.context = context;
+        private final DSLContext context;
+
+        public JavascriptService(DSLContext context, ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource, TaskScheduler scheduler) {
             this.scheduler = scheduler;
-            this.jdbcTemplate = jdbcTemplate;
+            this.context = context;
+            this.applicationDataSource = applicationDataSource;
         }
 
-        public void schedule(String jobId) {
-            if (jobs.contains(jobId)) {
+        public void schedule(String applicationCode, String jobId) {
+            if (jobs.contains(applicationCode + "=>" + jobId)) {
                 return;
             }
-            JobTable jobTable = Tables.JOB.as("jobTable");
-            JobRecord jobRecord = context.select(jobTable.fields()).from(jobTable).where(jobTable.JOB_ID.eq(jobId)).fetchOneInto(jobTable);
+            JdbcTemplate jdbcTemplate = this.applicationDataSource.getJdbcTemplate(applicationCode);
+            Map<String, Object> jobRecord = null;
+            jobRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JOB + " WHERE " + Jdbc.Job.JOB_ID + " = ?", jobId);
             if (jobRecord != null) {
                 try {
-                    this.scheduler.schedule(new JavascriptJob(context, jdbcTemplate, jobId), new JavascriptTrigger(context, jobId, jobRecord.getCron()));
+                    this.scheduler.schedule(new JavascriptJob(this.context, this.applicationDataSource, applicationCode, jobId), new JavascriptTrigger(this.applicationDataSource, applicationCode, jobId, (String) jobRecord.get("cron")));
                     jobs.add(jobId);
                 } catch (IllegalArgumentException e) {
                 }

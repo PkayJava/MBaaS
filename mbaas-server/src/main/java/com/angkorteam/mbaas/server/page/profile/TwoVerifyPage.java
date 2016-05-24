@@ -1,24 +1,26 @@
 package com.angkorteam.mbaas.server.page.profile;
 
+import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.UserTable;
-import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
 import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
-import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by socheat on 4/3/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice", "registered"})
+@AuthorizeInstantiation({"administrator", "registered"})
 @Mount("/profile/two/verify")
 public class TwoVerifyPage extends MasterPage {
 
@@ -65,20 +67,24 @@ public class TwoVerifyPage extends MasterPage {
                 setResponsePage(TwoMailPage.class);
                 return;
             } else if (AuthenticationEnum.TwoSMS.getLiteral().equals(this.type)) {
-                //setResponsePage(TwoSMSPage.class);
+//                setResponsePage(TwoSMSPage.class);
                 return;
             }
         }
-        DSLContext context = getDSLContext();
-        UserTable userTable = Tables.USER.as("userTable");
-        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(getSession().getUserId())).fetchOneInto(userTable);
+
+        Map<String, Object> wheres = new HashMap<>();
+        wheres.put(Jdbc.ApplicationUser.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        Map<String, Object> fields = new HashMap<>();
         if (AuthenticationEnum.TwoEMail.getLiteral().equals(this.type)) {
-            userRecord.setEmailAddress(this.recipient);
+            fields.put(Jdbc.ApplicationUser.EMAIL_ADDRESS, this.recipient);
         } else if (AuthenticationEnum.TwoSMS.getLiteral().equals(this.type)) {
-            userRecord.setMobileNumber(this.recipient);
+            fields.put(Jdbc.ApplicationUser.MOBILE_NUMBER, this.recipient);
         }
-        userRecord.setAuthentication(this.type);
-        userRecord.update();
+        fields.put(Jdbc.ApplicationUser.AUTHENTICATION, this.type);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
+        jdbcUpdate.withTableName(Jdbc.APPLICATION_USER);
+        jdbcUpdate.execute(fields, wheres);
         setResponsePage(InformationPage.class);
     }
 
