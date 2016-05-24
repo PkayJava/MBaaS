@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.page.attribute;
 import com.angkorteam.framework.extension.wicket.table.DataTable;
 import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
 import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
@@ -63,9 +64,9 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
 
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("name", this), "name", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("attributeType", this), "attributeType", provider));
+        columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
         columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup("extra", this), "extra", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("visibility", this), "visibility", provider));
-
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Show", "Hide", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
@@ -99,10 +100,10 @@ public class AttributeManagementPage extends MasterPage implements ActionFiltere
             AttributeFunction.deleteAttribute(jdbcTemplate, requestBody);
         }
         if ("Hide".equals(link)) {
-            jdbcTemplate.update("UPDATE " + Jdbc.ATTRIBUTE + " SET " + Jdbc.Attribute.VISIBILITY + " = ?", VisibilityEnum.Hided.getLiteral(), attributeId);
+            jdbcTemplate.update("UPDATE " + Jdbc.ATTRIBUTE + " SET " + Jdbc.Attribute.VISIBILITY + " = ? WHERE " + Jdbc.Attribute.ATTRIBUTE_ID + " = ?", VisibilityEnum.Hided.getLiteral(), attributeId);
         }
         if ("Show".equals(link)) {
-            jdbcTemplate.update("UPDATE " + Jdbc.ATTRIBUTE + " SET " + Jdbc.Attribute.VISIBILITY + " = ?", VisibilityEnum.Shown.getLiteral(), attributeId);
+            jdbcTemplate.update("UPDATE " + Jdbc.ATTRIBUTE + " SET " + Jdbc.Attribute.VISIBILITY + " = ? WHERE " + Jdbc.Attribute.ATTRIBUTE_ID + " = ?", VisibilityEnum.Shown.getLiteral(), attributeId);
         }
     }
 

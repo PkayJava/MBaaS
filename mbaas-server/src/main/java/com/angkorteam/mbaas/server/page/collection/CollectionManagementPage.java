@@ -6,6 +6,9 @@ import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooq
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.plain.request.collection.CollectionDeleteRequest;
+import com.angkorteam.mbaas.server.function.CollectionFunction;
+import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
+import com.angkorteam.mbaas.server.page.document.DocumentManagementPage;
 import com.angkorteam.mbaas.server.provider.CollectionProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -15,7 +18,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
@@ -61,24 +63,23 @@ public class CollectionManagementPage extends MasterPage implements ActionFilter
 
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         String collectionId = (String) object.get("collectionId");
         if ("name".equals(link)) {
             PageParameters parameters = new PageParameters();
             parameters.add("collectionId", collectionId);
-//            setResponsePage(DocumentManagementPage.class, parameters);
+            setResponsePage(DocumentManagementPage.class, parameters);
         }
         if ("Delete".equals(link)) {
-            DSLContext context = getDSLContext();
-            JdbcTemplate jdbcTemplate = getJdbcTemplate();
             CollectionDeleteRequest requestBody = new CollectionDeleteRequest();
             requestBody.setCollectionName((String) object.get("name"));
-//            CollectionFunction.deleteCollection(context, jdbcTemplate, requestBody);
+            CollectionFunction.deleteCollection(getApplicationSchema(), jdbcTemplate, requestBody);
             setResponsePage(CollectionManagementPage.class);
         }
         if ("Attribute".equals(link)) {
             PageParameters parameters = new PageParameters();
             parameters.add("collectionId", collectionId);
-//            setResponsePage(AttributeManagementPage.class, parameters);
+            setResponsePage(AttributeManagementPage.class, parameters);
         }
     }
 

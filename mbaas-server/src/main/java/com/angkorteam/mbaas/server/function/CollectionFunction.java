@@ -5,8 +5,10 @@ import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionCreateRequest;
+import com.angkorteam.mbaas.plain.request.collection.CollectionDeleteRequest;
 import com.angkorteam.mbaas.server.Jdbc;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
+import org.flywaydb.core.internal.dbsupport.Schema;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
@@ -18,29 +20,16 @@ import java.util.UUID;
  * Created by socheat on 3/3/16.
  */
 public class CollectionFunction {
-    //
-//    public static void deleteCollection(DSLContext context, JdbcTemplate jdbcTemplate, CollectionDeleteRequest requestBody) {
-//
-//        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-//        AttributeTable attributeTables = Tables.ATTRIBUTE.as("attributeTables");
-//        CollectionUserPrivacyTable collectionUserPrivacyTable = Tables.COLLECTION_USER_PRIVACY.as("CollectionROlePrivacyTable");
-//        CollectionRolePrivacyTable collectionRolePrivacyTable = Tables.COLLECTION_ROLE_PRIVACY.as("collectionRolePrivacyTable");
-//        DocumentUserPrivacyTable documentUserPrivacyTable = Tables.DOCUMENT_USER_PRIVACY.as("documentUserPrivacyTable");
-//        DocumentRolePrivacyTable documentRolePrivacyTable = Tables.DOCUMENT_ROLE_PRIVACY.as("documentRolePrivacyTable");
-//
-//        CollectionRecord collectionRecord = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(collectionTable);
-//
-//        if (collectionRecord != null) {
-//            context.delete(attributeTables).where(attributeTables.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-//            context.delete(collectionUserPrivacyTable).where(collectionUserPrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-//            context.delete(collectionRolePrivacyTable).where(collectionRolePrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-//            context.delete(documentUserPrivacyTable).where(documentUserPrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-//            context.delete(documentRolePrivacyTable).where(documentRolePrivacyTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-//            context.delete(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionRecord.getCollectionId())).execute();
-//            jdbcTemplate.execute("DROP TABLE `" + requestBody.getCollectionName() + "`");
-//        }
-//    }
-//
+
+    public static void deleteCollection(Schema schema, JdbcTemplate jdbcTemplate, CollectionDeleteRequest requestBody) {
+        Map<String, Object> collectionRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.NAME + " = ?", requestBody.getCollectionName());
+        if (collectionRecord != null) {
+            jdbcTemplate.update("DELETE FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ?", collectionRecord.get(Jdbc.Collection.COLLECTION_ID));
+            jdbcTemplate.update("DELETE FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.COLLECTION_ID + " = ?", collectionRecord.get(Jdbc.Collection.COLLECTION_ID));
+            schema.getTable(requestBody.getCollectionName()).drop();
+        }
+    }
+
     public static void createCollection(JdbcTemplate jdbcTemplate, String applicationCode, String ownerApplicationUserId, CollectionCreateRequest requestBody) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         String primaryName = requestBody.getCollectionName() + "_id";

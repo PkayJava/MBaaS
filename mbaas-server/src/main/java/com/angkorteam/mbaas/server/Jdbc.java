@@ -99,6 +99,7 @@ public class Jdbc {
         public static final String NAME = "name";
         public static final String ATTRIBUTE_TYPE = "attribute_type";
         public static final String VISIBILITY = "visibility";
+        public static final String DATE_CREATED = "date_created";
         public static final String EAV = "eav";
         public static final String SYSTEM = "system";
         public static final String EXTRA = "extra";

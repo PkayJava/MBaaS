@@ -64,7 +64,7 @@ public class ApplicationManagementPage extends MBaaSPage implements ActionFilter
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
         columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup("dateCreated", this), "dateCreated", provider));
 
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Backup", "Grant", "Deny", "Edit"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Delete", "Grant", "Deny", "Edit"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -89,6 +89,8 @@ public class ApplicationManagementPage extends MBaaSPage implements ActionFilter
             context.update(Tables.APPLICATION).set(Tables.APPLICATION.SECURITY, SecurityEnum.Granted.getLiteral()).where(Tables.APPLICATION.APPLICATION_ID.eq(applicationId)).execute();
             return;
         }
+        if ("Delete".equals(link)) {
+        }
         if ("Deny".equals(link)) {
             String applicationId = (String) object.get("applicationId");
             DSLContext context = getDSLContext();
@@ -107,10 +109,7 @@ public class ApplicationManagementPage extends MBaaSPage implements ActionFilter
         if ("Edit".equals(link)) {
             return true;
         }
-        if ("Backup".equals(link)) {
-            return true;
-        }
-        if ("Client".equals(link)) {
+        if ("Delete".equals(link)) {
             return true;
         }
         if ("Grant".equals(link)) {
@@ -145,10 +144,7 @@ public class ApplicationManagementPage extends MBaaSPage implements ActionFilter
         if ("Edit".equals(link)) {
             return "btn-xs btn-info";
         }
-        if ("Backup".equals(link)) {
-            return "btn-xs btn-info";
-        }
-        if ("Client".equals(link)) {
+        if ("Delete".equals(link)) {
             return "btn-xs btn-info";
         }
         if ("Grant".equals(link)) {

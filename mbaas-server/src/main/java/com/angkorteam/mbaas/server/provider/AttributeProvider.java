@@ -2,13 +2,14 @@ package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
 import com.angkorteam.mbaas.server.Jdbc;
-import org.jooq.Condition;
-import org.jooq.Field;
-import org.jooq.Table;
-import org.jooq.TableLike;
+import com.angkorteam.mbaas.server.wicket.Application;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,6 +30,7 @@ public class AttributeProvider extends JooqProvider {
         this.attributeTable = DSL.table(Jdbc.ATTRIBUTE).as("attributeTable");
         this.collectionId = collectionId;
         this.from = attributeTable;
+        setSort(this.attributeTable.getName() + "." + Jdbc.Attribute.DATE_CREATED, SortOrder.ASCENDING);
     }
 
     public Field<String> getName() {
@@ -41,6 +43,10 @@ public class AttributeProvider extends JooqProvider {
 
     public Field<String> getAttributeType() {
         return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.ATTRIBUTE_TYPE, String.class);
+    }
+
+    public Field<Date> getDateCreated() {
+        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.DATE_CREATED, Date.class);
     }
 
     public Field<Boolean> getSystem() {
@@ -63,8 +69,14 @@ public class AttributeProvider extends JooqProvider {
     @Override
     protected List<Condition> where() {
         List<Condition> where = new ArrayList<>();
-        where.add(attributeTable.field(Jdbc.Attribute.COLLECTION_ID, String.class).eq(this.collectionId));
+        where.add(DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.COLLECTION_ID, String.class).eq(this.collectionId));
         return where;
+    }
+
+    @Override
+    protected DSLContext getDSLContext() {
+        Application application = ApplicationUtils.getApplication();
+        return application.getDSLContext(this.applicationCode);
     }
 
     @Override

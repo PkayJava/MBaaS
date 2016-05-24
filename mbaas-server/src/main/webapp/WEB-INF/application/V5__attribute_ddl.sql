@@ -8,7 +8,8 @@ CREATE TABLE `attribute` (
   visibility       VARCHAR(50)  NOT NULL, -- SHOWN | HIDED
   eav              BIT(1)       NOT NULL,
   system           BIT(1)       NOT NULL,
-  extra            INT(11) DEFAULT 0,
+  extra            INT(11)  DEFAULT 0,
+  date_created     DATETIME DEFAULT NOW(),
 
   INDEX (collection_id),
   INDEX (application_code),
@@ -18,6 +19,7 @@ CREATE TABLE `attribute` (
   INDEX (eav),
   INDEX (system),
   INDEX (extra),
+  INDEX (date_created),
   UNIQUE KEY (name, collection_id),
   PRIMARY KEY (attribute_id)
 );

@@ -11,6 +11,7 @@ import org.flywaydb.core.internal.dbsupport.Table;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class AttributeFunction {
             good = !table.hasColumn(requestBody.getAttributeName());
         }
         if (good) {
-            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.Attribute.COLLECTION_ID + " = ? AND " + Jdbc.Attribute.NAME + " = ?", int.class, collectionRecord.get(Jdbc.Collection.COLLECTION_ID), requestBody.getAttributeName());
+            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ? AND " + Jdbc.Attribute.NAME + " = ?", int.class, collectionRecord.get(Jdbc.Collection.COLLECTION_ID), requestBody.getAttributeName());
             good = count <= 0;
         }
         if (good) {
@@ -69,6 +70,7 @@ public class AttributeFunction {
             fields.put(Jdbc.Attribute.ATTRIBUTE_ID, attributeId);
             fields.put(Jdbc.Attribute.EXTRA, extra);
             fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
+            fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
             fields.put(Jdbc.Attribute.COLLECTION_ID, collectionRecord.get(Jdbc.Collection.COLLECTION_ID));
             fields.put(Jdbc.Attribute.NAME, requestBody.getAttributeName());
             fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
