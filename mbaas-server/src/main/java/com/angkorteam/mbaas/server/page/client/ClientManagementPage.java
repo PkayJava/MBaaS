@@ -15,7 +15,6 @@ import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -59,12 +58,6 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
-
-        BookmarkablePageLink<Void> newClientLink = new BookmarkablePageLink<>("newClientLink", ClientCreatePage.class);
-        add(newClientLink);
-
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", ClientManagementPage.class);
-        add(refreshLink);
     }
 
     @Override
@@ -101,52 +94,23 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
     }
 
     protected boolean isAccess(String link, Map<String, Object> object) {
-        String ownerUserId = (String) object.get("ownerUserId");
         if ("Edit".equals(link)) {
-            if (getSession().isAdministrator()) {
-                return true;
-            } else {
-                // TODO
-//                if (getSession().getUserId().equals(ownerUserId)) {
-//                    return true;
-//                }
-            }
+            return true;
         }
         if ("Grant".equals(link)) {
             String security = (String) object.get("security");
             if (SecurityEnum.Denied.getLiteral().equals(security)) {
-                if (getSession().isAdministrator()) {
-                    return true;
-                } else {
-                    // TODO
-//                    if (getSession().getUserId().equals(ownerUserId)) {
-//                        return true;
-//                    }
-                }
+                return true;
             }
         }
         if ("Deny".equals(link)) {
             String security = (String) object.get("security");
             if (SecurityEnum.Granted.getLiteral().equals(security)) {
-                if (getSession().isAdministrator()) {
-                    return true;
-                } else {
-                    // TODO
-//                    if (getSession().getUserId().equals(ownerUserId)) {
-//                        return true;
-//                    }
-                }
+                return true;
             }
         }
         if ("Revoke".equals(link)) {
-            if (getSession().isAdministrator()) {
-                return true;
-            } else {
-                // TODO
-//                if (getSession().getUserId().equals(ownerUserId)) {
-//                    return true;
-//                }
-            }
+            return true;
         }
         return false;
     }

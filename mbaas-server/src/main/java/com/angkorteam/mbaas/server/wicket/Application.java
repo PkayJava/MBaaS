@@ -6,8 +6,10 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
+import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import com.angkorteam.mbaas.server.page.mbaas.MBaaSDashboardPage;
+import com.angkorteam.mbaas.server.page.profile.InformationPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -53,23 +55,17 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     public Class<? extends WebPage> getHomePage() {
         Session session = (Session) Session.get();
         if (session.isSignedIn()) {
-
-        } else {
+            if (session.getApplicationUserId() != null && !"".equals(session.getApplicationUserId())) {
+                if (session.isAdministrator()) {
+                    return DashboardPage.class;
+                } else if (session.isRegistered()) {
+                    return InformationPage.class;
+                }
+            } else if (session.getMbaasUserId() != null && !"".equals(session.getMbaasUserId())) {
+                return MBaaSDashboardPage.class;
+            }
         }
-        return MBaaSDashboardPage.class;
-//        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-//        String roleRegistered = null;
-////        roleRegistered = configuration.getString(Constants.ROLE_REGISTERED);
-//
-//        if (session == null || !session.isSignedIn()) {
-//            return MBaaSDashboardPage.class;
-//        } else {
-//            if (session.getRoles().hasRole(roleRegistered)) {
-//                return InformationPage.class;
-//            } else {
-//                return MBaaSDashboardPage.class;
-//            }
-//        }
+        return LoginPage.class;
     }
 
     /**

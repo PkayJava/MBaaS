@@ -193,9 +193,6 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuProfile.add(mmenuPassword);
         }
 
-        WebMarkupContainer mmenuNashorn = new WebMarkupContainer("mmenuNashorn");
-        mmenuNashorn.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuNashornClass")));
-        this.menuSecurity.add(mmenuNashorn);
         {
             this.menuSecurity = new WebMarkupContainer("menuSecurity");
             this.menuSecurity.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuSecurityClass")));
@@ -263,7 +260,6 @@ public abstract class MasterPage extends AdminLTEPage {
         super.onBeforeRender();
         boolean isAdministrator = getSession().isAdministrator();
         boolean isRegistered = getSession().isRegistered();
-        this.menuGeneral.setVisible(isAdministrator);
         this.menuSecurity.setVisible(isAdministrator);
         this.menuSession.setVisible(isAdministrator);
         this.menuLogicConsole.setVisible(isAdministrator);

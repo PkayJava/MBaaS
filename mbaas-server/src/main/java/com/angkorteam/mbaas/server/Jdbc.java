@@ -70,7 +70,7 @@ public class Jdbc {
         public static final String APPLICATION_CODE = "application_code";
         public static final String DATE_CREATED = "date_created";
         public static final String DATE_SEEN = "date_seen";
-        public static final String ACCESS_TOKEN = "access_token ";
+        public static final String ACCESS_TOKEN = "access_token";
         public static final String ACCESS_TOKEN_ISSUED_DATE = "access_token_issued_date";
         public static final String TIME_TO_LIVE = "time_to_live";
         public static final String GRANT_TYPE = "grant_type";

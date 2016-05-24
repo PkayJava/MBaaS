@@ -26,7 +26,6 @@ import java.util.Map;
 @Mount("/client/modify")
 public class ClientModifyPage extends MasterPage {
 
-    private String applicationId;
     private String clientId;
 
     private String name;
@@ -70,7 +69,7 @@ public class ClientModifyPage extends MasterPage {
 
         this.name = (String) clientRecord.get(Jdbc.Client.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
-        this.nameField.add(new ClientNameValidator(this.applicationId, this.clientId));
+        this.nameField.add(new ClientNameValidator(getSession().getApplicationCode(), this.clientId));
         this.nameField.setRequired(true);
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
@@ -104,11 +103,6 @@ public class ClientModifyPage extends MasterPage {
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(this.saveButton);
-
-        PageParameters parameters = new PageParameters();
-        parameters.add("applicationId", this.applicationId);
-        BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", ClientManagementPage.class, parameters);
-        this.form.add(closeLink);
 
         this.form.add(new PushClientValidator(this.pushVariantIdField, this.pushSecretField));
     }

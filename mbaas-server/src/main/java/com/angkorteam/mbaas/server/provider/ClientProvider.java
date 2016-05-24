@@ -26,39 +26,39 @@ public class ClientProvider extends JooqProvider {
         this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
         this.clientTable = DSL.table(Jdbc.CLIENT).as("clientTable");
         this.applicationCode = applicationCode;
-        this.from = this.clientTable.join(this.userTable).on(this.clientTable.field(Jdbc.Client.APPLICATION_USER_ID, String.class).eq(this.userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.from = this.clientTable.join(this.userTable).on(DSL.field(this.clientTable.getName() + "." + Jdbc.Client.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
     }
 
     public Field<String> getClientId() {
-        return this.clientTable.field(Jdbc.Client.CLIENT_ID, String.class);
+        return DSL.field(this.clientTable.getName() + "." + Jdbc.Client.CLIENT_ID, String.class);
     }
 
     public Field<String> getClientSecret() {
-        return this.clientTable.field(Jdbc.Client.CLIENT_SECRET, String.class);
+        return DSL.field(this.clientTable.getName() + "." + Jdbc.Client.CLIENT_SECRET, String.class);
     }
 
     public Field<String> getApplicationUser() {
-        return this.userTable.field(Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
     }
 
     public Field<String> getApplicationUserId() {
-        return this.userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
     }
 
     public Field<String> getSecurity() {
-        return this.clientTable.field(Jdbc.Client.SECURITY, String.class);
+        return DSL.field(this.clientTable.getName() + "." + Jdbc.Client.SECURITY, String.class);
     }
 
     public Field<String> getName() {
-        return this.clientTable.field(Jdbc.Client.NAME, String.class);
+        return DSL.field(this.clientTable.getName() + "." + Jdbc.Client.NAME, String.class);
     }
 
     public Field<Date> getDateCreated() {
-        return this.clientTable.field(Jdbc.Client.DATE_CREATED, Date.class);
+        return DSL.field(this.clientTable.getName() + "." + Jdbc.Client.DATE_CREATED, Date.class);
     }
 
     public Field<String> getDescription() {
-        return this.clientTable.field(Jdbc.Client.DESCRIPTION, String.class);
+        return DSL.field(this.clientTable.getName() + "." + Jdbc.Client.DESCRIPTION, String.class);
     }
 
     @Override

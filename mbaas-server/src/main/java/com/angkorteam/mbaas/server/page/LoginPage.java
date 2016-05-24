@@ -43,7 +43,7 @@ public class LoginPage extends AdminLTEPage {
     protected void onInitialize() {
         super.onInitialize();
 
-        this.secret = "d54ba28a-cad7-4f64-a3b5-7a3f6b43864e";
+        this.secret = "d9495747-fbbc-40da-bbb2-b0302b44fbff";
 
         this.form = new Form<>("form");
         add(this.form);

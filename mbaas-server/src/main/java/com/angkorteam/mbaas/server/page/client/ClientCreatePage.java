@@ -24,11 +24,9 @@ import java.util.UUID;
 /**
  * Created by socheat on 3/8/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/client/create")
 public class ClientCreatePage extends MasterPage {
-
-    private String applicationId;
 
     private String name;
     private TextField<String> nameField;
@@ -66,7 +64,7 @@ public class ClientCreatePage extends MasterPage {
         add(this.form);
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
-        this.nameField.add(new ClientNameValidator(this.applicationId));
+        this.nameField.add(new ClientNameValidator(getSession().getApplicationCode()));
         this.nameField.setRequired(true);
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
@@ -118,6 +116,7 @@ public class ClientCreatePage extends MasterPage {
         fields.put(Jdbc.Client.PUSH_VARIANT_ID, this.pushVariantId);
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.CLIENT);
         jdbcInsert.execute(fields);
         setResponsePage(ClientManagementPage.class);
     }

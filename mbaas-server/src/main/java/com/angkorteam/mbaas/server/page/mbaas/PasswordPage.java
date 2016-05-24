@@ -5,6 +5,7 @@ import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.MbaasUserTable;
+import com.angkorteam.mbaas.server.validator.MBaaSUserPasswordValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MBaaSPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -49,8 +50,7 @@ public class PasswordPage extends MBaaSPage {
         this.currentPasswordField = new PasswordTextField("currentPasswordField", new PropertyModel<>(this, "currentPassword"));
         this.currentPasswordField.setRequired(true);
         this.currentPasswordField.setLabel(JooqUtils.lookup("currentPassword", this));
-        // TODO
-//        this.currentPasswordField.add(new UserPasswordValidator(getSession().getUserId()));
+        this.currentPasswordField.add(new MBaaSUserPasswordValidator(getSession().getMbaasUserId()));
         this.form.add(this.currentPasswordField);
         this.currentPasswordFeedback = new TextFeedbackPanel("currentPasswordFeedback", this.currentPasswordField);
         this.form.add(this.currentPasswordFeedback);

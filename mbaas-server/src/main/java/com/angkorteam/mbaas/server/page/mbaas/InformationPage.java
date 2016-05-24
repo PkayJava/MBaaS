@@ -85,7 +85,6 @@ public class InformationPage extends MBaaSPage {
                 this.mobileNumberField.setRequired(true);
             }
         }
-        // TODO
         this.mobileNumberField.add(new MBaaSUserMobileNumberValidator(getSession().getMbaasUserId()));
         this.form.add(this.mobileNumberField);
         this.mobileNumberFeedback = new TextFeedbackPanel("mobileNumberFeedback", this.mobileNumberField);
