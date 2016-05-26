@@ -24,7 +24,7 @@ import java.util.UUID;
 /**
  * Created by socheat on 4/24/16.
  */
-@AuthorizeInstantiation({"administrator", "backoffice"})
+@AuthorizeInstantiation({"administrator"})
 @Mount("/job/create")
 public class JobCreatePage extends MasterPage {
 
