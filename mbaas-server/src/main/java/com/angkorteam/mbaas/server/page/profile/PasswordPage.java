@@ -76,7 +76,7 @@ public class PasswordPage extends MasterPage {
 
     private void updateButtonOnSubmit(Button button) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.PASSWORD + " = MD5(?) WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", this.newPassword, getSession().getApplicationUserId());
+        jdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.PASSWORD + " = MD5(?) WHERE " + Jdbc.User.USER_ID + " = ?", this.newPassword, getSession().getApplicationUserId());
     }
 
 }

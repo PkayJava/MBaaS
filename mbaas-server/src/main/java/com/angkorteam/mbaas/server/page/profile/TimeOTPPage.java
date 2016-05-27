@@ -75,14 +75,14 @@ public class TimeOTPPage extends MasterPage {
 
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> userRecord = null;
-        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", getSession().getApplicationUserId());
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " = ?", getSession().getApplicationUserId());
 
         boolean granted = false;
-        String totpSecret = (String) userRecord.get(Jdbc.ApplicationUser.TOTP_SECRET);
+        String totpSecret = (String) userRecord.get(Jdbc.User.TOTP_SECRET);
         if (totpSecret != null
                 && !"".equals(totpSecret)
-                && AuthenticationEnum.TOTP.getLiteral().equals(userRecord.get(Jdbc.ApplicationUser.AUTHENTICATION))
-                && UserTotpStatusEnum.Granted.getLiteral().equals(userRecord.get(Jdbc.ApplicationUser.TOTP_STATUS))) {
+                && AuthenticationEnum.TOTP.getLiteral().equals(userRecord.get(Jdbc.User.AUTHENTICATION))
+                && UserTotpStatusEnum.Granted.getLiteral().equals(userRecord.get(Jdbc.User.TOTP_STATUS))) {
             granted = true;
         }
 
@@ -93,7 +93,7 @@ public class TimeOTPPage extends MasterPage {
         this.api = HttpFunction.getHttpAddress(request) + "/api/qr?secret=" + secret + "||" + hash + "||" + getSession().getApplicationCode();
 
         if (!granted) {
-            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.TOTP_SECRET + " = ?, " + Jdbc.ApplicationUser.TOTP_HASH + " = ?, " + Jdbc.ApplicationUser.TOTP_STATUS + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", secret, hash, UserTotpStatusEnum.Denied.getLiteral(), getSession().getApplicationUserId());
+            jdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.TOTP_SECRET + " = ?, " + Jdbc.User.TOTP_HASH + " = ?, " + Jdbc.User.TOTP_STATUS + " = ? WHERE " + Jdbc.User.USER_ID + " = ?", secret, hash, UserTotpStatusEnum.Denied.getLiteral(), getSession().getApplicationUserId());
         }
 
         this.otpField.setVisible(!granted);
@@ -105,10 +105,10 @@ public class TimeOTPPage extends MasterPage {
     private void verifyButtonOnSubmit(Button button) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> userRecord = null;
-        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", getSession().getApplicationUserId());
-        Totp totp = new Totp(StringUtils.split((String) userRecord.get(Jdbc.ApplicationUser.TOTP_SECRET), "||")[1]);
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " = ?", getSession().getApplicationUserId());
+        Totp totp = new Totp(StringUtils.split((String) userRecord.get(Jdbc.User.TOTP_SECRET), "||")[1]);
         if (totp.verify(String.valueOf(this.otp))) {
-            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.TOTP_STATUS + " = ?, " + Jdbc.ApplicationUser.AUTHENTICATION + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", UserTotpStatusEnum.Granted.getLiteral(), AuthenticationEnum.TOTP.getLiteral(), getSession().getApplicationUserId());
+            jdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.TOTP_STATUS + " = ?, " + Jdbc.User.AUTHENTICATION + " = ? WHERE " + Jdbc.User.USER_ID + " = ?", UserTotpStatusEnum.Granted.getLiteral(), AuthenticationEnum.TOTP.getLiteral(), getSession().getApplicationUserId());
             setResponsePage(InformationPage.class);
         } else {
             this.otpField.error("invalid");
@@ -118,8 +118,8 @@ public class TimeOTPPage extends MasterPage {
     private void revokeButtonOnSubmit(Button button) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> userRecord = null;
-        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", getSession().getApplicationUserId());
-        jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.TOTP_SECRET + " = ?, " + Jdbc.ApplicationUser.TOTP_STATUS + " = ?, " + Jdbc.ApplicationUser.AUTHENTICATION + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", null, UserTotpStatusEnum.Denied.getLiteral(), AuthenticationEnum.None.getLiteral(), getSession().getApplicationUserId());
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " = ?", getSession().getApplicationUserId());
+        jdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.TOTP_SECRET + " = ?, " + Jdbc.User.TOTP_STATUS + " = ?, " + Jdbc.User.AUTHENTICATION + " = ? WHERE " + Jdbc.User.USER_ID + " = ?", null, UserTotpStatusEnum.Denied.getLiteral(), AuthenticationEnum.None.getLiteral(), getSession().getApplicationUserId());
         setResponsePage(InformationPage.class);
     }
 

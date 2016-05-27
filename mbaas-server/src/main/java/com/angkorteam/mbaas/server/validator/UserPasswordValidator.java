@@ -28,7 +28,7 @@ public class UserPasswordValidator extends JooqValidator<String> {
         if (password != null && !"".equals(password)) {
             Application application = ApplicationUtils.getApplication();
             JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ? AND " + Jdbc.ApplicationUser.PASSWORD + " = MD5(?)", int.class, this.applicationUserId, password);
+            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " = ? AND " + Jdbc.User.PASSWORD + " = MD5(?)", int.class, this.applicationUserId, password);
             if (count == 0) {
                 validatable.error(new ValidationError(this, "invalid"));
             }

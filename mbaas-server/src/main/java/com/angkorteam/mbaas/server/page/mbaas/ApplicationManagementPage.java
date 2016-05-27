@@ -7,7 +7,10 @@ import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJo
 import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.server.function.ApplicationFunction;
 import com.angkorteam.mbaas.server.provider.ApplicationProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MBaaSPage;
@@ -90,6 +93,13 @@ public class ApplicationManagementPage extends MBaaSPage implements ActionFilter
             return;
         }
         if ("Delete".equals(link)) {
+            DSLContext context = getDSLContext();
+            String applicationId = (String) object.get("applicationId");
+            ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+            ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(applicationId)).fetchOneInto(applicationTable);
+            if (applicationRecord != null) {
+                ApplicationFunction.drop(getJdbcTemplate(), applicationRecord.getApplicationId(), applicationRecord.getCode(), applicationRecord.getMysqlUsername(), applicationRecord.getMysqlDatabase());
+            }
         }
         if ("Deny".equals(link)) {
             String applicationId = (String) object.get("applicationId");

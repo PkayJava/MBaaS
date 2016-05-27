@@ -25,8 +25,8 @@ public class QueryProvider extends JooqProvider {
     public QueryProvider(String applicationCode) {
         this.applicationCode = applicationCode;
         this.queryTable = DSL.table(Jdbc.QUERY).as("queryTable");
-        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
-        this.from = this.queryTable.join(this.userTable).on(DSL.field(this.queryTable.getName() + "." + Jdbc.Query.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.userTable = DSL.table(Jdbc.USER).as("userTable");
+        this.from = this.queryTable.join(this.userTable).on(DSL.field(this.queryTable.getName() + "." + Jdbc.Query.USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
     }
 
     public Field<String> getQueryId() {
@@ -50,11 +50,11 @@ public class QueryProvider extends JooqProvider {
     }
 
     public Field<String> getApplicationUser() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
     }
 
     public Field<String> getApplicationUserId() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class);
     }
 
     @Override

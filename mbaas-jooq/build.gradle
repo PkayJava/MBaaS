@@ -40,7 +40,7 @@ sourceSets {
 
 flyway {
     driver = project.ext.get('temp.jdbc.driver')
-    url = project.ext.get('temp.jdbc.url')
+    url = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + project.ext.get('temp.jdbc.port') + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
     user = project.ext.get('temp.jdbc.username')
     password = project.ext.get('temp.jdbc.password')
     encoding = 'UTF-8'
@@ -49,7 +49,7 @@ flyway {
 
 jooq {
     jdbcDriver = project.ext.get('temp.jdbc.driver')
-    jdbcUrl = project.ext.get('temp.jdbc.url')
+    jdbcUrl = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + project.ext.get('temp.jdbc.port') + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
     jdbcUser = project.ext.get('temp.jdbc.username')
     jdbcPassword = project.ext.get('temp.jdbc.password')
     database = project.ext.get('temp.jdbc.database')

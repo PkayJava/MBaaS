@@ -3,9 +3,6 @@ package com.angkorteam.mbaas.server.wicket;
 import com.angkorteam.mbaas.configuration.Constants;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.flywaydb.core.internal.dbsupport.DbSupport;
-import org.flywaydb.core.internal.dbsupport.DbSupportFactory;
-import org.flywaydb.core.internal.dbsupport.Table;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderMapping;
@@ -20,9 +17,10 @@ public class JooqDb {
 
     public static void main(String args[]) throws Exception {
         XMLPropertiesConfiguration xml = Constants.getXmlPropertiesConfiguration();
+        String jdbcUrl = "jdbc:mysql://" + xml.getString(Constants.TEMP_JDBC_HOSTNAME) + ":" + xml.getString(Constants.TEMP_JDBC_PORT) + "/" + xml.getString(Constants.TEMP_JDBC_DATABASE) + "?" + xml.getString(Constants.TEMP_JDBC_EXTRA);
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(xml.getString(Constants.TEMP_JDBC_DRIVER));
-        dataSource.setUrl(xml.getString(Constants.TEMP_JDBC_URL));
+        dataSource.setUrl(jdbcUrl);
         dataSource.setUsername(xml.getString(Constants.TEMP_JDBC_USERNAME));
         dataSource.setPassword(xml.getString(Constants.TEMP_JDBC_PASSWORD));
 

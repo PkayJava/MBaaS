@@ -1,5 +1,8 @@
 package com.angkorteam.mbaas.server.factory;
 
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.angkorteam.mbaas.server.spring.JavascriptJob;
@@ -71,12 +74,15 @@ public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServi
             if (jobs.contains(applicationCode + "=>" + jobId)) {
                 return;
             }
-            JdbcTemplate jdbcTemplate = this.applicationDataSource.getJdbcTemplate(applicationCode);
+            ApplicationTable applicationTable = Tables.APPLICATION.as("applicationUser");
+            ApplicationRecord applicationRecord = this.context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.CODE.eq(applicationCode)).fetchOneInto(applicationTable);
+            String jdbcUrl = "jdbc:mysql://" + applicationRecord.getMysqlHostname() + ":" + applicationRecord.getMysqlPort() + "/" + applicationRecord.getMysqlDatabase() + "?" + applicationRecord.getMysqlExtra();
+            JdbcTemplate jdbcTemplate = this.applicationDataSource.getJdbcTemplate(applicationCode, jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
             Map<String, Object> jobRecord = null;
             jobRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JOB + " WHERE " + Jdbc.Job.JOB_ID + " = ?", jobId);
             if (jobRecord != null) {
                 try {
-                    this.scheduler.schedule(new JavascriptJob(this.context, this.applicationDataSource, applicationCode, jobId), new JavascriptTrigger(this.applicationDataSource, applicationCode, jobId, (String) jobRecord.get("cron")));
+                    this.scheduler.schedule(new JavascriptJob(this.context, this.applicationDataSource, applicationCode, jobId), new JavascriptTrigger(this.context, this.applicationDataSource, applicationCode, jobId, (String) jobRecord.get("cron")));
                     jobs.add(jobId);
                 } catch (IllegalArgumentException e) {
                 }

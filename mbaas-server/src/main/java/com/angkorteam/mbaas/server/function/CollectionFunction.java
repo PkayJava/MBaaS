@@ -60,12 +60,12 @@ public class CollectionFunction {
                 buffer.append("FULLTEXT(`").append(attribute.getName()).append("`), ");
             }
         }
-        buffer.append("`").append(configuration.getString(Constants.JDBC_COLUMN_OWNER_APPLICATION_USER_ID)).append("` VARCHAR(100) NOT NULL, ");
+        buffer.append("`").append(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID)).append("` VARCHAR(100) NOT NULL, ");
         buffer.append("`").append(configuration.getString(Constants.JDBC_COLUMN_DELETED)).append("` BIT(1) NOT NULL DEFAULT 0, ");
         buffer.append("`").append(configuration.getString(Constants.JDBC_COLUMN_DATE_CREATED)).append("` DATETIME NOT NULL DEFAULT NOW(), ");
         buffer.append("INDEX(`").append(configuration.getString(Constants.JDBC_COLUMN_DATE_CREATED)).append("`), ");
         buffer.append("INDEX(`").append(configuration.getString(Constants.JDBC_COLUMN_DELETED)).append("`), ");
-        buffer.append("INDEX(`").append(configuration.getString(Constants.JDBC_COLUMN_OWNER_APPLICATION_USER_ID)).append("`), ");
+        buffer.append("INDEX(`").append(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID)).append("`), ");
         buffer.append("PRIMARY KEY (`").append(primaryName).append("`)");
         buffer.append(" )");
         jdbcTemplate.execute(buffer.toString());
@@ -134,7 +134,7 @@ public class CollectionFunction {
             Map<String, Object> fields = new HashMap<>();
             fields.put(Jdbc.Attribute.ATTRIBUTE_ID, UUID.randomUUID().toString());
             fields.put(Jdbc.Attribute.COLLECTION_ID, collectionId);
-            fields.put(Jdbc.Attribute.NAME, configuration.getString(Constants.JDBC_COLUMN_OWNER_APPLICATION_USER_ID));
+            fields.put(Jdbc.Attribute.NAME, configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID));
             fields.put(Jdbc.Attribute.EXTRA, 0);
             fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
             fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);

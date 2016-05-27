@@ -66,11 +66,11 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
         String applicationUserId = (String) object.get("applicationUserId");
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         if ("Suspend".equals(link)) {
-            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.STATUS + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", UserStatusEnum.Suspended.getLiteral(), applicationUserId);
+            jdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.STATUS + " = ? WHERE " + Jdbc.User.USER_ID + " = ?", UserStatusEnum.Suspended.getLiteral(), applicationUserId);
             return;
         }
         if ("Activate".equals(link)) {
-            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.STATUS + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", UserStatusEnum.Active.getLiteral(), applicationUserId);
+            jdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.STATUS + " = ? WHERE " + Jdbc.User.USER_ID + " = ?", UserStatusEnum.Active.getLiteral(), applicationUserId);
             return;
         }
         if ("Edit".equals(link)) {

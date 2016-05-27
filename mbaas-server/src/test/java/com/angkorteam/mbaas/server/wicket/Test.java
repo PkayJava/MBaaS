@@ -1,18 +1,19 @@
 package com.angkorteam.mbaas.server.wicket;
 
-import org.eclipse.jetty.websocket.common.io.IOState;
-import org.hyperic.sigar.*;
-import org.hyperic.sigar.cmd.Iostat;
-import org.hyperic.sigar.cmd.Runner;
-import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
-import org.jooq.util.derby.sys.Sys;
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
- * Created by socheat on 4/10/16.
+ * Created by socheat on 5/25/16.
  */
 public class Test {
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws IOException {
+        File file = new File("/home/socheat/Documents/country.txt");
+        for (String line : FileUtils.readLines(file)) {
+            System.out.println("COUNTRIES.add(\"" + line.substring(3).trim() + "\");");
+        }
     }
 }

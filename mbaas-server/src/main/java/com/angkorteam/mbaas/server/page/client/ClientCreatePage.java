@@ -106,7 +106,7 @@ public class ClientCreatePage extends MasterPage {
         fields.put(Jdbc.Client.CLIENT_ID, UUID.randomUUID().toString());
         fields.put(Jdbc.Client.DATE_CREATED, new Date());
         fields.put(Jdbc.Client.APPLICATION_CODE, getSession().getApplicationCode());
-        fields.put(Jdbc.Client.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.Client.USER_ID, getSession().getApplicationUserId());
         fields.put(Jdbc.Client.CLIENT_SECRET, UUID.randomUUID().toString());
         fields.put(Jdbc.Client.SECURITY, SecurityEnum.Denied.getLiteral());
         fields.put(Jdbc.Client.NAME, this.name);

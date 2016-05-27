@@ -49,7 +49,8 @@ public class BearerAuthenticationProvider implements org.springframework.securit
             if (applicationRecord == null) {
                 throw new BadCredentialsException("application secret " + applicationSecret + " is not valid");
             }
-            jdbcTemplate = applicationDataSource.getJdbcTemplate(applicationRecord.getCode());
+            String jdbcUrl = "jdbc:mysql://" + applicationRecord.getMysqlHostname() + ":" + applicationRecord.getMysqlPort() + "/" + applicationRecord.getMysqlDatabase() + "?" + applicationRecord.getMysqlExtra();
+            jdbcTemplate = applicationDataSource.getJdbcTemplate(applicationRecord.getCode(), jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
         }
 
         String accessToken = ((BearerAuthenticationToken) authentication).getToken();

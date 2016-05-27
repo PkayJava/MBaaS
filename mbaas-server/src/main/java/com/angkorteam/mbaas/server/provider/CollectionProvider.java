@@ -25,20 +25,20 @@ public class CollectionProvider extends JooqProvider {
     public CollectionProvider(String applicationCode) {
         this.applicationCode = applicationCode;
         this.collectionTable = DSL.table(Jdbc.COLLECTION).as("collectionTable");
-        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
-        this.from = this.collectionTable.join(this.userTable).on(DSL.field(this.collectionTable.getName() + "." + Jdbc.Collection.OWNER_APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.userTable = DSL.table(Jdbc.USER).as("userTable");
+        this.from = this.collectionTable.join(this.userTable).on(DSL.field(this.collectionTable.getName() + "." + Jdbc.Collection.OWNER_APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
     }
 
     public Field<String> getApplicationUser() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
     }
 
     public Field<String> getApplicationUserId() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class);
     }
 
     public Field<Boolean> getSystem() {
-        return DSL.field(this.collectionTable.getName() + "." + Jdbc.ApplicationUser.SYSTEM, Boolean.class);
+        return DSL.field(this.collectionTable.getName() + "." + Jdbc.User.SYSTEM, Boolean.class);
     }
 
     public Field<String> getName() {

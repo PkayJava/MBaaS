@@ -52,7 +52,8 @@ public class IdentityHandlerMethodArgumentResolver implements HandlerMethodArgum
         {
             ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.SECRET.eq(applicationSecret)).fetchOneInto(applicationTable);
             if (applicationRecord != null) {
-                jdbcTemplate = this.applicationDataSource.getJdbcTemplate(applicationRecord.getCode());
+                String jdbcUrl = "jdbc:mysql://" + applicationRecord.getMysqlHostname() + ":" + applicationRecord.getMysqlPort() + "/" + applicationRecord.getMysqlDatabase() + "?" + applicationRecord.getMysqlExtra();
+                jdbcTemplate = this.applicationDataSource.getJdbcTemplate(applicationRecord.getCode(), jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
                 applicationCode = applicationRecord.getCode();
             }
         }

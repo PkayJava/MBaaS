@@ -63,9 +63,9 @@ public class UserModifyPage extends MasterPage {
         this.applicationUserId = parameters.get("applicationUserId").toString();
 
         Map<String, Object> userRecord = null;
-        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", this.applicationUserId);
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " = ?", this.applicationUserId);
 
-        this.fullName = (String) userRecord.get(Jdbc.ApplicationUser.FULL_NAME);
+        this.fullName = (String) userRecord.get(Jdbc.User.FULL_NAME);
         this.fullNameField = new TextField<>("fullNameField", new PropertyModel<>(this, "fullName"));
         this.fullNameField.setRequired(true);
         this.fullNameField.setLabel(JooqUtils.lookup("fullName", this));
@@ -73,11 +73,11 @@ public class UserModifyPage extends MasterPage {
         this.fullNameFeedback = new TextFeedbackPanel("fullNameFeedback", this.fullNameField);
         this.form.add(fullNameFeedback);
 
-        this.login = (String) userRecord.get(Jdbc.ApplicationUser.LOGIN);
+        this.login = (String) userRecord.get(Jdbc.User.LOGIN);
         this.loginLabel = new Label("loginLabel", new PropertyModel<>(this, "login"));
         this.form.add(this.loginLabel);
 
-        this.role = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", userRecord.get(Jdbc.ApplicationUser.ROLE_ID));
+        this.role = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", userRecord.get(Jdbc.User.ROLE_ID));
         List<Map<String, Object>> roles = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE);
         this.roleField = new DropDownChoice<>("roleField", new PropertyModel<>(this, "role"), roles, new RoleChoiceRenderer());
         this.roleField.setRequired(true);
@@ -93,13 +93,13 @@ public class UserModifyPage extends MasterPage {
 
     private void saveButtonOnSubmit(Button button) {
         Map<String, Object> wheres = new HashMap<>();
-        wheres.put(Jdbc.ApplicationUser.APPLICATION_USER_ID, this.applicationUserId);
+        wheres.put(Jdbc.User.USER_ID, this.applicationUserId);
         Map<String, Object> fields = new HashMap<>();
-        fields.put(Jdbc.ApplicationUser.FULL_NAME, this.fullName);
-        fields.put(Jdbc.ApplicationUser.ROLE_ID, this.role.get(Jdbc.Role.ROLE_ID));
+        fields.put(Jdbc.User.FULL_NAME, this.fullName);
+        fields.put(Jdbc.User.ROLE_ID, this.role.get(Jdbc.Role.ROLE_ID));
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
-        jdbcUpdate.withTableName(Jdbc.APPLICATION_USER);
+        jdbcUpdate.withTableName(Jdbc.USER);
         jdbcUpdate.execute(fields, wheres);
         setResponsePage(UserManagementPage.class);
     }

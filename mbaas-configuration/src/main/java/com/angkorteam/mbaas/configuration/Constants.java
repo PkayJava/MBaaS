@@ -17,26 +17,32 @@ public class Constants {
     public static final String WICKET = "wicket";
 
     public static final String TEMP_JDBC_DRIVER = "temp.jdbc.driver";
-    public static final String TEMP_JDBC_URL = "temp.jdbc.url";
+    public static final String TEMP_JDBC_HOSTNAME = "temp.jdbc.hostname";
+    public static final String TEMP_JDBC_EXTRA = "temp.jdbc.extra";
+    public static final String TEMP_JDBC_PORT = "temp.jdbc.port";
     public static final String TEMP_JDBC_USERNAME = "temp.jdbc.username";
     public static final String TEMP_JDBC_PASSWORD = "temp.jdbc.password";
     public static final String TEMP_JDBC_DATABASE = "temp.jdbc.database";
 
     public static final String APP_JDBC_DRIVER = "app.jdbc.driver";
-    public static final String APP_JDBC_URL = "app.jdbc.url";
+    public static final String APP_JDBC_HOSTNAME = "app.jdbc.hostname";
+    public static final String APP_JDBC_EXTRA = "app.jdbc.extra";
+    public static final String APP_JDBC_PORT = "app.jdbc.port";
     public static final String APP_JDBC_USERNAME = "app.jdbc.username";
     public static final String APP_JDBC_PASSWORD = "app.jdbc.password";
     public static final String APP_JDBC_DATABASE = "app.jdbc.database";
 
     public static final String TEST_JDBC_DRIVER = "test.jdbc.driver";
-    public static final String TEST_JDBC_URL = "test.jdbc.url";
+    public static final String TEST_JDBC_HOSTNAME = "test.jdbc.hostname";
+    public static final String TEST_JDBC_EXTRA = "test.jdbc.extra";
+    public static final String TEST_JDBC_PORT = "test.jdbc.port";
     public static final String TEST_JDBC_USERNAME = "test.jdbc.username";
     public static final String TEST_JDBC_PASSWORD = "test.jdbc.password";
     public static final String TEST_JDBC_DATABASE = "test.jdbc.database";
 
     public static final String JDBC_COLUMN_OPTIMISTIC = "jdbc.column.optimistic";
     public static final String JDBC_COLUMN_DELETED = "jdbc.column.deleted";
-    public static final String JDBC_COLUMN_OWNER_APPLICATION_USER_ID = "jdbc.column.owner_application_user_id";
+    public static final String JDBC_COLUMN_OWNER_USER_ID = "jdbc.column.owner_user_id";
     public static final String JDBC_COLUMN_DATE_CREATED = "jdbc.column.date_created";
 
     public static final String ROLE_MBAAS_ADMINISTRATOR = "role.mbaas.administrator";

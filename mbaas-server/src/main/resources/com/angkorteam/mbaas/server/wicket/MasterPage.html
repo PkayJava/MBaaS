@@ -112,7 +112,7 @@
                     </ul>
                 </li>
                 <wicket:container wicket:id="menuLogicConsole">
-                <li class="header"><wicket:container wicket:id="currentApplicationConsole"/> Console</li>
+                <li class="header">BackOffice Console</li>
                 <li wicket:id="mmenuClient">
                     <wicket:link><a href="../page/client/ClientManagementPage.html"><i class="fa fa-mobile"></i><span>Client</span></a></wicket:link>
                 </li>
@@ -128,7 +128,14 @@
                 <li wicket:id="mmenuJob">
                     <wicket:link><a href="../page/job/JobManagementPage.html"><i class="fa fa-gears"></i><span>Job</span></a></wicket:link>
                 </li>
+                    <li>
+                        <a><i class="fa fa-gears"></i><span>Logic</span></a>
+                    </li>
                 </wicket:container>
+                <li class="header">WebFlow Console</li>
+                <li>
+                    <a><i class="fa fa-gears"></i><span>Examination</span></a>
+                </li>
             </ul>
             <!-- /.sidebar-menu -->
         </section>

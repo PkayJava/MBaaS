@@ -73,17 +73,17 @@ public class TwoVerifyPage extends MasterPage {
         }
 
         Map<String, Object> wheres = new HashMap<>();
-        wheres.put(Jdbc.ApplicationUser.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        wheres.put(Jdbc.User.USER_ID, getSession().getApplicationUserId());
         Map<String, Object> fields = new HashMap<>();
         if (AuthenticationEnum.TwoEMail.getLiteral().equals(this.type)) {
-            fields.put(Jdbc.ApplicationUser.EMAIL_ADDRESS, this.recipient);
+            fields.put(Jdbc.User.EMAIL_ADDRESS, this.recipient);
         } else if (AuthenticationEnum.TwoSMS.getLiteral().equals(this.type)) {
-            fields.put(Jdbc.ApplicationUser.MOBILE_NUMBER, this.recipient);
+            fields.put(Jdbc.User.MOBILE_NUMBER, this.recipient);
         }
-        fields.put(Jdbc.ApplicationUser.AUTHENTICATION, this.type);
+        fields.put(Jdbc.User.AUTHENTICATION, this.type);
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
-        jdbcUpdate.withTableName(Jdbc.APPLICATION_USER);
+        jdbcUpdate.withTableName(Jdbc.USER);
         jdbcUpdate.execute(fields, wheres);
         setResponsePage(InformationPage.class);
     }

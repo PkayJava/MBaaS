@@ -91,7 +91,7 @@ public class JobCreatePage extends MasterPage {
         fields.put(Jdbc.Job.JAVASCRIPT, this.javascript);
         fields.put(Jdbc.Job.NAME, this.name);
         fields.put(Jdbc.Job.SECURITY, SecurityEnum.Denied.getLiteral());
-        fields.put(Jdbc.Job.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.Job.USER_ID, getSession().getApplicationUserId());
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
         jdbcInsert.withTableName(Jdbc.JOB);

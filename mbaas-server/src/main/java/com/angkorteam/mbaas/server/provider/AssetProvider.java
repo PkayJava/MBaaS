@@ -31,8 +31,8 @@ public class AssetProvider extends JooqProvider {
         this.applicationCode = applicationCode;
         this.applicationUserId = applicationUserId;
         this.assetTable = DSL.table(Jdbc.ASSET).as("assetTable");
-        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
-        this.from = this.assetTable.join(this.userTable).on(DSL.field(this.assetTable.getName() + "." + Jdbc.Asset.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.userTable = DSL.table(Jdbc.USER).as("userTable");
+        this.from = this.assetTable.join(this.userTable).on(DSL.field(this.assetTable.getName() + "." + Jdbc.Asset.USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
     }
 
     @Override
@@ -46,7 +46,7 @@ public class AssetProvider extends JooqProvider {
     }
 
     public Field<String> getApplicationUser() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
     }
 
     public Field<Integer> getLength() {
@@ -70,7 +70,7 @@ public class AssetProvider extends JooqProvider {
     protected List<Condition> where() {
         List<Condition> where = new ArrayList<>();
         if (this.applicationUserId != null && !"".equals(this.applicationUserId)) {
-            where.add(userTable.field(Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class).eq(this.applicationUserId));
+            where.add(userTable.field(Jdbc.User.USER_ID, String.class).eq(this.applicationUserId));
         }
         return where;
     }

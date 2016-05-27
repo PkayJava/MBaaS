@@ -102,7 +102,7 @@ public class FileCreatePage extends MasterPage {
         fields.put(Jdbc.File.LABEL, label);
         fields.put(Jdbc.File.NAME, name);
         fields.put(Jdbc.File.DATE_CREATED, new Date());
-        fields.put(Jdbc.File.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.File.USER_ID, getSession().getApplicationUserId());
 
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);

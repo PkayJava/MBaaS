@@ -11,6 +11,12 @@ CREATE TABLE application (
   oauth_roles         VARCHAR(255),
   security            VARCHAR(15)  NOT NULL,
   date_created        DATETIME,
+  mysql_extra         VARCHAR(255) NOT NULL,
+  mysql_hostname      VARCHAR(255) NOT NULL,
+  mysql_port          VARCHAR(10)  NOT NULL,
+  mysql_username      VARCHAR(255) NOT NULL,
+  mysql_password      VARCHAR(255) NOT NULL,
+  mysql_database      VARCHAR(255) NOT NULL,
 
   INDEX (mbaas_user_id),
   INDEX (description),
@@ -22,5 +28,11 @@ CREATE TABLE application (
   INDEX (oauth_roles),
   INDEX (security),
   INDEX (date_created),
+  INDEX (mysql_extra),
+  INDEX (mysql_hostname),
+  INDEX (mysql_port),
+  INDEX (mysql_username),
+  INDEX (mysql_password),
+  INDEX (mysql_database),
   PRIMARY KEY (application_id)
 );

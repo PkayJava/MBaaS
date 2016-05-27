@@ -33,7 +33,7 @@ public class DocumentProvider extends JooqProvider {
 
     public DocumentProvider(String applicationCode, String collectionId, String collectionName) {
         this.applicationCode = applicationCode;
-        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
+        this.userTable = DSL.table(Jdbc.USER).as("userTable");
         this.collectionName = collectionName;
         this.collectionId = collectionId;
 
@@ -77,8 +77,8 @@ public class DocumentProvider extends JooqProvider {
         }
 
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String jdbcColumnOwnerUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_APPLICATION_USER_ID);
-        this.from = table.innerJoin(this.userTable).on(DSL.field(this.collectionName + "." + jdbcColumnOwnerUserId, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        String jdbcColumnOwnerUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID);
+        this.from = table.innerJoin(this.userTable).on(DSL.field(this.collectionName + "." + jdbcColumnOwnerUserId, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
     }
 
     @Override
@@ -88,7 +88,7 @@ public class DocumentProvider extends JooqProvider {
     }
 
     public Field<String> getOwner() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
     }
 
     @Override

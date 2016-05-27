@@ -1,5 +1,8 @@
 package com.angkorteam.mbaas.server.spring;
 
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
@@ -38,8 +41,11 @@ public final class JavascriptJob implements Runnable {
 
     @Override
     public final void run() {
-        JdbcTemplate jdbcTemplate = this.applicationDataSource.getJdbcTemplate(this.applicationCode);
-        DSLContext context = this.applicationDataSource.getDSLContext(this.applicationCode);
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = this.context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.CODE.eq(this.applicationCode)).fetchOneInto(applicationTable);
+        String jdbcUrl = "jdbc:mysql://" + applicationRecord.getMysqlHostname() + ":" + applicationRecord.getMysqlPort() + "/" + applicationRecord.getMysqlDatabase() + "?" + applicationRecord.getMysqlExtra();
+        JdbcTemplate jdbcTemplate = this.applicationDataSource.getJdbcTemplate(this.applicationCode, jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
+        DSLContext context = this.applicationDataSource.getDSLContext(this.applicationCode, jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
         if (jdbcTemplate == null) {
             return;
         }

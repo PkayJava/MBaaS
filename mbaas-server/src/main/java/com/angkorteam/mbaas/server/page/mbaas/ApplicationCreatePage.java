@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.page.mbaas;
 import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
@@ -16,6 +17,7 @@ import com.angkorteam.mbaas.server.validator.ApplicationOAuthRoleValidator;
 import com.angkorteam.mbaas.server.validator.PushApplicationValidator;
 import com.angkorteam.mbaas.server.wicket.MBaaSPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.TextField;
@@ -118,11 +120,19 @@ public class ApplicationCreatePage extends MBaaSPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
 
         List<String> oauthRoles = CommonFunction.splitNoneWhite(this.oauthRoles);
 
         DSLContext context = getDSLContext();
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+
+        String mysqlHostname = configuration.getString(Constants.APP_JDBC_HOSTNAME);
+        String mysqlPort = configuration.getString(Constants.APP_JDBC_PORT);
+        String mysqlExtra = configuration.getString(Constants.APP_JDBC_EXTRA);
+        String mysqlDatabase = StringUtils.lowerCase(this.code);
+        String mysqlUsername = StringUtils.lowerCase(this.code);
+        String mysqlPassword = UUID.randomUUID().toString();
 
         ApplicationRecord applicationRecord = context.newRecord(applicationTable);
         String applicationId = UUID.randomUUID().toString();
@@ -136,6 +146,12 @@ public class ApplicationCreatePage extends MBaaSPage {
         applicationRecord.setMbaasUserId(getSession().getMbaasUserId());
         applicationRecord.setPushApplicationId(this.pushApplicationId);
         applicationRecord.setPushMasterSecret(this.pushMasterSecret);
+        applicationRecord.setMysqlHostname(mysqlHostname);
+        applicationRecord.setMysqlPort(mysqlPort);
+        applicationRecord.setMysqlDatabase(mysqlDatabase);
+        applicationRecord.setMysqlUsername(mysqlUsername);
+        applicationRecord.setMysqlPassword(mysqlPassword);
+        applicationRecord.setMysqlExtra(mysqlExtra);
         if (!oauthRoles.isEmpty()) {
             applicationRecord.setOauthRoles(StringUtils.join(oauthRoles, ", "));
         }
@@ -149,11 +165,16 @@ public class ApplicationCreatePage extends MBaaSPage {
             applicationRoleRecord.store();
         }
 
+        JdbcTemplate jdbcTemplate = getJdbcTemplate();
+        jdbcTemplate.execute("CREATE USER '" + mysqlUsername + "'@'%' IDENTIFIED BY '" + mysqlPassword + "'");
+        jdbcTemplate.execute("GRANT USAGE ON *.* TO '" + mysqlUsername + "'@'%' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0");
+        jdbcTemplate.execute("GRANT ALL PRIVILEGES ON `" + mysqlDatabase + "`.* TO '" + mysqlUsername + "'@'%';");
+
         DbSupport dbSupport = getDbSupport();
         ServletContext servletContext = getServletContext();
         ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource = getApplicationDataSource();
 
-        ApplicationFunction.createApplication(this.code, applicationDataSource, dbSupport, servletContext);
+        ApplicationFunction.createApplication(this.code, mysqlHostname, mysqlPort, mysqlExtra, mysqlDatabase, mysqlUsername, mysqlPassword, applicationDataSource, dbSupport, servletContext);
 
         setResponsePage(ApplicationManagementPage.class);
     }

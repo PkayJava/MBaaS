@@ -69,7 +69,7 @@ public class DocumentManagementPage extends MasterPage implements ActionFiltered
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(collectionName + "_id", this), collectionName + "_id", provider));
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String jdbcColumnOwnerApplicationUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_APPLICATION_USER_ID);
+        String jdbcColumnOwnerApplicationUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID);
         for (Map<String, Object> attributeRecord : attributeRecords) {
             if (attributeRecord.get(Jdbc.Attribute.NAME).equals(jdbcColumnOwnerApplicationUserId) || attributeRecord.get(Jdbc.Attribute.NAME).equals(collectionName + "_id")) {
                 continue;

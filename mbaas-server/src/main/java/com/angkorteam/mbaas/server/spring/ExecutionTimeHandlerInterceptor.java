@@ -84,7 +84,8 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
         }
         JdbcTemplate jdbcTemplate = null;
         if (applicationRecord != null) {
-            jdbcTemplate = this.applicationDataSource.getJdbcTemplate(applicationRecord.getCode());
+            String jdbcUrl = "jdbc:mysql://" + applicationRecord.getMysqlHostname() + ":" + applicationRecord.getMysqlPort() + "/" + applicationRecord.getMysqlDatabase() + "?" + applicationRecord.getMysqlExtra();
+            jdbcTemplate = this.applicationDataSource.getJdbcTemplate(applicationRecord.getCode(), jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
         }
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (jdbcTemplate != null && authorization != null && authorization.toUpperCase().startsWith("BEARER ")) {

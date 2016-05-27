@@ -5,7 +5,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.link.Link;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
-import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
@@ -225,9 +224,6 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuLogicConsole = new WebMarkupContainer("menuLogicConsole");
             add(this.menuLogicConsole);
 
-            Label currentApplicationConsole = new Label("currentApplicationConsole", new PropertyModel<>(this, "currentApplicationName"));
-            this.menuLogicConsole.add(currentApplicationConsole);
-
             WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript");
             mmenuJavascript.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJavascriptClass")));
             this.menuLogicConsole.add(mmenuJavascript);
@@ -387,20 +383,6 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuJobClass = "active";
         } else {
             this.mmenuJobClass = "";
-        }
-    }
-
-    public String getCurrentApplicationName() {
-        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
-        DSLContext context = getDSLContext();
-        ApplicationRecord applicationRecord = null;
-        if (getSession().getApplicationCode() != null && !"".equals(getSession().getApplicationCode())) {
-            applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.CODE.eq(getSession().getApplicationCode())).fetchOneInto(applicationTable);
-        }
-        if (applicationRecord != null) {
-            return applicationRecord.getName();
-        } else {
-            return "Select One Application";
         }
     }
 

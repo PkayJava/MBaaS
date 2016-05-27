@@ -3,6 +3,8 @@ package com.angkorteam.mbaas.server.wicket;
 import com.angkorteam.framework.extension.jooq.IDSLContext;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
@@ -12,6 +14,7 @@ import com.angkorteam.mbaas.server.page.mbaas.MBaaSDashboardPage;
 import com.angkorteam.mbaas.server.page.profile.InformationPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
+import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.WicketRuntimeException;
@@ -118,8 +121,12 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     }
 
     public final DSLContext getDSLContext(String applicationCode) {
+        DSLContext context = getDSLContext();
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.CODE.eq(applicationCode)).fetchOneInto(applicationTable);
+        String jdbcUrl = "jdbc:mysql://" + applicationRecord.getMysqlHostname() + ":" + applicationRecord.getMysqlPort() + "/" + applicationRecord.getMysqlDatabase() + "?" + applicationRecord.getMysqlExtra();
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
-        return applicationContext.getApplicationDataSource().getDSLContext(applicationCode);
+        return applicationContext.getApplicationDataSource().getDSLContext(applicationCode, jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
     }
 
     public final JdbcTemplate getJdbcTemplate() {
@@ -128,8 +135,12 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     }
 
     public final JdbcTemplate getJdbcTemplate(String applicationCode) {
+        DSLContext context = getDSLContext();
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.CODE.eq(applicationCode)).fetchOneInto(applicationTable);
+        String jdbcUrl = "jdbc:mysql://" + applicationRecord.getMysqlHostname() + ":" + applicationRecord.getMysqlPort() + "/" + applicationRecord.getMysqlDatabase() + "?" + applicationRecord.getMysqlExtra();
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
-        return applicationContext.getApplicationDataSource().getJdbcTemplate(applicationCode);
+        return applicationContext.getApplicationDataSource().getJdbcTemplate(applicationCode, jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
     }
 
     public final DbSupport getDbSupport() {
@@ -139,8 +150,12 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     }
 
     public final Schema getSchema(String applicationCode) {
+        DSLContext context = getDSLContext();
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.CODE.eq(applicationCode)).fetchOneInto(applicationTable);
+        String jdbcUrl = "jdbc:mysql://" + applicationRecord.getMysqlHostname() + ":" + applicationRecord.getMysqlPort() + "/" + applicationRecord.getMysqlDatabase() + "?" + applicationRecord.getMysqlExtra();
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
-        return applicationContext.getApplicationDataSource().getDbSchema(applicationCode);
+        return applicationContext.getApplicationDataSource().getDbSchema(applicationCode, jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
     }
 
     public final MailSender getMailSender() {
@@ -158,6 +173,12 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
         WebApplicationContextUtils.getWebApplicationContext(getServletContext());
         return applicationContext.getJavascriptService();
+    }
+
+    public final Gson getGson() {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+        return applicationContext.getGson();
     }
 
     @Override

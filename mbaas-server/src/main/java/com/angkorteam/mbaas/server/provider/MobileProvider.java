@@ -28,14 +28,14 @@ public class MobileProvider extends JooqProvider {
         this.applicationCode = applicationCode;
         this.mobileTable = DSL.table(Jdbc.MOBILE).as("mobileTable");
         this.clientTable = DSL.table(Jdbc.CLIENT).as("clientTable");
-        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
-        this.from = this.mobileTable.leftJoin(this.userTable).on(DSL.field(this.mobileTable.getName() + "." + Jdbc.Mobile.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)))
+        this.userTable = DSL.table(Jdbc.USER).as("userTable");
+        this.from = this.mobileTable.leftJoin(this.userTable).on(DSL.field(this.mobileTable.getName() + "." + Jdbc.Mobile.USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)))
                 .leftJoin(this.clientTable).on(DSL.field(this.mobileTable.getName() + "." + Jdbc.Mobile.CLIENT_ID, String.class).eq(DSL.field(this.clientTable.getName() + "." + Jdbc.Client.CLIENT_ID, String.class)));
         setSort(Jdbc.Mobile.DATE_SEEN, SortOrder.DESCENDING);
     }
 
     public Field<String> getLogin() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
     }
 
     public Field<String> getMobileId() {

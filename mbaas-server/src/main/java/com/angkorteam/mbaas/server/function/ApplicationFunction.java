@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.function;
 
 import com.angkorteam.mbaas.configuration.Constants;
+import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
 import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
 import com.angkorteam.mbaas.server.Jdbc;
@@ -36,22 +37,30 @@ public class ApplicationFunction {
     private static final NumberFormat ROUTINE = new DecimalFormat("000");
 
     public static void createApplication(String applicationCode,
+                                         String mysqlHostname,
+                                         String mysqlPort,
+                                         String mysqlExtra,
+                                         String mysqlDatabase,
+                                         String mysqlUsername,
+                                         String mysqlPassword,
                                          ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource,
                                          DbSupport dbSupport,
                                          ServletContext servletContext) {
-        Schema schema = dbSupport.getSchema(applicationCode);
+        Schema schema = dbSupport.getSchema(mysqlDatabase);
         if (schema.exists()) {
             throw new WicketRuntimeException("internal error");
         }
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         schema.create();
-        JdbcTemplate jdbcTemplate = applicationDataSource.getJdbcTemplate(applicationCode);
+        String jdbcUrl = "jdbc:mysql://" + mysqlHostname + ":" + mysqlPort + "/" + mysqlDatabase + "?" + mysqlExtra;
+        JdbcTemplate applicationJdbcTemplate = applicationDataSource.getJdbcTemplate(applicationCode, jdbcUrl, mysqlUsername, mysqlPassword);
         File ddlRepo = new File(servletContext.getRealPath("WEB-INF/application"));
         File[] ddls = ddlRepo.listFiles();
         if (ddls != null && ddls.length > 0) {
             for (File ddl : ddls) {
                 if (ddl.isFile() && "sql".equalsIgnoreCase(FilenameUtils.getExtension(ddl.getName()))) {
                     try {
-                        jdbcTemplate.execute(FileUtils.readFileToString(ddl));
+                        applicationJdbcTemplate.execute(FileUtils.readFileToString(ddl));
                         LOGGER.info("{} {}", applicationCode, ddl.getName());
                     } catch (IOException e) {
                         throw new WicketRuntimeException(e);
@@ -59,7 +68,6 @@ public class ApplicationFunction {
                 }
             }
         }
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         File resourceRepo = new File(configuration.getString(Constants.RESOURCE_REPO));
         File applicationRepo = new File(resourceRepo, applicationCode);
         applicationRepo.mkdirs();
@@ -115,34 +123,38 @@ public class ApplicationFunction {
             roles.add(role);
         }
         {
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(applicationJdbcTemplate);
             jdbcInsert.withTableName(Jdbc.ROLE);
             for (Map<String, Object> role : roles) {
                 jdbcInsert.execute(role);
             }
         }
         {
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-            jdbcInsert.withTableName(Jdbc.APPLICATION_USER);
+            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(applicationJdbcTemplate);
+            jdbcInsert.withTableName(Jdbc.USER);
             Map<String, Object> user = new HashMap<>();
             String userId = UUID.randomUUID().toString();
-            user.put(Jdbc.ApplicationUser.APPLICATION_USER_ID, userId);
-            user.put(Jdbc.ApplicationUser.ACCOUNT_NON_EXPIRED, true);
-            user.put(Jdbc.ApplicationUser.SYSTEM, true);
-            user.put(Jdbc.ApplicationUser.ACCOUNT_NON_LOCKED, true);
-            user.put(Jdbc.ApplicationUser.CREDENTIALS_NON_EXPIRED, true);
-            user.put(Jdbc.ApplicationUser.STATUS, UserStatusEnum.Active.getLiteral());
-            user.put(Jdbc.ApplicationUser.LOGIN, configuration.getString(Constants.USER_ADMIN));
-            user.put(Jdbc.ApplicationUser.FULL_NAME, configuration.getString(Constants.USER_ADMIN));
-            user.put(Jdbc.ApplicationUser.PASSWORD, configuration.getString(Constants.USER_ADMIN_PASSWORD));
-            user.put(Jdbc.ApplicationUser.ROLE_ID, roleId);
-            user.put(Jdbc.ApplicationUser.AUTHENTICATION, AuthenticationEnum.None.getLiteral());
+            user.put(Jdbc.User.USER_ID, userId);
+            user.put(Jdbc.User.ACCOUNT_NON_EXPIRED, true);
+            user.put(Jdbc.User.SYSTEM, true);
+            user.put(Jdbc.User.ACCOUNT_NON_LOCKED, true);
+            user.put(Jdbc.User.CREDENTIALS_NON_EXPIRED, true);
+            user.put(Jdbc.User.STATUS, UserStatusEnum.Active.getLiteral());
+            user.put(Jdbc.User.LOGIN, configuration.getString(Constants.USER_ADMIN));
+            user.put(Jdbc.User.FULL_NAME, configuration.getString(Constants.USER_ADMIN));
+            user.put(Jdbc.User.PASSWORD, configuration.getString(Constants.USER_ADMIN_PASSWORD));
+            user.put(Jdbc.User.ROLE_ID, roleId);
+            user.put(Jdbc.User.AUTHENTICATION, AuthenticationEnum.None.getLiteral());
             jdbcInsert.execute(user);
-            jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.PASSWORD + " = MD5(?) WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", configuration.getString(Constants.USER_ADMIN_PASSWORD), userId);
+            applicationJdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.PASSWORD + " = MD5(?) WHERE " + Jdbc.User.USER_ID + " = ?", configuration.getString(Constants.USER_ADMIN_PASSWORD), userId);
         }
-        {
+    }
 
-        }
+    public static void drop(JdbcTemplate jdbcTemplate, String applicationId, String applicationCode, String mysqlUsername, String mysqlDatabase) {
+        jdbcTemplate.update("DELETE FROM " + Tables.APPLICATION.getName() + " WHERE " + Tables.APPLICATION.CODE.getName() + " = ?", applicationCode);
+        jdbcTemplate.update("DELETE FROM " + Tables.APPLICATION_ROLE.getName() + " WHERE " + Tables.APPLICATION_ROLE.APPLICATION_ID.getName() + " = ?", applicationId);
+        jdbcTemplate.execute("DROP USER '" + mysqlUsername + "'");
+        jdbcTemplate.execute("DROP DATABASE " + mysqlDatabase);
     }
 
 //    public static File backup(JdbcTemplate jdbcTemplate, String applicationId, String userId) throws IOException {

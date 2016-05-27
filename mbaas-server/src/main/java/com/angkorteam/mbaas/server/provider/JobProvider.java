@@ -23,10 +23,10 @@ public class JobProvider extends JooqProvider {
     private final String applicationCode;
 
     public JobProvider(String applicationCode) {
-        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
+        this.userTable = DSL.table(Jdbc.USER).as("userTable");
         this.jobTable = DSL.table(Jdbc.JOB).as("jobTable");
         this.applicationCode = applicationCode;
-        this.from = this.jobTable.join(this.userTable).on(DSL.field(this.jobTable.getName() + "." + Jdbc.Job.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.from = this.jobTable.join(this.userTable).on(DSL.field(this.jobTable.getName() + "." + Jdbc.Job.USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
     }
 
     public Field<String> getJobId() {
@@ -34,11 +34,11 @@ public class JobProvider extends JooqProvider {
     }
 
     public Field<String> getApplicationUser() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
     }
 
     public Field<String> getApplicationUserId() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.Job.APPLICATION_USER_ID, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.Job.USER_ID, String.class);
     }
 
     public Field<String> getSecurity() {

@@ -5,7 +5,7 @@ package com.angkorteam.mbaas.server;
  */
 public class Jdbc {
 
-    public static final String APPLICATION_USER = "application_user";
+    public static final String USER = "user";
     public static final String MOBILE = "mobile";
     public static final String ROLE = "role";
     public static final String COLLECTION = "collection";
@@ -35,8 +35,8 @@ public class Jdbc {
     public static final String EAV_DATE = "eav_date";
     public static final String EAV_TIME = "eav_time";
 
-    public static final class ApplicationUser {
-        public static final String APPLICATION_USER_ID = "application_user_id";
+    public static final class User {
+        public static final String USER_ID = "user_id";
         public static final String LOGIN = "login";
         public static final String PASSWORD = "password";
         public static final String FULL_NAME = "full_name";
@@ -65,7 +65,7 @@ public class Jdbc {
 
     public static final class Mobile {
         public static final String MOBILE_ID = "mobile_id";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String CLIENT_ID = "client_id";
         public static final String APPLICATION_CODE = "application_code";
         public static final String DATE_CREATED = "date_created";
@@ -112,7 +112,7 @@ public class Jdbc {
         public static final String APPLICATION_CODE = "application_code";
         public static final String CLIENT_ID = "client_id";
         public static final String STATE = "state";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
     }
 
     public static final class Query {
@@ -124,7 +124,7 @@ public class Jdbc {
         public static final String RETURN_SUB_TYPE = "return_sub_type";
         public static final String DATE_CREATED = "date_created";
         public static final String SECURITY = "security";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String APPLICATION_CODE = "application_code";
     }
 
@@ -147,7 +147,7 @@ public class Jdbc {
         public static final String EXTENSION = "extension";
         public static final String LENGTH = "length";
         public static final String DATE_CREATED = "date_created";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String CLIENT_ID = "client_id";
     }
 
@@ -161,7 +161,7 @@ public class Jdbc {
         public static final String EXTENSION = "extension";
         public static final String LENGTH = "`length`";
         public static final String DATE_CREATED = "date_created";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String CLIENT_ID = "client_id";
     }
 
@@ -172,7 +172,7 @@ public class Jdbc {
         public static final String SCRIPT = "script";
         public static final String DATE_CREATED = "date_created";
         public static final String SECURITY = "security";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String APPLICATION_CODE = "application_code";
     }
 
@@ -180,7 +180,7 @@ public class Jdbc {
         public static final String JOB_ID = "job_id";
         public static final String NAME = "name";
         public static final String CRON = "cron";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String CONSUME = "consume";
         public static final String JAVASCRIPT = "javascript";
         public static final String ERROR_MESSAGE = "error_message";
@@ -194,7 +194,7 @@ public class Jdbc {
     public static final class Client {
         public static final String CLIENT_ID = "client_id";
         public static final String APPLICATION_CODE = "application_code";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String CLIENT_SECRET = "client_secret";
         public static final String DATE_CREATED = "date_created";
         public static final String PUSH_VARIANT_ID = "push_variant_id";
@@ -207,26 +207,26 @@ public class Jdbc {
 
     public static final class VisibleByFriend {
         public static final String VISIBLE_BY_FRIEND_ID = "visible_by_friend_id";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String ATTRIBUTE_ID = Attribute.ATTRIBUTE_ID;
     }
 
     public static final class VisibleByAnonymous {
         public static final String VISIBLE_BY_ANONYMOUS_ID = "visible_by_anonymous_id";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String ATTRIBUTE_ID = Attribute.ATTRIBUTE_ID;
     }
 
     public static final class VisibleByRegisteredUser {
         public static final String VISIBLE_BY_REGISTERED_USER_ID = "visible_by_registered_user_id";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String ATTRIBUTE_ID = Attribute.ATTRIBUTE_ID;
     }
 
     public static final class Friend {
         public static final String FRIEND_ID = "friend_id";
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
-        public static final String FRIEND_APPLICATION_USER_ID = "friend_" + ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
+        public static final String FRIEND_USER_ID = "friend_" + User.USER_ID;
         public static final String SUBSCRIPTION = "subscription";
         public static final String ASK_SUBSCRIPTION = "ask_subscription";
         public static final String DATE_CREATED = "date_created";
@@ -235,7 +235,7 @@ public class Jdbc {
     public static final class Participant {
         public static final String PARTICIPANT_ID = "participant_id";
         public static final String CONVERSATION_ID = Conversation.CONVERSATION_ID;
-        public static final String APPLICATION_USER_ID = ApplicationUser.APPLICATION_USER_ID;
+        public static final String USER_ID = User.USER_ID;
         public static final String DATE_CREATED = "date_created";
     }
 
@@ -248,8 +248,8 @@ public class Jdbc {
     public static final class Message {
         public static final String MESSAGE_ID = "message_id";
         public static final String CONVERSATION_ID = Conversation.CONVERSATION_ID;
-        public static final String SENDER_APPLICATION_USER_ID = "sender_" + ApplicationUser.APPLICATION_USER_ID;
-        public static final String RECEIVER_APPLICATION_USER_ID = "receiver_" + ApplicationUser.APPLICATION_USER_ID;
+        public static final String SENDER_USER_ID = "sender_" + User.USER_ID;
+        public static final String RECEIVER_USER_ID = "receiver_" + User.USER_ID;
         public static final String BODY = "body";
         public static final String READ = "`read`";
         public static final String DATE_CREATED = "date_created";

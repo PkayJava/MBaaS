@@ -24,8 +24,8 @@ public class FileProvider extends JooqProvider {
     public FileProvider(String applicationCode) {
         this.applicationCode = applicationCode;
         this.fileTable = DSL.table(Jdbc.FILE).as("fileTable");
-        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
-        this.from = this.fileTable.join(this.userTable).on(DSL.field(this.fileTable.getName() + "." + Jdbc.File.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.userTable = DSL.table(Jdbc.USER).as("userTable");
+        this.from = this.fileTable.join(this.userTable).on(DSL.field(this.fileTable.getName() + "." + Jdbc.File.USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
     }
 
     @Override
@@ -39,7 +39,7 @@ public class FileProvider extends JooqProvider {
     }
 
     public Field<String> getApplicationUser() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
     }
 
     public Field<Integer> getLength() {

@@ -41,15 +41,15 @@ public class TwoMailPage extends MasterPage {
         super.onInitialize();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> userRecord = null;
-        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " =?", getSession().getApplicationUserId());
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " =?", getSession().getApplicationUserId());
 
         this.form = new Form<>("form");
         add(this.form);
 
-        this.emailAddress = (String) userRecord.get(Jdbc.ApplicationUser.EMAIL_ADDRESS);
+        this.emailAddress = (String) userRecord.get(Jdbc.User.EMAIL_ADDRESS);
         this.emailAddressField = new TextField<>("emailAddressField", new PropertyModel<>(this, "emailAddress"));
         this.emailAddressField.setRequired(true);
-        this.emailAddressField.setEnabled(!AuthenticationEnum.TwoEMail.getLiteral().equals(userRecord.get(Jdbc.ApplicationUser.AUTHENTICATION)));
+        this.emailAddressField.setEnabled(!AuthenticationEnum.TwoEMail.getLiteral().equals(userRecord.get(Jdbc.User.AUTHENTICATION)));
         this.emailAddressField.add(EmailAddressValidator.getInstance());
         this.emailAddressField.add(new UserEmailAddressValidator(getSession().getApplicationCode(), getSession().getApplicationUserId()));
         this.form.add(this.emailAddressField);
@@ -58,12 +58,12 @@ public class TwoMailPage extends MasterPage {
 
         this.disableButton = new Button("disableButton");
         this.disableButton.setOnSubmit(this::disableButtonOnSubmit);
-        this.disableButton.setVisible(AuthenticationEnum.TwoEMail.getLiteral().equals(userRecord.get(Jdbc.ApplicationUser.AUTHENTICATION)));
+        this.disableButton.setVisible(AuthenticationEnum.TwoEMail.getLiteral().equals(userRecord.get(Jdbc.User.AUTHENTICATION)));
         this.form.add(this.disableButton);
 
         this.okayButton = new Button("okayButton");
         this.okayButton.setOnSubmit(this::okayButtonOnSubmit);
-        this.okayButton.setVisible(!AuthenticationEnum.TwoEMail.getLiteral().equals(userRecord.get(Jdbc.ApplicationUser.AUTHENTICATION)));
+        this.okayButton.setVisible(!AuthenticationEnum.TwoEMail.getLiteral().equals(userRecord.get(Jdbc.User.AUTHENTICATION)));
         this.form.add(this.okayButton);
     }
 
@@ -84,7 +84,7 @@ public class TwoMailPage extends MasterPage {
 
     private void disableButtonOnSubmit(Button button) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.AUTHENTICATION + " = ? WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", AuthenticationEnum.None.getLiteral(), getSession().getApplicationUserId());
+        jdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.AUTHENTICATION + " = ? WHERE " + Jdbc.User.USER_ID + " = ?", AuthenticationEnum.None.getLiteral(), getSession().getApplicationUserId());
         setResponsePage(InformationPage.class);
     }
 

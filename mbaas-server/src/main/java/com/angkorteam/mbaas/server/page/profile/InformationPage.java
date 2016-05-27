@@ -50,20 +50,20 @@ public class InformationPage extends MasterPage {
         super.onInitialize();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> userRecord = null;
-        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " =?", getSession().getApplicationUserId());
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " =?", getSession().getApplicationUserId());
 
         this.form = new Form<>("form");
         add(this.form);
 
-        this.login = (String) userRecord.get(Jdbc.ApplicationUser.LOGIN);
+        this.login = (String) userRecord.get(Jdbc.User.LOGIN);
         this.loginLabel = new Label("loginLabel", new PropertyModel<>(this, "login"));
         this.form.add(this.loginLabel);
 
-        this.authentication = (String) userRecord.get(Jdbc.ApplicationUser.AUTHENTICATION);
+        this.authentication = (String) userRecord.get(Jdbc.User.AUTHENTICATION);
         this.authenticationLabel = new Label("authenticationLabel", new PropertyModel<>(this, "authentication"));
         this.form.add(this.authenticationLabel);
 
-        this.emailAddress = (String) userRecord.get(Jdbc.ApplicationUser.EMAIL_ADDRESS);
+        this.emailAddress = (String) userRecord.get(Jdbc.User.EMAIL_ADDRESS);
         this.emailAddressField = new TextField<>("emailAddressField", new PropertyModel<>(this, "emailAddress"));
         if (AuthenticationEnum.TwoEMail.getLiteral().equals(this.authentication)) {
             this.emailAddressField.setRequired(true);
@@ -78,7 +78,7 @@ public class InformationPage extends MasterPage {
         this.emailAddressFeedback = new TextFeedbackPanel("emailAddressFeedback", this.emailAddressField);
         this.form.add(this.emailAddressFeedback);
 
-        this.mobileNumber = (String) userRecord.get(Jdbc.ApplicationUser.MOBILE_NUMBER);
+        this.mobileNumber = (String) userRecord.get(Jdbc.User.MOBILE_NUMBER);
         this.mobileNumberField = new TextField<>("mobileNumberField", new PropertyModel<>(this, "mobileNumber"));
         if (AuthenticationEnum.TwoSMS.getLiteral().equals(this.authentication)) {
             this.mobileNumberField.setRequired(true);
@@ -99,13 +99,13 @@ public class InformationPage extends MasterPage {
 
     private void updateButtonOnSubmit(Button button) {
         Map<String, Object> fields = new HashMap<>();
-        fields.put(Jdbc.ApplicationUser.EMAIL_ADDRESS, this.emailAddress);
-        fields.put(Jdbc.ApplicationUser.MOBILE_NUMBER, this.mobileNumber);
+        fields.put(Jdbc.User.EMAIL_ADDRESS, this.emailAddress);
+        fields.put(Jdbc.User.MOBILE_NUMBER, this.mobileNumber);
         Map<String, Object> wheres = new HashMap<>();
-        wheres.put(Jdbc.ApplicationUser.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        wheres.put(Jdbc.User.USER_ID, getSession().getApplicationUserId());
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
-        jdbcUpdate.withTableName(Jdbc.APPLICATION_USER);
+        jdbcUpdate.withTableName(Jdbc.USER);
         jdbcUpdate.execute(fields, wheres);
         setResponsePage(InformationPage.class);
     }

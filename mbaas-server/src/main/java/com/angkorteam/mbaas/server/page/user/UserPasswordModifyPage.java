@@ -55,9 +55,9 @@ public class UserPasswordModifyPage extends MasterPage {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
         Map<String, Object> userRecord = null;
-        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", this.applicationUserId);
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " = ?", this.applicationUserId);
 
-        this.login = (String) userRecord.get(Jdbc.ApplicationUser.LOGIN);
+        this.login = (String) userRecord.get(Jdbc.User.LOGIN);
         this.loginLabel = new Label("loginLabel", new PropertyModel<>(this, "login"));
         this.form.add(this.loginLabel);
 
@@ -92,7 +92,7 @@ public class UserPasswordModifyPage extends MasterPage {
 
     private void saveButtonOnSubmit(Button button) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.PASSWORD + " = MD5(?) WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", this.password, this.applicationUserId);
+        jdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.PASSWORD + " = MD5(?) WHERE " + Jdbc.User.USER_ID + " = ?", this.password, this.applicationUserId);
         setResponsePage(UserManagementPage.class);
     }
 

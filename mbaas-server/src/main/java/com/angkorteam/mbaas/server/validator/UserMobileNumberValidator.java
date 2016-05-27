@@ -34,9 +34,9 @@ public class UserMobileNumberValidator extends JooqValidator<String> {
             JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
             int count = 0;
             if (applicationUserId == null || "".equals(applicationUserId)) {
-                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.MOBILE_NUMBER + " = ?", int.class, mobileNumber);
+                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.USER + " WHERE " + Jdbc.User.MOBILE_NUMBER + " = ?", int.class, mobileNumber);
             } else {
-                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.MOBILE_NUMBER + " = ? AND " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " != ?", int.class, mobileNumber, this.applicationUserId);
+                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.USER + " WHERE " + Jdbc.User.MOBILE_NUMBER + " = ? AND " + Jdbc.User.USER_ID + " != ?", int.class, mobileNumber, this.applicationUserId);
             }
             if (count > 0) {
                 validatable.error(new ValidationError(this, "duplicated"));

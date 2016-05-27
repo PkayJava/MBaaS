@@ -2,13 +2,21 @@ package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.*;
-import com.angkorteam.mbaas.model.entity.tables.records.*;
-import com.angkorteam.mbaas.plain.enums.*;
+import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.MbaasRoleTable;
+import com.angkorteam.mbaas.model.entity.tables.MbaasUserTable;
+import com.angkorteam.mbaas.model.entity.tables.NashornTable;
+import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.MbaasRoleRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.MbaasUserRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.NashornRecord;
+import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
+import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
-import com.angkorteam.mbaas.server.service.*;
+import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.socket.ServerInitializer;
 import com.google.gson.Gson;
 import io.netty.bootstrap.ServerBootstrap;
@@ -57,9 +65,9 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
-import java.util.Date;
 import java.util.concurrent.*;
 
 /**
@@ -209,7 +217,8 @@ public class ApplicationContext implements ServletContextListener {
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
         List<ApplicationRecord> applicationRecords = context.select(applicationTable.fields()).from(applicationTable).fetchInto(applicationTable);
         for (ApplicationRecord applicationRecord : applicationRecords) {
-            JdbcTemplate jdbcTemplate = applicationDataSource.getJdbcTemplate(applicationRecord.getCode());
+            String jdbcUrl = "jdbc:mysql://" + applicationRecord.getMysqlHostname() + ":" + applicationRecord.getMysqlPort() + "/" + applicationRecord.getMysqlDatabase() + "?" + applicationRecord.getMysqlExtra();
+            JdbcTemplate jdbcTemplate = applicationDataSource.getJdbcTemplate(applicationRecord.getCode(), jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
             List<String> jobIds = jdbcTemplate.queryForList("SELECT " + Jdbc.Job.JOB_ID + " FROM " + Jdbc.JOB, String.class);
             for (String jobId : jobIds) {
                 javascriptService.schedule(applicationRecord.getCode(), jobId);
@@ -406,16 +415,18 @@ public class ApplicationContext implements ServletContextListener {
         String itest = System.getProperty("itest");
         if (itest == null || "".equals(itest)) {
             String jdbcDriver = configuration.getString(Constants.APP_JDBC_DRIVER);
+            String jdbcUrl = "jdbc:mysql://" + configuration.getString(Constants.APP_JDBC_HOSTNAME) + ":" + configuration.getString(Constants.APP_JDBC_PORT) + "/" + configuration.getString(Constants.APP_JDBC_DATABASE) + "?" + configuration.getString(Constants.APP_JDBC_EXTRA);
             dataSource.setDriverClassName(jdbcDriver);
             dataSource.setUsername(configuration.getString(Constants.APP_JDBC_USERNAME));
             dataSource.setPassword(configuration.getString(Constants.APP_JDBC_PASSWORD));
-            dataSource.setUrl(configuration.getString(Constants.APP_JDBC_URL));
+            dataSource.setUrl(jdbcUrl);
         } else {
             String jdbcDriver = configuration.getString(Constants.TEST_JDBC_DRIVER);
+            String jdbcUrl = "jdbc:mysql://" + configuration.getString(Constants.TEST_JDBC_HOSTNAME) + ":" + configuration.getString(Constants.TEST_JDBC_PORT) + "/" + configuration.getString(Constants.TEST_JDBC_DATABASE) + "?" + configuration.getString(Constants.TEST_JDBC_EXTRA);
             dataSource.setDriverClassName(jdbcDriver);
             dataSource.setUsername(configuration.getString(Constants.TEST_JDBC_USERNAME));
             dataSource.setPassword(configuration.getString(Constants.TEST_JDBC_PASSWORD));
-            dataSource.setUrl(configuration.getString(Constants.TEST_JDBC_URL));
+            dataSource.setUrl(jdbcUrl);
         }
         return dataSource;
     }

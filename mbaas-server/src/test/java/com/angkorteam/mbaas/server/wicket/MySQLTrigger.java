@@ -14,9 +14,10 @@ public class MySQLTrigger {
 
     public static void main(String args[]) throws Exception {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        String jdbcUrl = "jdbc:mysql://" + configuration.getString(Constants.TEMP_JDBC_HOSTNAME) + ":" + configuration.getString(Constants.TEMP_JDBC_PORT) + "/" + configuration.getString(Constants.TEMP_JDBC_DATABASE) + "?" + configuration.getString(Constants.TEMP_JDBC_EXTRA);
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(configuration.getString(Constants.TEMP_JDBC_DRIVER));
-        dataSource.setUrl(configuration.getString(Constants.TEMP_JDBC_URL));
+        dataSource.setUrl(jdbcUrl);
         dataSource.setUsername(configuration.getString(Constants.TEMP_JDBC_USERNAME));
         dataSource.setPassword(configuration.getString(Constants.TEMP_JDBC_PASSWORD));
         DbSupport support = DbSupportFactory.createDbSupport(dataSource.getConnection(), true);

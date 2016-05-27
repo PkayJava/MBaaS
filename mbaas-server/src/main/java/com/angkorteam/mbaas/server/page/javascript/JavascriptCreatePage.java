@@ -88,7 +88,7 @@ public class JavascriptCreatePage extends MasterPage {
         fields.put(Jdbc.Javascript.PATH, this.pathText);
         fields.put(Jdbc.Javascript.SCRIPT, this.script);
         fields.put(Jdbc.Javascript.DATE_CREATED, new Date());
-        fields.put(Jdbc.Javascript.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.Javascript.USER_ID, getSession().getApplicationUserId());
         fields.put(Jdbc.Javascript.APPLICATION_CODE, getSession().getApplicationCode());
         fields.put(Jdbc.Javascript.DESCRIPTION, this.description);
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();

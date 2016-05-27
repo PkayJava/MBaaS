@@ -34,9 +34,9 @@ public class UserEmailAddressValidator extends JooqValidator<String> {
             JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
             int count = 0;
             if (applicationUserId == null || "".equals(applicationUserId)) {
-                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.EMAIL_ADDRESS + " = ?", int.class, emailAddress);
+                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.USER + " WHERE " + Jdbc.User.EMAIL_ADDRESS + " = ?", int.class, emailAddress);
             } else {
-                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.EMAIL_ADDRESS + " = ? AND " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " != ?", int.class, emailAddress, this.applicationUserId);
+                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.USER + " WHERE " + Jdbc.User.EMAIL_ADDRESS + " = ? AND " + Jdbc.User.USER_ID + " != ?", int.class, emailAddress, this.applicationUserId);
             }
             if (count > 0) {
                 validatable.error(new ValidationError(this, "duplicated"));

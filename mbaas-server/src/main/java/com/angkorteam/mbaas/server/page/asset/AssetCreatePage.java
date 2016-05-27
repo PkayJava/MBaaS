@@ -103,7 +103,7 @@ public class AssetCreatePage extends MasterPage {
         fields.put(Jdbc.Asset.LABEL, label);
         fields.put(Jdbc.Asset.NAME, name);
         fields.put(Jdbc.Asset.DATE_CREATED, new Date());
-        fields.put(Jdbc.Asset.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.Asset.USER_ID, getSession().getApplicationUserId());
 
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);

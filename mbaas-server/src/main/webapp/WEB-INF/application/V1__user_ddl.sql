@@ -1,6 +1,6 @@
-CREATE TABLE application_user (
+CREATE TABLE user (
 
-  application_user_id               VARCHAR(100) NOT NULL,
+  user_id                           VARCHAR(100) NOT NULL,
   login                             VARCHAR(255) NOT NULL,
   password                          VARCHAR(255) NOT NULL,
   full_name                         VARCHAR(255) NOT NULL,
@@ -36,5 +36,5 @@ CREATE TABLE application_user (
   INDEX (status),
   INDEX (password_reset_token),
   INDEX (password_reset_token_expired_date),
-  PRIMARY KEY (application_user_id)
+  PRIMARY KEY (user_id)
 );

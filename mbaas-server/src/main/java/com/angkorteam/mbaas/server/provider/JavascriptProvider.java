@@ -25,8 +25,8 @@ public class JavascriptProvider extends JooqProvider {
     public JavascriptProvider(String applicationCode) {
         this.applicationCode = applicationCode;
         this.javascriptTable = DSL.table(Jdbc.JAVASCRIPT).as("javascriptTable");
-        this.userTable = DSL.table(Jdbc.APPLICATION_USER).as("userTable");
-        this.from = this.javascriptTable.join(this.userTable).on(DSL.field(this.javascriptTable.getName() + "." + Jdbc.Javascript.APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class)));
+        this.userTable = DSL.table(Jdbc.USER).as("userTable");
+        this.from = this.javascriptTable.join(this.userTable).on(DSL.field(this.javascriptTable.getName() + "." + Jdbc.Javascript.USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
     }
 
     public Field<String> getJavascriptId() {
@@ -50,11 +50,11 @@ public class JavascriptProvider extends JooqProvider {
     }
 
     public Field<String> getApplicationUser() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.LOGIN, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
     }
 
     public Field<String> getApplicationUserId() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.ApplicationUser.APPLICATION_USER_ID, String.class);
+        return DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class);
     }
 
     @Override

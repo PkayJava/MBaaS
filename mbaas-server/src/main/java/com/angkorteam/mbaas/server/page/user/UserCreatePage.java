@@ -115,22 +115,22 @@ public class UserCreatePage extends MasterPage {
     private void saveButtonOnSubmit(Button button) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-        jdbcInsert.withTableName(Jdbc.APPLICATION_USER);
+        jdbcInsert.withTableName(Jdbc.USER);
         Map<String, Object> user = new HashMap<>();
         String applicationUserId = UUID.randomUUID().toString();
-        user.put(Jdbc.ApplicationUser.APPLICATION_USER_ID, applicationUserId);
-        user.put(Jdbc.ApplicationUser.ACCOUNT_NON_EXPIRED, true);
-        user.put(Jdbc.ApplicationUser.SYSTEM, false);
-        user.put(Jdbc.ApplicationUser.ACCOUNT_NON_LOCKED, true);
-        user.put(Jdbc.ApplicationUser.CREDENTIALS_NON_EXPIRED, true);
-        user.put(Jdbc.ApplicationUser.STATUS, UserStatusEnum.Active.getLiteral());
-        user.put(Jdbc.ApplicationUser.LOGIN, this.login);
-        user.put(Jdbc.ApplicationUser.FULL_NAME, this.fullName);
-        user.put(Jdbc.ApplicationUser.PASSWORD, this.password);
-        user.put(Jdbc.ApplicationUser.ROLE_ID, role.get(Jdbc.Role.ROLE_ID));
-        user.put(Jdbc.ApplicationUser.AUTHENTICATION, AuthenticationEnum.None.getLiteral());
+        user.put(Jdbc.User.USER_ID, applicationUserId);
+        user.put(Jdbc.User.ACCOUNT_NON_EXPIRED, true);
+        user.put(Jdbc.User.SYSTEM, false);
+        user.put(Jdbc.User.ACCOUNT_NON_LOCKED, true);
+        user.put(Jdbc.User.CREDENTIALS_NON_EXPIRED, true);
+        user.put(Jdbc.User.STATUS, UserStatusEnum.Active.getLiteral());
+        user.put(Jdbc.User.LOGIN, this.login);
+        user.put(Jdbc.User.FULL_NAME, this.fullName);
+        user.put(Jdbc.User.PASSWORD, this.password);
+        user.put(Jdbc.User.ROLE_ID, role.get(Jdbc.Role.ROLE_ID));
+        user.put(Jdbc.User.AUTHENTICATION, AuthenticationEnum.None.getLiteral());
         jdbcInsert.execute(user);
-        jdbcTemplate.update("UPDATE " + Jdbc.APPLICATION_USER + " SET " + Jdbc.ApplicationUser.PASSWORD + " = MD5(?) WHERE " + Jdbc.ApplicationUser.APPLICATION_USER_ID + " = ?", this.password, applicationUserId);
+        jdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.PASSWORD + " = MD5(?) WHERE " + Jdbc.User.USER_ID + " = ?", this.password, applicationUserId);
         setResponsePage(UserManagementPage.class);
     }
 }

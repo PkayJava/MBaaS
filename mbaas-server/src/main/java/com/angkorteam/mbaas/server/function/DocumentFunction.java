@@ -117,7 +117,7 @@ public class DocumentFunction {
         if (good) {
             XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             // ownerUserId column
-            String jdbcColumnOwnerApplicationUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_APPLICATION_USER_ID);
+            String jdbcColumnOwnerApplicationUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID);
             if (attributeRecords.containsKey(jdbcColumnOwnerApplicationUserId)) {
                 goodDocument.put(jdbcColumnOwnerApplicationUserId, ownerApplicationUserId);
             }

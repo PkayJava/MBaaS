@@ -74,24 +74,23 @@ public class ApplicationDataSourceFactoryBean implements FactoryBean<Application
             this.dbSchemas = new WeakHashMap<>();
         }
 
-        public BasicDataSource getDataSource(String applicationCode) {
+        public BasicDataSource getDataSource(String applicationCode, String jdbcUrl, String jdbcUsername, String jdbcPassword) {
             BasicDataSource dataSource = this.dataSources.get(applicationCode);
             if (dataSource == null) {
                 dataSource = new BasicDataSource();
                 XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
                 String jdbcDriver = configuration.getString(Constants.APP_JDBC_DRIVER);
                 dataSource.setDriverClassName(jdbcDriver);
-                dataSource.setUsername(configuration.getString(Constants.APP_JDBC_USERNAME));
-                dataSource.setPassword(configuration.getString(Constants.APP_JDBC_PASSWORD));
-                String url = configuration.getString(Constants.APP_JDBC_URL).replaceAll(configuration.getString(Constants.APP_JDBC_DATABASE), applicationCode);
-                dataSource.setUrl(url);
+                dataSource.setUsername(jdbcUsername);
+                dataSource.setPassword(jdbcPassword);
+                dataSource.setUrl(jdbcUrl);
                 this.dataSources.put(applicationCode, dataSource);
             }
             return dataSource;
         }
 
-        public JdbcTemplate getJdbcTemplate(String applicationCode) {
-            DataSource dataSource = getDataSource(applicationCode);
+        public JdbcTemplate getJdbcTemplate(String applicationCode, String jdbcUrl, String jdbcUsername, String jdbcPassword) {
+            DataSource dataSource = getDataSource(applicationCode, jdbcUrl, jdbcUsername, jdbcPassword);
             if (dataSource == null) {
                 return null;
             }
@@ -103,8 +102,8 @@ public class ApplicationDataSourceFactoryBean implements FactoryBean<Application
             return jdbcTemplate;
         }
 
-        public Schema getDbSchema(String applicationCode) {
-            DataSource dataSource = getDataSource(applicationCode);
+        public Schema getDbSchema(String applicationCode, String jdbcUrl, String jdbcUsername, String jdbcPassword) {
+            DataSource dataSource = getDataSource(applicationCode, jdbcUrl, jdbcUsername, jdbcPassword);
             if (dataSource == null) {
                 return null;
             }
@@ -120,8 +119,8 @@ public class ApplicationDataSourceFactoryBean implements FactoryBean<Application
             return schema;
         }
 
-        public DSLContext getDSLContext(String applicationCode) {
-            BasicDataSource dataSource = getDataSource(applicationCode);
+        public DSLContext getDSLContext(String applicationCode, String jdbcUrl, String jdbcUsername, String jdbcPassword) {
+            BasicDataSource dataSource = getDataSource(applicationCode, jdbcUrl, jdbcUsername, jdbcPassword);
             if (dataSource == null) {
                 return null;
             }

@@ -127,7 +127,7 @@ public class QueryCreatePage extends MasterPage {
         fields.put(Jdbc.Query.NAME, this.name);
         fields.put(Jdbc.Query.SECURITY, SecurityEnum.Denied.getLiteral());
         fields.put(Jdbc.Query.SCRIPT, this.script);
-        fields.put(Jdbc.Query.APPLICATION_USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.Query.USER_ID, getSession().getApplicationUserId());
         fields.put(Jdbc.Query.APPLICATION_CODE, getApplicationCode());
         fields.put(Jdbc.Query.DATE_CREATED, new Date());
         fields.put(Jdbc.Query.DESCRIPTION, this.description);

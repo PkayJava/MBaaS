@@ -96,13 +96,13 @@ public class Session extends AuthenticatedWebSession {
         }
         JdbcTemplate jdbcTemplate = getJdbcTemplate(applicationRecord.getCode());
         Map<String, Object> userRecord = null;
-        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.APPLICATION_USER + " WHERE " + Jdbc.ApplicationUser.LOGIN + " = ? AND " + Jdbc.ApplicationUser.PASSWORD + " = MD5(?)", username, password);
+        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.LOGIN + " = ? AND " + Jdbc.User.PASSWORD + " = MD5(?)", username, password);
         if (userRecord == null) {
             return false;
         }
         String sessionId = getId();
         this.roles = new Roles();
-        Map<String, Object> roleRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", userRecord.get(Jdbc.ApplicationUser.ROLE_ID));
+        Map<String, Object> roleRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", userRecord.get(Jdbc.User.ROLE_ID));
         this.roles.add((String) roleRecord.get(Jdbc.Role.NAME));
 
         this.applicationCode = applicationRecord.getCode();
@@ -113,7 +113,7 @@ public class Session extends AuthenticatedWebSession {
         DesktopRecord desktopRecord = context.newRecord(desktopTable);
         desktopRecord.setDesktopId(UUID.randomUUID().toString());
         desktopRecord.setMbaasUserId(applicationRecord.getMbaasUserId());
-        desktopRecord.setApplicationUserId((String) userRecord.get(Jdbc.ApplicationUser.APPLICATION_USER_ID));
+        desktopRecord.setApplicationUserId((String) userRecord.get(Jdbc.User.USER_ID));
         desktopRecord.setDateSeen(new Date());
         desktopRecord.setDateCreated(new Date());
         desktopRecord.setSessionId(sessionId);
@@ -122,7 +122,7 @@ public class Session extends AuthenticatedWebSession {
         desktopRecord.store();
 
         this.mbaasUserId = applicationRecord.getMbaasUserId();
-        this.applicationUserId = (String) userRecord.get(Jdbc.ApplicationUser.APPLICATION_USER_ID);
+        this.applicationUserId = (String) userRecord.get(Jdbc.User.USER_ID);
 
         signIn(true);
 
