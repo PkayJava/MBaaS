@@ -40,6 +40,13 @@ public class ApplicationCodeValidator extends JooqValidator<String> {
                     break;
                 }
             }
+
+            if (!error) {
+                if ("root".equalsIgnoreCase(code)) {
+                    error = true;
+                }
+            }
+
             if (!error) {
                 Application application = ApplicationUtils.getApplication();
                 DbSupport dbSupport = application.getDbSupport();
