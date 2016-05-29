@@ -35,7 +35,7 @@ public class LogicManagementPage extends MasterPage implements ActionFilteredJoo
 
     @Override
     public String getPageHeader() {
-        return "Logic Management";
+        return "Page Management";
     }
 
     @Override

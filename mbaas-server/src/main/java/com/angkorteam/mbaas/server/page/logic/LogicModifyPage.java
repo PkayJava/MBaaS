@@ -62,7 +62,7 @@ public class LogicModifyPage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Modify Logic";
+        return "Modify Page";
     }
 
     public Map<String, Object> getMenu() {

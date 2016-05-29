@@ -58,7 +58,7 @@ public class LogicCreatePage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Create New Logic";
+        return "Create New Page";
     }
 
     @Override
