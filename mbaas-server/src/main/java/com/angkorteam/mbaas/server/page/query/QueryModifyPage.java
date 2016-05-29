@@ -81,7 +81,7 @@ public class QueryModifyPage extends MasterPage {
         this.name = (String) queryRecord.get(Jdbc.Query.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
-        this.nameField.add(new QueryNameValidator(this.queryId));
+        this.nameField.add(new QueryNameValidator(getSession().getApplicationCode(), this.queryId));
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);

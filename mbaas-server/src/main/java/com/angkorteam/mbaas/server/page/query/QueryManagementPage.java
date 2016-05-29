@@ -58,7 +58,7 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", QueryManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", QueryManagementPage.class);
         add(refreshLink);
     }
 

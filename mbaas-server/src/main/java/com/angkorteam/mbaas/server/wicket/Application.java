@@ -16,12 +16,16 @@ import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.google.gson.Gson;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
+import org.apache.commons.io.FileUtils;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
+import org.apache.wicket.core.util.file.WebApplicationPath;
+import org.apache.wicket.core.util.resource.ClassPathResourceFinder;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.resource.DynamicJQueryResourceReference;
+import org.apache.wicket.util.file.Path;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
 import org.flywaydb.core.internal.dbsupport.Schema;
 import org.jooq.DSLContext;
@@ -77,6 +81,8 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     @Override
     public void init() {
         super.init();
+        ResourceStreamLocator streamLocator = new ResourceStreamLocator(new org.apache.wicket.core.util.resource.locator.ResourceStreamLocator(new ClassPathResourceFinder(""), new WebApplicationPath(getServletContext(), "/"), new ClassPathResourceFinder("META-INF/resources/"), new Path(FileUtils.getTempDirectoryPath())));
+        getResourceSettings().setResourceStreamLocator(streamLocator);
         getRequestCycleSettings().setBufferResponse(true);
         getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
         getMarkupSettings().setCompressWhitespace(true);

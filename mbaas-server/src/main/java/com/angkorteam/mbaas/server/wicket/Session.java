@@ -106,6 +106,7 @@ public class Session extends AuthenticatedWebSession {
         this.roles.add((String) roleRecord.get(Jdbc.Role.NAME));
 
         this.applicationCode = applicationRecord.getCode();
+        setStyle(this.applicationCode);
 
         DesktopTable desktopTable = Tables.DESKTOP.as("desktopTable");
         context.delete(desktopTable).where(desktopTable.SESSION_ID.eq(sessionId)).execute();

@@ -34,6 +34,8 @@ public class Jdbc {
     public static final String EAV_CHARACTER = "eav_character";
     public static final String EAV_DATE = "eav_date";
     public static final String EAV_TIME = "eav_time";
+    public static final String PAGE = "page";
+    public static final String MENU = "menu";
 
     public static final class User {
         public static final String USER_ID = "user_id";
@@ -344,5 +346,26 @@ public class Jdbc {
         public static final String DOCUMENT_ID = "document_id";
         public static final String ATTRIBUTE_TYPE = "attribute_type";
         public static final String EAV_VALUE = "eav_value";
+    }
+
+    public static final class Page {
+        public static final String PAGE_ID = "page_id";
+        public static final String USER_ID = "user_id";
+        public static final String SECURITY = "security";
+        public static final String MENU_ID = "menu_id";
+        public static final String HTML = "html";
+        public static final String TITLE = "title";
+        public static final String DESCRIPTION = "description";
+        public static final String JAVASCRIPT = "javascript";
+        public static final String DATE_CREATED = "date_created";
+        public static final String DATE_MODIFIED = "date_modified";
+    }
+
+    public static final class Menu {
+        public static final String MENU_ID = "menu_id";
+        public static final String TITLE = "title";
+        public static final String USER_ID = "user_id";
+        public static final String PARENT_MENU_ID = "parent_menu_id";
+        public static final String DATE_CREATED = "date_created";
     }
 }

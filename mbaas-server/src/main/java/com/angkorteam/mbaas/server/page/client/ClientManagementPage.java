@@ -8,6 +8,7 @@ import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.page.asset.AssetManagementPage;
 import com.angkorteam.mbaas.server.provider.ClientProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -15,6 +16,7 @@ import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -58,6 +60,9 @@ public class ClientManagementPage extends MasterPage implements ActionFilteredJo
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
+
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", ClientManagementPage.class);
+        add(refreshLink);
     }
 
     @Override

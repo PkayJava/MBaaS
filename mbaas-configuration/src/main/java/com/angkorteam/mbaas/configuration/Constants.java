@@ -50,6 +50,8 @@ public class Constants {
     public static final String ROLE_MBAAS_SYSTEM = "role.mbaas.system";
     public static final String ROLE_MBAAS_SYSTEM_DESCRIPTION = "role.mbaas.system.description";
 
+    public static final String MENU_ROOT = "menu.root";
+
     public static final String ROLE_ADMINISTRATOR = "role.administrator";
     public static final String ROLE_ADMINISTRATOR_DESCRIPTION = "role.administrator.description";
     public static final String ROLE_REGISTERED = "role.registered";

@@ -52,7 +52,7 @@ public class UserManagementPage extends MasterPage implements ActionFilteredJooq
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", UserManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", UserManagementPage.class);
         add(refreshLink);
     }
 

@@ -112,29 +112,41 @@
                     </ul>
                 </li>
                 <wicket:container wicket:id="menuLogicConsole">
-                <li class="header">BackOffice Console</li>
-                <li wicket:id="mmenuClient">
-                    <wicket:link><a href="../page/client/ClientManagementPage.html"><i class="fa fa-mobile"></i><span>Client</span></a></wicket:link>
-                </li>
-                <li wicket:id="mmenuCollection">
-                    <wicket:link><a href="../page/collection/CollectionManagementPage.html"><i class="fa fa-cube"></i><span>Collection</span></a></wicket:link>
-                </li>
-                <li wicket:id="mmenuQuery">
-                    <wicket:link><a href="../page/query/QueryManagementPage.html"><i class="fa fa-cubes"></i><span>Query</span></a></wicket:link>
-                </li>
-                <li wicket:id="mmenuJavascript">
-                    <wicket:link><a href="../page/javascript/JavascriptManagementPage.html"><i class="fa fa-code"></i><span>Javascript</span></a></wicket:link>
-                </li>
-                <li wicket:id="mmenuJob">
-                    <wicket:link><a href="../page/job/JobManagementPage.html"><i class="fa fa-gears"></i><span>Job</span></a></wicket:link>
-                </li>
-                    <li>
-                        <a><i class="fa fa-gears"></i><span>Logic</span></a>
+                    <li class="header">BackOffice Console</li>
+                    <li wicket:id="mmenuMenu">
+                        <wicket:link><a href="../page/menu/MenuManagementPage.html"><i class="fa fa-gg"></i><span>Menu</span></a></wicket:link>
+                    </li>
+                    <li wicket:id="mmenuLogic">
+                        <wicket:link><a href="../page/logic/LogicManagementPage.html"><i class="fa fa-newspaper-o"></i><span>Logic</span></a></wicket:link>
+                    </li>
+                    <li wicket:id="mmenuClient">
+                        <wicket:link><a href="../page/client/ClientManagementPage.html"><i class="fa fa-mobile"></i><span>Client</span></a></wicket:link>
+                    </li>
+                    <li wicket:id="mmenuCollection">
+                        <wicket:link><a href="../page/collection/CollectionManagementPage.html"><i class="fa fa-cube"></i><span>Collection</span></a></wicket:link>
+                    </li>
+                    <li wicket:id="mmenuQuery">
+                        <wicket:link><a href="../page/query/QueryManagementPage.html"><i class="fa fa-cubes"></i><span>Query</span></a></wicket:link>
+                    </li>
+                    <li wicket:id="mmenuJavascript">
+                        <wicket:link><a href="../page/javascript/JavascriptManagementPage.html"><i class="fa fa-code"></i><span>Javascript</span></a></wicket:link>
+                    </li>
+                    <li wicket:id="mmenuJob">
+                        <wicket:link><a href="../page/job/JobManagementPage.html"><i class="fa fa-gears"></i><span>Job</span></a></wicket:link>
                     </li>
                 </wicket:container>
-                <li class="header">WebFlow Console</li>
-                <li>
-                    <a><i class="fa fa-gears"></i><span>Examination</span></a>
+                <li class="header" wicket:id="menuWebflowConsole"></li>
+                <li class="treeview" wicket:id="menus">
+                    <a href="#">
+                        <i class="fa fa-server"></i>
+                        <span wicket:id="menuLabel"></span>
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li wicket:id="pages">
+                            <a wicket:id="pageLink"><i class="fa fa-ils"></i><span wicket:id="pageLabel"></span></a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
             <!-- /.sidebar-menu -->

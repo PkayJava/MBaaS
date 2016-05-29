@@ -59,7 +59,7 @@ public class FileManagementPage extends MasterPage implements ActionFilteredJooq
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", FileManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", FileManagementPage.class);
         add(refreshLink);
     }
 

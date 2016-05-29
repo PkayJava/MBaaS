@@ -57,7 +57,7 @@ public class RoleManagementPage extends MasterPage implements ActionFilteredJooq
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", RoleManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<Void>("refreshLink", RoleManagementPage.class);
         add(refreshLink);
     }
 

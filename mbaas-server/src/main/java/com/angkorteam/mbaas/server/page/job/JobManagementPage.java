@@ -119,7 +119,6 @@ public class JobManagementPage extends MasterPage implements ActionFilteredJooqC
     }
 
     protected boolean isAccess(String link, Map<String, Object> object) {
-        String ownerUserId = (String) object.get("ownerUserId");
         if ("Edit".equals(link)) {
             return true;
         }

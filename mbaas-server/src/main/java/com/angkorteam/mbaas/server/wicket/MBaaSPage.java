@@ -182,7 +182,7 @@ public abstract class MBaaSPage extends AdminLTEPage {
         boolean isMbaasSystem = getSession().isMBaaSSystem();
         this.menuGeneral.setVisible(isMbaasAdministrator || isMbaasSystem);
         this.menuSecurity.setVisible(isMbaasSystem);
-        this.menuSession.setVisible(isMbaasAdministrator || isMbaasSystem);
+        this.menuSession.setVisible(isMbaasSystem);
         this.mmenuApplication.setVisible(isMbaasAdministrator || isMbaasSystem);
         this.menuProfile.setVisible(isMbaasAdministrator || isMbaasSystem);
 

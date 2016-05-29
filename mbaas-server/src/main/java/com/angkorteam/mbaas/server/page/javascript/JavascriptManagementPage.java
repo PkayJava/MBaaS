@@ -59,7 +59,7 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", JavascriptManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", JavascriptManagementPage.class);
         add(refreshLink);
     }
 

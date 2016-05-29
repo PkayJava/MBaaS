@@ -129,11 +129,11 @@ public class ApplicationFunction {
                 jdbcInsert.execute(role);
             }
         }
+        String userId = UUID.randomUUID().toString();
         {
             SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(applicationJdbcTemplate);
             jdbcInsert.withTableName(Jdbc.USER);
             Map<String, Object> user = new HashMap<>();
-            String userId = UUID.randomUUID().toString();
             user.put(Jdbc.User.USER_ID, userId);
             user.put(Jdbc.User.ACCOUNT_NON_EXPIRED, true);
             user.put(Jdbc.User.SYSTEM, true);
@@ -147,6 +147,18 @@ public class ApplicationFunction {
             user.put(Jdbc.User.AUTHENTICATION, AuthenticationEnum.None.getLiteral());
             jdbcInsert.execute(user);
             applicationJdbcTemplate.update("UPDATE " + Jdbc.USER + " SET " + Jdbc.User.PASSWORD + " = MD5(?) WHERE " + Jdbc.User.USER_ID + " = ?", configuration.getString(Constants.USER_ADMIN_PASSWORD), userId);
+        }
+        {
+            String menuRoot = configuration.getString(Constants.MENU_ROOT);
+            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(applicationJdbcTemplate);
+            jdbcInsert.withTableName(Jdbc.MENU);
+            Map<String, Object> menu = new HashMap<>();
+            String menuId = UUID.randomUUID().toString();
+            menu.put(Jdbc.Menu.MENU_ID, menuId);
+            menu.put(Jdbc.Menu.TITLE, menuRoot);
+            menu.put(Jdbc.Menu.DATE_CREATED, new Date());
+            menu.put(Jdbc.Menu.USER_ID, userId);
+            jdbcInsert.execute(menu);
         }
     }
 

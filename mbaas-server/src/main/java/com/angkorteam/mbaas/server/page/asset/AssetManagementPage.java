@@ -65,7 +65,7 @@ public class AssetManagementPage extends MasterPage implements ActionFilteredJoo
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", AssetManagementPage.class, getPageParameters());
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", AssetManagementPage.class);
         add(refreshLink);
     }
 

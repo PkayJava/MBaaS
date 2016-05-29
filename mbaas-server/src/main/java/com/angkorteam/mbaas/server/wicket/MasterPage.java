@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.function.HttpFunction;
@@ -26,12 +27,19 @@ import com.angkorteam.mbaas.server.page.document.DocumentModifyPage;
 import com.angkorteam.mbaas.server.page.file.FileCreatePage;
 import com.angkorteam.mbaas.server.page.file.FileManagementPage;
 import com.angkorteam.mbaas.server.page.file.FileModifyPage;
+import com.angkorteam.mbaas.server.page.flow.FlowPage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptCreatePage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptManagementPage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptModifyPage;
 import com.angkorteam.mbaas.server.page.job.JobCreatePage;
 import com.angkorteam.mbaas.server.page.job.JobManagementPage;
 import com.angkorteam.mbaas.server.page.job.JobModifyPage;
+import com.angkorteam.mbaas.server.page.logic.LogicCreatePage;
+import com.angkorteam.mbaas.server.page.logic.LogicManagementPage;
+import com.angkorteam.mbaas.server.page.logic.LogicModifyPage;
+import com.angkorteam.mbaas.server.page.menu.MenuCreatePage;
+import com.angkorteam.mbaas.server.page.menu.MenuManagementPage;
+import com.angkorteam.mbaas.server.page.menu.MenuModifyPage;
 import com.angkorteam.mbaas.server.page.profile.InformationPage;
 import com.angkorteam.mbaas.server.page.profile.PasswordPage;
 import com.angkorteam.mbaas.server.page.profile.TimeOTPPage;
@@ -52,6 +60,7 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -64,6 +73,8 @@ import org.springframework.mail.MailSender;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 3/10/16.
@@ -100,6 +111,8 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuClientClass = "";
 
     private String mmenuJobClass = "";
+    private String mmenuLogicClass = "";
+    private String mmenuMenuClass = "";
 
     private WebMarkupContainer menuGeneral;
     private WebMarkupContainer menuProfile;
@@ -134,6 +147,8 @@ public abstract class MasterPage extends AdminLTEPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+
         Session session = getSession();
 
         DSLContext context = getDSLContext();
@@ -243,6 +258,47 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuJob = new WebMarkupContainer("mmenuJob");
             mmenuJob.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJobClass")));
             this.menuLogicConsole.add(mmenuJob);
+
+            WebMarkupContainer mmenuLogic = new WebMarkupContainer("mmenuLogic");
+            mmenuLogic.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuLogicClass")));
+            this.menuLogicConsole.add(mmenuLogic);
+
+            WebMarkupContainer mmenuMenu = new WebMarkupContainer("mmenuMenu");
+            mmenuMenu.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMenuClass")));
+            this.menuLogicConsole.add(mmenuMenu);
+        }
+
+        String rootMenuId = null;
+        {
+            Map<String, Object> rootMenu = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MENU + " WHERE " + Jdbc.Menu.PARENT_MENU_ID + " IS NULL");
+            rootMenuId = (String) rootMenu.get(Jdbc.Menu.MENU_ID);
+            Label menuWebflowConsole = new Label("menuWebflowConsole", (String) rootMenu.get(Jdbc.Menu.TITLE));
+            this.add(menuWebflowConsole);
+        }
+        {
+            List<Map<String, Object>> items = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.MENU + " WHERE " + Jdbc.Menu.PARENT_MENU_ID + " = ?", rootMenuId);
+            RepeatingView menus = new RepeatingView("menus");
+            add(menus);
+            for (Map<String, Object> item : items) {
+                String menuId = (String) item.get(Jdbc.Menu.MENU_ID);
+                WebMarkupContainer menu = new WebMarkupContainer(menus.newChildId());
+                menus.add(menu);
+                Label menuLabel = new Label("menuLabel", (String) item.get(Jdbc.Menu.TITLE));
+                menu.add(menuLabel);
+                List<Map<String, Object>> pageRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.MENU_ID + " = ?", menuId);
+                RepeatingView pages = new RepeatingView("pages");
+                menu.add(pages);
+                for (Map<String, Object> pageRecord : pageRecords) {
+                    WebMarkupContainer page = new WebMarkupContainer(pages.newChildId());
+                    pages.add(page);
+                    PageParameters pageParameters = new PageParameters();
+                    pageParameters.add("pageId", pageRecord.get(Jdbc.Page.PAGE_ID));
+                    BookmarkablePageLink<Void> pageLink = new BookmarkablePageLink<>("pageLink", FlowPage.class, pageParameters);
+                    page.add(pageLink);
+                    Label pageLabel = new Label("pageLabel", (String) pageRecord.get(Jdbc.Page.TITLE));
+                    pageLink.add(pageLabel);
+                }
+            }
         }
     }
 
@@ -383,6 +439,18 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuJobClass = "active";
         } else {
             this.mmenuJobClass = "";
+        }
+
+        if (getPage() instanceof LogicCreatePage || getPage() instanceof LogicManagementPage || getPage() instanceof LogicModifyPage) {
+            this.mmenuLogicClass = "active";
+        } else {
+            this.mmenuLogicClass = "";
+        }
+
+        if (getPage() instanceof MenuCreatePage || getPage() instanceof MenuManagementPage || getPage() instanceof MenuModifyPage) {
+            this.mmenuMenuClass = "active";
+        } else {
+            this.mmenuMenuClass = "";
         }
     }
 
