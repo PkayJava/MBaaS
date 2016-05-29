@@ -55,8 +55,6 @@ public class JavascriptCreatePage extends MasterPage {
         this.form = new Form<>("form");
         add(this.form);
 
-        this.script = getString("javascript.script");
-
         this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "pathText"));
         this.pathField.setRequired(true);
         this.pathField.add(new JavascriptPathValidator(getSession().getApplicationCode()));
@@ -70,6 +68,7 @@ public class JavascriptCreatePage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
+        this.script = getString("javascript.script");
         this.scriptField = new JavascriptTextArea("scriptField", new PropertyModel<>(this, "script"));
         this.scriptField.setRequired(true);
         this.form.add(this.scriptField);

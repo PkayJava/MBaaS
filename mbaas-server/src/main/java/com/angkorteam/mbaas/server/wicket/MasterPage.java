@@ -73,6 +73,7 @@ import org.springframework.mail.MailSender;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -125,6 +126,9 @@ public abstract class MasterPage extends AdminLTEPage {
     private WebMarkupContainer mmenuFile;
     private WebMarkupContainer mmenuAsset;
 
+    private Map<String, String> mmenuItems;
+    private Map<String, String> mmenuPages;
+
     public MasterPage() {
     }
 
@@ -147,6 +151,8 @@ public abstract class MasterPage extends AdminLTEPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
+        this.mmenuItems = new HashMap<>();
+        this.mmenuPages = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
         Session session = getSession();
@@ -281,7 +287,9 @@ public abstract class MasterPage extends AdminLTEPage {
             add(menus);
             for (Map<String, Object> item : items) {
                 String menuId = (String) item.get(Jdbc.Menu.MENU_ID);
+                this.mmenuItems.put(menuId, "treeview");
                 WebMarkupContainer menu = new WebMarkupContainer(menus.newChildId());
+                menu.add(AttributeModifier.replace("class", new PropertyModel<>(this.mmenuItems, menuId)));
                 menus.add(menu);
                 Label menuLabel = new Label("menuLabel", (String) item.get(Jdbc.Menu.TITLE));
                 menu.add(menuLabel);
@@ -289,10 +297,13 @@ public abstract class MasterPage extends AdminLTEPage {
                 RepeatingView pages = new RepeatingView("pages");
                 menu.add(pages);
                 for (Map<String, Object> pageRecord : pageRecords) {
+                    String pageId = (String) pageRecord.get(Jdbc.Page.PAGE_ID);
                     WebMarkupContainer page = new WebMarkupContainer(pages.newChildId());
+                    page.add(AttributeModifier.replace("class", new PropertyModel<>(this.mmenuPages, pageId)));
                     pages.add(page);
+                    this.mmenuPages.put(pageId, "");
                     PageParameters pageParameters = new PageParameters();
-                    pageParameters.add("pageId", pageRecord.get(Jdbc.Page.PAGE_ID));
+                    pageParameters.add("pageId", pageId);
                     BookmarkablePageLink<Void> pageLink = new BookmarkablePageLink<>("pageLink", FlowPage.class, pageParameters);
                     page.add(pageLink);
                     Label pageLabel = new Label("pageLabel", (String) pageRecord.get(Jdbc.Page.TITLE));
@@ -305,6 +316,7 @@ public abstract class MasterPage extends AdminLTEPage {
     @Override
     protected void onBeforeRender() {
         super.onBeforeRender();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         boolean isAdministrator = getSession().isAdministrator();
         boolean isRegistered = getSession().isRegistered();
         this.menuSecurity.setVisible(isAdministrator);
@@ -315,6 +327,20 @@ public abstract class MasterPage extends AdminLTEPage {
         this.menuStorage.setVisible(this.mmenuAsset.isVisible() || this.mmenuFile.isVisible());
 
         // Parent Menu
+        for (String key : this.mmenuItems.keySet()) {
+            this.mmenuItems.put(key, "treeview");
+        }
+        for (String key : this.mmenuPages.keySet()) {
+            this.mmenuPages.put(key, "");
+        }
+
+        if (getPage() instanceof FlowPage) {
+            String pageId = getPageParameters().get("pageId").toString("");
+            Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
+            String menuId = (String) pageRecord.get(Jdbc.Page.MENU_ID);
+            this.mmenuItems.put(menuId, "treeview active");
+            this.mmenuPages.put(pageId, "active");
+        }
 
         if (isRegistered || getPage() instanceof InformationPage || getPage() instanceof TimeOTPPage || getPage() instanceof TwoMailPage || getPage() instanceof PasswordPage) {
             this.menuProfileClass = "treeview active";

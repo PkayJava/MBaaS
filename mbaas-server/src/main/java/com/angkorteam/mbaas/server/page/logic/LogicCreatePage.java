@@ -79,6 +79,7 @@ public class LogicCreatePage extends MasterPage {
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);
 
+        this.javascript = getString("logic.script");
         this.javascriptField = new JavascriptTextArea("javascriptField", new PropertyModel<>(this, "javascript"));
         this.javascriptField.setRequired(true);
         this.form.add(this.javascriptField);
@@ -91,6 +92,7 @@ public class LogicCreatePage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
+        this.html = getString("logic.html");
         this.htmlField = new JavascriptTextArea("htmlField", new PropertyModel<>(this, "html"));
         this.htmlField.setRequired(true);
         this.form.add(this.htmlField);
