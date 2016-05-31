@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.template;
 
-import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
-import com.angkorteam.framework.extension.wicket.html.form.Form;
+import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
+import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.validator.SubTypeValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import org.apache.wicket.markup.html.basic.Label;

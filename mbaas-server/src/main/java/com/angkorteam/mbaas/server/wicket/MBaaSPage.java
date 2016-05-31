@@ -12,6 +12,8 @@ import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.page.mbaas.*;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -78,6 +80,12 @@ public abstract class MBaaSPage extends AdminLTEPage {
 
     public String getPageDescription() {
         return null;
+    }
+
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        super.renderHead(response);
+        response.render(CssHeaderItem.forCSS("div[class=\"form-group\"] div.feedbackPanelERROR, div[class=\"form-group\"] label.error { color: #a94442; } div[class=\"form-group\"] input.error, div[class=\"form-group\"] select.error { border-color: #a94442; -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075); box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075); } div[class=\"form-group\"] input.error:focus { border-color: #843534; -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483; box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483; } .error .input-group-addon { color: #a94442; background-color: #f2dede; border-color: #a94442; } .error .form-control-feedback { color: #a94442; }", "bootstrap"));
     }
 
     @Override

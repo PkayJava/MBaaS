@@ -1,9 +1,9 @@
 package com.angkorteam.mbaas.server.page.query;
 
 import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.SQLTextArea;
-import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
+import com.angkorteam.framework.extension.wicket.markup.html.form.SQLTextArea;
+import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.enums.SubTypeEnum;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;

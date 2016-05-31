@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.page.user;
 
-import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
+import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
 import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
 import com.angkorteam.mbaas.server.Jdbc;

@@ -1,10 +1,10 @@
 package com.angkorteam.mbaas.server.page.role;
 
-import com.angkorteam.framework.extension.wicket.table.DataTable;
-import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
-import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
-import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.provider.RoleProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
@@ -27,8 +27,6 @@ import java.util.Map;
 @AuthorizeInstantiation("administrator")
 @Mount("/role/management")
 public class RoleManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
-
-    private DataTable<Map<String, Object>, String> dataTable;
 
     @Override
     public String getPageHeader() {
@@ -53,7 +51,7 @@ public class RoleManagementPage extends MasterPage implements ActionFilteredJooq
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", provider));
         columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Delete"));
 
-        dataTable = new DefaultDataTable<>("table", columns, provider, 16);
+        DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 16);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 

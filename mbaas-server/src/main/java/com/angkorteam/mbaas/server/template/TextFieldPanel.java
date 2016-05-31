@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.template;
 
-import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
+import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import org.apache.wicket.datetime.markup.html.form.DateTextField;

@@ -1,10 +1,10 @@
 package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
-import com.angkorteam.framework.extension.wicket.table.filter.DateFilteredJooqColumn;
-import com.angkorteam.framework.extension.wicket.table.filter.DateTimeFilteredJooqColumn;
-import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
-import com.angkorteam.framework.extension.wicket.table.filter.TimeFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.DateFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.DateTimeFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TimeFilteredJooqColumn;
 import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
 import org.apache.wicket.Page;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;

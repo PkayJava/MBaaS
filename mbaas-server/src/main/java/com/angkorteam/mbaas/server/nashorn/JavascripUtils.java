@@ -49,9 +49,11 @@ public class JavascripUtils {
             clazzes.add(Stack.class);
             clazzes.add(Tables.class);
             clazzes.add(DSL.class);
+            StringBuilder js = new StringBuilder();
             for (Class<?> clazz : clazzes) {
-                engine.eval("var " + clazz.getSimpleName() + " = Java.type('" + clazz.getName() + "')");
+                js.append("var " + clazz.getSimpleName() + " = Java.type('" + clazz.getName() + "'); ");
             }
+            engine.eval(js.toString());
         } catch (ScriptException e) {
         }
     }

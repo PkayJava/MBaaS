@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.logic;
 
-import com.angkorteam.framework.extension.wicket.html.form.Form;
+import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.model.IModel;
 

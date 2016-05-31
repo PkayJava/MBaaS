@@ -1,10 +1,10 @@
 package com.angkorteam.mbaas.server.page.mbaas;
 
-import com.angkorteam.framework.extension.wicket.table.DataTable;
-import com.angkorteam.framework.extension.wicket.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.table.filter.ActionFilteredJooqColumn;
-import com.angkorteam.framework.extension.wicket.table.filter.FilterToolbar;
-import com.angkorteam.framework.extension.wicket.table.filter.TextFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.LocalizationTable;
 import com.angkorteam.mbaas.server.provider.LocalizationProvider;

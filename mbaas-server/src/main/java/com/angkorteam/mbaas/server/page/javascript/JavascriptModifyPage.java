@@ -1,9 +1,9 @@
 package com.angkorteam.mbaas.server.page.javascript;
 
 import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.form.JavascriptTextArea;
-import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
+import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
+import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.JavascriptPathValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;

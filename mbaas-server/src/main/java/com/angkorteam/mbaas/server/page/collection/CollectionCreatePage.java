@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.page.collection;
 
-import com.angkorteam.framework.extension.wicket.feedback.TextFeedbackPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
+import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.plain.request.collection.CollectionCreateRequest;
 import com.angkorteam.mbaas.server.function.CollectionFunction;
 import com.angkorteam.mbaas.server.validator.CollectionNameValidator;
