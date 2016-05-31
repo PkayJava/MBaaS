@@ -16,6 +16,7 @@ import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
+import com.angkorteam.mbaas.server.nashorn.JavaFilter;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.socket.ServerInitializer;
 import com.google.gson.Gson;
@@ -25,6 +26,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import jdk.nashorn.api.scripting.ClassFilter;
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import okhttp3.OkHttpClient;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -57,6 +60,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import javax.script.ScriptEngineFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -113,6 +117,10 @@ public class ApplicationContext implements ServletContextListener {
 
     private Gson gson;
 
+    private ClassFilter classFilter;
+
+    private ScriptEngineFactory scriptEngineFactory;
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
@@ -132,6 +140,8 @@ public class ApplicationContext implements ServletContextListener {
         this.context = initDSLContext(this.configuration);
         this.httpClient = initHttpClient();
         this.pusherClient = initPusherClient(this.httpClient);
+        this.scriptEngineFactory = initScriptEngineFactory();
+        this.classFilter = initClassFilter(this.context);
         LOGGER.info("initializing string encryptors");
         this.stringEncryptor = initStringEncryptor();
         LOGGER.info("initializing default role");
@@ -139,7 +149,6 @@ public class ApplicationContext implements ServletContextListener {
         LOGGER.info("initializing default user");
         initMBaaSUser(this.context, this.jdbcTemplate);
         LOGGER.info("initializing nashorn security");
-        initNashorn(this.context);
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         String resourceRepo = configuration.getString(Constants.RESOURCE_REPO);
         try {
@@ -150,7 +159,7 @@ public class ApplicationContext implements ServletContextListener {
         LOGGER.info("initializing thread internal pool");
         this.executor = initExecutor();
         this.scheduler = initScheduler();
-        this.javascriptService = initJavascriptService(this.context, this.applicationDataSource, this.scheduler);
+        this.javascriptService = initJavascriptService(this.scriptEngineFactory, this.classFilter, this.context, this.applicationDataSource, this.scheduler);
 
         LOGGER.info("initializing communication service");
         this.bossGroup = initBossGroup();
@@ -159,6 +168,62 @@ public class ApplicationContext implements ServletContextListener {
 
         LOGGER.info("initialized mbaas-server core module");
         servletContext.setAttribute(KEY, this);
+    }
+
+    protected ScriptEngineFactory initScriptEngineFactory() {
+        NashornScriptEngineFactory scriptEngineFactory = new NashornScriptEngineFactory();
+        return scriptEngineFactory;
+    }
+
+    protected ClassFilter initClassFilter(DSLContext context) {
+        List<String> granted = new ArrayList<>();
+
+        granted.add(Boolean.class.getName());
+        granted.add(Byte.class.getName());
+        granted.add(Short.class.getName());
+        granted.add(Integer.class.getName());
+        granted.add(Long.class.getName());
+        granted.add(Float.class.getName());
+        granted.add(Double.class.getName());
+        granted.add(Character.class.getName());
+        granted.add(String.class.getName());
+        granted.add(Date.class.getName());
+        granted.add(BigDecimal.class.getName());
+        granted.add(BigInteger.class.getName());
+        granted.add(Arrays.class.getName());
+        granted.add(Collections.class.getName());
+        granted.add(LinkedHashMap.class.getName());
+        granted.add(LinkedHashSet.class.getName());
+        granted.add(Hashtable.class.getName());
+        granted.add(Vector.class.getName());
+        granted.add(LinkedList.class.getName());
+        granted.add(ArrayList.class.getName());
+        granted.add(HashMap.class.getName());
+        granted.add(ArrayBlockingQueue.class.getName());
+        granted.add(SynchronousQueue.class.getName());
+        granted.add(LinkedBlockingDeque.class.getName());
+        granted.add(DelayQueue.class.getName());
+        granted.add(LinkedTransferQueue.class.getName());
+        granted.add(ArrayDeque.class.getName());
+        granted.add(ConcurrentLinkedDeque.class.getName());
+        granted.add(Stack.class.getName());
+        granted.add(Tables.class.getName());
+        granted.add(DSL.class.getName());
+
+        NashornTable nashornTable = Tables.NASHORN.as("nashornTable");
+
+        for (String name : granted) {
+            int count = context.selectCount().from(nashornTable).where(nashornTable.NASHORN_ID.eq(name)).fetchOneInto(int.class);
+            if (count == 0) {
+                NashornRecord nashornRecord = context.newRecord(nashornTable);
+                nashornRecord.setNashornId(name);
+                nashornRecord.setDateCreated(new Date());
+                nashornRecord.setSecurity(SecurityEnum.Granted.getLiteral());
+                nashornRecord.store();
+            }
+        }
+        JavaFilter javaFilter = new JavaFilter(context);
+        return javaFilter;
     }
 
     protected Gson initGson() {
@@ -212,8 +277,8 @@ public class ApplicationContext implements ServletContextListener {
         return workGroup;
     }
 
-    protected JavascriptServiceFactoryBean.JavascriptService initJavascriptService(DSLContext context, ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource, TaskScheduler scheduler) {
-        JavascriptServiceFactoryBean.JavascriptService javascriptService = new JavascriptServiceFactoryBean.JavascriptService(context, applicationDataSource, scheduler);
+    protected JavascriptServiceFactoryBean.JavascriptService initJavascriptService(ScriptEngineFactory scriptEngineFactory, ClassFilter classFilter, DSLContext context, ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource, TaskScheduler scheduler) {
+        JavascriptServiceFactoryBean.JavascriptService javascriptService = new JavascriptServiceFactoryBean.JavascriptService(context, applicationDataSource, scheduler, scriptEngineFactory, classFilter);
         ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
         List<ApplicationRecord> applicationRecords = context.select(applicationTable.fields()).from(applicationTable).fetchInto(applicationTable);
         for (ApplicationRecord applicationRecord : applicationRecords) {
@@ -273,55 +338,6 @@ public class ApplicationContext implements ServletContextListener {
             return pusherClient;
         } else {
             return null;
-        }
-    }
-
-    protected void initNashorn(DSLContext context) {
-        List<String> granted = new ArrayList<>();
-
-        granted.add(Boolean.class.getName());
-        granted.add(Byte.class.getName());
-        granted.add(Short.class.getName());
-        granted.add(Integer.class.getName());
-        granted.add(Long.class.getName());
-        granted.add(Float.class.getName());
-        granted.add(Double.class.getName());
-        granted.add(Character.class.getName());
-        granted.add(String.class.getName());
-        granted.add(Date.class.getName());
-        granted.add(BigDecimal.class.getName());
-        granted.add(BigInteger.class.getName());
-        granted.add(Arrays.class.getName());
-        granted.add(Collections.class.getName());
-        granted.add(LinkedHashMap.class.getName());
-        granted.add(LinkedHashSet.class.getName());
-        granted.add(Hashtable.class.getName());
-        granted.add(Vector.class.getName());
-        granted.add(LinkedList.class.getName());
-        granted.add(ArrayList.class.getName());
-        granted.add(HashMap.class.getName());
-        granted.add(ArrayBlockingQueue.class.getName());
-        granted.add(SynchronousQueue.class.getName());
-        granted.add(LinkedBlockingDeque.class.getName());
-        granted.add(DelayQueue.class.getName());
-        granted.add(LinkedTransferQueue.class.getName());
-        granted.add(ArrayDeque.class.getName());
-        granted.add(ConcurrentLinkedDeque.class.getName());
-        granted.add(Stack.class.getName());
-        granted.add(Tables.class.getName());
-        granted.add(DSL.class.getName());
-
-        NashornTable nashornTable = Tables.NASHORN.as("nashornTable");
-
-        for (String name : granted) {
-            int count = context.selectCount().from(nashornTable).where(nashornTable.NASHORN_ID.eq(name)).fetchOneInto(int.class);
-            if (count == 0) {
-                NashornRecord nashornRecord = context.newRecord(nashornTable);
-                nashornRecord.setNashornId(name);
-                nashornRecord.setDateCreated(new Date());
-                nashornRecord.setSecurity(SecurityEnum.Granted.getLiteral());
-                nashornRecord.store();
-            }
         }
     }
 
@@ -521,6 +537,14 @@ public class ApplicationContext implements ServletContextListener {
         encryptor.setPassword(configuration.getString(Constants.ENCRYPTION_PASSWORD));
         encryptor.setStringOutputType(configuration.getString(Constants.ENCRYPTION_OUTPUT));
         return encryptor;
+    }
+
+    public final ClassFilter getClassFilter() {
+        return this.classFilter;
+    }
+
+    public final ScriptEngineFactory getScriptEngineFactory() {
+        return this.scriptEngineFactory;
     }
 
     public final MailSender getMailSender() {

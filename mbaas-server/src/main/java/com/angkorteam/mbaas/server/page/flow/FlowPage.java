@@ -2,16 +2,15 @@ package com.angkorteam.mbaas.server.page.flow;
 
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.Factory;
-import com.angkorteam.mbaas.server.nashorn.JavaFilter;
-import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.nashorn.function.IOnBeforeRender;
 import com.angkorteam.mbaas.server.nashorn.function.IOnInitialize;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.script.*;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,11 +36,7 @@ public class FlowPage extends MasterPage {
         this.userModel = new HashMap<>();
         this.factory = new Factory(this, this.userModel);
         this.pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
-        NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-        ScriptEngine engine = factory.getScriptEngine(new JavaFilter(getDSLContext()));
-        Bindings bindings = engine.createBindings();
-        engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
-        JavascripUtils.eval(engine);
+        ScriptEngine engine = getScriptEngine();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
         try {

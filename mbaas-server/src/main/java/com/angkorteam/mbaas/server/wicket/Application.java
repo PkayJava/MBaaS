@@ -15,6 +15,7 @@ import com.angkorteam.mbaas.server.page.profile.InformationPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.google.gson.Gson;
+import jdk.nashorn.api.scripting.ClassFilter;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.RuntimeConfigurationType;
@@ -34,8 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import javax.script.ScriptEngineFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -151,7 +152,6 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
 
     public final DbSupport getDbSupport() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
-        WebApplicationContextUtils.getWebApplicationContext(getServletContext());
         return applicationContext.getDbSupport();
     }
 
@@ -171,20 +171,27 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
 
     public final PusherClient getPusherClient() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
-        WebApplicationContextUtils.getWebApplicationContext(getServletContext());
         return applicationContext.getPusherClient();
     }
 
     public final JavascriptServiceFactoryBean.JavascriptService getJavascriptService() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
-        WebApplicationContextUtils.getWebApplicationContext(getServletContext());
         return applicationContext.getJavascriptService();
     }
 
     public final Gson getGson() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
-        WebApplicationContextUtils.getWebApplicationContext(getServletContext());
         return applicationContext.getGson();
+    }
+
+    public final ScriptEngineFactory getScriptEngineFactory() {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        return applicationContext.getScriptEngineFactory();
+    }
+
+    public final ClassFilter getClassFilter() {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        return applicationContext.getClassFilter();
     }
 
     @Override

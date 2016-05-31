@@ -10,6 +10,7 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.function.HttpFunction;
+import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import com.angkorteam.mbaas.server.page.asset.AssetCreatePage;
 import com.angkorteam.mbaas.server.page.asset.AssetManagementPage;
@@ -56,6 +57,8 @@ import com.angkorteam.mbaas.server.page.user.UserCreatePage;
 import com.angkorteam.mbaas.server.page.user.UserManagementPage;
 import com.angkorteam.mbaas.server.page.user.UserModifyPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
+import jdk.nashorn.api.scripting.ClassFilter;
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -72,6 +75,8 @@ import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -565,5 +570,27 @@ public abstract class MasterPage extends AdminLTEPage {
     public JavascriptServiceFactoryBean.JavascriptService getJavascriptService() {
         Application application = (Application) getApplication();
         return application.getJavascriptService();
+    }
+
+    public ScriptEngineFactory getScriptEngineFactory() {
+        Application application = (Application) getApplication();
+        return application.getScriptEngineFactory();
+    }
+
+    public ClassFilter getClassFilter() {
+        Application application = (Application) getApplication();
+        return application.getClassFilter();
+    }
+
+    public ScriptEngine getScriptEngine() {
+        ScriptEngineFactory scriptEngineFactory = getScriptEngineFactory();
+        ScriptEngine scriptEngine = null;
+        if (scriptEngineFactory instanceof NashornScriptEngineFactory) {
+            scriptEngine = ((NashornScriptEngineFactory) scriptEngineFactory).getScriptEngine(getClassFilter());
+        } else {
+            scriptEngine = scriptEngineFactory.getScriptEngine();
+        }
+        JavascripUtils.eval(scriptEngine);
+        return scriptEngine;
     }
 }

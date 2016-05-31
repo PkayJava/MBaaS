@@ -6,9 +6,9 @@ import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
-import com.angkorteam.mbaas.server.nashorn.JavaFilter;
 import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.nashorn.MBaaS;
+import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
 import java.util.Date;
 import java.util.Map;
 
@@ -32,11 +33,17 @@ public final class JavascriptJob implements Runnable {
 
     private final String applicationCode;
 
-    public JavascriptJob(DSLContext context, ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource, String applicationCode, String jobId) {
+    private final ScriptEngineFactory scriptEngineFactory;
+
+    private final ClassFilter classFilter;
+
+    public JavascriptJob(ScriptEngineFactory scriptEngineFactory, ClassFilter classFilter, DSLContext context, ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource, String applicationCode, String jobId) {
         this.context = context;
         this.jobId = jobId;
+        this.scriptEngineFactory = scriptEngineFactory;
         this.applicationDataSource = applicationDataSource;
         this.applicationCode = applicationCode;
+        this.classFilter = classFilter;
     }
 
     @Override
@@ -56,8 +63,12 @@ public final class JavascriptJob implements Runnable {
         }
         long start;
         try {
-            NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-            ScriptEngine engine = factory.getScriptEngine(new JavaFilter(this.context));
+            ScriptEngine engine = null;
+            if (this.scriptEngineFactory instanceof NashornScriptEngineFactory) {
+                engine = ((NashornScriptEngineFactory) this.scriptEngineFactory).getScriptEngine(this.classFilter);
+            } else {
+                engine = this.scriptEngineFactory.getScriptEngine();
+            }
             Bindings bindings = engine.createBindings();
             engine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
             bindings.put("MBaaS", new MBaaS(context, null, jdbcTemplate, null));

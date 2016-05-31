@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.angkorteam.mbaas.server.spring.JavascriptJob;
 import com.angkorteam.mbaas.server.spring.JavascriptTrigger;
+import jdk.nashorn.api.scripting.ClassFilter;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -14,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.context.ServletContextAware;
 
+import javax.script.ScriptEngineFactory;
 import javax.servlet.ServletContext;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,10 +66,16 @@ public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServi
 
         private final DSLContext context;
 
-        public JavascriptService(DSLContext context, ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource, TaskScheduler scheduler) {
+        private final ScriptEngineFactory scriptEngineFactory;
+
+        private final ClassFilter classFilter;
+
+        public JavascriptService(DSLContext context, ApplicationDataSourceFactoryBean.ApplicationDataSource applicationDataSource, TaskScheduler scheduler, ScriptEngineFactory scriptEngineFactory, ClassFilter classFilter) {
             this.scheduler = scheduler;
             this.context = context;
             this.applicationDataSource = applicationDataSource;
+            this.scriptEngineFactory = scriptEngineFactory;
+            this.classFilter = classFilter;
         }
 
         public void schedule(String applicationCode, String jobId) {
@@ -82,7 +90,7 @@ public class JavascriptServiceFactoryBean implements FactoryBean<JavascriptServi
             jobRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JOB + " WHERE " + Jdbc.Job.JOB_ID + " = ?", jobId);
             if (jobRecord != null) {
                 try {
-                    this.scheduler.schedule(new JavascriptJob(this.context, this.applicationDataSource, applicationCode, jobId), new JavascriptTrigger(this.context, this.applicationDataSource, applicationCode, jobId, (String) jobRecord.get("cron")));
+                    this.scheduler.schedule(new JavascriptJob(this.scriptEngineFactory, this.classFilter, this.context, this.applicationDataSource, applicationCode, jobId), new JavascriptTrigger(this.context, this.applicationDataSource, applicationCode, jobId, (String) jobRecord.get("cron")));
                     jobs.add(jobId);
                 } catch (IllegalArgumentException e) {
                 }

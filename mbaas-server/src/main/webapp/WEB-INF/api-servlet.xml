@@ -19,6 +19,7 @@
     <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
         <mvc:argument-resolvers>
             <ref bean="identityResolver"/>
+            <ref bean="scriptEngineResolver"/>
         </mvc:argument-resolvers>
         <mvc:message-converters>
             <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter">
@@ -131,6 +132,16 @@
         <property name="applicationDataSource" ref="applicationDataSource"/>
     </bean>
 
+    <bean id="scriptEngineFactory" class="com.angkorteam.mbaas.server.factory.ScriptEngineFactoryBean"/>
+
+    <bean id="classFilter" class="com.angkorteam.mbaas.server.factory.ClassFilterFactoryBean"/>
+
+    <bean id="scriptEngineResolver"
+          class="com.angkorteam.mbaas.server.spring.ScriptEngineHandlerMethodArgumentResolver">
+        <property name="scriptEngineFactory" ref="scriptEngineFactory"/>
+        <property name="classFilter" ref="classFilter"/>
+    </bean>
+
     <bean id="serviceActivator" class="com.angkorteam.mbaas.server.service.IMAPServiceActivator"/>
 
     <bean id="mailSender" class="com.angkorteam.mbaas.server.factory.MailSenderFactoryBean"/>
@@ -154,8 +165,8 @@
     <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"/>
 
     <!--<bean id="permission" class="com.angkorteam.mbaas.server.factory.PermissionFactoryBean">-->
-        <!--<property name="context" ref="context"/>-->
-        <!--<property name="jdbcTemplate" ref="jdbcTemplate"/>-->
+    <!--<property name="context" ref="context"/>-->
+    <!--<property name="jdbcTemplate" ref="jdbcTemplate"/>-->
     <!--</bean>-->
 
     <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationEntryPoint">
