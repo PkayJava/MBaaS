@@ -36,14 +36,6 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
         }
     }
 
-    public Map<String, Object> getUserModel() {
-        return userModel;
-    }
-
-    public void setUserModel(Map<String, Object> userModel) {
-        this.userModel = userModel;
-    }
-
     public OnSubmit<T> getOnSubmit() {
         return onSubmit;
     }
@@ -58,6 +50,14 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
 
     public void setOnError(OnError<T> onError) {
         this.onError = onError;
+    }
+
+    public Map<String, Object> getUserModel() {
+        return userModel;
+    }
+
+    public void setUserModel(Map<String, Object> userModel) {
+        this.userModel = userModel;
     }
 
     public interface OnSubmit<T> extends Serializable {

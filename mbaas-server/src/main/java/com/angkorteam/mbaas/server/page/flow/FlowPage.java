@@ -1,11 +1,11 @@
 package com.angkorteam.mbaas.server.page.flow;
 
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.logic.IOnBeforeRender;
-import com.angkorteam.mbaas.server.logic.IOnInitialize;
-import com.angkorteam.mbaas.server.logic.Page;
+import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.nashorn.JavaFilter;
 import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
+import com.angkorteam.mbaas.server.nashorn.function.IOnBeforeRender;
+import com.angkorteam.mbaas.server.nashorn.function.IOnInitialize;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
@@ -27,15 +27,15 @@ public class FlowPage extends MasterPage {
 
     private IOnBeforeRender iOnBeforeRender;
 
-    private Page page;
+    private Factory factory;
 
-    private Map<String, Object> model;
+    private Map<String, Object> userModel;
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        this.model = new HashMap<>();
-        this.page = new Page(this);
+        this.userModel = new HashMap<>();
+        this.factory = new Factory(this, this.userModel);
         this.pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
         NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
         ScriptEngine engine = factory.getScriptEngine(new JavaFilter(getDSLContext()));
@@ -53,7 +53,7 @@ public class FlowPage extends MasterPage {
         this.iOnInitialize = invocable.getInterface(IOnInitialize.class);
         this.iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
         if (this.iOnInitialize != null) {
-            this.iOnInitialize.onInitialize(this.page, this.model);
+            this.iOnInitialize.onInitialize(this.factory, this.userModel);
         }
     }
 
@@ -61,7 +61,7 @@ public class FlowPage extends MasterPage {
     protected void onBeforeRender() {
         super.onBeforeRender();
         if (this.iOnBeforeRender != null) {
-            this.iOnBeforeRender.onBeforeRender(this.page, this.model);
+            this.iOnBeforeRender.onBeforeRender(this.factory, this.userModel);
         }
     }
 
