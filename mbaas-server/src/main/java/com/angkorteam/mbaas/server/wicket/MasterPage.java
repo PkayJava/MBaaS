@@ -10,7 +10,6 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.function.HttpFunction;
-import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import com.angkorteam.mbaas.server.page.asset.AssetCreatePage;
 import com.angkorteam.mbaas.server.page.asset.AssetManagementPage;
@@ -58,7 +57,6 @@ import com.angkorteam.mbaas.server.page.user.UserManagementPage;
 import com.angkorteam.mbaas.server.page.user.UserModifyPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import jdk.nashorn.api.scripting.ClassFilter;
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -583,14 +581,7 @@ public abstract class MasterPage extends AdminLTEPage {
     }
 
     public ScriptEngine getScriptEngine() {
-        ScriptEngineFactory scriptEngineFactory = getScriptEngineFactory();
-        ScriptEngine scriptEngine = null;
-        if (scriptEngineFactory instanceof NashornScriptEngineFactory) {
-            scriptEngine = ((NashornScriptEngineFactory) scriptEngineFactory).getScriptEngine(getClassFilter());
-        } else {
-            scriptEngine = scriptEngineFactory.getScriptEngine();
-        }
-        JavascripUtils.eval(scriptEngine);
-        return scriptEngine;
+        Application application = (Application) getApplication();
+        return application.getScriptEngine();
     }
 }

@@ -1,18 +1,26 @@
 package com.angkorteam.mbaas.server.nashorn;
 
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.MultipleChoiceProvider;
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.NashornButton;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.NashornForm;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.select2.NashornChoiceRenderer;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.select2.NashornMultipleChoiceProvider;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.select2.NashornSingleChoiceProvider;
 import com.angkorteam.mbaas.server.page.flow.FlowPage;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,8 +31,13 @@ public class Factory implements Serializable,
         IFormFactory,
         IButtonFactory,
         IWebMarkupContainerFactory,
+        ILabelFactory,
         IPropertyModelFactory,
-        ILabelFactory {
+        IChoiceRendererFactory,
+        ISelect2MultipleChoiceFactory,
+        IMultipleChoiceProviderFactory,
+        ISelect2SingleChoiceFactory,
+        ISingleChoiceProviderFactory {
 
     private FlowPage container;
 
@@ -32,9 +45,15 @@ public class Factory implements Serializable,
 
     private Map<String, Object> userModel;
 
-    public Factory(FlowPage container, Map<String, Object> userModel) {
+    private String script;
+
+    private String applicationCode;
+
+    public Factory(FlowPage container, String applicationCode, String script, Map<String, Object> userModel) {
         this.container = container;
         this.userModel = userModel;
+        this.script = script;
+        this.applicationCode = applicationCode;
         this.children = new HashMap<>();
     }
 
@@ -112,6 +131,7 @@ public class Factory implements Serializable,
     @Override
     public <T> NashornForm<T> createForm(MarkupContainer container, String id) {
         NashornForm<T> object = new NashornForm<>(id);
+        object.setScript(this.script);
         object.setUserModel(this.userModel);
         container.add(object);
         this.children.put(id, object);
@@ -127,6 +147,7 @@ public class Factory implements Serializable,
     public <T> NashornForm<T> createForm(MarkupContainer container, String id, IModel<T> model) {
         NashornForm<T> object = new NashornForm<>(id, model);
         object.setUserModel(this.userModel);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -192,6 +213,7 @@ public class Factory implements Serializable,
     @Override
     public NashornButton createButton(MarkupContainer container, String id) {
         NashornButton object = new NashornButton(id);
+        object.setScript(this.script);
         object.setUserModel(this.userModel);
         container.add(object);
         this.children.put(id, object);
@@ -206,6 +228,7 @@ public class Factory implements Serializable,
     @Override
     public NashornButton createButton(MarkupContainer container, String id, IModel<String> model) {
         NashornButton object = new NashornButton(id, model);
+        object.setScript(this.script);
         object.setUserModel(this.userModel);
         container.add(object);
         this.children.put(id, object);
@@ -213,8 +236,55 @@ public class Factory implements Serializable,
     }
 
     @Override
+    public Select2MultipleChoice<Map<String, Object>> createSelect2MultipleChoice(String id, IModel<List<Map<String, Object>>> model, MultipleChoiceProvider<Map<String, Object>> provider, IChoiceRenderer<Map<String, Object>> renderer) {
+        return createSelect2MultipleChoice(container, id, model, provider, renderer);
+    }
+
+    @Override
+    public Select2MultipleChoice<Map<String, Object>> createSelect2MultipleChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> model, MultipleChoiceProvider<Map<String, Object>> provider, IChoiceRenderer<Map<String, Object>> renderer) {
+        Select2MultipleChoice<Map<String, Object>> object = new Select2MultipleChoice<>(id, model, provider, renderer);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public Select2SingleChoice<Map<String, Object>> createSelect2SingleChoice(String id, IModel<Map<String, Object>> model, NashornSingleChoiceProvider provider, NashornChoiceRenderer renderer) {
+        return createSelect2SingleChoice(container, id, model, provider, renderer);
+    }
+
+    @Override
+    public Select2SingleChoice<Map<String, Object>> createSelect2SingleChoice(MarkupContainer container, String id, IModel<Map<String, Object>> model, NashornSingleChoiceProvider provider, NashornChoiceRenderer renderer) {
+        Select2SingleChoice<Map<String, Object>> object = new Select2SingleChoice<>(id, model, provider, renderer);
+        container.add(object);
+        renderer.setId(id);
+        provider.setId(id);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
     public <T> PropertyModel<T> createPropertyModel(Object model, String expression) {
         PropertyModel<T> object = new PropertyModel<>(model, expression);
+        return object;
+    }
+
+    @Override
+    public NashornSingleChoiceProvider createSingleChoiceProvider() {
+        NashornSingleChoiceProvider object = new NashornSingleChoiceProvider(this.applicationCode);
+        object.setScript(this.script);
+        return object;
+    }
+
+    @Override
+    public NashornMultipleChoiceProvider createMultipleChoiceProvider() {
+        NashornMultipleChoiceProvider object = new NashornMultipleChoiceProvider(this.applicationCode);
+        return object;
+    }
+
+    @Override
+    public NashornChoiceRenderer createChoiceRenderer(String id, String text) {
+        NashornChoiceRenderer object = new NashornChoiceRenderer(id, text);
         return object;
     }
 }

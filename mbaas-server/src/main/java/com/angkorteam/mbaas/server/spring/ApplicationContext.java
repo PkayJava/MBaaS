@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.spring;
 
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
@@ -209,6 +210,8 @@ public class ApplicationContext implements ServletContextListener {
         granted.add(Stack.class.getName());
         granted.add(Tables.class.getName());
         granted.add(DSL.class.getName());
+        granted.add(Option.class.getName());
+        granted.add(Jdbc.class.getName());
 
         NashornTable nashornTable = Tables.NASHORN.as("nashornTable");
 

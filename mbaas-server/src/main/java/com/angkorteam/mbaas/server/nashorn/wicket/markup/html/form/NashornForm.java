@@ -1,7 +1,11 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
 
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import org.apache.wicket.model.IModel;
 
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -10,8 +14,7 @@ import java.util.Map;
  */
 public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
 
-    private OnSubmit<T> onSubmit;
-    private OnError<T> onError;
+    private String script;
     private Map<String, Object> userModel;
 
     public NashornForm(String id) {
@@ -24,32 +27,44 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
 
     @Override
     protected final void onSubmit() {
-        if (this.onSubmit != null) {
-            this.onSubmit.doOnSubmit(this, this.userModel);
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null || !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            invocable.invokeFunction(getId() + "__onSubmit", this, this.userModel);
+        } catch (ScriptException e) {
+        } catch (NoSuchMethodException e) {
         }
     }
 
     @Override
     protected final void onError() {
-        if (this.onError != null) {
-            this.onError.doOnError(this, this.userModel);
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null || !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            invocable.invokeFunction(getId() + "__onError", this, this.userModel);
+        } catch (ScriptException e) {
+        } catch (NoSuchMethodException e) {
         }
     }
 
-    public OnSubmit<T> getOnSubmit() {
-        return onSubmit;
+    public String getScript() {
+        return script;
     }
 
-    public void setOnSubmit(OnSubmit<T> onSubmit) {
-        this.onSubmit = onSubmit;
-    }
-
-    public OnError<T> getOnError() {
-        return onError;
-    }
-
-    public void setOnError(OnError<T> onError) {
-        this.onError = onError;
+    public void setScript(String script) {
+        this.script = script;
     }
 
     public Map<String, Object> getUserModel() {

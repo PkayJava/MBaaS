@@ -22,41 +22,47 @@ public class FlowPage extends MasterPage {
 
     private String pageId;
 
-    private IOnInitialize iOnInitialize;
-
-    private IOnBeforeRender iOnBeforeRender;
-
     private Factory factory;
 
     private Map<String, Object> userModel;
 
+    private String script;
+
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        this.userModel = new HashMap<>();
-        this.factory = new Factory(this, this.userModel);
         this.pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
-        ScriptEngine engine = getScriptEngine();
+        this.userModel = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
+        this.script = (String) pageRecord.get(Jdbc.Page.JAVASCRIPT);
+        this.factory = new Factory(this, getApplicationCode(), this.script, this.userModel);
+        ScriptEngine engine = getScriptEngine();
         try {
-            engine.eval((String) pageRecord.get(Jdbc.Page.JAVASCRIPT));
+            engine.eval(this.script);
         } catch (ScriptException e) {
             e.printStackTrace();
         }
         Invocable invocable = (Invocable) engine;
-        this.iOnInitialize = invocable.getInterface(IOnInitialize.class);
-        this.iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
-        if (this.iOnInitialize != null) {
-            this.iOnInitialize.onInitialize(this.factory, this.userModel);
+        IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
+        if (iOnInitialize != null) {
+            iOnInitialize.onInitialize(this.factory, this.userModel);
         }
     }
 
     @Override
     protected void onBeforeRender() {
         super.onBeforeRender();
-        if (this.iOnBeforeRender != null) {
-            this.iOnBeforeRender.onBeforeRender(this.factory, this.userModel);
+        ScriptEngine engine = getScriptEngine();
+        try {
+            engine.eval(this.script);
+        } catch (ScriptException e) {
+            e.printStackTrace();
+        }
+        Invocable invocable = (Invocable) engine;
+        IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
+        if (iOnBeforeRender != null) {
+            iOnBeforeRender.onBeforeRender(this.factory, this.userModel);
         }
     }
 

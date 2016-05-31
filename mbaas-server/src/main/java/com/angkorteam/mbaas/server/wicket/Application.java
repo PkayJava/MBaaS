@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
+import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import com.angkorteam.mbaas.server.page.mbaas.MBaaSDashboardPage;
@@ -16,6 +17,7 @@ import com.angkorteam.mbaas.server.service.PusherClient;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.google.gson.Gson;
 import jdk.nashorn.api.scripting.ClassFilter;
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.RuntimeConfigurationType;
@@ -36,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
 
+import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import java.util.HashMap;
 import java.util.Map;
@@ -192,6 +195,18 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     public final ClassFilter getClassFilter() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
         return applicationContext.getClassFilter();
+    }
+
+    public final ScriptEngine getScriptEngine() {
+        ScriptEngineFactory scriptEngineFactory = getScriptEngineFactory();
+        ScriptEngine scriptEngine = null;
+        if (scriptEngineFactory instanceof NashornScriptEngineFactory) {
+            scriptEngine = ((NashornScriptEngineFactory) scriptEngineFactory).getScriptEngine(getClassFilter());
+        } else {
+            scriptEngine = scriptEngineFactory.getScriptEngine();
+        }
+        JavascripUtils.eval(scriptEngine);
+        return scriptEngine;
     }
 
     @Override

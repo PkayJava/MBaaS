@@ -1,8 +1,11 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
 
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import org.apache.wicket.model.IModel;
 
-import java.io.Serializable;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import java.util.Map;
 
 /**
@@ -10,11 +13,9 @@ import java.util.Map;
  */
 public class NashornButton extends org.apache.wicket.markup.html.form.Button {
 
-    private OnSubmit onSubmit;
-
-    private OnError onError;
-
     private Map<String, Object> userModel;
+
+    private String script;
 
     public NashornButton(String id) {
         super(id);
@@ -24,13 +25,6 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
         super(id, model);
     }
 
-    public void setOnSubmit(OnSubmit onSubmit) {
-        this.onSubmit = onSubmit;
-    }
-
-    public void setOnError(OnError onError) {
-        this.onError = onError;
-    }
 
     public Map<String, Object> getUserModel() {
         return userModel;
@@ -42,23 +36,43 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
 
     @Override
     public final void onSubmit() {
-        if (this.onSubmit != null) {
-            this.onSubmit.doOnSubmit(this, this.userModel);
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null || !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            invocable.invokeFunction(getId() + "__onSubmit", this, this.userModel);
+        } catch (ScriptException e) {
+        } catch (NoSuchMethodException e) {
         }
     }
 
     @Override
     public final void onError() {
-        if (this.onError != null) {
-            this.onError.doOnError(this, this.userModel);
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null || !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            invocable.invokeFunction(getId() + "__onError", this, this.userModel);
+        } catch (ScriptException e) {
+        } catch (NoSuchMethodException e) {
         }
     }
 
-    public interface OnSubmit extends Serializable {
-        void doOnSubmit(NashornButton button, Map<String, Object> userModel);
+    public String getScript() {
+        return script;
     }
 
-    public interface OnError extends Serializable {
-        void doOnError(NashornButton button, Map<String, Object> userModel);
+    public void setScript(String script) {
+        this.script = script;
     }
 }
