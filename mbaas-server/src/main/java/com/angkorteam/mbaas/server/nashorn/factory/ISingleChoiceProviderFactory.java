@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
-import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.select2.NashornSingleChoiceProvider;
+import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornSingleChoiceProvider;
 
 import java.io.Serializable;
 

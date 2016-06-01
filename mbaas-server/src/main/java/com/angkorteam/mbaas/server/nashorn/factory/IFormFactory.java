@@ -15,8 +15,4 @@ public interface IFormFactory extends Serializable {
 
     <T> NashornForm<T> createForm(MarkupContainer container, String id);
 
-    <T> NashornForm<T> createForm(String id, IModel<T> model);
-
-    <T> NashornForm<T> createForm(MarkupContainer container, String id, IModel<T> model);
-
 }

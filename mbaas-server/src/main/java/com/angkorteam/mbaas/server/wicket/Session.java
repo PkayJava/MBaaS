@@ -186,7 +186,10 @@ public class Session extends AuthenticatedWebSession {
 
     public final DSLContext getDSLContext() {
         Application application = (Application) getApplication();
-        return application.getDSLContext();
+        if (application != null) {
+            return application.getDSLContext();
+        }
+        return null;
     }
 
     public final JdbcTemplate getJdbcTemplate(String applicationCode) {

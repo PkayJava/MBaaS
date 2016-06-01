@@ -13,9 +13,5 @@ public interface IButtonFactory extends Serializable {
 
     NashornButton createButton(String id);
 
-    NashornButton createButton(String id, IModel<String> model);
-
     NashornButton createButton(MarkupContainer container, String id);
-
-    NashornButton createButton(MarkupContainer container, String id, IModel<String> model);
 }

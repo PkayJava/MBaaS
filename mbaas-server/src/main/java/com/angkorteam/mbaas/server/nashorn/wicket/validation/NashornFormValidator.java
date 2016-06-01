@@ -1,12 +1,11 @@
-package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
+package com.angkorteam.mbaas.server.nashorn.wicket.validation;
 
-import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornFormValidator;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.validation.IFormValidator;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.script.Invocable;
@@ -15,23 +14,39 @@ import javax.script.ScriptException;
 import java.util.Map;
 
 /**
- * Created by socheat on 5/31/16.
+ * Created by socheat on 6/1/16.
  */
-public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
+public class NashornFormValidator implements IFormValidator {
+
+    private String id;
 
     private String script;
-    private Map<String, Object> userModel;
 
-    public NashornForm(String id) {
-        super(id);
-    }
+    private Map<String, Object> children;
 
-    public NashornForm(String id, IModel<T> model) {
-        super(id, model);
+    public NashornFormValidator() {
     }
 
     @Override
-    protected final void onSubmit() {
+    public FormComponent<?>[] getDependentFormComponents() {
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null || !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            return (FormComponent<?>[]) invocable.invokeFunction(getId() + "__dependent_form_component", this.children);
+        } catch (ScriptException e) {
+        } catch (NoSuchMethodException e) {
+        }
+        return null;
+    }
+
+    @Override
+    public void validate(Form<?> form) {
         Session session = (Session) Session.get();
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
@@ -45,39 +60,18 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), jdbcTemplate, this, this.userModel);
+            invocable.invokeFunction(getId() + "__validate", jdbcTemplate, this.children);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }
     }
 
-    @Override
-    protected final void onError() {
-        Session session = (Session) Session.get();
-        Application application = ApplicationUtils.getApplication();
-        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
-
-        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
-            try {
-                scriptEngine.eval(this.script);
-            } catch (ScriptException e) {
-            }
-        }
-        Invocable invocable = (Invocable) scriptEngine;
-        try {
-            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), jdbcTemplate, this, this.userModel);
-        } catch (ScriptException e) {
-        } catch (NoSuchMethodException e) {
-        }
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public void add(IFormValidator validator) {
-        if (validator instanceof NashornFormValidator) {
-            ((NashornFormValidator) validator).setId(this.getId());
-        }
-        super.add(validator);
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getScript() {
@@ -88,11 +82,11 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
         this.script = script;
     }
 
-    public Map<String, Object> getUserModel() {
-        return userModel;
+    public Map<String, Object> getChildren() {
+        return children;
     }
 
-    public void setUserModel(Map<String, Object> userModel) {
-        this.userModel = userModel;
+    public void setChildren(Map<String, Object> children) {
+        this.children = children;
     }
 }

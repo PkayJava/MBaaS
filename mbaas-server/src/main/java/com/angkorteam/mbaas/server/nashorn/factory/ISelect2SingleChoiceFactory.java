@@ -1,8 +1,8 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
-import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
-import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.select2.NashornChoiceRenderer;
-import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.select2.NashornSingleChoiceProvider;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.NashornSelect2SingleChoice;
+import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
+import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornSingleChoiceProvider;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.model.IModel;
 
@@ -14,13 +14,13 @@ import java.util.Map;
  */
 public interface ISelect2SingleChoiceFactory extends Serializable {
 
-    Select2SingleChoice<Map<String, Object>> createSelect2SingleChoice(
+    NashornSelect2SingleChoice createSelect2SingleChoice(
             String id,
             IModel<Map<String, Object>> model,
             NashornSingleChoiceProvider provider,
             NashornChoiceRenderer renderer);
 
-    Select2SingleChoice<Map<String, Object>> createSelect2SingleChoice(
+    NashornSelect2SingleChoice createSelect2SingleChoice(
             MarkupContainer container,
             String id,
             IModel<Map<String, Object>> model,

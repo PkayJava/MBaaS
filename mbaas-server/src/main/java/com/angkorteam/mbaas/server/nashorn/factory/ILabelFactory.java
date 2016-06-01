@@ -15,12 +15,4 @@ public interface ILabelFactory extends Serializable {
 
     public Label createLabel(MarkupContainer container, String id);
 
-    public Label createLabel(String id, Serializable model);
-
-    public Label createLabel(MarkupContainer container, String id, Serializable model);
-
-    public Label createLabel(String id, IModel<?> model);
-
-    public Label createLabel(MarkupContainer container, String id, IModel<?> model);
-
 }

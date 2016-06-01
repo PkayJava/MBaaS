@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.NashornTextField;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 
 import java.io.Serializable;
@@ -11,20 +11,12 @@ import java.io.Serializable;
  */
 public interface ITextFieldFactory extends Serializable {
 
-    public <T> TextField<T> createTextField(String id);
+    public <T> NashornTextField<T> createTextField(String id, IModel<T> model);
 
-    public <T> TextField<T> createTextField(MarkupContainer container, String id);
+    public <T> NashornTextField<T> createTextField(MarkupContainer container, String id, IModel<T> model);
 
-    public <T> TextField<T> createTextField(String id, Class<T> type);
+    public <T> NashornTextField<T> createTextField(String id, IModel<T> model, Class<T> type);
 
-    public <T> TextField<T> createTextField(MarkupContainer container, String id, Class<T> type);
-
-    public <T> TextField<T> createTextField(String id, IModel<T> model);
-
-    public <T> TextField<T> createTextField(MarkupContainer container, String id, IModel<T> model);
-
-    public <T> TextField<T> createTextField(String id, IModel<T> model, Class<T> type);
-
-    public <T> TextField<T> createTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type);
+    public <T> NashornTextField<T> createTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type);
 
 }

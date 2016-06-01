@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.select2;
+package com.angkorteam.mbaas.server.nashorn.wicket.provider.select2;
 
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
