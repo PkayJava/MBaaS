@@ -53,6 +53,7 @@ public class JavascripUtils {
             clazzes.add(DSL.class);
             clazzes.add(Option.class);
             clazzes.add(Jdbc.class);
+            clazzes.add(UUID.class);
             StringBuilder js = new StringBuilder();
             for (Class<?> clazz : clazzes) {
                 js.append("var " + clazz.getSimpleName() + " = Java.type('" + clazz.getName() + "'); ");

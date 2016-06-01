@@ -212,6 +212,7 @@ public class ApplicationContext implements ServletContextListener {
         granted.add(DSL.class.getName());
         granted.add(Option.class.getName());
         granted.add(Jdbc.class.getName());
+        granted.add(UUID.class.getName());
 
         NashornTable nashornTable = Tables.NASHORN.as("nashornTable");
 
