@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
-import com.angkorteam.framework.extension.wicket.markup.html.form.DateTextField;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.NashornDateTextField;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.model.IModel;
 
@@ -12,8 +12,8 @@ import java.util.Date;
  */
 public interface IDateTextFieldFactory extends Serializable {
 
-    DateTextField createDateTextField(String id, IModel<Date> model);
+    NashornDateTextField createDateTextField(String id, IModel<Date> model);
 
-    DateTextField createDateTextField(MarkupContainer container, String id, IModel<Date> model);
+    NashornDateTextField createDateTextField(MarkupContainer container, String id, IModel<Date> model);
 
 }

@@ -1,8 +1,5 @@
 package com.angkorteam.mbaas.server.nashorn;
 
-import com.angkorteam.framework.extension.wicket.markup.html.form.ColorTextField;
-import com.angkorteam.framework.extension.wicket.markup.html.form.DateTextField;
-import com.angkorteam.framework.extension.wicket.markup.html.form.TimeTextField;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
@@ -220,39 +217,39 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public DateTextField createDateTextField(String id, IModel<Date> model) {
+    public NashornDateTextField createDateTextField(String id, IModel<Date> model) {
         return createDateTextField(container, id, model);
     }
 
     @Override
-    public DateTextField createDateTextField(MarkupContainer container, String id, IModel<Date> model) {
-        DateTextField object = new DateTextField(id, model);
+    public NashornDateTextField createDateTextField(MarkupContainer container, String id, IModel<Date> model) {
+        NashornDateTextField object = new NashornDateTextField(id, model);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public ColorTextField createColorTextField(String id, IModel<String> model) {
+    public NashornColorTextField createColorTextField(String id, IModel<String> model) {
         return createColorTextField(container, id, model);
     }
 
     @Override
-    public ColorTextField createColorTextField(MarkupContainer container, String id, IModel<String> model) {
-        ColorTextField object = new ColorTextField(id, model);
+    public NashornColorTextField createColorTextField(MarkupContainer container, String id, IModel<String> model) {
+        NashornColorTextField object = new NashornColorTextField(id, model);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public TimeTextField createTimeTextField(String id, IModel<String> model) {
+    public NashornTimeTextField createTimeTextField(String id, IModel<String> model) {
         return createTimeTextField(container, id, model);
     }
 
     @Override
-    public TimeTextField createTimeTextField(MarkupContainer container, String id, IModel<String> model) {
-        TimeTextField object = new TimeTextField(id, model);
+    public NashornTimeTextField createTimeTextField(MarkupContainer container, String id, IModel<String> model) {
+        NashornTimeTextField object = new NashornTimeTextField(id, model);
         container.add(object);
         this.children.put(id, object);
         return object;
