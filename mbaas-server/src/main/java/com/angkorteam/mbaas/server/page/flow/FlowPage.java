@@ -2,15 +2,15 @@ package com.angkorteam.mbaas.server.page.flow;
 
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.Factory;
-import com.angkorteam.mbaas.server.nashorn.function.IOnBeforeRender;
-import com.angkorteam.mbaas.server.nashorn.function.IOnInitialize;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +46,7 @@ public class FlowPage extends MasterPage {
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
         if (iOnInitialize != null) {
-            iOnInitialize.onInitialize(this.factory, this.userModel);
+            iOnInitialize.onInitialize(RequestCycle.get(), jdbcTemplate, this.factory, this.userModel);
         }
     }
 
@@ -62,7 +62,8 @@ public class FlowPage extends MasterPage {
         Invocable invocable = (Invocable) engine;
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
         if (iOnBeforeRender != null) {
-            iOnBeforeRender.onBeforeRender(this.factory, this.userModel);
+            JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+            iOnBeforeRender.onBeforeRender(RequestCycle.get(), jdbcTemplate, this.factory, this.userModel);
         }
     }
 
@@ -71,4 +72,15 @@ public class FlowPage extends MasterPage {
         return this.pageId;
     }
 
+    public interface IOnBeforeRender extends Serializable {
+
+        void onBeforeRender(RequestCycle requestCycle, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> userModel);
+
+    }
+
+    public interface IOnInitialize extends Serializable {
+
+        void onInitialize(RequestCycle requestCycle, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> userModel);
+
+    }
 }

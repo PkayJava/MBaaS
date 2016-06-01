@@ -4,6 +4,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.SingleChoiceProvider;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import com.angkorteam.mbaas.server.wicket.Session;
 import com.google.gson.Gson;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,20 +20,18 @@ import java.util.Map;
  */
 public class NashornSingleChoiceProvider extends SingleChoiceProvider<Map<String, Object>> {
 
-    private final String applicationCode;
-
     private String id;
 
     private String script;
 
-    public NashornSingleChoiceProvider(String applicationCode) {
-        this.applicationCode = applicationCode;
+    public NashornSingleChoiceProvider() {
     }
 
     @Override
-    public Map<String, Object> toChoice(String id) {
+    public final Map<String, Object> toChoice(String id) {
+        Session session = (Session) Session.get();
         Application application = ApplicationUtils.getApplication();
-        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
         if (this.script != null || !"".equals(this.script)) {
@@ -43,7 +42,7 @@ public class NashornSingleChoiceProvider extends SingleChoiceProvider<Map<String
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            return (Map<String, Object>) invocable.invokeFunction(this.id + "__toChoice", jdbcTemplate, id);
+            return (Map<String, Object>) invocable.invokeFunction(this.id + "__to_choice", jdbcTemplate, id);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         } catch (EmptyResultDataAccessException e) {
@@ -52,9 +51,10 @@ public class NashornSingleChoiceProvider extends SingleChoiceProvider<Map<String
     }
 
     @Override
-    public List<Option> query(String term, int page) {
+    public final List<Option> query(String term, int page) {
+        Session session = (Session) Session.get();
         Application application = ApplicationUtils.getApplication();
-        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
         if (this.script != null || !"".equals(this.script)) {
@@ -90,9 +90,10 @@ public class NashornSingleChoiceProvider extends SingleChoiceProvider<Map<String
     }
 
     @Override
-    public boolean hasMore(String term, int page) {
+    public final boolean hasMore(String term, int page) {
+        Session session = (Session) Session.get();
         Application application = ApplicationUtils.getApplication();
-        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
         if (this.script != null || !"".equals(this.script)) {
@@ -103,7 +104,7 @@ public class NashornSingleChoiceProvider extends SingleChoiceProvider<Map<String
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            return (Boolean) invocable.invokeFunction(this.id + "__hasMore", jdbcTemplate, term, page);
+            return (Boolean) invocable.invokeFunction(this.id + "__has_more", jdbcTemplate, term, page);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }
@@ -111,7 +112,7 @@ public class NashornSingleChoiceProvider extends SingleChoiceProvider<Map<String
     }
 
     @Override
-    public Gson getGson() {
+    public final Gson getGson() {
         return ApplicationUtils.getApplication().getGson();
     }
 

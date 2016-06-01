@@ -1,10 +1,18 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.ajax.markup.html.form;
 
+import com.angkorteam.mbaas.server.wicket.Application;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.Serializable;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import java.util.Map;
 
 /**
@@ -12,9 +20,7 @@ import java.util.Map;
  */
 public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.AjaxButton {
 
-    private OnSubmit onSubmit;
-
-    private OnError onError;
+    private String script;
 
     private Map<String, Object> userModel;
 
@@ -44,31 +50,53 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
 
     @Override
     protected final void onSubmit(AjaxRequestTarget target, Form<?> form) {
-        if (this.onSubmit != null) {
-            this.onSubmit.doOnSubmit(this, target, form, this.userModel);
+        Session session = (Session) Session.get();
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
+
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null || !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), jdbcTemplate, this, target, form, this.userModel);
+        } catch (ScriptException e) {
+        } catch (NoSuchMethodException e) {
+        } catch (EmptyResultDataAccessException e) {
         }
     }
 
     @Override
     protected final void onError(AjaxRequestTarget target, Form<?> form) {
-        if (this.onError != null) {
-            this.onError.doOnError(this, target, form, this.userModel);
+        Session session = (Session) Session.get();
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
+
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null || !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), jdbcTemplate, this, target, form, this.userModel);
+        } catch (ScriptException e) {
+        } catch (NoSuchMethodException e) {
+        } catch (EmptyResultDataAccessException e) {
         }
     }
 
-    public void setOnSubmit(OnSubmit onSubmit) {
-        this.onSubmit = onSubmit;
+    public String getScript() {
+        return script;
     }
 
-    public void setOnError(OnError onError) {
-        this.onError = onError;
-    }
-
-    public interface OnSubmit extends Serializable {
-        void doOnSubmit(NashornAjaxButton ajaxButton, AjaxRequestTarget target, Form<?> form, Map<String, Object> userModel);
-    }
-
-    public interface OnError extends Serializable {
-        void doOnError(NashornAjaxButton ajaxButton, AjaxRequestTarget target, Form<?> form, Map<String, Object> userModel);
+    public void setScript(String script) {
+        this.script = script;
     }
 }

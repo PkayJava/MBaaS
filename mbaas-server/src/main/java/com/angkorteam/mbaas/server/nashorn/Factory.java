@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.server.nashorn;
 
-import com.angkorteam.framework.extension.wicket.markup.html.form.select2.MultipleChoiceProvider;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
@@ -13,7 +12,6 @@ import com.angkorteam.mbaas.server.page.flow.FlowPage;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
@@ -236,14 +234,16 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public Select2MultipleChoice<Map<String, Object>> createSelect2MultipleChoice(String id, IModel<List<Map<String, Object>>> model, MultipleChoiceProvider<Map<String, Object>> provider, IChoiceRenderer<Map<String, Object>> renderer) {
+    public Select2MultipleChoice<Map<String, Object>> createSelect2MultipleChoice(String id, IModel<List<Map<String, Object>>> model, NashornMultipleChoiceProvider provider, NashornChoiceRenderer renderer) {
         return createSelect2MultipleChoice(container, id, model, provider, renderer);
     }
 
     @Override
-    public Select2MultipleChoice<Map<String, Object>> createSelect2MultipleChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> model, MultipleChoiceProvider<Map<String, Object>> provider, IChoiceRenderer<Map<String, Object>> renderer) {
+    public Select2MultipleChoice<Map<String, Object>> createSelect2MultipleChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> model, NashornMultipleChoiceProvider provider, NashornChoiceRenderer renderer) {
         Select2MultipleChoice<Map<String, Object>> object = new Select2MultipleChoice<>(id, model, provider, renderer);
         container.add(object);
+        provider.setId(id);
+        renderer.setId(id);
         this.children.put(id, object);
         return object;
     }
@@ -271,14 +271,15 @@ public class Factory implements Serializable,
 
     @Override
     public NashornSingleChoiceProvider createSingleChoiceProvider() {
-        NashornSingleChoiceProvider object = new NashornSingleChoiceProvider(this.applicationCode);
+        NashornSingleChoiceProvider object = new NashornSingleChoiceProvider();
         object.setScript(this.script);
         return object;
     }
 
     @Override
     public NashornMultipleChoiceProvider createMultipleChoiceProvider() {
-        NashornMultipleChoiceProvider object = new NashornMultipleChoiceProvider(this.applicationCode);
+        NashornMultipleChoiceProvider object = new NashornMultipleChoiceProvider();
+        object.setScript(this.script);
         return object;
     }
 

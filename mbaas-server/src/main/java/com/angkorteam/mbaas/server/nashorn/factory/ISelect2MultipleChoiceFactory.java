@@ -1,9 +1,9 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
-import com.angkorteam.framework.extension.wicket.markup.html.form.select2.MultipleChoiceProvider;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.select2.NashornChoiceRenderer;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.select2.NashornMultipleChoiceProvider;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 
 import java.io.Serializable;
@@ -18,14 +18,14 @@ public interface ISelect2MultipleChoiceFactory extends Serializable {
     Select2MultipleChoice<Map<String, Object>> createSelect2MultipleChoice(
             String id,
             IModel<List<Map<String, Object>>> model,
-            MultipleChoiceProvider<Map<String, Object>> provider,
-            IChoiceRenderer<Map<String, Object>> renderer);
+            NashornMultipleChoiceProvider provider,
+            NashornChoiceRenderer renderer);
 
     Select2MultipleChoice<Map<String, Object>> createSelect2MultipleChoice(
             MarkupContainer container,
             String id,
             IModel<List<Map<String, Object>>> model,
-            MultipleChoiceProvider<Map<String, Object>> provider,
-            IChoiceRenderer<Map<String, Object>> renderer);
+            NashornMultipleChoiceProvider provider,
+            NashornChoiceRenderer renderer);
 
 }

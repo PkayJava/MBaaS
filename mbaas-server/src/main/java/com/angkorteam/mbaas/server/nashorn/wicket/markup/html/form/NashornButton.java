@@ -1,7 +1,11 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
 
+import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -25,7 +29,6 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
         super(id, model);
     }
 
-
     public Map<String, Object> getUserModel() {
         return userModel;
     }
@@ -36,6 +39,10 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
 
     @Override
     public final void onSubmit() {
+        Session session = (Session) Session.get();
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
+
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
         if (this.script != null || !"".equals(this.script)) {
             try {
@@ -45,7 +52,7 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__onSubmit", this, this.userModel);
+            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), jdbcTemplate, this, this.userModel);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }
@@ -53,6 +60,10 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
 
     @Override
     public final void onError() {
+        Session session = (Session) Session.get();
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
+
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
         if (this.script != null || !"".equals(this.script)) {
             try {
@@ -62,7 +73,7 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__onError", this, this.userModel);
+            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), jdbcTemplate, this, this.userModel);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }

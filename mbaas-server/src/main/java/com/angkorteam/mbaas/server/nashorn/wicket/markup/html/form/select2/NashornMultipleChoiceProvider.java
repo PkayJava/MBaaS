@@ -4,10 +4,14 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Multip
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import com.angkorteam.mbaas.server.wicket.Session;
 import com.google.gson.Gson;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.Serializable;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import java.util.List;
 import java.util.Map;
 
@@ -16,86 +20,99 @@ import java.util.Map;
  */
 public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<String, Object>> {
 
-    private final String applicationCode;
+    private String id;
 
-    private ToChoices toChoices;
+    private String script;
 
-    private Query query;
-
-    private HasMore hasMore;
-
-    public NashornMultipleChoiceProvider(String applicationCode) {
-        this.applicationCode = applicationCode;
+    public NashornMultipleChoiceProvider() {
     }
 
     @Override
-    public List<Map<String, Object>> toChoices(List<String> ids) {
-        if (this.toChoices != null) {
-            Application application = ApplicationUtils.getApplication();
-            JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-            return this.toChoices.toChoices(jdbcTemplate, ids);
+    public final List<Map<String, Object>> toChoices(List<String> ids) {
+        Session session = (Session) Session.get();
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
+
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null || !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            return (List<Map<String, Object>>) invocable.invokeFunction(this.id + "__to_choices", jdbcTemplate, ids);
+        } catch (ScriptException e) {
+        } catch (NoSuchMethodException e) {
+        } catch (EmptyResultDataAccessException e) {
         }
         return null;
     }
 
     @Override
-    public List<Option> query(String term, int page) {
-        if (this.query != null) {
-            Application application = ApplicationUtils.getApplication();
-            JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-            return this.query.query(jdbcTemplate, term, page);
+    public final List<Option> query(String term, int page) {
+        Session session = (Session) Session.get();
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
+
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null || !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            return (List<Option>) invocable.invokeFunction(this.id + "__query", jdbcTemplate, term, page);
+        } catch (ScriptException e) {
+        } catch (NoSuchMethodException e) {
+        } catch (EmptyResultDataAccessException e) {
         }
         return null;
     }
 
     @Override
-    public boolean hasMore(String term, int page) {
-        if (this.hasMore != null) {
-            Application application = ApplicationUtils.getApplication();
-            JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-            return this.hasMore.hasMore(jdbcTemplate, term, page);
+    public final boolean hasMore(String term, int page) {
+        Session session = (Session) Session.get();
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
+
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null || !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            return (Boolean) invocable.invokeFunction(this.id + "__has_more", jdbcTemplate, term, page);
+        } catch (ScriptException e) {
+        } catch (NoSuchMethodException e) {
         }
         return false;
     }
 
     @Override
-    public Gson getGson() {
+    public final Gson getGson() {
         return ApplicationUtils.getApplication().getGson();
     }
 
-    public ToChoices getToChoices() {
-        return toChoices;
+    public String getId() {
+        return id;
     }
 
-    public void setToChoices(ToChoices toChoices) {
-        this.toChoices = toChoices;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public Query getQuery() {
-        return query;
+    public String getScript() {
+        return script;
     }
 
-    public void setQuery(Query query) {
-        this.query = query;
-    }
-
-    public HasMore getHasMore() {
-        return hasMore;
-    }
-
-    public void setHasMore(HasMore hasMore) {
-        this.hasMore = hasMore;
-    }
-
-    public interface ToChoices extends Serializable {
-        List<Map<String, Object>> toChoices(JdbcTemplate jdbcTemplate, List<String> ids);
-    }
-
-    public interface Query extends Serializable {
-        List<Option> query(JdbcTemplate jdbcTemplate, String term, int page);
-    }
-
-    public interface HasMore extends Serializable {
-        boolean hasMore(JdbcTemplate jdbcTemplate, String term, int page);
+    public void setScript(String script) {
+        this.script = script;
     }
 }
