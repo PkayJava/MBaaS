@@ -4,13 +4,13 @@
     <entry key="logic.script"><![CDATA[/*
 Page onInitialize
 */
-function onInitialize(factory, model) {
+function onInitialize(requestCycle, jdbcTemplate, factory, userModel) {
 }
 
 /*
 Page onBeforeRender
 */
-function onBeforeRender(factory, model) {
+function onBeforeRender(requestCycle, jdbcTemplate, factory, userModel) {
 }]]></entry>
     <entry key="logic.html"><![CDATA[<!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">

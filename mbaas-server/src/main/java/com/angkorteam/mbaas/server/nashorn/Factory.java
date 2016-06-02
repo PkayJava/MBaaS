@@ -1,7 +1,9 @@
 package com.angkorteam.mbaas.server.nashorn;
 
 import com.angkorteam.mbaas.server.nashorn.factory.*;
+import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.NashornTable;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.*;
+import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultipleChoiceProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornSingleChoiceProvider;
@@ -9,6 +11,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornFormValidato
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
 import com.angkorteam.mbaas.server.page.flow.FlowPage;
 import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
@@ -34,6 +37,7 @@ public class Factory implements Serializable,
         IMultipleChoiceProviderFactory,
         IDateTextFieldFactory,
         IDropDownChoiceFactory,
+        ITableFactory,
         IListMultipleChoiceFactory,
         IValidatorFactory,
         IColorTextFieldFactory,
@@ -42,6 +46,7 @@ public class Factory implements Serializable,
         IRadioChoiceFactory,
         ICheckBoxMultipleChoiceFactory,
         ISelect2SingleChoiceFactory,
+        ITableProviderFactory,
         ICheckBoxFactory,
         ISingleChoiceProviderFactory {
 
@@ -61,6 +66,13 @@ public class Factory implements Serializable,
         this.script = script;
         this.applicationCode = applicationCode;
         this.children = new HashMap<>();
+    }
+
+    @Override
+    public NashornTableProvider createTableProvider() {
+        NashornTableProvider object = new NashornTableProvider();
+        object.setScript(this.script);
+        return object;
     }
 
     @Override
@@ -354,6 +366,20 @@ public class Factory implements Serializable,
     @Override
     public NashornCheckBox createCheckBox(MarkupContainer container, String id, IModel<Boolean> model) {
         NashornCheckBox object = new NashornCheckBox(id, model);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornTable createTable(String id, List<IColumn<Map<String, Object>, String>> columns, NashornTableProvider tableProvider, int rowsPerPage) {
+        return createTable(container, id, columns, tableProvider, rowsPerPage);
+    }
+
+    @Override
+    public NashornTable createTable(MarkupContainer container, String id, List<IColumn<Map<String, Object>, String>> columns, NashornTableProvider tableProvider, int rowsPerPage) {
+        NashornTable object = new NashornTable(id, columns, tableProvider, rowsPerPage);
+        tableProvider.setId(id);
         container.add(object);
         this.children.put(id, object);
         return object;

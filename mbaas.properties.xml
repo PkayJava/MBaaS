@@ -6,7 +6,7 @@
 
     <entry key="maintenance">false</entry>
 
-    <entry key="temp.jdbc.driver">org.mysql.jdbc.Driver</entry>
+    <entry key="temp.jdbc.driver">com.mysql.jdbc.Driver</entry>
     <entry key="temp.jdbc.hostname">pkayjava.ddns.net</entry>
     <entry key="temp.jdbc.port">3306</entry>
     <entry key="temp.jdbc.username">root</entry>
@@ -15,7 +15,7 @@
     <entry key="temp.jdbc.extra"><![CDATA[createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&serverTimezone=UTC]]></entry>
     <entry key="temp.jdbc.dialect">org.jooq.util.mysql.MySQLDatabase</entry>
 
-    <entry key="app.jdbc.driver">org.mysql.jdbc.Driver</entry>
+    <entry key="app.jdbc.driver">com.mysql.jdbc.Driver</entry>
     <entry key="app.jdbc.hostname">pkayjava.ddns.net</entry>
     <entry key="app.jdbc.port">3306</entry>
     <entry key="app.jdbc.username">root</entry>
@@ -23,7 +23,7 @@
     <entry key="app.jdbc.database">mbaas</entry>
     <entry key="app.jdbc.extra"><![CDATA[createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&serverTimezone=UTC]]></entry>
 
-    <entry key="test.jdbc.driver">org.mysql.jdbc.Driver</entry>
+    <entry key="test.jdbc.driver">com.mysql.jdbc.Driver</entry>
     <entry key="test.jdbc.hostname">pkayjava.ddns.net</entry>
     <entry key="test.jdbc.port">3306</entry>
     <entry key="test.jdbc.username">root</entry>
