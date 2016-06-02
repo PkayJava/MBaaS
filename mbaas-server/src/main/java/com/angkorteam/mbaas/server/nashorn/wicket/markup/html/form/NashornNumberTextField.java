@@ -3,16 +3,16 @@ package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
-import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.form.NumberTextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.validation.ValidatorAdapter;
 
 /**
- * Created by socheat on 6/1/16.
+ * Created by socheat on 6/2/16.
  */
-public class NashornTextField<T> extends TextField<T> {
+public class NashornNumberTextField<T extends Number & Comparable<T>> extends NumberTextField<T> {
 
-    public NashornTextField(String id, IModel<T> model, Class<T> type) {
+    public NashornNumberTextField(String id, IModel<T> model, Class<T> type) {
         super(id, model, type);
     }
 
@@ -27,4 +27,5 @@ public class NashornTextField<T> extends TextField<T> {
         }
         return super.add(behaviors);
     }
+
 }

@@ -3,17 +3,17 @@ package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
-import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.validation.ValidatorAdapter;
 
 /**
- * Created by socheat on 6/1/16.
+ * Created by socheat on 6/2/16.
  */
-public class NashornTextField<T> extends TextField<T> {
+public class NashornPasswordTextField extends PasswordTextField {
 
-    public NashornTextField(String id, IModel<T> model, Class<T> type) {
-        super(id, model, type);
+    public NashornPasswordTextField(String id, IModel<String> model) {
+        super(id, model);
     }
 
     @Override
