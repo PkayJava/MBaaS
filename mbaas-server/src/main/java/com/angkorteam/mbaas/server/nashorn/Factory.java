@@ -19,6 +19,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.model.util.MapModel;
+import org.apache.wicket.validation.IValidator;
 
 import java.io.Serializable;
 import java.util.*;
@@ -45,6 +46,7 @@ public class Factory implements Serializable,
         IListMultipleChoiceFactory,
         IValidatorFactory,
         IColorTextFieldFactory,
+        IEmailTextFieldFactory,
         ITimeTextFieldFactory,
         IListChoiceFactory,
         IRadioChoiceFactory,
@@ -391,6 +393,38 @@ public class Factory implements Serializable,
     public NashornTable createTable(MarkupContainer container, String id, List<IColumn<Map<String, Object>, String>> columns, NashornTableProvider tableProvider, int rowsPerPage) {
         NashornTable object = new NashornTable(id, columns, tableProvider, rowsPerPage);
         tableProvider.setId(id);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornEmailTextField createEmailTextField(String id, IModel<String> model) {
+        NashornEmailTextField object = new NashornEmailTextField(id, model);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornEmailTextField createEmailTextField(MarkupContainer container, String id, IModel<String> model) {
+        NashornEmailTextField object = new NashornEmailTextField(id, model);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornEmailTextField createEmailTextField(String id, IModel<String> model, IValidator<String> validator) {
+        NashornEmailTextField object = new NashornEmailTextField(id, model, validator);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornEmailTextField createEmailTextField(MarkupContainer container, String id, IModel<String> model, IValidator<String> validator) {
+        NashornEmailTextField object = new NashornEmailTextField(id, model, validator);
         container.add(object);
         this.children.put(id, object);
         return object;

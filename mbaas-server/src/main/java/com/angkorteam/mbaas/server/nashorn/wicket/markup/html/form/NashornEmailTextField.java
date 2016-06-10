@@ -17,8 +17,8 @@ public class NashornEmailTextField extends EmailTextField {
         super(id, model);
     }
 
-    public NashornEmailTextField(String id, IModel<String> model, IValidator<String> emailValidator) {
-        super(id, model, emailValidator);
+    public NashornEmailTextField(String id, IModel<String> model, IValidator<String> validator) {
+        super(id, model, validator);
     }
 
     @Override
