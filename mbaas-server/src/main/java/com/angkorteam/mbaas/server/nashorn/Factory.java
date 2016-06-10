@@ -17,6 +17,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.model.util.ListModel;
+import org.apache.wicket.model.util.MapModel;
 
 import java.io.Serializable;
 import java.util.*;
@@ -25,6 +27,8 @@ import java.util.*;
  * Created by socheat on 5/30/16.
  */
 public class Factory implements Serializable,
+        IList,
+        IMap,
         ITextFieldFactory,
         IFormFactory,
         IFormValidatorFactory,
@@ -66,6 +70,26 @@ public class Factory implements Serializable,
         this.script = script;
         this.applicationCode = applicationCode;
         this.children = new HashMap<>();
+    }
+
+    @Override
+    public <E> List<E> createList() {
+        return new LinkedList<>();
+    }
+
+    @Override
+    public <E> ListModel<E> createListModel(List<E> object) {
+        return new ListModel<>(object);
+    }
+
+    @Override
+    public <K, V> Map<K, V> createMap() {
+        return new LinkedHashMap<>();
+    }
+
+    @Override
+    public <K, V> MapModel<K, V> createMapModel(Map<K, V> object) {
+        return new MapModel<>(object);
     }
 
     @Override
