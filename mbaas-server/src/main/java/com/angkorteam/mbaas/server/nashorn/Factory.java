@@ -45,6 +45,7 @@ public class Factory implements Serializable,
         ITableFactory,
         IListMultipleChoiceFactory,
         IValidatorFactory,
+        IHiddenFieldFactory,
         IColorTextFieldFactory,
         IEmailTextFieldFactory,
         ITimeTextFieldFactory,
@@ -425,6 +426,22 @@ public class Factory implements Serializable,
     @Override
     public NashornEmailTextField createEmailTextField(MarkupContainer container, String id, IModel<String> model, IValidator<String> validator) {
         NashornEmailTextField object = new NashornEmailTextField(id, model, validator);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public <T> NashornHiddenField<T> createHiddenField(String id, IModel<T> model, Class<T> type) {
+        NashornHiddenField<T> object = new NashornHiddenField<T>(id, model, type);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public <T> NashornHiddenField<T> createHiddenField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
+        NashornHiddenField<T> object = new NashornHiddenField<T>(id, model, type);
         container.add(object);
         this.children.put(id, object);
         return object;
