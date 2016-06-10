@@ -158,19 +158,6 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public <T> NashornTextField<T> createTextField(String id, IModel<T> model) {
-        return createTextField(container, id, model);
-    }
-
-    @Override
-    public <T> NashornTextField<T> createTextField(MarkupContainer container, String id, IModel<T> model) {
-        NashornTextField<T> object = new NashornTextField<>(id, model);
-        container.add(object);
-        this.children.put(id, object);
-        return object;
-    }
-
-    @Override
     public <T> NashornTextField<T> createTextField(String id, IModel<T> model, Class<T> type) {
         return createTextField(container, id, model, type);
     }

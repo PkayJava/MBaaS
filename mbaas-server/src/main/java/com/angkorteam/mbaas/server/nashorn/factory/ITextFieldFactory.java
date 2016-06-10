@@ -11,10 +11,6 @@ import java.io.Serializable;
  */
 public interface ITextFieldFactory extends Serializable {
 
-    public <T> NashornTextField<T> createTextField(String id, IModel<T> model);
-
-    public <T> NashornTextField<T> createTextField(MarkupContainer container, String id, IModel<T> model);
-
     public <T> NashornTextField<T> createTextField(String id, IModel<T> model, Class<T> type);
 
     public <T> NashornTextField<T> createTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type);

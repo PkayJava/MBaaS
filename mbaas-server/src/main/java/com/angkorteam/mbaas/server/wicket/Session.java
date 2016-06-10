@@ -185,7 +185,11 @@ public class Session extends AuthenticatedWebSession {
     }
 
     public final DSLContext getDSLContext() {
-        Application application = (Application) getApplication();
+        Application application = null;
+        try {
+            application = (Application) getApplication();
+        } catch (WicketRuntimeException e) {
+        }
         if (application != null) {
             return application.getDSLContext();
         }
