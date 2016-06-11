@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.nashorn.wicket.provider.select2;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.MultipleChoiceProvider;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
+import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
@@ -20,11 +21,16 @@ import java.util.Map;
  */
 public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<String, Object>> {
 
-    private String id;
+    private final Factory factory;
 
-    private String script;
+    private final String id;
 
-    public NashornMultipleChoiceProvider() {
+    private final String script;
+
+    public NashornMultipleChoiceProvider(Factory factory, String id, String script) {
+        this.factory = factory;
+        this.id = id;
+        this.script = script;
     }
 
     @Override
@@ -65,7 +71,7 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            return (List<Option>) invocable.invokeFunction(this.id + "__query", jdbcTemplate, term, page);
+            return (List<Option>) invocable.invokeFunction(this.id + "__query", jdbcTemplate, this.factory, term, page);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         } catch (EmptyResultDataAccessException e) {
@@ -100,19 +106,4 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
         return ApplicationUtils.getApplication().getGson();
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getScript() {
-        return script;
-    }
-
-    public void setScript(String script) {
-        this.script = script;
-    }
 }
