@@ -27,4 +27,9 @@ public class NashornRangeTextField<T extends Number & Comparable<T>> extends Ran
         }
         return super.add(behaviors);
     }
+
+    @Override
+    protected String[] getInputTypes() {
+        return new String[]{"range", "text"};
+    }
 }

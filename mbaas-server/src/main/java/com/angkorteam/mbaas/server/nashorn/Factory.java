@@ -39,6 +39,7 @@ public class Factory implements Serializable,
         IPropertyModelFactory,
         IChoiceRendererFactory,
         IPasswordTextFieldFactory,
+        IRangeTextFieldFactory,
         INumberTextFieldFactory,
         ISelect2MultipleChoiceFactory,
         IMultipleChoiceProviderFactory,
@@ -461,6 +462,19 @@ public class Factory implements Serializable,
     @Override
     public NashornPasswordTextField createPasswordTextField(MarkupContainer container, String id, IModel<String> model) {
         NashornPasswordTextField object = new NashornPasswordTextField(id, model);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(String id, IModel<T> model, Class<T> type) {
+        return createRangeTextField(container, id, model, type);
+    }
+
+    @Override
+    public <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
+        NashornRangeTextField<T> object = new NashornRangeTextField<>(id, model, type);
         container.add(object);
         this.children.put(id, object);
         return object;
