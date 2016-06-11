@@ -99,10 +99,11 @@ public abstract class SqlProvider extends SortableDataProvider<Map<String, Objec
             String filterText = entry.getValue();
             if (filterText != null && !"".equals(filterText)) {
                 String tableColumn = entry.getKey();
-                String queryColumn = this.fields.get(tableColumn).trim().toUpperCase();
+                String queryColumn = this.fields.get(tableColumn);
+                String queryColumnAlias = this.fields.get(tableColumn).trim().toUpperCase();
                 Class<?> clazz = this.itemClass.get(tableColumn);
-                Field<?> field = parseField(tableColumn, clazz);
-                if (!AGGREGATE_FUNCTION.contains(queryColumn)) {
+                Field<?> field = parseField(queryColumn, clazz);
+                if (!AGGREGATE_FUNCTION.contains(queryColumnAlias)) {
                     Expression expression = Expression.parse(filterText.trim());
                     buildCondition(where, clazz, field, expression);
                 }
@@ -124,10 +125,11 @@ public abstract class SqlProvider extends SortableDataProvider<Map<String, Objec
             String filterText = entry.getValue();
             if (filterText != null && !"".equals(filterText)) {
                 String tableColumn = entry.getKey();
-                String queryColumn = this.fields.get(tableColumn).trim().toUpperCase();
+                String queryColumn = this.fields.get(tableColumn);
+                String queryColumnAlias = this.fields.get(tableColumn).trim().toUpperCase();
                 Class<?> clazz = this.itemClass.get(tableColumn);
-                Field<?> field = parseField(tableColumn, clazz);
-                if (AGGREGATE_FUNCTION.contains(queryColumn)) {
+                Field<?> field = parseField(queryColumn, clazz);
+                if (AGGREGATE_FUNCTION.contains(queryColumnAlias)) {
                     Expression expression = Expression.parse(filterText.trim());
                     buildCondition(having, clazz, field, expression);
                 }
