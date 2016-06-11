@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.nashorn;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.NashornTable;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.basic.NashornLabel;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
@@ -14,7 +15,6 @@ import com.angkorteam.mbaas.server.page.flow.FlowPage;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
@@ -141,13 +141,13 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public Label createLabel(String id) {
+    public NashornLabel createLabel(String id) {
         return createLabel(container, id);
     }
 
     @Override
-    public Label createLabel(MarkupContainer container, String id) {
-        Label object = new Label(id);
+    public NashornLabel createLabel(MarkupContainer container, String id) {
+        NashornLabel object = new NashornLabel(id, createPropertyModel(this.userModel, id));
         container.add(object);
         this.children.put(id, object);
         return object;

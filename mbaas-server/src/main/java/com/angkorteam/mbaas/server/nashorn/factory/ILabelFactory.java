@@ -1,8 +1,7 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.basic.NashornLabel;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.IModel;
 
 import java.io.Serializable;
 
@@ -11,8 +10,8 @@ import java.io.Serializable;
  */
 public interface ILabelFactory extends Serializable {
 
-    public Label createLabel(String id);
+    public NashornLabel createLabel(String id);
 
-    public Label createLabel(MarkupContainer container, String id);
+    public NashornLabel createLabel(MarkupContainer container, String id);
 
 }
