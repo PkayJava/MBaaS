@@ -28,8 +28,8 @@ import java.util.*;
  * Created by socheat on 5/30/16.
  */
 public class Factory implements Serializable,
-        IList,
-        IMap,
+        IListFactory,
+        IMapFactory,
         ITextFieldFactory,
         IFormFactory,
         IFormValidatorFactory,
@@ -38,6 +38,7 @@ public class Factory implements Serializable,
         ILabelFactory,
         IPropertyModelFactory,
         IChoiceRendererFactory,
+        IPasswordTextFieldFactory,
         INumberTextFieldFactory,
         ISelect2MultipleChoiceFactory,
         IMultipleChoiceProviderFactory,
@@ -447,6 +448,19 @@ public class Factory implements Serializable,
     @Override
     public <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
         NashornNumberTextField<T> object = new NashornNumberTextField<>(id, model, type);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornPasswordTextField createPasswordTextField(String id, IModel<String> model) {
+        return createPasswordTextField(container, id, model);
+    }
+
+    @Override
+    public NashornPasswordTextField createPasswordTextField(MarkupContainer container, String id, IModel<String> model) {
+        NashornPasswordTextField object = new NashornPasswordTextField(id, model);
         container.add(object);
         this.children.put(id, object);
         return object;

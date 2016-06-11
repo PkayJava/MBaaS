@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by socheat on 6/10/16.
  */
-public interface IMap extends Serializable {
+public interface IMapFactory extends Serializable {
 
     <K, V> Map<K, V> createMap();
 

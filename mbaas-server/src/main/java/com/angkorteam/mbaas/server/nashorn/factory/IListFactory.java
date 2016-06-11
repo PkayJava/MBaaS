@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by socheat on 6/10/16.
  */
-public interface IList extends Serializable {
+public interface IListFactory extends Serializable {
 
     <E> List<E> createList();
 

@@ -32,4 +32,9 @@ public class NashornEmailTextField extends EmailTextField {
         }
         return super.add(behaviors);
     }
+
+    @Override
+    protected String[] getInputTypes() {
+        return new String[]{"email", "text"};
+    }
 }

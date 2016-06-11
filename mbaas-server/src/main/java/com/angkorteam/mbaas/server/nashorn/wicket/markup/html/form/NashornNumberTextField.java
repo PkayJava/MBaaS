@@ -28,4 +28,8 @@ public class NashornNumberTextField<T extends Number & Comparable<T>> extends Nu
         return super.add(behaviors);
     }
 
+    @Override
+    protected String[] getInputTypes() {
+        return new String[]{"number", "text"};
+    }
 }
