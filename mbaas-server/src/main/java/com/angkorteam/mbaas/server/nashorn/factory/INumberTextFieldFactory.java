@@ -11,8 +11,8 @@ import java.io.Serializable;
  */
 public interface INumberTextFieldFactory extends Serializable {
 
-    <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(String id, IModel<T> model, Class<T> type);
+    <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(String id, Class<T> type);
 
-    <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type);
+    <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(MarkupContainer container, String id, Class<T> type);
 
 }

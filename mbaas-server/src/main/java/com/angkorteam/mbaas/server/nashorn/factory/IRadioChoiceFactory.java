@@ -15,8 +15,8 @@ import java.util.Map;
  */
 public interface IRadioChoiceFactory extends Serializable {
 
-    NashornRadioChoice createRadioChoice(String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
+    NashornRadioChoice createRadioChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
 
-    NashornRadioChoice createRadioChoice(MarkupContainer container, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
+    NashornRadioChoice createRadioChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
 
 }

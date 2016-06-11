@@ -247,26 +247,26 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornDateTextField createDateTextField(String id, IModel<Date> model) {
-        return createDateTextField(container, id, model);
+    public NashornDateTextField createDateTextField(String id) {
+        return createDateTextField(container, id);
     }
 
     @Override
-    public NashornDateTextField createDateTextField(MarkupContainer container, String id, IModel<Date> model) {
-        NashornDateTextField object = new NashornDateTextField(id, model);
+    public NashornDateTextField createDateTextField(MarkupContainer container, String id) {
+        NashornDateTextField object = new NashornDateTextField(id, createPropertyModel(this.userModel, id));
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public NashornColorTextField createColorTextField(String id, IModel<String> model) {
-        return createColorTextField(container, id, model);
+    public NashornColorTextField createColorTextField(String id) {
+        return createColorTextField(container, id);
     }
 
     @Override
-    public NashornColorTextField createColorTextField(MarkupContainer container, String id, IModel<String> model) {
-        NashornColorTextField object = new NashornColorTextField(id, model);
+    public NashornColorTextField createColorTextField(MarkupContainer container, String id) {
+        NashornColorTextField object = new NashornColorTextField(id, createPropertyModel(this.userModel, id));
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -286,104 +286,104 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornDropDownChoice createDropDownChoice(String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
-        return createDropDownChoice(container, id, model, choices, renderer);
+    public NashornDropDownChoice createDropDownChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+        return createDropDownChoice(container, id, choices, renderer);
     }
 
     @Override
-    public NashornDropDownChoice createDropDownChoice(MarkupContainer container, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
-        NashornDropDownChoice object = new NashornDropDownChoice(id, model, choices, renderer);
+    public NashornDropDownChoice createDropDownChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+        NashornDropDownChoice object = new NashornDropDownChoice(id, createPropertyModel(this.userModel, id), choices, renderer);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public NashornListMultipleChoice createListMultipleChoice(String id, IModel<Collection<Map<String, Object>>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
-        return createListMultipleChoice(container, id, model, choices, renderer);
+    public NashornListMultipleChoice createListMultipleChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+        return createListMultipleChoice(container, id, choices, renderer);
     }
 
     @Override
-    public NashornListMultipleChoice createListMultipleChoice(MarkupContainer container, String id, IModel<Collection<Map<String, Object>>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
-        NashornListMultipleChoice object = new NashornListMultipleChoice(id, model, choices, renderer);
+    public NashornListMultipleChoice createListMultipleChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+        NashornListMultipleChoice object = new NashornListMultipleChoice(id, createPropertyModel(this.userModel, id), choices, renderer);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public NashornListMultipleChoice createListMultipleChoice(String id, IModel<Collection<Map<String, Object>>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
-        return createListMultipleChoice(container, id, model, choices, renderer, maxRows);
+    public NashornListMultipleChoice createListMultipleChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
+        return createListMultipleChoice(container, id, choices, renderer, maxRows);
     }
 
     @Override
-    public NashornListMultipleChoice createListMultipleChoice(MarkupContainer container, String id, IModel<Collection<Map<String, Object>>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
-        NashornListMultipleChoice object = new NashornListMultipleChoice(id, model, choices, renderer, maxRows);
+    public NashornListMultipleChoice createListMultipleChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
+        NashornListMultipleChoice object = new NashornListMultipleChoice(id, createPropertyModel(this.userModel, id), choices, renderer, maxRows);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public NashornCheckBoxMultipleChoice createCheckBoxMultipleChoice(String id, IModel<Collection<Map<String, Object>>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
-        return createCheckBoxMultipleChoice(container, id, model, choices, renderer);
+    public NashornCheckBoxMultipleChoice createCheckBoxMultipleChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+        return createCheckBoxMultipleChoice(container, id, choices, renderer);
     }
 
     @Override
-    public NashornCheckBoxMultipleChoice createCheckBoxMultipleChoice(MarkupContainer container, String id, IModel<Collection<Map<String, Object>>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
-        NashornCheckBoxMultipleChoice object = new NashornCheckBoxMultipleChoice(id, model, choices, renderer);
+    public NashornCheckBoxMultipleChoice createCheckBoxMultipleChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+        NashornCheckBoxMultipleChoice object = new NashornCheckBoxMultipleChoice(id, createPropertyModel(this.userModel, id), choices, renderer);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public NashornListChoice createListChoice(String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
-        return createListChoice(container, id, model, choices, renderer);
+    public NashornListChoice createListChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+        return createListChoice(container, id, choices, renderer);
     }
 
     @Override
-    public NashornListChoice createListChoice(MarkupContainer container, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
-        NashornListChoice object = new NashornListChoice(id, model, choices, renderer);
+    public NashornListChoice createListChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+        NashornListChoice object = new NashornListChoice(id, createPropertyModel(this.userModel, id), choices, renderer);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public NashornListChoice createListChoice(String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
-        return createListChoice(container, id, model, choices, renderer, maxRows);
+    public NashornListChoice createListChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
+        return createListChoice(container, id, choices, renderer, maxRows);
     }
 
     @Override
-    public NashornListChoice createListChoice(MarkupContainer container, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
-        NashornListChoice object = new NashornListChoice(id, model, choices, renderer, maxRows);
+    public NashornListChoice createListChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
+        NashornListChoice object = new NashornListChoice(id, createPropertyModel(this.userModel, id), choices, renderer, maxRows);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public NashornRadioChoice createRadioChoice(String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
-        return createRadioChoice(container, id, model, choices, renderer);
+    public NashornRadioChoice createRadioChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+        return createRadioChoice(container, id, choices, renderer);
     }
 
     @Override
-    public NashornRadioChoice createRadioChoice(MarkupContainer container, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
-        NashornRadioChoice object = new NashornRadioChoice(id, model, choices, renderer);
+    public NashornRadioChoice createRadioChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+        NashornRadioChoice object = new NashornRadioChoice(id, createPropertyModel(this.userModel, id), choices, renderer);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public NashornCheckBox createCheckBox(String id, IModel<Boolean> model) {
-        return createCheckBox(container, id, model);
+    public NashornCheckBox createCheckBox(String id) {
+        return createCheckBox(container, id);
     }
 
     @Override
-    public NashornCheckBox createCheckBox(MarkupContainer container, String id, IModel<Boolean> model) {
-        NashornCheckBox object = new NashornCheckBox(id, model);
+    public NashornCheckBox createCheckBox(MarkupContainer container, String id) {
+        NashornCheckBox object = new NashornCheckBox(id, createPropertyModel(this.userModel, id));
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -404,91 +404,91 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornEmailTextField createEmailTextField(String id, IModel<String> model) {
-        return createEmailTextField(container, id, model);
+    public NashornEmailTextField createEmailTextField(String id) {
+        return createEmailTextField(container, id);
     }
 
     @Override
-    public NashornEmailTextField createEmailTextField(MarkupContainer container, String id, IModel<String> model) {
-        NashornEmailTextField object = new NashornEmailTextField(id, model);
+    public NashornEmailTextField createEmailTextField(MarkupContainer container, String id) {
+        NashornEmailTextField object = new NashornEmailTextField(id, createPropertyModel(this.userModel, id));
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public NashornEmailTextField createEmailTextField(String id, IModel<String> model, IValidator<String> validator) {
-        return createEmailTextField(container, id, model, validator);
+    public NashornEmailTextField createEmailTextField(String id, IValidator<String> validator) {
+        return createEmailTextField(container, id, validator);
     }
 
     @Override
-    public NashornEmailTextField createEmailTextField(MarkupContainer container, String id, IModel<String> model, IValidator<String> validator) {
-        NashornEmailTextField object = new NashornEmailTextField(id, model, validator);
+    public NashornEmailTextField createEmailTextField(MarkupContainer container, String id, IValidator<String> validator) {
+        NashornEmailTextField object = new NashornEmailTextField(id, createPropertyModel(this.userModel, id), validator);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public <T> NashornHiddenField<T> createHiddenField(String id, IModel<T> model, Class<T> type) {
-        return createHiddenField(container, id, model, type);
+    public <T> NashornHiddenField<T> createHiddenField(String id, Class<T> type) {
+        return createHiddenField(container, id, type);
     }
 
     @Override
-    public <T> NashornHiddenField<T> createHiddenField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
-        NashornHiddenField<T> object = new NashornHiddenField<>(id, model, type);
+    public <T> NashornHiddenField<T> createHiddenField(MarkupContainer container, String id, Class<T> type) {
+        NashornHiddenField<T> object = new NashornHiddenField<>(id, createPropertyModel(this.userModel, id), type);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(String id, IModel<T> model, Class<T> type) {
-        return createNumberTextField(container, id, model, type);
+    public <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(String id, Class<T> type) {
+        return createNumberTextField(container, id, type);
     }
 
     @Override
-    public <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
-        NashornNumberTextField<T> object = new NashornNumberTextField<>(id, model, type);
+    public <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(MarkupContainer container, String id, Class<T> type) {
+        NashornNumberTextField<T> object = new NashornNumberTextField<>(id, createPropertyModel(this.userModel, id), type);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public NashornPasswordTextField createPasswordTextField(String id, IModel<String> model) {
-        return createPasswordTextField(container, id, model);
+    public NashornPasswordTextField createPasswordTextField(String id) {
+        return createPasswordTextField(container, id);
     }
 
     @Override
-    public NashornPasswordTextField createPasswordTextField(MarkupContainer container, String id, IModel<String> model) {
-        NashornPasswordTextField object = new NashornPasswordTextField(id, model);
+    public NashornPasswordTextField createPasswordTextField(MarkupContainer container, String id) {
+        NashornPasswordTextField object = new NashornPasswordTextField(id, createPropertyModel(this.userModel, id));
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(String id, IModel<T> model, Class<T> type) {
-        return createRangeTextField(container, id, model, type);
+    public <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(String id, Class<T> type) {
+        return createRangeTextField(container, id, type);
     }
 
     @Override
-    public <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
-        NashornRangeTextField<T> object = new NashornRangeTextField<>(id, model, type);
+    public <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(MarkupContainer container, String id, Class<T> type) {
+        NashornRangeTextField<T> object = new NashornRangeTextField<>(id, createPropertyModel(this.userModel, id), type);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public <T> NashornRequiredTextField<T> createRequiredTextField(String id, IModel<T> model, Class<T> type) {
-        return createRequiredTextField(container, id, model, type);
+    public <T> NashornRequiredTextField<T> createRequiredTextField(String id, Class<T> type) {
+        return createRequiredTextField(container, id, type);
     }
 
     @Override
-    public <T> NashornRequiredTextField<T> createRequiredTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
-        NashornRequiredTextField<T> object = new NashornRequiredTextField<>(id, model, type);
+    public <T> NashornRequiredTextField<T> createRequiredTextField(MarkupContainer container, String id, Class<T> type) {
+        NashornRequiredTextField<T> object = new NashornRequiredTextField<>(id, createPropertyModel(this.userModel, id), type);
         container.add(object);
         this.children.put(id, object);
         return object;

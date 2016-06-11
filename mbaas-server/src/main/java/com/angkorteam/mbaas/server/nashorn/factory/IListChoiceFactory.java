@@ -15,12 +15,12 @@ import java.util.Map;
  */
 public interface IListChoiceFactory extends Serializable {
 
-    NashornListChoice createListChoice(String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
+    NashornListChoice createListChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
 
-    NashornListChoice createListChoice(MarkupContainer markupContainer, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
+    NashornListChoice createListChoice(MarkupContainer markupContainer, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
 
-    NashornListChoice createListChoice(String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows);
+    NashornListChoice createListChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows);
 
-    NashornListChoice createListChoice(MarkupContainer markupContainer, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows);
+    NashornListChoice createListChoice(MarkupContainer markupContainer, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows);
 
 }

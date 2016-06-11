@@ -11,8 +11,8 @@ import java.io.Serializable;
  */
 public interface IRangeTextFieldFactory extends Serializable {
 
-    <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(String id, IModel<T> model, Class<T> type);
+    <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(String id, Class<T> type);
 
-    <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type);
+    <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(MarkupContainer container, String id, Class<T> type);
 
 }

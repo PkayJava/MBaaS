@@ -15,8 +15,8 @@ import java.util.Map;
  */
 public interface IDropDownChoiceFactory extends Serializable {
 
-    NashornDropDownChoice createDropDownChoice(String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
+    NashornDropDownChoice createDropDownChoice(String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
 
-    NashornDropDownChoice createDropDownChoice(MarkupContainer container, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
+    NashornDropDownChoice createDropDownChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer);
 
 }

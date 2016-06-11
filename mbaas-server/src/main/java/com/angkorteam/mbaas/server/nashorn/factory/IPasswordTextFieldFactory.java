@@ -11,8 +11,8 @@ import java.io.Serializable;
  */
 public interface IPasswordTextFieldFactory extends Serializable {
 
-    NashornPasswordTextField createPasswordTextField(String id, IModel<String> model);
+    NashornPasswordTextField createPasswordTextField(String id);
 
-    NashornPasswordTextField createPasswordTextField(MarkupContainer container, String id, IModel<String> model);
+    NashornPasswordTextField createPasswordTextField(MarkupContainer container, String id);
 
 }
