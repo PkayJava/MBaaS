@@ -180,13 +180,13 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public <T> NashornTextField<T> createTextField(String id, IModel<T> model, Class<T> type) {
-        return createTextField(container, id, model, type);
+    public <T> NashornTextField<T> createTextField(String id, Class<T> type) {
+        return createTextField(container, id, type);
     }
 
     @Override
-    public <T> NashornTextField<T> createTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
-        NashornTextField<T> object = new NashornTextField<>(id, model, type);
+    public <T> NashornTextField<T> createTextField(MarkupContainer container, String id, Class<T> type) {
+        NashornTextField<T> object = new NashornTextField<>(id, createPropertyModel(this.userModel, id), type);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -262,13 +262,13 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornTimeTextField createTimeTextField(String id, IModel<String> model) {
-        return createTimeTextField(container, id, model);
+    public NashornTimeTextField createTimeTextField(String id) {
+        return createTimeTextField(container, id);
     }
 
     @Override
-    public NashornTimeTextField createTimeTextField(MarkupContainer container, String id, IModel<String> model) {
-        NashornTimeTextField object = new NashornTimeTextField(id, model);
+    public NashornTimeTextField createTimeTextField(MarkupContainer container, String id) {
+        NashornTimeTextField object = new NashornTimeTextField(id, createPropertyModel(this.userModel, id));
         container.add(object);
         this.children.put(id, object);
         return object;

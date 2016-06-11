@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.page.logic;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
+import com.angkorteam.framework.extension.wicket.markup.html.form.HtmlTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
@@ -38,7 +39,7 @@ public class LogicCreatePage extends MasterPage {
     private TextFeedbackPanel javascriptFeedback;
 
     private String html;
-    private JavascriptTextArea htmlField;
+    private HtmlTextArea htmlField;
     private TextFeedbackPanel htmlFeedback;
 
     private String title;
@@ -93,7 +94,7 @@ public class LogicCreatePage extends MasterPage {
         this.form.add(this.descriptionFeedback);
 
         this.html = getString("logic.html");
-        this.htmlField = new JavascriptTextArea("htmlField", new PropertyModel<>(this, "html"));
+        this.htmlField = new HtmlTextArea("htmlField", new PropertyModel<>(this, "html"));
         this.htmlField.setRequired(true);
         this.form.add(this.htmlField);
         this.htmlFeedback = new TextFeedbackPanel("htmlFeedback", this.htmlField);
