@@ -339,7 +339,7 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornListChoice createListChoice(MarkupContainer markupContainer, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
+    public NashornListChoice createListChoice(MarkupContainer container, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
         NashornListChoice object = new NashornListChoice(id, model, choices, renderer);
         container.add(object);
         this.children.put(id, object);
@@ -352,7 +352,7 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornListChoice createListChoice(MarkupContainer markupContainer, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
+    public NashornListChoice createListChoice(MarkupContainer container, String id, IModel<Map<String, Object>> model, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
         NashornListChoice object = new NashornListChoice(id, model, choices, renderer, maxRows);
         container.add(object);
         this.children.put(id, object);
