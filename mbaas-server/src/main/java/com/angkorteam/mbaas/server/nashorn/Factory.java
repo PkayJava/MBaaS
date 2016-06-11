@@ -21,6 +21,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.model.util.MapModel;
 import org.apache.wicket.validation.IValidator;
+import org.apache.wicket.validation.validator.UrlValidator;
 
 import java.io.Serializable;
 import java.util.*;
@@ -30,6 +31,7 @@ import java.util.*;
  */
 public class Factory implements Serializable,
         IListFactory,
+        IUrlTextFieldFactory,
         IMapFactory,
         ITextFieldFactory,
         IFormFactory,
@@ -478,6 +480,32 @@ public class Factory implements Serializable,
     @Override
     public <T> NashornRequiredTextField<T> createRequiredTextField(MarkupContainer container, String id, Class<T> type) {
         NashornRequiredTextField<T> object = new NashornRequiredTextField<>(id, createPropertyModel(this.userModel, id), type);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornUrlTextField createUrlTextField(String id) {
+        return createUrlTextField(container, id);
+    }
+
+    @Override
+    public NashornUrlTextField createUrlTextField(MarkupContainer container, String id) {
+        NashornUrlTextField object = new NashornUrlTextField(id, createPropertyModel(this.userModel, id));
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornUrlTextField createUrlTextField(String id, UrlValidator validator) {
+        return createUrlTextField(container, id, validator);
+    }
+
+    @Override
+    public NashornUrlTextField createUrlTextField(MarkupContainer container, String id, UrlValidator validator) {
+        NashornUrlTextField object = new NashornUrlTextField(id, createPropertyModel(this.userModel, id), validator);
         container.add(object);
         this.children.put(id, object);
         return object;

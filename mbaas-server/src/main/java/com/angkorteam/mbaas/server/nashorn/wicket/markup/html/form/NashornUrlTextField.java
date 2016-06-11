@@ -32,4 +32,9 @@ public class NashornUrlTextField extends UrlTextField {
         }
         return super.add(behaviors);
     }
+
+    @Override
+    protected String[] getInputTypes() {
+        return new String[]{"url", "text"};
+    }
 }
