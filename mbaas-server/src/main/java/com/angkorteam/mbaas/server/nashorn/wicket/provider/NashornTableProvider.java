@@ -1,11 +1,11 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.provider;
 
-import com.angkorteam.framework.extension.share.provider.JooqProvider;
+import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.jooq.Condition;
-import org.jooq.Field;
+import org.jooq.DSLContext;
 import org.jooq.TableLike;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,18 +18,21 @@ import java.util.List;
 /**
  * Created by socheat on 6/2/16.
  */
-public class NashornTableProvider extends JooqProvider {
+public class NashornTableProvider extends SqlProvider {
 
-    private String id;
+    private final Factory factory;
 
-    private String script;
+    private final String id;
 
-    public NashornTableProvider() {
-    }
+    private final String script;
 
-    @Override
-    public void boardField(String column, Field<?> jooqColumn) {
-        super.boardField(column, jooqColumn);
+    private final String applicationCode;
+
+    public NashornTableProvider(Factory factory, String id, String script, String applicationCode) {
+        this.script = script;
+        this.id = id;
+        this.factory = factory;
+        this.applicationCode = applicationCode;
     }
 
     @Override
@@ -101,19 +104,8 @@ public class NashornTableProvider extends JooqProvider {
         return null;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getScript() {
-        return script;
-    }
-
-    public void setScript(String script) {
-        this.script = script;
+    @Override
+    protected DSLContext getDSLContext() {
+        return ApplicationUtils.getApplication().getDSLContext(this.applicationCode);
     }
 }

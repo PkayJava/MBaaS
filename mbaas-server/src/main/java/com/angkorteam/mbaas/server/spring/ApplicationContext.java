@@ -72,6 +72,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -188,7 +191,9 @@ public class ApplicationContext implements ServletContextListener {
         granted.add(Double.class.getName());
         granted.add(Character.class.getName());
         granted.add(String.class.getName());
-        granted.add(Date.class.getName());
+        granted.add(LocalTime.class.getName());
+        granted.add(LocalDate.class.getName());
+        granted.add(LocalDateTime.class.getName());
         granted.add(BigDecimal.class.getName());
         granted.add(BigInteger.class.getName());
         granted.add(Arrays.class.getName());

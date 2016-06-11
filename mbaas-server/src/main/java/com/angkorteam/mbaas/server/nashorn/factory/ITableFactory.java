@@ -1,12 +1,9 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
-import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.NashornTable;
-import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
+import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,8 +11,8 @@ import java.util.Map;
  */
 public interface ITableFactory extends Serializable {
 
-    NashornTable createTable(String id, List<IColumn<Map<String, Object>, String>> columns, NashornTableProvider tableProvider, int rowsPerPage);
+    NashornFilterForm createTable(String id, Map<String, Class<?>> tableColumns, Map<String, String> queryColumns, int rowsPerPage);
 
-    NashornTable createTable(MarkupContainer container, String id, List<IColumn<Map<String, Object>, String>> columns, NashornTableProvider tableProvider, int rowsPerPage);
-    
+    NashornFilterForm createTable(MarkupContainer container, String id, Map<String, Class<?>> tableColumns, Map<String, String> queryColumns, int rowsPerPage);
+
 }

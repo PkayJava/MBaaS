@@ -1,8 +1,10 @@
 package com.angkorteam.mbaas.server.nashorn;
 
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
-import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.NashornTable;
+import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.*;
+import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.basic.NashornLabel;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
@@ -17,6 +19,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.model.util.MapModel;
@@ -24,6 +27,8 @@ import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.validator.UrlValidator;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -60,7 +65,6 @@ public class Factory implements Serializable,
         IRadioChoiceFactory,
         ICheckBoxMultipleChoiceFactory,
         ISelect2SingleChoiceFactory,
-        ITableProviderFactory,
         ICheckBoxFactory {
 
     private FlowPage container;
@@ -104,13 +108,6 @@ public class Factory implements Serializable,
     @Override
     public <K, V> MapModel<K, V> createMapModel(Map<K, V> object) {
         return new MapModel<>(object);
-    }
-
-    @Override
-    public NashornTableProvider createTableProvider() {
-        NashornTableProvider object = new NashornTableProvider();
-        object.setScript(this.script);
-        return object;
     }
 
     @Override
@@ -381,14 +378,48 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornTable createTable(String id, List<IColumn<Map<String, Object>, String>> columns, NashornTableProvider tableProvider, int rowsPerPage) {
-        return createTable(container, id, columns, tableProvider, rowsPerPage);
+    public NashornFilterForm createTable(String id, Map<String, Class<?>> tableColumns, Map<String, String> queryColumns, int rowsPerPage) {
+        return createTable(container, id, tableColumns, queryColumns, rowsPerPage);
     }
 
     @Override
-    public NashornTable createTable(MarkupContainer container, String id, List<IColumn<Map<String, Object>, String>> columns, NashornTableProvider tableProvider, int rowsPerPage) {
-        NashornTable object = new NashornTable(id, columns, tableProvider, rowsPerPage);
-        tableProvider.setId(id);
+    public NashornFilterForm createTable(MarkupContainer container, String id, Map<String, Class<?>> tableColumns, Map<String, String> queryColumns, int rowsPerPage) {
+        NashornTableProvider tableProvider = new NashornTableProvider(this, id, this.script, this.applicationCode);
+        List<IColumn<Map<String, Object>, String>> tableFields = new ArrayList<>();
+        for (Map.Entry<String, Class<?>> tableColumn : tableColumns.entrySet()) {
+            if (tableColumn.getValue() == java.time.LocalTime.class) {
+                NashornTimeColumn tableField = new NashornTimeColumn(Model.of(tableColumn.getKey()), tableColumn.getKey());
+                tableFields.add(tableField);
+                tableProvider.selectField(tableColumn.getKey(), queryColumns.get(tableColumn.getKey()), java.time.LocalTime.class);
+            } else if (tableColumn.getValue() == java.time.LocalDate.class) {
+                NashornDateColumn tableField = new NashornDateColumn(Model.of(tableColumn.getKey()), tableColumn.getKey());
+                tableFields.add(tableField);
+                tableProvider.selectField(tableColumn.getKey(), queryColumns.get(tableColumn.getKey()), java.time.LocalDate.class);
+            } else if (tableColumn.getValue() == java.time.LocalDateTime.class) {
+                NashornDateTimeColumn tableField = new NashornDateTimeColumn(Model.of(tableColumn.getKey()), tableColumn.getKey());
+                tableFields.add(tableField);
+                tableProvider.selectField(tableColumn.getKey(), queryColumns.get(tableColumn.getKey()), java.time.LocalDateTime.class);
+            } else if (tableColumn.getValue() == Boolean.class
+                    || tableColumn.getValue() == Byte.class
+                    || tableColumn.getValue() == Short.class
+                    || tableColumn.getValue() == Integer.class
+                    || tableColumn.getValue() == Long.class
+                    || tableColumn.getValue() == Float.class
+                    || tableColumn.getValue() == Double.class
+                    || tableColumn.getValue() == BigInteger.class
+                    || tableColumn.getValue() == BigDecimal.class
+                    || tableColumn.getValue() == Character.class
+                    || tableColumn.getValue() == String.class
+                    ) {
+                NashornTextColumn tableField = new NashornTextColumn(tableColumn.getValue(), Model.of(tableColumn.getKey()), tableColumn.getKey());
+                tableProvider.selectField(tableColumn.getKey(), queryColumns.get(tableColumn.getKey()), tableColumn.getValue());
+                tableFields.add(tableField);
+            }
+        }
+        NashornTable table = new NashornTable(id + "_table", tableFields, tableProvider, rowsPerPage);
+        NashornFilterForm object = new NashornFilterForm(id, tableProvider);
+        table.addTopToolbar(new FilterToolbar(table, object));
+        object.add(table);
         container.add(object);
         this.children.put(id, object);
         return object;
