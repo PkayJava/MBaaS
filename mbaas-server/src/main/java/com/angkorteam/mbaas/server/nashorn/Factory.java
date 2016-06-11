@@ -49,6 +49,7 @@ public class Factory implements Serializable,
         IListMultipleChoiceFactory,
         IValidatorFactory,
         IHiddenFieldFactory,
+        IRequiredTextFieldFactory,
         IColorTextFieldFactory,
         IEmailTextFieldFactory,
         ITimeTextFieldFactory,
@@ -475,6 +476,19 @@ public class Factory implements Serializable,
     @Override
     public <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
         NashornRangeTextField<T> object = new NashornRangeTextField<>(id, model, type);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public <T> NashornRequiredTextField<T> createRequiredTextField(String id, IModel<T> model, Class<T> type) {
+        return createRequiredTextField(container, id, model, type);
+    }
+
+    @Override
+    public <T> NashornRequiredTextField<T> createRequiredTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
+        NashornRequiredTextField<T> object = new NashornRequiredTextField<>(id, model, type);
         container.add(object);
         this.children.put(id, object);
         return object;
