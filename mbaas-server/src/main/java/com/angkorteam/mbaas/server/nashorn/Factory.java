@@ -38,6 +38,7 @@ public class Factory implements Serializable,
         ILabelFactory,
         IPropertyModelFactory,
         IChoiceRendererFactory,
+        INumberTextFieldFactory,
         ISelect2MultipleChoiceFactory,
         IMultipleChoiceProviderFactory,
         IDateTextFieldFactory,
@@ -401,10 +402,7 @@ public class Factory implements Serializable,
 
     @Override
     public NashornEmailTextField createEmailTextField(String id, IModel<String> model) {
-        NashornEmailTextField object = new NashornEmailTextField(id, model);
-        container.add(object);
-        this.children.put(id, object);
-        return object;
+        return createEmailTextField(container, id, model);
     }
 
     @Override
@@ -417,10 +415,7 @@ public class Factory implements Serializable,
 
     @Override
     public NashornEmailTextField createEmailTextField(String id, IModel<String> model, IValidator<String> validator) {
-        NashornEmailTextField object = new NashornEmailTextField(id, model, validator);
-        container.add(object);
-        this.children.put(id, object);
-        return object;
+        return createEmailTextField(container, id, model, validator);
     }
 
     @Override
@@ -433,15 +428,25 @@ public class Factory implements Serializable,
 
     @Override
     public <T> NashornHiddenField<T> createHiddenField(String id, IModel<T> model, Class<T> type) {
-        NashornHiddenField<T> object = new NashornHiddenField<T>(id, model, type);
+        return createHiddenField(container, id, model, type);
+    }
+
+    @Override
+    public <T> NashornHiddenField<T> createHiddenField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
+        NashornHiddenField<T> object = new NashornHiddenField<>(id, model, type);
         container.add(object);
         this.children.put(id, object);
         return object;
     }
 
     @Override
-    public <T> NashornHiddenField<T> createHiddenField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
-        NashornHiddenField<T> object = new NashornHiddenField<T>(id, model, type);
+    public <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(String id, IModel<T> model, Class<T> type) {
+        return createNumberTextField(container, id, model, type);
+    }
+
+    @Override
+    public <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(MarkupContainer container, String id, IModel<T> model, Class<T> type) {
+        NashornNumberTextField<T> object = new NashornNumberTextField<>(id, model, type);
         container.add(object);
         this.children.put(id, object);
         return object;
