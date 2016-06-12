@@ -1,12 +1,17 @@
 package com.angkorteam.mbaas.server.nashorn;
 
+import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
+import com.angkorteam.mbaas.configuration.Constants;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.basic.NashornLabel;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.*;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.NashornFileUpload;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.NashornMultiFileUpload;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultipleChoiceProvider;
@@ -14,10 +19,19 @@ import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornSingle
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornFormValidator;
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
 import com.angkorteam.mbaas.server.page.flow.FlowPage;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
+import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
@@ -25,7 +39,10 @@ import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.model.util.MapModel;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.validator.UrlValidator;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
+import java.io.File;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -44,6 +61,7 @@ public class Factory implements Serializable,
         IButtonFactory,
         IWebMarkupContainerFactory,
         ILabelFactory,
+        IJdbcTemplateFactory,
         IPropertyModelFactory,
         IChoiceRendererFactory,
         IPasswordTextFieldFactory,
@@ -63,8 +81,11 @@ public class Factory implements Serializable,
         ITimeTextFieldFactory,
         IListChoiceFactory,
         IRadioChoiceFactory,
+        IMultiFileUploadFactory,
         ICheckBoxMultipleChoiceFactory,
         ISelect2SingleChoiceFactory,
+        IFileUploadFactory,
+        IFileFactory,
         ICheckBoxFactory {
 
     private FlowPage container;
@@ -83,6 +104,69 @@ public class Factory implements Serializable,
         this.script = script;
         this.applicationCode = applicationCode;
         this.children = new HashMap<>();
+    }
+
+    @Override
+    public JdbcTemplate createJdbcTemplate() {
+        return ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+    }
+
+    @Override
+    public SimpleJdbcInsert createSimpleJdbcInsert(String tableName) {
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(tableName);
+        return jdbcInsert;
+    }
+
+    @Override
+    public SimpleJdbcUpdate createSimpleJdbcUpdate(String tableName) {
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
+        jdbcUpdate.withTableName(tableName);
+        return jdbcUpdate;
+    }
+
+    @Override
+    public File createFile(FileUpload fileUpload) {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+
+        String patternFolder = configuration.getString(Constants.PATTERN_FOLDER);
+        String repo = configuration.getString(Constants.RESOURCE_REPO);
+        String fileRepo = DateFormatUtils.format(new Date(), patternFolder);
+        File container = new File(repo + "/" + this.applicationCode + "/file" + fileRepo);
+        String extension = StringUtils.lowerCase(FilenameUtils.getExtension(fileUpload.getClientFileName()));
+        String fileId = UUID.randomUUID().toString();
+        String name = fileId + "." + extension;
+        container.mkdirs();
+        File file = new File(container, name);
+        try {
+            fileUpload.writeTo(file);
+        } catch (Exception e) {
+        }
+
+        long length = fileUpload.getSize();
+        String path = fileRepo;
+        String mime = fileUpload.getContentType();
+        String label = fileUpload.getClientFileName();
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.File.FILE_ID, fileId);
+        fields.put(Jdbc.File.APPLICATION_CODE, this.applicationCode);
+        fields.put(Jdbc.File.PATH, path);
+        fields.put(Jdbc.File.MIME, mime);
+        fields.put(Jdbc.File.EXTENSION, extension);
+        fields.put(Jdbc.File.LENGTH, length);
+        fields.put(Jdbc.File.LABEL, label);
+        fields.put(Jdbc.File.NAME, name);
+        fields.put(Jdbc.File.DATE_CREATED, new Date());
+        fields.put(Jdbc.File.USER_ID, this.container.getSession().getApplicationUserId());
+
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.FILE);
+        jdbcInsert.execute(fields);
+
+        return file;
     }
 
     @Override
@@ -378,42 +462,55 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornFilterForm createTable(String id, Map<String, Class<?>> tableColumns, Map<String, String> queryColumns, int rowsPerPage) {
-        return createTable(container, id, tableColumns, queryColumns, rowsPerPage);
+    public NashornFilterForm createTable(String id, JSObject columns, int rowsPerPage) {
+        return createTable(container, id, columns, rowsPerPage);
     }
 
     @Override
-    public NashornFilterForm createTable(MarkupContainer container, String id, Map<String, Class<?>> tableColumns, Map<String, String> queryColumns, int rowsPerPage) {
+    public NashornFilterForm createTable(MarkupContainer container, String id, JSObject columns, int rowsPerPage) {
+        if (!columns.isArray()) {
+            throw new WicketRuntimeException("columns is not right");
+        }
         NashornTableProvider tableProvider = new NashornTableProvider(this, id, this.script, this.applicationCode);
         List<IColumn<Map<String, Object>, String>> tableFields = new ArrayList<>();
-        for (Map.Entry<String, Class<?>> tableColumn : tableColumns.entrySet()) {
-            if (tableColumn.getValue() == java.time.LocalTime.class) {
-                NashornTimeColumn tableField = new NashornTimeColumn(Model.of(tableColumn.getKey()), tableColumn.getKey());
-                tableFields.add(tableField);
-                tableProvider.selectField(tableColumn.getKey(), queryColumns.get(tableColumn.getKey()), java.time.LocalTime.class);
-            } else if (tableColumn.getValue() == java.time.LocalDate.class) {
-                NashornDateColumn tableField = new NashornDateColumn(Model.of(tableColumn.getKey()), tableColumn.getKey());
-                tableFields.add(tableField);
-                tableProvider.selectField(tableColumn.getKey(), queryColumns.get(tableColumn.getKey()), java.time.LocalDate.class);
-            } else if (tableColumn.getValue() == java.time.LocalDateTime.class) {
-                NashornDateTimeColumn tableField = new NashornDateTimeColumn(Model.of(tableColumn.getKey()), tableColumn.getKey());
-                tableFields.add(tableField);
-                tableProvider.selectField(tableColumn.getKey(), queryColumns.get(tableColumn.getKey()), java.time.LocalDateTime.class);
-            } else if (tableColumn.getValue() == Boolean.class
-                    || tableColumn.getValue() == Byte.class
-                    || tableColumn.getValue() == Short.class
-                    || tableColumn.getValue() == Integer.class
-                    || tableColumn.getValue() == Long.class
-                    || tableColumn.getValue() == Float.class
-                    || tableColumn.getValue() == Double.class
-                    || tableColumn.getValue() == BigInteger.class
-                    || tableColumn.getValue() == BigDecimal.class
-                    || tableColumn.getValue() == Character.class
-                    || tableColumn.getValue() == String.class
-                    ) {
-                NashornTextColumn tableField = new NashornTextColumn(tableColumn.getValue(), Model.of(tableColumn.getKey()), tableColumn.getKey());
-                tableProvider.selectField(tableColumn.getKey(), queryColumns.get(tableColumn.getKey()), tableColumn.getValue());
-                tableFields.add(tableField);
+        if (columns instanceof ScriptObjectMirror) {
+            if (((ScriptObjectMirror) columns).size() > 0) {
+                for (int i = 0; i < ((ScriptObjectMirror) columns).size(); i++) {
+                    Object column = columns.getSlot(i);
+                    if (column instanceof ScriptObjectMirror) {
+                        Class<?> clazz = (Class<?>) ((ScriptObjectMirror) column).get("classColumn");
+                        String tableColumn = (String) ((ScriptObjectMirror) column).get("tableColumn");
+                        String queryColumn = (String) ((ScriptObjectMirror) column).get("queryColumn");
+                        if (clazz == java.time.LocalTime.class) {
+                            NashornTimeColumn tableField = new NashornTimeColumn(Model.of(tableColumn), tableColumn);
+                            tableFields.add(tableField);
+                            tableProvider.selectField(tableColumn, queryColumn, java.time.LocalTime.class);
+                        } else if (clazz == java.time.LocalDate.class) {
+                            NashornDateColumn tableField = new NashornDateColumn(Model.of(tableColumn), tableColumn);
+                            tableFields.add(tableField);
+                            tableProvider.selectField(tableColumn, queryColumn, java.time.LocalDate.class);
+                        } else if (clazz == java.time.LocalDateTime.class) {
+                            NashornDateTimeColumn tableField = new NashornDateTimeColumn(Model.of(tableColumn), tableColumn);
+                            tableFields.add(tableField);
+                            tableProvider.selectField(tableColumn, queryColumn, java.time.LocalDateTime.class);
+                        } else if (clazz == Boolean.class
+                                || clazz == Byte.class
+                                || clazz == Short.class
+                                || clazz == Integer.class
+                                || clazz == Long.class
+                                || clazz == Float.class
+                                || clazz == Double.class
+                                || clazz == BigInteger.class
+                                || clazz == BigDecimal.class
+                                || clazz == Character.class
+                                || clazz == String.class
+                                ) {
+                            NashornTextColumn tableField = new NashornTextColumn(clazz, Model.of(tableColumn), tableColumn);
+                            tableProvider.selectField(tableColumn, queryColumn, clazz);
+                            tableFields.add(tableField);
+                        }
+                    }
+                }
             }
         }
         NashornTable table = new NashornTable(id + "_table", tableFields, tableProvider, rowsPerPage);
@@ -537,6 +634,45 @@ public class Factory implements Serializable,
     @Override
     public NashornUrlTextField createUrlTextField(MarkupContainer container, String id, UrlValidator validator) {
         NashornUrlTextField object = new NashornUrlTextField(id, createPropertyModel(this.userModel, id), validator);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornFileUpload createFileUpload(String id) {
+        return createFileUpload(container, id);
+    }
+
+    @Override
+    public NashornFileUpload createFileUpload(MarkupContainer container, String id) {
+        NashornFileUpload object = new NashornFileUpload(id, createPropertyModel(this.userModel, id));
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornMultiFileUpload createMultiFileUpload(String id) {
+        return createMultiFileUpload(container, id);
+    }
+
+    @Override
+    public NashornMultiFileUpload createMultiFileUpload(MarkupContainer container, String id) {
+        NashornMultiFileUpload object = new NashornMultiFileUpload(id, createPropertyModel(this.userModel, id));
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornMultiFileUpload createMultiFileUpload(String id, int max) {
+        return createMultiFileUpload(container, id, max);
+    }
+
+    @Override
+    public NashornMultiFileUpload createMultiFileUpload(MarkupContainer container, String id, int max) {
+        NashornMultiFileUpload object = new NashornMultiFileUpload(id, createPropertyModel(this.userModel, id), max);
         container.add(object);
         this.children.put(id, object);
         return object;

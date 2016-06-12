@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
 
+import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
@@ -21,6 +22,8 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
     private Map<String, Object> userModel;
 
     private String script;
+
+    private Factory factory;
 
     public NashornButton(String id) {
         super(id);
