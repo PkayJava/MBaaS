@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.NashornFileUpload;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.NashornMultiFileUpload;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.image.NashornImage;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link.NashornLink;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultipleChoiceProvider;
@@ -74,6 +75,7 @@ public class Factory implements Serializable,
         IEmailTextFieldFactory,
         ITimeTextFieldFactory,
         IListChoiceFactory,
+        ILinkFactory,
         IRadioChoiceFactory,
         IImageFactory,
         IMultiFileUploadFactory,
@@ -645,6 +647,31 @@ public class Factory implements Serializable,
         container.add(object);
         this.children.put(id, object);
         return object;
+    }
+
+    @Override
+    public NashornLink createLink(String id, IModel<Map<String, Object>> model) {
+        return createLink(container, id, model);
+    }
+
+    @Override
+    public NashornLink createLink(MarkupContainer container, String id, IModel<Map<String, Object>> model) {
+        NashornLink object = new NashornLink(id, model);
+        object.setScript(this.script);
+        object.setDisk(this.disk);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornLink createLink(String id) {
+        return createLink(id, new MapModel<>(this.userModel));
+    }
+
+    @Override
+    public NashornLink createLink(MarkupContainer container, String id) {
+        return createLink(container, id, new MapModel<>(this.userModel));
     }
 
     public Component getChildren(String id) {
