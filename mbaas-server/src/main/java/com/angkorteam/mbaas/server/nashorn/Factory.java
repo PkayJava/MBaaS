@@ -98,10 +98,13 @@ public class Factory implements Serializable,
 
     private String applicationCode;
 
-    public Factory(FlowPage container, String applicationCode, String script, Map<String, Object> userModel) {
+    private Disk disk;
+
+    public Factory(FlowPage container, Disk disk, String applicationCode, String script, Map<String, Object> userModel) {
         this.container = container;
         this.userModel = userModel;
         this.script = script;
+        this.disk = disk;
         this.applicationCode = applicationCode;
         this.children = new HashMap<>();
     }
@@ -284,6 +287,7 @@ public class Factory implements Serializable,
     public NashornButton createButton(MarkupContainer container, String id) {
         NashornButton object = new NashornButton(id);
         object.setScript(this.script);
+        object.setDisk(this.disk);
         object.setUserModel(this.userModel);
         container.add(object);
         this.children.put(id, object);

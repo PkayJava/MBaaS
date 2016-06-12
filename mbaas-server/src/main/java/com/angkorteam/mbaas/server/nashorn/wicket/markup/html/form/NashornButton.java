@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
 
-import com.angkorteam.mbaas.server.nashorn.Factory;
+import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
@@ -12,7 +12,6 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Created by socheat on 5/31/16.
@@ -23,7 +22,7 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
 
     private String script;
 
-    private Factory factory;
+    private Disk disk;
 
     public NashornButton(String id) {
         super(id);
@@ -56,7 +55,7 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), jdbcTemplate, this, this.userModel);
+            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), this.disk, jdbcTemplate, this, this.userModel);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }
@@ -77,7 +76,7 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), jdbcTemplate, this, this.userModel);
+            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), this.disk, jdbcTemplate, this, this.userModel);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }
@@ -89,5 +88,13 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
 
     public void setScript(String script) {
         this.script = script;
+    }
+
+    public Disk getDisk() {
+        return disk;
+    }
+
+    public void setDisk(Disk disk) {
+        this.disk = disk;
     }
 }
