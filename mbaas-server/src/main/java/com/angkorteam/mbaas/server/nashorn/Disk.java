@@ -2,15 +2,18 @@ package com.angkorteam.mbaas.server.nashorn;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
@@ -30,6 +33,26 @@ public class Disk implements Serializable {
     public Disk(String applicationCode, String applicationUserId) {
         this.applicationCode = applicationCode;
         this.applicationUserId = applicationUserId;
+    }
+
+    public String httpFile(String fileId) {
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        Map<String, Object> fileRecord = null;
+        fileRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.FILE + " WHERE " + Jdbc.File.FILE_ID + " = ?", fileId);
+        StringBuffer address = new StringBuffer();
+        HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
+        address.append(HttpFunction.getHttpAddress(request)).append("/api/resource/").append(this.applicationCode).append("/file").append(fileRecord.get(Jdbc.File.PATH)).append("/").append(fileRecord.get(Jdbc.File.NAME));
+        return address.toString();
+    }
+
+    public String httpAsset(String assetId) {
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        Map<String, Object> assetRecord = null;
+        assetRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ASSET + " WHERE " + Jdbc.Asset.ASSET_ID + " = ?", assetId);
+        StringBuffer address = new StringBuffer();
+        HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
+        address.append(HttpFunction.getHttpAddress(request)).append("/api/resource/").append(this.applicationCode).append("/asset").append(assetRecord.get(Jdbc.Asset.PATH)).append("/").append(assetRecord.get(Jdbc.Asset.NAME));
+        return address.toString();
     }
 
     public String writeFile(FileUpload fileUpload) {

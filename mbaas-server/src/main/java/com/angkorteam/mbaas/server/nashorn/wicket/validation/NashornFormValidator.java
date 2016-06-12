@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.nashorn.wicket.validation;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.validation.IFormValidator;
@@ -22,7 +23,7 @@ public class NashornFormValidator implements IFormValidator {
 
     private String script;
 
-    private Map<String, Object> children;
+    private Map<String, Component> children;
 
     public NashornFormValidator() {
     }
@@ -82,11 +83,11 @@ public class NashornFormValidator implements IFormValidator {
         this.script = script;
     }
 
-    public Map<String, Object> getChildren() {
+    public Map<String, Component> getChildren() {
         return children;
     }
 
-    public void setChildren(Map<String, Object> children) {
+    public void setChildren(Map<String, Component> children) {
         this.children = children;
     }
 }

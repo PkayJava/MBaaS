@@ -3,8 +3,6 @@ package com.angkorteam.mbaas.server.nashorn;
 import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
-import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
@@ -12,6 +10,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.basic.NashornLabel
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.NashornFileUpload;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.NashornMultiFileUpload;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.image.NashornImage;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultipleChoiceProvider;
@@ -22,16 +21,12 @@ import com.angkorteam.mbaas.server.page.flow.FlowPage;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
@@ -42,7 +37,6 @@ import org.apache.wicket.validation.validator.UrlValidator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import java.io.File;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -81,16 +75,16 @@ public class Factory implements Serializable,
         ITimeTextFieldFactory,
         IListChoiceFactory,
         IRadioChoiceFactory,
+        IImageFactory,
         IMultiFileUploadFactory,
         ICheckBoxMultipleChoiceFactory,
         ISelect2SingleChoiceFactory,
         IFileUploadFactory,
-        IFileFactory,
         ICheckBoxFactory {
 
     private FlowPage container;
 
-    private Map<String, Object> children;
+    private Map<String, Component> children;
 
     private Map<String, Object> userModel;
 
@@ -128,48 +122,6 @@ public class Factory implements Serializable,
         SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
         jdbcUpdate.withTableName(tableName);
         return jdbcUpdate;
-    }
-
-    @Override
-    public File createFile(FileUpload fileUpload) {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-
-        String patternFolder = configuration.getString(Constants.PATTERN_FOLDER);
-        String repo = configuration.getString(Constants.RESOURCE_REPO);
-        String fileRepo = DateFormatUtils.format(new Date(), patternFolder);
-        File container = new File(repo + "/" + this.applicationCode + "/file" + fileRepo);
-        String extension = StringUtils.lowerCase(FilenameUtils.getExtension(fileUpload.getClientFileName()));
-        String fileId = UUID.randomUUID().toString();
-        String name = fileId + "." + extension;
-        container.mkdirs();
-        File file = new File(container, name);
-        try {
-            fileUpload.writeTo(file);
-        } catch (Exception e) {
-        }
-
-        long length = fileUpload.getSize();
-        String path = fileRepo;
-        String mime = fileUpload.getContentType();
-        String label = fileUpload.getClientFileName();
-        Map<String, Object> fields = new HashMap<>();
-        fields.put(Jdbc.File.FILE_ID, fileId);
-        fields.put(Jdbc.File.APPLICATION_CODE, this.applicationCode);
-        fields.put(Jdbc.File.PATH, path);
-        fields.put(Jdbc.File.MIME, mime);
-        fields.put(Jdbc.File.EXTENSION, extension);
-        fields.put(Jdbc.File.LENGTH, length);
-        fields.put(Jdbc.File.LABEL, label);
-        fields.put(Jdbc.File.NAME, name);
-        fields.put(Jdbc.File.DATE_CREATED, new Date());
-        fields.put(Jdbc.File.USER_ID, this.container.getSession().getApplicationUserId());
-
-        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-        jdbcInsert.withTableName(Jdbc.FILE);
-        jdbcInsert.execute(fields);
-
-        return file;
     }
 
     @Override
@@ -680,5 +632,22 @@ public class Factory implements Serializable,
         container.add(object);
         this.children.put(id, object);
         return object;
+    }
+
+    @Override
+    public NashornImage createImage(String id) {
+        return createImage(container, id);
+    }
+
+    @Override
+    public NashornImage createImage(MarkupContainer container, String id) {
+        NashornImage object = new NashornImage(id, createPropertyModel(this.userModel, id));
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    public Component getChildren(String id) {
+        return this.children.get(id);
     }
 }
