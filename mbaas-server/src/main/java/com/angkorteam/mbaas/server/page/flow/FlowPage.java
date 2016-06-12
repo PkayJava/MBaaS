@@ -50,7 +50,7 @@ public class FlowPage extends MasterPage {
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
         if (iOnInitialize != null) {
-            iOnInitialize.onInitialize(RequestCycle.get(), jdbcTemplate, this.disk, this.factory, this.userModel);
+            iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.userModel);
         }
     }
 
@@ -67,7 +67,7 @@ public class FlowPage extends MasterPage {
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
         if (iOnBeforeRender != null) {
             JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-            iOnBeforeRender.onBeforeRender(RequestCycle.get(), jdbcTemplate, this.disk, this.factory, this.userModel);
+            iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.userModel);
         }
     }
 
@@ -78,13 +78,13 @@ public class FlowPage extends MasterPage {
 
     public interface IOnBeforeRender extends Serializable {
 
-        void onBeforeRender(RequestCycle requestCycle, JdbcTemplate jdbcTemplate, Disk disk, Factory factory, Map<String, Object> userModel);
+        void onBeforeRender(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> userModel);
 
     }
 
     public interface IOnInitialize extends Serializable {
 
-        void onInitialize(RequestCycle requestCycle, JdbcTemplate jdbcTemplate, Disk disk, Factory factory, Map<String, Object> userModel);
+        void onInitialize(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> userModel);
 
     }
 }
