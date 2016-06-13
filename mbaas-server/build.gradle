@@ -46,8 +46,8 @@ dependencies {
     compile 'org.springframework:spring-jdbc:' + springVersion
     compile 'org.springframework:spring-webmvc:' + springVersion
 
-    compile 'org.springframework.integration:spring-integration-core:' + springVersion
-    compile 'org.springframework.integration:spring-integration-mail:' + springVersion
+    compile 'org.springframework.integration:spring-integration-core:' + springIntegrationVersion
+    compile 'org.springframework.integration:spring-integration-mail:' + springIntegrationVersion
 
     compile 'org.apache.commons:commons-email:' + commonsemailVersion
 

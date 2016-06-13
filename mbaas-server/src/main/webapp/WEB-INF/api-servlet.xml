@@ -6,11 +6,11 @@
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:task="http://www.springframework.org/schema/task"
        xmlns:security="http://www.springframework.org/schema/security"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
-       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.1.xsd
-       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.2.xsd">
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd">
 
     <context:component-scan base-package="com.angkorteam.mbaas.server"/>
 
@@ -18,8 +18,16 @@
 
     <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
         <mvc:argument-resolvers>
-            <ref bean="identityResolver"/>
-            <ref bean="scriptEngineResolver"/>
+            <bean id="identityResolver"
+                  class="com.angkorteam.mbaas.server.spring.IdentityHandlerMethodArgumentResolver">
+                <property name="context" ref="context"/>
+                <property name="applicationDataSource" ref="applicationDataSource"/>
+            </bean>
+            <bean id="scriptEngineResolver"
+                  class="com.angkorteam.mbaas.server.spring.ScriptEngineHandlerMethodArgumentResolver">
+                <property name="scriptEngineFactory" ref="scriptEngineFactory"/>
+                <property name="classFilter" ref="classFilter"/>
+            </bean>
         </mvc:argument-resolvers>
         <mvc:message-converters>
             <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter">
@@ -29,7 +37,7 @@
         <mvc:path-matching path-matcher="pathMatcher" suffix-pattern="false" registered-suffixes-only="true"/>
     </mvc:annotation-driven>
 
-    <mvc:interceptors path-matcher="pathMatcher">
+    <mvc:interceptors>
         <ref bean="interceptor"/>
     </mvc:interceptors>
 
@@ -39,11 +47,7 @@
         <property name="applicationDataSource" ref="applicationDataSource"/>
     </bean>
 
-    <mvc:resources mapping="/resource/**" location="file:${resource.repo}/" cache-period="604800">
-        <mvc:cache-control cache-private="true" cache-public="true" max-age="604800" no-store="true" no-cache="true"
-                           must-revalidate="true" no-transform="true" proxy-revalidate="true" s-maxage="604800"/>
-        <mvc:resource-chain resource-cache="true" cache-name="MBaaS" auto-registration="true"/>
-    </mvc:resources>
+    <mvc:resources mapping="/resource/**" location="file:${resource.repo}/" cache-period="604800"/>
 
     <task:annotation-driven executor="executor" scheduler="scheduler"/>
 
@@ -127,20 +131,9 @@
 
     <bean id="sigar" class="com.angkorteam.mbaas.server.factory.SigarFactoryBean"/>
 
-    <bean id="identityResolver" class="com.angkorteam.mbaas.server.spring.IdentityHandlerMethodArgumentResolver">
-        <property name="context" ref="context"/>
-        <property name="applicationDataSource" ref="applicationDataSource"/>
-    </bean>
-
     <bean id="scriptEngineFactory" class="com.angkorteam.mbaas.server.factory.ScriptEngineFactoryBean"/>
 
     <bean id="classFilter" class="com.angkorteam.mbaas.server.factory.ClassFilterFactoryBean"/>
-
-    <bean id="scriptEngineResolver"
-          class="com.angkorteam.mbaas.server.spring.ScriptEngineHandlerMethodArgumentResolver">
-        <property name="scriptEngineFactory" ref="scriptEngineFactory"/>
-        <property name="classFilter" ref="classFilter"/>
-    </bean>
 
     <bean id="serviceActivator" class="com.angkorteam.mbaas.server.service.IMAPServiceActivator"/>
 
