@@ -1,6 +1,5 @@
-CREATE TABLE page (
+CREATE TABLE master_page (
 
-  page_id          VARCHAR(100) NOT NULL,
   master_page_id   VARCHAR(100) NOT NULL,
   title            VARCHAR(100) NOT NULL,
   user_id          VARCHAR(100) NOT NULL,
@@ -15,18 +14,18 @@ CREATE TABLE page (
   date_created     DATETIME     NOT NULL,
   date_modified    DATETIME     NOT NULL,
 
+  INDEX (modified),
   INDEX (title),
-  INDEX (master_page_id),
   INDEX (description),
   INDEX (user_id),
   INDEX (menu_id),
   INDEX (security),
-  FULLTEXT (javascript),
   FULLTEXT (html),
+  FULLTEXT (javascript),
   INDEX (modified),
   FULLTEXT (stage_html),
   FULLTEXT (stage_javascript),
   INDEX (date_created),
   INDEX (date_modified),
-  PRIMARY KEY (page_id)
+  PRIMARY KEY (master_page_id)
 );

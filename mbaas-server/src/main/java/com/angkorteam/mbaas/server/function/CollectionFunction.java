@@ -30,7 +30,7 @@ public class CollectionFunction {
         }
     }
 
-    public static void createCollection(JdbcTemplate jdbcTemplate, String applicationCode, String ownerApplicationUserId, CollectionCreateRequest requestBody) {
+    public static void createCollection(JdbcTemplate jdbcTemplate, String applicationCode, String ownerUserId, CollectionCreateRequest requestBody) {
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         String primaryName = requestBody.getCollectionName() + "_id";
         StringBuilder buffer = new StringBuilder();
@@ -77,7 +77,7 @@ public class CollectionFunction {
             fields.put(Jdbc.Collection.SYSTEM, false);
             fields.put(Jdbc.Collection.LOCKED, true);
             fields.put(Jdbc.Collection.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Collection.OWNER_APPLICATION_USER_ID, ownerApplicationUserId);
+            fields.put(Jdbc.Collection.OWNER_USER_ID, ownerUserId);
             SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
             jdbcInsert.withTableName(Jdbc.COLLECTION);
             jdbcInsert.execute(fields);

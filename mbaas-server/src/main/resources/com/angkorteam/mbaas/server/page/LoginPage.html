@@ -12,11 +12,13 @@
         <p class="login-box-msg">Mobile Backend as a Service</p>
 
         <form wicket:id="form">
+            <wicket:enclosure child="hostnameField">
             <div class="form-group">
-                <label wicket:for="secretField">Secret</label>
-                <input wicket:id="secretField" type="text" class="form-control"/>
-                <span wicket:id="secretFeedback" class="help-block"/>
+                <label wicket:for="hostnameField">Hostname</label>
+                <input wicket:id="hostnameField" type="text" class="form-control"/>
+                <span wicket:id="hostnameFeedback" class="help-block"/>
             </div>
+            </wicket:enclosure>
             <div class="form-group">
                 <label wicket:for="loginField">Login</label>
                 <input wicket:id="loginField" type="text" class="form-control"/>

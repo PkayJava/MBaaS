@@ -26,7 +26,7 @@ public class CollectionProvider extends JooqProvider {
         this.applicationCode = applicationCode;
         this.collectionTable = DSL.table(Jdbc.COLLECTION).as("collectionTable");
         this.userTable = DSL.table(Jdbc.USER).as("userTable");
-        this.from = this.collectionTable.join(this.userTable).on(DSL.field(this.collectionTable.getName() + "." + Jdbc.Collection.OWNER_APPLICATION_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
+        this.from = this.collectionTable.join(this.userTable).on(DSL.field(this.collectionTable.getName() + "." + Jdbc.Collection.OWNER_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
     }
 
     public Field<String> getApplicationUser() {

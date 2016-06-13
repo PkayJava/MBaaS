@@ -6,8 +6,10 @@ import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackP
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.HostnameTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRoleRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.HostnameRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.function.ApplicationFunction;
@@ -164,6 +166,14 @@ public class ApplicationCreatePage extends MBaaSPage {
             applicationRoleRecord.setName(oauthRole);
             applicationRoleRecord.store();
         }
+
+        HostnameTable hostnameTable = Tables.HOSTNAME.as("hostnameTable");
+        HostnameRecord hostnameRecord = context.newRecord(hostnameTable);
+        hostnameRecord.setHostnameId(UUID.randomUUID().toString());
+        hostnameRecord.setDateCreated(new Date());
+        hostnameRecord.setApplicationId(applicationId);
+        hostnameRecord.setFqdn(StringUtils.lowerCase(code) + ".ddns.net");
+        hostnameRecord.store();
 
         JdbcTemplate jdbcTemplate = getJdbcTemplate();
         jdbcTemplate.execute("CREATE USER '" + mysqlUsername + "'@'%' IDENTIFIED BY '" + mysqlPassword + "'");
