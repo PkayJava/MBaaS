@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-    <entry key="logic.script"><![CDATA[/*
+    <entry key="page.script"><![CDATA[/*
 Page onInitialize
 */
 function onInitialize(requestCycle, jdbcTemplate, disk, factory, userModel) {
@@ -12,7 +12,7 @@ Page onBeforeRender
 */
 function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, userModel) {
 }]]></entry>
-    <entry key="logic.html"><![CDATA[<!DOCTYPE html>
+    <entry key="page.html"><![CDATA[<!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
 <head>
   <meta charset="utf-8"/>

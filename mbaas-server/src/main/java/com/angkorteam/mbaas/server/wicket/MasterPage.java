@@ -117,7 +117,7 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuClientClass = "";
 
     private String mmenuJobClass = "";
-    private String mmenuLogicClass = "";
+    private String mmenuPageClass = "";
     private String mmenuMenuClass = "";
 
     private WebMarkupContainer menuGeneral;
@@ -276,9 +276,9 @@ public abstract class MasterPage extends AdminLTEPage {
             mmenuJob.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJobClass")));
             this.menuLogicConsole.add(mmenuJob);
 
-            WebMarkupContainer mmenuLogic = new WebMarkupContainer("mmenuLogic");
-            mmenuLogic.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuLogicClass")));
-            this.menuLogicConsole.add(mmenuLogic);
+            WebMarkupContainer mmenuPage = new WebMarkupContainer("mmenuPage");
+            mmenuPage.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuPageClass")));
+            this.menuLogicConsole.add(mmenuPage);
 
             WebMarkupContainer mmenuMenu = new WebMarkupContainer("mmenuMenu");
             mmenuMenu.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMenuClass")));
@@ -479,9 +479,9 @@ public abstract class MasterPage extends AdminLTEPage {
         }
 
         if (getPage() instanceof PageCreatePage || getPage() instanceof PageManagementPage || getPage() instanceof PageModifyPage) {
-            this.mmenuLogicClass = "active";
+            this.mmenuPageClass = "active";
         } else {
-            this.mmenuLogicClass = "";
+            this.mmenuPageClass = "";
         }
 
         if (getPage() instanceof MenuCreatePage || getPage() instanceof MenuManagementPage || getPage() instanceof MenuModifyPage) {
