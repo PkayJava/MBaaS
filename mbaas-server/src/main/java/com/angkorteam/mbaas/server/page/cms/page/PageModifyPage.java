@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.logic;
+package com.angkorteam.mbaas.server.page.cms.page;
 
 import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
@@ -8,7 +8,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptText
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.page.flow.FlowPage;
+import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.renderer.MenuChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.MenuChoiceProvider;
 import com.angkorteam.mbaas.server.validator.JobNameValidator;
@@ -31,10 +31,10 @@ import java.util.Map;
  * Created by socheat on 5/26/16.
  */
 @AuthorizeInstantiation({"administrator"})
-@Mount("/logic/modify")
-public class LogicModifyPage extends MasterPage {
+@Mount("/cms/page/modify")
+public class PageModifyPage extends MasterPage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogicModifyPage.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PageModifyPage.class);
 
     private String pageId;
 
@@ -137,9 +137,9 @@ public class LogicModifyPage extends MasterPage {
         SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
         jdbcUpdate.withTableName(Jdbc.PAGE);
         jdbcUpdate.execute(fields, wheres);
-        setResponsePage(LogicManagementPage.class);
-        String cacheKey = FlowPage.class.getName() + "_" + this.pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-        String filename = FlowPage.class.getName().replaceAll("\\.", "/") + "_" + this.pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+        setResponsePage(PageManagementPage.class);
+        String cacheKey = PagePage.class.getName() + "_" + this.pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+        String filename = PagePage.class.getName().replaceAll("\\.", "/") + "_" + this.pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
         File temp = new File(FileUtils.getTempDirectory(), filename);
         FileUtils.deleteQuietly(temp);
         getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);

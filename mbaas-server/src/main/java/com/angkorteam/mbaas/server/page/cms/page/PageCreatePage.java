@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.logic;
+package com.angkorteam.mbaas.server.page.cms.page;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
@@ -29,10 +29,10 @@ import java.util.UUID;
  * Created by socheat on 5/26/16.
  */
 @AuthorizeInstantiation({"administrator"})
-@Mount("/logic/create")
-public class LogicCreatePage extends MasterPage {
+@Mount("/cms/page/create")
+public class PageCreatePage extends MasterPage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogicCreatePage.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PageCreatePage.class);
 
     private String javascript;
     private JavascriptTextArea javascriptField;
@@ -123,7 +123,7 @@ public class LogicCreatePage extends MasterPage {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
         jdbcInsert.withTableName(Jdbc.PAGE);
         jdbcInsert.execute(fields);
-        setResponsePage(LogicManagementPage.class);
+        setResponsePage(PageManagementPage.class);
     }
 
 }

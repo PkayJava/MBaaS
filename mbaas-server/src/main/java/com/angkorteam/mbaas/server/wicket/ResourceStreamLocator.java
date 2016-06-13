@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.page.flow.FlowPage;
+import com.angkorteam.mbaas.server.page.PagePage;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.core.util.resource.locator.IResourceNameIterator;
 import org.apache.wicket.core.util.resource.locator.IResourceStreamLocator;
@@ -39,7 +39,7 @@ public class ResourceStreamLocator implements IResourceStreamLocator {
     @Override
     public IResourceStream locate(Class<?> clazz, String path, String style, String variation, Locale locale, String extension, boolean strict) {
         LOGGER.info("locate : clazz {} path {} style {} variation {} locale {} extension {} strict {}", clazz.getName(), path == null ? "" : path, style == null ? "" : style, variation == null ? "" : variation, locale == null ? "" : locale.getDisplayName(), extension == null ? "" : extension, strict);
-        if (FlowPage.class.getName().replaceAll("\\.", "/").equals(path)) {
+        if (PagePage.class.getName().replaceAll("\\.", "/").equals(path)) {
             Application application = ApplicationUtils.getApplication();
             JdbcTemplate jdbcTemplate = application.getJdbcTemplate(style);
             String html = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.HTML + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", String.class, variation);

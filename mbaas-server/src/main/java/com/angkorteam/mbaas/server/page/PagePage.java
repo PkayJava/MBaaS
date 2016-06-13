@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.flow;
+package com.angkorteam.mbaas.server.page;
 
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.Disk;
@@ -18,8 +18,8 @@ import java.util.Map;
 /**
  * Created by socheat on 5/28/16.
  */
-@Mount("/flow")
-public class FlowPage extends MasterPage {
+@Mount("/page")
+public class PagePage extends MasterPage {
 
     private String pageId;
 

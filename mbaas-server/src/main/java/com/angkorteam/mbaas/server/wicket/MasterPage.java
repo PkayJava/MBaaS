@@ -27,16 +27,16 @@ import com.angkorteam.mbaas.server.page.document.DocumentModifyPage;
 import com.angkorteam.mbaas.server.page.file.FileCreatePage;
 import com.angkorteam.mbaas.server.page.file.FileManagementPage;
 import com.angkorteam.mbaas.server.page.file.FileModifyPage;
-import com.angkorteam.mbaas.server.page.flow.FlowPage;
+import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptCreatePage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptManagementPage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptModifyPage;
 import com.angkorteam.mbaas.server.page.job.JobCreatePage;
 import com.angkorteam.mbaas.server.page.job.JobManagementPage;
 import com.angkorteam.mbaas.server.page.job.JobModifyPage;
-import com.angkorteam.mbaas.server.page.logic.LogicCreatePage;
-import com.angkorteam.mbaas.server.page.logic.LogicManagementPage;
-import com.angkorteam.mbaas.server.page.logic.LogicModifyPage;
+import com.angkorteam.mbaas.server.page.cms.page.PageCreatePage;
+import com.angkorteam.mbaas.server.page.cms.page.PageManagementPage;
+import com.angkorteam.mbaas.server.page.cms.page.PageModifyPage;
 import com.angkorteam.mbaas.server.page.menu.MenuCreatePage;
 import com.angkorteam.mbaas.server.page.menu.MenuManagementPage;
 import com.angkorteam.mbaas.server.page.menu.MenuModifyPage;
@@ -315,7 +315,7 @@ public abstract class MasterPage extends AdminLTEPage {
                     this.mmenuPages.put(pageId, "");
                     PageParameters pageParameters = new PageParameters();
                     pageParameters.add("pageId", pageId);
-                    BookmarkablePageLink<Void> pageLink = new BookmarkablePageLink<>("pageLink", FlowPage.class, pageParameters);
+                    BookmarkablePageLink<Void> pageLink = new BookmarkablePageLink<>("pageLink", PagePage.class, pageParameters);
                     page.add(pageLink);
                     Label pageLabel = new Label("pageLabel", (String) pageRecord.get(Jdbc.Page.TITLE));
                     pageLink.add(pageLabel);
@@ -345,7 +345,7 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuPages.put(key, "");
         }
 
-        if (getPage() instanceof FlowPage) {
+        if (getPage() instanceof PagePage) {
             String pageId = getPageParameters().get("pageId").toString("");
             Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
             String menuId = (String) pageRecord.get(Jdbc.Page.MENU_ID);
@@ -478,7 +478,7 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuJobClass = "";
         }
 
-        if (getPage() instanceof LogicCreatePage || getPage() instanceof LogicManagementPage || getPage() instanceof LogicModifyPage) {
+        if (getPage() instanceof PageCreatePage || getPage() instanceof PageManagementPage || getPage() instanceof PageModifyPage) {
             this.mmenuLogicClass = "active";
         } else {
             this.mmenuLogicClass = "";

@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.logic;
+package com.angkorteam.mbaas.server.page.cms.page;
 
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
@@ -7,7 +7,7 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.page.flow.FlowPage;
+import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.page.job.JobManagementPage;
 import com.angkorteam.mbaas.server.provider.PageProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
@@ -30,8 +30,8 @@ import java.util.Map;
  * Created by socheat on 5/26/16.
  */
 @AuthorizeInstantiation({"administrator"})
-@Mount("/logic/management")
-public class LogicManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
+@Mount("/cms/page/management")
+public class PageManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     @Override
     public String getPageHeader() {
@@ -73,7 +73,7 @@ public class LogicManagementPage extends MasterPage implements ActionFilteredJoo
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
             parameters.add("pageId", object.get("pageId"));
-            setResponsePage(LogicModifyPage.class, parameters);
+            setResponsePage(PageModifyPage.class, parameters);
         }
         if ("Grant".equals(link)) {
             jdbcTemplate.update("UPDATE " + Jdbc.PAGE + " SET " + Jdbc.Job.SECURITY + " = ? WHERE " + Jdbc.Page.PAGE_ID + " = ?", SecurityEnum.Granted.getLiteral(), pageId);
@@ -84,8 +84,8 @@ public class LogicManagementPage extends MasterPage implements ActionFilteredJoo
             return;
         }
         if ("Delete".equals(link)) {
-            String cacheKey = FlowPage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            String filename = FlowPage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+            String cacheKey = PagePage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+            String filename = PagePage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
             File temp = new File(FileUtils.getTempDirectory(), filename);
             FileUtils.deleteQuietly(temp);
             getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
