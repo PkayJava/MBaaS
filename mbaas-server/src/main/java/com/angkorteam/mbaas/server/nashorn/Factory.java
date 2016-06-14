@@ -18,7 +18,6 @@ import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultip
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornSingleChoiceProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornFormValidator;
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
-import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -84,7 +83,7 @@ public class Factory implements Serializable,
         IFileUploadFactory,
         ICheckBoxFactory {
 
-    private PagePage container;
+    private MarkupContainer container;
 
     private Map<String, Component> children;
 
@@ -96,7 +95,7 @@ public class Factory implements Serializable,
 
     private Disk disk;
 
-    public Factory(PagePage container, Disk disk, String applicationCode, String script, Map<String, Object> userModel) {
+    public Factory(MarkupContainer container, Disk disk, String applicationCode, String script, Map<String, Object> userModel) {
         this.container = container;
         this.userModel = userModel;
         this.script = script;

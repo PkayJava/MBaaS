@@ -12,42 +12,42 @@ import java.util.List;
 /**
  * Created by socheat on 5/28/16.
  */
-public class PageProvider extends JooqProvider {
+public class MasterPageProvider extends JooqProvider {
 
     private TableLike<?> from;
 
     private final String applicationCode;
 
-    private Table<?> pageTable;
+    private Table<?> masterPageTable;
 
-    public PageProvider(String applicationCode) {
+    public MasterPageProvider(String applicationCode) {
         this.applicationCode = applicationCode;
-        this.pageTable = DSL.table(Jdbc.PAGE).as("pageTable");
-        this.from = this.pageTable;
+        this.masterPageTable = DSL.table(Jdbc.MASTER_PAGE).as("masterPageTable");
+        this.from = this.masterPageTable;
     }
 
-    public Field<String> getPageId() {
-        return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.PAGE_ID, String.class);
+    public Field<String> getMasterPageId() {
+        return DSL.field(this.masterPageTable.getName() + "." + Jdbc.MasterPage.MASTER_PAGE_ID, String.class);
     }
 
     public Field<Boolean> getModified() {
-        return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.MODIFIED, Boolean.class);
-    }
-
-    public Field<String> getUserId() {
-        return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.USER_ID, String.class);
+        return DSL.field(this.masterPageTable.getName() + "." + Jdbc.MasterPage.MODIFIED, Boolean.class);
     }
 
     public Field<String> getCode() {
-        return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.CODE, String.class);
+        return DSL.field(this.masterPageTable.getName() + "." + Jdbc.MasterPage.CODE, String.class);
+    }
+
+    public Field<String> getUserId() {
+        return DSL.field(this.masterPageTable.getName() + "." + Jdbc.MasterPage.USER_ID, String.class);
     }
 
     public Field<String> getTitle() {
-        return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.TITLE, String.class);
+        return DSL.field(this.masterPageTable.getName() + "." + Jdbc.MasterPage.TITLE, String.class);
     }
 
     public Field<String> getDescription() {
-        return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.DESCRIPTION, String.class);
+        return DSL.field(this.masterPageTable.getName() + "." + Jdbc.MasterPage.DESCRIPTION, String.class);
     }
 
     @Override

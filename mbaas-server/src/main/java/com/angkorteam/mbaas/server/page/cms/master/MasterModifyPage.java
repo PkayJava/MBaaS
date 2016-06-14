@@ -1,46 +1,47 @@
-package com.angkorteam.mbaas.server.page.cms.page;
+package com.angkorteam.mbaas.server.page.cms.master;
 
+import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.HtmlTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
-import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.MenuChoiceRenderer;
-import com.angkorteam.mbaas.server.select2.MenuChoiceProvider;
+import com.angkorteam.mbaas.server.page.cms.page.PageManagementPage;
+import com.angkorteam.mbaas.server.validator.JobNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import org.apache.commons.io.FileUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Created by socheat on 5/26/16.
  */
 @AuthorizeInstantiation({"administrator"})
-@Mount("/cms/page/create")
-public class PageCreatePage extends MasterPage {
+@Mount("/cms/master/modify")
+public class MasterModifyPage extends MasterPage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PageCreatePage.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MasterModifyPage.class);
 
-    private String code;
-    private TextField<String> codeField;
-    private TextFeedbackPanel codeFeedback;
+    private String masterPageId;
 
     private String javascript;
     private JavascriptTextArea javascriptField;
     private TextFeedbackPanel javascriptFeedback;
+
+    private String code;
+    private Label codeLabel;
 
     private String html;
     private HtmlTextArea htmlField;
@@ -54,16 +55,12 @@ public class PageCreatePage extends MasterPage {
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
 
-    private Map<String, Object> menu;
-    private Select2SingleChoice<Map<String, Object>> menuField;
-    private TextFeedbackPanel menuFeedback;
-
     private Form<Void> form;
     private Button saveButton;
 
     @Override
     public String getPageHeader() {
-        return "Create New Page";
+        return "Modify Layout";
     }
 
     @Override
@@ -72,38 +69,37 @@ public class PageCreatePage extends MasterPage {
         this.form = new Form<>("form");
         add(this.form);
 
-        this.menuField = new Select2SingleChoice<>("menuField", new PropertyModel<>(this, "menu"), new MenuChoiceProvider(getSession().getApplicationCode()), new MenuChoiceRenderer());
-        this.menuField.setRequired(true);
-        this.form.add(this.menuField);
-        this.menuFeedback = new TextFeedbackPanel("menuFeedback", this.menuField);
-        this.form.add(this.menuFeedback);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        this.masterPageId = getPageParameters().get("masterPageId").toString("");
+        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
 
+        this.title = (String) pageRecord.get(Jdbc.MasterPage.TITLE);
         this.titleField = new TextField<>("titleField", new PropertyModel<>(this, "title"));
+        this.titleField.add(new JobNameValidator(getSession().getApplicationCode()));
         this.titleField.setRequired(true);
         this.form.add(this.titleField);
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);
 
-        this.codeField = new TextField<>("codeField", new PropertyModel<>(this, "code"));
-        this.codeField.setRequired(true);
-        this.form.add(this.codeField);
-        this.codeFeedback = new TextFeedbackPanel("codeFeedback", this.codeField);
-        this.form.add(this.codeFeedback);
+        this.code = (String) pageRecord.get(Jdbc.MasterPage.CODE);
+        this.codeLabel = new Label("codeLabel", new PropertyModel<>(this, "code"));
+        this.form.add(codeLabel);
 
-        this.javascript = getString("page.script");
+        this.javascript = (String) pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT);
         this.javascriptField = new JavascriptTextArea("javascriptField", new PropertyModel<>(this, "javascript"));
         this.javascriptField.setRequired(true);
         this.form.add(this.javascriptField);
         this.javascriptFeedback = new TextFeedbackPanel("javascriptFeedback", this.javascriptField);
         this.form.add(this.javascriptFeedback);
 
+        this.description = (String) pageRecord.get(Jdbc.MasterPage.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
         this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.html = getString("page.html");
+        this.html = (String) pageRecord.get(Jdbc.MasterPage.STAGE_HTML);
         this.htmlField = new HtmlTextArea("htmlField", new PropertyModel<>(this, "html"));
         this.htmlField.setRequired(true);
         this.form.add(this.htmlField);
@@ -117,23 +113,26 @@ public class PageCreatePage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        String pageId = UUID.randomUUID().toString();
+        Map<String, Object> wheres = new HashMap<>();
+        wheres.put(Jdbc.MasterPage.MASTER_PAGE_ID, this.masterPageId);
         Map<String, Object> fields = new HashMap<>();
-        fields.put(Jdbc.Page.PAGE_ID, pageId);
-        fields.put(Jdbc.Page.DATE_CREATED, new Date());
-        fields.put(Jdbc.Page.DATE_MODIFIED, new Date());
-        fields.put(Jdbc.Page.TITLE, this.title);
-        fields.put(Jdbc.Page.CODE, this.code);
-        fields.put(Jdbc.Page.MENU_ID, this.menu.get(Jdbc.Menu.MENU_ID));
-        fields.put(Jdbc.Page.DESCRIPTION, this.description);
-        fields.put(Jdbc.Page.JAVASCRIPT, this.javascript);
-        fields.put(Jdbc.Page.HTML, this.html);
-        fields.put(Jdbc.Page.USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.MasterPage.TITLE, this.title);
+        fields.put(Jdbc.MasterPage.DESCRIPTION, this.description);
+        fields.put(Jdbc.MasterPage.STAGE_JAVASCRIPT, this.javascript);
+        fields.put(Jdbc.MasterPage.STAGE_HTML, this.html);
+        fields.put(Jdbc.MasterPage.MODIFIED, true);
+        fields.put(Jdbc.MasterPage.DATE_MODIFIED, new Date());
+
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-        jdbcInsert.withTableName(Jdbc.PAGE);
-        jdbcInsert.execute(fields);
-        setResponsePage(PageManagementPage.class);
+        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
+        jdbcUpdate.withTableName(Jdbc.MASTER_PAGE);
+        jdbcUpdate.execute(fields, wheres);
+        String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + this.masterPageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+        String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + this.masterPageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+        File temp = new File(FileUtils.getTempDirectory(), filename);
+        FileUtils.deleteQuietly(temp);
+        getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+        setResponsePage(MasterManagementPage.class);
     }
 
 }

@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.page.LoginPage;
+import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.page.asset.AssetCreatePage;
 import com.angkorteam.mbaas.server.page.asset.AssetManagementPage;
 import com.angkorteam.mbaas.server.page.asset.AssetModifyPage;
@@ -19,6 +20,12 @@ import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
 import com.angkorteam.mbaas.server.page.client.ClientCreatePage;
 import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
 import com.angkorteam.mbaas.server.page.client.ClientModifyPage;
+import com.angkorteam.mbaas.server.page.cms.master.MasterCreatePage;
+import com.angkorteam.mbaas.server.page.cms.master.MasterManagementPage;
+import com.angkorteam.mbaas.server.page.cms.master.MasterModifyPage;
+import com.angkorteam.mbaas.server.page.cms.page.PageCreatePage;
+import com.angkorteam.mbaas.server.page.cms.page.PageManagementPage;
+import com.angkorteam.mbaas.server.page.cms.page.PageModifyPage;
 import com.angkorteam.mbaas.server.page.collection.CollectionCreatePage;
 import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
 import com.angkorteam.mbaas.server.page.document.DocumentCreatePage;
@@ -27,16 +34,12 @@ import com.angkorteam.mbaas.server.page.document.DocumentModifyPage;
 import com.angkorteam.mbaas.server.page.file.FileCreatePage;
 import com.angkorteam.mbaas.server.page.file.FileManagementPage;
 import com.angkorteam.mbaas.server.page.file.FileModifyPage;
-import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptCreatePage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptManagementPage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptModifyPage;
 import com.angkorteam.mbaas.server.page.job.JobCreatePage;
 import com.angkorteam.mbaas.server.page.job.JobManagementPage;
 import com.angkorteam.mbaas.server.page.job.JobModifyPage;
-import com.angkorteam.mbaas.server.page.cms.page.PageCreatePage;
-import com.angkorteam.mbaas.server.page.cms.page.PageManagementPage;
-import com.angkorteam.mbaas.server.page.cms.page.PageModifyPage;
 import com.angkorteam.mbaas.server.page.menu.MenuCreatePage;
 import com.angkorteam.mbaas.server.page.menu.MenuManagementPage;
 import com.angkorteam.mbaas.server.page.menu.MenuModifyPage;
@@ -118,6 +121,7 @@ public abstract class MasterPage extends AdminLTEPage {
 
     private String mmenuJobClass = "";
     private String mmenuPageClass = "";
+    private String mmenuMasterClass = "";
     private String mmenuMenuClass = "";
 
     private WebMarkupContainer menuGeneral;
@@ -279,6 +283,10 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuPage = new WebMarkupContainer("mmenuPage");
             mmenuPage.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuPageClass")));
             this.menuLogicConsole.add(mmenuPage);
+
+            WebMarkupContainer mmenuMaster = new WebMarkupContainer("mmenuMaster");
+            mmenuMaster.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMasterClass")));
+            this.menuLogicConsole.add(mmenuMaster);
 
             WebMarkupContainer mmenuMenu = new WebMarkupContainer("mmenuMenu");
             mmenuMenu.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMenuClass")));
@@ -482,6 +490,12 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuPageClass = "active";
         } else {
             this.mmenuPageClass = "";
+        }
+
+        if (getPage() instanceof MasterCreatePage || getPage() instanceof MasterManagementPage || getPage() instanceof MasterModifyPage) {
+            this.mmenuMasterClass = "active";
+        } else {
+            this.mmenuMasterClass = "";
         }
 
         if (getPage() instanceof MenuCreatePage || getPage() instanceof MenuManagementPage || getPage() instanceof MenuModifyPage) {

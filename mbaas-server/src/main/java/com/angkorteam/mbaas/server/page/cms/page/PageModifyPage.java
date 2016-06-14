@@ -16,6 +16,7 @@ import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.slf4j.Logger;
@@ -37,6 +38,9 @@ public class PageModifyPage extends MasterPage {
     private static final Logger LOGGER = LoggerFactory.getLogger(PageModifyPage.class);
 
     private String pageId;
+
+    private String code;
+    private Label codeLabel;
 
     private String javascript;
     private JavascriptTextArea javascriptField;
@@ -86,6 +90,10 @@ public class PageModifyPage extends MasterPage {
         this.form.add(this.menuField);
         this.menuFeedback = new TextFeedbackPanel("menuFeedback", this.menuField);
         this.form.add(this.menuFeedback);
+
+        this.code = (String) pageRecord.get(Jdbc.Page.CODE);
+        this.codeLabel = new Label("codeLabel", new PropertyModel<>(this, "code"));
+        this.form.add(codeLabel);
 
         this.title = (String) pageRecord.get(Jdbc.Page.TITLE);
         this.titleField = new TextField<>("titleField", new PropertyModel<>(this, "title"));
@@ -137,12 +145,12 @@ public class PageModifyPage extends MasterPage {
         SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
         jdbcUpdate.withTableName(Jdbc.PAGE);
         jdbcUpdate.execute(fields, wheres);
-        setResponsePage(PageManagementPage.class);
         String cacheKey = PagePage.class.getName() + "_" + this.pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
         String filename = PagePage.class.getName().replaceAll("\\.", "/") + "_" + this.pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
         File temp = new File(FileUtils.getTempDirectory(), filename);
         FileUtils.deleteQuietly(temp);
         getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+        setResponsePage(PageManagementPage.class);
     }
 
 }

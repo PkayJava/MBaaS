@@ -2,6 +2,7 @@ CREATE TABLE page (
 
   page_id          VARCHAR(100) NOT NULL,
   master_page_id   VARCHAR(100) NOT NULL,
+  code             VARCHAR(100) NOT NULL,
   title            VARCHAR(100) NOT NULL,
   user_id          VARCHAR(100) NOT NULL,
   menu_id          VARCHAR(100) NOT NULL,
@@ -18,6 +19,7 @@ CREATE TABLE page (
   INDEX (title),
   INDEX (master_page_id),
   INDEX (description),
+  UNIQUE (code),
   INDEX (user_id),
   INDEX (menu_id),
   INDEX (security),

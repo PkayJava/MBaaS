@@ -1,11 +1,11 @@
 package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.page.MasterPage;
 import com.angkorteam.mbaas.server.page.PagePage;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.core.util.resource.locator.IResourceNameIterator;
 import org.apache.wicket.core.util.resource.locator.IResourceStreamLocator;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,6 @@ public class ResourceStreamLocator implements IResourceStreamLocator {
 
     @Override
     public IResourceStream locate(Class<?> clazz, String path) {
-        String pageId = RequestCycle.get().getRequest().getQueryParameters().getParameterValue("pageId").toString("");
         LOGGER.info("locate : clazz {} path {}", clazz.getName(), path == null ? "" : path);
         IResourceStream stream = this.streamLocator.locate(clazz, path);
         return stream;
@@ -51,6 +50,27 @@ public class ResourceStreamLocator implements IResourceStreamLocator {
                 } catch (IOException e) {
                 }
             }
+        } else if (MasterPage.class.getName().replaceAll("\\.", "/").equals(path)) {
+            boolean stage;
+            String masterPageId;
+            if (variation.endsWith("-stage")) {
+                masterPageId = variation.substring(0, variation.length() - 6);
+                stage = true;
+            } else {
+                masterPageId = variation;
+                stage = false;
+            }
+            Application application = ApplicationUtils.getApplication();
+            JdbcTemplate jdbcTemplate = application.getJdbcTemplate(style);
+            String html = jdbcTemplate.queryForObject("SELECT " + (stage ? Jdbc.MasterPage.STAGE_HTML : Jdbc.MasterPage.HTML) + " FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", String.class, masterPageId);
+            File temp = new File(FileUtils.getTempDirectory(), path + "_" + variation + "_" + style + "_" + locale.toString() + ".html");
+            if (!temp.exists()) {
+                temp.getParentFile().mkdirs();
+                try {
+                    FileUtils.write(temp, html);
+                } catch (IOException e) {
+                }
+            }
         }
         IResourceStream stream = this.streamLocator.locate(clazz, path, style, variation, locale, extension, strict);
         return stream;
@@ -58,7 +78,6 @@ public class ResourceStreamLocator implements IResourceStreamLocator {
 
     @Override
     public IResourceNameIterator newResourceNameIterator(String path, Locale locale, String style, String variation, String extension, boolean strict) {
-        String pageId = RequestCycle.get().getRequest().getQueryParameters().getParameterValue("pageId").toString("");
         LOGGER.info("newResourceNameIterator : path {} locale {} style {} variation {} extension {} strict {}", path == null ? "" : path, locale == null ? "" : locale.getDisplayName(), style == null ? "" : style, variation == null ? "" : variation, extension == null ? "" : extension, strict);
         IResourceNameIterator resourceName = this.streamLocator.newResourceNameIterator(path, locale, style, variation, extension, strict);
         return resourceName;

@@ -17,10 +17,10 @@ import java.util.Map;
 /**
  * Created by socheat on 5/28/16.
  */
-@Mount("/page")
-public class PagePage extends MasterPage {
+@Mount("/master")
+public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
 
-    private String pageId;
+    private String masterPageId;
 
     private Factory factory;
 
@@ -30,14 +30,23 @@ public class PagePage extends MasterPage {
 
     private String script;
 
+    private boolean stage;
+
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        this.pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
+        this.stage = getPageParameters().get("stage").toBoolean(false);
+        if (this instanceof PagePage) {
+            String pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
+            JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+            this.masterPageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.MASTER_PAGE_ID + " FROM ", String.class, pageId);
+        } else {
+            this.masterPageId = getRequest().getQueryParameters().getParameterValue("masterPageId").toString("");
+        }
         this.userModel = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
-        this.script = (String) pageRecord.get(Jdbc.Page.JAVASCRIPT);
+        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
+        this.script = (String) (this.stage ? pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.MasterPage.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
         this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.userModel);
         ScriptEngine engine = getScriptEngine();
@@ -72,7 +81,11 @@ public class PagePage extends MasterPage {
 
     @Override
     public String getVariation() {
-        return this.pageId;
+        if (this.stage) {
+            return this.masterPageId + "-stage";
+        } else {
+            return this.masterPageId;
+        }
     }
 
     public interface IOnBeforeRender extends Serializable {

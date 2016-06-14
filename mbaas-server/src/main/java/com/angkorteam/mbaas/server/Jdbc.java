@@ -353,9 +353,9 @@ public class Jdbc {
         public static final String PAGE_ID = PAGE + "_id";
         public static final String MASTER_PAGE_ID = MasterPage.MASTER_PAGE_ID;
         public static final String USER_ID = User.USER_ID;
-        public static final String SECURITY = "security";
         public static final String MENU_ID = Menu.MENU_ID;
         public static final String TITLE = "title";
+        public static final String CODE = "code";
         public static final String DESCRIPTION = "description";
         public static final String HTML = "html";
         public static final String JAVASCRIPT = "javascript";
@@ -379,9 +379,9 @@ public class Jdbc {
         public static final String TITLE = "title";
         public static final String USER_ID = User.USER_ID;
         public static final String DESCRIPTION = "description";
-        public static final String SECURITY = "security";
         public static final String JAVASCRIPT = "javascript";
         public static final String HTML = "html";
+        public static final String CODE = "code";
         public static final String STAGE_JAVASCRIPT = "stage_javascript";
         public static final String STAGE_HTML = "stage_html";
         public static final String MODIFIED = "modified";

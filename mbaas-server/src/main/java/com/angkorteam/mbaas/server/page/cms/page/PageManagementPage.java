@@ -51,6 +51,7 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
         add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
+        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("code", this), "code", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("title", this), "title", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
@@ -61,7 +62,7 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
         filterForm.add(dataTable);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", JobManagementPage.class);
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", PageManagementPage.class);
         add(refreshLink);
     }
 
@@ -76,11 +77,11 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
             setResponsePage(PageModifyPage.class, parameters);
         }
         if ("Grant".equals(link)) {
-            jdbcTemplate.update("UPDATE " + Jdbc.PAGE + " SET " + Jdbc.Job.SECURITY + " = ? WHERE " + Jdbc.Page.PAGE_ID + " = ?", SecurityEnum.Granted.getLiteral(), pageId);
+           // jdbcTemplate.update("UPDATE " + Jdbc.PAGE + " SET " + Jdbc.Page.SECURITY + " = ? WHERE " + Jdbc.Page.PAGE_ID + " = ?", SecurityEnum.Granted.getLiteral(), pageId);
             return;
         }
         if ("Deny".equals(link)) {
-            jdbcTemplate.update("UPDATE " + Jdbc.PAGE + " SET " + Jdbc.Job.SECURITY + " = ? WHERE " + Jdbc.Page.PAGE_ID + " = ?", SecurityEnum.Denied.getLiteral(), pageId);
+           // jdbcTemplate.update("UPDATE " + Jdbc.PAGE + " SET " + Jdbc.Page.SECURITY + " = ? WHERE " + Jdbc.Page.PAGE_ID + " = ?", SecurityEnum.Denied.getLiteral(), pageId);
             return;
         }
         if ("Delete".equals(link)) {
