@@ -1,10 +1,8 @@
 package com.angkorteam.mbaas.server.validator;
 
 import com.angkorteam.framework.extension.share.validation.JooqValidator;
-import com.angkorteam.mbaas.model.entity.Tables;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.ValidationError;
-import org.jooq.DSLContext;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 
 /**

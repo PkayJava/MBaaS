@@ -19,7 +19,6 @@ import com.google.gson.Gson;
 import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.WicketRuntimeException;
@@ -41,7 +40,6 @@ import org.springframework.mail.MailSender;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

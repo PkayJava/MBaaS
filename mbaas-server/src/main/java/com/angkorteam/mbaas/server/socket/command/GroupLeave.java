@@ -4,8 +4,6 @@ import com.angkorteam.mbaas.server.socket.Command;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
-
 /**
  * Created by socheat on 5/14/16.
  */
