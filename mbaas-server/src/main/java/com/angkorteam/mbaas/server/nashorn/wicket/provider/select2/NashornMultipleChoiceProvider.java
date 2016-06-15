@@ -48,7 +48,8 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            return (List<Map<String, Object>>) invocable.invokeFunction(this.id + "__to_choices", jdbcTemplate, ids.toArray(new String[ids.size()]));
+            String[] tmp = ids.toArray(new String[ids.size()]);
+            return (List<Map<String, Object>>) invocable.invokeFunction(this.id + "__to_choices", jdbcTemplate, tmp);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         } catch (EmptyResultDataAccessException e) {
