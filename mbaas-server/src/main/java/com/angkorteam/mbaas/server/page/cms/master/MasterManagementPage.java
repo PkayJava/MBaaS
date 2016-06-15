@@ -20,6 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -73,25 +74,58 @@ public class MasterManagementPage extends MasterPage implements ActionFilteredJo
             setResponsePage(MasterModifyPage.class, parameters);
         }
         if ("Delete".equals(link)) {
+            Map<String, String> temp = new HashMap<>();
             jdbcTemplate.update("DELETE FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", masterPageId);
             {
                 String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + masterPageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
                 String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + masterPageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                File temp = new File(FileUtils.getTempDirectory(), filename);
-                FileUtils.deleteQuietly(temp);
-                getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+                temp.put(cacheKey, filename);
             }
             {
                 String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + masterPageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
                 String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + masterPageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                File temp = new File(FileUtils.getTempDirectory(), filename);
-                FileUtils.deleteQuietly(temp);
+                temp.put(cacheKey, filename);
+            }
+            List<String> pageIds = jdbcTemplate.queryForList("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.MASTER_PAGE_ID + " = ?", String.class, masterPageId);
+            for (String pageId : pageIds) {
+                {
+                    String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                    String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                    temp.put(cacheKey, filename);
+                }
+                {
+                    String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                    String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                    temp.put(cacheKey, filename);
+                }
+            }
+            for (Map.Entry<String, String> item : temp.entrySet()) {
+                String cacheKey = item.getKey();
+                String filename = item.getValue();
+                File file = new File(FileUtils.getTempDirectory(), filename);
+                FileUtils.deleteQuietly(file);
                 getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
             }
             return;
         }
         if ("Go Live".equals(link)) {
             jdbcTemplate.update("UPDATE " + Jdbc.MASTER_PAGE + " SET " + Jdbc.MasterPage.HTML + " = " + Jdbc.MasterPage.STAGE_HTML + ", " + Jdbc.MasterPage.JAVASCRIPT + " = " + Jdbc.MasterPage.STAGE_JAVASCRIPT + ", " + Jdbc.MasterPage.MODIFIED + " = false " + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", masterPageId);
+            List<String> pageIds = jdbcTemplate.queryForList("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.MASTER_PAGE_ID + " = ?", String.class, masterPageId);
+            {
+                Map<String, String> temp = new HashMap<>();
+                for (String pageId : pageIds) {
+                    String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                    String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                    temp.put(cacheKey, filename);
+                }
+                for (Map.Entry<String, String> item : temp.entrySet()) {
+                    String cacheKey = item.getKey();
+                    String filename = item.getValue();
+                    File file = new File(FileUtils.getTempDirectory(), filename);
+                    FileUtils.deleteQuietly(file);
+                    getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+                }
+            }
             String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + masterPageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
             String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + masterPageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
             File temp = new File(FileUtils.getTempDirectory(), filename);

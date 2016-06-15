@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +21,6 @@ import java.util.Map;
 @Mount("/page")
 public class PagePage extends MasterPage {
 
-    private String pageId;
-
     private Factory factory;
 
     private Map<String, Object> userModel;
@@ -30,14 +29,19 @@ public class PagePage extends MasterPage {
 
     private String script;
 
+    private boolean stage;
+
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        this.pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
+        this.stage = getPageParameters().get("stage").toBoolean(false);
+        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
+        String pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
+        request.setAttribute("pageId", pageId);
         this.userModel = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
-        this.script = (String) pageRecord.get(Jdbc.Page.JAVASCRIPT);
+        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
+        this.script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
         this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.userModel);
         ScriptEngine engine = getScriptEngine();
@@ -72,7 +76,12 @@ public class PagePage extends MasterPage {
 
     @Override
     public String getVariation() {
-        return this.pageId;
+        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
+        if (this.stage) {
+            return request.getAttribute("pageId") + "-stage";
+        } else {
+            return (String) request.getAttribute("pageId");
+        }
     }
 
     public interface IOnBeforeRender extends Serializable {

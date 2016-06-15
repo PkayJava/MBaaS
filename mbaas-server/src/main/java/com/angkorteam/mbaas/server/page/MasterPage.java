@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,8 +20,6 @@ import java.util.Map;
  */
 @Mount("/master")
 public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
-
-    private String masterPageId;
 
     private Factory factory;
 
@@ -36,16 +35,19 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
     protected void onInitialize() {
         super.onInitialize();
         this.stage = getPageParameters().get("stage").toBoolean(false);
+        String masterPageId;
         if (this instanceof PagePage) {
             String pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
             JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-            this.masterPageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.MASTER_PAGE_ID + " FROM ", String.class, pageId);
+            masterPageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.MASTER_PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", String.class, pageId);
         } else {
-            this.masterPageId = getRequest().getQueryParameters().getParameterValue("masterPageId").toString("");
+            masterPageId = getRequest().getQueryParameters().getParameterValue("masterPageId").toString("");
         }
+        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
+        request.setAttribute("masterPageId", masterPageId);
         this.userModel = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
+        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", masterPageId);
         this.script = (String) (this.stage ? pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.MasterPage.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
         this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.userModel);
@@ -81,10 +83,11 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
 
     @Override
     public String getVariation() {
+        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         if (this.stage) {
-            return this.masterPageId + "-stage";
+            return request.getAttribute("masterPageId") + "-stage";
         } else {
-            return this.masterPageId;
+            return (String) request.getAttribute("masterPageId");
         }
     }
 

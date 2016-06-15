@@ -37,6 +37,7 @@ public class Jdbc {
     public static final String PAGE = "page";
     public static final String MENU = "menu";
     public static final String MASTER_PAGE = "master_page";
+    public static final String PAGE_ROLE = "page_role";
 
     public static final class User {
         public static final String USER_ID = USER + "_id";
@@ -372,6 +373,12 @@ public class Jdbc {
         public static final String USER_ID = User.USER_ID;
         public static final String PARENT_MENU_ID = "parent_" + MENU_ID;
         public static final String DATE_CREATED = "date_created";
+    }
+
+    public static final class PageRole {
+        public static final String PAGE_ROLE_ID = PAGE_ROLE + "_id";
+        public static final String PAGE_ID = Page.PAGE_ID;
+        public static final String ROLE_ID = Role.ROLE_ID;
     }
 
     public static final class MasterPage {

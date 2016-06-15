@@ -5,10 +5,8 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
-import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.page.PagePage;
-import com.angkorteam.mbaas.server.page.job.JobManagementPage;
 import com.angkorteam.mbaas.server.provider.PageProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -46,6 +44,7 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
 
         provider.selectField(String.class, "pageId");
         provider.selectField(String.class, "userId");
+        provider.selectField(Boolean.class, "modified");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -54,9 +53,8 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("code", this), "code", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("title", this), "title", this, provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("security", this), "security", provider));
 
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Grant", "Deny", "Edit", "Delete"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Delete", "Live Preview", "Go Live", "Stage Preview"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -76,14 +74,6 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
             parameters.add("pageId", object.get("pageId"));
             setResponsePage(PageModifyPage.class, parameters);
         }
-        if ("Grant".equals(link)) {
-           // jdbcTemplate.update("UPDATE " + Jdbc.PAGE + " SET " + Jdbc.Page.SECURITY + " = ? WHERE " + Jdbc.Page.PAGE_ID + " = ?", SecurityEnum.Granted.getLiteral(), pageId);
-            return;
-        }
-        if ("Deny".equals(link)) {
-           // jdbcTemplate.update("UPDATE " + Jdbc.PAGE + " SET " + Jdbc.Page.SECURITY + " = ? WHERE " + Jdbc.Page.PAGE_ID + " = ?", SecurityEnum.Denied.getLiteral(), pageId);
-            return;
-        }
         if ("Delete".equals(link)) {
             String cacheKey = PagePage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
             String filename = PagePage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
@@ -93,6 +83,28 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
             jdbcTemplate.update("DELETE FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
             return;
         }
+        if ("Go Live".equals(link)) {
+            jdbcTemplate.update("UPDATE " + Jdbc.PAGE + " SET " + Jdbc.Page.HTML + " = " + Jdbc.Page.STAGE_HTML + ", " + Jdbc.Page.JAVASCRIPT + " = " + Jdbc.Page.STAGE_JAVASCRIPT + ", " + Jdbc.Page.MODIFIED + " = false " + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
+            String cacheKey = com.angkorteam.mbaas.server.page.PagePage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+            String filename = com.angkorteam.mbaas.server.page.PagePage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+            File temp = new File(FileUtils.getTempDirectory(), filename);
+            FileUtils.deleteQuietly(temp);
+            getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+            return;
+        }
+        if ("Stage Preview".equals(link)) {
+            PageParameters parameters = new PageParameters();
+            parameters.add("pageId", object.get("pageId"));
+            parameters.add("stage", true);
+            setResponsePage(com.angkorteam.mbaas.server.page.PagePage.class, parameters);
+            return;
+        }
+        if ("Live Preview".equals(link)) {
+            PageParameters parameters = new PageParameters();
+            parameters.add("pageId", object.get("pageId"));
+            setResponsePage(com.angkorteam.mbaas.server.page.PagePage.class, parameters);
+            return;
+        }
     }
 
     @Override
@@ -100,14 +112,17 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
         if ("Edit".equals(link)) {
             return "btn-xs btn-info";
         }
-        if ("Grant".equals(link)) {
-            return "btn-xs btn-info";
-        }
-        if ("Deny".equals(link)) {
-            return "btn-xs btn-danger";
-        }
         if ("Delete".equals(link)) {
             return "btn-xs btn-danger";
+        }
+        if ("Go Live".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        if ("Stage Preview".equals(link)) {
+            return "btn-xs btn-info";
+        }
+        if ("Live Preview".equals(link)) {
+            return "btn-xs btn-info";
         }
         return "";
     }
@@ -126,19 +141,14 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
         if ("Edit".equals(link)) {
             return true;
         }
-        if ("Grant".equals(link)) {
-            String security = (String) object.get("security");
-            if (SecurityEnum.Denied.getLiteral().equals(security)) {
-                return true;
-            }
-        }
-        if ("Deny".equals(link)) {
-            String security = (String) object.get("security");
-            if (SecurityEnum.Granted.getLiteral().equals(security)) {
-                return true;
-            }
-        }
         if ("Delete".equals(link)) {
+            return true;
+        }
+        if ("Go Live".equals(link) || "Stage Preview".equals(link)) {
+            boolean modified = (boolean) object.get("modified");
+            return modified;
+        }
+        if ("Live Preview".equals(link)) {
             return true;
         }
         return false;

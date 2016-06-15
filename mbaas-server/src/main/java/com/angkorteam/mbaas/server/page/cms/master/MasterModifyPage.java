@@ -7,7 +7,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.HtmlTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.page.cms.page.PageManagementPage;
 import com.angkorteam.mbaas.server.validator.JobNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -23,6 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -127,6 +127,24 @@ public class MasterModifyPage extends MasterPage {
         SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
         jdbcUpdate.withTableName(Jdbc.MASTER_PAGE);
         jdbcUpdate.execute(fields, wheres);
+
+        List<String> pageIds = jdbcTemplate.queryForList("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.MASTER_PAGE_ID + " = ?", String.class, masterPageId);
+        {
+            Map<String, String> temp = new HashMap<>();
+            for (String pageId : pageIds) {
+                String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                temp.put(cacheKey, filename);
+            }
+            for (Map.Entry<String, String> item : temp.entrySet()) {
+                String cacheKey = item.getKey();
+                String filename = item.getValue();
+                File file = new File(FileUtils.getTempDirectory(), filename);
+                FileUtils.deleteQuietly(file);
+                getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+            }
+        }
+
         String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + this.masterPageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
         String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + this.masterPageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
         File temp = new File(FileUtils.getTempDirectory(), filename);

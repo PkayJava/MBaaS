@@ -4,12 +4,16 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.HtmlTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.renderer.MasterPageChoiceRenderer;
 import com.angkorteam.mbaas.server.renderer.MenuChoiceRenderer;
+import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
+import com.angkorteam.mbaas.server.select2.MasterPageChoiceProvider;
 import com.angkorteam.mbaas.server.select2.MenuChoiceProvider;
+import com.angkorteam.mbaas.server.select2.RoleChoiceProvider;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
@@ -20,10 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by socheat on 5/26/16.
@@ -41,6 +42,14 @@ public class PageCreatePage extends MasterPage {
     private String javascript;
     private JavascriptTextArea javascriptField;
     private TextFeedbackPanel javascriptFeedback;
+
+    private Map<String, Object> masterPage;
+    private Select2SingleChoice<Map<String, Object>> masterPageField;
+    private TextFeedbackPanel masterPageFeedback;
+
+    private List<Map<String, Object>> role;
+    private Select2MultipleChoice<Map<String, Object>> roleField;
+    private TextFeedbackPanel roleFeedback;
 
     private String html;
     private HtmlTextArea htmlField;
@@ -72,11 +81,22 @@ public class PageCreatePage extends MasterPage {
         this.form = new Form<>("form");
         add(this.form);
 
+        this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RoleChoiceProvider(getSession().getApplicationCode()), new RoleChoiceRenderer());
+        this.form.add(this.roleField);
+        this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);
+        this.form.add(this.roleFeedback);
+
         this.menuField = new Select2SingleChoice<>("menuField", new PropertyModel<>(this, "menu"), new MenuChoiceProvider(getSession().getApplicationCode()), new MenuChoiceRenderer());
         this.menuField.setRequired(true);
         this.form.add(this.menuField);
         this.menuFeedback = new TextFeedbackPanel("menuFeedback", this.menuField);
         this.form.add(this.menuFeedback);
+
+        this.masterPageField = new Select2SingleChoice<>("masterPageField", new PropertyModel<>(this, "masterPage"), new MasterPageChoiceProvider(getSession().getApplicationCode()), new MasterPageChoiceRenderer());
+        this.masterPageField.setRequired(true);
+        this.form.add(this.masterPageField);
+        this.masterPageFeedback = new TextFeedbackPanel("masterPageFeedback", this.masterPageField);
+        this.form.add(this.masterPageFeedback);
 
         this.titleField = new TextField<>("titleField", new PropertyModel<>(this, "title"));
         this.titleField.setRequired(true);
@@ -117,22 +137,35 @@ public class PageCreatePage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        String pageId = UUID.randomUUID().toString();
-        Map<String, Object> fields = new HashMap<>();
-        fields.put(Jdbc.Page.PAGE_ID, pageId);
-        fields.put(Jdbc.Page.DATE_CREATED, new Date());
-        fields.put(Jdbc.Page.DATE_MODIFIED, new Date());
-        fields.put(Jdbc.Page.TITLE, this.title);
-        fields.put(Jdbc.Page.CODE, this.code);
-        fields.put(Jdbc.Page.MENU_ID, this.menu.get(Jdbc.Menu.MENU_ID));
-        fields.put(Jdbc.Page.DESCRIPTION, this.description);
-        fields.put(Jdbc.Page.JAVASCRIPT, this.javascript);
-        fields.put(Jdbc.Page.HTML, this.html);
-        fields.put(Jdbc.Page.USER_ID, getSession().getApplicationUserId());
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        String pageId = UUID.randomUUID().toString();
+        {
+            Map<String, Object> fields = new HashMap<>();
+            fields.put(Jdbc.Page.PAGE_ID, pageId);
+            fields.put(Jdbc.Page.DATE_CREATED, new Date());
+            fields.put(Jdbc.Page.DATE_MODIFIED, new Date());
+            fields.put(Jdbc.Page.TITLE, this.title);
+            fields.put(Jdbc.Page.CODE, this.code);
+            fields.put(Jdbc.Page.MENU_ID, this.menu.get(Jdbc.Menu.MENU_ID));
+            fields.put(Jdbc.Page.MASTER_PAGE_ID, this.masterPage.get(Jdbc.MasterPage.MASTER_PAGE_ID));
+            fields.put(Jdbc.Page.DESCRIPTION, this.description);
+            fields.put(Jdbc.Page.STAGE_JAVASCRIPT, this.javascript);
+            fields.put(Jdbc.Page.MODIFIED, true);
+            fields.put(Jdbc.Page.STAGE_HTML, this.html);
+            fields.put(Jdbc.Page.USER_ID, getSession().getApplicationUserId());
+            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+            jdbcInsert.withTableName(Jdbc.PAGE);
+            jdbcInsert.execute(fields);
+        }
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-        jdbcInsert.withTableName(Jdbc.PAGE);
-        jdbcInsert.execute(fields);
+        jdbcInsert.withTableName(Jdbc.PAGE_ROLE);
+        for (Map<String, Object> role : this.role) {
+            Map<String, Object> fields = new HashMap<>();
+            fields.put(Jdbc.PageRole.PAGE_ROLE_ID, UUID.randomUUID().toString());
+            fields.put(Jdbc.PageRole.ROLE_ID, role.get(Jdbc.Role.ROLE_ID));
+            fields.put(Jdbc.PageRole.PAGE_ID, pageId);
+            jdbcInsert.execute(fields);
+        }
         setResponsePage(PageManagementPage.class);
     }
 
