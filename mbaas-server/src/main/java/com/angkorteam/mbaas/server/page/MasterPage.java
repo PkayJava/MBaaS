@@ -31,23 +31,22 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
 
     private boolean stage;
 
+    private String masterPageId;
+
     @Override
     protected void onInitialize() {
         super.onInitialize();
         this.stage = getPageParameters().get("stage").toBoolean(false);
-        String masterPageId;
         if (this instanceof PagePage) {
             String pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
             JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-            masterPageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.MASTER_PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", String.class, pageId);
+            this.masterPageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.MASTER_PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", String.class, pageId);
         } else {
-            masterPageId = getRequest().getQueryParameters().getParameterValue("masterPageId").toString("");
+            this.masterPageId = getRequest().getQueryParameters().getParameterValue("masterPageId").toString("");
         }
-        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
-        request.setAttribute("masterPageId", masterPageId);
         this.userModel = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", masterPageId);
+        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
         this.script = (String) (this.stage ? pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.MasterPage.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
         this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.userModel);
@@ -85,9 +84,11 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
     public String getVariation() {
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         if (this.stage) {
-            return request.getAttribute("masterPageId") + "-stage";
+            request.setAttribute("masterPageId", this.masterPageId + "-stage");
+            return this.masterPageId + "-stage";
         } else {
-            return (String) request.getAttribute("masterPageId");
+            request.setAttribute("masterPageId", this.masterPageId);
+            return this.masterPageId;
         }
     }
 

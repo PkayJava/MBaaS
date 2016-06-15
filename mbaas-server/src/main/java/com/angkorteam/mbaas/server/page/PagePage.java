@@ -29,18 +29,18 @@ public class PagePage extends MasterPage {
 
     private String script;
 
+    private String pageId;
+
     private boolean stage;
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
         this.stage = getPageParameters().get("stage").toBoolean(false);
-        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
-        String pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
-        request.setAttribute("pageId", pageId);
+        this.pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
         this.userModel = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
+        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
         this.script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
         this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.userModel);
@@ -76,11 +76,14 @@ public class PagePage extends MasterPage {
 
     @Override
     public String getVariation() {
+        super.getVariation();
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         if (this.stage) {
-            return request.getAttribute("pageId") + "-stage";
+            request.setAttribute("pageId", this.pageId + "-stage");
+            return this.pageId + "-stage";
         } else {
-            return (String) request.getAttribute("pageId");
+            request.setAttribute("pageId", this.pageId);
+            return this.pageId;
         }
     }
 

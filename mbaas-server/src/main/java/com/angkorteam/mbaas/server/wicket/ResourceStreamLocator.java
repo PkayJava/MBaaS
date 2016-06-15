@@ -41,7 +41,7 @@ public class ResourceStreamLocator implements IResourceStreamLocator {
     public IResourceStream locate(Class<?> clazz, String path, String style, String variation, Locale locale, String extension, boolean strict) {
         LOGGER.info("locate : clazz {} path {} style {} variation {} locale {} extension {} strict {}", clazz.getName(), path == null ? "" : path, style == null ? "" : style, variation == null ? "" : variation, locale == null ? "" : locale.getDisplayName(), extension == null ? "" : extension, strict);
         if (PagePage.class.getName().replaceAll("\\.", "/").equals(path)) {
-            boolean stage = variation.endsWith("-stage");
+            boolean stage = variation != null && variation.endsWith("-stage");
             RequestCycle requestCycle = RequestCycle.get();
             HttpServletRequest request = (HttpServletRequest) requestCycle.getRequest().getContainerRequest();
             String pageId = (String) request.getAttribute("pageId");
@@ -57,7 +57,7 @@ public class ResourceStreamLocator implements IResourceStreamLocator {
                 }
             }
         } else if (MasterPage.class.getName().replaceAll("\\.", "/").equals(path)) {
-            boolean stage = variation.endsWith("-stage");
+            boolean stage = variation != null && variation.endsWith("-stage");
             RequestCycle requestCycle = RequestCycle.get();
             HttpServletRequest request = (HttpServletRequest) requestCycle.getRequest().getContainerRequest();
             String masterPageId = (String) request.getAttribute("masterPageId");
