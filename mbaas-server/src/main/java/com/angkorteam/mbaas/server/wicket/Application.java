@@ -85,6 +85,7 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     @Override
     public void init() {
         super.init();
+        getSecuritySettings().setAuthorizationStrategy(new RoleAuthorizationStrategy(this));
         ResourceStreamLocator streamLocator = new ResourceStreamLocator(new org.apache.wicket.core.util.resource.locator.ResourceStreamLocator(new ClassPathResourceFinder(""), new WebApplicationPath(getServletContext(), "/"), new ClassPathResourceFinder("META-INF/resources/"), new Path(FileUtils.getTempDirectoryPath())));
         getResourceSettings().setResourceStreamLocator(streamLocator);
         getRequestCycleSettings().setBufferResponse(true);
