@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
@@ -36,11 +37,10 @@ public class RoleChoiceProvider extends MultipleChoiceProvider<Map<String, Objec
     }
 
     @Override
-    public List<Map<String, Object>> toChoices(List<String> ids) {
+    public List<Map<String, Object>> toChoices(String[] ids) {
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-        String[] tmp = ids.toArray(new String[ids.size()]);
-        return jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " IN (?)", tmp);
+        return jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " IN (" + StringUtils.repeat("?", ", ", ids.length) + ")", ids);
     }
 
     @Override

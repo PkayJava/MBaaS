@@ -34,7 +34,7 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
     }
 
     @Override
-    public final List<Map<String, Object>> toChoices(List<String> ids) {
+    public final List<Map<String, Object>> toChoices(String[] ids) {
         Session session = (Session) Session.get();
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
