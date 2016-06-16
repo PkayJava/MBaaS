@@ -38,6 +38,7 @@ public class Jdbc {
     public static final String MENU = "menu";
     public static final String MASTER_PAGE = "master_page";
     public static final String PAGE_ROLE = "page_role";
+    public static final String BLOCK = "block";
 
     public static final class User {
         public static final String USER_ID = USER + "_id";
@@ -391,6 +392,21 @@ public class Jdbc {
         public static final String CODE = "code";
         public static final String STAGE_JAVASCRIPT = "stage_javascript";
         public static final String STAGE_HTML = "stage_html";
+        public static final String MODIFIED = "modified";
+        public static final String DATE_CREATED = "date_created";
+        public static final String DATE_MODIFIED = "date_modified";
+    }
+
+    public static final class Block {
+        public static final String BLOCK_ID = BLOCK + "_id";
+        public static final String USER_ID = User.USER_ID;
+        public static final String TITLE = "title";
+        public static final String CODE = "code";
+        public static final String DESCRIPTION = "description";
+        public static final String HTML = "html";
+        public static final String JAVASCRIPT = "javascript";
+        public static final String STAGE_HTML = "stage_html";
+        public static final String STAGE_JAVASCRIPT = "stage_javascript";
         public static final String MODIFIED = "modified";
         public static final String DATE_CREATED = "date_created";
         public static final String DATE_MODIFIED = "date_modified";

@@ -1,4 +1,4 @@
-package com.angkorteam.mbaas.server.page.cms.master;
+package com.angkorteam.mbaas.server.page.cms.block;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
@@ -26,10 +26,10 @@ import java.util.UUID;
  * Created by socheat on 5/26/16.
  */
 @AuthorizeInstantiation({"administrator"})
-@Mount("/cms/master/create")
-public class MasterCreatePage extends MasterPage {
+@Mount("/cms/block/create")
+public class BlockCreatePage extends MasterPage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MasterCreatePage.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlockCreatePage.class);
 
     private String javascript;
     private JavascriptTextArea javascriptField;
@@ -56,7 +56,7 @@ public class MasterCreatePage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Create New Layout";
+        return "Create New Block";
     }
 
     @Override
@@ -78,7 +78,7 @@ public class MasterCreatePage extends MasterPage {
         this.codeFeedback = new TextFeedbackPanel("codeFeedback", this.codeField);
         this.form.add(this.codeFeedback);
 
-        this.javascript = getString("master.script");
+        this.javascript = getString("block.script");
         this.javascriptField = new JavascriptTextArea("javascriptField", new PropertyModel<>(this, "javascript"));
         this.javascriptField.setRequired(true);
         this.form.add(this.javascriptField);
@@ -91,7 +91,7 @@ public class MasterCreatePage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.html = getString("master.html");
+        this.html = getString("block.html");
         this.htmlField = new HtmlTextArea("htmlField", new PropertyModel<>(this, "html"));
         this.htmlField.setRequired(true);
         this.form.add(this.htmlField);
@@ -105,23 +105,23 @@ public class MasterCreatePage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        String masterPageId = UUID.randomUUID().toString();
+        String blockId = UUID.randomUUID().toString();
         Map<String, Object> fields = new HashMap<>();
-        fields.put(Jdbc.MasterPage.MASTER_PAGE_ID, masterPageId);
-        fields.put(Jdbc.MasterPage.DATE_CREATED, new Date());
-        fields.put(Jdbc.MasterPage.DATE_MODIFIED, new Date());
-        fields.put(Jdbc.MasterPage.TITLE, this.title);
-        fields.put(Jdbc.MasterPage.CODE, this.code);
-        fields.put(Jdbc.MasterPage.DESCRIPTION, this.description);
-        fields.put(Jdbc.MasterPage.STAGE_JAVASCRIPT, this.javascript);
-        fields.put(Jdbc.MasterPage.STAGE_HTML, this.html);
-        fields.put(Jdbc.MasterPage.MODIFIED, true);
-        fields.put(Jdbc.MasterPage.USER_ID, getSession().getApplicationUserId());
+        fields.put(Jdbc.Block.BLOCK_ID, blockId);
+        fields.put(Jdbc.Block.DATE_CREATED, new Date());
+        fields.put(Jdbc.Block.DATE_MODIFIED, new Date());
+        fields.put(Jdbc.Block.TITLE, this.title);
+        fields.put(Jdbc.Block.CODE, this.code);
+        fields.put(Jdbc.Block.DESCRIPTION, this.description);
+        fields.put(Jdbc.Block.STAGE_JAVASCRIPT, this.javascript);
+        fields.put(Jdbc.Block.STAGE_HTML, this.html);
+        fields.put(Jdbc.Block.MODIFIED, true);
+        fields.put(Jdbc.Block.USER_ID, getSession().getApplicationUserId());
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-        jdbcInsert.withTableName(Jdbc.MASTER_PAGE);
+        jdbcInsert.withTableName(Jdbc.BLOCK);
         jdbcInsert.execute(fields);
-        setResponsePage(MasterManagementPage.class);
+        setResponsePage(BlockManagementPage.class);
     }
 
 }

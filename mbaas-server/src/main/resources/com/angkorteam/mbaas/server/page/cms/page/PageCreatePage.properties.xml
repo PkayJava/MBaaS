@@ -4,13 +4,13 @@
     <entry key="page.script"><![CDATA[/*
 Page onInitialize
 */
-function onInitialize(requestCycle, jdbcTemplate, disk, factory, userModel) {
+function onInitialize(requestCycle, jdbcTemplate, disk, factory, pageModel) {
 }
 
 /*
 Page onBeforeRender
 */
-function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, userModel) {
+function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, pageModel) {
 }]]></entry>
     <entry key="page.html"><![CDATA[<!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">

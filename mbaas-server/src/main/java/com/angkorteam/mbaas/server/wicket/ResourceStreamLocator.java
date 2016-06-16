@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.block.BlockPanel;
 import com.angkorteam.mbaas.server.page.MasterPage;
 import com.angkorteam.mbaas.server.page.PagePage;
 import org.apache.commons.io.FileUtils;
@@ -64,6 +65,22 @@ public class ResourceStreamLocator implements IResourceStreamLocator {
             Application application = ApplicationUtils.getApplication();
             JdbcTemplate jdbcTemplate = application.getJdbcTemplate(style);
             String html = jdbcTemplate.queryForObject("SELECT " + (stage ? Jdbc.MasterPage.STAGE_HTML : Jdbc.MasterPage.HTML) + " FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", String.class, masterPageId);
+            File temp = new File(FileUtils.getTempDirectory(), path + "_" + variation + "_" + style + "_" + locale.toString() + ".html");
+            if (!temp.exists()) {
+                temp.getParentFile().mkdirs();
+                try {
+                    FileUtils.write(temp, html);
+                } catch (IOException e) {
+                }
+            }
+        } else if (BlockPanel.class.getName().replaceAll("\\.", "/").equals(path)) {
+            boolean stage = variation != null && variation.endsWith("-stage");
+            RequestCycle requestCycle = RequestCycle.get();
+            HttpServletRequest request = (HttpServletRequest) requestCycle.getRequest().getContainerRequest();
+            String blockId = (String) request.getAttribute("blockId");
+            Application application = ApplicationUtils.getApplication();
+            JdbcTemplate jdbcTemplate = application.getJdbcTemplate(style);
+            String html = jdbcTemplate.queryForObject("SELECT " + (stage ? Jdbc.Block.STAGE_HTML : Jdbc.Block.HTML) + " FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.BLOCK_ID + " = ?", String.class, blockId);
             File temp = new File(FileUtils.getTempDirectory(), path + "_" + variation + "_" + style + "_" + locale.toString() + ".html");
             if (!temp.exists()) {
                 temp.getParentFile().mkdirs();

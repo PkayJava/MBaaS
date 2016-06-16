@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.page;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,7 +24,7 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
 
     private Factory factory;
 
-    private Map<String, Object> userModel;
+    private Map<String, Object> pageModel;
 
     private Disk disk;
 
@@ -36,21 +37,20 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
+        this.pageModel = new HashMap<>();
         this.stage = getPageParameters().get("stage").toBoolean(false);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         if (this instanceof PagePage) {
             String pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
-            JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
             this.masterPageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.MASTER_PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", String.class, pageId);
         } else {
             this.masterPageId = getRequest().getQueryParameters().getParameterValue("masterPageId").toString("");
         }
-        this.userModel = new HashMap<>();
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
         this.script = (String) (this.stage ? pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.MasterPage.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
-        this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.userModel);
-        ScriptEngine engine = getScriptEngine();
+        this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.pageModel);
+        ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
             engine.eval(this.script);
         } catch (ScriptException e) {
@@ -59,7 +59,7 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
         if (iOnInitialize != null) {
-            iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.userModel);
+            iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         }
     }
 
@@ -76,7 +76,7 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
         if (iOnBeforeRender != null) {
             JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-            iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.userModel);
+            iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         }
     }
 
@@ -94,13 +94,13 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
 
     public interface IOnBeforeRender extends Serializable {
 
-        void onBeforeRender(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> userModel);
+        void onBeforeRender(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel);
 
     }
 
     public interface IOnInitialize extends Serializable {
 
-        void onInitialize(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> userModel);
+        void onInitialize(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel);
 
     }
 }

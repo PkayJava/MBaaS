@@ -23,7 +23,7 @@ public class PagePage extends MasterPage {
 
     private Factory factory;
 
-    private Map<String, Object> userModel;
+    private Map<String, Object> pageModel;
 
     private Disk disk;
 
@@ -38,12 +38,12 @@ public class PagePage extends MasterPage {
         super.onInitialize();
         this.stage = getPageParameters().get("stage").toBoolean(false);
         this.pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
-        this.userModel = new HashMap<>();
+        this.pageModel = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
         this.script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
-        this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.userModel);
+        this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.pageModel);
         ScriptEngine engine = getScriptEngine();
         try {
             engine.eval(this.script);
@@ -53,7 +53,7 @@ public class PagePage extends MasterPage {
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
         if (iOnInitialize != null) {
-            iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.userModel);
+            iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         }
     }
 
@@ -70,7 +70,7 @@ public class PagePage extends MasterPage {
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
         if (iOnBeforeRender != null) {
             JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-            iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.userModel);
+            iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         }
     }
 
@@ -89,13 +89,13 @@ public class PagePage extends MasterPage {
 
     public interface IOnBeforeRender extends Serializable {
 
-        void onBeforeRender(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> userModel);
+        void onBeforeRender(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel);
 
     }
 
     public interface IOnInitialize extends Serializable {
 
-        void onInitialize(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> userModel);
+        void onInitialize(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel);
 
     }
 }

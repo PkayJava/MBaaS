@@ -20,6 +20,9 @@ import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
 import com.angkorteam.mbaas.server.page.client.ClientCreatePage;
 import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
 import com.angkorteam.mbaas.server.page.client.ClientModifyPage;
+import com.angkorteam.mbaas.server.page.cms.block.BlockCreatePage;
+import com.angkorteam.mbaas.server.page.cms.block.BlockManagementPage;
+import com.angkorteam.mbaas.server.page.cms.block.BlockModifyPage;
 import com.angkorteam.mbaas.server.page.cms.master.MasterCreatePage;
 import com.angkorteam.mbaas.server.page.cms.master.MasterManagementPage;
 import com.angkorteam.mbaas.server.page.cms.master.MasterModifyPage;
@@ -123,6 +126,7 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuPageClass = "";
     private String mmenuMasterClass = "";
     private String mmenuMenuClass = "";
+    private String mmenuBlockClass = "";
 
     private WebMarkupContainer menuGeneral;
     private WebMarkupContainer menuProfile;
@@ -187,8 +191,6 @@ public abstract class MasterPage extends AdminLTEPage {
 
         BookmarkablePageLink<Void> dashboardPageLink = new BookmarkablePageLink<>("dashboardPageLink", getApplication().getHomePage());
         add(dashboardPageLink);
-
-        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
 
         Label labelDashboard = new Label("labelDashboard", "MBaaS");
         dashboardPageLink.add(labelDashboard);
@@ -287,6 +289,10 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuMaster = new WebMarkupContainer("mmenuMaster");
             mmenuMaster.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMasterClass")));
             this.menuLogicConsole.add(mmenuMaster);
+
+            WebMarkupContainer mmenuBlock = new WebMarkupContainer("mmenuBlock");
+            mmenuBlock.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuBlockClass")));
+            this.menuLogicConsole.add(mmenuBlock);
 
             WebMarkupContainer mmenuMenu = new WebMarkupContainer("mmenuMenu");
             mmenuMenu.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMenuClass")));
@@ -490,6 +496,12 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuPageClass = "active";
         } else {
             this.mmenuPageClass = "";
+        }
+
+        if (getPage() instanceof BlockCreatePage || getPage() instanceof BlockManagementPage || getPage() instanceof BlockModifyPage) {
+            this.mmenuBlockClass = "active";
+        } else {
+            this.mmenuBlockClass = "";
         }
 
         if (getPage() instanceof MasterCreatePage || getPage() instanceof MasterManagementPage || getPage() instanceof MasterModifyPage) {
