@@ -84,7 +84,7 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
     public String getVariation() {
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         if (this.stage) {
-            request.setAttribute("masterPageId", this.masterPageId + "-stage");
+            request.setAttribute("masterPageId", this.masterPageId);
             return this.masterPageId + "-stage";
         } else {
             request.setAttribute("masterPageId", this.masterPageId);

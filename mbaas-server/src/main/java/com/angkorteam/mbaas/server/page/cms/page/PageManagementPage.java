@@ -85,11 +85,21 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
         }
         if ("Go Live".equals(link)) {
             jdbcTemplate.update("UPDATE " + Jdbc.PAGE + " SET " + Jdbc.Page.HTML + " = " + Jdbc.Page.STAGE_HTML + ", " + Jdbc.Page.JAVASCRIPT + " = " + Jdbc.Page.STAGE_JAVASCRIPT + ", " + Jdbc.Page.MODIFIED + " = false " + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
-            String cacheKey = com.angkorteam.mbaas.server.page.PagePage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            String filename = com.angkorteam.mbaas.server.page.PagePage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            File temp = new File(FileUtils.getTempDirectory(), filename);
-            FileUtils.deleteQuietly(temp);
-            getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+            {
+                String cacheKey = com.angkorteam.mbaas.server.page.PagePage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                String filename = com.angkorteam.mbaas.server.page.PagePage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                File temp = new File(FileUtils.getTempDirectory(), filename);
+                FileUtils.deleteQuietly(temp);
+                getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+
+            }
+            {
+                String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+                File temp = new File(FileUtils.getTempDirectory(), filename);
+                FileUtils.deleteQuietly(temp);
+                getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+            }
             return;
         }
         if ("Stage Preview".equals(link)) {

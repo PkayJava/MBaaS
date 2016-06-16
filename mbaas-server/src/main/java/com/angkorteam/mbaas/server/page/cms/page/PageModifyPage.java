@@ -185,11 +185,20 @@ public class PageModifyPage extends MasterPage {
             jdbcInsert.execute(fields);
         }
 
-        String cacheKey = PagePage.class.getName() + "_" + this.pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-        String filename = PagePage.class.getName().replaceAll("\\.", "/") + "_" + this.pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-        File temp = new File(FileUtils.getTempDirectory(), filename);
-        FileUtils.deleteQuietly(temp);
-        getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+        {
+            String cacheKey = PagePage.class.getName() + "_" + this.pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+            String filename = PagePage.class.getName().replaceAll("\\.", "/") + "_" + this.pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+            File temp = new File(FileUtils.getTempDirectory(), filename);
+            FileUtils.deleteQuietly(temp);
+            getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+        }
+        {
+            String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + this.pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+            String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + this.pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+            File temp = new File(FileUtils.getTempDirectory(), filename);
+            FileUtils.deleteQuietly(temp);
+            getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+        }
         setResponsePage(PageManagementPage.class);
     }
 

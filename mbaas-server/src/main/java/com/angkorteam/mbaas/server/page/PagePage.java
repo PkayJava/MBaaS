@@ -79,7 +79,7 @@ public class PagePage extends MasterPage {
         super.getVariation();
         HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         if (this.stage) {
-            request.setAttribute("pageId", this.pageId + "-stage");
+            request.setAttribute("pageId", this.pageId);
             return this.pageId + "-stage";
         } else {
             request.setAttribute("pageId", this.pageId);
