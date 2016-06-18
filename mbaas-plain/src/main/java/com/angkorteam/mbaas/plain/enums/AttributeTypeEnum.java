@@ -1,6 +1,10 @@
 package com.angkorteam.mbaas.plain.enums;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
 
 /**
  * Created by socheat on 3/10/16.
@@ -78,6 +82,12 @@ public enum AttributeTypeEnum implements Serializable {
             return AttributeTypeEnum.Character;
         } else if (object instanceof String) {
             return AttributeTypeEnum.String;
+        } else if (object instanceof java.sql.Time || object instanceof LocalTime) {
+            return AttributeTypeEnum.Time;
+        } else if (object instanceof java.sql.Timestamp || object instanceof LocalDateTime) {
+            return AttributeTypeEnum.DateTime;
+        } else if (object instanceof java.sql.Date || object instanceof LocalDate || object instanceof java.util.Date) {
+            return AttributeTypeEnum.Date;
         } else {
             throw new IllegalArgumentException("clazz must be byte, short, integer, long, float, double, character, string, date");
         }

@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
-import com.angkorteam.mbaas.server.block.BlockPanel;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.panel.BlockPanel;
 import org.apache.wicket.MarkupContainer;
 
 import java.io.Serializable;

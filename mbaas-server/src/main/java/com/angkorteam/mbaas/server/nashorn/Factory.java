@@ -4,7 +4,6 @@ import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.server.block.BlockPanel;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
@@ -14,6 +13,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.Nashor
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.NashornMultiFileUpload;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.image.NashornImage;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link.NashornLink;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.panel.BlockPanel;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultipleChoiceProvider;
@@ -446,32 +446,46 @@ public class Factory implements Serializable,
                     if (column instanceof ScriptObjectMirror) {
                         Class<?> clazz = (Class<?>) ((ScriptObjectMirror) column).get("classColumn");
                         String tableColumn = (String) ((ScriptObjectMirror) column).get("tableColumn");
+                        String htmlColumn = (String) ((ScriptObjectMirror) column).get("htmlColumn");
                         String queryColumn = (String) ((ScriptObjectMirror) column).get("queryColumn");
-                        if (clazz == java.time.LocalTime.class) {
-                            NashornTimeColumn tableField = new NashornTimeColumn(Model.of(tableColumn), tableColumn);
+                        if (htmlColumn == null || "".equals(htmlColumn)) {
+                            htmlColumn = "Label";
+                        }
+                        if ("Label".equals(htmlColumn)) {
+                            if (clazz == java.time.LocalTime.class) {
+                                NashornTimeColumn tableField = new NashornTimeColumn(Model.of(tableColumn), tableColumn);
+                                tableFields.add(tableField);
+                                tableProvider.selectField(tableColumn, queryColumn, java.time.LocalTime.class);
+                            } else if (clazz == java.time.LocalDate.class) {
+                                NashornDateColumn tableField = new NashornDateColumn(Model.of(tableColumn), tableColumn);
+                                tableFields.add(tableField);
+                                tableProvider.selectField(tableColumn, queryColumn, java.time.LocalDate.class);
+                            } else if (clazz == java.time.LocalDateTime.class) {
+                                NashornDateTimeColumn tableField = new NashornDateTimeColumn(Model.of(tableColumn), tableColumn);
+                                tableFields.add(tableField);
+                                tableProvider.selectField(tableColumn, queryColumn, java.time.LocalDateTime.class);
+                            } else if (clazz == Boolean.class
+                                    || clazz == Byte.class
+                                    || clazz == Short.class
+                                    || clazz == Integer.class
+                                    || clazz == Long.class
+                                    || clazz == Float.class
+                                    || clazz == Double.class
+                                    || clazz == BigInteger.class
+                                    || clazz == BigDecimal.class
+                                    || clazz == Character.class
+                                    || clazz == String.class
+                                    ) {
+                                NashornTextColumn tableField = new NashornTextColumn(clazz, Model.of(tableColumn), tableColumn);
+                                tableProvider.selectField(tableColumn, queryColumn, clazz);
+                                tableFields.add(tableField);
+                            }
+                        } else if ("CheckBox".equals(htmlColumn)) {
+                            NashornCheckBoxColumn tableField = new NashornCheckBoxColumn();
+                            tableProvider.selectField(tableColumn, queryColumn, clazz);
                             tableFields.add(tableField);
-                            tableProvider.selectField(tableColumn, queryColumn, java.time.LocalTime.class);
-                        } else if (clazz == java.time.LocalDate.class) {
-                            NashornDateColumn tableField = new NashornDateColumn(Model.of(tableColumn), tableColumn);
-                            tableFields.add(tableField);
-                            tableProvider.selectField(tableColumn, queryColumn, java.time.LocalDate.class);
-                        } else if (clazz == java.time.LocalDateTime.class) {
-                            NashornDateTimeColumn tableField = new NashornDateTimeColumn(Model.of(tableColumn), tableColumn);
-                            tableFields.add(tableField);
-                            tableProvider.selectField(tableColumn, queryColumn, java.time.LocalDateTime.class);
-                        } else if (clazz == Boolean.class
-                                || clazz == Byte.class
-                                || clazz == Short.class
-                                || clazz == Integer.class
-                                || clazz == Long.class
-                                || clazz == Float.class
-                                || clazz == Double.class
-                                || clazz == BigInteger.class
-                                || clazz == BigDecimal.class
-                                || clazz == Character.class
-                                || clazz == String.class
-                                ) {
-                            NashornTextColumn tableField = new NashornTextColumn(clazz, Model.of(tableColumn), tableColumn);
+                        } else if ("TextField".equals(htmlColumn)) {
+                            NashornTextFieldColumn tableField = new NashornTextFieldColumn();
                             tableProvider.selectField(tableColumn, queryColumn, clazz);
                             tableFields.add(tableField);
                         }
