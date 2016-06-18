@@ -37,6 +37,9 @@ public class MasterPageChoiceProvider extends SingleChoiceProvider<Map<String, O
 
     @Override
     public Map<String, Object> toChoice(String id) {
+        if (id == null || id.length() == 0) {
+            return null;
+        }
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
         return jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", id);

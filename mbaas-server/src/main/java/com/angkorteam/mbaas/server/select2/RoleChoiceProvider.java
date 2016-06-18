@@ -38,6 +38,9 @@ public class RoleChoiceProvider extends MultipleChoiceProvider<Map<String, Objec
 
     @Override
     public List<Map<String, Object>> toChoices(String[] ids) {
+        if (ids == null || ids.length == 0) {
+            return null;
+        }
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
         return jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " IN (" + StringUtils.repeat("?", ", ", ids.length) + ")", (Object[]) ids);

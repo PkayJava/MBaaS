@@ -23,9 +23,6 @@ public class AnnotationsRoleAuthorizationStrategy extends org.apache.wicket.auth
     public <T extends IRequestableComponent> boolean isInstantiationAuthorized(Class<T> componentClass) {
         if (componentClass == PagePage.class) {
             RequestCycle requestCycle = RequestCycle.get();
-            if (!Session.get().isSignedIn()) {
-                return false;
-            }
             String applicationCode = ((Session) Session.get()).getApplicationCode();
             if (applicationCode == null || "".equals(applicationCode)) {
                 return false;
