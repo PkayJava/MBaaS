@@ -37,6 +37,9 @@ public class MenuChoiceProvider extends SingleChoiceProvider<Map<String, Object>
 
     @Override
     public Map<String, Object> toChoice(String id) {
+        if (id == null || id.length() == 0) {
+            return null;
+        }
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
         return jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MENU + " WHERE " + Jdbc.Menu.MENU_ID + " = ?", id);

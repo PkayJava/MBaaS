@@ -30,12 +30,16 @@ public class PageProvider extends JooqProvider {
         return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.PAGE_ID, String.class);
     }
 
-    public Field<String> getSecurity() {
-        return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.SECURITY, String.class);
+    public Field<Boolean> getModified() {
+        return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.MODIFIED, Boolean.class);
     }
 
     public Field<String> getUserId() {
         return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.USER_ID, String.class);
+    }
+
+    public Field<String> getCode() {
+        return DSL.field(this.pageTable.getName() + "." + Jdbc.Page.CODE, String.class);
     }
 
     public Field<String> getTitle() {

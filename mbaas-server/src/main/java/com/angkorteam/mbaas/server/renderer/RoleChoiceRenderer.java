@@ -24,9 +24,9 @@ public class RoleChoiceRenderer implements IChoiceRenderer<Map<String, Object>> 
 
     @Override
     public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
-        for (Map<String, Object> role : choices.getObject()) {
-            if (role.get(Jdbc.Role.ROLE_ID).equals(id)) {
-                return role;
+        for (Map<String, Object> menu : choices.getObject()) {
+            if (menu.get(Jdbc.Role.ROLE_ID).equals(id)) {
+                return menu;
             }
         }
         return null;

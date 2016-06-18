@@ -4,7 +4,9 @@ import com.angkorteam.framework.extension.jooq.IDSLContext;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.HostnameTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.HostnameRecord;
 import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
@@ -27,6 +29,9 @@ import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
 import org.apache.wicket.core.util.file.WebApplicationPath;
 import org.apache.wicket.core.util.resource.ClassPathResourceFinder;
 import org.apache.wicket.markup.html.WebPage;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.Response;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.resource.DynamicJQueryResourceReference;
 import org.apache.wicket.util.file.Path;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
@@ -40,6 +45,7 @@ import org.springframework.mail.MailSender;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -79,12 +85,34 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
         return LoginPage.class;
     }
 
+    @Override
+    public org.apache.wicket.Session newSession(Request request, Response response) {
+        Session session = (Session) super.newSession(request, response);
+        RequestCycle requestCycle = RequestCycle.get();
+        HttpServletRequest httpServletRequest = (HttpServletRequest) requestCycle.getRequest().getContainerRequest();
+        String hostname = httpServletRequest.getServerName();
+        DSLContext context = getDSLContext();
+        HostnameTable hostnameTable = Tables.HOSTNAME.as("hostnameTable");
+        HostnameRecord hostnameRecord = context.select(hostnameTable.fields()).from(hostnameTable).where(hostnameTable.FQDN.eq(hostname)).fetchOneInto(hostnameTable);
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = null;
+        if (hostnameRecord != null) {
+            applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(hostnameRecord.getApplicationId())).fetchOneInto(applicationTable);
+        }
+        if (applicationRecord != null) {
+            session.setStyle(applicationRecord.getCode());
+        }
+
+        return session;
+    }
+
     /**
      * @see org.apache.wicket.Application#init()
      */
     @Override
     public void init() {
         super.init();
+        getSecuritySettings().setAuthorizationStrategy(new RoleAuthorizationStrategy(this));
         ResourceStreamLocator streamLocator = new ResourceStreamLocator(new org.apache.wicket.core.util.resource.locator.ResourceStreamLocator(new ClassPathResourceFinder(""), new WebApplicationPath(getServletContext(), "/"), new ClassPathResourceFinder("META-INF/resources/"), new Path(FileUtils.getTempDirectoryPath())));
         getResourceSettings().setResourceStreamLocator(streamLocator);
         getRequestCycleSettings().setBufferResponse(true);
@@ -142,6 +170,10 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     public final JdbcTemplate getJdbcTemplate() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
         return applicationContext.getJdbcTemplate();
+    }
+
+    public final void close(String applicationCode) {
+        ApplicationUtils.getApplication().getApplicationDataSource().destroyApplication(applicationCode);
     }
 
     public final JdbcTemplate getJdbcTemplate(String applicationCode) {

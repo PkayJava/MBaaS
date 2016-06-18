@@ -9,9 +9,9 @@
         <form role="form" wicket:id="form">
             <div class="box-body">
                 <div class="form-group">
-                    <label wicket:for="menuField">Menu</label>
-                    <select wicket:id="menuField" class="form-control select2" style="width: 100%;"></select>
-                    <span wicket:id="menuFeedback" class="help-block"/>
+                    <label wicket:for="codeField">Code</label>
+                    <input wicket:id="codeField" type="text" class="form-control"/>
+                    <span wicket:id="codeFeedback" class="help-block"/>
                 </div>
                 <div class="form-group">
                     <label wicket:for="titleField">Title</label>
@@ -36,7 +36,7 @@
             </div>
             <div class="box-footer">
                 <wicket:link>
-                    <a class="btn btn-primary" href="LogicManagementPage.html">Close</a>
+                    <a class="btn btn-primary" href="MasterManagementPage.html">Close</a>
                 </wicket:link>
                 <button wicket:id="saveButton" type="submit" class="btn btn-primary">Save</button>
             </div>

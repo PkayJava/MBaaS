@@ -33,6 +33,7 @@ import okhttp3.OkHttpClient;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.WicketRuntimeException;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
@@ -218,6 +219,7 @@ public class ApplicationContext implements ServletContextListener {
         granted.add(Option.class.getName());
         granted.add(Jdbc.class.getName());
         granted.add(UUID.class.getName());
+        granted.add(StringUtils.class.getName());
 
         NashornTable nashornTable = Tables.NASHORN.as("nashornTable");
 

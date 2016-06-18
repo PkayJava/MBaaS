@@ -2,20 +2,15 @@ package com.angkorteam.mbaas.server.wicket;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
-import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
-import com.angkorteam.mbaas.model.entity.tables.MbaasRoleTable;
-import com.angkorteam.mbaas.model.entity.tables.MbaasUserTable;
-import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.MbaasRoleRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.MbaasUserRecord;
+import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.records.*;
 import com.angkorteam.mbaas.server.Jdbc;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebSession;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -23,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -207,7 +203,25 @@ public class Session extends AuthenticatedWebSession {
     }
 
     public final String getApplicationCode() {
-        return applicationCode;
+        if (isSignedIn()) {
+            return applicationCode;
+        } else {
+            RequestCycle requestCycle = RequestCycle.get();
+            HttpServletRequest request = (HttpServletRequest) requestCycle.getRequest().getContainerRequest();
+            String hostname = request.getServerName();
+            DSLContext context = getDSLContext();
+            HostnameTable hostnameTable = Tables.HOSTNAME.as("hostnameTable");
+            HostnameRecord hostnameRecord = context.select(hostnameTable.fields()).from(hostnameTable).where(hostnameTable.FQDN.eq(hostname)).fetchOneInto(hostnameTable);
+            ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+            ApplicationRecord applicationRecord = null;
+            if (hostnameRecord != null) {
+                applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(hostnameRecord.getApplicationId())).fetchOneInto(applicationTable);
+            }
+            if (applicationRecord != null) {
+                return applicationRecord.getCode();
+            }
+        }
+        return null;
     }
 
     @Override

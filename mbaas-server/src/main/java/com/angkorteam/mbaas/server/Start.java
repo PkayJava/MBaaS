@@ -10,8 +10,6 @@ import javax.management.MBeanServer;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
-import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**

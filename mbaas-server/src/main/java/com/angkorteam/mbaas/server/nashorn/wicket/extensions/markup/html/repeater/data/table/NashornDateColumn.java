@@ -6,7 +6,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.Filte
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredPropertyColumn;
 import org.apache.wicket.model.IModel;
 
-import java.util.Date;
 import java.util.Map;
 
 /**

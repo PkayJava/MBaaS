@@ -8,10 +8,12 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
+import com.angkorteam.mbaas.model.entity.tables.HostnameTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.function.ApplicationFunction;
 import com.angkorteam.mbaas.server.provider.ApplicationProvider;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MBaaSPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -97,7 +99,10 @@ public class ApplicationManagementPage extends MBaaSPage implements ActionFilter
             String applicationId = (String) object.get("applicationId");
             ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
             ApplicationRecord applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(applicationId)).fetchOneInto(applicationTable);
+            ApplicationUtils.getApplication().getApplicationDataSource().destroyApplication(applicationRecord.getCode());
             if (applicationRecord != null) {
+                HostnameTable hostnameTable = Tables.HOSTNAME.as("hostnameTable");
+                context.delete(hostnameTable).where(hostnameTable.APPLICATION_ID.eq(applicationRecord.getApplicationId())).execute();
                 ApplicationFunction.drop(getJdbcTemplate(), applicationRecord.getApplicationId(), applicationRecord.getCode(), applicationRecord.getMysqlUsername(), applicationRecord.getMysqlDatabase());
             }
         }

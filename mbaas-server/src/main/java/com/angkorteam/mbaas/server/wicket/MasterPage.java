@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.function.HttpFunction;
 import com.angkorteam.mbaas.server.page.LoginPage;
+import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.page.asset.AssetCreatePage;
 import com.angkorteam.mbaas.server.page.asset.AssetManagementPage;
 import com.angkorteam.mbaas.server.page.asset.AssetModifyPage;
@@ -19,6 +20,15 @@ import com.angkorteam.mbaas.server.page.attribute.AttributeManagementPage;
 import com.angkorteam.mbaas.server.page.client.ClientCreatePage;
 import com.angkorteam.mbaas.server.page.client.ClientManagementPage;
 import com.angkorteam.mbaas.server.page.client.ClientModifyPage;
+import com.angkorteam.mbaas.server.page.cms.block.BlockCreatePage;
+import com.angkorteam.mbaas.server.page.cms.block.BlockManagementPage;
+import com.angkorteam.mbaas.server.page.cms.block.BlockModifyPage;
+import com.angkorteam.mbaas.server.page.cms.master.MasterCreatePage;
+import com.angkorteam.mbaas.server.page.cms.master.MasterManagementPage;
+import com.angkorteam.mbaas.server.page.cms.master.MasterModifyPage;
+import com.angkorteam.mbaas.server.page.cms.page.PageCreatePage;
+import com.angkorteam.mbaas.server.page.cms.page.PageManagementPage;
+import com.angkorteam.mbaas.server.page.cms.page.PageModifyPage;
 import com.angkorteam.mbaas.server.page.collection.CollectionCreatePage;
 import com.angkorteam.mbaas.server.page.collection.CollectionManagementPage;
 import com.angkorteam.mbaas.server.page.document.DocumentCreatePage;
@@ -27,16 +37,12 @@ import com.angkorteam.mbaas.server.page.document.DocumentModifyPage;
 import com.angkorteam.mbaas.server.page.file.FileCreatePage;
 import com.angkorteam.mbaas.server.page.file.FileManagementPage;
 import com.angkorteam.mbaas.server.page.file.FileModifyPage;
-import com.angkorteam.mbaas.server.page.flow.FlowPage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptCreatePage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptManagementPage;
 import com.angkorteam.mbaas.server.page.javascript.JavascriptModifyPage;
 import com.angkorteam.mbaas.server.page.job.JobCreatePage;
 import com.angkorteam.mbaas.server.page.job.JobManagementPage;
 import com.angkorteam.mbaas.server.page.job.JobModifyPage;
-import com.angkorteam.mbaas.server.page.logic.LogicCreatePage;
-import com.angkorteam.mbaas.server.page.logic.LogicManagementPage;
-import com.angkorteam.mbaas.server.page.logic.LogicModifyPage;
 import com.angkorteam.mbaas.server.page.menu.MenuCreatePage;
 import com.angkorteam.mbaas.server.page.menu.MenuManagementPage;
 import com.angkorteam.mbaas.server.page.menu.MenuModifyPage;
@@ -117,8 +123,10 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuClientClass = "";
 
     private String mmenuJobClass = "";
-    private String mmenuLogicClass = "";
+    private String mmenuPageClass = "";
+    private String mmenuMasterClass = "";
     private String mmenuMenuClass = "";
+    private String mmenuBlockClass = "";
 
     private WebMarkupContainer menuGeneral;
     private WebMarkupContainer menuProfile;
@@ -183,8 +191,6 @@ public abstract class MasterPage extends AdminLTEPage {
 
         BookmarkablePageLink<Void> dashboardPageLink = new BookmarkablePageLink<>("dashboardPageLink", getApplication().getHomePage());
         add(dashboardPageLink);
-
-        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
 
         Label labelDashboard = new Label("labelDashboard", "MBaaS");
         dashboardPageLink.add(labelDashboard);
@@ -276,9 +282,17 @@ public abstract class MasterPage extends AdminLTEPage {
             mmenuJob.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJobClass")));
             this.menuLogicConsole.add(mmenuJob);
 
-            WebMarkupContainer mmenuLogic = new WebMarkupContainer("mmenuLogic");
-            mmenuLogic.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuLogicClass")));
-            this.menuLogicConsole.add(mmenuLogic);
+            WebMarkupContainer mmenuPage = new WebMarkupContainer("mmenuPage");
+            mmenuPage.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuPageClass")));
+            this.menuLogicConsole.add(mmenuPage);
+
+            WebMarkupContainer mmenuMaster = new WebMarkupContainer("mmenuMaster");
+            mmenuMaster.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMasterClass")));
+            this.menuLogicConsole.add(mmenuMaster);
+
+            WebMarkupContainer mmenuBlock = new WebMarkupContainer("mmenuBlock");
+            mmenuBlock.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuBlockClass")));
+            this.menuLogicConsole.add(mmenuBlock);
 
             WebMarkupContainer mmenuMenu = new WebMarkupContainer("mmenuMenu");
             mmenuMenu.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMenuClass")));
@@ -315,7 +329,7 @@ public abstract class MasterPage extends AdminLTEPage {
                     this.mmenuPages.put(pageId, "");
                     PageParameters pageParameters = new PageParameters();
                     pageParameters.add("pageId", pageId);
-                    BookmarkablePageLink<Void> pageLink = new BookmarkablePageLink<>("pageLink", FlowPage.class, pageParameters);
+                    BookmarkablePageLink<Void> pageLink = new BookmarkablePageLink<>("pageLink", PagePage.class, pageParameters);
                     page.add(pageLink);
                     Label pageLabel = new Label("pageLabel", (String) pageRecord.get(Jdbc.Page.TITLE));
                     pageLink.add(pageLabel);
@@ -345,7 +359,7 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuPages.put(key, "");
         }
 
-        if (getPage() instanceof FlowPage) {
+        if (getPage() instanceof PagePage) {
             String pageId = getPageParameters().get("pageId").toString("");
             Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
             String menuId = (String) pageRecord.get(Jdbc.Page.MENU_ID);
@@ -478,10 +492,22 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuJobClass = "";
         }
 
-        if (getPage() instanceof LogicCreatePage || getPage() instanceof LogicManagementPage || getPage() instanceof LogicModifyPage) {
-            this.mmenuLogicClass = "active";
+        if (getPage() instanceof PageCreatePage || getPage() instanceof PageManagementPage || getPage() instanceof PageModifyPage) {
+            this.mmenuPageClass = "active";
         } else {
-            this.mmenuLogicClass = "";
+            this.mmenuPageClass = "";
+        }
+
+        if (getPage() instanceof BlockCreatePage || getPage() instanceof BlockManagementPage || getPage() instanceof BlockModifyPage) {
+            this.mmenuBlockClass = "active";
+        } else {
+            this.mmenuBlockClass = "";
+        }
+
+        if (getPage() instanceof MasterCreatePage || getPage() instanceof MasterManagementPage || getPage() instanceof MasterModifyPage) {
+            this.mmenuMasterClass = "active";
+        } else {
+            this.mmenuMasterClass = "";
         }
 
         if (getPage() instanceof MenuCreatePage || getPage() instanceof MenuManagementPage || getPage() instanceof MenuModifyPage) {

@@ -89,6 +89,19 @@ public class ApplicationDataSourceFactoryBean implements FactoryBean<Application
             return dataSource;
         }
 
+        public void destroyApplication(String applicationCode) {
+            BasicDataSource dataSource = this.dataSources.remove(applicationCode);
+            if (dataSource != null) {
+                try {
+                    dataSource.close();
+                } catch (SQLException e) {
+                }
+            }
+            this.jdbcTemplates.remove(applicationCode);
+            this.dbSchemas.remove(applicationCode);
+            this.contexts.remove(applicationCode);
+        }
+
         public JdbcTemplate getJdbcTemplate(String applicationCode, String jdbcUrl, String jdbcUsername, String jdbcPassword) {
             DataSource dataSource = getDataSource(applicationCode, jdbcUrl, jdbcUsername, jdbcPassword);
             if (dataSource == null) {

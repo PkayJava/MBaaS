@@ -70,7 +70,7 @@
     <entry key="user.admin.password">admin</entry>
 
     <!-- menu -->
-    <entry key="menu.root">WebFlow Console</entry>
+    <entry key="menu.root">Page Console</entry>
 
     <entry key="mail.server">mail.home.com.kh</entry>
     <entry key="mail.port">25</entry>

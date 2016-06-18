@@ -30,7 +30,7 @@ public class AttributeProvider extends JooqProvider {
         this.attributeTable = DSL.table(Jdbc.ATTRIBUTE).as("attributeTable");
         this.collectionId = collectionId;
         this.from = attributeTable;
-        setSort(this.attributeTable.getName() + "." + Jdbc.Attribute.DATE_CREATED, SortOrder.ASCENDING);
+        setSort("dateCreated", SortOrder.ASCENDING);
     }
 
     public Field<String> getName() {
