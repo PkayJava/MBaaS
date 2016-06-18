@@ -28,6 +28,7 @@ import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
@@ -83,6 +84,7 @@ public class Factory implements Serializable,
         ICheckBoxMultipleChoiceFactory,
         ISelect2SingleChoiceFactory,
         IFileUploadFactory,
+        IRepeatingViewFactory,
         ICheckBoxFactory {
 
     private MarkupContainer container;
@@ -697,4 +699,18 @@ public class Factory implements Serializable,
         this.children.put(id, object);
         return object;
     }
+
+    @Override
+    public RepeatingView createRepeatingView(String id) {
+        return createRepeatingView(container, id);
+    }
+
+    @Override
+    public RepeatingView createRepeatingView(MarkupContainer container, String id) {
+        RepeatingView object = new RepeatingView(id);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
 }
