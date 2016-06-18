@@ -79,15 +79,6 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
         super.add(validator);
     }
 
-    @Override
-    public void add(IFormValidator validator) {
-        if (validator instanceof NashornFormValidator) {
-            throw new WicketRuntimeException("use registerValidator");
-        } else {
-            super.add(validator);
-        }
-    }
-
     public String getScript() {
         return script;
     }

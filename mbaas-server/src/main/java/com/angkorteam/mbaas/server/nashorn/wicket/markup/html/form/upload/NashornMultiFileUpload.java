@@ -26,18 +26,6 @@ public class NashornMultiFileUpload extends MultiFileUploadField {
         super(id, model, max, true);
     }
 
-    @Override
-    public Component add(Behavior... behaviors) {
-        for (Behavior behavior : behaviors) {
-            if (behavior instanceof ValidatorAdapter) {
-                if (((ValidatorAdapter) behavior).getValidator() instanceof NashornValidator) {
-                    throw new WicketRuntimeException("use registerValidator");
-                }
-            }
-        }
-        return super.add(behaviors);
-    }
-
     public void registerValidator(String event) {
         NashornValidator validator = new NashornValidator(getId(), event, this.script);
         super.add(validator);
