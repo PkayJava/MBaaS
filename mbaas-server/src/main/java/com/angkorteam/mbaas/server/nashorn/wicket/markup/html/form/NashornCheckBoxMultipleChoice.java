@@ -1,13 +1,9 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
 
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
-import org.apache.wicket.Component;
-import org.apache.wicket.WicketRuntimeException;
-import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.form.CheckBoxMultipleChoice;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.validation.ValidatorAdapter;
 
 import java.util.Collection;
 import java.util.List;

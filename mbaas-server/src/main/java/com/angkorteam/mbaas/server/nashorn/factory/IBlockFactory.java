@@ -4,7 +4,6 @@ import com.angkorteam.mbaas.server.block.BlockPanel;
 import org.apache.wicket.MarkupContainer;
 
 import java.io.Serializable;
-import java.util.Map;
 
 /**
  * Created by socheat on 6/17/16.

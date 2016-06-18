@@ -1,13 +1,9 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload;
 
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
-import org.apache.wicket.Component;
-import org.apache.wicket.WicketRuntimeException;
-import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.validation.ValidatorAdapter;
 
 import java.util.List;
 

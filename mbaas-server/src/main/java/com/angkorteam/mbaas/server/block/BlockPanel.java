@@ -5,22 +5,26 @@ import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.WicketRuntimeException;
+import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.util.MapModel;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.util.resource.IResourceStream;
+import org.apache.wicket.util.resource.StringResourceStream;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Created by socheat on 6/16/16.
  */
-public class BlockPanel extends Panel {
+public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
 
     private final String code;
 
@@ -94,13 +98,24 @@ public class BlockPanel extends Panel {
 
     @Override
     public String getVariation() {
-        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         if (this.stage) {
-            request.setAttribute("blockId", this.blockId);
             return this.blockId + "-stage";
         } else {
-            request.setAttribute("blockId", this.blockId);
             return this.blockId;
+        }
+    }
+
+    @Override
+    public IResourceStream getMarkupResourceStream(MarkupContainer container, Class<?> containerClass) {
+        if (containerClass == BlockPanel.class) {
+            Session session = (Session) getSession();
+            JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(session.getApplicationCode());
+            Map<String, Object> blockRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.BLOCK_ID + " = ?", this.blockId);
+            String html = (String) (this.stage ? blockRecord.get(Jdbc.Block.STAGE_HTML) : blockRecord.get(Jdbc.Block.HTML));
+            StringResourceStream stream = new StringResourceStream(html);
+            return stream;
+        } else {
+            throw new WicketRuntimeException("markup not found");
         }
     }
 
