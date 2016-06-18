@@ -11,7 +11,6 @@ import com.angkorteam.mbaas.server.block.BlockPanel;
 import com.angkorteam.mbaas.server.validator.JobNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import org.apache.commons.io.FileUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -20,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -129,9 +127,6 @@ public class BlockModifyPage extends MasterPage {
         jdbcUpdate.execute(fields, wheres);
 
         String cacheKey = BlockPanel.class.getName() + "_" + this.blockId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-        String filename = BlockPanel.class.getName().replaceAll("\\.", "/") + "_" + this.blockId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-        File temp = new File(FileUtils.getTempDirectory(), filename);
-        FileUtils.deleteQuietly(temp);
         getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
         setResponsePage(BlockManagementPage.class);
     }

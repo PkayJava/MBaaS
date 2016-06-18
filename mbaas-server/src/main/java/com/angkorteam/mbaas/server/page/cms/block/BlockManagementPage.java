@@ -75,23 +75,11 @@ public class BlockManagementPage extends MasterPage implements ActionFilteredJoo
             setResponsePage(BlockModifyPage.class, parameters);
         }
         if ("Delete".equals(link)) {
-            Map<String, String> temp = new HashMap<>();
+            List<String> temp = new ArrayList<>();
             jdbcTemplate.update("DELETE FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.BLOCK_ID + " = ?", blockId);
-            {
-                String cacheKey = BlockPanel.class.getName() + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                String filename = BlockPanel.class.getName().replaceAll("\\.", "/") + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                temp.put(cacheKey, filename);
-            }
-            {
-                String cacheKey = BlockPanel.class.getName() + "_" + blockId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                String filename = BlockPanel.class.getName().replaceAll("\\.", "/") + "_" + blockId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                temp.put(cacheKey, filename);
-            }
-            for (Map.Entry<String, String> item : temp.entrySet()) {
-                String cacheKey = item.getKey();
-                String filename = item.getValue();
-                File file = new File(FileUtils.getTempDirectory(), filename);
-                FileUtils.deleteQuietly(file);
+            temp.add(BlockPanel.class.getName() + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");
+            temp.add(BlockPanel.class.getName() + "_" + blockId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");
+            for (String cacheKey : temp) {
                 getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
             }
             return;
@@ -99,9 +87,6 @@ public class BlockManagementPage extends MasterPage implements ActionFilteredJoo
         if ("Go Live".equals(link)) {
             jdbcTemplate.update("UPDATE " + Jdbc.BLOCK + " SET " + Jdbc.Block.HTML + " = " + Jdbc.Block.STAGE_HTML + ", " + Jdbc.Block.JAVASCRIPT + " = " + Jdbc.Block.STAGE_JAVASCRIPT + ", " + Jdbc.Block.MODIFIED + " = false " + " WHERE " + Jdbc.Block.BLOCK_ID + " = ?", blockId);
             String cacheKey = BlockPanel.class.getName() + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            String filename = BlockPanel.class.getName().replaceAll("\\.", "/") + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            File temp = new File(FileUtils.getTempDirectory(), filename);
-            FileUtils.deleteQuietly(temp);
             getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
             return;
         }
