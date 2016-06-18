@@ -4,6 +4,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.server.Jdbc;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.validation.ValidationError;
 import org.jooq.impl.DSL;
 
 import javax.script.ScriptEngine;
@@ -57,6 +58,7 @@ public class JavascripUtils {
             clazzes.add(Stack.class);
             clazzes.add(Tables.class);
             clazzes.add(DSL.class);
+            clazzes.add(ValidationError.class);
             clazzes.add(StringUtils.class);
             clazzes.add(Option.class);
             clazzes.add(Jdbc.class);
