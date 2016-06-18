@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.nashorn;
 import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
+import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.block.BlockPanel;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.*;
@@ -25,6 +26,7 @@ import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -57,6 +59,7 @@ public class Factory implements Serializable,
         ILabelFactory,
         IJdbcTemplateFactory,
         IPropertyModelFactory,
+        IFeedback,
         IChoiceRendererFactory,
         IPasswordTextFieldFactory,
         IRangeTextFieldFactory,
@@ -720,4 +723,16 @@ public class Factory implements Serializable,
         return object;
     }
 
+    @Override
+    public TextFeedbackPanel createFeedback(String id, FormComponent<?> component) {
+        return createFeedback(container, id, component);
+    }
+
+    @Override
+    public TextFeedbackPanel createFeedback(MarkupContainer container, String id, FormComponent<?> component) {
+        TextFeedbackPanel object = new TextFeedbackPanel(id, component);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
 }
