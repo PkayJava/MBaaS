@@ -81,6 +81,12 @@ public class PageCreatePage extends MasterPage {
         this.form = new Form<>("form");
         add(this.form);
 
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+
+        String roleId = jdbcTemplate.queryForObject("SELECT " + Jdbc.User.ROLE_ID + " FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " = ?", String.class, getSession().getApplicationUserId());
+
+        this.role = new LinkedList<>();
+        this.role.add(jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", roleId));
         this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RoleChoiceProvider(getSession().getApplicationCode()), new RoleChoiceRenderer());
         this.form.add(this.roleField);
         this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);
