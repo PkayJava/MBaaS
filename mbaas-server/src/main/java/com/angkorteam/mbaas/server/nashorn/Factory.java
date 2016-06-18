@@ -17,8 +17,6 @@ import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultipleChoiceProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornSingleChoiceProvider;
-import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornFormValidator;
-import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -53,7 +51,6 @@ public class Factory implements Serializable,
         IMapFactory,
         ITextFieldFactory,
         IFormFactory,
-        IFormValidatorFactory,
         IButtonFactory,
         IBlockFactory,
         IWebMarkupContainerFactory,
@@ -70,7 +67,6 @@ public class Factory implements Serializable,
         ITableFactory,
         IListMultipleChoiceFactory,
         IOptionFactory,
-        IValidatorFactory,
         IHiddenFieldFactory,
         IRequiredTextFieldFactory,
         IColorTextFieldFactory,
@@ -162,21 +158,6 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public <T> NashornValidator<T> createValidator() {
-        NashornValidator<T> object = new NashornValidator<>();
-        object.setScript(this.script);
-        return object;
-    }
-
-    @Override
-    public NashornFormValidator createFormValidator() {
-        NashornFormValidator object = new NashornFormValidator();
-        object.setScript(this.script);
-        object.setChildren(this.children);
-        return object;
-    }
-
-    @Override
     public <T> PropertyModel<T> createPropertyModel(Object model, String expression) {
         PropertyModel<T> object = new PropertyModel<>(model, expression);
         return object;
@@ -237,6 +218,7 @@ public class Factory implements Serializable,
     @Override
     public <T> NashornTextField<T> createTextField(MarkupContainer container, String id, Class<T> type) {
         NashornTextField<T> object = new NashornTextField<>(id, createPropertyModel(this.pageModel, id), type);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -267,6 +249,7 @@ public class Factory implements Serializable,
     public NashornSelect2MultipleChoice createSelect2MultipleChoice(MarkupContainer container, String id, IChoiceRenderer<Map<String, Object>> renderer) {
         NashornMultipleChoiceProvider provider = new NashornMultipleChoiceProvider(this, id, this.script);
         NashornSelect2MultipleChoice object = new NashornSelect2MultipleChoice(id, createPropertyModel(this.pageModel, id), provider, renderer);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -281,6 +264,7 @@ public class Factory implements Serializable,
     public NashornSelect2SingleChoice createSelect2SingleChoice(MarkupContainer container, String id, IChoiceRenderer<Map<String, Object>> renderer) {
         NashornSingleChoiceProvider provider = new NashornSingleChoiceProvider(this, id, this.script);
         NashornSelect2SingleChoice object = new NashornSelect2SingleChoice(id, createPropertyModel(this.pageModel, id), provider, renderer);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -294,6 +278,7 @@ public class Factory implements Serializable,
     @Override
     public NashornDateTextField createDateTextField(MarkupContainer container, String id) {
         NashornDateTextField object = new NashornDateTextField(id, createPropertyModel(this.pageModel, id));
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -307,6 +292,7 @@ public class Factory implements Serializable,
     @Override
     public NashornColorTextField createColorTextField(MarkupContainer container, String id) {
         NashornColorTextField object = new NashornColorTextField(id, createPropertyModel(this.pageModel, id));
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -320,6 +306,7 @@ public class Factory implements Serializable,
     @Override
     public NashornTimeTextField createTimeTextField(MarkupContainer container, String id) {
         NashornTimeTextField object = new NashornTimeTextField(id, createPropertyModel(this.pageModel, id));
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -333,6 +320,7 @@ public class Factory implements Serializable,
     @Override
     public NashornDropDownChoice createDropDownChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
         NashornDropDownChoice object = new NashornDropDownChoice(id, createPropertyModel(this.pageModel, id), choices, renderer);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -346,6 +334,7 @@ public class Factory implements Serializable,
     @Override
     public NashornListMultipleChoice createListMultipleChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
         NashornListMultipleChoice object = new NashornListMultipleChoice(id, createPropertyModel(this.pageModel, id), choices, renderer);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -359,6 +348,7 @@ public class Factory implements Serializable,
     @Override
     public NashornListMultipleChoice createListMultipleChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
         NashornListMultipleChoice object = new NashornListMultipleChoice(id, createPropertyModel(this.pageModel, id), choices, renderer, maxRows);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -372,6 +362,7 @@ public class Factory implements Serializable,
     @Override
     public NashornCheckBoxMultipleChoice createCheckBoxMultipleChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
         NashornCheckBoxMultipleChoice object = new NashornCheckBoxMultipleChoice(id, createPropertyModel(this.pageModel, id), choices, renderer);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -385,6 +376,7 @@ public class Factory implements Serializable,
     @Override
     public NashornListChoice createListChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
         NashornListChoice object = new NashornListChoice(id, createPropertyModel(this.pageModel, id), choices, renderer);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -398,6 +390,7 @@ public class Factory implements Serializable,
     @Override
     public NashornListChoice createListChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer, int maxRows) {
         NashornListChoice object = new NashornListChoice(id, createPropertyModel(this.pageModel, id), choices, renderer, maxRows);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -411,6 +404,7 @@ public class Factory implements Serializable,
     @Override
     public NashornRadioChoice createRadioChoice(MarkupContainer container, String id, IModel<List<Map<String, Object>>> choices, IChoiceRenderer<Map<String, Object>> renderer) {
         NashornRadioChoice object = new NashornRadioChoice(id, createPropertyModel(this.pageModel, id), choices, renderer);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -424,6 +418,7 @@ public class Factory implements Serializable,
     @Override
     public NashornCheckBox createCheckBox(MarkupContainer container, String id) {
         NashornCheckBox object = new NashornCheckBox(id, createPropertyModel(this.pageModel, id));
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -498,6 +493,7 @@ public class Factory implements Serializable,
     @Override
     public NashornEmailTextField createEmailTextField(MarkupContainer container, String id) {
         NashornEmailTextField object = new NashornEmailTextField(id, createPropertyModel(this.pageModel, id));
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -511,6 +507,7 @@ public class Factory implements Serializable,
     @Override
     public NashornEmailTextField createEmailTextField(MarkupContainer container, String id, IValidator<String> validator) {
         NashornEmailTextField object = new NashornEmailTextField(id, createPropertyModel(this.pageModel, id), validator);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -524,6 +521,7 @@ public class Factory implements Serializable,
     @Override
     public <T> NashornHiddenField<T> createHiddenField(MarkupContainer container, String id, Class<T> type) {
         NashornHiddenField<T> object = new NashornHiddenField<>(id, createPropertyModel(this.pageModel, id), type);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -537,6 +535,7 @@ public class Factory implements Serializable,
     @Override
     public <T extends Number & Comparable<T>> NashornNumberTextField<T> createNumberTextField(MarkupContainer container, String id, Class<T> type) {
         NashornNumberTextField<T> object = new NashornNumberTextField<>(id, createPropertyModel(this.pageModel, id), type);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -550,6 +549,7 @@ public class Factory implements Serializable,
     @Override
     public NashornPasswordTextField createPasswordTextField(MarkupContainer container, String id) {
         NashornPasswordTextField object = new NashornPasswordTextField(id, createPropertyModel(this.pageModel, id));
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -563,6 +563,7 @@ public class Factory implements Serializable,
     @Override
     public <T extends Number & Comparable<T>> NashornRangeTextField<T> createRangeTextField(MarkupContainer container, String id, Class<T> type) {
         NashornRangeTextField<T> object = new NashornRangeTextField<>(id, createPropertyModel(this.pageModel, id), type);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -576,6 +577,7 @@ public class Factory implements Serializable,
     @Override
     public <T> NashornRequiredTextField<T> createRequiredTextField(MarkupContainer container, String id, Class<T> type) {
         NashornRequiredTextField<T> object = new NashornRequiredTextField<>(id, createPropertyModel(this.pageModel, id), type);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -589,6 +591,7 @@ public class Factory implements Serializable,
     @Override
     public NashornUrlTextField createUrlTextField(MarkupContainer container, String id) {
         NashornUrlTextField object = new NashornUrlTextField(id, createPropertyModel(this.pageModel, id));
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -602,6 +605,7 @@ public class Factory implements Serializable,
     @Override
     public NashornUrlTextField createUrlTextField(MarkupContainer container, String id, UrlValidator validator) {
         NashornUrlTextField object = new NashornUrlTextField(id, createPropertyModel(this.pageModel, id), validator);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -615,6 +619,7 @@ public class Factory implements Serializable,
     @Override
     public NashornFileUpload createFileUpload(MarkupContainer container, String id) {
         NashornFileUpload object = new NashornFileUpload(id, createPropertyModel(this.pageModel, id));
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -628,6 +633,7 @@ public class Factory implements Serializable,
     @Override
     public NashornMultiFileUpload createMultiFileUpload(MarkupContainer container, String id) {
         NashornMultiFileUpload object = new NashornMultiFileUpload(id, createPropertyModel(this.pageModel, id));
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -641,6 +647,7 @@ public class Factory implements Serializable,
     @Override
     public NashornMultiFileUpload createMultiFileUpload(MarkupContainer container, String id, int max) {
         NashornMultiFileUpload object = new NashornMultiFileUpload(id, createPropertyModel(this.pageModel, id), max);
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;

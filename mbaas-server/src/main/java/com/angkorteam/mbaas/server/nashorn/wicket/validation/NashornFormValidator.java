@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server.nashorn.wicket.validation;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
-import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.validation.IFormValidator;
@@ -12,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,29 +21,28 @@ public class NashornFormValidator implements IFormValidator {
 
     private String id;
 
+    private String event;
+
     private String script;
 
-    private Map<String, Component> children;
+    private FormComponent<?>[] components;
 
-    public NashornFormValidator() {
+    private Map<String, FormComponent<?>> map;
+
+    public NashornFormValidator(String id, String event, String script, FormComponent<?>[] components) {
+        this.id = id;
+        this.event = event;
+        this.script = script;
+        this.components = components;
+        this.map = new HashMap<>();
+        for (FormComponent<?> component : components) {
+            this.map.put(component.getId(), component);
+        }
     }
 
     @Override
     public FormComponent<?>[] getDependentFormComponents() {
-        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
-            try {
-                scriptEngine.eval(this.script);
-            } catch (ScriptException e) {
-            }
-        }
-        Invocable invocable = (Invocable) scriptEngine;
-        try {
-            return (FormComponent<?>[]) invocable.invokeFunction(getId() + "__dependent_form_component", this.children);
-        } catch (ScriptException e) {
-        } catch (NoSuchMethodException e) {
-        }
-        return null;
+        return this.components;
     }
 
     @Override
@@ -53,7 +52,7 @@ public class NashornFormValidator implements IFormValidator {
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
@@ -61,33 +60,9 @@ public class NashornFormValidator implements IFormValidator {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__validate", jdbcTemplate, this.children);
+            invocable.invokeFunction(this.id + "__" + this.event, jdbcTemplate, this.map);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getScript() {
-        return script;
-    }
-
-    public void setScript(String script) {
-        this.script = script;
-    }
-
-    public Map<String, Component> getChildren() {
-        return children;
-    }
-
-    public void setChildren(Map<String, Component> children) {
-        this.children = children;
     }
 }
