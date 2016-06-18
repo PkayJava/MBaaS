@@ -43,7 +43,7 @@ public class PagePage extends MasterPage {
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
         this.script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
-        this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.pageModel);
+        this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.stage, this.pageModel);
         ScriptEngine engine = getScriptEngine();
         try {
             engine.eval(this.script);

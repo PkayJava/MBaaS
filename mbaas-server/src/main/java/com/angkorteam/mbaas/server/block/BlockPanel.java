@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.util.MapModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -14,7 +15,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,7 +28,7 @@ public class BlockPanel extends Panel {
 
     private final Map<String, Object> pageModel;
 
-    private Map<String, Object> blockModel;
+    private MapModel<String, Object> blockModel;
 
     private Disk disk;
 
@@ -38,26 +38,29 @@ public class BlockPanel extends Panel {
 
     private Factory factory;
 
-    public BlockPanel(String id, String code, Map<String, Object> pageModel) {
-        super(id);
+    public BlockPanel(String id, String code, boolean stage, Map<String, Object> pageModel, MapModel<String, Object> blockModel) {
+        super(id, blockModel);
         this.code = code;
+        this.stage = stage;
         this.pageModel = pageModel;
+        this.blockModel = blockModel;
+        Session session = (Session) getSession();
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(session.getApplicationCode());
+        Map<String, Object> blockRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.CODE + " = ?", this.code);
+        this.blockId = (String) blockRecord.get(Jdbc.Block.BLOCK_ID);
     }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
         Session session = (Session) getSession();
-        this.blockModel = new HashMap<>();
         String applicationCode = session.getApplicationCode();
         String applicationUserId = session.getApplicationUserId();
-        this.stage = getPage().getPageParameters().get("stage").toBoolean(false);
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(session.getApplicationCode());
         Map<String, Object> blockRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.CODE + " = ?", this.code);
-        this.blockId = (String) blockRecord.get(Jdbc.Block.BLOCK_ID);
         this.script = (String) (this.stage ? blockRecord.get(Jdbc.Block.STAGE_JAVASCRIPT) : blockRecord.get(Jdbc.Block.JAVASCRIPT));
         this.disk = new Disk(applicationCode, applicationUserId);
-        this.factory = new Factory(this, this.disk, applicationCode, this.script, this.pageModel);
+        this.factory = new Factory(this, this.disk, applicationCode, this.script, this.stage, this.pageModel);
         ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
             engine.eval(this.script);
@@ -67,7 +70,7 @@ public class BlockPanel extends Panel {
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
         if (iOnInitialize != null) {
-            iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.blockModel);
+            iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.blockModel.getObject());
         }
     }
 
@@ -85,7 +88,7 @@ public class BlockPanel extends Panel {
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
         if (iOnBeforeRender != null) {
             JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(session.getApplicationCode());
-            iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.blockModel);
+            iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.blockModel.getObject());
         }
     }
 
