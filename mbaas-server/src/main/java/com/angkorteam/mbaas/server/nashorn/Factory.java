@@ -237,7 +237,7 @@ public class Factory implements Serializable,
         NashornButton object = new NashornButton(id);
         object.setScript(this.script);
         object.setDisk(this.disk);
-        object.setUserModel(this.pageModel);
+        object.setPageModel(this.pageModel);
         container.add(object);
         this.children.put(id, object);
         return object;
