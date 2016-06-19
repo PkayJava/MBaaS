@@ -4,6 +4,7 @@
     <entry key="ResourceValidator.duplicated">is taken</entry>
     <entry key="RoleNameValidator.duplicated">is taken</entry>
     <entry key="SettingKeyValidator.duplicated">is taken</entry>
+    <entry key="HostnameValidator.invalid">is invalid</entry>
     <entry key="UserLoginValidator.duplicated">is taken</entry>
     <entry key="UserPasswordValidator.invalid">is invalid</entry>
     <entry key="UserLoginFormValidator.duplicated">is taken</entry>

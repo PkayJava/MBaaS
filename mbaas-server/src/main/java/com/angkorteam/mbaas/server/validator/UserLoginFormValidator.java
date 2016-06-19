@@ -12,6 +12,7 @@ import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.util.lang.Classes;
 import org.apache.wicket.validation.ValidationError;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -53,8 +54,8 @@ public class UserLoginFormValidator extends JooqFormValidator {
                 JdbcTemplate jdbcTemplate = application.getJdbcTemplate(applicationCode);
                 int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.USER + " WHERE " + Jdbc.User.LOGIN + " = ?", int.class, login);
                 if (count > 0) {
-                    ValidationError error = new ValidationError(UserLoginFormValidator.class.getSimpleName());
-                    error.addKey("duplicated");
+                    ValidationError error = new ValidationError();
+                    error.addKey(Classes.simpleName(UserLoginFormValidator.class) + ".duplicated");
                     loginField.error(error);
                 }
             }
