@@ -18,13 +18,21 @@ import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.function.ApplicationFunction;
+import com.angkorteam.mbaas.server.nashorn.Http;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import com.angkorteam.mbaas.server.validator.ApplicationDomainValidator;
 import com.angkorteam.mbaas.server.validator.ApplicationLoginValidator;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import com.google.gson.reflect.TypeToken;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.GetRequest;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.validation.EqualPasswordInputValidator;
@@ -35,6 +43,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +57,9 @@ import java.util.UUID;
 public class MBaaSRegisterPage extends AdminLTEPage {
 
     private static final String DOMAIN = ".ddns.net";
+
+    private String server;
+    private Label serverLabel;
 
     private String fqdn;
     private TextField<String> fqdnField;
@@ -76,6 +89,16 @@ public class MBaaSRegisterPage extends AdminLTEPage {
         super.onInitialize();
         this.form = new Form<>("form");
         add(this.form);
+
+        try {
+            HttpResponse<String> json = Unirest.get("https://api.ipify.org/?format=json").asString();
+            Map<String, Object> gson = ApplicationUtils.getApplication().getGson().fromJson(json.getBody(), new TypeToken<Map<String, Object>>() {
+            }.getType());
+            this.server = (String) gson.get("ip");
+        } catch (UnirestException e) {
+        }
+        this.serverLabel = new Label("serverLabel", new PropertyModel<>(this, "server"));
+        this.form.add(serverLabel);
 
         this.fqdnField = new TextField<>("fqdnField", new PropertyModel<>(this, "fqdn"));
         this.fqdnField.setRequired(true);

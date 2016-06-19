@@ -13,6 +13,10 @@
 
         <form wicket:id="form">
             <div class="form-group">
+                <label>Server IP</label>
+                <span wicket:id="serverLabel" class="form-control"/>
+            </div>
+            <div class="form-group">
                 <label wicket:for="fqdnField">FQDN</label>
                 <input wicket:id="fqdnField" type="text" class="form-control" placeholder="yours.ddns.net"/>
                 <span wicket:id="fqdnFeedback" class="help-block"/>
