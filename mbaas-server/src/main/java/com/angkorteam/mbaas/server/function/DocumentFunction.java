@@ -24,7 +24,7 @@ public class DocumentFunction {
     public static boolean modifyDocument(JdbcTemplate jdbcTemplate, String collectionId, String collectionName, String documentId, DocumentModifyRequest requestBody) {
         Map<String, Map<String, Object>> attributeRecords = new LinkedHashMap<>();
 
-        for (Map<String, Object> attributeRecord : jdbcTemplate.queryForList("SELECT * FROM WHERE " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ?", collectionId)) {
+        for (Map<String, Object> attributeRecord : jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ?", collectionId)) {
             attributeRecords.put((String) attributeRecord.get(Jdbc.Attribute.NAME), attributeRecord);
         }
 

@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server.wicket;
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.framework.extension.wicket.markup.html.link.Link;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
 import com.angkorteam.mbaas.model.entity.tables.DesktopTable;
 import com.angkorteam.mbaas.model.entity.tables.records.DesktopRecord;
 import com.angkorteam.mbaas.server.Jdbc;
@@ -64,6 +63,7 @@ import com.angkorteam.mbaas.server.page.user.UserModifyPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import jdk.nashorn.api.scripting.ClassFilter;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -323,16 +323,20 @@ public abstract class MasterPage extends AdminLTEPage {
                 menu.add(pages);
                 for (Map<String, Object> pageRecord : pageRecords) {
                     String pageId = (String) pageRecord.get(Jdbc.Page.PAGE_ID);
-                    WebMarkupContainer page = new WebMarkupContainer(pages.newChildId());
-                    page.add(AttributeModifier.replace("class", new PropertyModel<>(this.mmenuPages, pageId)));
-                    pages.add(page);
-                    this.mmenuPages.put(pageId, "");
-                    PageParameters pageParameters = new PageParameters();
-                    pageParameters.add("pageId", pageId);
-                    BookmarkablePageLink<Void> pageLink = new BookmarkablePageLink<>("pageLink", PagePage.class, pageParameters);
-                    page.add(pageLink);
-                    Label pageLabel = new Label("pageLabel", (String) pageRecord.get(Jdbc.Page.TITLE));
-                    pageLink.add(pageLabel);
+                    Roles roles = new Roles();
+                    roles.addAll(jdbcTemplate.queryForList("SELECT " + Jdbc.ROLE + "." + Jdbc.Role.NAME + " FROM " + Jdbc.PAGE_ROLE + " JOIN " + Jdbc.ROLE + " ON " + Jdbc.PAGE_ROLE + "." + Jdbc.PageRole.ROLE_ID + " = " + Jdbc.ROLE + "." + Jdbc.Role.ROLE_ID + " WHERE " + Jdbc.PAGE_ROLE + "." + Jdbc.PageRole.PAGE_ID + " = ?", String.class, pageId));
+                    if (ApplicationUtils.getApplication().hasAnyRole(roles)) {
+                        WebMarkupContainer page = new WebMarkupContainer(pages.newChildId());
+                        page.add(AttributeModifier.replace("class", new PropertyModel<>(this.mmenuPages, pageId)));
+                        pages.add(page);
+                        this.mmenuPages.put(pageId, "");
+                        PageParameters pageParameters = new PageParameters();
+                        pageParameters.add("pageId", pageId);
+                        BookmarkablePageLink<Void> pageLink = new BookmarkablePageLink<>("pageLink", PagePage.class, pageParameters);
+                        page.add(pageLink);
+                        Label pageLabel = new Label("pageLabel", (String) pageRecord.get(Jdbc.Page.TITLE));
+                        pageLink.add(pageLabel);
+                    }
                 }
             }
         }

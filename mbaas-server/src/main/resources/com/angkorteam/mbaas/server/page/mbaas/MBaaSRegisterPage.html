@@ -13,9 +13,18 @@
 
         <form wicket:id="form">
             <div class="form-group">
-                <label wicket:for="hostnameField">Hostname</label>
-                <input wicket:id="hostnameField" type="text" class="form-control"/>
-                <span wicket:id="hostnameFeedback" class="help-block"/>
+                <label>Server IP</label>
+                <span wicket:id="serverLabel" class="form-control"/>
+            </div>
+            <div class="form-group">
+                <label wicket:for="fqdnField">FQDN</label>
+                <input wicket:id="fqdnField" type="text" class="form-control" placeholder="yours.ddns.net"/>
+                <span wicket:id="fqdnFeedback" class="help-block"/>
+            </div>
+            <div class="form-group">
+                <label wicket:for="fullNameField">Full Name</label>
+                <input wicket:id="fullNameField" type="text" class="form-control"/>
+                <span wicket:id="fullNameFeedback" class="help-block"/>
             </div>
             <div class="form-group">
                 <label wicket:for="loginField">Login</label>
@@ -35,7 +44,7 @@
             <div class="row">
                 <div class="col-xs-6">
                     <wicket:link>
-                        <a href="LoginPage.html" class="btn btn-primary btn-block btn-flat">Cancel</a>
+                        <a href="MBaaSLoginPage.html" class="btn btn-primary btn-block btn-flat">Cancel</a>
                     </wicket:link>
                 </div>
                 <div class="col-xs-6">

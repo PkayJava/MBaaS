@@ -4,13 +4,16 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.util.resource.IResourceStream;
+import org.apache.wicket.util.resource.StringResourceStream;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,15 +22,13 @@ import java.util.Map;
  * Created by socheat on 5/28/16.
  */
 @Mount("/page")
-public class PagePage extends MasterPage {
+public class PagePage extends MasterPage implements IMarkupResourceStreamProvider {
 
     private Factory factory;
 
     private Map<String, Object> pageModel;
 
     private Disk disk;
-
-    private String script;
 
     private String pageId;
 
@@ -41,12 +42,12 @@ public class PagePage extends MasterPage {
         this.pageModel = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
-        this.script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
+        String script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
-        this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.stage, this.pageModel);
+        this.factory = new Factory(this, this.disk, getApplicationCode(), script, this.stage, this.pageModel);
         ScriptEngine engine = getScriptEngine();
         try {
-            engine.eval(this.script);
+            engine.eval(script);
         } catch (ScriptException e) {
             e.printStackTrace();
         }
@@ -60,30 +61,41 @@ public class PagePage extends MasterPage {
     @Override
     protected void onBeforeRender() {
         super.onBeforeRender();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
+        String script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
         ScriptEngine engine = getScriptEngine();
         try {
-            engine.eval(this.script);
+            engine.eval(script);
         } catch (ScriptException e) {
             e.printStackTrace();
         }
         Invocable invocable = (Invocable) engine;
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
         if (iOnBeforeRender != null) {
-            JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
             iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         }
     }
 
     @Override
     public String getVariation() {
-        super.getVariation();
-        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         if (this.stage) {
-            request.setAttribute("pageId", this.pageId);
             return this.pageId + "-stage";
         } else {
-            request.setAttribute("pageId", this.pageId);
             return this.pageId;
+        }
+    }
+
+    @Override
+    public IResourceStream getMarkupResourceStream(MarkupContainer container, Class<?> containerClass) {
+        if (containerClass == PagePage.class) {
+            JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+            Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
+            String html = (String) (this.stage ? pageRecord.get(Jdbc.Page.STAGE_HTML) : pageRecord.get(Jdbc.Page.HTML));
+            StringResourceStream stream = new StringResourceStream(html);
+            return stream;
+        } else {
+            return super.getMarkupResourceStream(container, containerClass);
         }
     }
 

@@ -18,9 +18,14 @@ public class NashornValidator<T> implements IValidator<T> {
 
     private String id;
 
+    private String event;
+
     private String script;
 
-    public NashornValidator() {
+    public NashornValidator(String id, String event, String script) {
+        this.id = id;
+        this.event = event;
+        this.script = script;
     }
 
     @Override
@@ -30,7 +35,7 @@ public class NashornValidator<T> implements IValidator<T> {
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
@@ -38,25 +43,9 @@ public class NashornValidator<T> implements IValidator<T> {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(this.id + "__validate", jdbcTemplate, validatable.getValue());
+            invocable.invokeFunction(this.id + "__" + this.event, jdbcTemplate, validatable);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getScript() {
-        return script;
-    }
-
-    public void setScript(String script) {
-        this.script = script;
     }
 }

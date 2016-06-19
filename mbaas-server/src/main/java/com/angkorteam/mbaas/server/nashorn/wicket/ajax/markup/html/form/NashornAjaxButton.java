@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.ajax.markup.html.form;
 
+import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
@@ -23,6 +24,8 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
     private String script;
 
     private Map<String, Object> userModel;
+
+    private Factory factory;
 
     public NashornAjaxButton(String id) {
         super(id);
@@ -63,7 +66,7 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), jdbcTemplate, this, target, form, this.userModel);
+            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), jdbcTemplate, this.factory, target, form, this.userModel);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         } catch (EmptyResultDataAccessException e) {
@@ -98,5 +101,13 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
 
     public void setScript(String script) {
         this.script = script;
+    }
+
+    public Factory getFactory() {
+        return factory;
+    }
+
+    public void setFactory(Factory factory) {
+        this.factory = factory;
     }
 }
