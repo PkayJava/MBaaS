@@ -35,6 +35,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.WicketRuntimeException;
+import org.apache.wicket.validation.ValidationError;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
@@ -214,6 +215,7 @@ public class ApplicationContext implements ServletContextListener {
         granted.add(ArrayDeque.class.getName());
         granted.add(ConcurrentLinkedDeque.class.getName());
         granted.add(Stack.class.getName());
+        granted.add(ValidationError.class.getName());
         granted.add(Tables.class.getName());
         granted.add(DSL.class.getName());
         granted.add(Option.class.getName());

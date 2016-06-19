@@ -11,6 +11,9 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 /**
@@ -173,16 +176,20 @@ public class CommonFunction {
                         }
                         resultDocument.put(item.getKey(), (String) value);
                     } else if (internalType == AttributeTypeEnum.Time) {
-                        if (externalType == AttributeTypeEnum.String) {
+                        if (item.getValue() instanceof String) {
                             try {
                                 resultDocument.put(item.getKey(), patternTime.parse((String) value));
                             } catch (ParseException e) {
-                                try {
-                                    resultDocument.put(item.getKey(), patternTime.parse((String) value));
-                                } catch (ParseException e1) {
-                                    return false;
-                                }
+                                return false;
                             }
+                        } else if (item.getValue() instanceof Date
+                                || item.getValue() instanceof LocalDate
+                                || item.getValue() instanceof LocalTime
+                                || item.getValue() instanceof LocalDateTime
+                                || item.getValue() instanceof org.joda.time.LocalDate
+                                || item.getValue() instanceof org.joda.time.LocalDateTime
+                                || item.getValue() instanceof org.joda.time.LocalTime) {
+                            resultDocument.put(item.getKey(), value);
                         } else {
                             return false;
                         }
@@ -191,12 +198,16 @@ public class CommonFunction {
                             try {
                                 resultDocument.put(item.getKey(), patternDate.parse((String) value));
                             } catch (ParseException e) {
-                                try {
-                                    resultDocument.put(item.getKey(), patternDate.parse((String) value));
-                                } catch (ParseException e1) {
-                                    return false;
-                                }
+                                return false;
                             }
+                        } else if (item.getValue() instanceof Date
+                                || item.getValue() instanceof LocalDate
+                                || item.getValue() instanceof LocalTime
+                                || item.getValue() instanceof LocalDateTime
+                                || item.getValue() instanceof org.joda.time.LocalDate
+                                || item.getValue() instanceof org.joda.time.LocalDateTime
+                                || item.getValue() instanceof org.joda.time.LocalTime) {
+                            resultDocument.put(item.getKey(), value);
                         } else {
                             return false;
                         }
@@ -207,6 +218,14 @@ public class CommonFunction {
                             } catch (ParseException e) {
                                 return false;
                             }
+                        } else if (item.getValue() instanceof Date
+                                || item.getValue() instanceof LocalDate
+                                || item.getValue() instanceof LocalTime
+                                || item.getValue() instanceof LocalDateTime
+                                || item.getValue() instanceof org.joda.time.LocalDate
+                                || item.getValue() instanceof org.joda.time.LocalDateTime
+                                || item.getValue() instanceof org.joda.time.LocalTime) {
+                            resultDocument.put(item.getKey(), value);
                         } else {
                             return false;
                         }

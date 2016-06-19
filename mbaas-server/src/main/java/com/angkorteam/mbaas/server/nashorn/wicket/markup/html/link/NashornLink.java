@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link;
 
 import com.angkorteam.mbaas.server.nashorn.Disk;
+import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
@@ -23,6 +24,8 @@ public class NashornLink extends Link<Map<String, Object>> {
 
     private Disk disk;
 
+    private Factory factory;
+
     public NashornLink(String id, IModel<Map<String, Object>> model) {
         super(id, model);
     }
@@ -42,7 +45,7 @@ public class NashornLink extends Link<Map<String, Object>> {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_click", RequestCycle.get(), this.disk, jdbcTemplate, this, getModelObject());
+            invocable.invokeFunction(getId() + "__on_click", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, getModelObject());
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }
@@ -62,5 +65,13 @@ public class NashornLink extends Link<Map<String, Object>> {
 
     public void setDisk(Disk disk) {
         this.disk = disk;
+    }
+
+    public Factory getFactory() {
+        return factory;
+    }
+
+    public void setFactory(Factory factory) {
+        this.factory = factory;
     }
 }

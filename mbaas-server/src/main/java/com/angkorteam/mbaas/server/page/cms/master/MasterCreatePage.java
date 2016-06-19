@@ -113,6 +113,8 @@ public class MasterCreatePage extends MasterPage {
         fields.put(Jdbc.MasterPage.TITLE, this.title);
         fields.put(Jdbc.MasterPage.CODE, this.code);
         fields.put(Jdbc.MasterPage.DESCRIPTION, this.description);
+        fields.put(Jdbc.MasterPage.JAVASCRIPT, getString("master.blank.script"));
+        fields.put(Jdbc.MasterPage.HTML, getString("master.blank.html"));
         fields.put(Jdbc.MasterPage.STAGE_JAVASCRIPT, this.javascript);
         fields.put(Jdbc.MasterPage.STAGE_HTML, this.html);
         fields.put(Jdbc.MasterPage.MODIFIED, true);

@@ -10,7 +10,6 @@ import com.angkorteam.mbaas.server.provider.MasterPageProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import org.apache.commons.io.FileUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -18,9 +17,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,36 +71,16 @@ public class MasterManagementPage extends MasterPage implements ActionFilteredJo
             setResponsePage(MasterModifyPage.class, parameters);
         }
         if ("Delete".equals(link)) {
-            Map<String, String> temp = new HashMap<>();
+            List<String> temp = new ArrayList<>();
             jdbcTemplate.update("DELETE FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", masterPageId);
-            {
-                String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + masterPageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + masterPageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                temp.put(cacheKey, filename);
-            }
-            {
-                String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + masterPageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + masterPageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                temp.put(cacheKey, filename);
-            }
+            temp.add(com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + masterPageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");
+            temp.add(com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + masterPageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");
             List<String> pageIds = jdbcTemplate.queryForList("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.MASTER_PAGE_ID + " = ?", String.class, masterPageId);
             for (String pageId : pageIds) {
-                {
-                    String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                    String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                    temp.put(cacheKey, filename);
-                }
-                {
-                    String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                    String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                    temp.put(cacheKey, filename);
-                }
+                temp.add(com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");
+                temp.add(com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");
             }
-            for (Map.Entry<String, String> item : temp.entrySet()) {
-                String cacheKey = item.getKey();
-                String filename = item.getValue();
-                File file = new File(FileUtils.getTempDirectory(), filename);
-                FileUtils.deleteQuietly(file);
+            for (String cacheKey : temp) {
                 getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
             }
             return;
@@ -112,24 +89,15 @@ public class MasterManagementPage extends MasterPage implements ActionFilteredJo
             jdbcTemplate.update("UPDATE " + Jdbc.MASTER_PAGE + " SET " + Jdbc.MasterPage.HTML + " = " + Jdbc.MasterPage.STAGE_HTML + ", " + Jdbc.MasterPage.JAVASCRIPT + " = " + Jdbc.MasterPage.STAGE_JAVASCRIPT + ", " + Jdbc.MasterPage.MODIFIED + " = false " + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", masterPageId);
             List<String> pageIds = jdbcTemplate.queryForList("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.MASTER_PAGE_ID + " = ?", String.class, masterPageId);
             {
-                Map<String, String> temp = new HashMap<>();
+                List<String> temp = new ArrayList<>();
                 for (String pageId : pageIds) {
-                    String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                    String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                    temp.put(cacheKey, filename);
+                    temp.add(com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");
                 }
-                for (Map.Entry<String, String> item : temp.entrySet()) {
-                    String cacheKey = item.getKey();
-                    String filename = item.getValue();
-                    File file = new File(FileUtils.getTempDirectory(), filename);
-                    FileUtils.deleteQuietly(file);
+                for (String cacheKey : temp) {
                     getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
                 }
             }
             String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + masterPageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + masterPageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            File temp = new File(FileUtils.getTempDirectory(), filename);
-            FileUtils.deleteQuietly(temp);
             getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
             return;
         }

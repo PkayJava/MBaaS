@@ -164,7 +164,7 @@ public class Jdbc {
         public static final String PATH = "path";
         public static final String MIME = "mime";
         public static final String EXTENSION = "extension";
-        public static final String LENGTH = "`length`";
+        public static final String LENGTH = "length";
         public static final String DATE_CREATED = "date_created";
         public static final String USER_ID = User.USER_ID;
         public static final String CLIENT_ID = Client.CLIENT_ID;

@@ -81,6 +81,12 @@ public class PageCreatePage extends MasterPage {
         this.form = new Form<>("form");
         add(this.form);
 
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+
+        String roleId = jdbcTemplate.queryForObject("SELECT " + Jdbc.User.ROLE_ID + " FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " = ?", String.class, getSession().getApplicationUserId());
+
+        this.role = new LinkedList<>();
+        this.role.add(jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", roleId));
         this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RoleChoiceProvider(getSession().getApplicationCode()), new RoleChoiceRenderer());
         this.form.add(this.roleField);
         this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);
@@ -149,9 +155,11 @@ public class PageCreatePage extends MasterPage {
             fields.put(Jdbc.Page.MENU_ID, this.menu.get(Jdbc.Menu.MENU_ID));
             fields.put(Jdbc.Page.MASTER_PAGE_ID, this.masterPage.get(Jdbc.MasterPage.MASTER_PAGE_ID));
             fields.put(Jdbc.Page.DESCRIPTION, this.description);
+            fields.put(Jdbc.Page.JAVASCRIPT, getString("page.blank.script"));
+            fields.put(Jdbc.Page.HTML, getString("page.blank.html"));
             fields.put(Jdbc.Page.STAGE_JAVASCRIPT, this.javascript);
-            fields.put(Jdbc.Page.MODIFIED, true);
             fields.put(Jdbc.Page.STAGE_HTML, this.html);
+            fields.put(Jdbc.Page.MODIFIED, true);
             fields.put(Jdbc.Page.USER_ID, getSession().getApplicationUserId());
             SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
             jdbcInsert.withTableName(Jdbc.PAGE);

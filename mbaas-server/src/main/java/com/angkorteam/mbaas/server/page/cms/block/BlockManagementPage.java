@@ -6,13 +6,11 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.block.BlockPanel;
-import com.angkorteam.mbaas.server.page.cms.master.MasterModifyPage;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.panel.BlockPanel;
 import com.angkorteam.mbaas.server.provider.BlockProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import org.apache.commons.io.FileUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -20,9 +18,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,23 +72,11 @@ public class BlockManagementPage extends MasterPage implements ActionFilteredJoo
             setResponsePage(BlockModifyPage.class, parameters);
         }
         if ("Delete".equals(link)) {
-            Map<String, String> temp = new HashMap<>();
+            List<String> temp = new ArrayList<>();
             jdbcTemplate.update("DELETE FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.BLOCK_ID + " = ?", blockId);
-            {
-                String cacheKey = BlockPanel.class.getName() + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                String filename = BlockPanel.class.getName().replaceAll("\\.", "/") + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                temp.put(cacheKey, filename);
-            }
-            {
-                String cacheKey = BlockPanel.class.getName() + "_" + blockId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                String filename = BlockPanel.class.getName().replaceAll("\\.", "/") + "_" + blockId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                temp.put(cacheKey, filename);
-            }
-            for (Map.Entry<String, String> item : temp.entrySet()) {
-                String cacheKey = item.getKey();
-                String filename = item.getValue();
-                File file = new File(FileUtils.getTempDirectory(), filename);
-                FileUtils.deleteQuietly(file);
+            temp.add(BlockPanel.class.getName() + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");
+            temp.add(BlockPanel.class.getName() + "_" + blockId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");
+            for (String cacheKey : temp) {
                 getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
             }
             return;
@@ -100,9 +84,6 @@ public class BlockManagementPage extends MasterPage implements ActionFilteredJoo
         if ("Go Live".equals(link)) {
             jdbcTemplate.update("UPDATE " + Jdbc.BLOCK + " SET " + Jdbc.Block.HTML + " = " + Jdbc.Block.STAGE_HTML + ", " + Jdbc.Block.JAVASCRIPT + " = " + Jdbc.Block.STAGE_JAVASCRIPT + ", " + Jdbc.Block.MODIFIED + " = false " + " WHERE " + Jdbc.Block.BLOCK_ID + " = ?", blockId);
             String cacheKey = BlockPanel.class.getName() + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            String filename = BlockPanel.class.getName().replaceAll("\\.", "/") + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            File temp = new File(FileUtils.getTempDirectory(), filename);
-            FileUtils.deleteQuietly(temp);
             getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
             return;
         }

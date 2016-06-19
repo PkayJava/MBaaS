@@ -24,8 +24,8 @@ public class UserProvider extends JooqProvider {
 
     public UserProvider(String applicationCode) {
         this.applicationCode = applicationCode;
-        this.userTable = DSL.table("application_user").as("userTable");
-        this.roleTable = DSL.table("role").as("roleTable");
+        this.userTable = DSL.table(Jdbc.USER).as("userTable");
+        this.roleTable = DSL.table(Jdbc.ROLE).as("roleTable");
         this.from = this.userTable.join(this.roleTable).on(DSL.field(this.userTable.getName() + "." + Jdbc.User.ROLE_ID, String.class).eq(DSL.field(this.roleTable.getName() + "." + Jdbc.User.ROLE_ID, String.class)));
     }
 

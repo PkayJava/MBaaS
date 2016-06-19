@@ -71,7 +71,7 @@ public class ApplicationFunction {
         File resourceRepo = new File(configuration.getString(Constants.RESOURCE_REPO));
         File applicationRepo = new File(resourceRepo, applicationCode);
         applicationRepo.mkdirs();
-        String roleId = null;
+        String roleId;
         List<Map<String, Object>> roles = new ArrayList<>();
         {
             Map<String, Object> role = new HashMap<>();

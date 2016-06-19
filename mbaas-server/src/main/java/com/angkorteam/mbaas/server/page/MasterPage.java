@@ -5,13 +5,17 @@ import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.WicketRuntimeException;
+import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.util.resource.IResourceStream;
+import org.apache.wicket.util.resource.StringResourceStream;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,15 +24,13 @@ import java.util.Map;
  * Created by socheat on 5/28/16.
  */
 @Mount("/master")
-public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
+public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage implements IMarkupResourceStreamProvider {
 
     private Factory factory;
 
     private Map<String, Object> pageModel;
 
     private Disk disk;
-
-    private String script;
 
     private boolean stage;
 
@@ -47,12 +49,12 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
             this.masterPageId = getRequest().getQueryParameters().getParameterValue("masterPageId").toString("");
         }
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
-        this.script = (String) (this.stage ? pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.MasterPage.JAVASCRIPT));
+        String script = (String) (this.stage ? pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.MasterPage.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
-        this.factory = new Factory(this, this.disk, getApplicationCode(), this.script, this.stage, this.pageModel);
+        this.factory = new Factory(this, this.disk, getApplicationCode(), script, this.stage, this.pageModel);
         ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
-            engine.eval(this.script);
+            engine.eval(script);
         } catch (ScriptException e) {
             e.printStackTrace();
         }
@@ -66,29 +68,41 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage {
     @Override
     protected void onBeforeRender() {
         super.onBeforeRender();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
+        String script = (String) (this.stage ? pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.MasterPage.JAVASCRIPT));
         ScriptEngine engine = getScriptEngine();
         try {
-            engine.eval(this.script);
+            engine.eval(script);
         } catch (ScriptException e) {
             e.printStackTrace();
         }
         Invocable invocable = (Invocable) engine;
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
         if (iOnBeforeRender != null) {
-            JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
             iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         }
     }
 
     @Override
     public String getVariation() {
-        HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
         if (this.stage) {
-            request.setAttribute("masterPageId", this.masterPageId);
             return this.masterPageId + "-stage";
         } else {
-            request.setAttribute("masterPageId", this.masterPageId);
             return this.masterPageId;
+        }
+    }
+
+    @Override
+    public IResourceStream getMarkupResourceStream(MarkupContainer container, Class<?> containerClass) {
+        if (containerClass == MasterPage.class) {
+            JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+            Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
+            String html = (String) (this.stage ? pageRecord.get(Jdbc.MasterPage.STAGE_HTML) : pageRecord.get(Jdbc.MasterPage.HTML));
+            StringResourceStream stream = new StringResourceStream(html);
+            return stream;
+        } else {
+            throw new WicketRuntimeException("markup not found");
         }
     }
 

@@ -113,6 +113,8 @@ public class BlockCreatePage extends MasterPage {
         fields.put(Jdbc.Block.TITLE, this.title);
         fields.put(Jdbc.Block.CODE, this.code);
         fields.put(Jdbc.Block.DESCRIPTION, this.description);
+        fields.put(Jdbc.Block.JAVASCRIPT, getString("block.blank.script"));
+        fields.put(Jdbc.Block.HTML, getString("block.blank.html"));
         fields.put(Jdbc.Block.STAGE_JAVASCRIPT, this.javascript);
         fields.put(Jdbc.Block.STAGE_HTML, this.html);
         fields.put(Jdbc.Block.MODIFIED, true);

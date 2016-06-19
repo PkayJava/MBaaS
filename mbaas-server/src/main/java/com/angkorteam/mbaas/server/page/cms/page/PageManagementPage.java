@@ -76,9 +76,6 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
         }
         if ("Delete".equals(link)) {
             String cacheKey = PagePage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            String filename = PagePage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-            File temp = new File(FileUtils.getTempDirectory(), filename);
-            FileUtils.deleteQuietly(temp);
             getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
             jdbcTemplate.update("DELETE FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
             return;
@@ -87,17 +84,10 @@ public class PageManagementPage extends MasterPage implements ActionFilteredJooq
             jdbcTemplate.update("UPDATE " + Jdbc.PAGE + " SET " + Jdbc.Page.HTML + " = " + Jdbc.Page.STAGE_HTML + ", " + Jdbc.Page.JAVASCRIPT + " = " + Jdbc.Page.STAGE_JAVASCRIPT + ", " + Jdbc.Page.MODIFIED + " = false " + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
             {
                 String cacheKey = com.angkorteam.mbaas.server.page.PagePage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                String filename = com.angkorteam.mbaas.server.page.PagePage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                File temp = new File(FileUtils.getTempDirectory(), filename);
-                FileUtils.deleteQuietly(temp);
                 getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
-
             }
             {
                 String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                String filename = com.angkorteam.mbaas.server.page.MasterPage.class.getName().replaceAll("\\.", "/") + "_" + pageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-                File temp = new File(FileUtils.getTempDirectory(), filename);
-                FileUtils.deleteQuietly(temp);
                 getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
             }
             return;
