@@ -694,6 +694,7 @@ public class Factory implements Serializable,
         NashornLink object = new NashornLink(id, model);
         object.setScript(this.script);
         object.setDisk(this.disk);
+        object.setFactory(this);
         container.add(object);
         this.children.put(id, object);
         return object;
