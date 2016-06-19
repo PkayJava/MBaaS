@@ -14,11 +14,30 @@ function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, pageModel, bl
 }]]></entry>
     <entry key="block.html"><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>
 <html xmlns:wicket="http://wicket.apache.org">
-<body>
-<wicket:panel>
-    <span>your markup</span>
-</wicket:panel>
-</body>
+  <body>
+    <wicket:panel>
+      <span>your markup</span>
+    </wicket:panel>
+  </body>
+</html>
+]]></entry>
+    <entry key="block.blank.script"><![CDATA[/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, jdbcTemplate, disk, factory, pageModel, blockModel) {
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, pageModel, blockModel) {
+}]]></entry>
+    <entry key="block.blank.html"><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>
+<html xmlns:wicket="http://wicket.apache.org">
+  <body>
+    <wicket:panel>
+    </wicket:panel>
+  </body>
 </html>
 ]]></entry>
 </properties>

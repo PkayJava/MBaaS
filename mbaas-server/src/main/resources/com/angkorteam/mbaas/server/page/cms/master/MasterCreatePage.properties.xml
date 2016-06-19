@@ -22,4 +22,25 @@ function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, pageModel) {
 </body>
 </html>
 ]]></entry>
+    <entry key="master.blank.script"><![CDATA[/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, jdbcTemplate, disk, factory, pageModel) {
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, pageModel) {
+}]]></entry>
+    <entry key="master.blank.html"><![CDATA[<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+  <meta charset="utf-8"/>
+</head>
+<body>
+  <wicket:child/>
+</body>
+</html>
+]]></entry>
 </properties>

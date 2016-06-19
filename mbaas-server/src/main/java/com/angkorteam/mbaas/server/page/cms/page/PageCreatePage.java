@@ -155,9 +155,11 @@ public class PageCreatePage extends MasterPage {
             fields.put(Jdbc.Page.MENU_ID, this.menu.get(Jdbc.Menu.MENU_ID));
             fields.put(Jdbc.Page.MASTER_PAGE_ID, this.masterPage.get(Jdbc.MasterPage.MASTER_PAGE_ID));
             fields.put(Jdbc.Page.DESCRIPTION, this.description);
+            fields.put(Jdbc.Page.JAVASCRIPT, getString("page.blank.script"));
+            fields.put(Jdbc.Page.HTML, getString("page.blank.html"));
             fields.put(Jdbc.Page.STAGE_JAVASCRIPT, this.javascript);
-            fields.put(Jdbc.Page.MODIFIED, true);
             fields.put(Jdbc.Page.STAGE_HTML, this.html);
+            fields.put(Jdbc.Page.MODIFIED, true);
             fields.put(Jdbc.Page.USER_ID, getSession().getApplicationUserId());
             SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
             jdbcInsert.withTableName(Jdbc.PAGE);
