@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
 
 import com.angkorteam.mbaas.server.nashorn.Disk;
+import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
@@ -23,6 +24,8 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
     private String script;
 
     private Disk disk;
+
+    private Factory factory;
 
     public NashornButton(String id) {
         super(id);
@@ -55,7 +58,7 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), this.disk, jdbcTemplate, this, this.pageModel);
+            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }
@@ -76,10 +79,18 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), this.disk, jdbcTemplate, this, this.pageModel);
+            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }
+    }
+
+    public Factory getFactory() {
+        return factory;
+    }
+
+    public void setFactory(Factory factory) {
+        this.factory = factory;
     }
 
     public String getScript() {
