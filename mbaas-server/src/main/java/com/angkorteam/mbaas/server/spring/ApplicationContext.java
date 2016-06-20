@@ -54,7 +54,9 @@ import org.jooq.impl.DefaultConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.converter.json.GsonFactoryBean;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.mail.MailSender;
@@ -301,9 +303,15 @@ public class ApplicationContext implements ServletContextListener {
         for (ApplicationRecord applicationRecord : applicationRecords) {
             String jdbcUrl = "jdbc:mysql://" + applicationRecord.getMysqlHostname() + ":" + applicationRecord.getMysqlPort() + "/" + applicationRecord.getMysqlDatabase() + "?" + applicationRecord.getMysqlExtra();
             JdbcTemplate jdbcTemplate = applicationDataSource.getJdbcTemplate(applicationRecord.getCode(), jdbcUrl, applicationRecord.getMysqlUsername(), applicationRecord.getMysqlPassword());
-            List<String> jobIds = jdbcTemplate.queryForList("SELECT " + Jdbc.Job.JOB_ID + " FROM " + Jdbc.JOB, String.class);
-            for (String jobId : jobIds) {
-                javascriptService.schedule(applicationRecord.getCode(), jobId);
+            List<String> jobIds = null;
+            try {
+                jobIds = jdbcTemplate.queryForList("SELECT " + Jdbc.Job.JOB_ID + " FROM " + Jdbc.JOB, String.class);
+            } catch (DataAccessException e) {
+            }
+            if (jobIds != null && !jobIds.isEmpty()) {
+                for (String jobId : jobIds) {
+                    javascriptService.schedule(applicationRecord.getCode(), jobId);
+                }
             }
         }
         return javascriptService;
