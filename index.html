@@ -51,95 +51,130 @@
 <div class="container bs-docs-container">
     <div class=row>
         <div class=col-md-9 role=main>
-            <div class=bs-docs-section><h1 id=download class=page-header>Download</h1>
-                <p class=lead>Bootstrap (currently v3.3.6) has a few easy ways to quickly get started, each one
-                    appealing to a different skill level and use case. Read through to see what suits your particular
-                    needs.</p>
-                <div class="row bs-downloads">
-                    <div class=col-sm-4><h3 id=download-bootstrap>Bootstrap</h3>
-                        <p>Compiled and minified CSS, JavaScript, and fonts. No docs or original source files are
-                            included.</p>
-                        <p><a href=https://github.com/twbs/bootstrap/releases/download/v3.3.6/bootstrap-3.3.6-dist.zip
-                              class="btn btn-lg btn-outline"
-                              onclick="ga(&quot;send&quot;,&quot;event&quot;,&quot;Getting started&quot;,&quot;Download&quot;,&quot;Download compiled&quot;)">Download
-                            Bootstrap</a></p></div>
-                    <div class=col-sm-4><h3 id=download-source>Source code</h3>
-                        <p>Source Less, JavaScript, and font files, along with our docs. <strong>Requires a Less
-                            compiler and <a href=#grunt>some setup.</a></strong></p>
-                        <p><a href=https://github.com/twbs/bootstrap/archive/v3.3.6.zip class="btn btn-lg btn-outline"
-                              onclick="ga(&quot;send&quot;,&quot;event&quot;,&quot;Getting started&quot;,&quot;Download&quot;,&quot;Download source&quot;)">Download
-                            source</a></p></div>
-                    <div class=col-sm-4><h3 id=download-sass>Sass</h3>
-                        <p><a href=https://github.com/twbs/bootstrap-sass>Bootstrap ported from Less to Sass</a> for
-                            easy inclusion in Rails, Compass, or Sass-only projects.</p>
-                        <p><a href=https://github.com/twbs/bootstrap-sass/archive/v3.3.6.tar.gz
-                              class="btn btn-lg btn-outline"
-                              onclick="ga(&quot;send&quot;,&quot;event&quot;,&quot;Getting started&quot;,&quot;Download&quot;,&quot;Download Sass&quot;)">Download
-                            Sass</a></p></div>
+            <div class="bs-docs-section">
+                <h1 id="whatismbaas" class="page-header">What is MBaaS</h1>
+                <p class="lead">MBaaS is mobile backend as a service + software as a service</p>
+                <p>Developer could simplify able to write code for rest json service and design application for
+                    different purpose</p>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-registration" class="page-header">MBaaS Registration</h1>
+                <div class="row">
+                    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                        <p>You could simply registration for your application with just a few seconds, after the
+                            registration is successfully, MBaaS will create a new application, and assign <span
+                                    class="label label-danger">you</span> as the administrator, and also create one
+                            <span class="label label-danger">admin</span> user by default.</p>
+                        <p>Goto <a target="_blank" href="http://skh2016.ddns.net:9080/web/mbaas/register">MBaaS
+                            Registration</a>
+                        </p>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                <tr>
+                                    <th class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Field</th>
+                                    <th class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Description</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>Server IP</td>
+                                    <td>MBaaS Server IP</td>
+                                </tr>
+                                <tr>
+                                    <td>FQDN</td>
+                                    <td>fully qualify domain name</td>
+                                </tr>
+                                <tr>
+                                    <td>Full Name</td>
+                                    <td>first name and last name</td>
+                                </tr>
+                                <tr>
+                                    <td>Login</td>
+                                    <td>name for login into application</td>
+                                </tr>
+                                <tr>
+                                    <td>Password</td>
+                                    <td>password for login into application</td>
+                                </tr>
+                                <tr>
+                                    <td>Retype Password</td>
+                                    <td>verify password</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                        <img class="thumbnail img-responsive" src="mbaas-docs/examples/mbaas-registration.png">
+                    </div>
                 </div>
-                <h2 id=download-cdn>Bootstrap CDN</h2>
-                <p>The folks over at <a href="https://www.maxcdn.com/">MaxCDN</a> graciously provide CDN support for
-                    Bootstrap's CSS and JavaScript. Just use these <a href="https://www.bootstrapcdn.com/">Bootstrap
-                        CDN</a> links.</p>
-                <figure class=highlight><pre><code class=language-html data-lang=html><span class=c>&lt;!-- Latest compiled and minified CSS --&gt;</span>
-<span class=nt>&lt;link</span> <span class=na>rel=</span><span class=s>"stylesheet"</span> <span
-                            class=na>href=</span><span class=s>"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"</span> <span
-                            class=na>integrity=</span><span class=s>"sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"</span> <span
-                            class=na>crossorigin=</span><span class=s>"anonymous"</span><span class=nt>&gt;</span>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-database" class="page-header">MBaaS JdbcTemplate (<a target="_blank"
+                                                                                   href="http://docs.spring.io/spring/docs/current/spring-framework-reference/html/jdbc.html">CRUD</a>)
+                </h1>
+                <p id="mbaas-database-create" class="lead">Create</p>
+                <figure class="highlight">
+                    <pre><code class="language-java"
+                               data-lang="java"><span>var jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);</span>
+<span>jdbcInsert.withTableName("user");</span>
+<span>var userId = UUID.randomUUID().toString();</span>
+<span>var fields = new HashMap();</span>
+<span>fields.put("user_id",userId);</span>
+<span>jdbcInsert.execute(fields);</span>
+</code></pre>
+                </figure>
+                <p id="mbaas-database-read" class="lead">Read</p>
+                <figure class="highlight">
+                    <pre><code class="language-java"
+                               data-lang="java"><span>jdbcTemplate.queryForList(query,param...)</span>
 
-<span class=c>&lt;!-- Optional theme --&gt;</span>
-<span class=nt>&lt;link</span> <span class=na>rel=</span><span class=s>"stylesheet"</span> <span
-                            class=na>href=</span><span class=s>"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"</span> <span
-                            class=na>integrity=</span><span class=s>"sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"</span> <span
-                            class=na>crossorigin=</span><span class=s>"anonymous"</span><span class=nt>&gt;</span>
+<span>// Example It will return a list of map</span>
+<span>jdbcTemplate.queryForList("select * from user where user_id = ? and created_date = ?", 1, new Date());</span>
 
-<span class=c>&lt;!-- Latest compiled and minified JavaScript --&gt;</span>
-<span class=nt>&lt;script </span><span class=na>src=</span><span class=s>"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"</span> <span
-                            class=na>integrity=</span><span class=s>"sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"</span> <span
-                            class=na>crossorigin=</span><span class=s>"anonymous"</span><span class=nt>&gt;&lt;/script&gt;</span></code></pre>
+<span>jdbcTemplate.queryForMap(query,params...)</span>
+
+<span>// Example It will return a map</span>
+<span>jdbcTemplate.queryForMap("select * from user where user_id = ? and created_date = ? limit 0,1", 1, new Date());</span>
+</code></pre>
                 </figure>
-                <h2 id=download-bower>Install with Bower</h2>
-                <p>You can also install and manage Bootstrap's Less, CSS, JavaScript, and fonts using <a
-                        href=http://bower.io>Bower</a>:</p>
-                <figure class=highlight>
-                    <pre><code class=language-bash data-lang=bash><span class=gp>$ </span>bower install bootstrap</code></pre>
+                <p id="mbaas-database-update" class="lead">Update</p>
+                <figure class="highlight">
+                    <pre><code class="language-java"
+                               data-lang="java"><span>var jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);</span>
+<span>jdbcUpdate.withTableName("user");</span>
+<span>var fields = new HashMap();</span>
+<span>fields.put("created_date", new Date());</span>
+<span>var wheres = new HashMap();</span>
+<span>wheres.put("user_id", 1);</span>
+<span>jdbcUpdate.execute(fields,wheres);</span>
+</code></pre>
                 </figure>
-                <h2 id=download-npm>Install with npm</h2>
-                <p>You can also install Bootstrap using <a href=https://www.npmjs.com>npm</a>:</p>
-                <figure class=highlight>
-                    <pre><code class=language-bash data-lang=bash><span
-                            class=gp>$ </span>npm install bootstrap</code></pre>
+                <p id="mbaas-database-delete" class="lead">Delete</p>
+                <figure class="highlight">
+                    <pre><code class="language-java"
+                               data-lang="java"><span>jdbcTemplate.update(query,params...);</span>
+
+<span>// Example</span>
+<span>jdbcTemplate.update("delete from user where user_id = ?",1);</span>
+</code></pre>
                 </figure>
-                <p><code>require('bootstrap')</code> will load all of Bootstrap's jQuery plugins onto the jQuery object.
-                    The <code>bootstrap</code> module itself does not export anything. You can manually load Bootstrap's
-                    jQuery plugins individually by loading the <code>/js/*.js</code> files under the package's top-level
-                    directory.</p>
-                <p>Bootstrap's <code>package.json</code> contains some additional metadata under the following keys:</p>
-                <ul>
-                    <li><code>less</code> - path to Bootstrap's main <a href=http://lesscss.org>Less</a> source file
-                    </li>
-                    <li><code>style</code> - path to Bootstrap's non-minified CSS that's been precompiled using the
-                        default settings (no customization)
-                    </li>
-                </ul>
-                <h2 id=download-composer>Install with Composer</h2>
-                <p>You can also install and manage Bootstrap's Less, CSS, JavaScript, and fonts using <a
-                        href=https://getcomposer.org>Composer</a>:</p>
-                <figure class=highlight>
-                    <pre><code class=language-bash data-lang=bash><span class=gp>$ </span>composer require twbs/bootstrap</code></pre>
-                </figure>
-                <h2 id=download-autoprefixer>Autoprefixer required for Less/Sass</h2>
-                <p>Bootstrap uses <a href=https://github.com/postcss/autoprefixer>Autoprefixer</a> to deal with <a
-                        href=http://webdesign.about.com/od/css/a/css-vendor-prefixes.htm>CSS vendor prefixes</a>. If
-                    you're compiling Bootstrap from its Less/Sass source and not using our Gruntfile, you'll need to
-                    integrate Autoprefixer into your build process yourself. If you're using precompiled Bootstrap or
-                    using our Gruntfile, you don't need to worry about this because Autoprefixer is already integrated
-                    into our Gruntfile.</p></div>
+            </div>
         </div>
         <div class=col-md-3 role=complementary>
             <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
                 <ul class="nav bs-docs-sidenav">
-                    <li><a href=#download>Download</a></li>
+                    <li><a href=#whatismbaas>What's MBaaS</a></li>
+                    <li><a href=#mbaas-registration>MBaaS Registration</a></li>
+                    <li><a href=#mbaas-database>MBaaS Database</a>
+                        <ul class="nav">
+                            <li><a href="#mbaas-database-create">Create</a></li>
+                            <li><a href="#mbaas-database-read">Read</a></li>
+                            <li><a href="#mbaas-database-update">Update</a></li>
+                            <li><a href="#mbaas-database-delete">Delete</a></li>
+                        </ul>
+                    </li>
                 </ul>
                 <a class=back-to-top href=#top> Back to top </a></nav>
         </div>
