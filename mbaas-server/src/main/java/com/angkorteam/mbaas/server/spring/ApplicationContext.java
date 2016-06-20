@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.spring;
 
+import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
@@ -55,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.converter.json.GsonFactoryBean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.TaskScheduler;
@@ -222,6 +224,8 @@ public class ApplicationContext implements ServletContextListener {
         granted.add(Jdbc.class.getName());
         granted.add(UUID.class.getName());
         granted.add(StringUtils.class.getName());
+        granted.add(SimpleJdbcInsert.class.getName());
+        granted.add(SimpleJdbcUpdate.class.getName());
 
         NashornTable nashornTable = Tables.NASHORN.as("nashornTable");
 

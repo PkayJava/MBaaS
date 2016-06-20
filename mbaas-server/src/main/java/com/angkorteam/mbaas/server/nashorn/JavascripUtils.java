@@ -1,11 +1,13 @@
 package com.angkorteam.mbaas.server.nashorn;
 
+import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.server.Jdbc;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.validation.ValidationError;
 import org.jooq.impl.DSL;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -63,6 +65,8 @@ public class JavascripUtils {
             clazzes.add(Option.class);
             clazzes.add(Jdbc.class);
             clazzes.add(UUID.class);
+            clazzes.add(SimpleJdbcInsert.class);
+            clazzes.add(SimpleJdbcUpdate.class);
             StringBuilder js = new StringBuilder();
             for (Class<?> clazz : clazzes) {
                 js.append("var " + clazz.getSimpleName() + " = Java.type('" + clazz.getName() + "'); ");
