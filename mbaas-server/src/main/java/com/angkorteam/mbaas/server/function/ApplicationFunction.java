@@ -165,8 +165,8 @@ public class ApplicationFunction {
     public static void drop(JdbcTemplate jdbcTemplate, String applicationId, String applicationCode, String mysqlUsername, String mysqlDatabase) {
         jdbcTemplate.update("DELETE FROM " + Tables.APPLICATION.getName() + " WHERE " + Tables.APPLICATION.CODE.getName() + " = ?", applicationCode);
         jdbcTemplate.update("DELETE FROM " + Tables.APPLICATION_ROLE.getName() + " WHERE " + Tables.APPLICATION_ROLE.APPLICATION_ID.getName() + " = ?", applicationId);
-        jdbcTemplate.execute("DROP USER '" + mysqlUsername + "'");
-        jdbcTemplate.execute("DROP DATABASE " + mysqlDatabase);
+        jdbcTemplate.execute("DROP USER IF EXISTS '" + mysqlUsername + "'");
+        jdbcTemplate.execute("DROP DATABASE IF EXISTS " + mysqlDatabase);
     }
 
 //    public static File backup(JdbcTemplate jdbcTemplate, String applicationId, String userId) throws IOException {
