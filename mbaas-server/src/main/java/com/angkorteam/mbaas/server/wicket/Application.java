@@ -30,6 +30,7 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.resource.DynamicJQueryResourceReference;
+import org.apache.wicket.settings.ExceptionSettings;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
 import org.flywaydb.core.internal.dbsupport.Schema;
 import org.jooq.DSLContext;
@@ -108,6 +109,9 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
     @Override
     public void init() {
         super.init();
+        getExceptionSettings().setAjaxErrorHandlingStrategy(ExceptionSettings.AjaxErrorStrategy.REDIRECT_TO_ERROR_PAGE);
+        getExceptionSettings().setThreadDumpStrategy(ExceptionSettings.ThreadDumpStrategy.THREAD_HOLDING_LOCK);
+        getExceptionSettings().setUnexpectedExceptionDisplay(ExceptionSettings.SHOW_EXCEPTION_PAGE);
         getSecuritySettings().setAuthorizationStrategy(new RoleAuthorizationStrategy(this));
         getRequestCycleSettings().setBufferResponse(true);
         getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
