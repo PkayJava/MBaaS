@@ -7,7 +7,9 @@ import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.ValidationError;
+import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
+import org.flywaydb.core.internal.dbsupport.Schema;
 import org.jooq.DSLContext;
 
 import java.util.Arrays;
@@ -48,7 +50,17 @@ public class ApplicationCodeValidator extends JooqValidator<String> {
 
             Application application = ApplicationUtils.getApplication();
             DbSupport dbSupport = application.getDbSupport();
-            if (dbSupport.getSchema(code).exists()) {
+            Schema schema = dbSupport.getSchema(code);
+            boolean exists = false;
+            boolean error = true;
+            while (error) {
+                try {
+                    exists = schema.exists();
+                    error = false;
+                } catch (FlywayException e) {
+                }
+            }
+            if (exists) {
                 validatable.error(new ValidationError(this, "duplicated"));
                 return;
             }

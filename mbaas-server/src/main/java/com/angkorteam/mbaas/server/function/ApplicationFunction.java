@@ -10,6 +10,7 @@ import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.wicket.WicketRuntimeException;
+import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
 import org.flywaydb.core.internal.dbsupport.Schema;
 import org.slf4j.Logger;
@@ -47,7 +48,17 @@ public class ApplicationFunction {
                                          DbSupport dbSupport,
                                          ServletContext servletContext) {
         Schema schema = dbSupport.getSchema(mysqlDatabase);
-        if (schema.exists()) {
+        boolean exists = false;
+        boolean error = true;
+        while (error) {
+            try {
+                exists = schema.exists();
+                error = false;
+            } catch (FlywayException e) {
+            }
+        }
+
+        if (exists) {
             throw new WicketRuntimeException("internal error");
         }
         XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
