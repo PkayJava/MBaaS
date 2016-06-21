@@ -109,7 +109,7 @@ public class Factory implements Serializable,
         this.stage = stage;
         this.script = script;
         this.disk = disk;
-        this.applicationCode = applicationCode;
+        this.applicationUserId = applicationUserId;
         this.children = new HashMap<>();
     }
 
