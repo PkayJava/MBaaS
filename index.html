@@ -111,6 +111,53 @@
                 </div>
             </div>
             <div class="bs-docs-section">
+                <h1 id="mbaas-alias-type" class="page-header">Alias Type</h1>
+                <p>
+                <ul>
+                    <li><strong>Boolean</strong></li>
+                    <li><strong>Byte</strong></li>
+                    <li><strong>Short</strong></li>
+                    <li><strong>Integer</strong></li>
+                    <li><strong>Long</strong></li>
+                    <li><strong>Float</strong></li>
+                    <li><strong>Double</strong></li>
+                    <li><strong>Character</strong></li>
+                    <li><strong>String</strong></li>
+                    <li><strong>Date</strong></li>
+                    <li><strong>LocalDate</strong></li>
+                    <li><strong>LocalTime</strong></li>
+                    <li><strong>LocalDateTime</strong></li>
+                    <li><strong>BigDecimal</strong></li>
+                    <li><strong>BigInteger</strong></li>
+                    <li><strong>Arrays</strong></li>
+                    <li><strong>Collections</strong></li>
+                    <li><strong>LinkedHashMap</strong></li>
+                    <li><strong>LinkedHashSet</strong></li>
+                    <li><strong>Hashtable</strong></li>
+                    <li><strong>Vector</strong></li>
+                    <li><strong>LinkedList</strong></li>
+                    <li><strong>ArrayList</strong></li>
+                    <li><strong>HashMap</strong></li>
+                    <li><strong>ArrayBlockingQueue</strong></li>
+                    <li><strong>SynchronousQueue</strong></li>
+                    <li><strong>DelayQueue</strong></li>
+                    <li><strong>LinkedTransferQueue</strong></li>
+                    <li><strong>ArrayDeque</strong></li>
+                    <li><strong>ConcurrentLinkedDeque</strong></li>
+                    <li><strong>Stack</strong></li>
+                    <li><strong>Tables</strong></li>
+                    <li><strong>DSL</strong></li>
+                    <li><strong>ValidationError</strong></li>
+                    <li><strong>StringUtils</strong></li>
+                    <li><strong>Option</strong></li>
+                    <li><strong>Jdbc</strong></li>
+                    <li><strong>UUID</strong></li>
+                    <li><strong>SimpleJdbcInsert</strong></li>
+                    <li><strong>SimpleJdbcUpdate</strong></li>
+                </ul>
+                </p>
+            </div>
+            <div class="bs-docs-section">
                 <h1 id="mbaas-collection-attribute" class="page-header">Collection / Attribute</h1>
                 <p>
                 <ul>
@@ -131,6 +178,15 @@
                     <pre><code class="language-java"
                                data-lang="java"><span>var jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);</span>
 <span>jdbcInsert.withTableName("user");</span>
+<span>var userId = UUID.randomUUID().toString();</span>
+<span>var fields = new HashMap();</span>
+<span>fields.put("user_id",userId);</span>
+<span>jdbcInsert.execute(fields);</span>
+</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-java"
+                               data-lang="java"><span>var jdbcInsert = factory.createSimpleJdbcInsert("user");</span>
 <span>var userId = UUID.randomUUID().toString();</span>
 <span>var fields = new HashMap();</span>
 <span>fields.put("user_id",userId);</span>
@@ -163,6 +219,16 @@
 <span>jdbcUpdate.execute(fields,wheres);</span>
 </code></pre>
                 </figure>
+                <figure class="highlight">
+                    <pre><code class="language-java"
+                               data-lang="java"><span>var jdbcUpdate = factory.createSimpleJdbcUpdate("user");</span>
+<span>var fields = new HashMap();</span>
+<span>fields.put("created_date", new Date());</span>
+<span>var wheres = new HashMap();</span>
+<span>wheres.put("user_id", 1);</span>
+<span>jdbcUpdate.execute(fields,wheres);</span>
+</code></pre>
+                </figure>
                 <p id="mbaas-database-delete" class="lead">Delete</p>
                 <figure class="highlight">
                     <pre><code class="language-java"
@@ -179,7 +245,7 @@
                 <ul class="nav bs-docs-sidenav">
                     <li><a href=#whatismbaas>What's MBaaS</a></li>
                     <li><a href=#mbaas-registration>MBaaS Registration</a></li>
-                    <li><a href=#mbaas-registration>Alias Data Type</a></li>
+                    <li><a href=#mbaas-alias-type>Alias Type</a></li>
                     <li><a href=#mbaas-collection-attribute>Collection / Attribute</a></li>
                     <li><a href=#mbaas-database>MBaaS Database</a>
                         <ul class="nav">
@@ -189,14 +255,18 @@
                             <li><a href="#mbaas-database-delete">Delete</a></li>
                         </ul>
                     </li>
-                    <li><a href=#mbaas-registration>Collection</a></li>
-                    <li><a href=#mbaas-registration>Attribute</a></li>
+                    <li><a href=#mbaas-cms>Content Management System</a>
+                        <ul class="nav">
+                            <li><a href="#mbaas-cms-menu">Menu</a></li>
+                            <li><a href="#mbaas-cms-block">Block</a></li>
+                            <li><a href="#mbaas-cms-layout">Layout</a></li>
+                            <li><a href="#mbaas-cms-page">Page</a></li>
+                            <li><a href="#mbaas-cms-page">Page's Element</a></li>
+                            <li><a href="#mbaas-cms-page">Form's Element</a></li>
+                        </ul>
+                    </li>
                     <li><a href=#mbaas-registration>User</a></li>
                     <li><a href=#mbaas-registration>Role</a></li>
-                    <li><a href=#mbaas-registration>Menu</a></li>
-                    <li><a href=#mbaas-registration>Block</a></li>
-                    <li><a href=#mbaas-registration>Layout</a></li>
-                    <li><a href=#mbaas-registration>Page</a></li>
                 </ul>
                 <a class=back-to-top href=#top> Back to top </a></nav>
         </div>
