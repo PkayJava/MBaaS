@@ -4,6 +4,7 @@ import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
@@ -18,6 +19,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultipleChoiceProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornSingleChoiceProvider;
+import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -34,6 +36,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.model.util.MapModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.validator.UrlValidator;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -124,6 +128,45 @@ public class Factory implements Serializable,
     @Override
     public JdbcTemplate createJdbcTemplate() {
         return ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+    }
+
+    public void navigateTo(String pageCode) {
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        String pageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.CODE + " = ?", String.class, pageCode);
+        PageParameters parameters = new PageParameters();
+        parameters.add("pageId", pageId);
+        parameters.add("stage", this.stage);
+        RequestCycle.get().setResponsePage(PagePage.class, parameters);
+    }
+
+    public void navigateTo(String pageCode, Map<String, Object> params) {
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        String pageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.CODE + " = ?", String.class, pageCode);
+        PageParameters parameters = new PageParameters();
+        parameters.add("pageId", pageId);
+        parameters.add("stage", this.stage);
+        for (Map.Entry<String, Object> param : params.entrySet()) {
+            if (param.getKey().equals("pageId") || param.getKey().equals("stage")) {
+                throw new WicketRuntimeException("pageId or stage not allow, it is reserved for system");
+            }
+            parameters.add(param.getKey(), param.getValue());
+        }
+        RequestCycle.get().setResponsePage(PagePage.class, parameters);
+    }
+
+    public void navigateTo(String pageCode, ScriptObjectMirror js) {
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        String pageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.CODE + " = ?", String.class, pageCode);
+        PageParameters parameters = new PageParameters();
+        parameters.add("pageId", pageId);
+        parameters.add("stage", this.stage);
+        for (Map.Entry<String, Object> param : js.entrySet()) {
+            if (param.getKey().equals("pageId") || param.getKey().equals("stage")) {
+                throw new WicketRuntimeException("pageId or stage not allow, it is reserved for system");
+            }
+            parameters.add(param.getKey(), param.getValue());
+        }
+        RequestCycle.get().setResponsePage(PagePage.class, parameters);
     }
 
     @Override
