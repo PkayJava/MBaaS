@@ -36,6 +36,7 @@ public class JavascripUtils {
             clazzes.add(Double.class);
             clazzes.add(Character.class);
             clazzes.add(String.class);
+            clazzes.add(Date.class);
             clazzes.add(LocalDate.class);
             clazzes.add(LocalTime.class);
             clazzes.add(LocalDateTime.class);

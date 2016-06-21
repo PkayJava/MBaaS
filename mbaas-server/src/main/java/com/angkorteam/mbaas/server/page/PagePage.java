@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -37,6 +38,8 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
     @Override
     protected void onInitialize() {
         super.onInitialize();
+        Session session = getSession();
+        String applicationUserId = session.getApplicationUserId();
         this.stage = getPageParameters().get("stage").toBoolean(false);
         this.pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
         this.pageModel = new HashMap<>();
@@ -44,7 +47,7 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
         String script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
-        this.factory = new Factory(this, this.disk, getApplicationCode(), script, this.stage, this.pageModel);
+        this.factory = new Factory(applicationUserId, this, this.disk, getApplicationCode(), script, this.stage, this.pageModel);
         ScriptEngine engine = getScriptEngine();
         try {
             engine.eval(script);

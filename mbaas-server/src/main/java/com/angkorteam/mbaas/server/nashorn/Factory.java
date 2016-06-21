@@ -100,7 +100,10 @@ public class Factory implements Serializable,
 
     private boolean stage;
 
-    public Factory(MarkupContainer container, Disk disk, String applicationCode, String script, boolean stage, Map<String, Object> pageModel) {
+    private String applicationUserId;
+
+    public Factory(String applicationUserId, MarkupContainer container, Disk disk, String applicationCode, String script, boolean stage, Map<String, Object> pageModel) {
+        this.applicationCode = applicationCode;
         this.container = container;
         this.pageModel = pageModel;
         this.stage = stage;
@@ -112,6 +115,10 @@ public class Factory implements Serializable,
 
     public Component getChildren(String id) {
         return this.children.get(id);
+    }
+
+    public String getApplicationUserId() {
+        return this.applicationUserId;
     }
 
     @Override

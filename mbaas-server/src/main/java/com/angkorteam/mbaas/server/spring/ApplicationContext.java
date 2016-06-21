@@ -197,6 +197,7 @@ public class ApplicationContext implements ServletContextListener {
         granted.add(Double.class.getName());
         granted.add(Character.class.getName());
         granted.add(String.class.getName());
+        granted.add(Date.class.getName());
         granted.add(LocalTime.class.getName());
         granted.add(LocalDate.class.getName());
         granted.add(LocalDateTime.class.getName());

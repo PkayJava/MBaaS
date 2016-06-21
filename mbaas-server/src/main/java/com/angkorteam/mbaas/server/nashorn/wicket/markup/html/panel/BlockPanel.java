@@ -64,7 +64,7 @@ public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
         Map<String, Object> blockRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.CODE + " = ?", this.code);
         this.script = (String) (this.stage ? blockRecord.get(Jdbc.Block.STAGE_JAVASCRIPT) : blockRecord.get(Jdbc.Block.JAVASCRIPT));
         this.disk = new Disk(applicationCode, applicationUserId);
-        this.factory = new Factory(this, this.disk, applicationCode, this.script, this.stage, this.pageModel);
+        this.factory = new Factory(applicationUserId, this, this.disk, applicationCode, this.script, this.stage, this.pageModel);
         ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
             engine.eval(this.script);
