@@ -10,7 +10,7 @@ function onInitialize(requestCycle, jdbcTemplate, disk, factory, pageModel) {
 /*
 Page onBeforeRender
 */
-function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, pageModel) {
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 }]]></entry>
     <entry key="page.html"><![CDATA[<!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
@@ -27,7 +27,7 @@ function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, pageModel) {
     <entry key="page.blank.script"><![CDATA[/*
 Page onInitialize
 */
-function onInitialize(requestCycle, jdbcTemplate, disk, factory, pageModel) {
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 }
 
 /*
