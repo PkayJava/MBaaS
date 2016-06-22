@@ -334,27 +334,153 @@ jdbcTemplate.update(&quot;delete from user where user_id = ?&quot;,1);</code></p
                 <p class="lead">Block</p>
                 <p class="lead">Layout</p>
                 <p class="lead">Page</p>
-                <p class="lead">Element</p>
-                <p><strong>Example</strong></p>
+                <p id="mbaas-cms-markup-element" class="lead">Markup Element</p>
+                <p id="mbaas-cms-markup-element-hiddenfield"><strong>HiddenField</strong></p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java"></code></pre>
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var hiddenField = factory.createHiddenField(form, &quot;hiddenField&quot;);</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html"></code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;input type=&quot;hidden&quot; wicket:id=&quot;hiddenField&quot;/&gt;
+&lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p><strong>TextArea</strong></p>
+                <p id="mbaas-cms-markup-element-form"><strong>Form</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java"
+                               data-lang="java">var form = factory.createForm(&quot;form&quot;);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-emailtextfield"><strong>EmailTextField</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var emailTextField = factory.createEmailTextField(form, &quot;emailTextField&quot;);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;input type=&quot;text&quot; wicket:id=&quot;emailTextField&quot;/&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-dropdownchoice"><strong>DropDownChoice</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
+
+var optionA = factory.createMap();
+optionA.put(&quot;id&quot;,&quot;MissA&quot;);
+optionA.put(&quot;text&quot;,&quot;Miss A Description&quot;);
+
+var optionB = factory.createMap();
+optionB.put(&quot;id&quot;,&quot;MissB&quot;);
+optionB.put(&quot;text&quot;,&quot;Miss B Description&quot;);
+
+var choices = factory.createList();
+choices.add(optionA);
+choices.add(optionB)
+
+var dropDownChoice = factory.createDropDownChoice(form, &quot;dropDownChoice&quot;, factory.createListModel(choices), renderer);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;select wicket:id=&quot;dropDownChoice&quot;&gt;&lt;/select&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-datetextfield"><strong>DateTextField</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var dateTextField = factory.createDateTextField(form, &quot;dateTextField&quot;);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;input type=&quot;text&quot; wicket:id=&quot;dateTextField&quot;/&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-colortextfield"><strong>ColorTextField</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var colorTextField = factory.createColorTextField(form, &quot;colorTextField&quot;);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;input type=&quot;text&quot; wicket:id=&quot;colorTextField&quot;/&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-checkboxmultiplechoice"><strong>CheckBoxMultipleChoice</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
+
+var optionA = factory.createMap();
+optionA.put(&quot;id&quot;,&quot;MissA&quot;);
+optionA.put(&quot;text&quot;,&quot;Miss A Description&quot;);
+
+var optionB = factory.createMap();
+optionB.put(&quot;id&quot;,&quot;MissB&quot;);
+optionB.put(&quot;text&quot;,&quot;Miss B Description&quot;);
+
+var choices = factory.createList();
+choices.add(optionA);
+choices.add(optionB)
+
+var checkbox = factory.createCheckBoxMultipleChoice(form, &quot;checkbox&quot;, factory.createListModel(choices), renderer);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;span wicket:id=&quot;checkbox&quot;&gt;&lt;/span&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-checkbox"><strong>CheckBox</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var checkBox = factory.createCheckBox(form,&quot;checkBox&quot;);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;input type=&quot;checkbox&quot; wicket:id=&quot;checkBox&quot;/&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-button"><strong>Button</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var button = factory.createButtonform,&quot;button&quot;);
+
+// there are two functions will be executed
+// function name rule {markup id}__on_submit
+function button__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}
+
+// function name rule {markup id}__on_error
+function button__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;button type=&quot;submit&quot; wicket:id=&quot;button&quot;&gt;Okay&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-textarea"><strong>TextArea</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var textarea = factory.createTextArea(form,&quot;text&quot;);</code></pre>
                 </figure>
                 <figure class="highlight">
                     <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-&lt;textarea wicket:id=&quot;text/&gt;
+  &lt;textarea wicket:id=&quot;text&quot;/&gt;
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p><strong>Table</strong> : it is used for visually data as column and row</p>
+                <p id="mbaas-cms-markup-element-table"><strong>Table</strong></p>
                 <div>
                     Column definition.
                 </div>
@@ -479,6 +605,450 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
   &lt;table wicket:id=&quot;form_table&quot;/&gt;
 &lt;/form&gt;</code></pre>
                 </figure>
+                <p id="mbaas-cms-markup-element-listchoice"><strong>ListChoice</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
+
+var optionA = factory.createMap();
+optionA.put(&quot;id&quot;,&quot;MissA&quot;);
+optionA.put(&quot;text&quot;,&quot;Miss A Description&quot;);
+
+var optionB = factory.createMap();
+optionB.put(&quot;id&quot;,&quot;MissB&quot;);
+optionB.put(&quot;text&quot;,&quot;Miss B Description&quot;);
+
+var choices = factory.createList();
+choices.add(optionA);
+choices.add(optionB)
+
+var listChoice = factory.createListChoice(form, &quot;listChoice&quot;, factory.createListModel(choices), renderer, 2);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;select wicket:id=&quot;listChoice&quot;&gt;&lt;/select&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-listmultiplechoice"><strong>ListMultipleChoice</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
+
+var optionA = factory.createMap();
+optionA.put(&quot;id&quot;,&quot;MissA&quot;);
+optionA.put(&quot;text&quot;,&quot;Miss A Description&quot;);
+
+var optionB = factory.createMap();
+optionB.put(&quot;id&quot;,&quot;MissB&quot;);
+optionB.put(&quot;text&quot;,&quot;Miss B Description&quot;);
+
+var choices = factory.createList();
+choices.add(optionA);
+choices.add(optionB)
+
+var listMultipleChoice = factory.createListMultipleChoice(form, &quot;listMultipleChoice&quot;, factory.createListModel(choices), renderer, 2);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;select wicket:id=&quot;listMultipleChoice&quot;&gt;&lt;/select&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-numbertextfield"><strong>NumberTextField</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var numberTextField = factory.createNumberTextField(form, &quot;numberTextField&quot;, Float.class);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;input type=&quot;text&quot; wicket:id=&quot;numberTextField&quot;/&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-passwordtextfield"><strong>PasswordTextField</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var passwordTextField = factory.createPasswordTextField(form, &quot;passwordTextField&quot;);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;input type=&quot;password&quot; wicket:id=&quot;passwordTextField&quot;/&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-radiochoice"><strong>RadioChoice</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
+
+var optionA = factory.createMap();
+optionA.put(&quot;id&quot;,&quot;MissA&quot;);
+optionA.put(&quot;text&quot;,&quot;Miss A Description&quot;);
+
+var optionB = factory.createMap();
+optionB.put(&quot;id&quot;,&quot;MissB&quot;);
+optionB.put(&quot;text&quot;,&quot;Miss B Description&quot;);
+
+var choices = factory.createList();
+choices.add(optionA);
+choices.add(optionB)
+
+var radioChoice = factory.createRadioChoice(form, &quot;radioChoice&quot;, factory.createListModel(choices), renderer);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;span wicket:id=&quot;radioChoice&quot;&gt;&lt;/span&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-rangetextfield"><strong>RangeTextField</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var rangeTextField = factory.createRangeTextField(form, &quot;rangeTextField&quot;, Float.class);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;input type=&quot;range&quot; wicket:id=&quot;rangeTextField&quot;/&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-requiredtextfield"><strong>RequiredTextField</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+var requiredTextField = factory.createRequiredTextField(form, &quot;requiredTextField&quot;, String.class);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
+  &lt;input type=&quot;text&quot; wicket:id=&quot;requiredTextField&quot;/&gt;
+&lt;/form&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-select2multiplechoice"><strong>Select2MultipleChoice</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var renderer = factory.createChoiceRenderer(Jdbc.Menu.MENU_ID,Jdbc.Menu.TITLE);
+  var select2 = factory.createSelect2MultipleChoice(form, &quot;select2&quot;, renderer)
+}
+
+function select2__query(jdbcTemplate, factory, term, page) {
+  var items = jdbcTemplate.queryForList('select * from ' + Jdbc.MENU);
+  var options = new ArrayList();
+  for each (item in items) {
+    var option = factory.createOption(item.get(Jdbc.Menu.MENU_ID),item.get(Jdbc.Menu.TITLE));
+    options.add(option);
+  }
+  return options;
+}
+
+function select2__has_more(jdbcTemplate, term, page){
+  return false;
+}
+
+function select2__to_choices(jdbcTemplate, ids) {
+  return jdbcTemplate.queryForList(&quot;select * from &quot; + Jdbc.MENU + &quot; WHERE &quot; + Jdbc.Menu.MENU_ID + &quot; in (?)&quot;,ids);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+  &lt;form wicket:id=&quot;form&quot;&gt;
+    &lt;select wicket:id=&quot;select2&quot; style=&quot;width:100%&quot;&gt;&lt;/select&gt;
+  &lt;/form&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-select2singlechoice"><strong>Select2SingleChoice</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var renderer = factory.createChoiceRenderer(Jdbc.Menu.MENU_ID,Jdbc.Menu.TITLE);
+  var select2 = factory.createSelect2SingleChoice(form, &quot;select2&quot;, renderer)
+}
+
+function select2__query(jdbcTemplate, factory, term, page) {
+  var items = jdbcTemplate.queryForList('select * from ' + Jdbc.MENU);
+  var options = new ArrayList();
+  for each (item in items) {
+    var option = factory.createOption(item.get(Jdbc.Menu.MENU_ID),item.get(Jdbc.Menu.TITLE));
+    options.add(option);
+  }
+  return options;
+}
+
+function select2__has_more(jdbcTemplate, term, page){
+  return false;
+}
+
+function select2__to_choice(jdbcTemplate, id) {
+  return jdbcTemplate.queryForMap(&quot;select * from &quot; + Jdbc.MENU + &quot; WHERE &quot; + Jdbc.Menu.MENU_ID + &quot; = ?&quot;,id);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+  &lt;form wicket:id=&quot;form&quot;&gt;
+    &lt;select wicket:id=&quot;select2&quot; style=&quot;width:100%&quot;&gt;&lt;/select&gt;
+  &lt;/form&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-textfield"><strong>TextField</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var textField = factory.createTextField(form,&quot;textField&quot;, String.class);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+  &lt;form wicket:id=&quot;form&quot;&gt;
+    &lt;input type=&quot;text&quot; wicket:id=&quot;textField&quot;/&gt;
+  &lt;/form&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-timetextfield"><strong>TimeTextField</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var timeTextField = factory.createTimeTextField(form,&quot;timeTextField&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+  &lt;form wicket:id=&quot;form&quot;&gt;
+    &lt;input type=&quot;text&quot; wicket:id=&quot;timeTextField&quot;/&gt;
+  &lt;/form&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-urltextfield"><strong>UrlTextField</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var urlTextField = factory.createUrlTextField(form,&quot;urlTextField&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+  &lt;form wicket:id=&quot;form&quot;&gt;
+    &lt;input type=&quot;url&quot; wicket:id=&quot;urlTextField&quot;/&gt;
+  &lt;/form&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-label"><strong>Label</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  userModel.put(&quot;label&quot;, new Date());
+  var label = factory.createLabel(&quot;label&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+  &lt;div wicket:id=&quot;label&quot;&gt;&lt;/div&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-fileupload"><strong>FileUpload</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var file = factory.createFileUpload(form,&quot;file&quot;);
+  var image = factory.createImage(form,&quot;image&quot;);
+  var okay = factory.createButton(form,&quot;okay&quot;);
+}
+
+function okay__on_submit(requestCycle, disk, jdbcTemplate, button, pageModel) {
+  var files = userModel.get(&quot;file&quot;);
+  var file = files.get(0);
+  var fileId = disk.writeFile(file);
+  userModel['image'] = disk.httpFile(fileId);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
+  var image = factory.getChildren('image');
+  if (userModel['image'] == null || &quot;&quot;.equals(image)){
+    image.setVisible(false);
+  } else {
+    image.setVisible(true);
+  }
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html"><!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+  <meta charset="utf-8"/>
+</head>
+<body>
+<wicket:extend>
+  <form wicket:id="form">
+    <input type="file" wicket:id="file"/>
+    <br/>
+    <img wicket:id="image"/>
+    <button type="submit" wicket:id="okay">Okay</button>
+  </form>
+</wicket:extend>
+</body>
+</html></code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-multiplefileupload"><strong>MultiFileUpload</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var file = factory.createMultiFileUpload(form,&quot;file&quot;);
+  var image = factory.createImage(form,&quot;image&quot;);
+  var okay = factory.createButton(form,&quot;okay&quot;);
+}
+
+function okay__on_submit(requestCycle, disk, jdbcTemplate, button, pageModel) {
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
+}
+</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+  &lt;form wicket:id=&quot;form&quot;&gt;
+    &lt;input type=&quot;file&quot; wicket:id=&quot;file&quot;/&gt;
+    &lt;button type=&quot;submit&quot; wicket:id=&quot;okay&quot;&gt;Okay&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-image"><strong>Image</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var image = factory.createImage(form,&quot;image&quot;);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html"
+                               data-lang="html">&lt;img wicket:id=&quot;image&quot;/&gt;</code></pre>
+                </figure>
             </div>
         </div>
         <div class=col-md-3 role=complementary>
@@ -502,7 +1072,35 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                             <li><a href="#mbaas-cms-block">Block</a></li>
                             <li><a href="#mbaas-cms-layout">Layout</a></li>
                             <li><a href="#mbaas-cms-page">Page</a></li>
-                            <li><a href="#mbaas-cms-page">Element</a></li>
+                            <li><a href="#mbaas-cms-markup-element"><strong>Markup Element</strong></a></li>
+                            <li><a href="#mbaas-cms-markup-element-hiddenfield">HiddenField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-form">Form</a></li>
+                            <li><a href="#mbaas-cms-markup-element-emailtextfield">EmailTextField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-dropdownchoice">DropDownChoice</a></li>
+                            <li><a href="#mbaas-cms-markup-element-datetextfield">DateTextField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-colortextfield">ColorTextField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-checkboxmultiplechoice">CheckBoxMultipleChoice</a>
+                            </li>
+                            <li><a href="#mbaas-cms-markup-element-checkbox">CheckBox</a></li>
+                            <li><a href="#mbaas-cms-markup-element-button">Button</a></li>
+                            <li><a href="#mbaas-cms-markup-element-textarea">TextArea</a></li>
+                            <li><a href="#mbaas-cms-markup-element-table">Table</a></li>
+                            <li><a href="#mbaas-cms-markup-element-listchoice">ListChoice</a></li>
+                            <li><a href="#mbaas-cms-markup-element-listmultiplechoice">ListMultipleChoice</a></li>
+                            <li><a href="#mbaas-cms-markup-element-numbertextfield">NumberTextField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-passwordtextfield">PasswordTextField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-radiochoice">RadioChoice</a></li>
+                            <li><a href="#mbaas-cms-markup-element-rangetextfield">RangeTextField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-requiredtextfield">RequiredTextField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-select2multiplechoice">Select2MultipleChoice</a></li>
+                            <li><a href="#mbaas-cms-markup-element-select2singlechoice">Select2SingleChoice</a></li>
+                            <li><a href="#mbaas-cms-markup-element-textfield">TextField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-timetextfield">TimeTextField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-urltextfield">UrlTextField</a></li>
+                            <li><a href="#mbaas-cms-markup-element-label">Label</a></li>
+                            <li><a href="#mbaas-cms-markup-element-fileupload">FileUpload</a></li>
+                            <li><a href="#mbaas-cms-markup-element-multiplefileupload">MultiFileUpload</a></li>
+                            <li><a href="#mbaas-cms-markup-element-image">Image</a></li>
                         </ul>
                     </li>
                     <li><a href=#mbaas-registration>User</a></li>
