@@ -26,8 +26,15 @@ public class NashornLink extends Link<Map<String, Object>> {
 
     private Factory factory;
 
+    private String eventId;
+
     public NashornLink(String id, IModel<Map<String, Object>> model) {
+        this(id, id, model);
+    }
+
+    public NashornLink(String id, String eventId, IModel<Map<String, Object>> model) {
         super(id, model);
+        this.eventId = eventId;
     }
 
     @Override
@@ -45,7 +52,7 @@ public class NashornLink extends Link<Map<String, Object>> {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_click", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, getModelObject());
+            invocable.invokeFunction(this.eventId + "__on_click", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, getModelObject());
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
         }

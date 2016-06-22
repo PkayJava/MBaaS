@@ -125,6 +125,10 @@ public class Factory implements Serializable,
         return this.applicationUserId;
     }
 
+    public Map<String, Object> getPageModel() {
+        return this.pageModel;
+    }
+
     @Override
     public JdbcTemplate createJdbcTemplate() {
         return ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
@@ -489,6 +493,7 @@ public class Factory implements Serializable,
             throw new WicketRuntimeException("columns is not right");
         }
         NashornTableProvider tableProvider = new NashornTableProvider(this, id, this.script, this.applicationCode);
+        String tableId = id + "_table";
         List<IColumn<Map<String, Object>, String>> tableFields = new ArrayList<>();
         if (columns instanceof ScriptObjectMirror) {
             if (((ScriptObjectMirror) columns).size() > 0) {
@@ -497,8 +502,8 @@ public class Factory implements Serializable,
                     if (column instanceof ScriptObjectMirror) {
                         Class<?> clazz = (Class<?>) ((ScriptObjectMirror) column).get("classColumn");
                         String tableColumn = (String) ((ScriptObjectMirror) column).get("tableColumn");
-                        String htmlColumn = (String) ((ScriptObjectMirror) column).get("htmlColumn");
                         String queryColumn = (String) ((ScriptObjectMirror) column).get("queryColumn");
+                        String htmlColumn = (String) ((ScriptObjectMirror) column).get("htmlColumn");
                         if (htmlColumn == null || "".equals(htmlColumn)) {
                             htmlColumn = "Label";
                         }
@@ -527,16 +532,27 @@ public class Factory implements Serializable,
                                     || clazz == Character.class
                                     || clazz == String.class
                                     ) {
-                                NashornTextColumn tableField = new NashornTextColumn(clazz, Model.of(tableColumn), tableColumn);
+                                NashornTextColumn tableField = new NashornTextColumn(Model.of(tableColumn), tableColumn);
                                 tableProvider.selectField(tableColumn, queryColumn, clazz);
                                 tableFields.add(tableField);
                             }
-                        } else if ("CheckBox".equals(htmlColumn)) {
-                            NashornCheckBoxColumn tableField = new NashornCheckBoxColumn();
+                        } else if ("TextLink".equals(htmlColumn)) {
+                            NashornTextLinkColumn tableField = new NashornTextLinkColumn(Model.of(tableColumn), tableColumn, tableId);
+                            tableField.setDisk(this.disk);
+                            tableField.setFactory(this);
+                            tableField.setScript(this.script);
                             tableProvider.selectField(tableColumn, queryColumn, clazz);
                             tableFields.add(tableField);
-                        } else if ("TextField".equals(htmlColumn)) {
-                            NashornTextFieldColumn tableField = new NashornTextFieldColumn();
+                        } else if ("Action".equals(htmlColumn)) {
+                            ScriptObjectMirror actionColumn = (ScriptObjectMirror) ((ScriptObjectMirror) column).get("actionColumn");
+                            Map<String, String> actions = new HashMap<>();
+                            for (Map.Entry<String, Object> action : actionColumn.entrySet()) {
+                                actions.put(action.getKey(), (String) action.getValue());
+                            }
+                            NashornActionColumn tableField = new NashornActionColumn(Model.of(tableColumn), actions, tableId);
+                            tableField.setDisk(this.disk);
+                            tableField.setFactory(this);
+                            tableField.setScript(this.script);
                             tableProvider.selectField(tableColumn, queryColumn, clazz);
                             tableFields.add(tableField);
                         }
@@ -544,7 +560,7 @@ public class Factory implements Serializable,
                 }
             }
         }
-        NashornTable table = new NashornTable(id + "_table", tableFields, tableProvider, rowsPerPage);
+        NashornTable table = new NashornTable(tableId, tableFields, tableProvider, rowsPerPage);
         NashornFilterForm object = new NashornFilterForm(id, tableProvider);
         table.addTopToolbar(new FilterToolbar(table, object));
         object.add(table);

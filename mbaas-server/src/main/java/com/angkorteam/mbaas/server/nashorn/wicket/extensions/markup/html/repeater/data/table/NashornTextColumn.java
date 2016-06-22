@@ -13,14 +13,8 @@ import java.util.Map;
  */
 public class NashornTextColumn extends TextFilteredPropertyColumn<Map<String, Object>, Map<String, String>, String> {
 
-    private Class<?> columnClass;
-
-    private String columnName;
-
-    public NashornTextColumn(Class<?> columnClass, IModel<String> displayModel, String columnName) {
-        super(displayModel, columnName, columnName);
-        this.columnClass = columnClass;
-        this.columnName = columnName;
+    public NashornTextColumn(IModel<String> headerModel, String columnName) {
+        super(headerModel, columnName, columnName);
     }
 
     @Override
@@ -29,4 +23,5 @@ public class NashornTextColumn extends TextFilteredPropertyColumn<Map<String, Ob
         TextFilter<Map<String, String>> filter = new TextFilter<>(componentId, filterModel, form);
         return filter;
     }
+
 }

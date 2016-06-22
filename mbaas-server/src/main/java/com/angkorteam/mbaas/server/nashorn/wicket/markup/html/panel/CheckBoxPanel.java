@@ -12,12 +12,19 @@ import org.apache.wicket.util.resource.StringResourceStream;
  */
 public class CheckBoxPanel extends Panel implements IMarkupResourceStreamProvider {
 
+    private CheckBox checkBox;
+
     public CheckBoxPanel(String id) {
         super(id);
-        add(new CheckBox("checkbox"));
+    }
+
+    @Override
+    protected void onInitialize() {
+        super.onInitialize();
+        this.checkBox = new CheckBox("checkBox");
     }
 
     public IResourceStream getMarkupResourceStream(MarkupContainer container, Class<?> containerClass) {
-        return new StringResourceStream("<wicket:panel><input wicket:id=\"checkbox\" type=\"checkbox\"/></wicket:panel>");
+        return new StringResourceStream("<wicket:panel><input wicket:id='checkbox' type='checkbox'/></wicket:panel>");
     }
 }
