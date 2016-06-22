@@ -88,6 +88,7 @@ public class Factory implements Serializable,
         ISelect2SingleChoiceFactory,
         IFileUploadFactory,
         IRepeatingViewFactory,
+        ITextAreaFactory,
         ICheckBoxFactory {
 
     private MarkupContainer container;
@@ -813,6 +814,20 @@ public class Factory implements Serializable,
     @Override
     public TextFeedbackPanel createFeedback(MarkupContainer container, String id, FormComponent<?> component) {
         TextFeedbackPanel object = new TextFeedbackPanel(id, component);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornTextArea createTextArea(String id) {
+        return createTextArea(container, id);
+    }
+
+    @Override
+    public NashornTextArea createTextArea(MarkupContainer container, String id) {
+        NashornTextArea object = new NashornTextArea(id, createPropertyModel(this.pageModel, id));
+        object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
         return object;
