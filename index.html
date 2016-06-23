@@ -52,7 +52,7 @@
     <div class=row>
         <div class=col-md-9 role=main>
             <div class="bs-docs-section">
-                <h1 id="whatismbaas" class="page-header">What is MBaaS</h1>
+                <h1 id="what-is-mbaas" class="page-header">What is MBaaS</h1>
                 <p class="lead">MBaaS is mobile backend as a service + software as a service</p>
                 <p>Developer could simplify able to write code for rest json service and design application for
                     different purpose</p>
@@ -326,14 +326,87 @@ jdbcTemplate.update(&quot;delete from user where user_id = ?&quot;,1);</code></p
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-cms" class="page-header">Content Management System</h1>
-                <p class="lead">Menu</p>
+                <p id="mbaas-cms-menu" class="lead">Menu</p>
                 <p>
                     Menu : it is used to group pages together which might have similar function, category. it is also
                     help you to keep more room for display content.
                 </p>
-                <p class="lead">Block</p>
-                <p class="lead">Layout</p>
-                <p class="lead">Page</p>
+                <p id="mbaas-cms-block" class="lead">Block</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel, blockModel) {
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel, blockModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+  &lt;body&gt;
+    &lt;wicket:panel&gt;
+      &lt;span&gt;your markup&lt;/span&gt;
+    &lt;/wicket:panel&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <p id="mbaas-cms-layout" class="lead">Layout</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:child/&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <p id="mbaas-cms-page" class="lead">Page</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;span&gt;your markup&lt;/span&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
                 <p id="mbaas-cms-markup-element" class="lead">Markup Element</p>
                 <p id="mbaas-cms-markup-element-hiddenfield"><strong>HiddenField</strong></p>
                 <figure class="highlight">
@@ -1054,7 +1127,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
         <div class=col-md-3 role=complementary>
             <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
                 <ul class="nav bs-docs-sidenav">
-                    <li><a href=#whatismbaas>What's MBaaS</a></li>
+                    <li><a href=#what-is-mbaas>What's MBaaS</a></li>
                     <li><a href=#mbaas-registration>MBaaS Registration</a></li>
                     <li><a href=#mbaas-alias-type>Alias Type</a></li>
                     <li><a href=#mbaas-collection-attribute>Collection / Attribute</a></li>
