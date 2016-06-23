@@ -4,7 +4,7 @@
     <entry key="master.script"><![CDATA[/*
 Page onInitialize
 */
-function onInitialize(requestCycle, jdbcTemplate, disk, factory, pageModel) {
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 }
 
 /*
