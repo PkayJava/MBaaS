@@ -33,7 +33,7 @@ function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 /*
 Page onBeforeRender
 */
-function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, pageModel) {
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 }]]></entry>
     <entry key="page.blank.html"><![CDATA[<!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">

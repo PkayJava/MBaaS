@@ -6,7 +6,7 @@
 /build
 /.gradle
 /.idea
-target/
+/target
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup

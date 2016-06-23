@@ -24,13 +24,13 @@ function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, pageModel, bl
     <entry key="block.blank.script"><![CDATA[/*
 Page onInitialize
 */
-function onInitialize(requestCycle, jdbcTemplate, disk, factory, pageModel, blockModel) {
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel, blockModel) {
 }
 
 /*
 Page onBeforeRender
 */
-function onBeforeRender(requestCycle, jdbcTemplate, disk, factory, pageModel, blockModel) {
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel, blockModel) {
 }]]></entry>
     <entry key="block.blank.html"><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>
 <html xmlns:wicket="http://wicket.apache.org">
