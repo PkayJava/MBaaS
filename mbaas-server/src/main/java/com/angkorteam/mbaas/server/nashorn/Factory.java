@@ -30,6 +30,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -828,6 +829,55 @@ public class Factory implements Serializable,
     public NashornTextArea createTextArea(MarkupContainer container, String id) {
         NashornTextArea object = new NashornTextArea(id, createPropertyModel(this.pageModel, id));
         object.setScript(this.script);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public BookmarkablePageLink<Void> createPageLink(String id, String pageCode) {
+        return createPageLink(container, id, pageCode, new HashMap<>());
+    }
+
+    @Override
+    public BookmarkablePageLink<Void> createPageLink(String id, String pageCode, ScriptObjectMirror params) {
+        return createPageLink(container, id, pageCode, params);
+    }
+
+    @Override
+    public BookmarkablePageLink<Void> createPageLink(String id, String pageCode, Map<String, Object> params) {
+        return createPageLink(container, id, pageCode, params);
+    }
+
+    @Override
+    public BookmarkablePageLink<Void> createPageLink(MarkupContainer container, String id, String pageCode) {
+        return createPageLink(container, id, pageCode, new HashMap<>());
+    }
+
+    @Override
+    public BookmarkablePageLink<Void> createPageLink(MarkupContainer container, String id, String pageCode, ScriptObjectMirror params) {
+        Map<String, Object> temps = new HashMap<>();
+        if (params != null && !params.isEmpty()) {
+            for (Map.Entry<String, Object> param : params.entrySet()) {
+                temps.put(param.getKey(), param.getValue());
+            }
+        }
+        return createPageLink(container, id, pageCode, temps);
+    }
+
+    @Override
+    public BookmarkablePageLink<Void> createPageLink(MarkupContainer container, String id, String pageCode, Map<String, Object> params) {
+        PageParameters parameters = new PageParameters();
+        if (params != null && !params.isEmpty()) {
+            for (Map.Entry<String, Object> param : params.entrySet()) {
+                parameters.add(param.getKey(), param.getValue());
+            }
+        }
+        parameters.add("pageId", id);
+        if (stage) {
+            parameters.add("stage", true);
+        }
+        BookmarkablePageLink<Void> object = new BookmarkablePageLink<>(id, PagePage.class, parameters);
         container.add(object);
         this.children.put(id, object);
         return object;
