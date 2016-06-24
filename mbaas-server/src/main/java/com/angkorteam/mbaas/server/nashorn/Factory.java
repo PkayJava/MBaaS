@@ -873,7 +873,7 @@ public class Factory implements Serializable,
                 parameters.add(param.getKey(), param.getValue());
             }
         }
-        parameters.add("pageId", id);
+        parameters.add("pageId", pageCode);
         if (stage) {
             parameters.add("stage", true);
         }
