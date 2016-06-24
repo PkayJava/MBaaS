@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,13 +55,16 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
             }
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
             invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException(e);
         }
     }
 

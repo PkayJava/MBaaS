@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornFormValidato
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -37,17 +38,20 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
             }
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
             invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), jdbcTemplate, this, this.userModel);
         } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException(e);
         }
     }
 
@@ -58,17 +62,20 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
             }
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
             invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), jdbcTemplate, this, this.userModel);
         } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException(e);
         }
     }
 

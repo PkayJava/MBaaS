@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.wicket.WicketRuntimeException;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.TableLike;
@@ -42,20 +43,23 @@ public class NashornTableProvider extends SqlProvider {
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
             }
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
             return (TableLike<?>) invocable.invokeFunction(this.id + "__from", jdbcTemplate);
         } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException(e);
         } catch (EmptyResultDataAccessException e) {
+            throw new WicketRuntimeException(e);
         }
-        return null;
     }
 
     @Override
@@ -65,20 +69,23 @@ public class NashornTableProvider extends SqlProvider {
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
             }
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
             return (List<Condition>) invocable.invokeFunction(this.id + "__where", jdbcTemplate);
         } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException(e);
         } catch (EmptyResultDataAccessException e) {
+            throw new WicketRuntimeException(e);
         }
-        return null;
     }
 
     @Override
@@ -88,20 +95,23 @@ public class NashornTableProvider extends SqlProvider {
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
             }
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
             return (List<Condition>) invocable.invokeFunction(this.id + "__having", jdbcTemplate);
         } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException(e);
         } catch (EmptyResultDataAccessException e) {
+            throw new WicketRuntimeException(e);
         }
-        return null;
     }
 
     @Override

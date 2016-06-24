@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.resource.IResourceStream;
@@ -52,7 +53,7 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
         try {
             engine.eval(script);
         } catch (ScriptException e) {
-            e.printStackTrace();
+            throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
@@ -71,7 +72,7 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
         try {
             engine.eval(script);
         } catch (ScriptException e) {
-            e.printStackTrace();
+            throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);

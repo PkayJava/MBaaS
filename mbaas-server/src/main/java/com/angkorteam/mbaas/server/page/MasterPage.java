@@ -59,7 +59,7 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
         try {
             engine.eval(script);
         } catch (ScriptException e) {
-            e.printStackTrace();
+            throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
@@ -78,7 +78,7 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
         try {
             engine.eval(script);
         } catch (ScriptException e) {
-            e.printStackTrace();
+            throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);

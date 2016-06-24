@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
 import com.google.gson.Gson;
+import org.apache.wicket.WicketRuntimeException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -40,20 +41,23 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
             }
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
             return (List<Map<String, Object>>) invocable.invokeFunction(this.id + "__to_choices", jdbcTemplate, ids);
         } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException(e);
         } catch (EmptyResultDataAccessException e) {
+            throw new WicketRuntimeException(e);
         }
-        return null;
     }
 
     @Override
@@ -63,20 +67,23 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
             }
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
             return (List<Option>) invocable.invokeFunction(this.id + "__query", jdbcTemplate, this.factory, term, page);
         } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException(e);
         } catch (EmptyResultDataAccessException e) {
+            throw new WicketRuntimeException(e);
         }
-        return null;
     }
 
     @Override
@@ -86,19 +93,21 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
             }
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
             return (Boolean) invocable.invokeFunction(this.id + "__has_more", jdbcTemplate, term, page);
         } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException(e);
         }
-        return false;
     }
 
     @Override

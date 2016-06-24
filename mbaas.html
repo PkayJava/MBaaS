@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<wicket:extend>
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title">Create Author</h3>
+        </div>
+        <form role="form" wicket:id="form">
+            <div class="box-body">
+                <div class="form-group">
+                    <label for="nameField">Name</label>
+                    <input wicket:id="nameField" type="text" class="form-control" placeholder="Author Name">
+                </div>
+            </div>
+
+            <div class="box-footer">
+                <button wicket:id="createButton" type="submit" class="btn btn-primary">Create</button>
+            </div>
+        </form>
+    </div>
+</wicket:extend>
+</body>
+</html>

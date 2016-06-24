@@ -69,7 +69,7 @@ public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
         try {
             engine.eval(this.script);
         } catch (ScriptException e) {
-            e.printStackTrace();
+            throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
@@ -85,7 +85,7 @@ public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
         try {
             engine.eval(this.script);
         } catch (ScriptException e) {
-            e.printStackTrace();
+            throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         Session session = (Session) getSession();

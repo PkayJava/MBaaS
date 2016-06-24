@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.nashorn.wicket.validation;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.validation.IFormValidator;
@@ -56,13 +57,16 @@ public class NashornFormValidator implements IFormValidator {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
             }
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
             invocable.invokeFunction(this.id + "__" + this.event, jdbcTemplate, this.map);
         } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException(e);
         }
     }
 }
