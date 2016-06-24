@@ -407,7 +407,70 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
-                <p id="mbaas-cms-markup-element" class="lead">Markup Element</p>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-cms-markup-element" class="page-header">Markup Element</h1>
+                <p id="mbaas-cms-markup-element-link"><strong>Link</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  factory.createLink(&quot;link&quot;);
+}
+
+function link__on_click(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;a wicket:id=&quot;link&quot;&gt;Link&lt;/a&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-cms-markup-element-page-link"><strong>PageLink</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  factory.createPageLink(&quot;pageLink&quot;,&quot;f&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;a wicket:id=&quot;pageLink&quot;&gt;PP&lt;/a&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
                 <p id="mbaas-cms-markup-element-hiddenfield"><strong>HiddenField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
@@ -1126,7 +1189,9 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
             <div class="bs-docs-section">
                 <h1 id="mbaas-tutorial" class="page-header">Tutorial</h1>
                 <p><strong>Book Management</strong></p>
-                <div>in this section will show how we can you mbaas to create book management, basically it will cover create new book, modify book, and list book, book validation</div>
+                <div>in this section will show how we can you mbaas to create book management, basically it will cover
+                    create new book, modify book, and list book, book validation
+                </div>
                 <hr/>
                 <div>
                     <p><strong>Create Author Collection</strong></p>
@@ -1160,15 +1225,19 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
                             <li><a href="#mbaas-cms-block">Block</a></li>
                             <li><a href="#mbaas-cms-layout">Layout</a></li>
                             <li><a href="#mbaas-cms-page">Page</a></li>
-                            <li><a href="#mbaas-cms-markup-element"><strong>Markup Element</strong></a></li>
+                        </ul>
+                    </li>
+                    <li><a href=#mbaas-cms-markup-element>Markup Element</a>
+                        <ul class="nav">
+                            <li><a href="#mbaas-cms-markup-element-link">Link</a></li>
+                            <li><a href="#mbaas-cms-markup-element-page-link">PageLink</a></li>
                             <li><a href="#mbaas-cms-markup-element-hiddenfield">HiddenField</a></li>
                             <li><a href="#mbaas-cms-markup-element-form">Form</a></li>
                             <li><a href="#mbaas-cms-markup-element-emailtextfield">EmailTextField</a></li>
                             <li><a href="#mbaas-cms-markup-element-dropdownchoice">DropDownChoice</a></li>
                             <li><a href="#mbaas-cms-markup-element-datetextfield">DateTextField</a></li>
                             <li><a href="#mbaas-cms-markup-element-colortextfield">ColorTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-checkboxmultiplechoice">CheckBoxMultipleChoice</a>
-                            </li>
+                            <li><a href="#mbaas-cms-markup-element-checkboxmultiplechoice">CheckBoxMultipleChoice</a></li>
                             <li><a href="#mbaas-cms-markup-element-checkbox">CheckBox</a></li>
                             <li><a href="#mbaas-cms-markup-element-button">Button</a></li>
                             <li><a href="#mbaas-cms-markup-element-textarea">TextArea</a></li>
