@@ -8,46 +8,51 @@
     <div class="box box-primary">
         <form role="form" wicket:id="form">
             <div class="box-body">
-                <div class="form-group">
-                    <label wicket:for="masterPageField">Layout</label>
-                    <select wicket:id="masterPageField" class="form-control select2" style="width: 100%;"></select>
-                    <span wicket:id="menuFeedback" class="help-block"/>
-                </div>
-                <div class="form-group">
+
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
                     <label wicket:for="menuField">Menu</label>
                     <select wicket:id="menuField" class="form-control select2" style="width: 100%;"></select>
                     <span wicket:id="menuFeedback" class="help-block"/>
                 </div>
-                <div class="form-group">
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <label wicket:for="masterPageField">Layout</label>
+                    <select wicket:id="masterPageField" class="form-control select2" style="width: 100%;"></select>
+                    <span wicket:id="menuFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
                     <label wicket:for="roleField">Role</label>
                     <select wicket:id="roleField" class="form-control select2" style="width: 100%;"></select>
                     <span wicket:id="roleFeedback" class="help-block"/>
                 </div>
-                <div class="form-group">
+
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
                     <label wicket:for="codeField">Code</label>
                     <input wicket:id="codeField" type="text" class="form-control"/>
                     <span wicket:id="codeFeedback" class="help-block"/>
                 </div>
-                <div class="form-group">
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
                     <label wicket:for="titleField">Title</label>
                     <input wicket:id="titleField" type="text" class="form-control"/>
                     <span wicket:id="titleFeedback" class="help-block"/>
                 </div>
-                <div class="form-group">
+
+                <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <label wicket:for="descriptionField">Description</label>
                     <input wicket:id="descriptionField" type="text" class="form-control"/>
                     <span wicket:id="descriptionFeedback" class="help-block"/>
                 </div>
-                <div class="form-group">
-                    <label wicket:for="javascriptField">Javascript</label>
-                    <textarea wicket:id="javascriptField" rows="15" class="form-control"/>
-                    <span wicket:id="javascriptFeedback" class="help-block"/>
-                </div>
-                <div class="form-group">
+
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
                     <label wicket:for="htmlField">HTML</label>
-                    <textarea wicket:id="htmlField" rows="15" class="form-control"/>
+                    <textarea wicket:id="htmlField" class="form-control"/>
                     <span wicket:id="htmlFeedback" class="help-block"/>
                 </div>
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="javascriptField">Javascript</label>
+                    <textarea wicket:id="javascriptField" class="form-control"/>
+                    <span wicket:id="javascriptFeedback" class="help-block"/>
+                </div>
+
             </div>
             <div class="box-footer">
                 <wicket:link>
