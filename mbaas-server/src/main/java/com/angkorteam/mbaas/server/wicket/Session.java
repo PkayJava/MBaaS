@@ -15,6 +15,7 @@ import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
 
@@ -92,7 +93,10 @@ public class Session extends AuthenticatedWebSession {
         }
         JdbcTemplate jdbcTemplate = getJdbcTemplate(applicationRecord.getCode());
         Map<String, Object> userRecord = null;
-        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.LOGIN + " = ? AND " + Jdbc.User.PASSWORD + " = MD5(?)", username, password);
+        try {
+            userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.LOGIN + " = ? AND " + Jdbc.User.PASSWORD + " = MD5(?)", username, password);
+        } catch (EmptyResultDataAccessException e) {
+        }
         if (userRecord == null) {
             return false;
         }
