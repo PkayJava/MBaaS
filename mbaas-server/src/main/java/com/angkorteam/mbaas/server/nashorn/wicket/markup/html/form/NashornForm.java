@@ -1,5 +1,7 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form;
 
+import com.angkorteam.mbaas.server.nashorn.Disk;
+import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornFormValidator;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
@@ -21,7 +23,9 @@ import java.util.Map;
 public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
 
     private String script;
-    private Map<String, Object> userModel;
+    private Map<String, Object> pageModel;
+    private Disk disk;
+    private Factory factory;
 
     public NashornForm(String id) {
         super(id);
@@ -47,11 +51,11 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), jdbcTemplate, this, this.userModel);
+            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + getId() + "__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
         }
     }
 
@@ -71,11 +75,11 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), jdbcTemplate, this, this.userModel);
+            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + getId() + "__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
         }
     }
 
@@ -92,11 +96,27 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
         this.script = script;
     }
 
-    public Map<String, Object> getUserModel() {
-        return userModel;
+    public Map<String, Object> getPageModel() {
+        return pageModel;
     }
 
-    public void setUserModel(Map<String, Object> userModel) {
-        this.userModel = userModel;
+    public void setPageModel(Map<String, Object> pageModel) {
+        this.pageModel = pageModel;
+    }
+
+    public Disk getDisk() {
+        return disk;
+    }
+
+    public void setDisk(Disk disk) {
+        this.disk = disk;
+    }
+
+    public Factory getFactory() {
+        return factory;
+    }
+
+    public void setFactory(Factory factory) {
+        this.factory = factory;
     }
 }

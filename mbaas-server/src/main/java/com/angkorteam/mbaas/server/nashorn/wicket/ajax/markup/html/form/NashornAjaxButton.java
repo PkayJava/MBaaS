@@ -1,9 +1,11 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.ajax.markup.html.form;
 
+import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
+import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
@@ -23,9 +25,11 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
 
     private String script;
 
-    private Map<String, Object> userModel;
+    private Map<String, Object> pageModel;
 
     private Factory factory;
+
+    private Disk disk;
 
     public NashornAjaxButton(String id) {
         super(id);
@@ -43,14 +47,6 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
         super(id, model, form);
     }
 
-    public Map<String, Object> getUserModel() {
-        return userModel;
-    }
-
-    public void setUserModel(Map<String, Object> userModel) {
-        this.userModel = userModel;
-    }
-
     @Override
     protected final void onSubmit(AjaxRequestTarget target, Form<?> form) {
         Session session = (Session) Session.get();
@@ -58,7 +54,7 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
@@ -66,9 +62,10 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), jdbcTemplate, this.factory, target, form, this.userModel);
+            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, target, form, this.pageModel);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException("function " + getId() + "__on_submit(requestCycle, disk, jdbcTemplate, factory, target, form, pageModel){} is missing");
         } catch (EmptyResultDataAccessException e) {
         }
     }
@@ -80,7 +77,7 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
-        if (this.script != null || !"".equals(this.script)) {
+        if (this.script != null && !"".equals(this.script)) {
             try {
                 scriptEngine.eval(this.script);
             } catch (ScriptException e) {
@@ -88,9 +85,10 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), jdbcTemplate, this, target, form, this.userModel);
+            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, target, form, this.pageModel);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException("function " + getId() + "__on_error(requestCycle, disk, jdbcTemplate, factory, target, form, pageModel){} is missing");
         } catch (EmptyResultDataAccessException e) {
         }
     }

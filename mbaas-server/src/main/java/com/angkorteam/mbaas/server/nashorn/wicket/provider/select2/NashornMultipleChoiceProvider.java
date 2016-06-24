@@ -54,7 +54,7 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + this.id + "__to_choices(jdbcTemplate, ids){} is missing");
         } catch (EmptyResultDataAccessException e) {
             throw new WicketRuntimeException(e);
         }
@@ -80,7 +80,7 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + this.id + "__query(jdbcTemplate, factory, term, page){} is missing");
         } catch (EmptyResultDataAccessException e) {
             throw new WicketRuntimeException(e);
         }
@@ -106,7 +106,7 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + this.id + "__has_more(jdbcTemplate, term, page){} is missing");
         }
     }
 

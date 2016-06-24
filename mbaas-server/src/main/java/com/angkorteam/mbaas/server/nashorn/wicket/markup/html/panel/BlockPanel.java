@@ -73,9 +73,10 @@ public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
         }
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
-        if (iOnInitialize != null) {
-            iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.blockModel.getObject());
+        if (iOnInitialize == null) {
+            throw new WicketRuntimeException("Block." + this.code + " function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel, blockModel){} is missing");
         }
+        iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.blockModel.getObject());
     }
 
     @Override
@@ -90,10 +91,11 @@ public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
         Invocable invocable = (Invocable) engine;
         Session session = (Session) getSession();
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
-        if (iOnBeforeRender != null) {
-            JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(session.getApplicationCode());
-            iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.blockModel.getObject());
+        if (iOnBeforeRender == null) {
+            throw new WicketRuntimeException("Block." + this.code + " function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel, blockModel){} is missing");
         }
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(session.getApplicationCode());
+        iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.blockModel.getObject());
     }
 
     @Override

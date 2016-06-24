@@ -56,7 +56,7 @@ public class NashornTableProvider extends SqlProvider {
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + this.id + "__from(jdbcTemplate){} is missing");
         } catch (EmptyResultDataAccessException e) {
             throw new WicketRuntimeException(e);
         }
@@ -82,7 +82,7 @@ public class NashornTableProvider extends SqlProvider {
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + this.id + "__where(jdbcTemplate){} is missing");
         } catch (EmptyResultDataAccessException e) {
             throw new WicketRuntimeException(e);
         }
@@ -108,7 +108,7 @@ public class NashornTableProvider extends SqlProvider {
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + this.id + "__having(jdbcTemplate){} is missing");
         } catch (EmptyResultDataAccessException e) {
             throw new WicketRuntimeException(e);
         }

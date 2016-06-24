@@ -66,7 +66,7 @@ public class NashornFormValidator implements IFormValidator {
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + this.id + "__" + this.event + "(jdbcTemplate, components){} is missing");
         }
     }
 }

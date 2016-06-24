@@ -58,7 +58,7 @@ public class NashornLink extends Link<Map<String, Object>> {
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + this.eventId + "__on_click(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
         }
     }
 

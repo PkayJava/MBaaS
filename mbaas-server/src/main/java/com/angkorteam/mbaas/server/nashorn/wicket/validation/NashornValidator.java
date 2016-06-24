@@ -52,7 +52,7 @@ public class NashornValidator<T> implements IValidator<T> {
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException(e);
+            throw new WicketRuntimeException("function " + this.id + "__" + this.event + "(jdbcTemplate, validatable){} is missing");
         }
     }
 }

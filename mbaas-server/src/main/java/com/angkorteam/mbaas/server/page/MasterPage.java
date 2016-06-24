@@ -37,10 +37,12 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
 
     private String masterPageId;
 
+    private String masterPageCode;
+
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        Session session = (Session) getSession();
+        Session session = getSession();
         String applicationUserId = session.getApplicationUserId();
         this.pageModel = new HashMap<>();
         this.stage = getPageParameters().get("stage").toBoolean(false);
@@ -51,6 +53,7 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
         } else {
             this.masterPageId = getRequest().getQueryParameters().getParameterValue("masterPageId").toString("");
         }
+        this.masterPageCode = jdbcTemplate.queryForObject("SELECT " + Jdbc.MasterPage.CODE + " FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", String.class, this.masterPageId);
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
         String script = (String) (this.stage ? pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.MasterPage.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
@@ -63,9 +66,10 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
         }
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
-        if (iOnInitialize != null) {
-            iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
+        if (iOnInitialize == null) {
+            throw new WicketRuntimeException("Layout." + this.masterPageCode + "function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
         }
+        iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
     }
 
     @Override
@@ -82,9 +86,10 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
         }
         Invocable invocable = (Invocable) engine;
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
-        if (iOnBeforeRender != null) {
-            iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
+        if (iOnBeforeRender == null) {
+            throw new WicketRuntimeException("Layout." + this.masterPageCode + " function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
         }
+        iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
     }
 
     @Override

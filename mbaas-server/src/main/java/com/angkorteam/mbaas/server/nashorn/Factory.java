@@ -263,7 +263,9 @@ public class Factory implements Serializable,
     public <T> NashornForm<T> createForm(MarkupContainer container, String id) {
         NashornForm<T> object = new NashornForm<>(id);
         object.setScript(this.script);
-        object.setUserModel(this.pageModel);
+        object.setPageModel(this.pageModel);
+        object.setDisk(this.disk);
+        object.setFactory(this);
         container.add(object);
         this.children.put(id, object);
         return object;

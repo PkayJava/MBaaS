@@ -34,6 +34,8 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
 
     private String pageId;
 
+    private String pageCode;
+
     private boolean stage;
 
     @Override
@@ -46,6 +48,7 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
         this.pageModel = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
+        this.pageCode = (String) pageRecord.get(Jdbc.Page.CODE);
         String script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
         this.factory = new Factory(applicationUserId, this, this.disk, getApplicationCode(), script, this.stage, this.pageModel);
@@ -57,9 +60,10 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
         }
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
-        if (iOnInitialize != null) {
-            iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
+        if (iOnInitialize == null) {
+            throw new WicketRuntimeException("Page." + this.pageCode + " function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
         }
+        iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
     }
 
     @Override
@@ -76,9 +80,10 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
         }
         Invocable invocable = (Invocable) engine;
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
-        if (iOnBeforeRender != null) {
-            iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
+        if (iOnBeforeRender == null) {
+            throw new WicketRuntimeException("Page." + this.pageCode + " function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
         }
+        iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
     }
 
     @Override
