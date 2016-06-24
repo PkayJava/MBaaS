@@ -873,7 +873,9 @@ public class Factory implements Serializable,
                 parameters.add(param.getKey(), param.getValue());
             }
         }
-        parameters.add("pageId", pageCode);
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        String pageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.CODE + " = ?", String.class, pageCode);
+        parameters.add("pageId", pageId);
         if (stage) {
             parameters.add("stage", true);
         }
