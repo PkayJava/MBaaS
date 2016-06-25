@@ -4,16 +4,12 @@ import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.NashornButton;
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
 
@@ -24,8 +20,6 @@ import java.util.Map;
  */
 public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStreamProvider {
 
-    private AjaxCheckBox checkBoxToggle;
-
     private String tableId;
 
     private String columnName;
@@ -35,8 +29,6 @@ public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStrea
     private Disk disk;
 
     private Factory factory;
-
-    private Boolean value;
 
     private Map<String, Object> checks;
 
@@ -53,19 +45,6 @@ public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStrea
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        this.checkBoxToggle = new AjaxCheckBox("checkBoxToggle", new PropertyModel<>(this, "value")) {
-            @Override
-            protected void onUpdate(AjaxRequestTarget target) {
-                for (Map.Entry<String, Object> check : checks.entrySet()) {
-                    check.setValue(value);
-                }
-                Component component = factory.getChildren(tableId);
-                if (component != null) {
-                    target.add(component);
-                }
-            }
-        };
-        this.add(this.checkBoxToggle);
         RepeatingView buttons = new RepeatingView("buttons");
         add(buttons);
         for (Map.Entry<String, String> action : this.actions.entrySet()) {
@@ -86,7 +65,7 @@ public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStrea
 
     @Override
     public IResourceStream getMarkupResourceStream(MarkupContainer markupContainer, Class<?> aClass) {
-        return new StringResourceStream("<wicket:panel><div><input type='checkbox' wicket:id='checkBoxToggle'/> <wicket:container wicket:id='buttons'><button type='submit' wicket:id='button'><wicket:container wicket:id='buttonLabel'/></button> </wicket:container></div></wicket:panel>");
+        return new StringResourceStream("<wicket:panel><wicket:container wicket:id='buttons'><button type='submit' wicket:id='button'><wicket:container wicket:id='buttonLabel'/> </button></wicket:container></wicket:panel>");
     }
 
     public String getScript() {

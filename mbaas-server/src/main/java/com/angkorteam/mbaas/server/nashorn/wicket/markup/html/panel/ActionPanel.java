@@ -88,6 +88,6 @@ public class ActionPanel extends Panel implements IMarkupResourceStreamProvider 
     }
 
     public IResourceStream getMarkupResourceStream(MarkupContainer container, Class<?> containerClass) {
-        return new StringResourceStream("<wicket:panel><wicket:container wicket:id='links'><a wicket:id='link'><wicket:container wicket:id='text'/></a></wicket:container></wicket:panel>");
+        return new StringResourceStream("<wicket:panel><wicket:container wicket:id='links'><a wicket:id='link'><wicket:container wicket:id='text'/></a> </wicket:container></wicket:panel>");
     }
 }
