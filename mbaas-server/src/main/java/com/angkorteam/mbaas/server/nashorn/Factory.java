@@ -540,6 +540,27 @@ public class Factory implements Serializable,
                                 tableProvider.selectField(tableColumn, queryColumn, clazz);
                                 tableFields.add(tableField);
                             }
+                        } else if ("Hidden".equals(htmlColumn)) {
+                            if (clazz == java.time.LocalTime.class) {
+                                tableProvider.selectField(tableColumn, queryColumn, java.time.LocalTime.class);
+                            } else if (clazz == java.time.LocalDate.class) {
+                                tableProvider.selectField(tableColumn, queryColumn, java.time.LocalDate.class);
+                            } else if (clazz == java.time.LocalDateTime.class) {
+                                tableProvider.selectField(tableColumn, queryColumn, java.time.LocalDateTime.class);
+                            } else if (clazz == Boolean.class
+                                    || clazz == Byte.class
+                                    || clazz == Short.class
+                                    || clazz == Integer.class
+                                    || clazz == Long.class
+                                    || clazz == Float.class
+                                    || clazz == Double.class
+                                    || clazz == BigInteger.class
+                                    || clazz == BigDecimal.class
+                                    || clazz == Character.class
+                                    || clazz == String.class
+                                    ) {
+                                tableProvider.selectField(tableColumn, queryColumn, clazz);
+                            }
                         } else if ("TextLink".equals(htmlColumn)) {
                             NashornTextLinkColumn tableField = new NashornTextLinkColumn(Model.of(tableColumn), tableColumn, tableId);
                             tableField.setDisk(this.disk);
