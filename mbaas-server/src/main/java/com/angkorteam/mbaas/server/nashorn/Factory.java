@@ -547,6 +547,18 @@ public class Factory implements Serializable,
                             tableField.setScript(this.script);
                             tableProvider.selectField(tableColumn, queryColumn, clazz);
                             tableFields.add(tableField);
+                        } else if ("CheckBox".equals(htmlColumn)) {
+                            ScriptObjectMirror actionColumn = (ScriptObjectMirror) ((ScriptObjectMirror) column).get("actionColumn");
+                            Map<String, String> actions = new HashMap<>();
+                            for (Map.Entry<String, Object> action : actionColumn.entrySet()) {
+                                actions.put(action.getKey(), (String) action.getValue());
+                            }
+                            NashornCheckBoxColumn tableField = new NashornCheckBoxColumn(Model.of(tableColumn), actions, tableId);
+                            tableField.setDisk(this.disk);
+                            tableField.setFactory(this);
+                            tableField.setScript(this.script);
+                            tableProvider.selectField(tableColumn, queryColumn, clazz);
+                            tableFields.add(tableField);
                         } else if ("Action".equals(htmlColumn)) {
                             ScriptObjectMirror actionColumn = (ScriptObjectMirror) ((ScriptObjectMirror) column).get("actionColumn");
                             Map<String, String> actions = new HashMap<>();

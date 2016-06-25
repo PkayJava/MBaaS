@@ -6,7 +6,6 @@ import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.WicketRuntimeException;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -28,12 +27,15 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
 
     private Factory factory;
 
+    private String eventId;
+
     public NashornButton(String id) {
-        super(id);
+        this(id, id);
     }
 
-    public NashornButton(String id, IModel<String> model) {
-        super(id, model);
+    public NashornButton(String id, String eventId) {
+        super(id);
+        this.eventId = eventId;
     }
 
     public Map<String, Object> getPageModel() {
@@ -60,11 +62,11 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_submit", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
+            invocable.invokeFunction(this.eventId + "__on_submit", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException("function " + getId() + "__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
+            throw new WicketRuntimeException("function " + this.eventId + "__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
         }
     }
 
@@ -83,10 +85,10 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(getId() + "__on_error", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
+            invocable.invokeFunction(this.eventId + "__on_error", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         } catch (ScriptException e) {
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException("function " + getId() + "__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
+            throw new WicketRuntimeException("function " + this.eventId + "__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){} is missing");
         }
     }
 
