@@ -635,8 +635,12 @@ var textarea = factory.createTextArea(form,&quot;text&quot;);</code></pre>
                         </tr>
                         <tr>
                             <td>htmlColumn</td>
-                            <td>column type, <span class="label label-info">Label</span> <span class="label label-info">Action</span>
+                            <td>column type, <span class="label label-info">Hidden</span> <span class="label label-info">CheckBox</span> <span class="label label-info">Label</span> <span class="label label-info">Action</span>
                             </td>
+                        </tr>
+                        <tr>
+                            <td>objectColumn</td>
+                            <td>it is use with CheckBox column, which field would we like to have a boolean of that field to be true or false, usually it is the identity record field, and mostly we don't want to show identity record in the table, because it is useless to user. Hidden htmlColumn is ideally for that identity column to load into table but it show does not show</td>
                         </tr>
                         <tr>
                             <td>queryColumn</td>
@@ -664,6 +668,7 @@ var textarea = factory.createTextArea(form,&quot;text&quot;);</code></pre>
                         <tr>
                             <td>actionColumn</td>
                             <td>
+                                <div>it is use together with CheckBox column or ActionColumn.</div>
                                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">{&quot;Name&quot;:&quot;CSS Class&quot;,&quot;Name&quot;:&quot;CSS Class&quot;}</code></pre>
