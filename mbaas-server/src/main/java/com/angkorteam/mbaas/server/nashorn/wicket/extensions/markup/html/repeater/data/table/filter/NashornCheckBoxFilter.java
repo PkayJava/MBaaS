@@ -3,17 +3,17 @@ package com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeat
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.NashornButton;
-import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link.NashornLink;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
 
@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStreamProvider {
 
-    private CheckBox checkBoxToggle;
+    private AjaxCheckBox checkBoxToggle;
 
     private String tableId;
 
@@ -36,14 +36,16 @@ public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStrea
 
     private Factory factory;
 
-    private FilterForm<?> form;
+    private Boolean value;
+
+    private Map<String, Object> checks;
 
     private Map<String, String> actions;
 
-    public NashornCheckBoxFilter(String id, String tableId, String columnName, FilterForm<?> form, Map<String, String> actions) {
+    public NashornCheckBoxFilter(String id, String tableId, String columnName, Map<String, Object> checks, Map<String, String> actions) {
         super(id);
         this.columnName = columnName;
-        this.form = form;
+        this.checks = checks;
         this.tableId = tableId;
         this.actions = actions;
     }
@@ -51,7 +53,18 @@ public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStrea
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        this.checkBoxToggle = new CheckBox("checkBoxToggle");
+        this.checkBoxToggle = new AjaxCheckBox("checkBoxToggle", new PropertyModel<>(this, "value")) {
+            @Override
+            protected void onUpdate(AjaxRequestTarget target) {
+                for (Map.Entry<String, Object> check : checks.entrySet()) {
+                    check.setValue(value);
+                }
+                Component component = factory.getChildren(tableId);
+                if (component != null) {
+                    target.add(component);
+                }
+            }
+        };
         this.add(this.checkBoxToggle);
         RepeatingView buttons = new RepeatingView("buttons");
         add(buttons);
@@ -59,19 +72,21 @@ public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStrea
             WebMarkupContainer container = new WebMarkupContainer(buttons.newChildId());
             buttons.add(container);
             NashornButton button = new NashornButton("button", this.tableId + "_" + this.columnName + "_" + action.getKey());
+            button.setPageModel(this.checks);
             button.setScript(this.script);
             button.setFactory(this.factory);
+            button.setDefaultFormProcessing(true);
             button.setDisk(this.disk);
             container.add(button);
             button.add(AttributeModifier.replace("class", action.getValue()));
-            Label text = new Label("text", action.getKey());
-            button.add(text);
+            Label buttonLabel = new Label("buttonLabel", action.getKey());
+            button.add(buttonLabel);
         }
     }
 
     @Override
     public IResourceStream getMarkupResourceStream(MarkupContainer markupContainer, Class<?> aClass) {
-        return new StringResourceStream("<wicket:panel><input type='checkbox' wicket:id='checkBoxToggle'/> <wicket:container wicket:id='buttons'><button type='submit' wicket:id='button'><wicket:container wicket:id='button'/></button> </wicket:container></wicket:panel>");
+        return new StringResourceStream("<wicket:panel><div><input type='checkbox' wicket:id='checkBoxToggle'/> <wicket:container wicket:id='buttons'><button type='submit' wicket:id='button'><wicket:container wicket:id='buttonLabel'/></button> </wicket:container></div></wicket:panel>");
     }
 
     public String getScript() {

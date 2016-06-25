@@ -14,6 +14,7 @@ public class NashornTable extends DefaultDataTable<Map<String, Object>, String> 
 
     public NashornTable(String id, List<IColumn<Map<String, Object>, String>> columns, NashornTableProvider tableProvider, int rowsPerPage) {
         super(id, columns, tableProvider, rowsPerPage);
+        setOutputMarkupId(true);
     }
 
 }

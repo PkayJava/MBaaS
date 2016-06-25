@@ -1,19 +1,17 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table;
 
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.GoAndClearFilter;
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornCheckBoxFilter;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.panel.CheckBoxPanel;
 import org.apache.wicket.Component;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.HeaderlessColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilteredAbstractColumn;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -31,20 +29,26 @@ public class NashornCheckBoxColumn extends FilteredAbstractColumn<Map<String, Ob
 
     private Disk disk;
 
-    public NashornCheckBoxColumn(IModel<String> displayModel, Map<String, String> actions, String tableId) {
+    private Map<String, Object> checks;
+
+    private String objectColumn;
+
+    public NashornCheckBoxColumn(IModel<String> displayModel, String objectColumn, Map<String, String> actions, String tableId) {
         super(displayModel);
+        this.objectColumn = objectColumn;
         this.actions = actions;
         this.tableId = tableId;
+        this.checks = new HashMap<>();
     }
 
     @Override
     public void populateItem(Item<ICellPopulator<Map<String, Object>>> cellItem, String componentId, IModel<Map<String, Object>> rowModel) {
-        cellItem.add(new CheckBoxPanel(componentId));
+        cellItem.add(new CheckBoxPanel(componentId, (String) rowModel.getObject().get(this.objectColumn), this.checks));
     }
 
     @Override
     public Component getFilter(String componentId, FilterForm<?> form) {
-        NashornCheckBoxFilter filter = new NashornCheckBoxFilter(componentId, this.tableId, getDisplayModel().getObject(), form, actions);
+        NashornCheckBoxFilter filter = new NashornCheckBoxFilter(componentId, this.tableId, getDisplayModel().getObject(), this.checks, this.actions);
         filter.setScript(this.script);
         filter.setDisk(this.disk);
         filter.setFactory(this.factory);

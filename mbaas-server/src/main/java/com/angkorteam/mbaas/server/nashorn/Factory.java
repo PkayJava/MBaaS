@@ -548,12 +548,13 @@ public class Factory implements Serializable,
                             tableProvider.selectField(tableColumn, queryColumn, clazz);
                             tableFields.add(tableField);
                         } else if ("CheckBox".equals(htmlColumn)) {
+                            String objectColumn = (String) ((ScriptObjectMirror) column).get("objectColumn");
                             ScriptObjectMirror actionColumn = (ScriptObjectMirror) ((ScriptObjectMirror) column).get("actionColumn");
                             Map<String, String> actions = new HashMap<>();
                             for (Map.Entry<String, Object> action : actionColumn.entrySet()) {
                                 actions.put(action.getKey(), (String) action.getValue());
                             }
-                            NashornCheckBoxColumn tableField = new NashornCheckBoxColumn(Model.of(tableColumn), actions, tableId);
+                            NashornCheckBoxColumn tableField = new NashornCheckBoxColumn(Model.of(tableColumn), objectColumn, actions, tableId);
                             tableField.setDisk(this.disk);
                             tableField.setFactory(this);
                             tableField.setScript(this.script);
@@ -582,6 +583,7 @@ public class Factory implements Serializable,
         object.add(table);
         container.add(object);
         this.children.put(id, object);
+        this.children.put(table.getId(), table);
         return object;
     }
 
