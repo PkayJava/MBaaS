@@ -2,6 +2,8 @@ package com.angkorteam.mbaas.server.nashorn;
 
 import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
+import com.angkorteam.framework.extension.wicket.markup.html.FullCalendar;
+import com.angkorteam.framework.extension.wicket.markup.html.FullCalendarItem;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
@@ -15,6 +17,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.Nashor
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.image.NashornImage;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link.NashornLink;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.panel.BlockPanel;
+import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornFullCalendarProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultipleChoiceProvider;
@@ -23,6 +26,7 @@ import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
@@ -65,6 +69,7 @@ public class Factory implements Serializable,
         IJdbcTemplateFactory,
         IPropertyModelFactory,
         IFeedback,
+        IFullCalendarFactory,
         IChoiceRendererFactory,
         IPasswordTextFieldFactory,
         IRangeTextFieldFactory,
@@ -920,5 +925,29 @@ public class Factory implements Serializable,
         container.add(object);
         this.children.put(id, object);
         return object;
+    }
+
+    @Override
+    public FullCalendar createFullCalendar(String id) {
+        return createFullCalendar(container, id);
+    }
+
+    @Override
+    public FullCalendar createFullCalendar(MarkupContainer container, String id) {
+        NashornFullCalendarProvider provider = new NashornFullCalendarProvider(this, id, this.script, this.applicationCode);
+        FullCalendar object = new FullCalendar(id, provider);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public FullCalendarItem createFullCalendarItem(String id, String title, Date start, Date end) {
+        FullCalendarItem item = new FullCalendarItem();
+        item.setId(id);
+        item.setTitle(title);
+        item.setStart(DateFormatUtils.ISO_DATETIME_FORMAT.format(start));
+        item.setEnd(DateFormatUtils.ISO_DATETIME_FORMAT.format(end));
+        return item;
     }
 }

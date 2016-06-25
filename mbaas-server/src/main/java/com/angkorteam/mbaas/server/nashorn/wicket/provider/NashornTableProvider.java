@@ -38,9 +38,8 @@ public class NashornTableProvider extends SqlProvider {
 
     @Override
     protected TableLike<?> from() {
-        Session session = (Session) Session.get();
         Application application = ApplicationUtils.getApplication();
-        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
 
         ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
         if (this.script != null && !"".equals(this.script)) {
