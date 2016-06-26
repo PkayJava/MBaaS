@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
-import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
+import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.NashornTable;
 import jdk.nashorn.api.scripting.JSObject;
 import org.apache.wicket.MarkupContainer;
 
@@ -11,8 +11,8 @@ import java.io.Serializable;
  */
 public interface ITableFactory extends Serializable {
 
-    NashornFilterForm createTable(String id, JSObject columns, int rowsPerPage);
+    NashornTable createTable(String id, JSObject columns, int rowsPerPage);
 
-    NashornFilterForm createTable(MarkupContainer container, String id, JSObject columns, int rowsPerPage);
+    NashornTable createTable(MarkupContainer container, String id, JSObject columns, int rowsPerPage);
 
 }

@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.WicketRuntimeException;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.IFilterStateLocator;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.TableLike;
@@ -15,6 +16,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 6/2/16.
@@ -29,7 +31,8 @@ public class NashornTableProvider extends SqlProvider {
 
     private final String applicationCode;
 
-    public NashornTableProvider(Factory factory, String id, String script, String applicationCode) {
+    public NashornTableProvider(IFilterStateLocator<Map<String, String>> stateLocator, Factory factory, String id, String script, String applicationCode) {
+        super(stateLocator);
         this.script = script;
         this.id = id;
         this.factory = factory;

@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
+import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.NashornForm;
 import org.apache.wicket.MarkupContainer;
 
@@ -13,5 +14,9 @@ public interface IFormFactory extends Serializable {
     <T> NashornForm<T> createForm(String id);
 
     <T> NashornForm<T> createForm(MarkupContainer container, String id);
+
+    NashornFilterForm createFilterForm(String id);
+
+    NashornFilterForm createFilterForm(MarkupContainer container, String id);
 
 }

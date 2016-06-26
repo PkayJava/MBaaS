@@ -1,6 +1,6 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter;
 
-import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
+import com.angkorteam.mbaas.server.nashorn.wicket.provider.FilterStateLocator;
 
 import java.util.Map;
 
@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public class NashornFilterForm extends org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm<Map<String, String>> {
 
-    public NashornFilterForm(String id, NashornTableProvider locator) {
+    public NashornFilterForm(String id, FilterStateLocator locator) {
         super(id, locator);
     }
 

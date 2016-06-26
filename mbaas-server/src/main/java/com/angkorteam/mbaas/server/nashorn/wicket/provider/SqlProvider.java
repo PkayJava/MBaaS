@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * Created by socheat on 6/11/16.
  */
-public abstract class SqlProvider extends SortableDataProvider<Map<String, Object>, String> implements IFilterStateLocator<Map<String, String>> {
+public abstract class SqlProvider extends SortableDataProvider<Map<String, Object>, String> {
 
     /**
      *
@@ -35,13 +35,13 @@ public abstract class SqlProvider extends SortableDataProvider<Map<String, Objec
 
     private static final char HIDDEN_SPACE = '\u200B';
 
-    private Map<String, String> filterState;
-
     private Map<String, Class<?>> itemClass;
     private String groupBy;
 
     private Map<String, String> fields;
     private Map<String, String> reverseFields;
+
+    private IFilterStateLocator<Map<String, String>> stateLocator;
 
     private static final List<String> AGGREGATE_FUNCTION;
 
@@ -49,11 +49,11 @@ public abstract class SqlProvider extends SortableDataProvider<Map<String, Objec
         AGGREGATE_FUNCTION = Arrays.asList("MAX", "MIN", "SUM", "AVG", "MEDIAN", "STDDEV_POP", "STDDEV_SAMP", "VAR_POP", "VAR_SAMP", "REGR_SLOPE", "REGR_INTERCEPT", "REGR_COUNT", "REGR_R2", "REGR_AVGX", "REGR_AVGY");
     }
 
-    public SqlProvider() {
+    public SqlProvider(IFilterStateLocator<Map<String, String>> stateLocator) {
         this.fields = new HashMap<>();
         this.reverseFields = new HashMap<>();
         this.itemClass = new HashMap<>();
-        this.filterState = new HashMap<>();
+        this.stateLocator = stateLocator;
     }
 
     private Field<?> findField(Field<?> alias) {
@@ -95,7 +95,7 @@ public abstract class SqlProvider extends SortableDataProvider<Map<String, Objec
     private List<Condition> buildWhere() {
         List<Condition> where = new ArrayList<>();
 
-        for (Map.Entry<String, String> entry : this.filterState.entrySet()) {
+        for (Map.Entry<String, String> entry : this.stateLocator.getFilterState().entrySet()) {
             String filterText = entry.getValue();
             if (filterText != null && !"".equals(filterText)) {
                 String tableColumn = entry.getKey();
@@ -121,7 +121,7 @@ public abstract class SqlProvider extends SortableDataProvider<Map<String, Objec
     private List<Condition> buildHaving() {
         List<Condition> having = new ArrayList<>();
 
-        for (Map.Entry<String, String> entry : this.filterState.entrySet()) {
+        for (Map.Entry<String, String> entry : this.stateLocator.getFilterState().entrySet()) {
             String filterText = entry.getValue();
             if (filterText != null && !"".equals(filterText)) {
                 String tableColumn = entry.getKey();
@@ -186,6 +186,10 @@ public abstract class SqlProvider extends SortableDataProvider<Map<String, Objec
                 conditions.addAll(condition);
             }
         }
+    }
+
+    public IFilterStateLocator<Map<String, String>> getStateLocator() {
+        return this.stateLocator;
     }
 
     protected SortField<?> buildOrderBy() {
@@ -260,16 +264,6 @@ public abstract class SqlProvider extends SortableDataProvider<Map<String, Objec
     @Override
     public final IModel<Map<String, Object>> model(Map<String, Object> object) {
         return new MapModel<>(object);
-    }
-
-    @Override
-    public final Map<String, String> getFilterState() {
-        return this.filterState;
-    }
-
-    @Override
-    public final void setFilterState(Map<String, String> state) {
-        this.filterState = state;
     }
 
     protected SelectLimitStep<Record> buildQuery() {

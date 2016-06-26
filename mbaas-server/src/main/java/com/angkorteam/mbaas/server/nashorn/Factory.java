@@ -18,6 +18,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.Nashor
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.image.NashornImage;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link.NashornLink;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.panel.BlockPanel;
+import com.angkorteam.mbaas.server.nashorn.wicket.provider.FilterStateLocator;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornFullCalendarProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoiceRenderer;
@@ -32,6 +33,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
@@ -494,17 +496,34 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornFilterForm createTable(String id, JSObject columns, int rowsPerPage) {
+    public NashornFilterForm createFilterForm(String id) {
+        return createFilterForm(container, id);
+    }
+
+    @Override
+    public NashornFilterForm createFilterForm(MarkupContainer container, String id) {
+        FilterStateLocator stateLocator = new FilterStateLocator();
+        NashornFilterForm object = new NashornFilterForm(id, stateLocator);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
+    }
+
+    @Override
+    public NashornTable createTable(String id, JSObject columns, int rowsPerPage) {
         return createTable(container, id, columns, rowsPerPage);
     }
 
     @Override
-    public NashornFilterForm createTable(MarkupContainer container, String id, JSObject columns, int rowsPerPage) {
+    public NashornTable createTable(MarkupContainer container, String id, JSObject columns, int rowsPerPage) {
         if (!columns.isArray()) {
             throw new WicketRuntimeException("columns is not right");
         }
-        NashornTableProvider tableProvider = new NashornTableProvider(this, id, this.script, this.applicationCode);
-        String tableId = id + "_table";
+        if (!(container instanceof NashornFilterForm)) {
+            throw new WicketRuntimeException("filter form is required, factory.createFilterForm('id)");
+        }
+        NashornFilterForm form = (NashornFilterForm) container;
+        NashornTableProvider tableProvider = new NashornTableProvider(form.getStateLocator(), this, id, this.script, this.applicationCode);
         List<IColumn<Map<String, Object>, String>> tableFields = new ArrayList<>();
         if (columns instanceof ScriptObjectMirror) {
             if (((ScriptObjectMirror) columns).size() > 0) {
@@ -569,7 +588,7 @@ public class Factory implements Serializable,
                                 tableProvider.selectField(tableColumn, queryColumn, clazz);
                             }
                         } else if ("TextLink".equals(htmlColumn)) {
-                            NashornTextLinkColumn tableField = new NashornTextLinkColumn(Model.of(tableColumn), tableColumn, tableId);
+                            NashornTextLinkColumn tableField = new NashornTextLinkColumn(Model.of(tableColumn), tableColumn, id);
                             tableField.setDisk(this.disk);
                             tableField.setFactory(this);
                             tableField.setScript(this.script);
@@ -582,7 +601,7 @@ public class Factory implements Serializable,
                             for (Map.Entry<String, Object> action : actionColumn.entrySet()) {
                                 actions.put(action.getKey(), (String) action.getValue());
                             }
-                            NashornCheckBoxColumn tableField = new NashornCheckBoxColumn(Model.of(tableColumn), objectColumn, actions, tableId);
+                            NashornCheckBoxColumn tableField = new NashornCheckBoxColumn(Model.of(tableColumn), objectColumn, actions, id);
                             tableField.setDisk(this.disk);
                             tableField.setFactory(this);
                             tableField.setScript(this.script);
@@ -594,7 +613,7 @@ public class Factory implements Serializable,
                             for (Map.Entry<String, Object> action : actionColumn.entrySet()) {
                                 actions.put(action.getKey(), (String) action.getValue());
                             }
-                            NashornActionColumn tableField = new NashornActionColumn(Model.of(tableColumn), actions, tableId);
+                            NashornActionColumn tableField = new NashornActionColumn(Model.of(tableColumn), actions, id);
                             tableField.setDisk(this.disk);
                             tableField.setFactory(this);
                             tableField.setScript(this.script);
@@ -605,13 +624,11 @@ public class Factory implements Serializable,
                 }
             }
         }
-        NashornTable table = new NashornTable(tableId, tableFields, tableProvider, rowsPerPage);
-        NashornFilterForm object = new NashornFilterForm(id, tableProvider);
-        table.addTopToolbar(new FilterToolbar(table, object));
-        object.add(table);
+        NashornTable object = new NashornTable(id, tableFields, tableProvider, rowsPerPage);
+        object.addTopToolbar(new FilterToolbar(object, form));
         container.add(object);
         this.children.put(id, object);
-        this.children.put(table.getId(), table);
+        this.children.put(object.getId(), object);
         return object;
     }
 
