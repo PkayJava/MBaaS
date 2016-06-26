@@ -4,6 +4,7 @@ import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.markup.html.FullCalendar;
 import com.angkorteam.framework.extension.wicket.markup.html.FullCalendarItem;
+import com.angkorteam.framework.extension.wicket.markup.html.form.CKEditorTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
@@ -65,6 +66,7 @@ public class Factory implements Serializable,
         IButtonFactory,
         IBlockFactory,
         IWebMarkupContainerFactory,
+        IEditorTextAreaFactory,
         ILabelFactory,
         IJdbcTemplateFactory,
         IPropertyModelFactory,
@@ -949,5 +951,18 @@ public class Factory implements Serializable,
         item.setStart(DateFormatUtils.ISO_DATETIME_FORMAT.format(start));
         item.setEnd(DateFormatUtils.ISO_DATETIME_FORMAT.format(end));
         return item;
+    }
+
+    @Override
+    public CKEditorTextArea createEditorTextArea(String id) {
+        return createEditorTextArea(container, id);
+    }
+
+    @Override
+    public CKEditorTextArea createEditorTextArea(MarkupContainer container, String id) {
+        CKEditorTextArea object = new CKEditorTextArea(id, createPropertyModel(this.pageModel, id));
+        container.add(object);
+        this.children.put(id, object);
+        return object;
     }
 }
