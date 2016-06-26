@@ -33,7 +33,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
@@ -153,12 +152,17 @@ public class Factory implements Serializable,
     }
 
     public void navigateTo(String pageCode) {
-        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-        String pageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.CODE + " = ?", String.class, pageCode);
-        PageParameters parameters = new PageParameters();
-        parameters.add("pageId", pageId);
-        parameters.add("stage", this.stage);
-        RequestCycle.get().setResponsePage(PagePage.class, parameters);
+        navigateTo(pageCode, new HashMap<>());
+    }
+
+    public void navigateTo(String pageCode, ScriptObjectMirror js) {
+        Map<String, Object> params = new HashMap<>();
+        if (js != null && !js.isEmpty()) {
+            for (Map.Entry<String, Object> param : js.entrySet()) {
+                params.put(param.getKey(), param.getValue());
+            }
+        }
+        navigateTo(pageCode, params);
     }
 
     public void navigateTo(String pageCode, Map<String, Object> params) {
@@ -166,23 +170,10 @@ public class Factory implements Serializable,
         String pageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.CODE + " = ?", String.class, pageCode);
         PageParameters parameters = new PageParameters();
         parameters.add("pageId", pageId);
-        parameters.add("stage", this.stage);
-        for (Map.Entry<String, Object> param : params.entrySet()) {
-            if (param.getKey().equals("pageId") || param.getKey().equals("stage")) {
-                throw new WicketRuntimeException("pageId or stage not allow, it is reserved for system");
-            }
-            parameters.add(param.getKey(), param.getValue());
+        if (this.stage) {
+            parameters.add("stage", this.stage);
         }
-        RequestCycle.get().setResponsePage(PagePage.class, parameters);
-    }
-
-    public void navigateTo(String pageCode, ScriptObjectMirror js) {
-        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-        String pageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.CODE + " = ?", String.class, pageCode);
-        PageParameters parameters = new PageParameters();
-        parameters.add("pageId", pageId);
-        parameters.add("stage", this.stage);
-        for (Map.Entry<String, Object> param : js.entrySet()) {
+        for (Map.Entry<String, Object> param : params.entrySet()) {
             if (param.getKey().equals("pageId") || param.getKey().equals("stage")) {
                 throw new WicketRuntimeException("pageId or stage not allow, it is reserved for system");
             }
