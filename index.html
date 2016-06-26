@@ -712,7 +712,7 @@ function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
   ];
 
   var form = factory.createFilterForm(&quot;form&quot;);
-  var table = factory.createFilterForm(&quot;form_table&quot;, columns, 10);
+  var table = factory.createFilterForm(form, &quot;form_table&quot;, columns, 10);
 }
 
 // this function will be executed when you click on Edit link
