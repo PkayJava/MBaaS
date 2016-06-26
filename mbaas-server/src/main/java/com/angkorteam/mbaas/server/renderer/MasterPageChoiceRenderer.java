@@ -14,7 +14,7 @@ public class MasterPageChoiceRenderer implements IChoiceRenderer<Map<String, Obj
 
     @Override
     public Object getDisplayValue(Map<String, Object> object) {
-        return object.get(Jdbc.MasterPage.TITLE);
+        return object.get(Jdbc.MasterPage.CODE);
     }
 
     @Override
