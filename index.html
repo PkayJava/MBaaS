@@ -1190,6 +1190,77 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
                     <pre><code class="language-html"
                                data-lang="html">&lt;img wicket:id=&quot;image&quot;/&gt;</code></pre>
                 </figure>
+                <p id="mbaas-cms-markup-element-editor-text-area"><strong>EditorTextArea</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var textarea = factory.createEditorTextArea(form,&quot;textarea&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;textarea wicket:id=&quot;textarea&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <p id="mbaas-cms-markup-element-full-calendar"><strong>FullCalendar</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var calendar = factory.createFullCalendar(&quot;calendar&quot;);
+}
+
+function calendar__query(factory, jdbcTemplate){
+  var items = factory.createList();
+  var start = new Date();
+  var end = new Date();
+  var title = &quot;Hello&quot;;
+  var id = &quot;id&quot;;
+  var item = factory.createFullCalendarItem(id,title, start, end);
+  item.setUrl(&quot;http://www.google.com&quot;);
+  items.add(item);
+  return items;
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;div wicket:id=&quot;calendar&quot;/&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-tutorial" class="page-header">Tutorial</h1>
@@ -1263,6 +1334,8 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
                             <li><a href="#mbaas-cms-markup-element-fileupload">FileUpload</a></li>
                             <li><a href="#mbaas-cms-markup-element-multiplefileupload">MultiFileUpload</a></li>
                             <li><a href="#mbaas-cms-markup-element-image">Image</a></li>
+                            <li><a href="#mbaas-cms-markup-element-editor-text-area">EditorTextArea (WYSIWYG)</a></li>
+                            <li><a href="#mbaas-cms-markup-element-full-calendar">FullCalendar</a></li>
                         </ul>
                     </li>
                     <li><a href=#mbaas-tutorial>Tutorial</a>

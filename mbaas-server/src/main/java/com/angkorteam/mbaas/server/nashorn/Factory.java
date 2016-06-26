@@ -920,7 +920,7 @@ public class Factory implements Serializable,
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
         String pageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.CODE + " = ?", String.class, pageCode);
         parameters.add("pageId", pageId);
-        if (stage) {
+        if (this.stage) {
             parameters.add("stage", true);
         }
         BookmarkablePageLink<Void> object = new BookmarkablePageLink<>(id, PagePage.class, parameters);
@@ -964,5 +964,32 @@ public class Factory implements Serializable,
         container.add(object);
         this.children.put(id, object);
         return object;
+    }
+
+    @Override
+    public String createAddressLink(String pageCode, ScriptObjectMirror params) {
+        Map<String, Object> temps = new HashMap<>();
+        if (params != null && !params.isEmpty()) {
+            for (Map.Entry<String, Object> param : params.entrySet()) {
+                temps.put(param.getKey(), param.getValue());
+            }
+        }
+        return createAddressLink(pageCode, temps);
+    }
+
+    @Override
+    public String createAddressLink(String pageCode, Map<String, Object> params) {
+        RequestCycle requestCycle = RequestCycle.get();
+        PageParameters parameters = new PageParameters();
+        for (Map.Entry<String, Object> param : params.entrySet()) {
+            parameters.add(param.getKey(), param.getValue());
+        }
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        String pageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.CODE + " = ?", String.class, pageCode);
+        parameters.add("pageId", pageId);
+        if (this.stage) {
+            parameters.add("stage", true);
+        }
+        return requestCycle.urlFor(PagePage.class, parameters).toString();
     }
 }
