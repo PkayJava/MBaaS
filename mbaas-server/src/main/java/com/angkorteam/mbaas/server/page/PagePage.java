@@ -51,7 +51,7 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
         this.pageCode = (String) pageRecord.get(Jdbc.Page.CODE);
         String script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
-        this.factory = new Factory(applicationUserId, this, this.disk, getApplicationCode(), script, this.stage, this.pageModel);
+        this.factory = new Factory(applicationUserId, getPageParameters(), this, this.disk, getApplicationCode(), script, this.stage, this.pageModel);
         ScriptEngine engine = getScriptEngine();
         try {
             engine.eval(script);

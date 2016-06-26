@@ -113,12 +113,15 @@ public class Factory implements Serializable,
 
     private Disk disk;
 
+    private PageParameters pageParameters;
+
     private boolean stage;
 
     private String applicationUserId;
 
-    public Factory(String applicationUserId, MarkupContainer container, Disk disk, String applicationCode, String script, boolean stage, Map<String, Object> pageModel) {
+    public Factory(String applicationUserId, PageParameters pageParameters, MarkupContainer container, Disk disk, String applicationCode, String script, boolean stage, Map<String, Object> pageModel) {
         this.applicationCode = applicationCode;
+        this.pageParameters = pageParameters;
         this.container = container;
         this.pageModel = pageModel;
         this.stage = stage;
@@ -126,6 +129,10 @@ public class Factory implements Serializable,
         this.disk = disk;
         this.applicationUserId = applicationUserId;
         this.children = new HashMap<>();
+    }
+
+    public PageParameters getPageParameters() {
+        return this.pageParameters;
     }
 
     public Component getChildren(String id) {

@@ -57,7 +57,7 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
         String script = (String) (this.stage ? pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.MasterPage.JAVASCRIPT));
         this.disk = new Disk(getApplicationCode(), getSession().getApplicationUserId());
-        this.factory = new Factory(applicationUserId, this, this.disk, getApplicationCode(), script, this.stage, this.pageModel);
+        this.factory = new Factory(applicationUserId, getPageParameters(), this, this.disk, getApplicationCode(), script, this.stage, this.pageModel);
         ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
             engine.eval(script);
