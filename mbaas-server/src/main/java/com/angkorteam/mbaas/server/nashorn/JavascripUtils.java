@@ -13,6 +13,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -40,6 +41,7 @@ public class JavascripUtils {
             clazzes.add(LocalDate.class);
             clazzes.add(LocalTime.class);
             clazzes.add(LocalDateTime.class);
+            clazzes.add(Instant.class);
             clazzes.add(BigDecimal.class);
             clazzes.add(BigInteger.class);
             clazzes.add(Arrays.class);
