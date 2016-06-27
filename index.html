@@ -635,12 +635,19 @@ var textarea = factory.createTextArea(form,&quot;text&quot;);</code></pre>
                         </tr>
                         <tr>
                             <td>htmlColumn</td>
-                            <td>column type, <span class="label label-info">Hidden</span> <span class="label label-info">CheckBox</span> <span class="label label-info">Label</span> <span class="label label-info">Action</span>
+                            <td>column type, <span class="label label-info">Hidden</span> <span
+                                    class="label label-info">CheckBox</span> <span class="label label-info">Label</span>
+                                <span class="label label-info">Action</span>
                             </td>
                         </tr>
                         <tr>
                             <td>objectColumn</td>
-                            <td>it is use with CheckBox column, which field would we like to have a boolean of that field to be true or false, usually it is the identity record field, and mostly we don't want to show identity record in the table, because it is useless to user. Hidden htmlColumn is ideally for that identity column to load into table but it show does not show</td>
+                            <td>it is use with CheckBox column, which field would we like to have a boolean of that
+                                field to be true or false, usually it is the identity record field, and mostly we don't
+                                want to show identity record in the table, because it is useless to user. Hidden
+                                htmlColumn is ideally for that identity column to load into table but it show does not
+                                show
+                            </td>
                         </tr>
                         <tr>
                             <td>queryColumn</td>
@@ -1275,6 +1282,49 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                 </figure>
             </div>
             <div class="bs-docs-section">
+                <h1 id="mbaas-query" class="page-header">Query</h1>
+                <p><strong>Condition</strong></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var field = DSL.field(&quot;table.field&quot;);
+
+field.like(value);
+field.like(field);
+field.notLike(value);
+field.notLike(field);
+
+field.equal(value);
+field.equal(field);
+field.notEqual(value);
+field.notEqual(field);
+
+field.greaterThan(value);
+field.greaterThan(field);
+field.greaterOrEqual(value);
+field.greaterOrEqual(field);
+
+field.lessThan(value);
+field.lessThan(field);
+field.lessOrEqual(value);
+field.lessOrEqual(field);
+
+field.between(value, value);
+field.between(field, field);
+field.notBetween(value, value);
+field.notBetween(field, field);
+
+field.notIn(values);
+field.notIn(field);
+field.in(values);
+field.in(field);
+
+field.isNull();
+field.isNotNull();
+
+field.isFalse();
+field.isTrue();</code></pre>
+                </figure>
+            </div>
+            <div class="bs-docs-section">
                 <h1 id="mbaas-tutorial" class="page-header">Tutorial</h1>
                 <p><strong>Book Management</strong></p>
                 <div>in this section will show how we can you mbaas to create book management, basically it will cover
@@ -1325,7 +1375,8 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                             <li><a href="#mbaas-cms-markup-element-dropdownchoice">DropDownChoice</a></li>
                             <li><a href="#mbaas-cms-markup-element-datetextfield">DateTextField</a></li>
                             <li><a href="#mbaas-cms-markup-element-colortextfield">ColorTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-checkboxmultiplechoice">CheckBoxMultipleChoice</a></li>
+                            <li><a href="#mbaas-cms-markup-element-checkboxmultiplechoice">CheckBoxMultipleChoice</a>
+                            </li>
                             <li><a href="#mbaas-cms-markup-element-checkbox">CheckBox</a></li>
                             <li><a href="#mbaas-cms-markup-element-button">Button</a></li>
                             <li><a href="#mbaas-cms-markup-element-textarea">TextArea</a></li>
@@ -1348,6 +1399,11 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                             <li><a href="#mbaas-cms-markup-element-image">Image</a></li>
                             <li><a href="#mbaas-cms-markup-element-editor-text-area">EditorTextArea (WYSIWYG)</a></li>
                             <li><a href="#mbaas-cms-markup-element-full-calendar">FullCalendar</a></li>
+                        </ul>
+                    </li>
+                    <li><a href=#mbaas-query>Query</a>
+                        <ul class="nav">
+                            <li><a href="#mbaas-query-condition">Condition</a></li>
                         </ul>
                     </li>
                     <li><a href=#mbaas-tutorial>Tutorial</a>
