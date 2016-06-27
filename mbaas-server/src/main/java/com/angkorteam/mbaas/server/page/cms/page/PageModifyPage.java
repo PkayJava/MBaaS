@@ -19,17 +19,16 @@ import com.angkorteam.mbaas.server.select2.RoleChoiceProvider;
 import com.angkorteam.mbaas.server.validator.JobNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
-import org.apache.commons.io.FileUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import java.io.File;
 import java.util.*;
 
 /**
@@ -76,6 +75,7 @@ public class PageModifyPage extends MasterPage {
 
     private Form<Void> form;
     private Button saveButton;
+    private Button previewButton;
 
     @Override
     public String getPageHeader() {
@@ -151,11 +151,22 @@ public class PageModifyPage extends MasterPage {
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
-
         this.form.add(this.saveButton);
+
+        this.previewButton = new Button("previewButton");
+        this.previewButton.setOnSubmit(this::previewButtonOnSubmit);
+        this.form.add(this.previewButton);
     }
 
-    private void saveButtonOnSubmit(Button button) {
+    private void previewButtonOnSubmit(Button button) {
+        save();
+        PageParameters parameters = new PageParameters();
+        parameters.add("pageId", this.pageId);
+        parameters.add("stage", true);
+        setResponsePage(PagePage.class, parameters);
+    }
+
+    private void save() {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         {
             Map<String, Object> wheres = new HashMap<>();
@@ -193,6 +204,10 @@ public class PageModifyPage extends MasterPage {
             String cacheKey = com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + this.pageId + "-stage" + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
             getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
         }
+    }
+
+    private void saveButtonOnSubmit(Button button) {
+        save();
         setResponsePage(PageManagementPage.class);
     }
 

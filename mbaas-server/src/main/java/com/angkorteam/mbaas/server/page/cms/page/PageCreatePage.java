@@ -8,6 +8,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.renderer.MasterPageChoiceRenderer;
 import com.angkorteam.mbaas.server.renderer.MenuChoiceRenderer;
 import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
@@ -19,6 +20,7 @@ import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -69,6 +71,7 @@ public class PageCreatePage extends MasterPage {
 
     private Form<Void> form;
     private Button saveButton;
+    private Button previewButton;
 
     @Override
     public String getPageHeader() {
@@ -138,13 +141,24 @@ public class PageCreatePage extends MasterPage {
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
-
         this.form.add(this.saveButton);
+
+        this.previewButton = new Button("previewButton");
+        this.previewButton.setOnSubmit(this::previewButtonOnSubmit);
+        this.form.add(this.previewButton);
     }
 
-    private void saveButtonOnSubmit(Button button) {
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+    private void previewButtonOnSubmit(Button button) {
         String pageId = UUID.randomUUID().toString();
+        save(pageId);
+        PageParameters parameters = new PageParameters();
+        parameters.add("pageId", pageId);
+        parameters.add("stage", true);
+        setResponsePage(PagePage.class, parameters);
+    }
+
+    private void save(String pageId) {
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         {
             Map<String, Object> fields = new HashMap<>();
             fields.put(Jdbc.Page.PAGE_ID, pageId);
@@ -174,6 +188,10 @@ public class PageCreatePage extends MasterPage {
             fields.put(Jdbc.PageRole.PAGE_ID, pageId);
             jdbcInsert.execute(fields);
         }
+    }
+
+    private void saveButtonOnSubmit(Button button) {
+        save(UUID.randomUUID().toString());
         setResponsePage(PageManagementPage.class);
     }
 
