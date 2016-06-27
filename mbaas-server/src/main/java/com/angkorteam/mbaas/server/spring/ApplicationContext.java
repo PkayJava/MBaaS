@@ -65,6 +65,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import javax.script.ScriptEngineFactory;
@@ -360,6 +361,7 @@ public class ApplicationContext implements ServletContextListener {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(httpAddress)
                     .client(httpClient)
+                    .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             PusherClient pusherClient = retrofit.create(PusherClient.class);
