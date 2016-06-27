@@ -622,7 +622,7 @@ public class Factory implements Serializable,
                                     links.put(link.getKey(), (String) link.getValue());
                                 }
                             }
-                            NashornActionColumn tableField = new NashornActionColumn(Model.of(tableColumn), actions, links, id, this.pageModel);
+                            NashornActionColumn tableField = new NashornActionColumn(Model.of(tableColumn), links, actions, id, this.pageModel);
                             tableField.setDisk(this.disk);
                             tableField.setFactory(this);
                             tableField.setScript(this.script);

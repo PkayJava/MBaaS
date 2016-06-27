@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public class NashornGoAndClearFilter extends GoAndClearFilter implements IMarkupResourceStreamProvider {
 
-    private Map<String, String> links;
+    private Map<String, String> actions;
 
     private String script;
 
@@ -37,12 +37,12 @@ public class NashornGoAndClearFilter extends GoAndClearFilter implements IMarkup
 
     private Map<String, Object> pageModel;
 
-    public NashornGoAndClearFilter(String id, String tableId, String columnName, FilterForm<?> form, IModel<String> goModel, IModel<String> clearModel, Map<String, String> links, Map<String, Object> pageModel) {
+    public NashornGoAndClearFilter(String id, String tableId, String columnName, FilterForm<?> form, IModel<String> goModel, IModel<String> clearModel, Map<String, String> actions, Map<String, Object> pageModel) {
         super(id, form, goModel, clearModel);
         this.tableId = tableId;
         this.columnName = columnName;
         this.pageModel = pageModel;
-        this.links = links;
+        this.actions = actions;
     }
 
     @Override
@@ -55,16 +55,16 @@ public class NashornGoAndClearFilter extends GoAndClearFilter implements IMarkup
         super.onInitialize();
         RepeatingView links = new RepeatingView("links");
         add(links);
-        for (Map.Entry<String, String> item : this.links.entrySet()) {
+        for (Map.Entry<String, String> action : this.actions.entrySet()) {
             WebMarkupContainer container = new WebMarkupContainer(links.newChildId());
             links.add(container);
-            NashornLink link = new NashornLink("link", this.tableId + "_head_" + this.columnName + "_" + item.getKey(), new MapModel<>(this.pageModel));
+            NashornLink link = new NashornLink("link", this.tableId + "_head_" + this.columnName + "_" + action.getKey(), new MapModel<>(this.pageModel));
             link.setScript(this.script);
             link.setFactory(this.factory);
             link.setDisk(this.disk);
             container.add(link);
-            link.add(AttributeModifier.replace("class", item.getValue()));
-            Label text = new Label("text", item.getKey());
+            link.add(AttributeModifier.replace("class", action.getValue()));
+            Label text = new Label("text", action.getKey());
             link.add(text);
         }
     }

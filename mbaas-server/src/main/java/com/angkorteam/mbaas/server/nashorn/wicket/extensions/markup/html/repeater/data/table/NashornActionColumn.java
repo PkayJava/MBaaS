@@ -33,7 +33,7 @@ public class NashornActionColumn extends FilteredAbstractColumn<Map<String, Obje
 
     private Disk disk;
 
-    public NashornActionColumn(IModel<String> displayModel, Map<String, String> actions, Map<String, String> links, String tableId, Map<String, Object> pageModel) {
+    public NashornActionColumn(IModel<String> displayModel, Map<String, String> links, Map<String, String> actions, String tableId, Map<String, Object> pageModel) {
         super(displayModel);
         this.actions = actions;
         this.links = links;
@@ -43,7 +43,7 @@ public class NashornActionColumn extends FilteredAbstractColumn<Map<String, Obje
 
     @Override
     public Component getFilter(String componentId, FilterForm<?> form) {
-        NashornGoAndClearFilter object = new NashornGoAndClearFilter(componentId, this.tableId, getDisplayModel().getObject(), form, Model.of("Filter"), Model.of("Clear"), this.links, this.pageModel);
+        NashornGoAndClearFilter object = new NashornGoAndClearFilter(componentId, this.tableId, getDisplayModel().getObject(), form, Model.of("Filter"), Model.of("Clear"), this.actions, this.pageModel);
         object.setDisk(this.disk);
         object.setFactory(this.factory);
         object.setScript(this.script);
@@ -52,7 +52,7 @@ public class NashornActionColumn extends FilteredAbstractColumn<Map<String, Obje
 
     @Override
     public void populateItem(Item<ICellPopulator<Map<String, Object>>> cellItem, String componentId, IModel<Map<String, Object>> itemModel) {
-        ActionPanel object = new ActionPanel(componentId, this.tableId, getDisplayModel().getObject(), this.actions, this.pageModel, itemModel);
+        ActionPanel object = new ActionPanel(componentId, this.tableId, getDisplayModel().getObject(), this.links, this.pageModel, itemModel);
         object.setDisk(this.disk);
         object.setScript(this.script);
         object.setFactory(this.factory);

@@ -50,7 +50,7 @@ public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStrea
         for (Map.Entry<String, String> action : this.actions.entrySet()) {
             WebMarkupContainer container = new WebMarkupContainer(buttons.newChildId());
             buttons.add(container);
-            NashornButton button = new NashornButton("button", this.tableId + "_" + this.columnName + "_" + action.getKey());
+            NashornButton button = new NashornButton("button", this.tableId + "_head_" + this.columnName + "_" + action.getKey());
             button.setPageModel(this.checks);
             button.setScript(this.script);
             button.setFactory(this.factory);
