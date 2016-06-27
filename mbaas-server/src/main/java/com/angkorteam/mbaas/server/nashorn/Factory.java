@@ -521,7 +521,7 @@ public class Factory implements Serializable,
             throw new WicketRuntimeException("filter form is required, factory.createFilterForm('id)");
         }
         NashornFilterForm form = (NashornFilterForm) container;
-        NashornTableProvider tableProvider = new NashornTableProvider(form.getStateLocator(), this, id, this.script, this.applicationCode);
+        NashornTableProvider tableProvider = new NashornTableProvider(form.getStateLocator(), this, id, this.script, this.applicationCode, this.pageModel);
         List<IColumn<Map<String, Object>, String>> tableFields = new ArrayList<>();
         if (columns instanceof ScriptObjectMirror) {
             if (((ScriptObjectMirror) columns).size() > 0) {

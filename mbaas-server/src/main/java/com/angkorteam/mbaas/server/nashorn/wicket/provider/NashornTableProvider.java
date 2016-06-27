@@ -31,12 +31,15 @@ public class NashornTableProvider extends SqlProvider {
 
     private final String applicationCode;
 
-    public NashornTableProvider(IFilterStateLocator<Map<String, String>> stateLocator, Factory factory, String id, String script, String applicationCode) {
+    private Map<String, Object> pageModel;
+
+    public NashornTableProvider(IFilterStateLocator<Map<String, String>> stateLocator, Factory factory, String id, String script, String applicationCode, Map<String, Object> pageModel) {
         super(stateLocator);
         this.script = script;
         this.id = id;
         this.factory = factory;
         this.applicationCode = applicationCode;
+        this.pageModel = pageModel;
     }
 
     @Override
@@ -54,11 +57,11 @@ public class NashornTableProvider extends SqlProvider {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            return (TableLike<?>) invocable.invokeFunction(this.id + "__from", jdbcTemplate);
+            return (TableLike<?>) invocable.invokeFunction(this.id + "__from", this.factory, jdbcTemplate, this.pageModel);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException("function " + this.id + "__from(jdbcTemplate){} is missing");
+            throw new WicketRuntimeException("function " + this.id + "__from(factory, jdbcTemplate, pageModel){} is missing");
         } catch (EmptyResultDataAccessException e) {
             throw new WicketRuntimeException(e);
         }
@@ -80,11 +83,11 @@ public class NashornTableProvider extends SqlProvider {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            return (List<Condition>) invocable.invokeFunction(this.id + "__where", jdbcTemplate);
+            return (List<Condition>) invocable.invokeFunction(this.id + "__where", this.factory, jdbcTemplate, this.pageModel);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException("function " + this.id + "__where(jdbcTemplate){} is missing");
+            throw new WicketRuntimeException("function " + this.id + "__where(factory, jdbcTemplate, pageModel){} is missing");
         } catch (EmptyResultDataAccessException e) {
             throw new WicketRuntimeException(e);
         }
@@ -106,11 +109,11 @@ public class NashornTableProvider extends SqlProvider {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            return (List<Condition>) invocable.invokeFunction(this.id + "__having", jdbcTemplate);
+            return (List<Condition>) invocable.invokeFunction(this.id + "__having", this.factory, jdbcTemplate, this.pageModel);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException("function " + this.id + "__having(jdbcTemplate){} is missing");
+            throw new WicketRuntimeException("function " + this.id + "__having(factory, jdbcTemplate, pageModel){} is missing");
         } catch (EmptyResultDataAccessException e) {
             throw new WicketRuntimeException(e);
         }
