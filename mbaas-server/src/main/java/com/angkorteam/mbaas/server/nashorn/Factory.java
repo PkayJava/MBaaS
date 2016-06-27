@@ -593,12 +593,14 @@ public class Factory implements Serializable,
                             tableProvider.selectField(tableColumn, queryColumn, clazz);
                             tableFields.add(tableField);
                         } else if ("CheckBox".equals(htmlColumn)) {
-                            String objectColumn = (String) ((ScriptObjectMirror) column).get("objectColumn");
                             ScriptObjectMirror actionColumn = (ScriptObjectMirror) ((ScriptObjectMirror) column).get("actionColumn");
                             Map<String, String> actions = new HashMap<>();
-                            for (Map.Entry<String, Object> action : actionColumn.entrySet()) {
-                                actions.put(action.getKey(), (String) action.getValue());
+                            if (actionColumn != null) {
+                                for (Map.Entry<String, Object> action : actionColumn.entrySet()) {
+                                    actions.put(action.getKey(), (String) action.getValue());
+                                }
                             }
+                            String objectColumn = (String) ((ScriptObjectMirror) column).get("objectColumn");
                             NashornCheckBoxColumn tableField = new NashornCheckBoxColumn(Model.of(tableColumn), objectColumn, actions, id);
                             tableField.setDisk(this.disk);
                             tableField.setFactory(this);
@@ -608,10 +610,19 @@ public class Factory implements Serializable,
                         } else if ("Action".equals(htmlColumn)) {
                             ScriptObjectMirror actionColumn = (ScriptObjectMirror) ((ScriptObjectMirror) column).get("actionColumn");
                             Map<String, String> actions = new HashMap<>();
-                            for (Map.Entry<String, Object> action : actionColumn.entrySet()) {
-                                actions.put(action.getKey(), (String) action.getValue());
+                            if (actionColumn != null) {
+                                for (Map.Entry<String, Object> action : actionColumn.entrySet()) {
+                                    actions.put(action.getKey(), (String) action.getValue());
+                                }
                             }
-                            NashornActionColumn tableField = new NashornActionColumn(Model.of(tableColumn), actions, id);
+                            ScriptObjectMirror linkColumn = (ScriptObjectMirror) ((ScriptObjectMirror) column).get("linkColumn");
+                            Map<String, String> links = new HashMap<>();
+                            if (linkColumn != null) {
+                                for (Map.Entry<String, Object> link : linkColumn.entrySet()) {
+                                    links.put(link.getKey(), (String) link.getValue());
+                                }
+                            }
+                            NashornActionColumn tableField = new NashornActionColumn(Model.of(tableColumn), actions, links, id, this.pageModel);
                             tableField.setDisk(this.disk);
                             tableField.setFactory(this);
                             tableField.setScript(this.script);

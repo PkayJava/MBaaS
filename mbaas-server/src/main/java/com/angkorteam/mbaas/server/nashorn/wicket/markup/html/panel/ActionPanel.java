@@ -2,7 +2,7 @@ package com.angkorteam.mbaas.server.nashorn.wicket.markup.html.panel;
 
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
-import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link.NashornLink;
+import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link.NashornLinkColumn;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
@@ -21,7 +21,9 @@ import java.util.Map;
  */
 public class ActionPanel extends Panel implements IMarkupResourceStreamProvider {
 
-    private IModel<Map<String, Object>> rowModel;
+    private Map<String, Object> pageModel;
+
+    private IModel<Map<String, Object>> itemModel;
 
     private Map<String, String> action;
 
@@ -35,12 +37,13 @@ public class ActionPanel extends Panel implements IMarkupResourceStreamProvider 
 
     private Disk disk;
 
-    public ActionPanel(String id, String tableId, String columnName, Map<String, String> action, IModel<Map<String, Object>> rowModel) {
+    public ActionPanel(String id, String tableId, String columnName, Map<String, String> action, Map<String, Object> pageModel, IModel<Map<String, Object>> itemModel) {
         super(id);
         this.tableId = tableId;
         this.action = action;
         this.columnName = columnName;
-        this.rowModel = rowModel;
+        this.itemModel = itemModel;
+        this.pageModel = pageModel;
     }
 
     @Override
@@ -52,7 +55,7 @@ public class ActionPanel extends Panel implements IMarkupResourceStreamProvider 
         for (Map.Entry<String, String> action : this.action.entrySet()) {
             WebMarkupContainer container = new WebMarkupContainer(links.newChildId());
             links.add(container);
-            NashornLink link = new NashornLink("link", this.tableId + "_" + this.columnName + "_" + action.getKey(), this.rowModel);
+            NashornLinkColumn link = new NashornLinkColumn("link", this.tableId + "_" + this.columnName + "_" + action.getKey(), this.pageModel, this.itemModel);
             link.setScript(this.script);
             link.setFactory(this.factory);
             link.setDisk(this.disk);

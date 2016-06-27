@@ -1,8 +1,8 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table;
 
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.GoAndClearFilter;
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
+import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornGoAndClearFilter;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.panel.ActionPanel;
 import org.apache.wicket.Component;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -21,6 +21,10 @@ public class NashornActionColumn extends FilteredAbstractColumn<Map<String, Obje
 
     private Map<String, String> actions;
 
+    private Map<String, String> links;
+
+    private Map<String, Object> pageModel;
+
     private String tableId;
 
     private String script;
@@ -29,20 +33,26 @@ public class NashornActionColumn extends FilteredAbstractColumn<Map<String, Obje
 
     private Disk disk;
 
-    public NashornActionColumn(IModel<String> displayModel, Map<String, String> actions, String tableId) {
+    public NashornActionColumn(IModel<String> displayModel, Map<String, String> actions, Map<String, String> links, String tableId, Map<String, Object> pageModel) {
         super(displayModel);
         this.actions = actions;
+        this.links = links;
         this.tableId = tableId;
+        this.pageModel = pageModel;
     }
 
     @Override
     public Component getFilter(String componentId, FilterForm<?> form) {
-        return new GoAndClearFilter(componentId, form, Model.of("Filter"), Model.of("Clear"));
+        NashornGoAndClearFilter object = new NashornGoAndClearFilter(componentId, this.tableId, getDisplayModel().getObject(), form, Model.of("Filter"), Model.of("Clear"), this.links, this.pageModel);
+        object.setDisk(this.disk);
+        object.setFactory(this.factory);
+        object.setScript(this.script);
+        return object;
     }
 
     @Override
-    public void populateItem(Item<ICellPopulator<Map<String, Object>>> cellItem, String componentId, IModel<Map<String, Object>> rowModel) {
-        ActionPanel object = new ActionPanel(componentId, this.tableId, getDisplayModel().getObject(), this.actions, rowModel);
+    public void populateItem(Item<ICellPopulator<Map<String, Object>>> cellItem, String componentId, IModel<Map<String, Object>> itemModel) {
+        ActionPanel object = new ActionPanel(componentId, this.tableId, getDisplayModel().getObject(), this.actions, this.pageModel, itemModel);
         object.setDisk(this.disk);
         object.setScript(this.script);
         object.setFactory(this.factory);
