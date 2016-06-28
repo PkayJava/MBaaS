@@ -47,6 +47,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.validator.UrlValidator;
+import org.jooq.Condition;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
@@ -149,6 +150,10 @@ public class Factory implements Serializable,
     @Override
     public JdbcTemplate createJdbcTemplate() {
         return ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+    }
+
+    public Condition[] arrayCondition(Condition... conditions) {
+        return conditions;
     }
 
     public void navigateTo(String pageCode) {
