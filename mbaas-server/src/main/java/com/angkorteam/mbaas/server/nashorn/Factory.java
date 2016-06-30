@@ -9,6 +9,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
+import com.angkorteam.mbaas.server.nashorn.wicket.ajax.markup.html.form.NashornAjaxButton;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.basic.NashornLabel;
@@ -93,6 +94,7 @@ public class Factory implements Serializable,
         ILinkFactory,
         IRadioChoiceFactory,
         IImageFactory,
+        IAjaxButtonFactory,
         IMultiFileUploadFactory,
         ICheckBoxMultipleChoiceFactory,
         ISelect2SingleChoiceFactory,
@@ -1022,5 +1024,22 @@ public class Factory implements Serializable,
             parameters.add("stage", true);
         }
         return requestCycle.urlFor(PagePage.class, parameters).toString();
+    }
+
+    @Override
+    public NashornAjaxButton createAjaxButton(String id) {
+        return createAjaxButton(container, id);
+    }
+
+    @Override
+    public NashornAjaxButton createAjaxButton(MarkupContainer container, String id) {
+        NashornAjaxButton object = new NashornAjaxButton(id);
+        object.setScript(this.script);
+        object.setDisk(this.disk);
+        object.setFactory(this);
+        object.setPageModel(this.pageModel);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
     }
 }

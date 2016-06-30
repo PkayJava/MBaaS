@@ -93,6 +93,22 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
         }
     }
 
+    public Map<String, Object> getPageModel() {
+        return pageModel;
+    }
+
+    public void setPageModel(Map<String, Object> pageModel) {
+        this.pageModel = pageModel;
+    }
+
+    public Disk getDisk() {
+        return disk;
+    }
+
+    public void setDisk(Disk disk) {
+        this.disk = disk;
+    }
+
     public String getScript() {
         return script;
     }
