@@ -19,6 +19,7 @@ allprojects {
         mavenCentral()
     }
     ext {
+        commonsioVersion = '2.5'
         commonsconfigurationVersion = '1.10'
         commonslang3Version = '3.4'
         gsonVersion = '2.6.2'

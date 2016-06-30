@@ -73,6 +73,7 @@ dependencies {
 
     compile 'org.apache.commons:commons-dbcp2:' + commonsdbcp2Version
     compile 'org.apache.commons:commons-lang3:' + commonslang3Version
+    compile 'commons-io:commons-io:' + commonsioVersion
 
     compile 'javax.servlet:javax.servlet-api:' + servletVersion
 
