@@ -42,7 +42,7 @@
     <aside class="main-sidebar">
 
         <!-- sidebar: style can be found in sidebar.less -->
-        <section class="sidebar">
+        <section class="sidebar" style="height: auto;">
 
             <!-- Sidebar Menu -->
             <ul class="sidebar-menu">
@@ -52,7 +52,9 @@
                     <a href="#">
                         <i class="fa fa-user"></i>
                         <span>Profile</span>
-                        <i class="fa fa-angle-left pull-right"></i>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
                     </a>
                     <ul class="treeview-menu">
                         <li wicket:id="mmenuInformation">
@@ -73,7 +75,9 @@
                     <a href="#">
                         <i class="fa fa-shield"></i>
                         <span>Security</span>
-                        <i class="fa fa-angle-left pull-right"></i>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
                     </a>
                     <ul class="treeview-menu">
                         <li wicket:id="mmenuUser">
@@ -88,7 +92,9 @@
                     <a href="#">
                         <i class="fa fa-folder-open"></i>
                         <span>Storage</span>
-                        <i class="fa fa-angle-left pull-right"></i>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
                     </a>
                     <ul class="treeview-menu">
                         <li wicket:id="mmenuFile">
@@ -103,7 +109,9 @@
                     <a href="#">
                         <i class="fa fa-globe"></i>
                         <span>Session</span>
-                        <i class="fa fa-angle-left pull-right"></i>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
                     </a>
                     <ul class="treeview-menu">
                         <li wicket:id="mmenuMobile">
@@ -146,7 +154,9 @@
                     <a href="#">
                         <i class="fa fa-server"></i>
                         <span wicket:id="menuLabel"></span>
-                        <i class="fa fa-angle-left pull-right"></i>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
                     </a>
                     <ul class="treeview-menu">
                         <li wicket:id="pages">
