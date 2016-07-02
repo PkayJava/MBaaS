@@ -64,11 +64,9 @@ public class MasterModifyPage extends MasterPage {
         this.form = new Form<>("form");
         add(this.form);
 
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         this.masterPageId = getPageParameters().get("masterPageId").toString("");
-        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
-        this.title = (String) pageRecord.get(Jdbc.MasterPage.TITLE);
         this.titleField = new TextField<>("titleField", new PropertyModel<>(this, "title"));
         this.titleField.add(new JobNameValidator(getSession().getApplicationCode()));
         this.titleField.setRequired(true);
@@ -76,25 +74,21 @@ public class MasterModifyPage extends MasterPage {
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);
 
-        this.code = (String) pageRecord.get(Jdbc.MasterPage.CODE);
         this.codeLabel = new Label("codeLabel", new PropertyModel<>(this, "code"));
         this.form.add(codeLabel);
 
-        this.javascript = (String) pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT);
         this.javascriptField = new JavascriptTextArea("javascriptField", new PropertyModel<>(this, "javascript"));
         this.javascriptField.setRequired(true);
         this.form.add(this.javascriptField);
         this.javascriptFeedback = new TextFeedbackPanel("javascriptFeedback", this.javascriptField);
         this.form.add(this.javascriptFeedback);
 
-        this.description = (String) pageRecord.get(Jdbc.MasterPage.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
         this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.html = (String) pageRecord.get(Jdbc.MasterPage.STAGE_HTML);
         this.htmlField = new HtmlTextArea("htmlField", new PropertyModel<>(this, "html"));
         this.htmlField.setRequired(true);
         this.form.add(this.htmlField);
@@ -105,6 +99,18 @@ public class MasterModifyPage extends MasterPage {
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
 
         this.form.add(this.saveButton);
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);
+        this.title = (String) pageRecord.get(Jdbc.MasterPage.TITLE);
+        this.code = (String) pageRecord.get(Jdbc.MasterPage.CODE);
+        this.javascript = (String) pageRecord.get(Jdbc.MasterPage.STAGE_JAVASCRIPT);
+        this.description = (String) pageRecord.get(Jdbc.MasterPage.DESCRIPTION);
+        this.html = (String) pageRecord.get(Jdbc.MasterPage.STAGE_HTML);
     }
 
     private void saveButtonOnSubmit(Button button) {

@@ -19,6 +19,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.Nashor
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.image.NashornImage;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link.NashornLink;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.panel.BlockPanel;
+import com.angkorteam.mbaas.server.nashorn.wicket.protocol.ws.api.NashornWebSocketBehavior;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.FilterStateLocator;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornFullCalendarProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.NashornTableProvider;
@@ -44,6 +45,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.model.util.MapModel;
+import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
+import org.apache.wicket.protocol.ws.api.registry.IKey;
+import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.validation.IValidator;
@@ -52,6 +56,7 @@ import org.jooq.Condition;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -101,6 +106,7 @@ public class Factory implements Serializable,
         IFileUploadFactory,
         IRepeatingViewFactory,
         ITextAreaFactory,
+        IWebSocketFactory,
         ICheckBoxFactory {
 
     private MarkupContainer container;
@@ -120,6 +126,8 @@ public class Factory implements Serializable,
     private boolean stage;
 
     private String applicationUserId;
+
+    private NashornWebSocketBehavior webSocketBehavior;
 
     public Factory(String applicationUserId, PageParameters pageParameters, MarkupContainer container, Disk disk, String applicationCode, String script, boolean stage, Map<String, Object> pageModel) {
         this.applicationCode = applicationCode;
@@ -170,6 +178,14 @@ public class Factory implements Serializable,
             }
         }
         navigateTo(pageCode, params);
+    }
+
+    public StringBuilder createStringBuilder() {
+        return new StringBuilder();
+    }
+
+    public StringBuffer createStringBuffer() {
+        return new StringBuffer();
     }
 
     public void navigateTo(String pageCode, Map<String, Object> params) {
@@ -253,6 +269,19 @@ public class Factory implements Serializable,
         container.add(object);
         this.children.put(id, object);
         return object;
+    }
+
+    @Override
+    public NashornWebSocketBehavior registerWebSocket() {
+        if (this.webSocketBehavior == null) {
+            this.webSocketBehavior = new NashornWebSocketBehavior(this, this.disk, this.script, this.pageModel, this.applicationCode);
+            this.container.add(this.webSocketBehavior);
+        }
+        return this.webSocketBehavior;
+    }
+
+    public NashornWebSocketBehavior getWebSocketBehavior() {
+        return this.webSocketBehavior;
     }
 
     @Override
@@ -1042,4 +1071,45 @@ public class Factory implements Serializable,
         this.children.put(id, object);
         return object;
     }
+
+    @Override
+    public void pushMessage(String message) {
+        SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
+        Collection<IWebSocketConnection> connections = registry.getConnections(ApplicationUtils.getApplication());
+        for (IWebSocketConnection connection : connections) {
+            if (connection != null && connection.isOpen()) {
+                try {
+                    connection.sendMessage(message);
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+
+    @Override
+    public void pushMessage(String sessionId, String message) {
+        SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
+        Collection<IWebSocketConnection> connections = registry.getConnections(ApplicationUtils.getApplication(), sessionId);
+        for (IWebSocketConnection connection : connections) {
+            if (connection != null && connection.isOpen()) {
+                try {
+                    connection.sendMessage(message);
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+
+    @Override
+    public void pushMessage(String sessionId, IKey key, String message) {
+        SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
+        IWebSocketConnection connection = registry.getConnection(ApplicationUtils.getApplication(), sessionId, key);
+        if (connection != null && connection.isOpen()) {
+            try {
+                connection.sendMessage(message);
+            } catch (IOException e) {
+            }
+        }
+    }
+
 }

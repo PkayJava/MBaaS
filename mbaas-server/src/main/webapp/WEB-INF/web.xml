@@ -10,11 +10,6 @@
         <param-value>classpath:/application-context.xml</param-value>
     </context-param>
 
-    <context-param>
-        <param-name>org.eclipse.jetty.websocket.jsr356</param-name>
-        <param-value>false</param-value>
-    </context-param>
-
     <listener>
         <listener-class>com.angkorteam.mbaas.server.spring.ApplicationContext</listener-class>
     </listener>
@@ -33,7 +28,7 @@
 
     <filter>
         <filter-name>MBaaS Web</filter-name>
-        <filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
+        <filter-class>org.apache.wicket.protocol.ws.javax.JavaxWebSocketFilter</filter-class>
         <init-param>
             <param-name>applicationClassName</param-name>
             <param-value>com.angkorteam.mbaas.server.wicket.Application</param-value>

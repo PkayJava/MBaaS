@@ -92,9 +92,8 @@ public class PageModifyPage extends MasterPage {
         this.form = new Form<>("form");
         add(this.form);
 
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         this.pageId = getPageParameters().get("pageId").toString("");
-        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
         this.role = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " IN (SELECT " + Jdbc.PageRole.ROLE_ID + " FROM " + Jdbc.PAGE_ROLE + " WHERE " + Jdbc.PageRole.PAGE_ID + " = ?)", this.pageId);
         this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RoleChoiceProvider(getSession().getApplicationCode()), new RoleChoiceRenderer());
@@ -102,25 +101,21 @@ public class PageModifyPage extends MasterPage {
         this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);
         this.form.add(this.roleFeedback);
 
-        this.masterPage = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", pageRecord.get(Jdbc.Page.MASTER_PAGE_ID));
         this.masterPageField = new Select2SingleChoice<>("masterPageField", new PropertyModel<>(this, "masterPage"), new MasterPageChoiceProvider(getSession().getApplicationCode()), new MasterPageChoiceRenderer());
         this.masterPageField.setRequired(true);
         this.form.add(this.masterPageField);
         this.masterPageFeedback = new TextFeedbackPanel("masterPageFeedback", this.masterPageField);
         this.form.add(this.masterPageFeedback);
 
-        this.menu = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MENU + " WHERE " + Jdbc.Menu.MENU_ID + " = ?", pageRecord.get(Jdbc.Page.MENU_ID));
         this.menuField = new Select2SingleChoice<>("menuField", new PropertyModel<>(this, "menu"), new MenuChoiceProvider(getSession().getApplicationCode()), new MenuChoiceRenderer());
         this.menuField.setRequired(true);
         this.form.add(this.menuField);
         this.menuFeedback = new TextFeedbackPanel("menuFeedback", this.menuField);
         this.form.add(this.menuFeedback);
 
-        this.code = (String) pageRecord.get(Jdbc.Page.CODE);
         this.codeLabel = new Label("codeLabel", new PropertyModel<>(this, "code"));
         this.form.add(codeLabel);
 
-        this.title = (String) pageRecord.get(Jdbc.Page.TITLE);
         this.titleField = new TextField<>("titleField", new PropertyModel<>(this, "title"));
         this.titleField.add(new JobNameValidator(getSession().getApplicationCode()));
         this.titleField.setRequired(true);
@@ -128,21 +123,18 @@ public class PageModifyPage extends MasterPage {
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);
 
-        this.javascript = (String) pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT);
         this.javascriptField = new JavascriptTextArea("javascriptField", new PropertyModel<>(this, "javascript"));
         this.javascriptField.setRequired(true);
         this.form.add(this.javascriptField);
         this.javascriptFeedback = new TextFeedbackPanel("javascriptFeedback", this.javascriptField);
         this.form.add(this.javascriptFeedback);
 
-        this.description = (String) pageRecord.get(Jdbc.Page.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
         this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.html = (String) pageRecord.get(Jdbc.Page.STAGE_HTML);
         this.htmlField = new HtmlTextArea("htmlField", new PropertyModel<>(this, "html"));
         this.htmlField.setRequired(true);
         this.form.add(this.htmlField);
@@ -156,6 +148,20 @@ public class PageModifyPage extends MasterPage {
         this.previewButton = new Button("previewButton");
         this.previewButton.setOnSubmit(this::previewButtonOnSubmit);
         this.form.add(this.previewButton);
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        super.onBeforeRender();
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
+        this.masterPage = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", pageRecord.get(Jdbc.Page.MASTER_PAGE_ID));
+        this.menu = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MENU + " WHERE " + Jdbc.Menu.MENU_ID + " = ?", pageRecord.get(Jdbc.Page.MENU_ID));
+        this.javascript = (String) pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT);
+        this.description = (String) pageRecord.get(Jdbc.Page.DESCRIPTION);
+        this.html = (String) pageRecord.get(Jdbc.Page.STAGE_HTML);
+        this.code = (String) pageRecord.get(Jdbc.Page.CODE);
+        this.title = (String) pageRecord.get(Jdbc.Page.TITLE);
     }
 
     private void previewButtonOnSubmit(Button button) {

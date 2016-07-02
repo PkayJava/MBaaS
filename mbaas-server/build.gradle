@@ -47,9 +47,14 @@ dependencies {
     compile 'org.apache.wicket:wicket-request:' + wicketVersion
     compile 'org.apache.wicket:wicket-velocity:' + wicketVersion
     compile 'org.apache.wicket:wicket-native-websocket-core:' + wicketVersion
-    compile 'org.apache.wicket:wicket-native-websocket-jetty:' + wicketVersion
-    compile 'org.apache.wicket:wicket-native-websocket-tomcat:' + wicketVersion
-    compile 'org.apache.wicket:wicket-native-websocket-jetty9:' + wicketVersion
+    compile 'org.apache.wicket:wicket-native-websocket-javax:' + wicketVersion
+    compile 'javax.websocket:javax.websocket-api:' + javaxwebsocketVersion
+    //compile 'org.apache.wicket:wicket-native-websocket-tomcat:' + wicketVersion
+    //compile 'org.apache.wicket:wicket-native-websocket-jetty9:' + wicketVersion
+    //compile 'org.eclipse.jetty.aggregate:jetty-all:' + jetty9Version
+    //compile 'org.eclipse.jetty.websocket:javax-websocket-server-impl:' + jetty9Version
+    //compile 'org.eclipse.jetty:jetty-webapp:' + jetty9Version
+    //compile 'org.eclipse.jetty:jetty-server:' + jetty9Version
 
     compile 'org.springframework:spring-core:' + springVersion
     compile 'org.springframework:spring-context:' + springVersion
@@ -87,8 +92,6 @@ dependencies {
     compile 'commons-io:commons-io:' + commonsioVersion
 
     compile 'javax.servlet:javax.servlet-api:' + servletVersion
-
-    compile 'org.eclipse.jetty.aggregate:jetty-all:' + jetty9Version
 
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion
     compile 'org.apache.logging.log4j:log4j-core:' + log4jVersion
