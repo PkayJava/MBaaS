@@ -34,6 +34,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
+import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponent;
@@ -99,6 +100,7 @@ public class Factory implements Serializable,
         ILinkFactory,
         IRadioChoiceFactory,
         IImageFactory,
+        IWindowModalFactory,
         IAjaxButtonFactory,
         IMultiFileUploadFactory,
         ICheckBoxMultipleChoiceFactory,
@@ -885,16 +887,16 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public BlockPanel createBlock(String id, String code) {
-        return createBlock(container, id, code);
+    public BlockPanel createBlock(String id, String blockCode) {
+        return createBlock(container, id, blockCode);
     }
 
     @Override
-    public BlockPanel createBlock(MarkupContainer container, String id, String code) {
+    public BlockPanel createBlock(MarkupContainer container, String id, String blockCode) {
         Map<String, Object> blockModel = new HashMap<>();
         pageModel.put(id, blockModel);
         MapModel<String, Object> model = new MapModel<>(blockModel);
-        BlockPanel object = new BlockPanel(id, code, this.stage, this.pageModel, model);
+        BlockPanel object = new BlockPanel(id, blockCode, this.stage, this.pageModel, model);
         container.add(object);
         this.children.put(id, object);
         return object;
@@ -1110,6 +1112,24 @@ public class Factory implements Serializable,
             } catch (IOException e) {
             }
         }
+    }
+
+    @Override
+    public ModalWindow createModalWindow(String id, String blockCode) {
+        return createModalWindow(container, id, blockCode);
+    }
+
+    @Override
+    public ModalWindow createModalWindow(MarkupContainer container, String id, String blockCode) {
+        Map<String, Object> blockModel = new HashMap<>();
+        pageModel.put(id, blockModel);
+        MapModel<String, Object> model = new MapModel<>(blockModel);
+        BlockPanel content = new BlockPanel(ModalWindow.CONTENT_ID, blockCode, this.stage, this.pageModel, model);
+        ModalWindow object = new ModalWindow(id);
+        object.setContent(content);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
     }
 
 }

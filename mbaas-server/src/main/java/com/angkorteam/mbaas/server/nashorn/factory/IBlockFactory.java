@@ -10,8 +10,8 @@ import java.io.Serializable;
  */
 public interface IBlockFactory extends Serializable {
 
-    BlockPanel createBlock(String id, String code);
+    BlockPanel createBlock(String id, String blockCode);
 
-    BlockPanel createBlock(MarkupContainer container, String id, String code);
+    BlockPanel createBlock(MarkupContainer container, String id, String blockCode);
 
 }
