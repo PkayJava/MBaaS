@@ -13,6 +13,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.ajax.markup.html.NashornAjaxLi
 import com.angkorteam.mbaas.server.nashorn.wicket.ajax.markup.html.form.NashornAjaxButton;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
+import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.tabs.NashornTab;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.basic.NashornLabel;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.form.upload.NashornFileUpload;
@@ -36,7 +37,9 @@ import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
+import org.apache.wicket.extensions.ajax.markup.html.tabs.AjaxTabbedPanel;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.tabs.ITab;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
@@ -95,6 +98,7 @@ public class Factory implements Serializable,
         IHiddenFieldFactory,
         IRequiredTextFieldFactory,
         IColorTextFieldFactory,
+        IAjaxTabbedPanelFactory,
         IEmailTextFieldFactory,
         ITimeTextFieldFactory,
         IListChoiceFactory,
@@ -1119,6 +1123,39 @@ public class Factory implements Serializable,
             } catch (IOException e) {
             }
         }
+    }
+
+    @Override
+    public AjaxTabbedPanel<? extends ITab> createAjaxTabbedPanel(String id, JSObject columns) {
+        return createAjaxTabbedPanel(container, id, columns);
+    }
+
+    @Override
+    public AjaxTabbedPanel<? extends ITab> createAjaxTabbedPanel(MarkupContainer container, String id, JSObject columns) {
+        if (!columns.isArray()) {
+            throw new WicketRuntimeException("columns is not right");
+        }
+        List<ITab> tabs = new ArrayList<>();
+        if (columns instanceof ScriptObjectMirror) {
+            if (((ScriptObjectMirror) columns).size() > 0) {
+                for (int i = 0; i < ((ScriptObjectMirror) columns).size(); i++) {
+                    Object column = columns.getSlot(i);
+                    if (column instanceof ScriptObjectMirror) {
+                        String blockTitle = (String) ((ScriptObjectMirror) column).get("blockTitle");
+                        String blockCode = (String) ((ScriptObjectMirror) column).get("blockCode");
+                        Map<String, Object> blockModel = new HashMap<>();
+                        this.pageModel.put(id + "_" + blockTitle, blockCode);
+                        NashornTab nashornTab = new NashornTab(Model.of(blockTitle), blockCode, this.stage, this.pageModel, blockModel);
+                        tabs.add(nashornTab);
+                    }
+                }
+            }
+        }
+        AjaxTabbedPanel<ITab> object = new AjaxTabbedPanel<>(id, tabs);
+        container.add(object);
+        this.children.put(id, object);
+        this.children.put(object.getId(), object);
+        return object;
     }
 
     @Override

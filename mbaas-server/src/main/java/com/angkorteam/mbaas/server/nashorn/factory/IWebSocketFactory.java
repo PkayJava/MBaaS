@@ -3,12 +3,14 @@ package com.angkorteam.mbaas.server.nashorn.factory;
 import com.angkorteam.mbaas.server.nashorn.wicket.protocol.ws.api.NashornWebSocketBehavior;
 import org.apache.wicket.protocol.ws.api.registry.IKey;
 
+import java.io.Serializable;
+
 /**
  * Created by socheat on 7/2/16.
  */
-public interface IWebSocketFactory {
+public interface IWebSocketFactory extends Serializable {
 
-    public NashornWebSocketBehavior registerWebSocket();
+    NashornWebSocketBehavior registerWebSocket();
 
     void pushMessage(String message);
 

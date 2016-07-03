@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
 
-    private final String code;
+    private final String blockCode;
 
     private String blockId;
 
@@ -42,15 +42,15 @@ public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
 
     private Factory factory;
 
-    public BlockPanel(String id, String code, boolean stage, Map<String, Object> pageModel, MapModel<String, Object> blockModel) {
+    public BlockPanel(String id, String blockCode, boolean stage, Map<String, Object> pageModel, MapModel<String, Object> blockModel) {
         super(id, blockModel);
-        this.code = code;
+        this.blockCode = blockCode;
         this.stage = stage;
         this.pageModel = pageModel;
         this.blockModel = blockModel;
         Session session = (Session) getSession();
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(session.getApplicationCode());
-        Map<String, Object> blockRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.CODE + " = ?", this.code);
+        Map<String, Object> blockRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.CODE + " = ?", this.blockCode);
         this.blockId = (String) blockRecord.get(Jdbc.Block.BLOCK_ID);
     }
 
@@ -61,7 +61,7 @@ public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
         String applicationCode = session.getApplicationCode();
         String applicationUserId = session.getApplicationUserId();
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(session.getApplicationCode());
-        Map<String, Object> blockRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.CODE + " = ?", this.code);
+        Map<String, Object> blockRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.CODE + " = ?", this.blockCode);
         this.script = (String) (this.stage ? blockRecord.get(Jdbc.Block.STAGE_JAVASCRIPT) : blockRecord.get(Jdbc.Block.JAVASCRIPT));
         this.disk = new Disk(applicationCode, applicationUserId);
         this.factory = new Factory(applicationUserId, getPage().getPageParameters(), this, this.disk, applicationCode, this.script, this.stage, this.pageModel);
@@ -74,7 +74,7 @@ public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
         Invocable invocable = (Invocable) engine;
         IOnInitialize iOnInitialize = invocable.getInterface(IOnInitialize.class);
         if (iOnInitialize == null) {
-            throw new WicketRuntimeException("Block." + this.code + " function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel, blockModel){} is missing");
+            throw new WicketRuntimeException("Block." + this.blockCode + " function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel, blockModel){} is missing");
         }
         iOnInitialize.onInitialize(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.blockModel.getObject());
     }
@@ -92,7 +92,7 @@ public class BlockPanel extends Panel implements IMarkupResourceStreamProvider {
         Session session = (Session) getSession();
         IOnBeforeRender iOnBeforeRender = invocable.getInterface(IOnBeforeRender.class);
         if (iOnBeforeRender == null) {
-            throw new WicketRuntimeException("Block." + this.code + " function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel, blockModel){} is missing");
+            throw new WicketRuntimeException("Block." + this.blockCode + " function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel, blockModel){} is missing");
         }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(session.getApplicationCode());
         iOnBeforeRender.onBeforeRender(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.blockModel.getObject());
