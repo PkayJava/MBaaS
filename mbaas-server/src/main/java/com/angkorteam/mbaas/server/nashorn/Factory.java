@@ -9,6 +9,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.factory.*;
+import com.angkorteam.mbaas.server.nashorn.wicket.ajax.markup.html.NashornAjaxLink;
 import com.angkorteam.mbaas.server.nashorn.wicket.ajax.markup.html.form.NashornAjaxButton;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.*;
 import com.angkorteam.mbaas.server.nashorn.wicket.extensions.markup.html.repeater.data.table.filter.NashornFilterForm;
@@ -861,13 +862,13 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornLink createLink(String id, IModel<Map<String, Object>> model) {
-        return createLink(container, id, model);
+    public NashornAjaxLink createAjaxLink(String id) {
+        return createAjaxLink(container, id);
     }
 
     @Override
-    public NashornLink createLink(MarkupContainer container, String id, IModel<Map<String, Object>> model) {
-        NashornLink object = new NashornLink(id, model);
+    public NashornAjaxLink createAjaxLink(MarkupContainer container, String id) {
+        NashornAjaxLink object = new NashornAjaxLink(id, new MapModel<>(this.pageModel));
         object.setScript(this.script);
         object.setDisk(this.disk);
         object.setFactory(this);
@@ -878,12 +879,18 @@ public class Factory implements Serializable,
 
     @Override
     public NashornLink createLink(String id) {
-        return createLink(id, new MapModel<>(this.pageModel));
+        return createLink(container, id);
     }
 
     @Override
     public NashornLink createLink(MarkupContainer container, String id) {
-        return createLink(container, id, new MapModel<>(this.pageModel));
+        NashornLink object = new NashornLink(id, new MapModel<>(this.pageModel));
+        object.setScript(this.script);
+        object.setDisk(this.disk);
+        object.setFactory(this);
+        container.add(object);
+        this.children.put(id, object);
+        return object;
     }
 
     @Override

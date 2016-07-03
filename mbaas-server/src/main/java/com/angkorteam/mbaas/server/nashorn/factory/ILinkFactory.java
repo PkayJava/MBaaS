@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.nashorn.factory;
 
+import com.angkorteam.mbaas.server.nashorn.wicket.ajax.markup.html.NashornAjaxLink;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link.NashornLink;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.wicket.MarkupContainer;
@@ -16,11 +17,11 @@ public interface ILinkFactory extends Serializable {
 
     NashornLink createLink(String id);
 
-    NashornLink createLink(String id, IModel<Map<String, Object>> model);
-
     NashornLink createLink(MarkupContainer container, String id);
 
-    NashornLink createLink(MarkupContainer container, String id, IModel<Map<String, Object>> model);
+    NashornAjaxLink createAjaxLink(String id);
+
+    NashornAjaxLink createAjaxLink(MarkupContainer container, String id);
 
     BookmarkablePageLink<Void> createPageLink(String id, String pageCode);
 
