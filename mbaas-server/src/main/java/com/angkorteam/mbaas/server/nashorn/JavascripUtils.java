@@ -61,6 +61,8 @@ public class JavascripUtils {
             clazzes.add(ArrayDeque.class);
             clazzes.add(ConcurrentLinkedDeque.class);
             clazzes.add(Stack.class);
+            clazzes.add(StringBuilder.class);
+            clazzes.add(StringBuffer.class);
             clazzes.add(Tables.class);
             clazzes.add(DSL.class);
             clazzes.add(ValidationError.class);
