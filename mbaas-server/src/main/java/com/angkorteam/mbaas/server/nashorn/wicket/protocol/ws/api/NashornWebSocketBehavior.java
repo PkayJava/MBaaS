@@ -58,8 +58,8 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
                 throw new WicketRuntimeException("function script_on_message(requestCycle, disk, jdbcTemplate, factory, pageModel, event, message){} is missing");
             }
             JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-            String body = scriptMessage.script_on_message(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event", "message");
-            String scriptOnMessage = "Wicket.Event.subscribe('/websocket/message', function(event, message){ " + (body == null || "undefined".equals(body) ? "" : body) + " });";
+            StringBuilder body = scriptMessage.script_on_message(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event", "message");
+            String scriptOnMessage = "Wicket.Event.subscribe('/websocket/message', function(event, message){ " + (body == null || "undefined".equals(body.toString()) ? "" : body.toString()) + " });";
             response.render(OnDomReadyHeaderItem.forScript(scriptOnMessage));
         }
         {
@@ -68,8 +68,8 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
                 throw new WicketRuntimeException("function script_on_open(requestCycle, disk, jdbcTemplate, factory, pageModel, event){} is missing");
             }
             JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-            String body = scriptOpen.script_on_open(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event");
-            String scriptOnOpen = "Wicket.Event.subscribe('/websocket/open', function(event){" + (body == null || "undefined".equals(body) ? "" : body) + "});";
+            StringBuilder body = scriptOpen.script_on_open(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event");
+            String scriptOnOpen = "Wicket.Event.subscribe('/websocket/open', function(event){" + (body == null || "undefined".equals(body.toString()) ? "" : body.toString()) + "});";
             response.render(OnDomReadyHeaderItem.forScript(scriptOnOpen));
         }
         {
@@ -78,8 +78,8 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
                 throw new WicketRuntimeException("function script_on_closed(requestCycle, disk, jdbcTemplate, factory, pageModel, event){} is missing");
             }
             JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-            String body = scriptClosed.script_on_closed(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event");
-            String scriptOnClosed = "Wicket.Event.subscribe('/websocket/closed', function(event){" + (body == null || "undefined".equals(body) ? "" : body) + "});";
+            StringBuilder body = scriptClosed.script_on_closed(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event");
+            String scriptOnClosed = "Wicket.Event.subscribe('/websocket/closed', function(event){" + (body == null || "undefined".equals(body.toString()) ? "" : body.toString()) + "});";
             response.render(OnDomReadyHeaderItem.forScript(scriptOnClosed));
         }
         {
@@ -88,8 +88,8 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
                 throw new WicketRuntimeException("function script_on_error(requestCycle, disk, jdbcTemplate, factory, pageModel, event){} is missing");
             }
             JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-            String body = scriptError.script_on_error(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event");
-            String scriptOnError = "Wicket.Event.subscribe('/websocket/error', function(event){" + (body == null || "undefined".equals(body) ? "" : body) + "});";
+            StringBuilder body = scriptError.script_on_error(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event");
+            String scriptOnError = "Wicket.Event.subscribe('/websocket/error', function(event){" + (body == null || "undefined".equals(body.toString()) ? "" : body.toString()) + "});";
             response.render(OnDomReadyHeaderItem.forScript(scriptOnError));
         }
     }
@@ -214,19 +214,19 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
     }
 
     public interface IScriptOpen extends Serializable {
-        String script_on_open(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event);
+        StringBuilder script_on_open(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event);
     }
 
     public interface IScriptMessage extends Serializable {
-        String script_on_message(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event, String message);
+        StringBuilder script_on_message(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event, String message);
     }
 
     public interface IScriptClosed extends Serializable {
-        String script_on_closed(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event);
+        StringBuilder script_on_closed(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event);
     }
 
     public interface IScriptError extends Serializable {
-        String script_on_error(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event);
+        StringBuilder script_on_error(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event);
     }
 
     public interface ISocketPush extends Serializable {
