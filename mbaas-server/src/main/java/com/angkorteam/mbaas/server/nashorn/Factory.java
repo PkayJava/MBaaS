@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.nashorn;
 
 import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.tabs.TabbedPanel;
 import com.angkorteam.framework.extension.wicket.markup.html.FullCalendar;
 import com.angkorteam.framework.extension.wicket.markup.html.FullCalendarItem;
 import com.angkorteam.framework.extension.wicket.markup.html.form.CKEditorTextArea;
@@ -37,7 +38,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
-import org.apache.wicket.extensions.ajax.markup.html.tabs.AjaxTabbedPanel;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.tabs.ITab;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -98,7 +98,7 @@ public class Factory implements Serializable,
         IHiddenFieldFactory,
         IRequiredTextFieldFactory,
         IColorTextFieldFactory,
-        IAjaxTabbedPanelFactory,
+        ITabbedPanelFactory,
         IEmailTextFieldFactory,
         ITimeTextFieldFactory,
         IListChoiceFactory,
@@ -1142,12 +1142,12 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public AjaxTabbedPanel<? extends ITab> createAjaxTabbedPanel(String id, JSObject columns) {
-        return createAjaxTabbedPanel(container, id, columns);
+    public TabbedPanel<? extends ITab> createTabbedPanel(String id, JSObject columns) {
+        return createTabbedPanel(container, id, columns);
     }
 
     @Override
-    public AjaxTabbedPanel<? extends ITab> createAjaxTabbedPanel(MarkupContainer container, String id, JSObject columns) {
+    public TabbedPanel<? extends ITab> createTabbedPanel(MarkupContainer container, String id, JSObject columns) {
         if (!columns.isArray()) {
             throw new WicketRuntimeException("columns is not right");
         }
@@ -1167,7 +1167,7 @@ public class Factory implements Serializable,
                 }
             }
         }
-        AjaxTabbedPanel<ITab> object = new AjaxTabbedPanel<>(id, tabs);
+        TabbedPanel<ITab> object = new TabbedPanel<>(id, tabs);
         container.add(object);
         this.children.put(id, object);
         this.children.put(object.getId(), object);
