@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
 
@@ -23,7 +22,7 @@ public class ActionPanel extends Panel implements IMarkupResourceStreamProvider 
 
     private Map<String, Object> pageModel;
 
-    private IModel<Map<String, Object>> itemModel;
+    private Map<String, Object> itemModel;
 
     private Map<String, String> action;
 
@@ -37,7 +36,7 @@ public class ActionPanel extends Panel implements IMarkupResourceStreamProvider 
 
     private Disk disk;
 
-    public ActionPanel(String id, String tableId, String columnName, Map<String, String> action, Map<String, Object> pageModel, IModel<Map<String, Object>> itemModel) {
+    public ActionPanel(String id, String tableId, String columnName, Map<String, String> action, Map<String, Object> pageModel, Map<String, Object> itemModel) {
         super(id);
         this.tableId = tableId;
         this.action = action;

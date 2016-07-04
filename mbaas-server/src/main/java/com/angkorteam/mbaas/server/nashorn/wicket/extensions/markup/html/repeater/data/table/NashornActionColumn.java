@@ -52,7 +52,7 @@ public class NashornActionColumn extends FilteredAbstractColumn<Map<String, Obje
 
     @Override
     public void populateItem(Item<ICellPopulator<Map<String, Object>>> cellItem, String componentId, IModel<Map<String, Object>> itemModel) {
-        ActionPanel object = new ActionPanel(componentId, this.tableId, getDisplayModel().getObject(), this.links, this.pageModel, itemModel);
+        ActionPanel object = new ActionPanel(componentId, this.tableId, getDisplayModel().getObject(), this.links, this.pageModel, itemModel.getObject());
         object.setDisk(this.disk);
         object.setScript(this.script);
         object.setFactory(this.factory);

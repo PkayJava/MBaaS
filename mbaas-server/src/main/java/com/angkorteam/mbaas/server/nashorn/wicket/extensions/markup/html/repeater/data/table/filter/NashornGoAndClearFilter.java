@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.util.MapModel;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
 
@@ -58,7 +57,8 @@ public class NashornGoAndClearFilter extends GoAndClearFilter implements IMarkup
         for (Map.Entry<String, String> action : this.actions.entrySet()) {
             WebMarkupContainer container = new WebMarkupContainer(links.newChildId());
             links.add(container);
-            NashornLink link = new NashornLink("link", this.tableId + "_head_" + this.columnName + "_" + action.getKey(), new MapModel<>(this.pageModel));
+            NashornLink link = new NashornLink("link", this.tableId + "_head_" + this.columnName + "_" + action.getKey());
+            link.setPageModel(this.pageModel);
             link.setScript(this.script);
             link.setFactory(this.factory);
             link.setDisk(this.disk);
