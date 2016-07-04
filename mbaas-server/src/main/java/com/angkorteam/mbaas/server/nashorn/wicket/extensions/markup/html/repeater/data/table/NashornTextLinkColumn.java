@@ -24,6 +24,8 @@ public class NashornTextLinkColumn extends TextFilteredPropertyColumn<Map<String
 
     private Factory factory;
 
+    private Map<String, Object> pageModel;
+
     private Disk disk;
 
     public NashornTextLinkColumn(IModel<String> headerModel, String columnName, String tableId) {
@@ -39,9 +41,10 @@ public class NashornTextLinkColumn extends TextFilteredPropertyColumn<Map<String
     }
 
     @Override
-    public void populateItem(Item<ICellPopulator<Map<String, Object>>> cellItem, String componentId, IModel<Map<String, Object>> rowModel) {
-        TextLinkPanel object = new TextLinkPanel(componentId, this.tableId, getPropertyExpression(), rowModel);
+    public void populateItem(Item<ICellPopulator<Map<String, Object>>> cellItem, String componentId, IModel<Map<String, Object>> itemModel) {
+        TextLinkPanel object = new TextLinkPanel(componentId, this.tableId, getPropertyExpression(), itemModel.getObject());
         object.setDisk(this.disk);
+        object.setPageModel(this.pageModel);
         object.setScript(this.script);
         object.setFactory(this.factory);
         cellItem.add(object);
@@ -69,5 +72,13 @@ public class NashornTextLinkColumn extends TextFilteredPropertyColumn<Map<String
 
     public void setDisk(Disk disk) {
         this.disk = disk;
+    }
+
+    public Map<String, Object> getPageModel() {
+        return pageModel;
+    }
+
+    public void setPageModel(Map<String, Object> pageModel) {
+        this.pageModel = pageModel;
     }
 }

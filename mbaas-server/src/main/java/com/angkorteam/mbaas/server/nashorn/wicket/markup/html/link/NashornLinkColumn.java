@@ -7,7 +7,6 @@ import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -31,14 +30,17 @@ public class NashornLinkColumn extends Link<Map<String, Object>> {
 
     private Map<String, Object> pageModel;
 
-    public NashornLinkColumn(String id, Map<String, Object> pageModel, IModel<Map<String, Object>> itemModel) {
+    private Map<String, Object> itemModel;
+
+    public NashornLinkColumn(String id, Map<String, Object> pageModel, Map<String, Object> itemModel) {
         this(id, id, pageModel, itemModel);
     }
 
-    public NashornLinkColumn(String id, String eventId, Map<String, Object> pageModel, IModel<Map<String, Object>> itemModel) {
-        super(id, itemModel);
+    public NashornLinkColumn(String id, String eventId, Map<String, Object> pageModel, Map<String, Object> itemModel) {
+        super(id);
         this.eventId = eventId;
         this.pageModel = pageModel;
+        this.itemModel = itemModel;
     }
 
     @Override
@@ -57,7 +59,7 @@ public class NashornLinkColumn extends Link<Map<String, Object>> {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(this.eventId + "__on_click", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, getModelObject());
+            invocable.invokeFunction(this.eventId + "__on_click", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, this.itemModel);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {

@@ -8,7 +8,6 @@ import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,16 +34,8 @@ public class NashornAjaxButton extends org.apache.wicket.ajax.markup.html.form.A
         super(id);
     }
 
-    public NashornAjaxButton(String id, IModel<String> model) {
-        super(id, model);
-    }
-
     public NashornAjaxButton(String id, Form<?> form) {
         super(id, form);
-    }
-
-    public NashornAjaxButton(String id, IModel<String> model, Form<?> form) {
-        super(id, model, form);
     }
 
     @Override

@@ -8,7 +8,6 @@ import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -30,12 +29,14 @@ public class NashornAjaxLink extends AjaxLink<Map<String, Object>> {
 
     private String eventId;
 
-    public NashornAjaxLink(String id, IModel<Map<String, Object>> model) {
-        this(id, id, model);
+    private Map<String, Object> pageModel;
+
+    public NashornAjaxLink(String id) {
+        this(id, id);
     }
 
-    public NashornAjaxLink(String id, String eventId, IModel<Map<String, Object>> model) {
-        super(id, model);
+    public NashornAjaxLink(String id, String eventId) {
+        super(id);
         this.eventId = eventId;
     }
 
@@ -55,7 +56,7 @@ public class NashornAjaxLink extends AjaxLink<Map<String, Object>> {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(this.eventId + "__on_click", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, target, getModelObject());
+            invocable.invokeFunction(this.eventId + "__on_click", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, target, this.pageModel);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
@@ -85,5 +86,13 @@ public class NashornAjaxLink extends AjaxLink<Map<String, Object>> {
 
     public void setFactory(Factory factory) {
         this.factory = factory;
+    }
+
+    public Map<String, Object> getPageModel() {
+        return pageModel;
+    }
+
+    public void setPageModel(Map<String, Object> pageModel) {
+        this.pageModel = pageModel;
     }
 }

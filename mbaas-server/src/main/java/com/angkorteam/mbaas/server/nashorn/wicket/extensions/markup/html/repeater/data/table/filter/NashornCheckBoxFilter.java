@@ -30,6 +30,8 @@ public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStrea
 
     private Factory factory;
 
+    private Map<String, Object> pageModel;
+
     private Map<String, Object> checks;
 
     private Map<String, String> actions;
@@ -53,6 +55,7 @@ public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStrea
             NashornButton button = new NashornButton("button", this.tableId + "_head_" + this.columnName + "_" + action.getKey());
             button.setPageModel(this.checks);
             button.setScript(this.script);
+            button.setPageModel(this.pageModel);
             button.setFactory(this.factory);
             button.setDefaultFormProcessing(true);
             button.setDisk(this.disk);
@@ -92,4 +95,11 @@ public class NashornCheckBoxFilter extends Panel implements IMarkupResourceStrea
         this.disk = disk;
     }
 
+    public Map<String, Object> getPageModel() {
+        return pageModel;
+    }
+
+    public void setPageModel(Map<String, Object> pageModel) {
+        this.pageModel = pageModel;
+    }
 }

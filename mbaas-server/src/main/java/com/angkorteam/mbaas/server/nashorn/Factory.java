@@ -630,6 +630,7 @@ public class Factory implements Serializable,
                             }
                         } else if ("TextLink".equals(htmlColumn)) {
                             NashornTextLinkColumn tableField = new NashornTextLinkColumn(Model.of(tableColumn), tableColumn, id);
+                            tableField.setPageModel(this.pageModel);
                             tableField.setDisk(this.disk);
                             tableField.setFactory(this);
                             tableField.setScript(this.script);
@@ -645,6 +646,7 @@ public class Factory implements Serializable,
                             }
                             String objectColumn = (String) ((ScriptObjectMirror) column).get("objectColumn");
                             NashornCheckBoxColumn tableField = new NashornCheckBoxColumn(Model.of(tableColumn), objectColumn, actions, id);
+                            tableField.setPageModel(this.pageModel);
                             tableField.setDisk(this.disk);
                             tableField.setFactory(this);
                             tableField.setScript(this.script);
@@ -872,8 +874,9 @@ public class Factory implements Serializable,
 
     @Override
     public NashornAjaxLink createAjaxLink(MarkupContainer container, String id) {
-        NashornAjaxLink object = new NashornAjaxLink(id, new MapModel<>(this.pageModel));
+        NashornAjaxLink object = new NashornAjaxLink(id);
         object.setScript(this.script);
+        object.setPageModel(this.pageModel);
         object.setDisk(this.disk);
         object.setFactory(this);
         container.add(object);
@@ -888,8 +891,9 @@ public class Factory implements Serializable,
 
     @Override
     public NashornLink createLink(MarkupContainer container, String id) {
-        NashornLink object = new NashornLink(id, new MapModel<>(this.pageModel));
+        NashornLink object = new NashornLink(id);
         object.setScript(this.script);
+        object.setPageModel(this.pageModel);
         object.setDisk(this.disk);
         object.setFactory(this);
         container.add(object);

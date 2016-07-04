@@ -29,6 +29,8 @@ public class NashornCheckBoxColumn extends FilteredAbstractColumn<Map<String, Ob
 
     private Disk disk;
 
+    private Map<String, Object> pageModel;
+
     private Map<String, Object> checks;
 
     private String objectColumn;
@@ -51,6 +53,7 @@ public class NashornCheckBoxColumn extends FilteredAbstractColumn<Map<String, Ob
         NashornCheckBoxFilter filter = new NashornCheckBoxFilter(componentId, this.tableId, getDisplayModel().getObject(), this.checks, this.actions);
         filter.setScript(this.script);
         filter.setDisk(this.disk);
+        filter.setPageModel(this.pageModel);
         filter.setFactory(this.factory);
         return filter;
     }
@@ -77,5 +80,13 @@ public class NashornCheckBoxColumn extends FilteredAbstractColumn<Map<String, Ob
 
     public void setDisk(Disk disk) {
         this.disk = disk;
+    }
+
+    public Map<String, Object> getPageModel() {
+        return pageModel;
+    }
+
+    public void setPageModel(Map<String, Object> pageModel) {
+        this.pageModel = pageModel;
     }
 }

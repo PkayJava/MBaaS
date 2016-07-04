@@ -7,7 +7,6 @@ import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -29,12 +28,14 @@ public class NashornLink extends Link<Map<String, Object>> {
 
     private String eventId;
 
-    public NashornLink(String id, IModel<Map<String, Object>> model) {
-        this(id, id, model);
+    private Map<String, Object> pageModel;
+
+    public NashornLink(String id) {
+        this(id, id);
     }
 
-    public NashornLink(String id, String eventId, IModel<Map<String, Object>> model) {
-        super(id, model);
+    public NashornLink(String id, String eventId) {
+        super(id);
         this.eventId = eventId;
     }
 
@@ -54,7 +55,7 @@ public class NashornLink extends Link<Map<String, Object>> {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(this.eventId + "__on_click", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, getModelObject());
+            invocable.invokeFunction(this.eventId + "__on_click", RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
@@ -84,5 +85,13 @@ public class NashornLink extends Link<Map<String, Object>> {
 
     public void setFactory(Factory factory) {
         this.factory = factory;
+    }
+
+    public Map<String, Object> getPageModel() {
+        return pageModel;
+    }
+
+    public void setPageModel(Map<String, Object> pageModel) {
+        this.pageModel = pageModel;
     }
 }
