@@ -1091,6 +1091,10 @@ public class Factory implements Serializable,
 
     @Override
     public void pushMessage(String message) {
+        // TODO : remove this trick
+        if (message == null || "".equals(message)) {
+            message = " ";
+        }
         SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
         Collection<IWebSocketConnection> connections = registry.getConnections(ApplicationUtils.getApplication());
         for (IWebSocketConnection connection : connections) {
@@ -1105,6 +1109,10 @@ public class Factory implements Serializable,
 
     @Override
     public void pushMessage(String sessionId, String message) {
+        // TODO : remove this trick
+        if (message == null || "".equals(message)) {
+            message = " ";
+        }
         SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
         Collection<IWebSocketConnection> connections = registry.getConnections(ApplicationUtils.getApplication(), sessionId);
         for (IWebSocketConnection connection : connections) {
@@ -1119,6 +1127,10 @@ public class Factory implements Serializable,
 
     @Override
     public void pushMessage(String sessionId, IKey key, String message) {
+        // TODO : remove this trick
+        if (message == null || "".equals(message)) {
+            message = " ";
+        }
         SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
         IWebSocketConnection connection = registry.getConnection(ApplicationUtils.getApplication(), sessionId, key);
         if (connection != null && connection.isOpen()) {
