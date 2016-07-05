@@ -1,8 +1,11 @@
 package com.angkorteam.mbaas.server.page.role;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.renderer.PageChoiceRenderer;
+import com.angkorteam.mbaas.server.select2.PageChoiceProvider;
 import com.angkorteam.mbaas.server.validator.RoleNameValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -33,6 +36,10 @@ public class RoleCreatePage extends MasterPage {
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
 
+    private Map<String, Object> page;
+    private Select2SingleChoice<Map<String, Object>> pageField;
+    private TextFeedbackPanel pageFeedback;
+
     private Button saveButton;
 
     private Form<Void> form;
@@ -57,6 +64,10 @@ public class RoleCreatePage extends MasterPage {
         this.descriptionField.setLabel(JooqUtils.lookup("description", this));
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
 
+        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "description"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
+        this.pageField.setLabel(JooqUtils.lookup("page", this));
+        this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);
+
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
 
@@ -79,6 +90,7 @@ public class RoleCreatePage extends MasterPage {
         fields.put(Jdbc.Role.ROLE_ID, UUID.randomUUID().toString());
         fields.put(Jdbc.Role.SYSTEM, false);
         fields.put(Jdbc.Role.DESCRIPTION, this.description);
+        fields.put(Jdbc.Role.HOME_PAGE_ID, this.page.get(Jdbc.Page.PAGE_ID));
         fields.put(Jdbc.Role.NAME, this.name);
 
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);

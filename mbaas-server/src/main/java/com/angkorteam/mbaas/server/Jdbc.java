@@ -65,6 +65,7 @@ public class Jdbc {
         public static final String ROLE_ID = ROLE + "_id";
         public static final String SYSTEM = "system";
         public static final String NAME = "name";
+        public static final String HOME_PAGE_ID = "home_" + Page.PAGE_ID;
         public static final String DESCRIPTION = "description";
     }
 

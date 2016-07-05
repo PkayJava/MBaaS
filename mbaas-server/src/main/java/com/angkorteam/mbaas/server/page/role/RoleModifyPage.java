@@ -1,8 +1,11 @@
 package com.angkorteam.mbaas.server.page.role;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.renderer.PageChoiceRenderer;
+import com.angkorteam.mbaas.server.select2.PageChoiceProvider;
 import com.angkorteam.mbaas.server.validator.RoleNameValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -12,6 +15,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Map;
@@ -33,6 +37,10 @@ public class RoleModifyPage extends MasterPage {
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
 
+    private Map<String, Object> page;
+    private Select2SingleChoice<Map<String, Object>> pageField;
+    private TextFeedbackPanel pageFeedback;
+
     private Button saveButton;
 
     private Form<Void> form;
@@ -51,8 +59,7 @@ public class RoleModifyPage extends MasterPage {
 
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
-        Map<String, Object> roleRecord = null;
-        roleRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.roleId);
+        Map<String, Object> roleRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.roleId);
 
         this.name = (String) roleRecord.get(Jdbc.Role.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
@@ -66,6 +73,14 @@ public class RoleModifyPage extends MasterPage {
         this.descriptionField.setRequired(true);
         this.descriptionField.setLabel(JooqUtils.lookup("description", this));
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
+
+        try {
+            this.page = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", roleRecord.get(Jdbc.Role.HOME_PAGE_ID));
+        } catch (DataAccessException e) {
+        }
+        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "description"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
+        this.pageField.setLabel(JooqUtils.lookup("page", this));
+        this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
@@ -84,7 +99,7 @@ public class RoleModifyPage extends MasterPage {
 
     private void saveButtonOnSubmit(Button button) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        jdbcTemplate.update("UPDATE " + Jdbc.ROLE + " SET " + Jdbc.Role.NAME + " = ?, " + Jdbc.Role.DESCRIPTION + " = ? WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.name, this.description, this.roleId);
+        jdbcTemplate.update("UPDATE " + Jdbc.ROLE + " SET " + Jdbc.Role.NAME + " = ?, " + Jdbc.Role.DESCRIPTION + " = ?" + Jdbc.Role.HOME_PAGE_ID + " = ? WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.name, this.description, this.page.get(Jdbc.Page.PAGE_ID), this.roleId);
         setResponsePage(RoleManagementPage.class);
     }
 

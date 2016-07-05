@@ -56,6 +56,8 @@ public class Constants {
     public static final String ROLE_ADMINISTRATOR_DESCRIPTION = "role.administrator.description";
     public static final String ROLE_REGISTERED = "role.registered";
     public static final String ROLE_REGISTERED_DESCRIPTION = "role.registered.description";
+    public static final String ROLE_ANONYMOUS= "role.anonymous";
+    public static final String ROLE_ANONYMOUS_DESCRIPTION = "role.anonymous.description";
     public static final String ROLE_OAUTH2_AUTHORIZATION = "role.oauth2.authorization";
     public static final String ROLE_OAUTH2_AUTHORIZATION_DESCRIPTION = "role.oauth2.authorization.description";
     public static final String ROLE_OAUTH2_IMPLICIT = "role.oauth2.implicit";

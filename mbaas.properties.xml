@@ -44,9 +44,11 @@
 
     <!-- Application Role -->
     <entry key="role.administrator">administrator</entry>
-    <entry key="role.administrator.description">mbaas administrative role, users belonging to this role are Gods</entry>
+    <entry key="role.administrator.description">administrative role, users belonging to this role are Gods</entry>
     <entry key="role.registered">registered</entry>
     <entry key="role.registered.description">Default role for new registered users</entry>
+    <entry key="role.anonymous">anonymous</entry>
+    <entry key="role.anonymous.description">anonymous role</entry>
     <entry key="role.oauth2.authorization">oauth2.authorization</entry>
     <entry key="role.oauth2.authorization.description">OAuth2 Authorization</entry>
     <entry key="role.oauth2.implicit">oauth2.implicit</entry>
