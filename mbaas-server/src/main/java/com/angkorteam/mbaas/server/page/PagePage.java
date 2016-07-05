@@ -9,6 +9,7 @@ import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -41,10 +42,15 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
     @Override
     protected void onInitialize() {
         super.onInitialize();
+        PageParameters parameters = getPageParameters();
+        this.pageId = parameters.get("pageId").toString("");
+        if (this.pageId == null || "".equals(this.pageId)) {
+            this.pageId = getSession().getHomePageId();
+        }
         Session session = getSession();
         String applicationUserId = session.getApplicationUserId();
         this.stage = getPageParameters().get("stage").toBoolean(false);
-        this.pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
+
         this.pageModel = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
@@ -71,7 +77,7 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
         super.onBeforeRender();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
-        String script = (String) (stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
+        String script = (String) (this.stage ? pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT) : pageRecord.get(Jdbc.Page.JAVASCRIPT));
         ScriptEngine engine = getScriptEngine();
         try {
             engine.eval(script);

@@ -38,12 +38,38 @@ public class Session extends AuthenticatedWebSession {
 
     private String applicationCode;
 
+    private String homePageId;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
 
     public static final transient Map<String, Session> SESSIONS = new WeakHashMap<>();
 
     public Session(Request request) {
         super(request);
+        this.roles = new Roles();
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request.getContainerRequest();
+        String hostname = httpServletRequest.getServerName();
+        HostnameTable hostnameTable = Tables.HOSTNAME.as("hostnameTable");
+        DSLContext context = ApplicationUtils.getApplication().getDSLContext();
+        HostnameRecord hostnameRecord = context.select(hostnameTable.fields()).from(hostnameTable).where(hostnameTable.FQDN.eq(hostname)).fetchOneInto(hostnameTable);
+        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
+        ApplicationRecord applicationRecord = null;
+        if (hostnameRecord != null) {
+            applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(hostnameRecord.getApplicationId())).fetchOneInto(applicationTable);
+        }
+        if (applicationRecord != null) {
+            this.applicationCode = applicationRecord.getCode();
+            setStyle(this.applicationCode);
+        }
+        if (this.applicationCode != null && !"".equals(this.applicationCode)) {
+            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+            JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(applicationCode);
+            Map<String, Object> roleRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.NAME + " = ?", configuration.getString(Constants.ROLE_ANONYMOUS));
+            if (roleRecord != null) {
+                this.homePageId = (String) roleRecord.get(Jdbc.Role.HOME_PAGE_ID);
+                this.roles.add((String) roleRecord.get(Jdbc.Role.NAME));
+            }
+        }
     }
 
     public final boolean mbaasSignIn(final String username, final String password) {
@@ -104,6 +130,7 @@ public class Session extends AuthenticatedWebSession {
         this.roles = new Roles();
         Map<String, Object> roleRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", userRecord.get(Jdbc.User.ROLE_ID));
         this.roles.add((String) roleRecord.get(Jdbc.Role.NAME));
+        this.homePageId = (String) roleRecord.get(Jdbc.Role.HOME_PAGE_ID);
 
         this.applicationCode = applicationRecord.getCode();
         setStyle(this.applicationCode);
@@ -145,7 +172,7 @@ public class Session extends AuthenticatedWebSession {
     }
 
     public final String getMbaasUserId() {
-        return mbaasUserId;
+        return this.mbaasUserId;
     }
 
     public final String getApplicationUserId() {
@@ -206,9 +233,13 @@ public class Session extends AuthenticatedWebSession {
         return application.getMailSender();
     }
 
+    public final String getHomePageId() {
+        return this.homePageId;
+    }
+
     public final String getApplicationCode() {
         if (isSignedIn()) {
-            return applicationCode;
+            return this.applicationCode;
         } else {
             RequestCycle requestCycle = RequestCycle.get();
             HttpServletRequest request = (HttpServletRequest) requestCycle.getRequest().getContainerRequest();

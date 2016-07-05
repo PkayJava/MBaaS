@@ -3,7 +3,6 @@ package com.angkorteam.mbaas.server.page;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
-import com.angkorteam.mbaas.server.nashorn.wicket.protocol.ws.api.NashornWebSocketBehavior;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
@@ -11,6 +10,7 @@ import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -43,16 +43,20 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
     @Override
     protected void onInitialize() {
         super.onInitialize();
+        PageParameters parameters = getPageParameters();
         Session session = getSession();
         String applicationUserId = session.getApplicationUserId();
         this.pageModel = new HashMap<>();
-        this.stage = getPageParameters().get("stage").toBoolean(false);
+        this.stage = parameters.get("stage").toBoolean(false);
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         if (this instanceof PagePage) {
-            String pageId = getRequest().getQueryParameters().getParameterValue("pageId").toString("");
+            String pageId = parameters.get("pageId").toString("");
+            if (pageId == null || "".equals(pageId)) {
+                pageId = getSession().getHomePageId();
+            }
             this.masterPageId = jdbcTemplate.queryForObject("SELECT " + Jdbc.Page.MASTER_PAGE_ID + " FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", String.class, pageId);
         } else {
-            this.masterPageId = getRequest().getQueryParameters().getParameterValue("masterPageId").toString("");
+            this.masterPageId = parameters.get("masterPageId").toString("");
         }
         this.masterPageCode = jdbcTemplate.queryForObject("SELECT " + Jdbc.MasterPage.CODE + " FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", String.class, this.masterPageId);
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", this.masterPageId);

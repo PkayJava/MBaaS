@@ -4,15 +4,14 @@ import com.angkorteam.framework.extension.jooq.IDSLContext;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.ApplicationTable;
-import com.angkorteam.mbaas.model.entity.tables.HostnameTable;
 import com.angkorteam.mbaas.model.entity.tables.records.ApplicationRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.HostnameRecord;
 import com.angkorteam.mbaas.server.Scope;
 import com.angkorteam.mbaas.server.factory.ApplicationDataSourceFactoryBean;
 import com.angkorteam.mbaas.server.factory.JavascriptServiceFactoryBean;
 import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
+import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.page.mbaas.MBaaSDashboardPage;
 import com.angkorteam.mbaas.server.page.profile.InformationPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
@@ -26,9 +25,6 @@ import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.request.Request;
-import org.apache.wicket.request.Response;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.resource.DynamicJQueryResourceReference;
 import org.apache.wicket.settings.ExceptionSettings;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
@@ -42,7 +38,6 @@ import org.springframework.mail.MailSender;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -72,35 +67,23 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
             if (session.getApplicationUserId() != null && !"".equals(session.getApplicationUserId())) {
                 if (session.isAdministrator()) {
                     return DashboardPage.class;
-                } else if (session.isRegistered()) {
-                    return InformationPage.class;
+                } else {
+                    if (session.getHomePageId() != null && !"".equals(session.getHomePageId())) {
+                        return PagePage.class;
+                    } else {
+                        return InformationPage.class;
+                    }
                 }
-            } else if (session.getMbaasUserId() != null && !"".equals(session.getMbaasUserId())) {
+            }
+            if (session.getMbaasUserId() != null && !"".equals(session.getMbaasUserId())) {
                 return MBaaSDashboardPage.class;
+            }
+        } else {
+            if (session.getHomePageId() != null && !"".equals(session.getHomePageId())) {
+                return PagePage.class;
             }
         }
         return LoginPage.class;
-    }
-
-    @Override
-    public org.apache.wicket.Session newSession(Request request, Response response) {
-        Session session = (Session) super.newSession(request, response);
-        RequestCycle requestCycle = RequestCycle.get();
-        HttpServletRequest httpServletRequest = (HttpServletRequest) requestCycle.getRequest().getContainerRequest();
-        String hostname = httpServletRequest.getServerName();
-        DSLContext context = getDSLContext();
-        HostnameTable hostnameTable = Tables.HOSTNAME.as("hostnameTable");
-        HostnameRecord hostnameRecord = context.select(hostnameTable.fields()).from(hostnameTable).where(hostnameTable.FQDN.eq(hostname)).fetchOneInto(hostnameTable);
-        ApplicationTable applicationTable = Tables.APPLICATION.as("applicationTable");
-        ApplicationRecord applicationRecord = null;
-        if (hostnameRecord != null) {
-            applicationRecord = context.select(applicationTable.fields()).from(applicationTable).where(applicationTable.APPLICATION_ID.eq(hostnameRecord.getApplicationId())).fetchOneInto(applicationTable);
-        }
-        if (applicationRecord != null) {
-            session.setStyle(applicationRecord.getCode());
-        }
-
-        return session;
     }
 
     /**

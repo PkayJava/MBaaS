@@ -29,6 +29,9 @@ public class AnnotationsRoleAuthorizationStrategy extends org.apache.wicket.auth
             }
             String pageId = requestCycle.getRequest().getQueryParameters().getParameterValue("pageId").toString("");
             if (pageId == null || "".equals(pageId)) {
+                pageId = ((Session) Session.get()).getHomePageId();
+            }
+            if (pageId == null || "".equals(pageId)) {
                 return false;
             }
             JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(applicationCode);

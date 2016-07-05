@@ -365,6 +365,9 @@ public abstract class MasterPage extends AdminLTEPage {
 
         if (getPage() instanceof PagePage) {
             String pageId = getPageParameters().get("pageId").toString("");
+            if (pageId == null || "".equals(pageId)) {
+                pageId = getSession().getHomePageId();
+            }
             Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", pageId);
             String menuId = (String) pageRecord.get(Jdbc.Page.MENU_ID);
             this.mmenuItems.put(menuId, "treeview active");
