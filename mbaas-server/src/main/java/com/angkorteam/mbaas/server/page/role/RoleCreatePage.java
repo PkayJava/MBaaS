@@ -53,34 +53,34 @@ public class RoleCreatePage extends MasterPage {
     protected void onInitialize() {
         super.onInitialize();
 
+        this.form = new Form<>("form");
+        add(this.form);
+
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
         this.nameField.add(new RoleNameValidator(getSession().getApplicationCode()));
         this.nameField.setLabel(JooqUtils.lookup("name", this));
+        this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
+        this.form.add(this.nameFeedback);
 
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
         this.descriptionField.setLabel(JooqUtils.lookup("description", this));
+        this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
+        this.form.add(this.descriptionFeedback);
 
-        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "description"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
+        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "page"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
         this.pageField.setLabel(JooqUtils.lookup("page", this));
+        this.form.add(this.pageField);
         this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);
+        this.form.add(this.pageFeedback);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
-
-        this.form = new Form<>("form");
-        add(this.form);
-
-        this.form.add(this.nameField);
-        this.form.add(this.nameFeedback);
-
-        this.form.add(this.descriptionField);
-        this.form.add(this.descriptionFeedback);
-
         this.form.add(this.saveButton);
+
     }
 
     private void saveButtonOnSubmit(Button button) {

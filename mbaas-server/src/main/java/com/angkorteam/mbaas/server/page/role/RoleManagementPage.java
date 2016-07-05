@@ -75,7 +75,11 @@ public class RoleManagementPage extends MasterPage implements ActionFilteredJooq
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> model) {
         if ((Boolean) model.get("system")) {
-            return false;
+            if ("Delete".equals(link)) {
+                return false;
+            } else {
+                return true;
+            }
         } else {
             return true;
         }

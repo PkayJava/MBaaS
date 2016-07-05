@@ -54,6 +54,9 @@ public class RoleModifyPage extends MasterPage {
     protected void onInitialize() {
         super.onInitialize();
 
+        this.form = new Form<>("form");
+        add(this.form);
+
         PageParameters parameters = getPageParameters();
         this.roleId = parameters.get("roleId").toString();
 
@@ -64,37 +67,40 @@ public class RoleModifyPage extends MasterPage {
         this.name = (String) roleRecord.get(Jdbc.Role.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
+        if ((Boolean) roleRecord.get(Jdbc.Role.SYSTEM)) {
+            this.nameField.setEnabled(false);
+        }
         this.nameField.add(new RoleNameValidator(getSession().getApplicationCode(), this.roleId));
         this.nameField.setLabel(JooqUtils.lookup("name", this));
+        this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
+        this.form.add(this.nameFeedback);
 
         this.description = (String) roleRecord.get(Jdbc.Role.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
+        if ((Boolean) roleRecord.get(Jdbc.Role.SYSTEM)) {
+            this.descriptionField.setEnabled(false);
+        }
         this.descriptionField.setRequired(true);
         this.descriptionField.setLabel(JooqUtils.lookup("description", this));
+        this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
+        this.form.add(this.descriptionFeedback);
 
         try {
             this.page = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", roleRecord.get(Jdbc.Role.HOME_PAGE_ID));
         } catch (DataAccessException e) {
         }
-        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "description"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
+        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "page"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
         this.pageField.setLabel(JooqUtils.lookup("page", this));
+        this.form.add(this.pageField);
         this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);
+        this.form.add(this.pageFeedback);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
-
-        this.form = new Form<>("form");
-        add(this.form);
-
-        this.form.add(this.nameField);
-        this.form.add(this.nameFeedback);
-
-        this.form.add(this.descriptionField);
-        this.form.add(this.descriptionFeedback);
-
         this.form.add(this.saveButton);
+
     }
 
     private void saveButtonOnSubmit(Button button) {
