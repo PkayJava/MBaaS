@@ -105,7 +105,11 @@ public class RoleModifyPage extends MasterPage {
 
     private void saveButtonOnSubmit(Button button) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        jdbcTemplate.update("UPDATE " + Jdbc.ROLE + " SET " + Jdbc.Role.NAME + " = ?, " + Jdbc.Role.DESCRIPTION + " = ?" + Jdbc.Role.HOME_PAGE_ID + " = ? WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.name, this.description, this.homePage.get(Jdbc.Page.PAGE_ID), this.roleId);
+        if (this.homePage != null) {
+            jdbcTemplate.update("UPDATE " + Jdbc.ROLE + " SET " + Jdbc.Role.NAME + " = ?, " + Jdbc.Role.DESCRIPTION + " = ?" + Jdbc.Role.HOME_PAGE_ID + " = ? WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.name, this.description, this.homePage.get(Jdbc.Page.PAGE_ID), this.roleId);
+        } else {
+            jdbcTemplate.update("UPDATE " + Jdbc.ROLE + " SET " + Jdbc.Role.NAME + " = ?, " + Jdbc.Role.DESCRIPTION + " = ?" + Jdbc.Role.HOME_PAGE_ID + " = ? WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.name, this.description, null, this.roleId);
+        }
         setResponsePage(RoleManagementPage.class);
     }
 

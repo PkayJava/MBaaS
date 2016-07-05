@@ -90,7 +90,9 @@ public class RoleCreatePage extends MasterPage {
         fields.put(Jdbc.Role.ROLE_ID, UUID.randomUUID().toString());
         fields.put(Jdbc.Role.SYSTEM, false);
         fields.put(Jdbc.Role.DESCRIPTION, this.description);
-        fields.put(Jdbc.Role.HOME_PAGE_ID, this.homePage.get(Jdbc.Page.PAGE_ID));
+        if (this.homePage != null) {
+            fields.put(Jdbc.Role.HOME_PAGE_ID, this.homePage.get(Jdbc.Page.PAGE_ID));
+        }
         fields.put(Jdbc.Role.NAME, this.name);
 
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
