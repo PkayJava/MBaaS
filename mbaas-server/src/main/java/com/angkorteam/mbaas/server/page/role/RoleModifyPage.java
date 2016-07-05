@@ -37,7 +37,7 @@ public class RoleModifyPage extends MasterPage {
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
 
-    private Map<String, Object> page;
+    private Map<String, Object> homePage;
     private Select2SingleChoice<Map<String, Object>> pageField;
     private TextFeedbackPanel pageFeedback;
 
@@ -88,10 +88,10 @@ public class RoleModifyPage extends MasterPage {
         this.form.add(this.descriptionFeedback);
 
         try {
-            this.page = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", roleRecord.get(Jdbc.Role.HOME_PAGE_ID));
+            this.homePage = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", roleRecord.get(Jdbc.Role.HOME_PAGE_ID));
         } catch (DataAccessException e) {
         }
-        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "page"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
+        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "homePage"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
         this.pageField.setLabel(JooqUtils.lookup("page", this));
         this.form.add(this.pageField);
         this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);
@@ -105,7 +105,7 @@ public class RoleModifyPage extends MasterPage {
 
     private void saveButtonOnSubmit(Button button) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        jdbcTemplate.update("UPDATE " + Jdbc.ROLE + " SET " + Jdbc.Role.NAME + " = ?, " + Jdbc.Role.DESCRIPTION + " = ?" + Jdbc.Role.HOME_PAGE_ID + " = ? WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.name, this.description, this.page.get(Jdbc.Page.PAGE_ID), this.roleId);
+        jdbcTemplate.update("UPDATE " + Jdbc.ROLE + " SET " + Jdbc.Role.NAME + " = ?, " + Jdbc.Role.DESCRIPTION + " = ?" + Jdbc.Role.HOME_PAGE_ID + " = ? WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.name, this.description, this.homePage.get(Jdbc.Page.PAGE_ID), this.roleId);
         setResponsePage(RoleManagementPage.class);
     }
 

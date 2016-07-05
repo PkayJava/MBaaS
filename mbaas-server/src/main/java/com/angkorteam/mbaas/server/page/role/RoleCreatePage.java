@@ -36,7 +36,7 @@ public class RoleCreatePage extends MasterPage {
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
 
-    private Map<String, Object> page;
+    private Map<String, Object> homePage;
     private Select2SingleChoice<Map<String, Object>> pageField;
     private TextFeedbackPanel pageFeedback;
 
@@ -71,7 +71,7 @@ public class RoleCreatePage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "page"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
+        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "homePage"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
         this.pageField.setLabel(JooqUtils.lookup("page", this));
         this.form.add(this.pageField);
         this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);
@@ -90,7 +90,7 @@ public class RoleCreatePage extends MasterPage {
         fields.put(Jdbc.Role.ROLE_ID, UUID.randomUUID().toString());
         fields.put(Jdbc.Role.SYSTEM, false);
         fields.put(Jdbc.Role.DESCRIPTION, this.description);
-        fields.put(Jdbc.Role.HOME_PAGE_ID, this.page.get(Jdbc.Page.PAGE_ID));
+        fields.put(Jdbc.Role.HOME_PAGE_ID, this.homePage.get(Jdbc.Page.PAGE_ID));
         fields.put(Jdbc.Role.NAME, this.name);
 
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
