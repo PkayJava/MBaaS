@@ -330,6 +330,9 @@ public class Factory implements Serializable,
     public <T> NashornTextField<T> createTextField(MarkupContainer container, String id, Class<T> type) {
         NashornTextField<T> object = new NashornTextField<>(id, createPropertyModel(this.pageModel, id), type);
         object.setScript(this.script);
+        object.setPageModel(this.pageModel);
+        object.setFactory(this);
+        object.setDisk(this.disk);
         container.add(object);
         this.children.put(id, object);
         return object;
