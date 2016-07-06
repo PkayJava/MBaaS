@@ -39,8 +39,12 @@
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="#">Special Thanks</a></li>
-                <li><a href="https://www.yourkit.com/java/profiler/index.jsp" target="_blank"><img height="20" src="https://www.yourkit.com/images/yklogo.png"/></a></li>
-                <li><a href="https://www.jetbrains.com/idea/" target="_blank"><img height="20" src="mbaas-docs/examples/IJ.png"/></a></li>
+                <li><a href="https://www.yourkit.com/java/profiler/index.jsp" target="_blank"><img height="20"
+                                                                                                   src="https://www.yourkit.com/images/yklogo.png"/></a>
+                </li>
+                <li><a href="https://www.jetbrains.com/idea/" target="_blank"><img height="20"
+                                                                                   src="mbaas-docs/examples/IJ.png"/></a>
+                </li>
             </ul>
         </nav>
     </div>
@@ -411,17 +415,26 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                 </figure>
             </div>
             <div class="bs-docs-section">
-                <h1 id="mbaas-cms-markup-element" class="page-header">Markup Element</h1>
-                <p id="mbaas-cms-markup-element-link"><strong>Link</strong></p>
+                <h1 id="mbaas-server-side-element" class="page-header">Server Side Element</h1>
+                <p id="mbaas-server-side-element-link"><label class="label label-danger">Link</label></p>
+                <p>it is a server side link, so you will need to define its callback method when user click on that
+                    link. its callback have to be following pattern</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">function {link_id}__on_click(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}</code></pre>
+                </figure>
+                <p>Full Example :</p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
 */
 function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
-  factory.createLink(&quot;link&quot;);
+  var demoLink = factory.createLink(&quot;demoLink&quot;);
+  var label = factory.createLabel(&quot;label&quot;);
 }
 
-function link__on_click(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+function demoLink__on_click(requestCycle, disk, jdbcTemplate, factory, pageModel){
+  pageModel['label'] = &quot;You Clicked Me !&quot;;
 }
 
 /*
@@ -438,19 +451,145 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/head&gt;
 &lt;body&gt;
   &lt;wicket:extend&gt;
-    &lt;a wicket:id=&quot;link&quot;&gt;Link&lt;/a&gt;
+    &lt;a wicket:id=&quot;demoLink&quot;&gt;Demo Link&lt;/a&gt;
+    &lt;span wicket:id=&quot;label&quot;&gt;&lt;/span&gt;
   &lt;/wicket:extend&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <img src="mbaas-docs/examples/link.png" class="thumbnail img-responsive">
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <img src="mbaas-docs/examples/link_clicked.png" class="thumbnail img-responsive">
+                    </div>
+                </div>
                 <hr/>
-                <p id="mbaas-cms-markup-element-page-link"><strong>PageLink</strong></p>
+                <p id="mbaas-server-side-element-page-link"><label class="label label-danger">PageLink</label></p>
+                <p>it is a server side link which will redirect user to another page when he/she clicked it. the
+                    following example it will redirect to page demo_link, in this example it is require you to create a
+                    page first.</p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
 */
 function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
-  factory.createPageLink(&quot;pageLink&quot;,&quot;f&quot;);
+  var demoPageLink = factory.createPageLink(&quot;demoPageLink&quot;, &quot;demo_link&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+    &lt;div class=&quot;box box-primary&quot;&gt;
+        &lt;div class=&quot;box-header with-border&quot;&gt;
+            &lt;h3 class=&quot;box-title&quot;&gt;Demo PageLink&lt;/h3&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;box-body&quot;&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;a wicket:id=&quot;demoPageLink&quot;&gt;Demo PageLink&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;box-footer&quot;&gt;
+
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <img src="mbaas-docs/examples/page_link.png" class="thumbnail img-responsive">
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <img src="mbaas-docs/examples/page_link_clicked.png" class="thumbnail img-responsive">
+                    </div>
+                </div>
+                <hr/>
+                <p id="mbaas-server-side-element-hiddenfield"><label class="label label-danger">HiddenField</label></p>
+                <p>It is a server side hidden field, it is a form element, every form element support validation
+                    mechanism, to do that, you will need to register a event method for validation, and that event
+                    method will be invoked during form post back process.</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">hiddenField.registerValidator(event);
+hiddenField.registerValidator(event, params);</code></pre>
+                </figure>
+                <p>Full Example :</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;input type=&quot;hidden&quot; wicket:id=&quot;hidden&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var hidden = factory.createHiddenField(form, 'hidden', String.class);
+  hidden.registerValidator('hello');
+}
+
+function hidden__hello(jdbcTemplate, validatable, params){
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}   </code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-form"><label class="label label-danger">Form</label></p>
+                <p>
+                    it is a server side form which is use for send user input data to server, form could stay as child
+                    element of the other form, and every single form will have to event callback method, on_error and
+                    on_submit,
+                    on_error will be call when ever we have error during validation step of its children or form
+                    validator itself and on_submit will be call when there is no error is reported only.
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">function {form_id}__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}
+
+function {form_id}__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}</code></pre>
+                </figure>
+                <p>Full Example :</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+}
+
+function form__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}
+
+function form__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){
 }
 
 /*
@@ -467,33 +606,13 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/head&gt;
 &lt;body&gt;
   &lt;wicket:extend&gt;
-    &lt;a wicket:id=&quot;pageLink&quot;&gt;PP&lt;/a&gt;
+    &lt;form wicket:id=&quot;form&quot;/&gt;
   &lt;/wicket:extend&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-hiddenfield"><strong>HiddenField</strong></p>
-                <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var hiddenField = factory.createHiddenField(form, &quot;hiddenField&quot;);</code></pre>
-                </figure>
-                <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;input type=&quot;hidden&quot; wicket:id=&quot;hiddenField&quot;/&gt;
-&lt;/form&gt;</code></pre>
-                </figure>
-                <hr/>
-                <p id="mbaas-cms-markup-element-form"><strong>Form</strong></p>
-                <figure class="highlight">
-                    <pre><code class="language-java"
-                               data-lang="java">var form = factory.createForm(&quot;form&quot;);</code></pre>
-                </figure>
-                <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;&lt;/form&gt;</code></pre>
-                </figure>
-                <hr/>
-                <p id="mbaas-cms-markup-element-emailtextfield"><strong>EmailTextField</strong></p>
+                <p id="mbaas-server-side-element-emailtextfield"><strong>EmailTextField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var emailTextField = factory.createEmailTextField(form, &quot;emailTextField&quot;);</code></pre>
@@ -504,7 +623,7 @@ var emailTextField = factory.createEmailTextField(form, &quot;emailTextField&quo
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-dropdownchoice"><strong>DropDownChoice</strong></p>
+                <p id="mbaas-server-side-element-dropdownchoice"><strong>DropDownChoice</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
@@ -529,7 +648,7 @@ var dropDownChoice = factory.createDropDownChoice(form, &quot;dropDownChoice&quo
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-datetextfield"><strong>DateTextField</strong></p>
+                <p id="mbaas-server-side-element-datetextfield"><strong>DateTextField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var dateTextField = factory.createDateTextField(form, &quot;dateTextField&quot;);</code></pre>
@@ -540,7 +659,7 @@ var dateTextField = factory.createDateTextField(form, &quot;dateTextField&quot;)
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-colortextfield"><strong>ColorTextField</strong></p>
+                <p id="mbaas-server-side-element-colortextfield"><strong>ColorTextField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var colorTextField = factory.createColorTextField(form, &quot;colorTextField&quot;);</code></pre>
@@ -551,7 +670,7 @@ var colorTextField = factory.createColorTextField(form, &quot;colorTextField&quo
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-checkboxmultiplechoice"><strong>CheckBoxMultipleChoice</strong></p>
+                <p id="mbaas-server-side-element-checkboxmultiplechoice"><strong>CheckBoxMultipleChoice</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
@@ -576,7 +695,7 @@ var checkbox = factory.createCheckBoxMultipleChoice(form, &quot;checkbox&quot;, 
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-checkbox"><strong>CheckBox</strong></p>
+                <p id="mbaas-server-side-element-checkbox"><strong>CheckBox</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var checkBox = factory.createCheckBox(form,&quot;checkBox&quot;);</code></pre>
@@ -587,7 +706,7 @@ var checkBox = factory.createCheckBox(form,&quot;checkBox&quot;);</code></pre>
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-button"><strong>Button</strong></p>
+                <p id="mbaas-server-side-element-button"><strong>Button</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var button = factory.createButtonform,&quot;button&quot;);
@@ -607,7 +726,7 @@ function button__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-textarea"><strong>TextArea</strong></p>
+                <p id="mbaas-server-side-element-textarea"><strong>TextArea</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var textarea = factory.createTextArea(form,&quot;text&quot;);</code></pre>
@@ -618,7 +737,7 @@ var textarea = factory.createTextArea(form,&quot;text&quot;);</code></pre>
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-table"><strong>Table</strong></p>
+                <p id="mbaas-server-side-element-table"><strong>Table</strong></p>
                 <div>
                     Column definition.
                 </div>
@@ -677,7 +796,9 @@ var textarea = factory.createTextArea(form,&quot;text&quot;);</code></pre>
                         <tr>
                             <td>actionColumn</td>
                             <td>
-                                <div>it is use together with CheckBox column or Action column for having extra header link/button.</div>
+                                <div>it is use together with CheckBox column or Action column for having extra header
+                                    link/button.
+                                </div>
                                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">{&quot;Name&quot;:&quot;CSS Class&quot;,&quot;Name&quot;:&quot;CSS Class&quot;}</code></pre>
@@ -767,7 +888,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-listchoice"><strong>ListChoice</strong></p>
+                <p id="mbaas-server-side-element-listchoice"><strong>ListChoice</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
@@ -792,7 +913,7 @@ var listChoice = factory.createListChoice(form, &quot;listChoice&quot;, factory.
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-listmultiplechoice"><strong>ListMultipleChoice</strong></p>
+                <p id="mbaas-server-side-element-listmultiplechoice"><strong>ListMultipleChoice</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
@@ -817,7 +938,7 @@ var listMultipleChoice = factory.createListMultipleChoice(form, &quot;listMultip
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-numbertextfield"><strong>NumberTextField</strong></p>
+                <p id="mbaas-server-side-element-numbertextfield"><strong>NumberTextField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var numberTextField = factory.createNumberTextField(form, &quot;numberTextField&quot;, Float.class);</code></pre>
@@ -828,7 +949,7 @@ var numberTextField = factory.createNumberTextField(form, &quot;numberTextField&
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-passwordtextfield"><strong>PasswordTextField</strong></p>
+                <p id="mbaas-server-side-element-passwordtextfield"><strong>PasswordTextField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var passwordTextField = factory.createPasswordTextField(form, &quot;passwordTextField&quot;);</code></pre>
@@ -839,7 +960,7 @@ var passwordTextField = factory.createPasswordTextField(form, &quot;passwordText
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-radiochoice"><strong>RadioChoice</strong></p>
+                <p id="mbaas-server-side-element-radiochoice"><strong>RadioChoice</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
@@ -864,7 +985,7 @@ var radioChoice = factory.createRadioChoice(form, &quot;radioChoice&quot;, facto
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-rangetextfield"><strong>RangeTextField</strong></p>
+                <p id="mbaas-server-side-element-rangetextfield"><strong>RangeTextField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var rangeTextField = factory.createRangeTextField(form, &quot;rangeTextField&quot;, Float.class);</code></pre>
@@ -875,7 +996,7 @@ var rangeTextField = factory.createRangeTextField(form, &quot;rangeTextField&quo
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-requiredtextfield"><strong>RequiredTextField</strong></p>
+                <p id="mbaas-server-side-element-requiredtextfield"><strong>RequiredTextField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
 var requiredTextField = factory.createRequiredTextField(form, &quot;requiredTextField&quot;, String.class);</code></pre>
@@ -886,7 +1007,7 @@ var requiredTextField = factory.createRequiredTextField(form, &quot;requiredText
 &lt;/form&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-select2multiplechoice"><strong>Select2MultipleChoice</strong></p>
+                <p id="mbaas-server-side-element-select2multiplechoice"><strong>Select2MultipleChoice</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -937,7 +1058,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-select2singlechoice"><strong>Select2SingleChoice</strong></p>
+                <p id="mbaas-server-side-element-select2singlechoice"><strong>Select2SingleChoice</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -988,7 +1109,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-textfield"><strong>TextField</strong></p>
+                <p id="mbaas-server-side-element-textfield"><strong>TextField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1020,7 +1141,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-timetextfield"><strong>TimeTextField</strong></p>
+                <p id="mbaas-server-side-element-timetextfield"><strong>TimeTextField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1052,7 +1173,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-urltextfield"><strong>UrlTextField</strong></p>
+                <p id="mbaas-server-side-element-urltextfield"><strong>UrlTextField</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1084,7 +1205,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-label"><strong>Label</strong></p>
+                <p id="mbaas-server-side-element-label"><strong>Label</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1114,7 +1235,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-fileupload"><strong>FileUpload</strong></p>
+                <p id="mbaas-server-side-element-fileupload"><strong>FileUpload</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1164,7 +1285,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-multiplefileupload"><strong>MultiFileUpload</strong></p>
+                <p id="mbaas-server-side-element-multiplefileupload"><strong>MultiFileUpload</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1203,7 +1324,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-cms-markup-element-image"><strong>Image</strong></p>
+                <p id="mbaas-server-side-element-image"><strong>Image</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">var image = factory.createImage(form,&quot;image&quot;);</code></pre>
                 </figure>
@@ -1211,7 +1332,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
                     <pre><code class="language-html"
                                data-lang="html">&lt;img wicket:id=&quot;image&quot;/&gt;</code></pre>
                 </figure>
-                <p id="mbaas-cms-markup-element-editor-text-area"><strong>EditorTextArea</strong></p>
+                <p id="mbaas-server-side-element-editor-text-area"><strong>EditorTextArea</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1242,7 +1363,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
-                <p id="mbaas-cms-markup-element-full-calendar"><strong>FullCalendar</strong></p>
+                <p id="mbaas-server-side-element-full-calendar"><strong>FullCalendar</strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1367,40 +1488,41 @@ field.isTrue();</code></pre>
                             <li><a href="#mbaas-cms-page">Page</a></li>
                         </ul>
                     </li>
-                    <li><a href=#mbaas-cms-markup-element>Markup Element</a>
+                    <li><a href=#mbaas-server-side-element>Server Side Element</a>
                         <ul class="nav">
-                            <li><a href="#mbaas-cms-markup-element-link">Link</a></li>
-                            <li><a href="#mbaas-cms-markup-element-page-link">PageLink</a></li>
-                            <li><a href="#mbaas-cms-markup-element-hiddenfield">HiddenField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-form">Form</a></li>
-                            <li><a href="#mbaas-cms-markup-element-emailtextfield">EmailTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-dropdownchoice">DropDownChoice</a></li>
-                            <li><a href="#mbaas-cms-markup-element-datetextfield">DateTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-colortextfield">ColorTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-checkboxmultiplechoice">CheckBoxMultipleChoice</a>
+                            <li><a href="#mbaas-server-side-element-link">Link</a></li>
+                            <li><a href="#mbaas-server-side-element-page-link">PageLink</a></li>
+                            <li><a href="#mbaas-server-side-element-hiddenfield">HiddenField</a></li>
+                            <li><a href="#mbaas-server-side-element-form">Form</a></li>
+                            <li><a href="#mbaas-server-side-element-emailtextfield">EmailTextField</a></li>
+                            <li><a href="#mbaas-server-side-element-dropdownchoice">DropDownChoice</a></li>
+                            <li><a href="#mbaas-server-side-element-datetextfield">DateTextField</a></li>
+                            <li><a href="#mbaas-server-side-element-colortextfield">ColorTextField</a></li>
+                            <li><a href="#mbaas-server-side-element-checkboxmultiplechoice">CheckBoxMultipleChoice</a>
                             </li>
-                            <li><a href="#mbaas-cms-markup-element-checkbox">CheckBox</a></li>
-                            <li><a href="#mbaas-cms-markup-element-button">Button</a></li>
-                            <li><a href="#mbaas-cms-markup-element-textarea">TextArea</a></li>
-                            <li><a href="#mbaas-cms-markup-element-table">Table</a></li>
-                            <li><a href="#mbaas-cms-markup-element-listchoice">ListChoice</a></li>
-                            <li><a href="#mbaas-cms-markup-element-listmultiplechoice">ListMultipleChoice</a></li>
-                            <li><a href="#mbaas-cms-markup-element-numbertextfield">NumberTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-passwordtextfield">PasswordTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-radiochoice">RadioChoice</a></li>
-                            <li><a href="#mbaas-cms-markup-element-rangetextfield">RangeTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-requiredtextfield">RequiredTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-select2multiplechoice">Select2MultipleChoice</a></li>
-                            <li><a href="#mbaas-cms-markup-element-select2singlechoice">Select2SingleChoice</a></li>
-                            <li><a href="#mbaas-cms-markup-element-textfield">TextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-timetextfield">TimeTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-urltextfield">UrlTextField</a></li>
-                            <li><a href="#mbaas-cms-markup-element-label">Label</a></li>
-                            <li><a href="#mbaas-cms-markup-element-fileupload">FileUpload</a></li>
-                            <li><a href="#mbaas-cms-markup-element-multiplefileupload">MultiFileUpload</a></li>
-                            <li><a href="#mbaas-cms-markup-element-image">Image</a></li>
-                            <li><a href="#mbaas-cms-markup-element-editor-text-area">EditorTextArea (WYSIWYG)</a></li>
-                            <li><a href="#mbaas-cms-markup-element-full-calendar">FullCalendar</a></li>
+                            <li><a href="#mbaas-server-side-element-checkbox">CheckBox</a></li>
+                            <li><a href="#mbaas-server-side-element-button">Button</a></li>
+                            <li><a href="#mbaas-server-side-element-textarea">TextArea</a></li>
+                            <li><a href="#mbaas-server-side-element-table">Table</a></li>
+                            <li><a href="#mbaas-server-side-element-listchoice">ListChoice</a></li>
+                            <li><a href="#mbaas-server-side-element-listmultiplechoice">ListMultipleChoice</a></li>
+                            <li><a href="#mbaas-server-side-element-numbertextfield">NumberTextField</a></li>
+                            <li><a href="#mbaas-server-side-element-passwordtextfield">PasswordTextField</a></li>
+                            <li><a href="#mbaas-server-side-element-radiochoice">RadioChoice</a></li>
+                            <li><a href="#mbaas-server-side-element-rangetextfield">RangeTextField</a></li>
+                            <li><a href="#mbaas-server-side-element-requiredtextfield">RequiredTextField</a></li>
+                            <li><a href="#mbaas-server-side-element-select2multiplechoice">Select2MultipleChoice</a>
+                            </li>
+                            <li><a href="#mbaas-server-side-element-select2singlechoice">Select2SingleChoice</a></li>
+                            <li><a href="#mbaas-server-side-element-textfield">TextField</a></li>
+                            <li><a href="#mbaas-server-side-element-timetextfield">TimeTextField</a></li>
+                            <li><a href="#mbaas-server-side-element-urltextfield">UrlTextField</a></li>
+                            <li><a href="#mbaas-server-side-element-label">Label</a></li>
+                            <li><a href="#mbaas-server-side-element-fileupload">FileUpload</a></li>
+                            <li><a href="#mbaas-server-side-element-multiplefileupload">MultiFileUpload</a></li>
+                            <li><a href="#mbaas-server-side-element-image">Image</a></li>
+                            <li><a href="#mbaas-server-side-element-editor-text-area">EditorTextArea (WYSIWYG)</a></li>
+                            <li><a href="#mbaas-server-side-element-full-calendar">FullCalendar</a></li>
                         </ul>
                     </li>
                     <li><a href=#mbaas-query>Query</a>
@@ -1429,7 +1551,9 @@ field.isTrue();</code></pre>
         <p>MBaaS offer Software as a Service, <a href="mailto:pkayjava@gmail.com">PkayJava</a></p>
         <br/>
         <p>YourKit supports open source projects with its full-featured Java Profiler.</p>
-        <p>YourKit, LLC is the creator of <a href="https://www.yourkit.com/java/profiler/index.jsp">YourKit Java Profiler</a> and <a href="https://www.yourkit.com/.net/profiler/index.jsp">YourKit .NET Profiler</a>, innovative and intelligent tools for profiling Java and .NET applications.</p>
+        <p>YourKit, LLC is the creator of <a href="https://www.yourkit.com/java/profiler/index.jsp">YourKit Java
+            Profiler</a> and <a href="https://www.yourkit.com/.net/profiler/index.jsp">YourKit .NET Profiler</a>,
+            innovative and intelligent tools for profiling Java and .NET applications.</p>
     </div>
 </footer>
 <script src=https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js></script>

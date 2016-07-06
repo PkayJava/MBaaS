@@ -8,12 +8,9 @@ import org.apache.wicket.model.IModel;
  */
 public class NashornLabel extends Label {
 
-    public NashornLabel(String id) {
-        super(id);
-    }
-
     public NashornLabel(String id, IModel<?> model) {
         super(id, model);
+        setOutputMarkupId(true);
     }
-    
+
 }
