@@ -28,7 +28,7 @@ public class NashornFormValidator implements IFormValidator {
 
     private FormComponent<?>[] components;
 
-    private Map<String, FormComponent<?>> map;
+    private Map<String, FormComponent<?>> formComponents;
 
     private Map<String, Object> params;
 
@@ -41,9 +41,9 @@ public class NashornFormValidator implements IFormValidator {
         this.event = event;
         this.script = script;
         this.components = components;
-        this.map = new HashMap<>();
+        this.formComponents = new HashMap<>();
         for (FormComponent<?> component : components) {
-            this.map.put(component.getId(), component);
+            this.formComponents.put(component.getId(), component);
         }
         this.params = params;
     }
@@ -69,11 +69,11 @@ public class NashornFormValidator implements IFormValidator {
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            invocable.invokeFunction(this.id + "__" + this.event, jdbcTemplate, this.map, this.params == null ? new HashMap<>() : this.params);
+            invocable.invokeFunction(this.id + "__" + this.event, jdbcTemplate, this.formComponents, this.params == null ? new HashMap<>() : this.params);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new WicketRuntimeException("function " + this.id + "__" + this.event + "(jdbcTemplate, components, params){} is missing");
+            throw new WicketRuntimeException("function " + this.id + "__" + this.event + "(jdbcTemplate, formComponents, params){} is missing");
         }
     }
 }

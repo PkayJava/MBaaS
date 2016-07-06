@@ -568,8 +568,16 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                     element of the other form, and every single form will have to event callback method, on_error and
                     on_submit,
                     on_error will be call when ever we have error during validation step of its children or form
-                    validator itself and on_submit will be call when there is no error is reported only.
+                    validator itself and on_submit will be call when there is no error is reported only. form validator is only for validate a compound input field together.
                 </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">form.registerValidator(event, formComponent1, formComponent2, formComponent3, formComponentN);
+form.registerValidator(event, params, formComponent1, formComponent2, formComponent3, formComponentN);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">function {form_id}__{event}(jdbcTemplate, formComponents, params){
+}</code></pre>
+                </figure>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">function {form_id}__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){
 }
