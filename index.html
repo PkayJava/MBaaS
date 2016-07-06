@@ -526,6 +526,10 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                     <pre><code class="language-java" data-lang="java">hiddenField.registerValidator(event);
 hiddenField.registerValidator(event, params);</code></pre>
                 </figure>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">function {hidden_field_id}__{event}(jdbcTemplate, validatable, params){
+}</code></pre>
+                </figure>
                 <p>Full Example :</p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">&lt;!DOCTYPE html&gt;
@@ -568,7 +572,8 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                     element of the other form, and every single form will have to event callback method, on_error and
                     on_submit,
                     on_error will be call when ever we have error during validation step of its children or form
-                    validator itself and on_submit will be call when there is no error is reported only. form validator is only for validate a compound input field together.
+                    validator itself and on_submit will be call when there is no error is reported only. form validator
+                    is only for validate a compound input field together.
                 </p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">form.registerValidator(event, formComponent1, formComponent2, formComponent3, formComponentN);
@@ -620,15 +625,52 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-emailtextfield"><strong>EmailTextField</strong></p>
+                <p id="mbaas-server-side-element-emailtextfield"><label
+                        class="label label-danger">EmailTextField</label></p>
+                <p>It is a server text field, which accept only email address, it is also able to register validation
+                    event to validate further more complex like check for duplication in database.</p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var emailTextField = factory.createEmailTextField(form, &quot;emailTextField&quot;);</code></pre>
+                    <pre><code class="language-java" data-lang="java">emailTextField.registerValidator(event);
+emailTextField.registerValidator(event, params);</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;input type=&quot;text&quot; wicket:id=&quot;emailTextField&quot;/&gt;
-&lt;/form&gt;</code></pre>
+                    <pre><code class="language-java" data-lang="java">function {email_text_field_id}__{event}(jdbcTemplate, validatable, params){
+}</code></pre>
+                </figure>
+                <p>Full Example :</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;input type=&quot;text&quot; wicket:id=&quot;email&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var email = factory.createEmailTextField(form, 'email');
+  email.registerValidator('hello');
+}
+
+function email__hello(jdbcTemplate, validatable, params){
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}   </code></pre>
                 </figure>
                 <hr/>
                 <p id="mbaas-server-side-element-dropdownchoice"><strong>DropDownChoice</strong></p>
