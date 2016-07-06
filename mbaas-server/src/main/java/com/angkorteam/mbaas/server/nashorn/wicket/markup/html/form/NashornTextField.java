@@ -17,6 +17,7 @@ public class NashornTextField<T> extends TextField<T> {
 
     public NashornTextField(String id, IModel<T> model, Class<T> type) {
         super(id, model, type);
+        setOutputMarkupId(true);
     }
 
     public String getScript() {
@@ -44,5 +45,9 @@ public class NashornTextField<T> extends TextField<T> {
     public void registerValidator(String event, Map<String, Object> params) {
         NashornValidator validator = new NashornValidator(getId(), event, this.script, params);
         super.add(validator);
+    }
+
+    public void registerUpdatingBehavior(String event){
+        
     }
 }
