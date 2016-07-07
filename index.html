@@ -673,9 +673,25 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 }   </code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-dropdownchoice"><strong>DropDownChoice</strong></p>
+                <p id="mbaas-server-side-element-dropdownchoice"><label
+                        class="label label-danger">DropDownChoice</label></p>
+                <p>it is a single select dropdown server side form input control, this control is automatically convert
+                    between string and user object (dictionary) vice versa vai its choice renderer, it is also accept validation event.</p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+                    <pre><code class="language-java" data-lang="java">dropDownChoice.registerValidator(event);
+dropDownChoice.registerValidator(event, params);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">function {drop_down_choice_id}__{event}(jdbcTemplate, validatable, params){
+}</code></pre>
+                </figure>
+                <p>Full Example :</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
 var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
 
 var optionA = factory.createMap();
@@ -690,12 +706,29 @@ var choices = factory.createList();
 choices.add(optionA);
 choices.add(optionB)
 
-var dropDownChoice = factory.createDropDownChoice(form, &quot;dropDownChoice&quot;, factory.createListModel(choices), renderer);</code></pre>
+var dropDownChoice = factory.createDropDownChoice(form, &quot;dropDownChoice&quot;, factory.createListModel(choices), renderer);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;select wicket:id=&quot;dropDownChoice&quot;&gt;&lt;/select&gt;
-&lt;/form&gt;</code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+        &lt;select wicket:id=&quot;dropDownChoice&quot;&gt;&lt;/select&gt;
+    &lt;/form&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
                 <p id="mbaas-server-side-element-datetextfield"><strong>DateTextField</strong></p>
