@@ -270,7 +270,7 @@ var me = new Date();</code></pre>
                 <h1 id="mbaas-database" class="page-header">MBaaS JdbcTemplate (<a target="_blank"
                                                                                    href="http://docs.spring.io/spring/docs/current/spring-framework-reference/html/jdbc.html">CRUD</a>)
                 </h1>
-                <p id="mbaas-database-create"><strong>Create</strong></p>
+                <p id="mbaas-database-create"><strong><label class="label label-danger">Create</label></strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">var jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
@@ -288,7 +288,7 @@ var fields = new HashMap();
 fields.put(&quot;user_id&quot;,userId);
 jdbcInsert.execute(fields);</code></pre>
                 </figure>
-                <p id="mbaas-database-read"><strong>Read</strong></p>
+                <p id="mbaas-database-read"><strong><label class="label label-danger">Read</label></strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">jdbcTemplate.queryForList(query,param...)
@@ -301,7 +301,7 @@ jdbcTemplate.queryForMap(query,params...)
 // Example It will return a map
 jdbcTemplate.queryForMap(&quot;select * from user where user_id = ? and created_date = ? limit 0,1&quot;, 1, new Date());</code></pre>
                 </figure>
-                <p id="mbaas-database-update"><strong>Update</strong></p>
+                <p id="mbaas-database-update"><strong><label class="label label-danger">Update</label></strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">var jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
@@ -321,7 +321,7 @@ var wheres = new HashMap();
 wheres.put(&quot;user_id&quot;, 1);
 jdbcUpdate.execute(fields,wheres);</code></pre>
                 </figure>
-                <p id="mbaas-database-delete"><strong>Delete</strong></p>
+                <p id="mbaas-database-delete"><strong><label class="label label-danger">Delete</label></strong></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">jdbcTemplate.update(query,params...);
@@ -332,12 +332,12 @@ jdbcTemplate.update(&quot;delete from user where user_id = ?&quot;,1);</code></p
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-cms" class="page-header">Content Management System</h1>
-                <p id="mbaas-cms-menu" class="lead">Menu</p>
+                <p id="mbaas-cms-menu" class="lead"><label class="label label-danger">Menu</label></p>
                 <p>
                     Menu : it is used to group pages together which might have similar function, category. it is also
                     help you to keep more room for display content.
                 </p>
-                <p id="mbaas-cms-block" class="lead">Block</p>
+                <p id="mbaas-cms-block" class="lead"><label class="label label-danger">Block</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -361,7 +361,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel, bl
   &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
-                <p id="mbaas-cms-layout" class="lead">Layout</p>
+                <p id="mbaas-cms-layout" class="lead"><label class="label label-danger">Layout</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -386,7 +386,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
-                <p id="mbaas-cms-page" class="lead">Page</p>
+                <p id="mbaas-cms-page" class="lead"><label class="label label-danger">Page</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -676,7 +676,8 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                 <p id="mbaas-server-side-element-dropdownchoice"><label
                         class="label label-danger">DropDownChoice</label></p>
                 <p>it is a single select dropdown server side form input control, this control is automatically convert
-                    between string and user object (dictionary) vice versa vai its choice renderer, it is also accept validation event.</p>
+                    between string and user object (dictionary) vice versa vai its choice renderer, it is also accept
+                    validation event.</p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">dropDownChoice.registerValidator(event);
 dropDownChoice.registerValidator(event, params);</code></pre>
@@ -731,31 +732,87 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-datetextfield"><strong>DateTextField</strong></p>
+                <p id="mbaas-server-side-element-datetextfield"><label class="label label-danger">DateTextField</label>
+                </p>
+                <p>it is a date picker input field. it is also accept validation event, its data type is use
+                    java.util.Date.</p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var dateTextField = factory.createDateTextField(form, &quot;dateTextField&quot;);</code></pre>
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var date = factory.createDateTextField(form, &quot;date&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;input type=&quot;text&quot; wicket:id=&quot;dateTextField&quot;/&gt;
-&lt;/form&gt;</code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;input type=&quot;text&quot; wicket:id=&quot;date&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-colortextfield"><strong>ColorTextField</strong></p>
+                <p id="mbaas-server-side-element-colortextfield"><label
+                        class="label label-danger">ColorTextField</label></p>
+                <p>it is color picker input field, it is also accept validation event, since we don't accept color at
+                    server side, so its data type is just a simple string.</p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var colorTextField = factory.createColorTextField(form, &quot;colorTextField&quot;);</code></pre>
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var color = factory.createColorTextField(form, &quot;color&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;input type=&quot;text&quot; wicket:id=&quot;colorTextField&quot;/&gt;
-&lt;/form&gt;</code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;input type=&quot;text&quot; wicket:id=&quot;color&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-checkboxmultiplechoice"><strong>CheckBoxMultipleChoice</strong></p>
+                <p id="mbaas-server-side-element-checkboxmultiplechoice"><label class="label label-danger">CheckBoxMultipleChoice</label>
+                </p>
+                <p>
+                    it is group of checkbox
+                </p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
 var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
 
 var optionA = factory.createMap();
@@ -770,78 +827,177 @@ var choices = factory.createList();
 choices.add(optionA);
 choices.add(optionB)
 
-var checkbox = factory.createCheckBoxMultipleChoice(form, &quot;checkbox&quot;, factory.createListModel(choices), renderer);</code></pre>
-                </figure>
-                <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;span wicket:id=&quot;checkbox&quot;&gt;&lt;/span&gt;
-&lt;/form&gt;</code></pre>
-                </figure>
-                <hr/>
-                <p id="mbaas-server-side-element-checkbox"><strong>CheckBox</strong></p>
-                <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var checkBox = factory.createCheckBox(form,&quot;checkBox&quot;);</code></pre>
-                </figure>
-                <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;input type=&quot;checkbox&quot; wicket:id=&quot;checkBox&quot;/&gt;
-&lt;/form&gt;</code></pre>
-                </figure>
-                <hr/>
-                <p id="mbaas-server-side-element-button"><strong>Button</strong></p>
-                <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var button = factory.createButtonform,&quot;button&quot;);
-
-// there are two functions will be executed
-// function name rule {markup id}__on_submit
-function button__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){
+var checkbox = factory.createCheckBoxMultipleChoice(form, &quot;checkbox&quot;, factory.createListModel(choices), renderer);
 }
 
-// function name rule {markup id}__on_error
-function button__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 }</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;button type=&quot;submit&quot; wicket:id=&quot;button&quot;&gt;Okay&lt;/button&gt;
-&lt;/form&gt;</code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+        &lt;span wicket:id=&quot;checkbox&quot;&gt;&lt;/span&gt;
+    &lt;/form&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-textarea"><strong>TextArea</strong></p>
+                <p id="mbaas-server-side-element-checkbox"><label class="label label-danger">CheckBox</label></p>
+                <p>
+                    it is a single checkbox
+                </p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var textarea = factory.createTextArea(form,&quot;text&quot;);</code></pre>
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var checkbox = factory.createCheckBox(form,&quot;checkbox&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;textarea wicket:id=&quot;text&quot;/&gt;
-&lt;/form&gt;</code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;input type=&quot;checkbox&quot; wicket:id=&quot;checkbox&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-table"><strong>Table</strong></p>
-                <div>
+                <p id="mbaas-server-side-element-button"><label class="label label-danger">Button</label></p>
+                <p>
+                    it is a submit button
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+var form = factory.createForm(&quot;form&quot;);
+var button = factory.createButton(form,&quot;button&quot;);
+}
+
+function form__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){}
+function form__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){}
+
+function button__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}
+
+function button__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;button type=&quot;submit&quot; wicket:id=&quot;button&quot;&gt;Okay&lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-textarea"><label class="label label-danger">TextArea</label></p>
+                <p>
+                    it is multiple line input field
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var textarea = factory.createTextArea(form,&quot;text&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;textarea wicket:id=&quot;text&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-table"><label class="label label-danger">Table</label></p>
+                <p>
+                    it is html table, usually it is for display data
+                </p>
+                <p>
                     Column definition.
-                </div>
+                </p>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
                             <th class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Field</th>
                             <th class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Description</th>
+                            <th class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Value / Enum</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr>
                             <td>tableColumn</td>
                             <td>column header</td>
+                            <td>String</td>
                         </tr>
                         <tr>
                             <td>htmlColumn</td>
-                            <td>column type, <span class="label label-info">Hidden</span> <span
-                                    class="label label-info">CheckBox</span> <span class="label label-info">Label</span>
-                                <span class="label label-info">Action</span>
+                            <td>
+                                column type
+                            </td>
+                            <td>
+                                <p><span class="label label-info">Hidden</span></p>
+                                <p><span class="label label-info">CheckBox</span></p>
+                                <p><span class="label label-info">Label</span></p>
+                                <p><span class="label label-info">Action</span></p>
                             </td>
                         </tr>
                         <tr>
@@ -852,36 +1008,40 @@ var textarea = factory.createTextArea(form,&quot;text&quot;);</code></pre>
                                 htmlColumn is ideally for that identity column to load into table but it show does not
                                 show
                             </td>
+                            <td>String</td>
                         </tr>
                         <tr>
                             <td>queryColumn</td>
                             <td>field name of table in the database</td>
+                            <td>String</td>
                         </tr>
                         <tr>
                             <td>classColumn</td>
                             <td>data type of column
-                                <span class="label label-info">Boolean</span>
-                                <span class="label label-info">Byte</span>
-                                <span class="label label-info">Short</span>
-                                <span class="label label-info">Integer</span>
-                                <span class="label label-info">Long</span>
-                                <span class="label label-info">Float</span>
-                                <span class="label label-info">Double</span>
-                                <span class="label label-info">BigInteger</span>
-                                <span class="label label-info">BigDecimal</span>
-                                <span class="label label-info">Character</span>
-                                <span class="label label-info">String</span>
-                                <span class="label label-info">LocalTime</span>
-                                <span class="label label-info">LocalDate</span>
-                                <span class="label label-info">LocalDateTime</span>
+                            </td>
+                            <td>
+                                <p><span class="label label-info">Boolean</span></p>
+                                <p><span class="label label-info">Byte</span></p>
+                                <p><span class="label label-info">Short</span></p>
+                                <p><span class="label label-info">Integer</span></p>
+                                <p><span class="label label-info">Long</span></p>
+                                <p><span class="label label-info">Float</span></p>
+                                <p><span class="label label-info">Double</span></p>
+                                <p><span class="label label-info">BigInteger</span></p>
+                                <p><span class="label label-info">BigDecimal</span></p>
+                                <p><span class="label label-info">Character</span></p>
+                                <p><span class="label label-info">String</span></p>
+                                <p><span class="label label-info">LocalTime</span></p>
+                                <p><span class="label label-info">LocalDate</span></p>
+                                <p><span class="label label-info">LocalDateTime</span></p>
                             </td>
                         </tr>
                         <tr>
                             <td>actionColumn</td>
+                            <td>it is use together with CheckBox column or Action column for having extra header
+                                link/button.
+                            </td>
                             <td>
-                                <div>it is use together with CheckBox column or Action column for having extra header
-                                    link/button.
-                                </div>
                                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">{&quot;Name&quot;:&quot;CSS Class&quot;,&quot;Name&quot;:&quot;CSS Class&quot;}</code></pre>
@@ -891,7 +1051,9 @@ var textarea = factory.createTextArea(form,&quot;text&quot;);</code></pre>
                         <tr>
                             <td>linkColumn</td>
                             <td>
-                                <div>it is use together Action column</div>
+                                it is use together Action column
+                            </td>
+                            <td>
                                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">{&quot;Name&quot;:&quot;CSS Class&quot;,&quot;Name&quot;:&quot;CSS Class&quot;}</code></pre>
@@ -930,12 +1092,12 @@ function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
     {
       &quot;tableColumn&quot;:&quot;opertaion&quot;,
       &quot;htmlColumn&quot;:&quot;Action&quot;,
-      &quot;actionColumn&quot; : {&quot;Edit&quot;:&quot;btn-xs btn-info&quot;}
+      &quot;linkColumn&quot; : {&quot;Edit&quot;:&quot;btn-xs btn-info&quot;}
     }
   ];
 
-  var form = factory.createFilterForm(&quot;form&quot;);
-  var table = factory.createFilterForm(form, &quot;form_table&quot;, columns, 10);
+  var filterForm = factory.createFilterForm(&quot;filter-form&quot;);
+  var table = factory.createTable(filterForm, &quot;table&quot;, columns, 10);
 }
 
 // this function will be executed when you click on Edit link
@@ -953,27 +1115,213 @@ function form_table_operation_Edit__on_click(requestCycle, disk, jdbcTemplate, f
 // this is define the select table from
 // form is form markup id
 // from is event name
-function form_table__from(jdbcTemplate){
+function table__from(factory, jdbcTemplate, pageModel){
   return DSL.table(&quot;page&quot;);
+}
+
+function table__where(factory, jdbcTemplate, pageModel){
+}
+
+function table__having(factory, jdbcTemplate, pageModel){}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html"
+                               data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;filter-form&quot;&gt;
+      &lt;table wicket:id=&quot;table&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-listchoice"><strong class="label label-danger">ListChoice</strong></p>
+                <p>it is a single selection list</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
+
+var optionA = factory.createMap();
+optionA.put(&quot;id&quot;,&quot;MissA&quot;);
+optionA.put(&quot;text&quot;,&quot;Miss A Description&quot;);
+
+var optionB = factory.createMap();
+optionB.put(&quot;id&quot;,&quot;MissB&quot;);
+optionB.put(&quot;text&quot;,&quot;Miss B Description&quot;);
+
+var choices = factory.createList();
+choices.add(optionA);
+choices.add(optionB)
+
+var list = factory.createListChoice(form, &quot;list&quot;, factory.createListModel(choices), renderer, 2);
 }
 
 /*
 Page onBeforeRender
 */
 function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;select wicket:id=&quot;list&quot;&gt;&lt;/select&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-listmultiplechoice"><label class="label label-danger">ListMultipleChoice</label>
+                </p>
+                <p>it is a multiple selection list</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+var form = factory.createForm(&quot;form&quot;);
+var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
+
+var optionA = factory.createMap();
+optionA.put(&quot;id&quot;,&quot;MissA&quot;);
+optionA.put(&quot;text&quot;,&quot;Miss A Description&quot;);
+
+var optionB = factory.createMap();
+optionB.put(&quot;id&quot;,&quot;MissB&quot;);
+optionB.put(&quot;text&quot;,&quot;Miss B Description&quot;);
+
+var choices = factory.createList();
+choices.add(optionA);
+choices.add(optionB)
+
+var list = factory.createListMultipleChoice(form, &quot;list&quot;, factory.createListModel(choices), renderer, 2);
 }
-</code></pre>
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html"
-                               data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;table wicket:id=&quot;form_table&quot;/&gt;
-&lt;/form&gt;</code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;select wicket:id=&quot;list&quot;&gt;&lt;/select&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-listchoice"><strong>ListChoice</strong></p>
+                <p id="mbaas-server-side-element-numbertextfield"><label
+                        class="label label-danger">NumberTextField</label></p>
+                <p>it is a text field which accept only number</p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var number = factory.createNumberTextField(form, &quot;number&quot;, Float.class);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;input type=&quot;number&quot; wicket:id=&quot;number&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-passwordtextfield"><label
+                        class="label label-danger">PasswordTextField</label></p>
+                <p>
+                    it is a password text field
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var password = factory.createPasswordTextField(form, &quot;password&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;input type=&quot;password&quot; wicket:id=&quot;password&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-radiochoice"><label class="label label-danger">RadioChoice</label></p>
+                <p>
+                    it is a group of radio
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+var form = factory.createForm(&quot;form&quot;);
 var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
 
 var optionA = factory.createMap();
@@ -988,109 +1336,104 @@ var choices = factory.createList();
 choices.add(optionA);
 choices.add(optionB)
 
-var listChoice = factory.createListChoice(form, &quot;listChoice&quot;, factory.createListModel(choices), renderer, 2);</code></pre>
+var choice = factory.createRadioChoice(form, &quot;choice&quot;, factory.createListModel(choices), renderer);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;select wicket:id=&quot;listChoice&quot;&gt;&lt;/select&gt;
-&lt;/form&gt;</code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;span wicket:id=&quot;choice&quot;&gt;&lt;/span&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-listmultiplechoice"><strong>ListMultipleChoice</strong></p>
+                <p id="mbaas-server-side-element-rangetextfield"><label
+                        class="label label-danger">RangeTextField</label></p>
+                <p>it is number slider or number input field if browser is not support</p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var number = factory.createRangeTextField(form, &quot;number&quot;, Float.class);
+}
 
-var optionA = factory.createMap();
-optionA.put(&quot;id&quot;,&quot;MissA&quot;);
-optionA.put(&quot;text&quot;,&quot;Miss A Description&quot;);
-
-var optionB = factory.createMap();
-optionB.put(&quot;id&quot;,&quot;MissB&quot;);
-optionB.put(&quot;text&quot;,&quot;Miss B Description&quot;);
-
-var choices = factory.createList();
-choices.add(optionA);
-choices.add(optionB)
-
-var listMultipleChoice = factory.createListMultipleChoice(form, &quot;listMultipleChoice&quot;, factory.createListModel(choices), renderer, 2);</code></pre>
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;select wicket:id=&quot;listMultipleChoice&quot;&gt;&lt;/select&gt;
-&lt;/form&gt;</code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;input type=&quot;range&quot; wicket:id=&quot;number&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-numbertextfield"><strong>NumberTextField</strong></p>
+                <p id="mbaas-server-side-element-requiredtextfield"><label
+                        class="label label-danger">RequiredTextField</label></p>
+                <p>it is require text input field</p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var numberTextField = factory.createNumberTextField(form, &quot;numberTextField&quot;, Float.class);</code></pre>
-                </figure>
-                <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;input type=&quot;text&quot; wicket:id=&quot;numberTextField&quot;/&gt;
-&lt;/form&gt;</code></pre>
-                </figure>
-                <hr/>
-                <p id="mbaas-server-side-element-passwordtextfield"><strong>PasswordTextField</strong></p>
-                <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var passwordTextField = factory.createPasswordTextField(form, &quot;passwordTextField&quot;);</code></pre>
-                </figure>
-                <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;input type=&quot;password&quot; wicket:id=&quot;passwordTextField&quot;/&gt;
-&lt;/form&gt;</code></pre>
-                </figure>
-                <hr/>
-                <p id="mbaas-server-side-element-radiochoice"><strong>RadioChoice</strong></p>
-                <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var renderer = factory.createChoiceRenderer(&quot;id&quot;,&quot;text&quot;);
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+var form = factory.createForm(&quot;form&quot;);
+var text = factory.createRequiredTextField(form, &quot;text&quot;, String.class);
+}
 
-var optionA = factory.createMap();
-optionA.put(&quot;id&quot;,&quot;MissA&quot;);
-optionA.put(&quot;text&quot;,&quot;Miss A Description&quot;);
-
-var optionB = factory.createMap();
-optionB.put(&quot;id&quot;,&quot;MissB&quot;);
-optionB.put(&quot;text&quot;,&quot;Miss B Description&quot;);
-
-var choices = factory.createList();
-choices.add(optionA);
-choices.add(optionB)
-
-var radioChoice = factory.createRadioChoice(form, &quot;radioChoice&quot;, factory.createListModel(choices), renderer);</code></pre>
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;span wicket:id=&quot;radioChoice&quot;&gt;&lt;/span&gt;
-&lt;/form&gt;</code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;input type=&quot;text&quot; wicket:id=&quot;text&quot;/&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-rangetextfield"><strong>RangeTextField</strong></p>
-                <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var rangeTextField = factory.createRangeTextField(form, &quot;rangeTextField&quot;, Float.class);</code></pre>
-                </figure>
-                <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;input type=&quot;range&quot; wicket:id=&quot;rangeTextField&quot;/&gt;
-&lt;/form&gt;</code></pre>
-                </figure>
-                <hr/>
-                <p id="mbaas-server-side-element-requiredtextfield"><strong>RequiredTextField</strong></p>
-                <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var form = factory.createForm(&quot;form&quot;);
-var requiredTextField = factory.createRequiredTextField(form, &quot;requiredTextField&quot;, String.class);</code></pre>
-                </figure>
-                <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html">&lt;form wicket:id=&quot;form&quot;&gt;
-  &lt;input type=&quot;text&quot; wicket:id=&quot;requiredTextField&quot;/&gt;
-&lt;/form&gt;</code></pre>
-                </figure>
-                <hr/>
-                <p id="mbaas-server-side-element-select2multiplechoice"><strong>Select2MultipleChoice</strong></p>
+                <p id="mbaas-server-side-element-select2multiplechoice"><label class="label label-danger">Select2MultipleChoice</label>
+                </p>
+                <p>
+                    it is auto suggestion input tag
+                </p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1098,10 +1441,10 @@ Page onInitialize
 function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
   var form = factory.createForm(&quot;form&quot;);
   var renderer = factory.createChoiceRenderer(Jdbc.Menu.MENU_ID,Jdbc.Menu.TITLE);
-  var select2 = factory.createSelect2MultipleChoice(form, &quot;select2&quot;, renderer)
+  var tags = factory.createSelect2MultipleChoice(form, &quot;tags&quot;, renderer)
 }
 
-function select2__query(jdbcTemplate, factory, term, page) {
+function tags__query(jdbcTemplate, factory, term, page) {
   var items = jdbcTemplate.queryForList('select * from ' + Jdbc.MENU);
   var options = new ArrayList();
   for each (item in items) {
@@ -1111,11 +1454,11 @@ function select2__query(jdbcTemplate, factory, term, page) {
   return options;
 }
 
-function select2__has_more(jdbcTemplate, term, page){
+function tags__has_more(jdbcTemplate, term, page){
   return false;
 }
 
-function select2__to_choices(jdbcTemplate, ids) {
+function tags__to_choices(jdbcTemplate, ids) {
   return jdbcTemplate.queryForList(&quot;select * from &quot; + Jdbc.MENU + &quot; WHERE &quot; + Jdbc.Menu.MENU_ID + &quot; in (?)&quot;,ids);
 }
 
@@ -1134,14 +1477,18 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;body&gt;
 &lt;wicket:extend&gt;
   &lt;form wicket:id=&quot;form&quot;&gt;
-    &lt;select wicket:id=&quot;select2&quot; style=&quot;width:100%&quot;&gt;&lt;/select&gt;
+    &lt;select wicket:id=&quot;tags&quot; style=&quot;width:100%&quot;&gt;&lt;/select&gt;
   &lt;/form&gt;
 &lt;/wicket:extend&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-select2singlechoice"><strong>Select2SingleChoice</strong></p>
+                <p id="mbaas-server-side-element-select2singlechoice"><label class="label label-danger">Select2SingleChoice</label>
+                </p>
+                <p>
+                    it is single suggestion choice
+                </p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1149,10 +1496,10 @@ Page onInitialize
 function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
   var form = factory.createForm(&quot;form&quot;);
   var renderer = factory.createChoiceRenderer(Jdbc.Menu.MENU_ID,Jdbc.Menu.TITLE);
-  var select2 = factory.createSelect2SingleChoice(form, &quot;select2&quot;, renderer)
+  var choice = factory.createSelect2SingleChoice(form, &quot;choice&quot;, renderer)
 }
 
-function select2__query(jdbcTemplate, factory, term, page) {
+function choice__query(jdbcTemplate, factory, term, page) {
   var items = jdbcTemplate.queryForList('select * from ' + Jdbc.MENU);
   var options = new ArrayList();
   for each (item in items) {
@@ -1162,11 +1509,11 @@ function select2__query(jdbcTemplate, factory, term, page) {
   return options;
 }
 
-function select2__has_more(jdbcTemplate, term, page){
+function choice__has_more(jdbcTemplate, term, page){
   return false;
 }
 
-function select2__to_choice(jdbcTemplate, id) {
+function choice__to_choice(jdbcTemplate, id) {
   return jdbcTemplate.queryForMap(&quot;select * from &quot; + Jdbc.MENU + &quot; WHERE &quot; + Jdbc.Menu.MENU_ID + &quot; = ?&quot;,id);
 }
 
@@ -1185,21 +1532,24 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;body&gt;
 &lt;wicket:extend&gt;
   &lt;form wicket:id=&quot;form&quot;&gt;
-    &lt;select wicket:id=&quot;select2&quot; style=&quot;width:100%&quot;&gt;&lt;/select&gt;
+    &lt;select wicket:id=&quot;choice&quot; style=&quot;width:100%&quot;&gt;&lt;/select&gt;
   &lt;/form&gt;
 &lt;/wicket:extend&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-textfield"><strong>TextField</strong></p>
+                <p id="mbaas-server-side-element-textfield"><label class="label label-danger">TextField</label></p>
+                <p>
+                    it is input text field
+                </p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
 */
 function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
   var form = factory.createForm(&quot;form&quot;);
-  var textField = factory.createTextField(form,&quot;textField&quot;, String.class);
+  var text = factory.createTextField(form,&quot;text&quot;, String.class);
 }
 
 /*
@@ -1217,21 +1567,23 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;body&gt;
 &lt;wicket:extend&gt;
   &lt;form wicket:id=&quot;form&quot;&gt;
-    &lt;input type=&quot;text&quot; wicket:id=&quot;textField&quot;/&gt;
+    &lt;input type=&quot;text&quot; wicket:id=&quot;text&quot;/&gt;
   &lt;/form&gt;
 &lt;/wicket:extend&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-timetextfield"><strong>TimeTextField</strong></p>
+                <p id="mbaas-server-side-element-timetextfield"><label class="label label-danger">TimeTextField</label>
+                </p>
+                <p>it is time picker input field</p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
 */
 function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
   var form = factory.createForm(&quot;form&quot;);
-  var timeTextField = factory.createTimeTextField(form,&quot;timeTextField&quot;);
+  var time = factory.createTimeTextField(form,&quot;time&quot;);
 }
 
 /*
@@ -1249,21 +1601,25 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;body&gt;
 &lt;wicket:extend&gt;
   &lt;form wicket:id=&quot;form&quot;&gt;
-    &lt;input type=&quot;text&quot; wicket:id=&quot;timeTextField&quot;/&gt;
+    &lt;input type=&quot;text&quot; wicket:id=&quot;time&quot;/&gt;
   &lt;/form&gt;
 &lt;/wicket:extend&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-urltextfield"><strong>UrlTextField</strong></p>
+                <p id="mbaas-server-side-element-urltextfield"><label class="label label-danger">UrlTextField</label>
+                </p>
+                <p>
+                    it is text input field for url
+                </p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
 */
 function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
   var form = factory.createForm(&quot;form&quot;);
-  var urlTextField = factory.createUrlTextField(form,&quot;urlTextField&quot;);
+  var url = factory.createUrlTextField(form,&quot;url&quot;);
 }
 
 /*
@@ -1281,14 +1637,15 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;body&gt;
 &lt;wicket:extend&gt;
   &lt;form wicket:id=&quot;form&quot;&gt;
-    &lt;input type=&quot;url&quot; wicket:id=&quot;urlTextField&quot;/&gt;
+    &lt;input type=&quot;url&quot; wicket:id=&quot;url&quot;/&gt;
   &lt;/form&gt;
 &lt;/wicket:extend&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-label"><strong>Label</strong></p>
+                <p id="mbaas-server-side-element-label"><label class="label label-danger">Label</label></p>
+                <p>it is label for display out data from server</p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1318,7 +1675,8 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-fileupload"><strong>FileUpload</strong></p>
+                <p id="mbaas-server-side-element-fileupload"><label class="label label-danger">FileUpload</label></p>
+                <p>it is single file upload</p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1368,7 +1726,9 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-multiplefileupload"><strong>MultiFileUpload</strong></p>
+                <p id="mbaas-server-side-element-multiplefileupload"><label
+                        class="label label-danger">MultiFileUpload</label></p>
+                <p>it is multiple file upload</p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1407,15 +1767,63 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-image"><strong>Image</strong></p>
+                <p id="mbaas-server-side-element-image"><label class="label label-danger">Image</label></p>
+                <p>it is for display image</p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var image = factory.createImage(form,&quot;image&quot;);</code></pre>
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var file = factory.createFileUpload(form,&quot;file&quot;);
+  var image = factory.createImage(form,&quot;image&quot;);
+  var okay = factory.createButton(form,&quot;okay&quot;);
+}
+
+function okay__on_submit(requestCycle, disk, jdbcTemplate, button, pageModel) {
+  var files = userModel.get(&quot;file&quot;);
+  var file = files.get(0);
+  var fileId = disk.writeFile(file);
+  userModel['image'] = disk.httpFile(fileId);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, userModel) {
+  var image = factory.getChildren('image');
+  if (userModel['image'] == null || &quot;&quot;.equals(image)){
+    image.setVisible(false);
+  } else {
+    image.setVisible(true);
+  }
+}</code></pre>
                 </figure>
                 <figure class="highlight">
                     <pre><code class="language-html"
-                               data-lang="html">&lt;img wicket:id=&quot;image&quot;/&gt;</code></pre>
+                               data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+  &lt;form wicket:id=&quot;form&quot;&gt;
+    &lt;input type=&quot;file&quot; wicket:id=&quot;file&quot;/&gt;
+    &lt;br/&gt;
+    &lt;img wicket:id=&quot;image&quot;/&gt;
+    &lt;button type=&quot;submit&quot; wicket:id=&quot;okay&quot;&gt;Okay&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
-                <p id="mbaas-server-side-element-editor-text-area"><strong>EditorTextArea</strong></p>
+                <hr/>
+                <p id="mbaas-server-side-element-editor-text-area"><label
+                        class="label label-danger">EditorTextArea</label></p>
+                <p>
+                    it is rich text editor
+                </p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1446,7 +1854,12 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </figure>
-                <p id="mbaas-server-side-element-full-calendar"><strong>FullCalendar</strong></p>
+                <hr/>
+                <p id="mbaas-server-side-element-full-calendar"><label class="label label-danger">FullCalendar</label>
+                </p>
+                <p>
+                    it is calendar widget
+                </p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
 Page onInitialize
@@ -1485,6 +1898,42 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
   &lt;/wicket:extend&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-tab"><label class="label label-danger">Tab</label>
+                </p>
+                <p>
+                    it is tab widget
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java"></code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html"></code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-popup"><label class="label label-danger">Popup</label>
+                </p>
+                <p>
+                    it is popup widget
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java"></code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html"></code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-block"><label class="label label-danger">Block</label>
+                </p>
+                <p>
+                    it is block widget
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java"></code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html"></code></pre>
                 </figure>
             </div>
             <div class="bs-docs-section">
@@ -1606,6 +2055,9 @@ field.isTrue();</code></pre>
                             <li><a href="#mbaas-server-side-element-image">Image</a></li>
                             <li><a href="#mbaas-server-side-element-editor-text-area">EditorTextArea (WYSIWYG)</a></li>
                             <li><a href="#mbaas-server-side-element-full-calendar">FullCalendar</a></li>
+                            <li><a href="#mbaas-server-side-element-tab">Tab</a></li>
+                            <li><a href="#mbaas-server-side-element-popup">Popup</a></li>
+                            <li><a href="#mbaas-server-side-element-block">Block</a></li>
                         </ul>
                     </li>
                     <li><a href=#mbaas-query>Query</a>

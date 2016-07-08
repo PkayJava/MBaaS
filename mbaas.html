@@ -5,20 +5,9 @@
 </head>
 <body>
 <wicket:extend>
-    <div class="box box-primary">
-        <div class="box-header with-border">
-            <h3 class="box-title">Demo Link</h3>
-        </div>
-        <div class="box-body">
-            <div class="form-group">
-                <a wicket:id="demoLink">Demo Link</a>
-                <span wicket:id="label"></span>
-            </div>
-        </div>
-        <div class="box-footer">
-            <button wicket:id="createButton" type="submit" class="btn btn-primary">Update</button>
-        </div>
-    </div>
+    <form wicket:id="form">
+        <span wicket:id="checkbox"></span>
+    </form>
 </wicket:extend>
 </body>
 </html>
