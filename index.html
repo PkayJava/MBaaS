@@ -118,7 +118,7 @@
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-alias-type" class="page-header">Java Alias Type</h1>
-                <p><strong>Boolean</strong></p>
+                <p><label class="label label-danger">Boolean</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.lang.Boolean
@@ -127,7 +127,7 @@ var me = new Boolean(true);
 // javascript
 var me = true;</code></pre>
                 </figure>
-                <p><strong>Byte</strong></p>
+                <p><label class="label label-danger">Byte</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.lang.Byte
@@ -136,7 +136,7 @@ var me = new Byte(11);
 // javascript
 var me = 123;</code></pre>
                 </figure>
-                <p><strong>Short</strong></p>
+                <p><label class="label label-danger">Short</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.lang.Short
@@ -145,7 +145,7 @@ var me = new Short(113);
 // javascript
 var me = 123;</code></pre>
                 </figure>
-                <p><strong>Integer</strong></p>
+                <p><label class="label label-danger">Integer</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.lang.Integer
@@ -154,7 +154,7 @@ var me = new Integer(11);
 // javascript
 var me = 123;</code></pre>
                 </figure>
-                <p><strong>Long</strong></p>
+                <p><label class="label label-danger">Long</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.lang.Long
@@ -163,7 +163,7 @@ var me = new Long(11);
 // javascript
 var me = 123;</code></pre>
                 </figure>
-                <p><strong>Float</strong></p>
+                <p><label class="label label-danger">Float</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.lang.Float
@@ -172,7 +172,7 @@ var me = new Long(11);
 // javascript
 var me = 123;</code></pre>
                 </figure>
-                <p><strong>Double</strong></p>
+                <p><label class="label label-danger">Double</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.lang.Double
@@ -181,7 +181,7 @@ var me = new Double(11);
 // javascript
 var me = 123;</code></pre>
                 </figure>
-                <p><strong>Character</strong></p>
+                <p><label class="label label-danger">Character</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.lang.Character
@@ -190,7 +190,7 @@ var me = new Character('c');
 // javascript
 var me = 'c';</code></pre>
                 </figure>
-                <p><strong>String</strong></p>
+                <p><label class="label label-danger">String</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.lang.String
@@ -199,25 +199,25 @@ var me = new String("ppp");
 // javascript
 var me = "pp";</code></pre>
                 </figure>
-                <p><strong>Date</strong></p>
+                <p><label class="label label-danger">Date</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.util.Date
 var me = new Date();</code></pre>
                 </figure>
-                <p><strong>LocalDate</strong></p>
+                <p><label class="label label-danger">LocalDate</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.time.LocalDate
 // no example yet :D</code></pre>
                 </figure>
-                <p><strong>LocalTime</strong></p>
+                <p><label class="label label-danger">LocalTime</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.time.LocalTime
 // no example yet :D</code></pre>
                 </figure>
-                <p><strong>LocalDateTime</strong></p>
+                <p><label class="label label-danger">LocalDateTime</label></p>
                 <figure class="highlight">
                     <pre><code class="language-java"
                                data-lang="java">// influence java type java.time.LocalDateTime
@@ -1900,40 +1900,191 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
-                <p id="mbaas-server-side-element-tab"><label class="label label-danger">Tab</label>
-                </p>
+                <p id="mbaas-server-side-element-tab"><label class="label label-danger">Tab</label></p>
                 <p>
-                    it is tab widget
+                    it is tab widget, you need to create have create a few <a href="#mbaas-cms-block">blocks</a> first.
                 </p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java"></code></pre>
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var tabs = [
+    {&quot;blockTitle&quot;:&quot;Tab1&quot;,&quot;blockCode&quot;:&quot;block_a&quot;},
+    {&quot;blockTitle&quot;:&quot;Tab2&quot;,&quot;blockCode&quot;:&quot;block_b&quot;}
+  ];
+  var tab = factory.createTabbedPanel(&quot;tab&quot;, tabs);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html"></code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;div wicket:id=&quot;tab&quot; class=&quot;tabpanel&quot;/&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
                 <p id="mbaas-server-side-element-popup"><label class="label label-danger">Popup</label>
                 </p>
                 <p>
-                    it is popup widget
+                    it is popup widget, need to several <a href="#mbaas-cms-block">blocks</a> first
                 </p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java"></code></pre>
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var link = factory.createAjaxLink(&quot;link&quot;);
+  var modal = factory.createModalWindow(&quot;modal&quot;,&quot;block_a&quot;);
+}
+
+function link__on_click(requestCycle, disk, jdbcTemplate, factory, target, pageModel){
+  var modal = factory.getChildren(&quot;modal&quot;);
+  modal.show(target);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html"></code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;div wicket:id=&quot;modal&quot;/&gt;
+    &lt;a wicket:id=&quot;link&quot;&gt;Show&lt;/a&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
                 <p id="mbaas-server-side-element-block"><label class="label label-danger">Block</label>
                 </p>
                 <p>
-                    it is block widget
+                    it is block widget, need to several <a href="#mbaas-cms-block">blocks</a> first
                 </p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java"></code></pre>
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var block = factory.createBlock(&quot;block&quot;, &quot;block_a&quot;);
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
                 </figure>
                 <figure class="highlight">
-                    <pre><code class="language-html" data-lang="html"></code></pre>
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;div wicket:id=&quot;block&quot;/&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-ajax-link"><label class="label label-danger">AjaxLink</label>
+                </p>
+                <p>
+                    it is ajax link
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var link = factory.createAjaxLink(&quot;link&quot;);
+}
+
+function link__on_click(requestCycle, disk, jdbcTemplate, factory, target, pageModel){
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;a wicket:id=&quot;link&quot;&gt;AjaxLink&lt;/a&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
+                <p id="mbaas-server-side-element-ajax-button"><label class="label label-danger">AjaxButton</label>
+                </p>
+                <p>
+                    it is ajax button submit
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var button = factory.createAjaxButton(form, &quot;button&quot;);
+}
+
+function form__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}
+
+function button__on_submit(requestCycle, disk, jdbcTemplate, factory, target, form, pageModel){
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;button type=&quot;submit&quot; wicket:id=&quot;button&quot;&gt;AjaxButton&lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
             </div>
             <div class="bs-docs-section">
@@ -2058,6 +2209,8 @@ field.isTrue();</code></pre>
                             <li><a href="#mbaas-server-side-element-tab">Tab</a></li>
                             <li><a href="#mbaas-server-side-element-popup">Popup</a></li>
                             <li><a href="#mbaas-server-side-element-block">Block</a></li>
+                            <li><a href="#mbaas-server-side-element-ajax-link">AjaxLink</a></li>
+                            <li><a href="#mbaas-server-side-element-ajax-button">AjaxButton</a></li>
                         </ul>
                     </li>
                     <li><a href=#mbaas-query>Query</a>
