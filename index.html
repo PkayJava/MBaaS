@@ -415,6 +415,107 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                 </figure>
             </div>
             <div class="bs-docs-section">
+                <h1 id="mbaas-markup-element" class="page-header">Markup Element</h1>
+                <p>There are two types of markup element</p>
+                <p><label class="label label-primary">Simple Markup</label> it is a traditional markup html that will
+                    send to browser the same as it is defined.</p>
+                <p><label class="label label-primary">Server Side Markup</label> it is a markup html that will be handle
+                    and manage by server before it is transform and send to browser, usually server markup it is always
+                    have wicket:id attribute.</p>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;label wicket:id=&quot;label&quot;&gt;Label&lt;/label&gt;</code></pre>
+                </figure>
+                <p>There are two types of server side markup element, form input element, and none form input
+                    element</p>
+                <p><label class="label label-danger">Form Input Element</label></p>
+                <p>all form input element share the same abstract behaviour</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">input.registerValidator(event);
+input.registerValidator(event, params);
+
+input.setRequired(boolean);
+
+input.setVisible(boolean);
+input.setEnable(boolean);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">function {input}__{event}(jdbcTemplate, validatable, params){
+}</code></pre>
+                </figure>
+                <ul>
+                    <li>HiddenField</li>
+                    <li>CheckBox</li>
+                    <li>TextField, RequiredTextField, EmailTextField, PasswordTextField, UrlTextField, ColorTextField,
+                        DateTextField, TimeTextField, NumberTextField, RangeTextField, EditorTextArea
+                    </li>
+                    <li>DropDownChoice, ListChoice, RadioChoice, Select2SingleChoice</li>
+                    <li>CheckBoxMultipleChoice, Select2MultipleChoice, ListMultipleChoice</li>
+                    <li>FileUpload, MultipleFileUpload</li>
+                </ul>
+                <p><label class="label label-danger">None Form Input Element</label></p>
+                <p>All element are able to disable and enable or show and hide</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">element.setVisible(boolean);
+element.setEnable(boolean);</code></pre>
+                </figure>
+                <ul>
+                    <li>Feedback</li>
+                    <li>Label</li>
+                    <li>Form</li>
+                    <li>Table</li>
+                    <li>FullCalendar</li>
+                    <li>Image</li>
+                    <li>Tab</li>
+                    <li>Block</li>
+                    <li>Popup</li>
+                    <li>Link, PageLink, AjaxLink</li>
+                    <li>Button, AjaxButton</li>
+                </ul>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-form-validation" class="page-header">Form Validation</h1>
+                <p>There are two kind of validation, single input validation and compound input validation</p>
+                <p><label class="label label-danger">Single Input Validation</label></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">input.registerValidator(event);
+input.registerValidator(event, params);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">function {input}__{event}(jdbcTemplate, validatable, params){
+}</code></pre>
+                </figure>
+                <p><label class="label label-danger">Compound Input Validation</label></p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">form.registerValidator(event, inputA, inputB);
+form.registerValidator(event, params, inputA, inputB);</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">function {form}__{event}(jdbcTemplate, formComponents, params){
+}</code></pre>
+                </figure>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-jdbc-template" class="page-header">JdbcTemplate Object</h1>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-factory" class="page-header">Factory Object</h1>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-disk" class="page-header">Disk Object</h1>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-page-model" class="page-header">PageModel Object</h1>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-item-model" class="page-header">ItemModel Object</h1>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-request-cycle" class="page-header">RequestCycle Object</h1>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-target-model" class="page-header">Target Object</h1>
+            </div>
+            <div class="bs-docs-section">
                 <h1 id="mbaas-server-side-element" class="page-header">Server Side Element</h1>
                 <p id="mbaas-server-side-element-link"><label class="label label-danger">Link</label></p>
                 <p>it is a server side link, so you will need to define its callback method when user click on that
@@ -1429,6 +1530,57 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 &lt;/html&gt;</code></pre>
                 </figure>
                 <hr/>
+                <p id="mbaas-server-side-element-feedback"><label
+                        class="label label-danger">Feedback</label></p>
+                <p>it is feedback error message when there is error is report on user input control</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  var form = factory.createForm(&quot;form&quot;);
+  var text = factory.createTextField(form, &quot;text&quot;, String.class);
+  text.setRequired(true);
+  var feedback = factory.createFeedback(form, &quot;feedback&quot;,text);
+  var okay = factory.createButton(form, &quot;okay&quot;);
+}
+
+function form__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}
+
+function form__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}
+
+function okay__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}
+
+function okay__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;wicket:extend&gt;
+    &lt;form wicket:id=&quot;form&quot;&gt;
+      &lt;input type=&quot;text&quot; wicket:id=&quot;text&quot;/&gt;
+      &lt;span wicket:id=&quot;feedback&quot;/&gt;
+      &lt;button wicket:id=&quot;okay&quot; type=&quot;submit&quot;&gt;Okay&lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </figure>
+                <hr/>
                 <p id="mbaas-server-side-element-select2multiplechoice"><label class="label label-danger">Select2MultipleChoice</label>
                 </p>
                 <p>
@@ -2151,11 +2303,11 @@ field.isTrue();</code></pre>
         <div class=col-md-3 role=complementary>
             <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
                 <ul class="nav bs-docs-sidenav">
-                    <li><a href=#what-is-mbaas>What's MBaaS</a></li>
-                    <li><a href=#mbaas-registration>MBaaS Registration</a></li>
-                    <li><a href=#mbaas-alias-type>Alias Type</a></li>
-                    <li><a href=#mbaas-collection-attribute>Collection / Attribute</a></li>
-                    <li><a href=#mbaas-database>MBaaS Database</a>
+                    <li><a href="#what-is-mbaas">What's MBaaS</a></li>
+                    <li><a href="#mbaas-registration">MBaaS Registration</a></li>
+                    <li><a href="#mbaas-alias-type">Alias Type</a></li>
+                    <li><a href="#mbaas-collection-attribute">Collection / Attribute</a></li>
+                    <li><a href="#mbaas-database">MBaaS Database</a>
                         <ul class="nav">
                             <li><a href="#mbaas-database-create">Create</a></li>
                             <li><a href="#mbaas-database-read">Read</a></li>
@@ -2163,7 +2315,7 @@ field.isTrue();</code></pre>
                             <li><a href="#mbaas-database-delete">Delete</a></li>
                         </ul>
                     </li>
-                    <li><a href=#mbaas-cms>Content Management System</a>
+                    <li><a href="#mbaas-cms">Content Management System</a>
                         <ul class="nav">
                             <li><a href="#mbaas-cms-menu">Menu</a></li>
                             <li><a href="#mbaas-cms-block">Block</a></li>
@@ -2171,43 +2323,16 @@ field.isTrue();</code></pre>
                             <li><a href="#mbaas-cms-page">Page</a></li>
                         </ul>
                     </li>
-                    <li><a href=#mbaas-form-validation>Markup Element</a>
-                        <ul class="nav">
-                            <li><a href="#mbaas-form-validation-single">Form Element</a></li>
-                            <li><a href="#mbaas-form-validation-compound">None Form Element</a></li>
-                        </ul>
-                    </li>
-                    <li><a href=#mbaas-form-validation>Form Validation</a>
-                        <ul class="nav">
-                            <li><a href="#mbaas-form-validation-single">Single Component</a></li>
-                            <li><a href="#mbaas-form-validation-compound">Compound Component</a></li>
-                        </ul>
-                    </li>
-                    <li><a href=#mbaas-form-validation>Factory</a>
-                        <ul class="nav">
-                            <li><a href="#mbaas-form-validation-single">Form Element</a></li>
-                            <li><a href="#mbaas-form-validation-compound">None Form Element</a></li>
-                        </ul>
-                    </li>
-                    <li><a href=#mbaas-form-validation>Disk</a>
-                        <ul class="nav">
-                            <li><a href="#mbaas-form-validation-single">Form Element</a></li>
-                            <li><a href="#mbaas-form-validation-compound">None Form Element</a></li>
-                        </ul>
-                    </li>
-                    <li><a href=#mbaas-form-validation>PageModel / ItemModel</a>
-                        <ul class="nav">
-                            <li><a href="#mbaas-form-validation-single">Form Element</a></li>
-                            <li><a href="#mbaas-form-validation-compound">None Form Element</a></li>
-                        </ul>
-                    </li>
-                    <li><a href=#mbaas-form-validation>Target</a>
-                        <ul class="nav">
-                            <li><a href="#mbaas-form-validation-single">Form Element</a></li>
-                            <li><a href="#mbaas-form-validation-compound">None Form Element</a></li>
-                        </ul>
-                    </li>
-                    <li><a href=#mbaas-server-side-element>Server Side Element</a>
+                    <li><a href="#mbaas-markup-element">Markup Element</a></li>
+                    <li><a href="#mbaas-form-validation">Form Validation</a></li>
+                    <li><a href="#mbaas-jdbc-template">JdbcTemplate Object</a></li>
+                    <li><a href="#mbaas-factory">Factory Object</a></li>
+                    <li><a href="#mbaas-disk">Disk Object</a></li>
+                    <li><a href="#mbaas-page-model">PageModel Object</a></li>
+                    <li><a href="#mbaas-item-model">ItemModel Object</a></li>
+                    <li><a href="#mbaas-request-cycle">RequestCycle Object</a></li>
+                    <li><a href="#mbaas-target">Target Object</a></li>
+                    <li><a href="#mbaas-server-side-element">Server Side Element</a>
                         <ul class="nav">
                             <li><a href="#mbaas-server-side-element-link">Link</a></li>
                             <li><a href="#mbaas-server-side-element-page-link">PageLink</a></li>
@@ -2221,6 +2346,10 @@ field.isTrue();</code></pre>
                             </li>
                             <li><a href="#mbaas-server-side-element-checkbox">CheckBox</a></li>
                             <li><a href="#mbaas-server-side-element-button">Button</a></li>
+                        </ul>
+                    </li>
+                    <li><a href=#mbaas-server-side-element-textarea>Server Side Element Cont.</a>
+                        <ul class="nav">
                             <li><a href="#mbaas-server-side-element-textarea">TextArea</a></li>
                             <li><a href="#mbaas-server-side-element-table">Table</a></li>
                             <li><a href="#mbaas-server-side-element-listchoice">ListChoice</a></li>
@@ -2230,8 +2359,13 @@ field.isTrue();</code></pre>
                             <li><a href="#mbaas-server-side-element-radiochoice">RadioChoice</a></li>
                             <li><a href="#mbaas-server-side-element-rangetextfield">RangeTextField</a></li>
                             <li><a href="#mbaas-server-side-element-requiredtextfield">RequiredTextField</a></li>
+                            <li><a href="#mbaas-server-side-element-feedback">Feedback</a></li>
                             <li><a href="#mbaas-server-side-element-select2multiplechoice">Select2MultipleChoice</a>
                             </li>
+                        </ul>
+                    </li>
+                    <li><a href=#mbaas-server-side-element-select2singlechoice>Server Side Element Cont.</a>
+                        <ul class="nav">
                             <li><a href="#mbaas-server-side-element-select2singlechoice">Select2SingleChoice</a></li>
                             <li><a href="#mbaas-server-side-element-textfield">TextField</a></li>
                             <li><a href="#mbaas-server-side-element-timetextfield">TimeTextField</a></li>
