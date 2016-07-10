@@ -20,10 +20,6 @@ public class NashornEmailTextField extends EmailTextField {
         super(id, model);
     }
 
-    public NashornEmailTextField(String id, IModel<String> model, IValidator<String> validator) {
-        super(id, model, validator);
-    }
-
     public String getScript() {
         return script;
     }
@@ -41,10 +37,10 @@ public class NashornEmailTextField extends EmailTextField {
         registerValidator(event, new HashMap<>());
     }
 
-    public void registerValidator(String event, ScriptObjectMirror jsobject) {
+    public void registerValidator(String event, ScriptObjectMirror js) {
         Map<String, Object> params = new HashMap<>();
-        if (jsobject != null && !jsobject.isEmpty()) {
-            for (Map.Entry<String, Object> param : jsobject.entrySet()) {
+        if (js != null && !js.isEmpty()) {
+            for (Map.Entry<String, Object> param : js.entrySet()) {
                 params.put(param.getKey(), param.getValue());
             }
         }

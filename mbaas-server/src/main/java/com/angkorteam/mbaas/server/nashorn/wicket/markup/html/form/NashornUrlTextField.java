@@ -20,10 +20,6 @@ public class NashornUrlTextField extends UrlTextField {
         super(id, model);
     }
 
-    public NashornUrlTextField(String id, IModel<String> model, UrlValidator urlValidator) {
-        super(id, model, urlValidator);
-    }
-
     public String getScript() {
         return script;
     }
@@ -41,10 +37,10 @@ public class NashornUrlTextField extends UrlTextField {
         registerValidator(event, new HashMap<>());
     }
 
-    public void registerValidator(String event, ScriptObjectMirror jsobject) {
+    public void registerValidator(String event, ScriptObjectMirror js) {
         Map<String, Object> params = new HashMap<>();
-        if (jsobject != null && !jsobject.isEmpty()) {
-            for (Map.Entry<String, Object> param : jsobject.entrySet()) {
+        if (js != null && !js.isEmpty()) {
+            for (Map.Entry<String, Object> param : js.entrySet()) {
                 params.put(param.getKey(), param.getValue());
             }
         }

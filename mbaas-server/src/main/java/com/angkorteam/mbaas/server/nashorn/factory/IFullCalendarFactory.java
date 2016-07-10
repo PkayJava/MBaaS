@@ -20,6 +20,8 @@ public interface IFullCalendarFactory extends Serializable {
 
     FullCalendarItem createFullCalendarItem(String id, String title, Date start, Date end);
 
+    String createAddressLink(String pageCode);
+
     String createAddressLink(String pageCode, ScriptObjectMirror params);
 
     String createAddressLink(String pageCode, Map<String, Object> params);

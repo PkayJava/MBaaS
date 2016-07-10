@@ -15,8 +15,4 @@ public interface IUrlTextFieldFactory extends Serializable {
 
     NashornUrlTextField createUrlTextField(MarkupContainer container, String id);
 
-    NashornUrlTextField createUrlTextField(String id, UrlValidator validator);
-
-    NashornUrlTextField createUrlTextField(MarkupContainer container, String id, UrlValidator validator);
-
 }

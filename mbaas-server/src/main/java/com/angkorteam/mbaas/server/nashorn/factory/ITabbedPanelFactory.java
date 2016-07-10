@@ -12,8 +12,8 @@ import java.io.Serializable;
  */
 public interface ITabbedPanelFactory extends Serializable {
 
-    TabbedPanel<? extends ITab> createTabbedPanel(String id, JSObject columns);
+    TabbedPanel<? extends ITab> createTabbedPanel(String id, JSObject items);
 
-    TabbedPanel<? extends ITab> createTabbedPanel(MarkupContainer container, String id, JSObject columns);
+    TabbedPanel<? extends ITab> createTabbedPanel(MarkupContainer container, String id, JSObject items);
 
 }

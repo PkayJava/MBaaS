@@ -462,6 +462,7 @@ element.setEnable(boolean);</code></pre>
                     <li>Feedback</li>
                     <li>Label</li>
                     <li>Form</li>
+                    <li>FilterForm</li>
                     <li>Table</li>
                     <li>FullCalendar</li>
                     <li>Image</li>
@@ -496,9 +497,396 @@ form.registerValidator(event, params, inputA, inputB);</code></pre>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-jdbc-template" class="page-header">JdbcTemplate Object</h1>
+                <p>
+                    It is a kind of DAO access object which offer use to access database for read, write, delete, query,
+                    update...
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">// this is example of query for a list of records
+var query = &quot;select * from page&quot;;
+var result = jdbcTemplate.queryForList(query);
+
+// this example of query for a single record
+var query = &quot;select * from page limit 0,1&quot;
+var result = jdbcTemplate.queryForMap(query);</code></pre>
+                </figure>
+                <p>
+                    of course it does much more than this, go to <a
+                        href="http://docs.spring.io/spring/docs/current/spring-framework-reference/html/jdbc.html"
+                        target="_blank">reference</a>
+                </p>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-factory" class="page-header">Factory Object</h1>
+                <p>It is build-in factory object in MBaaS which use for create object, create markup server element,
+                    navigation between pages.</p>
+                <p>
+                    <label class="label label-danger">1. Page Navigation</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var pageCode = 'page_code';
+var params = {
+    'email': 'pkayjava@gmail.com',
+    'subject': 'contact'
+};
+factory.navigateTo(pageCode);
+factory.navigateTo(pageCode, params);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">2. Find Page Element</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java"
+                               data-lang="java">var element = factory.getChildren('elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">3. Create an array of the given condition</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var pageIdField = DSL.field('page_id',String.class);
+var condition = pageIdField.eq('1');
+var arrayCondition = factory.arrayCondition(condition);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">4. Enable WebSocket</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">factory.registerWebSocket();</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">5. Create Simple Markup</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">factory.createWebMarkupContainer('elementId');
+factory.createWebMarkupContainer(container,'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">6. Create Reference Address Link</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var pageCode = 'page_code';
+var params = {
+    'email': 'pkayjava@gmail.com',
+    'subject': 'contact'
+};
+factory.createAddressLink(pageCode);
+factory.createAddressLink(pageCode, params);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">7. Create Form Element</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">factory.createForm('elementId');
+factory.createForm(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">8. Create Filter Form Element</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">factory.createFilterForm('elementId');
+factory.createFilterForm(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">9. Create jdbc / jdbcInsert / jdbcUpdate</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var jdbc = factory.createJdbcTemplate();
+var jdbcInsert = factory.createSimpleJdbcInsert('tableName');
+var jdbcUpdate = factory.createSimpleJdbcUpdate('tableName');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">10. Create Collection List / Map</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var list = factory.createList();
+var map = factory.createMap();</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">11. Create ListModel / MapModel</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var list = factory.createList();
+var listModel = factory.createListModel(list);
+var map = factory.createMap();
+var mapModel = factory.createMapModel(map);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">12. Create StringBuilder / StringBuffer</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var builder = factory.createStringBuilder();
+var buffer = factory.createStringBuffer();</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">13. Create Option / Option Choice Renderer</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var id = '1';
+var text = 'Female';
+var option = factory.createOption(id, text);
+var attributeNameId = 'id';
+vat attributeNameText = 'text';
+var renderer = factory.createChoiceRenderer(attributeNameId, attributeNameText);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">14. Create HiddenField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createHiddenField('elementId', clazz);
+var element = factory.createHiddenField(container, 'elementId', clazz);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">15. Create CheckBox</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createCheckBox('elementId');
+var element = factory.createCheckBox(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">16. Create TextField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createTextField('elementId', clazz);
+var element = factory.createTextField(container, 'elementId', clazz);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">16. Create RequiredTextField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createRequiredTextField('elementId', clazz);
+var element = factory.createRequiredTextField(container, 'elementId', clazz);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">17. Create EmailTextField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createEmailTextField('elementId');
+var element = factory.createEmailTextField(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">17. Create PasswordTextField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createPasswordTextField('elementId');
+var element = factory.createPasswordTextField(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">18. Create UrlTextField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createUrlTextField('elementId');
+var element = factory.createUrlTextField(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">19. Create ColorTextField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createColorTextField('elementId');
+var element = factory.createColorTextField(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">20. Create DateTextField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createDateTextField('elementId');
+var element = factory.createDateTextField(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">21. Create TimeTextField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createTimeTextField('elementId');
+var element = factory.createTimeTextField(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">22. Create NumberTextField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createNumberTextField('elementId');
+var element = factory.createNumberTextField(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">23. Create RangeTextField</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createRangeTextField('elementId');
+var element = factory.createRangeTextField(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">24. Create EditorTextArea</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createEditorTextArea('elementId');
+var element = factory.createEditorTextArea(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">25. Create DropDownChoice</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createDropDownChoice('elementId', listModelOfOption, optionChoiceRenderer);
+var element = factory.createDropDownChoice(container, 'elementId', optionListModel, optionChoiceRenderer);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">26. Create ListChoice</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createListChoice('elementId', listModelOfOption, optionChoiceRenderer);
+var element = factory.createListChoice(container, 'elementId', optionListModel, optionChoiceRenderer);
+var element = factory.createListChoice('elementId', listModelOfOption, optionChoiceRenderer, maxRows);
+var element = factory.createListChoice(container, 'elementId', optionListModel, optionChoiceRenderer, maxRows);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">27. Create RadioChoice</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createRadioChoice('elementId', listModelOfOption, optionChoiceRenderer);
+var element = factory.createRadioChoice(container, 'elementId', optionListModel, optionChoiceRenderer);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">28. Create Select2SingleChoice</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createSelect2SingleChoice('elementId', optionChoiceRenderer);
+var element = factory.createSelect2SingleChoice(container, 'elementId', optionChoiceRenderer);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">29. Create Select2MultipleChoice</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createSelect2MultipleChoice('elementId', optionChoiceRenderer);
+var element = factory.createSelect2MultipleChoice(container, 'elementId', optionChoiceRenderer);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">30. Create CheckBoxMultipleChoice</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createCheckBoxMultipleChoice('elementId', optionListModel, optionChoiceRenderer);
+var element = factory.createCheckBoxMultipleChoice(container, 'elementId', optionListModel, optionChoiceRenderer);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">31. Create ListMultipleChoice</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createListMultipleChoice('elementId', listModelOfOption, optionChoiceRenderer);
+var element = factory.createListMultipleChoice(container, 'elementId', optionListModel, optionChoiceRenderer);
+var element = factory.createListMultipleChoice('elementId', listModelOfOption, optionChoiceRenderer, maxRows);
+var element = factory.createListMultipleChoice(container, 'elementId', optionListModel, optionChoiceRenderer, maxRows);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">32. Create FileUpload</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createFileUpload('elementId');
+var element = factory.createFileUpload(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">33. Create MultipleFileUpload</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createMultipleFileUpload('elementId');
+var element = factory.createMultipleFileUpload(container, 'elementId');
+var element = factory.createMultipleFileUpload('elementId', max);
+var element = factory.createMultipleFileUpload(container, 'elementId', max);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">34. Create Feedback</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createFeedback('elementId', inputElement);
+var element = factory.createFeedback(container, 'elementId', inputElement);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">35. Create Label</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createLabel('elementId');
+var element = factory.createLabel(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">36. Create Table</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createTable('elementId', columns, numberPerPage);
+var element = factory.createTable(container, 'elementId', columns, numberPerPage);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">37. Create FullCalendar</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createFullCalendar('elementId');
+var element = factory.createFullCalendar(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">38. Create FullCalendarItem</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createFullCalendarItem(id, title, startDate, endDate);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">39. Create Image</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createImage('elementId');
+var element = factory.createImage(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">40. Create TabbedPanel</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createTabbedPanel('elementId', items);
+var element = factory.createTabbedPanel(container, 'elementId', items);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">41. Create Block</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createBlock('elementId', 'blockCode');
+var element = factory.createBlock(container, 'elementId', 'blockCode');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">42. Create Popup</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createModalWindow('elementId', 'blockCode');
+var element = factory.createModalWindow(container, 'elementId', 'blockCode');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">43. Create Link</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createLink('elementId');
+var element = factory.createLink(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">44. Create PageLink</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createPageLink('elementId', 'pageCode');
+var element = factory.createPageLink(container, 'elementId', 'pageCode');
+var element = factory.createPageLink('elementId', 'pageCode', params);
+var element = factory.createPageLink(container, 'elementId', 'pageCode', params);</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">45. Create AjaxLink</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createAjaxLink('elementId');
+var element = factory.createAjaxLink(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">46. Create Button</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createButton('elementId');
+var element = factory.createButton(container, 'elementId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">47. Create AjaxButton</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">var element = factory.createAjaxButton('elementId');
+var element = factory.createAjaxButton(container, 'elementId');</code></pre>
+                </figure>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-disk" class="page-header">Disk Object</h1>
@@ -513,7 +901,7 @@ form.registerValidator(event, params, inputA, inputB);</code></pre>
                 <h1 id="mbaas-request-cycle" class="page-header">RequestCycle Object</h1>
             </div>
             <div class="bs-docs-section">
-                <h1 id="mbaas-target-model" class="page-header">Target Object</h1>
+                <h1 id="mbaas-target" class="page-header">Target Object</h1>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-server-side-element" class="page-header">Server Side Element</h1>

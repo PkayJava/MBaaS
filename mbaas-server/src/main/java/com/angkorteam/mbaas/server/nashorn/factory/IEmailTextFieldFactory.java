@@ -13,8 +13,4 @@ public interface IEmailTextFieldFactory {
 
     NashornEmailTextField createEmailTextField(MarkupContainer container, String id);
 
-    NashornEmailTextField createEmailTextField(String id, IValidator<String> emailValidator);
-
-    NashornEmailTextField createEmailTextField(MarkupContainer container, String id, IValidator<String> emailValidator);
-
 }

@@ -55,8 +55,6 @@ import org.apache.wicket.protocol.ws.api.registry.IKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.validation.IValidator;
-import org.apache.wicket.validation.validator.UrlValidator;
 import org.jooq.Condition;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -704,20 +702,6 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornEmailTextField createEmailTextField(String id, IValidator<String> validator) {
-        return createEmailTextField(container, id, validator);
-    }
-
-    @Override
-    public NashornEmailTextField createEmailTextField(MarkupContainer container, String id, IValidator<String> validator) {
-        NashornEmailTextField object = new NashornEmailTextField(id, createPropertyModel(this.pageModel, id), validator);
-        object.setScript(this.script);
-        container.add(object);
-        this.children.put(id, object);
-        return object;
-    }
-
-    @Override
     public <T> NashornHiddenField<T> createHiddenField(String id, Class<T> type) {
         return createHiddenField(container, id, type);
     }
@@ -795,20 +779,6 @@ public class Factory implements Serializable,
     @Override
     public NashornUrlTextField createUrlTextField(MarkupContainer container, String id) {
         NashornUrlTextField object = new NashornUrlTextField(id, createPropertyModel(this.pageModel, id));
-        object.setScript(this.script);
-        container.add(object);
-        this.children.put(id, object);
-        return object;
-    }
-
-    @Override
-    public NashornUrlTextField createUrlTextField(String id, UrlValidator validator) {
-        return createUrlTextField(container, id, validator);
-    }
-
-    @Override
-    public NashornUrlTextField createUrlTextField(MarkupContainer container, String id, UrlValidator validator) {
-        NashornUrlTextField object = new NashornUrlTextField(id, createPropertyModel(this.pageModel, id), validator);
         object.setScript(this.script);
         container.add(object);
         this.children.put(id, object);
@@ -1049,6 +1019,11 @@ public class Factory implements Serializable,
     }
 
     @Override
+    public String createAddressLink(String pageCode) {
+        return createAddressLink(pageCode, new HashMap<>());
+    }
+
+    @Override
     public String createAddressLink(String pageCode, ScriptObjectMirror params) {
         Map<String, Object> temps = new HashMap<>();
         if (params != null && !params.isEmpty()) {
@@ -1145,20 +1120,20 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public TabbedPanel<? extends ITab> createTabbedPanel(String id, JSObject columns) {
-        return createTabbedPanel(container, id, columns);
+    public TabbedPanel<? extends ITab> createTabbedPanel(String id, JSObject items) {
+        return createTabbedPanel(container, id, items);
     }
 
     @Override
-    public TabbedPanel<? extends ITab> createTabbedPanel(MarkupContainer container, String id, JSObject columns) {
-        if (!columns.isArray()) {
-            throw new WicketRuntimeException("columns is not right");
+    public TabbedPanel<? extends ITab> createTabbedPanel(MarkupContainer container, String id, JSObject items) {
+        if (!items.isArray()) {
+            throw new WicketRuntimeException("items is not right");
         }
         List<ITab> tabs = new ArrayList<>();
-        if (columns instanceof ScriptObjectMirror) {
-            if (((ScriptObjectMirror) columns).size() > 0) {
-                for (int i = 0; i < ((ScriptObjectMirror) columns).size(); i++) {
-                    Object column = columns.getSlot(i);
+        if (items instanceof ScriptObjectMirror) {
+            if (((ScriptObjectMirror) items).size() > 0) {
+                for (int i = 0; i < ((ScriptObjectMirror) items).size(); i++) {
+                    Object column = items.getSlot(i);
                     if (column instanceof ScriptObjectMirror) {
                         String blockTitle = (String) ((ScriptObjectMirror) column).get("blockTitle");
                         String blockCode = (String) ((ScriptObjectMirror) column).get("blockCode");
