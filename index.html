@@ -908,16 +908,41 @@ var httpDownloadAddress = disk.httpFile('fileId');</code></pre>
                 </figure>
             </div>
             <div class="bs-docs-section">
-                <h1 id="mbaas-page-model" class="page-header">PageModel Object</h1>
-            </div>
-            <div class="bs-docs-section">
-                <h1 id="mbaas-item-model" class="page-header">ItemModel Object</h1>
+                <h1 class="page-header">Model Object</h1>
+                <p id="mbaas-page-model">
+                    <label class="label label-danger">PageModel Object</label>
+                </p>
+                <p>
+                    it is represent any user input control in a page.
+                </p>
+                <p id="mbaas-block-model">
+                    <label class="label label-danger">BlockModel Object</label>
+                </p>
+                <p>
+                    it is represent to a current block panel
+                </p>
+                <p id="mbaas-item-model">
+                    <label class="label label-danger">ItemModel Object</label>
+                </p>
+                <p>
+                    itemModel is created when a table is populated. when user click a row action link, itemModel is
+                    representation that current clicked row.
+                </p>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-request-cycle" class="page-header">RequestCycle Object</h1>
+                <p>N/A</p>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-target" class="page-header">Target Object</h1>
+                <p>
+                    it is available for ajax request only, for instance ajaxLink, ajaxButton
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">target.appendJavaScript('javascript to be executed at client side');
+// elements that we want to refresh it content at client side.
+target.add(element, element, element, ...);</code></pre>
+                </figure>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-server-side-element" class="page-header">Server Side Element</h1>
@@ -2732,8 +2757,13 @@ field.isTrue();</code></pre>
                     <li><a href="#mbaas-jdbc-template">JdbcTemplate Object</a></li>
                     <li><a href="#mbaas-factory">Factory Object</a></li>
                     <li><a href="#mbaas-disk">Disk Object</a></li>
-                    <li><a href="#mbaas-page-model">PageModel Object</a></li>
-                    <li><a href="#mbaas-item-model">ItemModel Object</a></li>
+                    <li><a href="#mbaas-model">Model Object</a>
+                        <ul class="nav">
+                            <li><a href="#mbaas-page-model">PageModel Object</a></li>
+                            <li><a href="#mbaas-block-model">BlockModel Object</a></li>
+                            <li><a href="#mbaas-item-model">ItemModel Object</a></li>
+                        </ul>
+                    </li>
                     <li><a href="#mbaas-request-cycle">RequestCycle Object</a></li>
                     <li><a href="#mbaas-target">Target Object</a></li>
                     <li><a href="#mbaas-server-side-element">Server Side Element</a>
