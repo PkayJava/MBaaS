@@ -39,6 +39,7 @@ public class Jdbc {
     public static final String MASTER_PAGE = "master_page";
     public static final String PAGE_ROLE = "page_role";
     public static final String BLOCK = "block";
+    public static final String RESTORE = "restore";
 
     public static final class User {
         public static final String USER_ID = USER + "_id";
@@ -411,5 +412,12 @@ public class Jdbc {
         public static final String MODIFIED = "modified";
         public static final String DATE_CREATED = "date_created";
         public static final String DATE_MODIFIED = "date_modified";
+    }
+
+    public static final class Restore {
+        public static final String RESTORE_ID = RESTORE + "_id";
+        public static final String FIELDS = "fields";
+        public static final String TABLE_NAME = "table_name";
+        public static final String DATE_CREATED = "date_created";
     }
 }

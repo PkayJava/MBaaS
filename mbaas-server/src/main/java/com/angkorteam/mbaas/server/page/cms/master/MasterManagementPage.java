@@ -6,10 +6,9 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.function.RestoreFunction;
 import com.angkorteam.mbaas.server.provider.MasterPageProvider;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
-import com.angkorteam.mbaas.server.wicket.MasterPage;
-import com.angkorteam.mbaas.server.wicket.Mount;
+import com.angkorteam.mbaas.server.wicket.*;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -71,6 +70,8 @@ public class MasterManagementPage extends MasterPage implements ActionFilteredJo
             setResponsePage(MasterModifyPage.class, parameters);
         }
         if ("Delete".equals(link)) {
+            Application application = ApplicationUtils.getApplication();
+            RestoreFunction.backup(application.getJdbcGson(), getApplicationJdbcTemplate(), Jdbc.MASTER_PAGE, masterPageId);
             List<String> temp = new ArrayList<>();
             jdbcTemplate.update("DELETE FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", masterPageId);
             temp.add(com.angkorteam.mbaas.server.page.MasterPage.class.getName() + "_" + masterPageId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");

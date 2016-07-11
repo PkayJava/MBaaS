@@ -48,7 +48,7 @@ public class JavascriptModifyPage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Modify Javascript";
+        return "Modify Rest API";
     }
 
     @Override

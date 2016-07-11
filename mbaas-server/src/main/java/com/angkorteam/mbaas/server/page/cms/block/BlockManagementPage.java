@@ -6,11 +6,10 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.function.RestoreFunction;
 import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.panel.BlockPanel;
 import com.angkorteam.mbaas.server.provider.BlockProvider;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
-import com.angkorteam.mbaas.server.wicket.MasterPage;
-import com.angkorteam.mbaas.server.wicket.Mount;
+import com.angkorteam.mbaas.server.wicket.*;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -72,6 +71,8 @@ public class BlockManagementPage extends MasterPage implements ActionFilteredJoo
             setResponsePage(BlockModifyPage.class, parameters);
         }
         if ("Delete".equals(link)) {
+            Application application = ApplicationUtils.getApplication();
+            RestoreFunction.backup(application.getJdbcGson(), getApplicationJdbcTemplate(), Jdbc.BLOCK, blockId);
             List<String> temp = new ArrayList<>();
             jdbcTemplate.update("DELETE FROM " + Jdbc.BLOCK + " WHERE " + Jdbc.Block.BLOCK_ID + " = ?", blockId);
             temp.add(BlockPanel.class.getName() + "_" + blockId + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html");

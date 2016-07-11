@@ -53,6 +53,7 @@ import com.angkorteam.mbaas.server.page.query.QueryCreatePage;
 import com.angkorteam.mbaas.server.page.query.QueryManagementPage;
 import com.angkorteam.mbaas.server.page.query.QueryModifyPage;
 import com.angkorteam.mbaas.server.page.query.QueryParameterModifyPage;
+import com.angkorteam.mbaas.server.page.restore.RestoreManagementPage;
 import com.angkorteam.mbaas.server.page.role.RoleCreatePage;
 import com.angkorteam.mbaas.server.page.role.RoleManagementPage;
 import com.angkorteam.mbaas.server.page.role.RoleModifyPage;
@@ -123,6 +124,7 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuClientClass = "";
 
     private String mmenuJobClass = "";
+    private String mmenuRestoreClass = "";
     private String mmenuPageClass = "";
     private String mmenuMasterClass = "";
     private String mmenuMenuClass = "";
@@ -281,6 +283,10 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuJob = new WebMarkupContainer("mmenuJob");
             mmenuJob.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJobClass")));
             this.menuLogicConsole.add(mmenuJob);
+
+            WebMarkupContainer mmenuRestore = new WebMarkupContainer("mmenuRestore");
+            mmenuJob.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuRestoreClass")));
+            this.menuLogicConsole.add(mmenuRestore);
 
             WebMarkupContainer mmenuPage = new WebMarkupContainer("mmenuPage");
             mmenuPage.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuPageClass")));
@@ -497,6 +503,12 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuJobClass = "active";
         } else {
             this.mmenuJobClass = "";
+        }
+
+        if (getPage() instanceof RestoreManagementPage) {
+            this.mmenuRestoreClass = "active";
+        } else {
+            this.mmenuRestoreClass = "";
         }
 
         if (getPage() instanceof PageCreatePage || getPage() instanceof PageManagementPage || getPage() instanceof PageModifyPage) {

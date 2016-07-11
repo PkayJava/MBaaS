@@ -200,6 +200,11 @@ public class Application extends AuthenticatedWebApplication implements IDSLCont
         return applicationContext.getGson();
     }
 
+    public final Gson getJdbcGson() {
+        ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
+        return applicationContext.getJdbcGson();
+    }
+
     public final ScriptEngineFactory getScriptEngineFactory() {
         ApplicationContext applicationContext = ApplicationContext.get(getServletContext());
         return applicationContext.getScriptEngineFactory();

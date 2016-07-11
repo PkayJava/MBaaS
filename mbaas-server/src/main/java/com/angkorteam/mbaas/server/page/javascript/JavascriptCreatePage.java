@@ -47,7 +47,7 @@ public class JavascriptCreatePage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Create New Javascript";
+        return "Create New Rest API";
     }
 
     @Override

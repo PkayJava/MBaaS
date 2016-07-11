@@ -8,10 +8,9 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.function.RestoreFunction;
 import com.angkorteam.mbaas.server.provider.JavascriptProvider;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
-import com.angkorteam.mbaas.server.wicket.MasterPage;
-import com.angkorteam.mbaas.server.wicket.Mount;
+import com.angkorteam.mbaas.server.wicket.*;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -32,7 +31,7 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
 
     @Override
     public String getPageHeader() {
-        return "Javascript Management";
+        return "Rest API Management";
     }
 
     @Override
@@ -91,6 +90,8 @@ public class JavascriptManagementPage extends MasterPage implements ActionFilter
             return;
         }
         if ("Delete".equals(link)) {
+            Application application = ApplicationUtils.getApplication();
+            RestoreFunction.backup(application.getJdbcGson(), getApplicationJdbcTemplate(), Jdbc.JAVASCRIPT, javascriptId);
             jdbcTemplate.update("DELETE FROM " + Jdbc.JAVASCRIPT + " WHERE " + Jdbc.Javascript.JAVASCRIPT_ID + " = ?", javascriptId);
             return;
         }

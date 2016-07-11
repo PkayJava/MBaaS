@@ -129,6 +129,8 @@ public class ApplicationContext implements ServletContextListener {
 
     private Gson gson;
 
+    private Gson jdbcGson;
+
     private ClassFilter classFilter;
 
     private ScriptEngineFactory scriptEngineFactory;
@@ -137,6 +139,7 @@ public class ApplicationContext implements ServletContextListener {
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
         this.gson = initGson();
+        this.jdbcGson = initJdbcGson();
         LOGGER.info("initializing mail sender");
         this.mailSender = initMailSender();
         LOGGER.info("initializing mbaas data source");
@@ -259,6 +262,17 @@ public class ApplicationContext implements ServletContextListener {
         factoryBean.setPrettyPrinting(false);
         factoryBean.setSerializeNulls(false);
         factoryBean.setDateFormatPattern(configuration.getString(Constants.PATTERN_DATETIME));
+        factoryBean.afterPropertiesSet();
+        return factoryBean.getObject();
+    }
+
+    protected Gson initJdbcGson() {
+        GsonFactoryBean factoryBean = new GsonFactoryBean();
+        factoryBean.setBase64EncodeByteArrays(false);
+        factoryBean.setDisableHtmlEscaping(true);
+        factoryBean.setPrettyPrinting(false);
+        factoryBean.setSerializeNulls(false);
+        factoryBean.setDateFormatPattern("yyyy-MM-dd hh:mm:ss");
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();
     }
@@ -625,5 +639,9 @@ public class ApplicationContext implements ServletContextListener {
 
     public final Gson getGson() {
         return this.gson;
+    }
+
+    public final Gson getJdbcGson() {
+        return this.jdbcGson;
     }
 }

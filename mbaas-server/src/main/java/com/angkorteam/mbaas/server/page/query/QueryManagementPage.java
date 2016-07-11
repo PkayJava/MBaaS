@@ -8,10 +8,9 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.function.RestoreFunction;
 import com.angkorteam.mbaas.server.provider.QueryProvider;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
-import com.angkorteam.mbaas.server.wicket.MasterPage;
-import com.angkorteam.mbaas.server.wicket.Mount;
+import com.angkorteam.mbaas.server.wicket.*;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -99,6 +98,12 @@ public class QueryManagementPage extends MasterPage implements ActionFilteredJoo
             return;
         }
         if ("Delete".equals(link)) {
+            Application application = ApplicationUtils.getApplication();
+            RestoreFunction.backup(application.getJdbcGson(), getApplicationJdbcTemplate(), Jdbc.QUERY, queryId);
+            List<String> queryParameterIds = jdbcTemplate.queryForList("SELECT " + Jdbc.QueryParameter.QUERY_PARAMETER_ID + " FROM " + Jdbc.QUERY_PARAMETER + " WHERE " + Jdbc.QueryParameter.QUERY_ID + " = ?", String.class, queryId);
+            for (String queryParameterId : queryParameterIds) {
+                RestoreFunction.backup(application.getJdbcGson(), getApplicationJdbcTemplate(), Jdbc.QUERY_PARAMETER, queryParameterId);
+            }
             jdbcTemplate.update("DELETE FROM " + Jdbc.QUERY + " WHERE " + Jdbc.Query.QUERY_ID + " = ?", queryId);
             jdbcTemplate.update("DELETE FROM " + Jdbc.QUERY_PARAMETER + " WHERE " + Jdbc.QueryParameter.QUERY_ID + " = ?", queryId);
             return;
