@@ -890,6 +890,22 @@ var element = factory.createAjaxButton(container, 'elementId');</code></pre>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-disk" class="page-header">Disk Object</h1>
+                <p>It is a object which to file / asset for read and write, we can write file upload from user into disk
+                    and get download url</p>
+                <p>
+                    <label class="label label-danger">1. Asset</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java"> var assetId = disk.writeAsset(fileUpload);
+var httpDownloadAddress = disk.httpAsset('assetId');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">2. File</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java"> var fileId = disk.writeAsset(fileUpload);
+var httpDownloadAddress = disk.httpFile('fileId');</code></pre>
+                </figure>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-page-model" class="page-header">PageModel Object</h1>
@@ -2027,7 +2043,7 @@ function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
                 <p id="mbaas-server-side-element-select2singlechoice"><label class="label label-danger">Select2SingleChoice</label>
                 </p>
                 <p>
-                    it is single suggestion choice
+                    it is a single suggestion choice
                 </p>
                 <figure class="highlight">
                     <pre><code class="language-java" data-lang="java">/*
