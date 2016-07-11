@@ -22,7 +22,7 @@ allprojects {
         commonsioVersion = '2.5'
         commonsconfigurationVersion = '1.10'
         commonslang3Version = '3.4'
-        gsonVersion = '2.6.2'
+        gsonVersion = '2.7'
         jodatimeVersion = '2.9.4'
         jooqVersion = '3.8.2'
         flywayVersion = '4.0.3'
