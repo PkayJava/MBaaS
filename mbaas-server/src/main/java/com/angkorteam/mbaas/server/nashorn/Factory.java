@@ -31,6 +31,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultip
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornSingleChoiceProvider;
 import com.angkorteam.mbaas.server.page.PagePage;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import com.angkorteam.mbaas.server.wicket.Session;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -144,6 +145,10 @@ public class Factory implements Serializable,
         this.disk = disk;
         this.applicationUserId = applicationUserId;
         this.children = new HashMap<>();
+    }
+
+    public Session getSession() {
+        return (Session) Session.get();
     }
 
     public PageParameters getPageParameters() {
