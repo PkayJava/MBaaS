@@ -104,8 +104,8 @@ public class ApplicationFunction {
         {
             Map<String, Object> role = new HashMap<>();
             role.put(Jdbc.Role.ROLE_ID, UUID.randomUUID().toString());
-            role.put(Jdbc.Role.NAME, configuration.getString(Constants.ROLE_ADMINISTRATOR));
-            role.put(Jdbc.Role.DESCRIPTION, configuration.getString(Constants.ROLE_ADMINISTRATOR_DESCRIPTION));
+            role.put(Jdbc.Role.NAME, configuration.getString(Constants.ROLE_ANONYMOUS));
+            role.put(Jdbc.Role.DESCRIPTION, configuration.getString(Constants.ROLE_ANONYMOUS_DESCRIPTION));
             role.put(Jdbc.Role.SYSTEM, true);
             roles.add(role);
         }
