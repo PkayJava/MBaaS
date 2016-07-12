@@ -36,6 +36,7 @@ public class NashornButton extends org.apache.wicket.markup.html.form.Button {
     public NashornButton(String id, String eventId) {
         super(id);
         this.eventId = eventId;
+        setOutputMarkupId(true);
     }
 
     public Map<String, Object> getPageModel() {

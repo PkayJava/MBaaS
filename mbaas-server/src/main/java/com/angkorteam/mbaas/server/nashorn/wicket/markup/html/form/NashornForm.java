@@ -31,10 +31,12 @@ public class NashornForm<T> extends org.apache.wicket.markup.html.form.Form<T> {
 
     public NashornForm(String id) {
         super(id);
+        setOutputMarkupId(true);
     }
 
     public NashornForm(String id, IModel<T> model) {
         super(id, model);
+        setOutputMarkupId(true);
     }
 
     @Override
