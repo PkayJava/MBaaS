@@ -67,7 +67,7 @@ public class DocumentProvider extends JooqProvider {
                 boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), Double.class));
             } else if (AttributeTypeEnum.Character == attributeType) {
                 boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), String.class));
-            } else if (AttributeTypeEnum.String == attributeType) {
+            } else if (AttributeTypeEnum.String == attributeType || AttributeTypeEnum.Text == attributeType) {
                 boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), String.class));
             } else if (AttributeTypeEnum.Time == attributeType
                     || AttributeTypeEnum.Date == attributeType
