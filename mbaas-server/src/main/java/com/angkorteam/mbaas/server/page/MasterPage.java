@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
+import org.apache.wicket.markup.DefaultMarkupResourceStreamProvider;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -115,7 +116,8 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
             StringResourceStream stream = new StringResourceStream(html);
             return stream;
         } else {
-            throw new WicketRuntimeException("markup not found");
+            DefaultMarkupResourceStreamProvider streamProvider = new DefaultMarkupResourceStreamProvider();
+            return streamProvider.getMarkupResourceStream(container, containerClass);
         }
     }
 
