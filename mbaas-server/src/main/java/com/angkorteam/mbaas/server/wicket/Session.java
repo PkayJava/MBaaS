@@ -128,7 +128,9 @@ public class Session extends AuthenticatedWebSession {
         }
         String sessionId = getId();
         this.roles = new Roles();
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         Map<String, Object> roleRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", userRecord.get(Jdbc.User.ROLE_ID));
+        this.roles.add(configuration.getString(Constants.ROLE_ANONYMOUS));
         this.roles.add((String) roleRecord.get(Jdbc.Role.NAME));
         this.homePageId = (String) roleRecord.get(Jdbc.Role.HOME_PAGE_ID);
 

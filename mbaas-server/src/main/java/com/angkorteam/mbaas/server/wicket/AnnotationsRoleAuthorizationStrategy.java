@@ -37,7 +37,9 @@ public class AnnotationsRoleAuthorizationStrategy extends org.apache.wicket.auth
             JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(applicationCode);
             List<String> roles = jdbcTemplate.queryForList("SELECT " + Jdbc.Role.NAME + " FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " IN (SELECT " + Jdbc.PageRole.ROLE_ID + " FROM " + Jdbc.PAGE_ROLE + " WHERE " + Jdbc.PageRole.PAGE_ID + " = ?" + ")", String.class, pageId);
             Roles r = new Roles();
-            r.addAll(roles);
+            if (roles != null && !roles.isEmpty()) {
+                r.addAll(roles);
+            }
             return hasAny(r);
         } else {
             return super.isInstantiationAuthorized(componentClass);

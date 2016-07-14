@@ -7,7 +7,6 @@ import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.wicket.markup.html.form.UrlTextField;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.validation.validator.UrlValidator;
 
 import java.util.HashMap;
 import java.util.Map;

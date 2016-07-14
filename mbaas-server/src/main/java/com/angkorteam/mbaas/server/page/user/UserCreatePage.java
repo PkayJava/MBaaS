@@ -6,7 +6,6 @@ import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
 import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
-import com.angkorteam.mbaas.server.validator.UserLoginFormValidator;
 import com.angkorteam.mbaas.server.validator.UserLoginValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;

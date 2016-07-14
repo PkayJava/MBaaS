@@ -5,7 +5,6 @@ import com.angkorteam.mbaas.server.nashorn.wicket.markup.html.link.NashornLink;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.model.IModel;
 
 import java.io.Serializable;
 import java.util.Map;
