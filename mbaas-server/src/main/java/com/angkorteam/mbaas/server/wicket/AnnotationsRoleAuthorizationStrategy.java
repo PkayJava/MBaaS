@@ -1,9 +1,7 @@
 package com.angkorteam.mbaas.server.wicket;
 
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.page.PagePage;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.authroles.authorization.strategies.role.IRoleCheckingStrategy;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.component.IRequestableComponent;
