@@ -76,6 +76,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
 import org.flywaydb.core.internal.dbsupport.Schema;
+import org.joda.time.LocalDate;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSender;
@@ -175,6 +176,9 @@ public abstract class MasterPage extends AdminLTEPage {
         this.mmenuItems = new HashMap<>();
         this.mmenuPages = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+
+        Label copyrightYear = new Label("copyrightYear", "2015 - " + new LocalDate().getYear());
+        add(copyrightYear);
 
         Session session = getSession();
 
