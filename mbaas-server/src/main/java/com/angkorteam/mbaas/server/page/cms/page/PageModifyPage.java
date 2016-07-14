@@ -101,9 +101,7 @@ public class PageModifyPage extends MasterPage {
         add(this.form);
 
         this.pageId = getPageParameters().get("pageId").toString("");
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
 
-        this.role = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " IN (SELECT " + Jdbc.PageRole.ROLE_ID + " FROM " + Jdbc.PAGE_ROLE + " WHERE " + Jdbc.PageRole.PAGE_ID + " = ?)", this.pageId);
         this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RoleChoiceProvider(getSession().getApplicationCode()), new RoleChoiceRenderer());
         this.form.add(this.roleField);
         this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);
@@ -163,6 +161,7 @@ public class PageModifyPage extends MasterPage {
         super.onBeforeRender();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
+        this.role = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " IN (SELECT " + Jdbc.PageRole.ROLE_ID + " FROM " + Jdbc.PAGE_ROLE + " WHERE " + Jdbc.PageRole.PAGE_ID + " = ?)", this.pageId);
         this.masterPage = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE " + Jdbc.MasterPage.MASTER_PAGE_ID + " = ?", pageRecord.get(Jdbc.Page.MASTER_PAGE_ID));
         this.menu = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.MENU + " WHERE " + Jdbc.Menu.MENU_ID + " = ?", pageRecord.get(Jdbc.Page.MENU_ID));
         this.javascript = (String) pageRecord.get(Jdbc.Page.STAGE_JAVASCRIPT);
