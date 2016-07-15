@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.DefaultMarkupResourceStreamProvider;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -44,6 +45,7 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
     @Override
     protected void onInitialize() {
         super.onInitialize();
+
         PageParameters parameters = getPageParameters();
         Session session = getSession();
         String applicationUserId = session.getApplicationUserId();
@@ -132,4 +134,8 @@ public class MasterPage extends com.angkorteam.mbaas.server.wicket.MasterPage im
         void onInitialize(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel);
 
     }
+
+    protected void onMessageUpdate(AjaxRequestTarget target, String message) {
+    }
+
 }

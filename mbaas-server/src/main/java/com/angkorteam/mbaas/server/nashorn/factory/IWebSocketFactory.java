@@ -12,9 +12,11 @@ public interface IWebSocketFactory extends Serializable {
 
     NashornWebSocketBehavior registerWebSocket();
 
-    void pushMessage(String message);
+    void sendMessage(String message);
 
-    void pushMessage(String sessionId, String message);
+    void sendMessage(String sessionId, IKey key, String message);
+
+    void pushMessage(String message);
 
     void pushMessage(String sessionId, IKey key, String message);
 

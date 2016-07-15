@@ -3,10 +3,14 @@ package com.angkorteam.mbaas.server.page;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
+import com.angkorteam.mbaas.server.nashorn.wicket.protocol.ws.api.NashornWebSocketBehavior;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import com.angkorteam.mbaas.server.wicket.PushMessage;
 import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -42,6 +46,7 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
     @Override
     protected void onInitialize() {
         super.onInitialize();
+
         PageParameters parameters = getPageParameters();
         this.pageId = parameters.get("pageId").toString("");
         if (this.pageId == null || "".equals(this.pageId)) {
@@ -107,6 +112,17 @@ public class PagePage extends MasterPage implements IMarkupResourceStreamProvide
             JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
             Map<String, Object> pageRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", this.pageId);
             String html = (String) (this.stage ? pageRecord.get(Jdbc.Page.STAGE_HTML) : pageRecord.get(Jdbc.Page.HTML));
+//            int indexExtend = html.indexOf("<wicket:extend>");
+//            if (indexExtend != -1) {
+//                indexExtend = indexExtend + "<wicket:extend>".length();
+//                StringResourceStream stream = new StringResourceStream(html.substring(0, indexExtend) + "<form wicket:id='hiddenForm'><input type='hidden' wicket:id='hiddenMessage'></form>" + html.substring(indexExtend));
+//                return stream;
+//            } else {
+//                int index = html.indexOf("<body");
+//                index = html.indexOf(">", index) + 1;
+//                StringResourceStream stream = new StringResourceStream(html.substring(0, index) + "<form wicket:id='hiddenForm'><input type='hidden' wicket:id='hiddenMessage'></form>" + html.substring(index));
+//                return stream;
+//            }
             StringResourceStream stream = new StringResourceStream(html);
             return stream;
         } else {

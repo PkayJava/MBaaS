@@ -30,7 +30,9 @@ import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornChoice
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornMultipleChoiceProvider;
 import com.angkorteam.mbaas.server.nashorn.wicket.provider.select2.NashornSingleChoiceProvider;
 import com.angkorteam.mbaas.server.page.PagePage;
+import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import com.angkorteam.mbaas.server.wicket.PushMessage;
 import com.angkorteam.mbaas.server.wicket.Session;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -51,7 +53,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.model.util.MapModel;
+import org.apache.wicket.protocol.ws.WebSocketSettings;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
+import org.apache.wicket.protocol.ws.api.WebSocketPushBroadcaster;
+import org.apache.wicket.protocol.ws.api.message.ConnectedMessage;
 import org.apache.wicket.protocol.ws.api.registry.IKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -1136,10 +1141,9 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public void pushMessage(String message) {
-        // TODO : remove this trick
+    public void sendMessage(String message) {
         if (message == null || "".equals(message)) {
-            message = " ";
+            return;
         }
         SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
         Collection<IWebSocketConnection> connections = registry.getConnections(ApplicationUtils.getApplication());
@@ -1154,28 +1158,9 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public void pushMessage(String sessionId, String message) {
-        // TODO : remove this trick
+    public void sendMessage(String sessionId, IKey key, String message) {
         if (message == null || "".equals(message)) {
-            message = " ";
-        }
-        SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
-        Collection<IWebSocketConnection> connections = registry.getConnections(ApplicationUtils.getApplication(), sessionId);
-        for (IWebSocketConnection connection : connections) {
-            if (connection != null && connection.isOpen()) {
-                try {
-                    connection.sendMessage(message);
-                } catch (IOException e) {
-                }
-            }
-        }
-    }
-
-    @Override
-    public void pushMessage(String sessionId, IKey key, String message) {
-        // TODO : remove this trick
-        if (message == null || "".equals(message)) {
-            message = " ";
+            return;
         }
         SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
         IWebSocketConnection connection = registry.getConnection(ApplicationUtils.getApplication(), sessionId, key);
@@ -1185,6 +1170,28 @@ public class Factory implements Serializable,
             } catch (IOException e) {
             }
         }
+    }
+
+    @Override
+    public void pushMessage(String message) {
+        if (message == null || "".equals(message)) {
+            return;
+        }
+        Application application = ApplicationUtils.getApplication();
+        WebSocketSettings webSocketSettings = WebSocketSettings.Holder.get(application);
+        WebSocketPushBroadcaster broadcaster = new WebSocketPushBroadcaster(webSocketSettings.getConnectionRegistry());
+        PushMessage pushMessage = new PushMessage(message);
+        broadcaster.broadcastAll(application, pushMessage);
+    }
+
+    @Override
+    public void pushMessage(String sessionId, IKey key, String message) {
+        Application application = ApplicationUtils.getApplication();
+        WebSocketSettings webSocketSettings = WebSocketSettings.Holder.get(application);
+        WebSocketPushBroadcaster broadcaster = new WebSocketPushBroadcaster(webSocketSettings.getConnectionRegistry());
+        PushMessage pushMessage = new PushMessage(message);
+        ConnectedMessage connectedMessage = new ConnectedMessage(application, sessionId, key);
+        broadcaster.broadcast(connectedMessage, pushMessage);
     }
 
     @Override

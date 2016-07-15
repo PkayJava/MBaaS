@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import javax.websocket.WebSocketContainer;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -45,84 +46,40 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
     @Override
     public void renderHead(Component component, IHeaderResponse response) {
         super.renderHead(component, response);
-        ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
-        try {
-            engine.eval(script);
-        } catch (ScriptException e) {
-            throw new WicketRuntimeException(e);
-        }
-        Invocable invocable = (Invocable) engine;
         {
-            IScriptMessage scriptMessage = invocable.getInterface(IScriptMessage.class);
-            if (scriptMessage == null) {
-                throw new WicketRuntimeException("function script_on_message(requestCycle, disk, jdbcTemplate, factory, pageModel, event, message){} is missing");
-            }
-            JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-            StringBuilder body = scriptMessage.script_on_message(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event", "message");
+            StringBuilder body = new StringBuilder("");
             String scriptOnMessage = "Wicket.Event.subscribe('/websocket/message', function(event, message){ " + (body == null || "undefined".equals(body.toString()) ? "" : body.toString()) + " });";
             response.render(OnDomReadyHeaderItem.forScript(scriptOnMessage));
         }
         {
-            IScriptOpen scriptOpen = invocable.getInterface(IScriptOpen.class);
-            if (scriptOpen == null) {
-                throw new WicketRuntimeException("function script_on_open(requestCycle, disk, jdbcTemplate, factory, pageModel, event){} is missing");
-            }
-            JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-            StringBuilder body = scriptOpen.script_on_open(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event");
+            StringBuilder body = new StringBuilder("");
             String scriptOnOpen = "Wicket.Event.subscribe('/websocket/open', function(event){" + (body == null || "undefined".equals(body.toString()) ? "" : body.toString()) + "});";
             response.render(OnDomReadyHeaderItem.forScript(scriptOnOpen));
         }
         {
-            IScriptClosed scriptClosed = invocable.getInterface(IScriptClosed.class);
-            if (scriptClosed == null) {
-                throw new WicketRuntimeException("function script_on_closed(requestCycle, disk, jdbcTemplate, factory, pageModel, event){} is missing");
-            }
-            JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-            StringBuilder body = scriptClosed.script_on_closed(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event");
+            StringBuilder body = new StringBuilder("");
             String scriptOnClosed = "Wicket.Event.subscribe('/websocket/closed', function(event){" + (body == null || "undefined".equals(body.toString()) ? "" : body.toString()) + "});";
             response.render(OnDomReadyHeaderItem.forScript(scriptOnClosed));
         }
         {
-            IScriptError scriptError = invocable.getInterface(IScriptError.class);
-            if (scriptError == null) {
-                throw new WicketRuntimeException("function script_on_error(requestCycle, disk, jdbcTemplate, factory, pageModel, event){} is missing");
-            }
-            JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-            StringBuilder body = scriptError.script_on_error(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, "event");
+            StringBuilder body = new StringBuilder("");
             String scriptOnError = "Wicket.Event.subscribe('/websocket/error', function(event){" + (body == null || "undefined".equals(body.toString()) ? "" : body.toString()) + "});";
             response.render(OnDomReadyHeaderItem.forScript(scriptOnError));
         }
     }
 
     @Override
-    protected void onPush(WebSocketRequestHandler handler, IWebSocketPushMessage message) {
-        ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
-        try {
-            engine.eval(script);
-        } catch (ScriptException e) {
-            throw new WicketRuntimeException(e);
-        }
-        Invocable invocable = (Invocable) engine;
-        ISocketPush push = invocable.getInterface(ISocketPush.class);
-        if (push == null) {
-            throw new WicketRuntimeException("function socket_on_push(requestCycle, disk, jdbcTemplate, factory, pageModel, handler, message){} is missing");
-        }
-        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-        push.socket_on_push(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, handler, message);
-    }
-
-    @Override
     protected void onConnect(ConnectedMessage message) {
         ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
-            engine.eval(script);
+            engine.eval(this.script);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         ISocketConnect connect = invocable.getInterface(ISocketConnect.class);
         if (connect == null) {
-            throw new WicketRuntimeException("function socket_on_connect(requestCycle, disk, jdbcTemplate, factory, pageModel, message){} is missing");
+            throw new WicketRuntimeException("function socket_on_connect(requestCycle, disk, jdbcTemplate, factory, pageModel, connectedMessage){} is missing");
         }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
         connect.socket_on_connect(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, message);
@@ -132,14 +89,14 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
     protected void onClose(ClosedMessage message) {
         ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
-            engine.eval(script);
+            engine.eval(this.script);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         ISocketClose close = invocable.getInterface(ISocketClose.class);
         if (close == null) {
-            throw new WicketRuntimeException("function socket_on_close(requestCycle, disk, jdbcTemplate, factory, pageModel, message){} is missing");
+            throw new WicketRuntimeException("function socket_on_close(requestCycle, disk, jdbcTemplate, factory, pageModel, closedMessage){} is missing");
         }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
         close.socket_on_close(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, message);
@@ -149,14 +106,14 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
     protected void onError(WebSocketRequestHandler handler, ErrorMessage message) {
         ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
-            engine.eval(script);
+            engine.eval(this.script);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         ISocketError error = invocable.getInterface(ISocketError.class);
         if (error == null) {
-            throw new WicketRuntimeException("function socket_on_error(requestCycle, disk, jdbcTemplate, factory, pageModel, handler, message){} is missing");
+            throw new WicketRuntimeException("function socket_on_error(requestCycle, disk, jdbcTemplate, factory, pageModel, handler, errorMessage){} is missing");
         }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
         error.socket_on_error(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, handler, message);
@@ -166,14 +123,14 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
     protected void onAbort(AbortedMessage message) {
         ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
-            engine.eval(script);
+            engine.eval(this.script);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         ISocketAbort abort = invocable.getInterface(ISocketAbort.class);
         if (abort == null) {
-            throw new WicketRuntimeException("function socket_on_abort(requestCycle, disk, jdbcTemplate, factory, pageModel, message){} is missing");
+            throw new WicketRuntimeException("function socket_on_abort(requestCycle, disk, jdbcTemplate, factory, pageModel, abortedMessage){} is missing");
         }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
         abort.socket_on_abort(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, message);
@@ -183,14 +140,14 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
     protected void onMessage(WebSocketRequestHandler handler, TextMessage message) {
         ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
-            engine.eval(script);
+            engine.eval(this.script);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         }
         Invocable invocable = (Invocable) engine;
         ISocketTextMessage textMessage = invocable.getInterface(ISocketTextMessage.class);
         if (textMessage == null) {
-            throw new WicketRuntimeException("function socket_on_text_message(requestCycle, disk, jdbcTemplate, factory, pageModel, handler, message){} is missing");
+            throw new WicketRuntimeException("function socket_on_text_message(requestCycle, disk, jdbcTemplate, factory, pageModel, handler, textMessage){} is missing");
         }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
         textMessage.socket_on_text_message(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, handler, message);
@@ -207,30 +164,10 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
         Invocable invocable = (Invocable) engine;
         ISocketBinaryMessage binaryMessage = invocable.getInterface(ISocketBinaryMessage.class);
         if (binaryMessage == null) {
-            throw new WicketRuntimeException("function socket_on_binary_message(requestCycle, disk, jdbcTemplate, factory, pageModel, handler, message){} is missing");
+            throw new WicketRuntimeException("function socket_on_binary_message(requestCycle, disk, jdbcTemplate, factory, pageModel, handler, binaryMessage){} is missing");
         }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
         binaryMessage.socket_on_binary_message(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, handler, message);
-    }
-
-    public interface IScriptOpen extends Serializable {
-        StringBuilder script_on_open(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event);
-    }
-
-    public interface IScriptMessage extends Serializable {
-        StringBuilder script_on_message(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event, String message);
-    }
-
-    public interface IScriptClosed extends Serializable {
-        StringBuilder script_on_closed(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event);
-    }
-
-    public interface IScriptError extends Serializable {
-        StringBuilder script_on_error(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, String event);
-    }
-
-    public interface ISocketPush extends Serializable {
-        void socket_on_push(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, WebSocketRequestHandler handler, IWebSocketPushMessage message);
     }
 
     public interface ISocketConnect extends Serializable {

@@ -64,11 +64,15 @@ import com.angkorteam.mbaas.server.page.user.UserModifyPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import jdk.nashorn.api.scripting.ClassFilter;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.HiddenField;
+import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -97,6 +101,8 @@ public abstract class MasterPage extends AdminLTEPage {
 
     private Label pageHeaderLabel;
     private Label pageDescriptionLabel;
+
+    private String hiddenMessage;
 
     private String menuProfileClass = "treeview";
     private String menuSecurityClass = "treeview";
@@ -173,6 +179,7 @@ public abstract class MasterPage extends AdminLTEPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
+
         this.mmenuItems = new HashMap<>();
         this.mmenuPages = new HashMap<>();
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
