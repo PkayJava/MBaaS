@@ -187,31 +187,31 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
         binaryMessage.socket_on_binary_message(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, handler, message);
     }
 
-    interface ISocketPush extends Serializable {
+    public interface ISocketPush extends Serializable {
         void socket_on_push(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, WebSocketRequestHandler handler, PushMessage message);
     }
 
-    interface ISocketConnect extends Serializable {
+    public interface ISocketConnect extends Serializable {
         void socket_on_connect(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, ConnectedMessage message);
     }
 
-    interface ISocketClose extends Serializable {
+    public interface ISocketClose extends Serializable {
         void socket_on_close(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, ClosedMessage message);
     }
 
-    interface ISocketError extends Serializable {
+    public interface ISocketError extends Serializable {
         void socket_on_error(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, WebSocketRequestHandler handler, ErrorMessage message);
     }
 
-    interface ISocketAbort extends Serializable {
+    public interface ISocketAbort extends Serializable {
         void socket_on_abort(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, AbortedMessage message);
     }
 
-    interface ISocketTextMessage extends Serializable {
+    public interface ISocketTextMessage extends Serializable {
         void socket_on_text_message(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, WebSocketRequestHandler handler, TextMessage message);
     }
 
-    interface ISocketBinaryMessage extends Serializable {
+    public interface ISocketBinaryMessage extends Serializable {
         void socket_on_binary_message(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, WebSocketRequestHandler handler, BinaryMessage binaryMessage);
     }
 
