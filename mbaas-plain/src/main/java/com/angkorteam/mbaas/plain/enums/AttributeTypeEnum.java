@@ -10,23 +10,25 @@ import java.time.LocalTime;
  */
 public enum AttributeTypeEnum implements Serializable {
 
-    Boolean("Boolean", java.lang.Boolean.class.getName(), "BIT(1)", true, "eav_boolean"),
-    Byte("Byte", java.lang.Byte.class.getName(), "INT(11)", false, "eav_integer"),
-    Short("Short", java.lang.Short.class.getName(), "INT(11)", false, "eav_integer"),
-    Integer("Integer", java.lang.Integer.class.getName(), "INT(11)", true, "eav_integer"),
-    Long("Long", java.lang.Long.class.getName(), "INT(11)", false, "eav_integer"),
-    Float("Float", java.lang.Float.class.getName(), "DECIMAL(15,4)", false, "eav_decimal"),
-    Double("Double", java.lang.Double.class.getName(), "DECIMAL(15,4)", true, "eav_decimal"),
-    Character("Character", java.lang.Character.class.getName(), "VARCHAR(1)", true, "eav_character"),
-    Text("Text", java.lang.String.class.getName(), "TEXT", true, "eav_text"),
-    String("String", java.lang.String.class.getName(), "VARCHAR(255)", true, "eav_varchar"),
-    Time("Time", java.sql.Time.class.getName(), "TIME", true, "eav_time"),
-    Date("Date", java.sql.Date.class.getName(), "DATE", true, "eav_date"),
-    DateTime("DateTime", java.sql.Timestamp.class.getName(), "DATETIME", true, "eav_datetime");
+    Boolean("Boolean", java.lang.Boolean.class.getName(), "BIT", "1", true, "eav_boolean"),
+    Byte("Byte", java.lang.Byte.class.getName(), "INT", "11", false, "eav_integer"),
+    Short("Short", java.lang.Short.class.getName(), "INT", "11", false, "eav_integer"),
+    Integer("Integer", java.lang.Integer.class.getName(), "INT", "11", true, "eav_integer"),
+    Long("Long", java.lang.Long.class.getName(), "INT", "11", false, "eav_integer"),
+    Float("Float", java.lang.Float.class.getName(), "DECIMAL", "15,4", false, "eav_decimal"),
+    Double("Double", java.lang.Double.class.getName(), "DECIMAL", "15,4", true, "eav_decimal"),
+    Character("Character", java.lang.Character.class.getName(), "VARCHAR", "1", true, "eav_character"),
+    Text("Text", java.lang.String.class.getName(), "TEXT", "", true, "eav_text"),
+    String("String", java.lang.String.class.getName(), "VARCHAR", "255", true, "eav_varchar"),
+    Time("Time", java.sql.Time.class.getName(), "TIME", "", true, "eav_time"),
+    Date("Date", java.sql.Date.class.getName(), "DATE", "", true, "eav_date"),
+    DateTime("DateTime", java.sql.Timestamp.class.getName(), "DATETIME", "", true, "eav_datetime");
 
     private final String literal;
 
     private final String javaType;
+
+    private final String length;
 
     private final String sqlType;
 
@@ -34,9 +36,10 @@ public enum AttributeTypeEnum implements Serializable {
 
     private final String eavTable;
 
-    AttributeTypeEnum(java.lang.String literal, java.lang.String javaType, java.lang.String sqlType, boolean exposed, java.lang.String eavTable) {
+    AttributeTypeEnum(java.lang.String literal, java.lang.String javaType, java.lang.String sqlType, String length, boolean exposed, java.lang.String eavTable) {
         this.literal = literal;
         this.javaType = javaType;
+        this.length = length;
         this.sqlType = sqlType;
         this.exposed = exposed;
         this.eavTable = eavTable;
@@ -44,6 +47,10 @@ public enum AttributeTypeEnum implements Serializable {
 
     public final String getLiteral() {
         return literal;
+    }
+
+    public final String getLength() {
+        return length;
     }
 
     public final String getJavaType() {

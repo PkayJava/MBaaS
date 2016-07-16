@@ -55,9 +55,17 @@ public class AttributeFunction {
                 String jdbc;
                 if (attributeType == AttributeTypeEnum.Text
                         || attributeType == AttributeTypeEnum.String) {
-                    jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD FULLTEXT (`" + requestBody.getAttributeName() + "`);";
+                    if (requestBody.getLength() == null || "".equals(requestBody.getLength())) {
+                        jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD FULLTEXT (`" + requestBody.getAttributeName() + "`);";
+                    } else {
+                        jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(" + requestBody.getLength() + ")" + " , ADD FULLTEXT (`" + requestBody.getAttributeName() + "`);";
+                    }
                 } else {
-                    jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD INDEX (`" + requestBody.getAttributeName() + "`);";
+                    if (requestBody.getLength() == null || "".equals(requestBody.getLength())) {
+                        jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD INDEX (`" + requestBody.getAttributeName() + "`);";
+                    } else {
+                        jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(" + requestBody.getLength() + ")" + " , ADD INDEX (`" + requestBody.getAttributeName() + "`);";
+                    }
                 }
                 jdbcTemplate.execute(jdbc);
             }

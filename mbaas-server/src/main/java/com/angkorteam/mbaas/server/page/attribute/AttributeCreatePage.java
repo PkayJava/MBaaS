@@ -42,6 +42,11 @@ public class AttributeCreatePage extends MasterPage {
     private DropDownChoice<String> eavField;
     private TextFeedbackPanel eavFeedback;
 
+    private String length;
+    private TextField<String> lengthField;
+    private TextFeedbackPanel lengthFeedback;
+
+
     private String nullable;
     private DropDownChoice<String> nullableField;
     private TextFeedbackPanel nullableFeedback;
@@ -82,23 +87,32 @@ public class AttributeCreatePage extends MasterPage {
                 attributeTypes.add(attributeTypeEnum.getLiteral());
             }
         }
+        this.attributeType = AttributeTypeEnum.String.getLiteral();
         this.attributeTypeField = new DropDownChoice<>("attributeTypeField", new PropertyModel<>(this, "attributeType"), attributeTypes);
         this.attributeTypeField.setRequired(true);
         this.form.add(this.attributeTypeField);
         this.attributeTypeFeedback = new TextFeedbackPanel("attributeTypeFeedback", this.attributeTypeField);
         this.form.add(attributeTypeFeedback);
 
+        this.nullable = "Yes";
         this.nullableField = new DropDownChoice<>("nullableField", new PropertyModel<>(this, "nullable"), Arrays.asList("Yes", "No"));
         this.nullableField.setRequired(true);
         this.form.add(this.nullableField);
         this.nullableFeedback = new TextFeedbackPanel("nullableFeedback", this.nullableField);
         this.form.add(this.nullableFeedback);
 
+        this.eav = "No";
         this.eavField = new DropDownChoice<>("eavField", new PropertyModel<>(this, "eav"), Arrays.asList("Yes", "No"));
         this.eavField.setRequired(true);
         this.form.add(this.eavField);
         this.eavFeedback = new TextFeedbackPanel("eavFeedback", this.eavField);
         this.form.add(this.eavFeedback);
+
+        this.length = AttributeTypeEnum.String.getLength();
+        this.lengthField = new TextField<>("lengthField", new PropertyModel<>(this, "length"));
+        this.form.add(this.lengthField);
+        this.lengthFeedback = new TextFeedbackPanel("lengthFeedback", this.lengthField);
+        this.form.add(this.lengthFeedback);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
@@ -116,8 +130,13 @@ public class AttributeCreatePage extends MasterPage {
         requestBody.setAttributeName(this.name);
         requestBody.setNullable("Yes".equals(this.nullable));
         requestBody.setEav("Yes".equals(this.eav));
-        requestBody.setAttributeType(AttributeTypeEnum.valueOf(this.attributeType).getLiteral());
+        requestBody.setAttributeType(this.attributeType);
         requestBody.setCollectionName(this.collectionName);
+        if (this.length == null || "".equals(this.length)) {
+            requestBody.setLength(AttributeTypeEnum.valueOf(this.attributeType).getLength());
+        } else {
+            requestBody.setLength(this.length);
+        }
 
         AttributeFunction.createAttribute(getApplicationSchema(), jdbcTemplate, getSession().getApplicationCode(), UUID.randomUUID().toString(), requestBody);
 

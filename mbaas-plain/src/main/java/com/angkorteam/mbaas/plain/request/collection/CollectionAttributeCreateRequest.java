@@ -28,6 +28,18 @@ public class CollectionAttributeCreateRequest {
     @SerializedName("attributeType")
     private String attributeType;
 
+    @Expose
+    @SerializedName("length")
+    private String length;
+
+    public String getLength() {
+        return length;
+    }
+
+    public void setLength(String length) {
+        this.length = length;
+    }
+
     public boolean isEav() {
         return eav;
     }
