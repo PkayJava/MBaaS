@@ -40,6 +40,7 @@ public class Jdbc {
     public static final String PAGE_ROLE = "page_role";
     public static final String BLOCK = "block";
     public static final String RESTORE = "restore";
+    public static final String SOCKET = "socket";
 
     public static final class User {
         public static final String USER_ID = USER + "_id";
@@ -419,5 +420,14 @@ public class Jdbc {
         public static final String FIELDS = "fields";
         public static final String TABLE_NAME = "table_name";
         public static final String DATE_CREATED = "date_created";
+    }
+
+    public static final class Socket {
+        public static final String SOCKET_ID = SOCKET + "_id";
+        public static final String USER_ID = User.USER_ID;
+        public static final String DATE_CREATED = "date_created";
+        public static final String SESSION_ID = "session_id";
+        public static final String RESOURCE_NAME = "resource_name";
+        public static final String PAGE_KEY = "page_key";
     }
 }

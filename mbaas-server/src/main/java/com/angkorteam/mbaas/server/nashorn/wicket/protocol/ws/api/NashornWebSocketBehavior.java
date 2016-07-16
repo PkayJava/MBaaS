@@ -1,9 +1,11 @@
 package com.angkorteam.mbaas.server.nashorn.wicket.protocol.ws.api;
 
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.PushMessage;
+import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.Component;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -11,14 +13,22 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.protocol.ws.api.WebSocketBehavior;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.protocol.ws.api.message.*;
+import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
+import org.apache.wicket.protocol.ws.api.registry.ResourceNameKey;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.util.ReflectionUtils;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by socheat on 7/2/16.
@@ -82,6 +92,29 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
             throw new WicketRuntimeException("function socket_on_connect(requestCycle, disk, jdbcTemplate, factory, pageModel, connectedMessage){} is missing");
         }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        Map<String, Object> fields = new HashMap<>();
+        Session session = (Session) Session.get();
+        fields.put(Jdbc.Socket.USER_ID, session.getApplicationUserId());
+        fields.put(Jdbc.Socket.SOCKET_ID, UUID.randomUUID().toString());
+        fields.put(Jdbc.Socket.SESSION_ID, message.getSessionId());
+        fields.put(Jdbc.Socket.DATE_CREATED, new Date());
+        if (message.getKey() instanceof PageIdKey) {
+            Field field = ReflectionUtils.findField(PageIdKey.class, "pageId", Integer.class);
+            field.setAccessible(true);
+            Integer pageKey = (Integer) ReflectionUtils.getField(field, message.getKey());
+            fields.put(Jdbc.Socket.PAGE_KEY, pageKey);
+            jdbcInsert.usingColumns(Jdbc.Socket.SOCKET_ID, Jdbc.Socket.DATE_CREATED, Jdbc.Socket.USER_ID, Jdbc.Socket.SESSION_ID, Jdbc.Socket.PAGE_KEY);
+        }
+        if (message.getKey() instanceof ResourceNameKey) {
+            Field field = ReflectionUtils.findField(PageIdKey.class, "resourceName", String.class);
+            field.setAccessible(true);
+            String resourceName = (String) ReflectionUtils.getField(field, message.getKey());
+            fields.put(Jdbc.Socket.RESOURCE_NAME, resourceName);
+            jdbcInsert.usingColumns(Jdbc.Socket.SOCKET_ID, Jdbc.Socket.DATE_CREATED, Jdbc.Socket.USER_ID, Jdbc.Socket.SESSION_ID, Jdbc.Socket.RESOURCE_NAME);
+        }
+        jdbcInsert.withTableName(Jdbc.SOCKET);
+        jdbcInsert.execute(fields);
         connect.socket_on_connect(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, message);
     }
 
@@ -100,6 +133,20 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
         }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
         close.socket_on_close(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, message);
+        if (message.getKey() instanceof PageIdKey) {
+            Field field = ReflectionUtils.findField(PageIdKey.class, "pageId", Integer.class);
+            field.setAccessible(true);
+            Integer pageKey = (Integer) ReflectionUtils.getField(field, message.getKey());
+            String sessionId = message.getSessionId();
+            jdbcTemplate.update("DELETE FROM " + Jdbc.SOCKET + " WHERE " + Jdbc.Socket.SESSION_ID + " = ? AND " + Jdbc.Socket.PAGE_KEY + " = ?", sessionId, pageKey);
+        }
+        if (message.getKey() instanceof ResourceNameKey) {
+            Field field = ReflectionUtils.findField(PageIdKey.class, "resourceName", String.class);
+            field.setAccessible(true);
+            String resourceName = (String) ReflectionUtils.getField(field, message.getKey());
+            String sessionId = message.getSessionId();
+            jdbcTemplate.update("DELETE FROM " + Jdbc.SOCKET + " WHERE " + Jdbc.Socket.SESSION_ID + " = ? AND " + Jdbc.Socket.RESOURCE_NAME + " = ?", sessionId, resourceName);
+        }
     }
 
     @Override

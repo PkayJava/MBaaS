@@ -58,6 +58,8 @@ import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.WebSocketPushBroadcaster;
 import org.apache.wicket.protocol.ws.api.message.ConnectedMessage;
 import org.apache.wicket.protocol.ws.api.registry.IKey;
+import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
+import org.apache.wicket.protocol.ws.api.registry.ResourceNameKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -1145,13 +1147,61 @@ public class Factory implements Serializable,
         if (message == null || "".equals(message)) {
             return;
         }
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        List<Map<String, Object>> sockets = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.SOCKET);
         SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
-        Collection<IWebSocketConnection> connections = registry.getConnections(ApplicationUtils.getApplication());
-        for (IWebSocketConnection connection : connections) {
-            if (connection != null && connection.isOpen()) {
-                try {
-                    connection.sendMessage(message);
-                } catch (IOException e) {
+        for (Map<String, Object> socket : sockets) {
+            String sessionId = (String) socket.get(Jdbc.Socket.SESSION_ID);
+            Integer pageKey = (Integer) socket.get(Jdbc.Socket.PAGE_KEY);
+            if (pageKey != null) {
+                IWebSocketConnection connection = registry.getConnection(ApplicationUtils.getApplication(), sessionId, new PageIdKey(pageKey));
+                if (connection != null && connection.isOpen()) {
+                    try {
+                        connection.sendMessage(message);
+                    } catch (IOException e) {
+                    }
+                }
+            }
+            String resourceName = (String) socket.get(Jdbc.Socket.RESOURCE_NAME);
+            if (resourceName != null && !"".equals(resourceName)) {
+                IWebSocketConnection connection = registry.getConnection(ApplicationUtils.getApplication(), sessionId, new ResourceNameKey(resourceName));
+                if (connection != null && connection.isOpen()) {
+                    try {
+                        connection.sendMessage(message);
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void sendMessage(String sessionId, String message) {
+        if (message == null || "".equals(message)) {
+            return;
+        }
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        List<Map<String, Object>> sockets = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.SOCKET + " WHERE " + Jdbc.Socket.SESSION_ID + " = ?", sessionId);
+        SimpleWebSocketConnectionRegistry registry = new SimpleWebSocketConnectionRegistry();
+        for (Map<String, Object> socket : sockets) {
+            Integer pageKey = (Integer) socket.get(Jdbc.Socket.PAGE_KEY);
+            if (pageKey != null) {
+                IWebSocketConnection connection = registry.getConnection(ApplicationUtils.getApplication(), sessionId, new PageIdKey(pageKey));
+                if (connection != null && connection.isOpen()) {
+                    try {
+                        connection.sendMessage(message);
+                    } catch (IOException e) {
+                    }
+                }
+            }
+            String resourceName = (String) socket.get(Jdbc.Socket.RESOURCE_NAME);
+            if (resourceName != null && !"".equals(resourceName)) {
+                IWebSocketConnection connection = registry.getConnection(ApplicationUtils.getApplication(), sessionId, new ResourceNameKey(resourceName));
+                if (connection != null && connection.isOpen()) {
+                    try {
+                        connection.sendMessage(message);
+                    } catch (IOException e) {
+                    }
                 }
             }
         }
@@ -1178,14 +1228,58 @@ public class Factory implements Serializable,
             return;
         }
         Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        List<Map<String, Object>> sockets = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.SOCKET);
         WebSocketSettings webSocketSettings = WebSocketSettings.Holder.get(application);
         WebSocketPushBroadcaster broadcaster = new WebSocketPushBroadcaster(webSocketSettings.getConnectionRegistry());
-        PushMessage pushMessage = new PushMessage(message);
-        broadcaster.broadcastAll(application, pushMessage);
+        for (Map<String, Object> socket : sockets) {
+            String sessionId = (String) socket.get(Jdbc.Socket.SESSION_ID);
+            Integer pageKey = (Integer) socket.get(Jdbc.Socket.PAGE_KEY);
+            if (pageKey != null) {
+                PushMessage pushMessage = new PushMessage(message);
+                ConnectedMessage connectedMessage = new ConnectedMessage(application, sessionId, new PageIdKey(pageKey));
+                broadcaster.broadcast(connectedMessage, pushMessage);
+            }
+            String resourceName = (String) socket.get(Jdbc.Socket.RESOURCE_NAME);
+            if (resourceName != null && !"".equals(resourceName)) {
+                PushMessage pushMessage = new PushMessage(message);
+                ConnectedMessage connectedMessage = new ConnectedMessage(application, sessionId, new ResourceNameKey(resourceName));
+                broadcaster.broadcast(connectedMessage, pushMessage);
+            }
+        }
+    }
+
+    @Override
+    public void pushMessage(String sessionId, String message) {
+        if (message == null || "".equals(message)) {
+            return;
+        }
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        List<Map<String, Object>> sockets = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.SOCKET + " WHERE " + Jdbc.Socket.SESSION_ID + " = ?", sessionId);
+        WebSocketSettings webSocketSettings = WebSocketSettings.Holder.get(application);
+        WebSocketPushBroadcaster broadcaster = new WebSocketPushBroadcaster(webSocketSettings.getConnectionRegistry());
+        for (Map<String, Object> socket : sockets) {
+            Integer pageKey = (Integer) socket.get(Jdbc.Socket.PAGE_KEY);
+            if (pageKey != null) {
+                PushMessage pushMessage = new PushMessage(message);
+                ConnectedMessage connectedMessage = new ConnectedMessage(application, sessionId, new PageIdKey(pageKey));
+                broadcaster.broadcast(connectedMessage, pushMessage);
+            }
+            String resourceName = (String) socket.get(Jdbc.Socket.RESOURCE_NAME);
+            if (resourceName != null && !"".equals(resourceName)) {
+                PushMessage pushMessage = new PushMessage(message);
+                ConnectedMessage connectedMessage = new ConnectedMessage(application, sessionId, new ResourceNameKey(resourceName));
+                broadcaster.broadcast(connectedMessage, pushMessage);
+            }
+        }
     }
 
     @Override
     public void pushMessage(String sessionId, IKey key, String message) {
+        if (message == null || "".equals(message)) {
+            return;
+        }
         Application application = ApplicationUtils.getApplication();
         WebSocketSettings webSocketSettings = WebSocketSettings.Holder.get(application);
         WebSocketPushBroadcaster broadcaster = new WebSocketPushBroadcaster(webSocketSettings.getConnectionRegistry());

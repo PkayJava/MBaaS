@@ -58,21 +58,19 @@ import com.angkorteam.mbaas.server.page.role.RoleCreatePage;
 import com.angkorteam.mbaas.server.page.role.RoleManagementPage;
 import com.angkorteam.mbaas.server.page.role.RoleModifyPage;
 import com.angkorteam.mbaas.server.page.session.SessionMobilePage;
+import com.angkorteam.mbaas.server.page.socket.PushMessagePage;
+import com.angkorteam.mbaas.server.page.socket.SocketManagementPage;
 import com.angkorteam.mbaas.server.page.user.UserCreatePage;
 import com.angkorteam.mbaas.server.page.user.UserManagementPage;
 import com.angkorteam.mbaas.server.page.user.UserModifyPage;
 import com.angkorteam.mbaas.server.service.PusherClient;
 import jdk.nashorn.api.scripting.ClassFilter;
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.HiddenField;
-import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -118,6 +116,7 @@ public abstract class MasterPage extends AdminLTEPage {
 
     private String mmenuUserClass = "";
     private String mmenuRoleClass = "";
+    private String mmenuSocketClass = "";
 
     private String mmenuCollectionClass = "";
     private String mmenuQueryClass = "";
@@ -248,6 +247,9 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuRole = new WebMarkupContainer("mmenuRole");
             mmenuRole.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuRoleClass")));
             this.menuSecurity.add(mmenuRole);
+            WebMarkupContainer mmenuSocket = new WebMarkupContainer("mmenuSocket");
+            mmenuSocket.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuSocketClass")));
+            this.menuSecurity.add(mmenuSocket);
         }
 
         {
@@ -402,7 +404,9 @@ public abstract class MasterPage extends AdminLTEPage {
                 || getPage() instanceof UserCreatePage
                 || getPage() instanceof RoleManagementPage
                 || getPage() instanceof RoleModifyPage
-                || getPage() instanceof RoleCreatePage) {
+                || getPage() instanceof RoleCreatePage
+                || getPage() instanceof SocketManagementPage
+                || getPage() instanceof PushMessagePage) {
             this.menuSecurityClass = "treeview active";
         } else {
             this.menuSecurityClass = "treeview";
@@ -464,6 +468,11 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuRoleClass = "active";
         } else {
             this.mmenuRoleClass = "";
+        }
+        if (getPage() instanceof SocketManagementPage || getPage() instanceof PushMessagePage) {
+            this.mmenuSocketClass = "active";
+        } else {
+            this.mmenuSocketClass = "";
         }
         if (getPage() instanceof CollectionManagementPage
                 || getPage() instanceof CollectionCreatePage
