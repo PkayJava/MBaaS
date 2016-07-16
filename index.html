@@ -887,6 +887,12 @@ var element = factory.createButton(container, 'elementId');</code></pre>
                     <pre><code class="language-java" data-lang="java">var element = factory.createAjaxButton('elementId');
 var element = factory.createAjaxButton(container, 'elementId');</code></pre>
                 </figure>
+                <p>
+                    <label class="label label-danger">48. WebSocket</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">factory.registerWebSocket();</code></pre>
+                </figure>
             </div>
             <div class="bs-docs-section">
                 <h1 id="mbaas-disk" class="page-header">Disk Object</h1>
@@ -2709,6 +2715,133 @@ field.isNotNull();
 
 field.isFalse();
 field.isTrue();</code></pre>
+                </figure>
+            </div>
+            <div class="bs-docs-section">
+                <h1 id="mbaas-web-socket" class="page-header">WebSocket</h1>
+                <p>
+                    It is server message push component, it is enable communication between browser/server real time, it
+                    is useful for chatting application, report application, notification monitoring tool.
+                    <a href="https://en.wikipedia.org/wiki/WebSocket" target="_blank">https://en.wikipedia.org/wiki/WebSocket</a>
+                </p>
+                <p>
+                    <label class="label label-danger">Server Push Message</label>
+                </p>
+                <p>
+                    Push Message allow to push message to connected server session.
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">// send to all sessions
+                factory.pushMessage('message');
+
+                // send to all link within a session
+                factory.pushMessage('sessionId', 'message');
+
+                // send to a connected session link
+                factory.pushMessage('sessionId', key, 'message');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">Server Send Message</label>
+                </p>
+                <p>
+                    Send Message allow server to send message directly to browser.
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">// send to all browsers
+factory.sendMessage('message');
+
+// send to all browsers within a session
+factory.sendMessage('sessionId', 'message');
+
+// send to a connected browser
+factory.sendMessage('sessionId', key, 'message');</code></pre>
+                </figure>
+                <p>
+                    <label class="label label-danger">Client Send Message</label>
+                </p>
+                <figure class="highlight">
+                    <pre><code class="language-javascript"
+                               data-lang="javascript">Wicket.WebSocket.send('hello world');</code></pre>
+                </figure>
+                <p>Example :</p>
+                <figure class="highlight">
+                    <pre><code class="language-java" data-lang="java">/*
+Page onInitialize
+*/
+function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+  factory.registerWebSocket();
+  var form = factory.createForm(&quot;form&quot;);
+  var messageField = factory.createTextField(form, &quot;messageField&quot;, String.class);
+  var receiveField = factory.createTextArea(form, &quot;receiveField&quot;);
+  pageModel['receiveField'] = &quot;Welcome To MBaaS Simple Chat&quot;;
+  var sendButton = factory.createAjaxButton(form,&quot;sendButton&quot;);
+}
+
+function socket_on_text_message(requestCycle, disk, jdbcTemplate, factory, pageModel, handler, textMessage){
+}
+
+function socket_on_push(requestCycle, disk, jdbcTemplate, factory, pageModel, handler, pushMessage){
+  var receiveField = pageModel['receiveField'];
+  receiveField = pushMessage.getText() + &quot;\n&quot; + receiveField;
+  pageModel['receiveField'] = receiveField;
+  handler.add(factory.getChildren('receiveField'));
+}
+
+function form__on_submit(requestCycle, disk, jdbcTemplate, factory, pageModel){}
+
+function form__on_error(requestCycle, disk, jdbcTemplate, factory, pageModel){}
+
+function sendButton__on_error(requestCycle, disk, jdbcTemplate, factory, target, form, pageModel){
+}
+
+function sendButton__on_submit(requestCycle, disk, jdbcTemplate, factory, target, form, pageModel){
+  var message = pageModel['messageField'];
+  if (message == null){
+    message = &quot;&quot;;
+  }
+  factory.pushMessage(message);
+}
+
+function socket_on_connect(requestCycle, disk, jdbcTemplate, factory, pageModel, connectedMessage){
+}
+
+function socket_on_close(requestCycle, disk, jdbcTemplate, factory, pageModel, closedMessage){
+}
+
+/*
+Page onBeforeRender
+*/
+function onBeforeRender(requestCycle, disk, jdbcTemplate, factory, pageModel) {
+}</code></pre>
+                </figure>
+                <figure class="highlight">
+                    <pre><code class="language-html" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:wicket=&quot;http://wicket.apache.org&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;wicket:extend&gt;
+    &lt;div class=&quot;box box-primary&quot;&gt;
+        &lt;div class=&quot;box-header with-border&quot;&gt;
+            &lt;h3 class=&quot;box-title&quot;&gt;Simple Chat&lt;/h3&gt;
+        &lt;/div&gt;
+        &lt;form role=&quot;form&quot; wicket:id=&quot;form&quot;&gt;
+            &lt;div class=&quot;box-body&quot;&gt;
+                &lt;div class=&quot;form-group&quot;&gt;
+                  &lt;input wicket:id=&quot;messageField&quot; type=&quot;text&quot; class=&quot;form-control&quot; placeholder=&quot;What to send&quot;&gt;
+                  &lt;textarea style=&quot;height:200px&quot; wicket:id=&quot;receiveField&quot; type=&quot;text&quot; class=&quot;form-control&quot;/&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+             &lt;div class=&quot;box-footer&quot;&gt;
+                &lt;button wicket:id=&quot;sendButton&quot; type=&quot;button&quot; class=&quot;btn btn-primary&quot;&gt;Send&lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/wicket:extend&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                 </figure>
             </div>
             <div class="bs-docs-section">
