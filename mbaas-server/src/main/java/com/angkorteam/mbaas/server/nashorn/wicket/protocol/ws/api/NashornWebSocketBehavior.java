@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.nashorn.wicket.protocol.ws.api;
 import com.angkorteam.mbaas.server.nashorn.Disk;
 import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import com.angkorteam.mbaas.server.wicket.PushMessage;
 import org.apache.wicket.Component;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -16,7 +17,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import javax.websocket.WebSocketContainer;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -154,10 +154,27 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
     }
 
     @Override
+    protected void onPush(WebSocketRequestHandler handler, IWebSocketPushMessage message) {
+        ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
+        try {
+            engine.eval(this.script);
+        } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
+        }
+        Invocable invocable = (Invocable) engine;
+        ISocketPush push = invocable.getInterface(ISocketPush.class);
+        if (push == null) {
+            throw new WicketRuntimeException("function socket_on_push(requestCycle, disk, jdbcTemplate, factory, pageModel, handler, pushMessage){} is missing");
+        }
+        JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
+        push.socket_on_push(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, handler, (PushMessage) message);
+    }
+
+    @Override
     protected void onMessage(WebSocketRequestHandler handler, BinaryMessage message) {
         ScriptEngine engine = ApplicationUtils.getApplication().getScriptEngine();
         try {
-            engine.eval(script);
+            engine.eval(this.script);
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         }
@@ -170,27 +187,31 @@ public class NashornWebSocketBehavior extends WebSocketBehavior {
         binaryMessage.socket_on_binary_message(RequestCycle.get(), this.disk, jdbcTemplate, this.factory, this.pageModel, handler, message);
     }
 
-    public interface ISocketConnect extends Serializable {
+    interface ISocketPush extends Serializable {
+        void socket_on_push(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, WebSocketRequestHandler handler, PushMessage message);
+    }
+
+    interface ISocketConnect extends Serializable {
         void socket_on_connect(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, ConnectedMessage message);
     }
 
-    public interface ISocketClose extends Serializable {
+    interface ISocketClose extends Serializable {
         void socket_on_close(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, ClosedMessage message);
     }
 
-    public interface ISocketError extends Serializable {
+    interface ISocketError extends Serializable {
         void socket_on_error(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, WebSocketRequestHandler handler, ErrorMessage message);
     }
 
-    public interface ISocketAbort extends Serializable {
+    interface ISocketAbort extends Serializable {
         void socket_on_abort(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, AbortedMessage message);
     }
 
-    public interface ISocketTextMessage extends Serializable {
+    interface ISocketTextMessage extends Serializable {
         void socket_on_text_message(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, WebSocketRequestHandler handler, TextMessage message);
     }
 
-    public interface ISocketBinaryMessage extends Serializable {
+    interface ISocketBinaryMessage extends Serializable {
         void socket_on_binary_message(RequestCycle requestCycle, Disk disk, JdbcTemplate jdbcTemplate, Factory factory, Map<String, Object> pageModel, WebSocketRequestHandler handler, BinaryMessage binaryMessage);
     }
 
