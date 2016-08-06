@@ -41,6 +41,8 @@ public class Jdbc {
     public static final String BLOCK = "block";
     public static final String RESTORE = "restore";
     public static final String SOCKET = "socket";
+    public static final String ENUM = "enum";
+    public static final String ENUM_ITEM = "enum_item";
 
     public static final class User {
         public static final String USER_ID = USER + "_id";
@@ -429,5 +431,19 @@ public class Jdbc {
         public static final String SESSION_ID = "session_id";
         public static final String RESOURCE_NAME = "resource_name";
         public static final String PAGE_KEY = "page_key";
+    }
+
+    public static final class Enum {
+        public static final String ENUM_ID = ENUM + "_id";
+        public static final String NAME = "name";
+        public static final String TYPE = "type";
+        public static final String FORMAT = "format";
+        public static final String DESCRIPTION = "description";
+    }
+
+    public static final class EnumItem {
+        public static final String ENUM_ITEM_ID = ENUM_ITEM + "_id";
+        public static final String ENUM_ID = Enum.ENUM_ID;
+        public static final String VALUE = "value";
     }
 }

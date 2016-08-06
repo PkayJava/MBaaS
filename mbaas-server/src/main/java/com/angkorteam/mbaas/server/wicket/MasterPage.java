@@ -53,6 +53,9 @@ import com.angkorteam.mbaas.server.page.query.QueryCreatePage;
 import com.angkorteam.mbaas.server.page.query.QueryManagementPage;
 import com.angkorteam.mbaas.server.page.query.QueryModifyPage;
 import com.angkorteam.mbaas.server.page.query.QueryParameterModifyPage;
+import com.angkorteam.mbaas.server.page.rest.EnumCreatePage;
+import com.angkorteam.mbaas.server.page.rest.EnumManagementPage;
+import com.angkorteam.mbaas.server.page.rest.EnumModifyPage;
 import com.angkorteam.mbaas.server.page.restore.RestoreManagementPage;
 import com.angkorteam.mbaas.server.page.role.RoleCreatePage;
 import com.angkorteam.mbaas.server.page.role.RoleManagementPage;
@@ -126,8 +129,9 @@ public abstract class MasterPage extends AdminLTEPage {
 
     private String mmenuMobileClass = "";
 
-    private String mmenuJavascriptClass;
+    private String mmenuJavascriptClass = "";
     private String mmenuClientClass = "";
+    private String mmenuEnumClass = "";
 
     private String mmenuJobClass = "";
     private String mmenuRestoreClass = "";
@@ -280,6 +284,10 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript");
             mmenuJavascript.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJavascriptClass")));
             this.menuLogicConsole.add(mmenuJavascript);
+
+            WebMarkupContainer mmenuEnum = new WebMarkupContainer("mmenuEnum");
+            mmenuEnum.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuEnumClass")));
+            this.menuLogicConsole.add(mmenuEnum);
 
             WebMarkupContainer mmenuClient = new WebMarkupContainer("mmenuClient");
             mmenuClient.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuClientClass")));
@@ -513,6 +521,11 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             this.menuSessionClass = "treeview";
             this.mmenuMobileClass = "";
+        }
+        if (getPage() instanceof EnumManagementPage || getPage() instanceof EnumCreatePage || getPage() instanceof EnumModifyPage) {
+            this.mmenuEnumClass = "active";
+        } else {
+            this.mmenuEnumClass = "";
         }
         if (getPage() instanceof JavascriptManagementPage || getPage() instanceof JavascriptCreatePage || getPage() instanceof JavascriptModifyPage) {
             this.mmenuJavascriptClass = "active";

@@ -51,7 +51,7 @@ public class ClientModifyPage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Create New Client";
+        return "Modify Client";
     }
 
     @Override

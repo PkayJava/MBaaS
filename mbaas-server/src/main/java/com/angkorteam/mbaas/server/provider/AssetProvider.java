@@ -70,7 +70,7 @@ public class AssetProvider extends JooqProvider {
     protected List<Condition> where() {
         List<Condition> where = new ArrayList<>();
         if (this.applicationUserId != null && !"".equals(this.applicationUserId)) {
-            where.add(userTable.field(Jdbc.User.USER_ID, String.class).eq(this.applicationUserId));
+            where.add(DSL.field(userTable.getName() + "." + Jdbc.User.USER_ID, String.class).eq(this.applicationUserId));
         }
         return where;
     }
