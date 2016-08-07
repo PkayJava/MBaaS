@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.wicket.model.IModel;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ public class NashornTimeTextField extends TimeTextField {
 
     private Map<String, Object> pageModel;
 
-    public NashornTimeTextField(String id, IModel<String> model) {
+    public NashornTimeTextField(String id, IModel<Date> model) {
         super(id, model);
         setOutputMarkupId(true);
     }

@@ -62,7 +62,7 @@ public class EnumValueProvider extends JooqProvider {
     @Override
     protected List<Condition> where() {
         List<Condition> where = new ArrayList<>();
-        where.add(DSL.field(enumItemTable.getName() + "." + Jdbc.EnumItem.ENUM_ID, String.class).eq(this.enumId));
+        where.add(DSL.field(this.enumItemTable.getName() + "." + Jdbc.EnumItem.ENUM_ID, String.class).eq(this.enumId));
         return where;
     }
 

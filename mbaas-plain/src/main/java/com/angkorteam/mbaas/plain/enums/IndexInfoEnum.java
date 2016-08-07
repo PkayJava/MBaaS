@@ -6,7 +6,6 @@ import java.io.Serializable;
  * Created by Khauv Socheat on 2/9/2016.
  */
 public enum IndexInfoEnum implements Serializable {
-    TABLE_SCHEM("TABLE_SCHEM"),
     TABLE_NAME("TABLE_NAME"),
     NON_UNIQUE("NON_UNIQUE"),
     TABLE_SCHEMA("TABLE_SCHEMA"),

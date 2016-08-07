@@ -1,46 +1,133 @@
 package com.angkorteam.mbaas.plain.enums;
 
 import java.io.Serializable;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 3/10/16.
  */
 public enum TypeEnum implements Serializable {
 
-    Boolean("Boolean"),
-    Byte("Byte", false),
-    Short("Short", false),
-    Integer("Integer"),
-    Long("Long", false),
-    Float("Float", false),
-    Double("Double"),
-    Character("Character"),
-    String("String"),
-    Time("Time"),
-    Date("Date"),
-    DateTime("DateTime"),
-    Map("Map"),
-    List("List");
+    Boolean(/*  */"Boolean", /*  */Boolean.class, /*  */"BIT", /*     */"1", /*   */"eav_boolean", /*  */true, /* */true, /* */true, /* */true),
+    Long(/*     */"Long", /*     */Long.class, /*     */"INT", /*     */"11", /*  */"eav_integer", /*  */true, /* */true, /* */true, /* */true),
+    Double(/*   */"Double", /*   */Double.class, /*   */"DECIMAL", /* */"15,4", /**/"eav_decimal", /*  */true, /* */true, /* */true, /* */true),
+    Character(/**/"Character", /**/Character.class, /**/"VARCHAR", /* */"1", /*   */"eav_character", /**/true, /* */true, /* */false, /**/false),
+    Text(/*     */"Text", /*     */String.class, /*   */"TEXT", /*    */"", /*    */"eav_text", /*     */true, /* */true, /* */false, /**/false),
+    String(/*   */"String", /*   */String.class, /*   */"VARCHAR", /* */"255", /* */"eav_varchar", /*  */true, /* */true, /* */true, /* */true),
+    Time(/*     */"Time", /*     */Time.class, /*     */"TIME", /*    */"", /*    */"eav_time", /*     */true, /* */true, /* */true, /* */true),
+    Date(/*     */"Date", /*     */Date.class, /*     */"DATE", /*    */"", /*    */"eav_date", /*     */true, /* */true, /* */true, /* */true),
+    DateTime(/* */"DateTime", /* */Timestamp.class, /**/"DATETIME", /**/"", /*    */"eav_datetime", /* */true, /* */true, /* */true, /* */true),
+    List(/*     */"List", /*     */List.class, /*     */"", /*        */"", /*    */"", /*             */false, /**/false, /**/true, /* */true),
+    Map(/*      */"Map", /*      */Map.class, /*      */"", /*        */"", /*    */"", /*             */false, /**/false, /**/true, /* */true);
 
     private final String literal;
 
-    private final boolean subType;
+    private final Class<?> javaType;
 
-    TypeEnum(String literal) {
-        this.literal = literal;
-        this.subType = true;
-    }
+    private final String length;
 
-    TypeEnum(String literal, boolean subType) {
+    private final String sqlType;
+
+    private final boolean exposed;
+
+    private final String eavTable;
+
+    private final boolean attributeType;
+
+    private final boolean queryType;
+
+    private final boolean querySubType;
+
+    TypeEnum(String literal,
+             Class<?> javaType,
+             String sqlType,
+             String length,
+             String eavTable,
+             boolean exposed,
+             boolean attributeType,
+             boolean queryType,
+             boolean querySubType) {
         this.literal = literal;
-        this.subType = subType;
+        this.javaType = javaType;
+        this.length = length;
+        this.sqlType = sqlType;
+        this.exposed = exposed;
+        this.eavTable = eavTable;
+        this.attributeType = attributeType;
+        this.queryType = queryType;
+        this.querySubType = querySubType;
     }
 
     public final String getLiteral() {
         return literal;
     }
 
-    public final boolean isSubType() {
-        return subType;
+    public final String getLength() {
+        return length;
+    }
+
+    public final Class<?> getJavaType() {
+        return javaType;
+    }
+
+    public final String getSqlType() {
+        return sqlType;
+    }
+
+    public final boolean isExposed() {
+        return exposed;
+    }
+
+    public final String getEavTable() {
+        return eavTable;
+    }
+
+    public boolean isAttributeType() {
+        return attributeType;
+    }
+
+    public boolean isQueryType() {
+        return queryType;
+    }
+
+    public boolean isQuerySubType() {
+        return querySubType;
+    }
+
+    public static final TypeEnum parseExternalType(Object object) {
+        if (object instanceof Boolean) {
+            return TypeEnum.Boolean;
+        } else if (object instanceof Byte) {
+            return TypeEnum.Long;
+        } else if (object instanceof Short) {
+            return TypeEnum.Long;
+        } else if (object instanceof Integer) {
+            return TypeEnum.Long;
+        } else if (object instanceof Long) {
+            return TypeEnum.Long;
+        } else if (object instanceof Float) {
+            return TypeEnum.Double;
+        } else if (object instanceof Double) {
+            return TypeEnum.Double;
+        } else if (object instanceof Character) {
+            return TypeEnum.Character;
+        } else if (object instanceof String) {
+            return TypeEnum.String;
+        } else if (object instanceof java.sql.Time || object instanceof LocalTime) {
+            return TypeEnum.Time;
+        } else if (object instanceof java.sql.Timestamp || object instanceof LocalDateTime) {
+            return TypeEnum.DateTime;
+        } else if (object instanceof java.sql.Date || object instanceof LocalDate || object instanceof java.util.Date) {
+            return TypeEnum.Date;
+        } else {
+            throw new IllegalArgumentException("clazz must be byte, short, integer, long, float, double, character, string, date");
+        }
     }
 }

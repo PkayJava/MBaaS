@@ -5,7 +5,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.SQLTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
-import com.angkorteam.mbaas.plain.enums.SubTypeEnum;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.QueryNameValidator;
@@ -92,7 +91,7 @@ public class QueryCreatePage extends MasterPage {
 
         List<String> returnTypes = new ArrayList<>();
         for (TypeEnum typeEnum : TypeEnum.values()) {
-            if (typeEnum.isSubType()) {
+            if (typeEnum.isQueryType()) {
                 returnTypes.add(typeEnum.getLiteral());
             }
         }
@@ -103,8 +102,8 @@ public class QueryCreatePage extends MasterPage {
         this.form.add(returnTypeFeedback);
 
         List<String> returnSubTypes = new ArrayList<>();
-        for (SubTypeEnum typeEnum : SubTypeEnum.values()) {
-            if (typeEnum.isSubType()) {
+        for (TypeEnum typeEnum : TypeEnum.values()) {
+            if (typeEnum.isQuerySubType()) {
                 returnSubTypes.add(typeEnum.getLiteral());
             }
         }

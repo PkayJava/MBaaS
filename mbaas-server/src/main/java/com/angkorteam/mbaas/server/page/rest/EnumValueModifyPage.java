@@ -10,18 +10,13 @@ import com.angkorteam.mbaas.server.validator.EnumItemValueValidator;
 import com.angkorteam.mbaas.server.wicket.*;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.string.StringValue;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -85,21 +80,21 @@ public class EnumValueModifyPage extends MasterPage {
         this.valueField = new TextField<>("valueField", new PropertyModel<>(this, "value"));
         this.valueField.setRequired(true);
         if (TypeEnum.Boolean.getLiteral().equals(this.type)) {
-            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), TypeEnum.Boolean, this.enumItemId));
+            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), this.enumId, TypeEnum.Boolean, this.enumItemId));
         } else if (TypeEnum.Long.getLiteral().equals(this.type)) {
-            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), TypeEnum.Long, this.enumItemId));
+            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), this.enumId, TypeEnum.Long, this.enumItemId));
         } else if (TypeEnum.Double.getLiteral().equals(this.type)) {
-            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), TypeEnum.Double, this.enumItemId));
+            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), this.enumId, TypeEnum.Double, this.enumItemId));
         } else if (TypeEnum.Time.getLiteral().equals(this.type)) {
-            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), TypeEnum.Time, this.enumItemId));
+            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), this.enumId, TypeEnum.Time, this.enumItemId));
         } else if (TypeEnum.Date.getLiteral().equals(this.type)) {
-            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), TypeEnum.Date, this.enumItemId));
+            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), this.enumId, TypeEnum.Date, this.enumItemId));
         } else if (TypeEnum.DateTime.getLiteral().equals(this.type)) {
-            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), TypeEnum.DateTime, this.enumItemId));
+            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), this.enumId, TypeEnum.DateTime, this.enumItemId));
         } else if (TypeEnum.String.getLiteral().equals(this.type)) {
-            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), TypeEnum.String, this.enumItemId));
+            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), this.enumId, TypeEnum.String, this.enumItemId));
         } else if (TypeEnum.Character.getLiteral().equals(this.type)) {
-            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), TypeEnum.Character, this.enumItemId));
+            this.valueField.add(new EnumItemValueValidator(getSession().getApplicationCode(), this.enumId, TypeEnum.Character, this.enumItemId));
         }
         this.form.add(this.valueField);
         this.valueFeedback = new TextFeedbackPanel("valueFeedback", this.valueField);

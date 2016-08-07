@@ -2,10 +2,11 @@ package com.angkorteam.mbaas.server.page.document;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
-import com.angkorteam.mbaas.server.template.TextFieldPanel;
+import com.angkorteam.mbaas.server.template.*;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
@@ -14,10 +15,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by socheat on 3/7/16.
@@ -52,13 +50,44 @@ public class DocumentCreatePage extends MasterPage {
 
         RepeatingView fields = new RepeatingView("fields");
         for (Map<String, Object> attribute : attributes) {
-            TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), (String) attribute.get(Jdbc.Attribute.ATTRIBUTE_TYPE), (String) attribute.get(Jdbc.Attribute.NAME), this.fields);
-            fields.add(fieldPanel);
+            TypeEnum type = TypeEnum.valueOf((String) attribute.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
+            String name = (String) attribute.get(Jdbc.Attribute.NAME);
+            if ("Boolean".equals(type.getLiteral())) {
+                BooleanPanel fieldPanel = new BooleanPanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("Character".equals(type.getLiteral())) {
+                CharacterPanel fieldPanel = new CharacterPanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("String".equals(type.getLiteral())) {
+                StringPanel fieldPanel = new StringPanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("Text".equals(type.getLiteral())) {
+                TextPanel fieldPanel = new TextPanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("Long".equals(type.getLiteral())) {
+                LongPanel fieldPanel = new LongPanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("Double".equals(type.getLiteral())) {
+                DoublePanel fieldPanel = new DoublePanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("DateTime".equals(type.getLiteral())) {
+                this.fields.put(name, new Date());
+                DateTimePanel fieldPanel = new DateTimePanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("Date".equals(type.getLiteral())) {
+                this.fields.put(name, new Date());
+                DatePanel fieldPanel = new DatePanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("Time".equals(type.getLiteral())) {
+                TimePanel fieldPanel = new TimePanel(fields.newChildId(), name, this.fields);
+                this.fields.put(name, new Date());
+                fields.add(fieldPanel);
+            }
         }
 
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collectionId);
-        BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<Void>("closeLink", DocumentManagementPage.class, parameters);
+        BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", DocumentManagementPage.class, parameters);
 
         Button saveButton = new Button("saveButton");
         saveButton.setOnSubmit(this::saveButtonOnSubmit);
@@ -76,7 +105,7 @@ public class DocumentCreatePage extends MasterPage {
         DocumentCreateRequest requestBody = new DocumentCreateRequest();
         requestBody.setDocument(fields);
         String documentId = UUID.randomUUID().toString();
-        DocumentFunction.insertDocument(jdbcTemplate, getSession().getApplicationUserId(), documentId, this.collectionId, (String) this.collection.get(Jdbc.Collection.NAME), requestBody);
+        DocumentFunction.internalInsertDocument(jdbcTemplate, getSession().getApplicationUserId(), documentId, this.collectionId, (String) this.collection.get(Jdbc.Collection.NAME), requestBody);
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", collectionId);
         setResponsePage(DocumentManagementPage.class, parameters);

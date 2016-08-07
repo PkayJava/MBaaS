@@ -2,7 +2,7 @@ package com.angkorteam.mbaas.server.function;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionDeleteRequest;
@@ -38,25 +38,21 @@ public class CollectionFunction {
         buffer.append("CREATE TABLE `").append(requestBody.getCollectionName()).append("` (");
         buffer.append("`").append(primaryName).append("` VARCHAR(100) NOT NULL, ");
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
-            AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attribute.getAttributeType());
-            if (attributeType == AttributeTypeEnum.Boolean
-                    || attributeType == AttributeTypeEnum.Byte
-                    || attributeType == AttributeTypeEnum.Short
-                    || attributeType == AttributeTypeEnum.Integer
-                    || attributeType == AttributeTypeEnum.Long
-                    || attributeType == AttributeTypeEnum.Float
-                    || attributeType == AttributeTypeEnum.Double
-                    || attributeType == AttributeTypeEnum.Time
-                    || attributeType == AttributeTypeEnum.Date
-                    || attributeType == AttributeTypeEnum.DateTime
-                    || attributeType == AttributeTypeEnum.Character
+            TypeEnum attributeType = TypeEnum.valueOf(attribute.getAttributeType());
+            if (attributeType == TypeEnum.Boolean
+                    || attributeType == TypeEnum.Long
+                    || attributeType == TypeEnum.Double
+                    || attributeType == TypeEnum.Time
+                    || attributeType == TypeEnum.Date
+                    || attributeType == TypeEnum.DateTime
+                    || attributeType == TypeEnum.Character
                     ) {
                 buffer.append("`").append(attribute.getName()).append("` " + attributeType.getSqlType() + ", ");
                 buffer.append("INDEX(`").append(attribute.getName()).append("`), ");
-            } else if (attributeType == AttributeTypeEnum.String) {
+            } else if (attributeType == TypeEnum.String) {
                 buffer.append("`").append(attribute.getName()).append("` " + attributeType.getSqlType() + ", ");
                 buffer.append("FULLTEXT(`").append(attribute.getName()).append("`), ");
-            } else if (attributeType == AttributeTypeEnum.Text) {
+            } else if (attributeType == TypeEnum.Text) {
                 buffer.append("`").append(attribute.getName()).append("` " + attributeType.getSqlType() + ", ");
                 buffer.append("FULLTEXT(`").append(attribute.getName()).append("`), ");
             }
@@ -93,7 +89,7 @@ public class CollectionFunction {
             fields.put(Jdbc.Attribute.EXTRA, AttributeExtraEnum.PRIMARY | AttributeExtraEnum.AUTO_INCREMENT | AttributeExtraEnum.EXPOSED);
             fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Shown.getLiteral());
             fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, AttributeTypeEnum.String.getLiteral());
+            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, TypeEnum.String.getLiteral());
             fields.put(Jdbc.Attribute.SYSTEM, true);
             fields.put(Jdbc.Attribute.EAV, false);
             fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
@@ -110,7 +106,7 @@ public class CollectionFunction {
             fields.put(Jdbc.Attribute.EXTRA, AttributeExtraEnum.EXPOSED);
             fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
             fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, AttributeTypeEnum.DateTime.getLiteral());
+            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, TypeEnum.DateTime.getLiteral());
             fields.put(Jdbc.Attribute.SYSTEM, true);
             fields.put(Jdbc.Attribute.EAV, false);
             fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
@@ -127,7 +123,7 @@ public class CollectionFunction {
             fields.put(Jdbc.Attribute.EXTRA, 0);
             fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
             fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, AttributeTypeEnum.Boolean.getLiteral());
+            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, TypeEnum.Boolean.getLiteral());
             fields.put(Jdbc.Attribute.SYSTEM, true);
             fields.put(Jdbc.Attribute.EAV, false);
             fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
@@ -143,7 +139,7 @@ public class CollectionFunction {
             fields.put(Jdbc.Attribute.EXTRA, 0);
             fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
             fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, AttributeTypeEnum.String.getLiteral());
+            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, TypeEnum.String.getLiteral());
             fields.put(Jdbc.Attribute.SYSTEM, true);
             fields.put(Jdbc.Attribute.EAV, false);
             fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
@@ -153,7 +149,7 @@ public class CollectionFunction {
         }
 
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
-            AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(attribute.getAttributeType());
+            TypeEnum attributeType = TypeEnum.valueOf(attribute.getAttributeType());
             Map<String, Object> fields = new HashMap<>();
             fields.put(Jdbc.Attribute.ATTRIBUTE_ID, UUID.randomUUID().toString());
             fields.put(Jdbc.Attribute.COLLECTION_ID, collectionId);

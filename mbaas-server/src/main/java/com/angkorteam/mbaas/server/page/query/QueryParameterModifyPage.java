@@ -4,7 +4,6 @@ import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
-import com.angkorteam.mbaas.plain.enums.SubTypeEnum;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.template.QueryParameterSelectFieldPanel;
@@ -70,14 +69,14 @@ public class QueryParameterModifyPage extends MasterPage {
 
         List<String> types = new ArrayList<>();
         for (TypeEnum typeEnum : TypeEnum.values()) {
-            if (typeEnum.isSubType()) {
+            if (typeEnum.isQueryType()) {
                 types.add(typeEnum.getLiteral());
             }
         }
 
         List<String> subTypes = new ArrayList<>();
-        for (SubTypeEnum typeEnum : SubTypeEnum.values()) {
-            if (typeEnum.isSubType()) {
+        for (TypeEnum typeEnum : TypeEnum.values()) {
+            if (typeEnum.isQuerySubType()) {
                 subTypes.add(typeEnum.getLiteral());
             }
         }

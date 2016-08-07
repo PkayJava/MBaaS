@@ -1,8 +1,9 @@
-CREATE TABLE field (
+CREATE TABLE json_field (
 
-  field_id          VARCHAR(100) NOT NULL,
-  json_id           VARCHAR(100),
-  name              VARCHAR(100),
+  json_field_id     VARCHAR(100) NOT NULL,
+  json_id           VARCHAR(100) NOT NULL,
+  name              VARCHAR(100) NOT NULL,
+  description       VARCHAR(255) NOT NULL,
   maximum           INT(11),
   exclusive_maximum BIT(1),
   minimum           INT(11),
@@ -16,6 +17,6 @@ CREATE TABLE field (
   `enum`            TEXT,
   multiple_of       INT(11),
 
-  INDEX (json_id),
-  PRIMARY KEY (field_id)
+  UNIQUE KEY (json_id, name),
+  PRIMARY KEY (json_field_id)
 );

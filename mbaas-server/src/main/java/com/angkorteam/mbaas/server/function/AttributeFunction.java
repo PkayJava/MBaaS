@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.function;
 
 import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
@@ -49,12 +49,12 @@ public class AttributeFunction {
         if (good) {
             int extra = 0;
 
-            AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf(requestBody.getAttributeType());
+            TypeEnum attributeType = TypeEnum.valueOf(requestBody.getAttributeType());
 
             if (!requestBody.isEav()) {
                 String jdbc;
-                if (attributeType == AttributeTypeEnum.Text
-                        || attributeType == AttributeTypeEnum.String) {
+                if (attributeType == TypeEnum.Text
+                        || attributeType == TypeEnum.String) {
                     if (requestBody.getLength() == null || "".equals(requestBody.getLength())) {
                         jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD FULLTEXT (`" + requestBody.getAttributeName() + "`);";
                     } else {

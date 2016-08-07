@@ -56,12 +56,10 @@ public class EnumModifyPage extends MasterPage {
     protected void onInitialize() {
         super.onInitialize();
 
-        PageParameters parameters = getPageParameters();
-        StringValue enumValue = parameters.get("enumId");
+        this.enumId = getPageParameters().get("enumId").toString("");
 
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        Map<String, Object> enumRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " = ?", enumValue.toString(""));
-        this.enumId = (String) enumRecord.get(Jdbc.Enum.ENUM_ID);
+        Map<String, Object> enumRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " = ?", this.enumId);
 
         this.form = new Form<>("form");
         this.add(this.form);

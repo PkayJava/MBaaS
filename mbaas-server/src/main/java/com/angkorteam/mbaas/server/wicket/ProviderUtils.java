@@ -5,7 +5,7 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.DateTimeFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TimeFilteredJooqColumn;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import org.apache.wicket.Page;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 
@@ -17,31 +17,23 @@ import java.util.Map;
  */
 public class ProviderUtils {
 
-    public static void addColumn(JooqProvider provider, List<IColumn<Map<String, Object>, String>> columns, Map<String, Object> attributeRecord, AttributeTypeEnum attributeType, Page page) {
+    public static void addColumn(JooqProvider provider, List<IColumn<Map<String, Object>, String>> columns, Map<String, Object> attributeRecord, TypeEnum attributeType, Page page) {
         String column = (String) attributeRecord.get("name");
-        if (AttributeTypeEnum.Boolean == attributeType) {
+        if (TypeEnum.Boolean == attributeType) {
             columns.add(new TextFilteredJooqColumn(Boolean.class, JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.Byte == attributeType) {
-            columns.add(new TextFilteredJooqColumn(Byte.class, JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.Short == attributeType) {
-            columns.add(new TextFilteredJooqColumn(Short.class, JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.Integer == attributeType) {
-            columns.add(new TextFilteredJooqColumn(Integer.class, JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.Long == attributeType) {
+        } else if (TypeEnum.Long == attributeType) {
             columns.add(new TextFilteredJooqColumn(Long.class, JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.Float == attributeType) {
-            columns.add(new TextFilteredJooqColumn(Float.class, JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.Double == attributeType) {
+        } else if (TypeEnum.Double == attributeType) {
             columns.add(new TextFilteredJooqColumn(Double.class, JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.Character == attributeType) {
+        } else if (TypeEnum.Character == attributeType) {
             columns.add(new TextFilteredJooqColumn(Character.class, JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.String == attributeType || AttributeTypeEnum.Text == attributeType) {
+        } else if (TypeEnum.String == attributeType || TypeEnum.Text == attributeType) {
             columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.Time == attributeType) {
+        } else if (TypeEnum.Time == attributeType) {
             columns.add(new TimeFilteredJooqColumn(JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.Date == attributeType) {
+        } else if (TypeEnum.Date == attributeType) {
             columns.add(new DateFilteredJooqColumn(JooqUtils.lookup(column, page), column, provider));
-        } else if (AttributeTypeEnum.DateTime == attributeType) {
+        } else if (TypeEnum.DateTime == attributeType) {
             columns.add(new DateTimeFilteredJooqColumn(JooqUtils.lookup(column, page), column, provider));
         }
     }

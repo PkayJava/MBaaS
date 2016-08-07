@@ -2,11 +2,11 @@ package com.angkorteam.mbaas.server.page.document;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
-import com.angkorteam.mbaas.server.template.TextFieldPanel;
+import com.angkorteam.mbaas.server.template.*;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.commons.lang3.StringUtils;
@@ -16,10 +16,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 3/7/16.
@@ -63,57 +60,54 @@ public class DocumentModifyPage extends MasterPage {
 
         boolean hasEav = false;
         for (Map<String, Object> attribute : attributes) {
-            if ((boolean) attribute.get(Jdbc.Attribute.EAV)) {
+            boolean eav = (boolean) attribute.get(Jdbc.Attribute.EAV);
+            if (eav) {
                 hasEav = true;
-                AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf((String) attribute.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
+                TypeEnum type = TypeEnum.valueOf((String) attribute.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
                 String eavTable = null;
                 String eavField = null;
                 // eav time
-                if (attributeType == AttributeTypeEnum.Time) {
+                if (type == TypeEnum.Time) {
                     eavTable = Jdbc.EAV_TIME;
                     eavField = Jdbc.EAV_TIME + "." + Jdbc.EavTime.DOCUMENT_ID;
                 }
                 // eav date
-                if (attributeType == AttributeTypeEnum.Date) {
+                if (type == TypeEnum.Date) {
                     eavTable = Jdbc.EAV_DATE;
                     eavField = Jdbc.EAV_DATE + "." + Jdbc.EavDate.DOCUMENT_ID;
                 }
                 // eav datetime
-                if (attributeType == AttributeTypeEnum.DateTime) {
+                if (type == TypeEnum.DateTime) {
                     eavTable = Jdbc.EAV_DATE_TIME;
                     eavField = Jdbc.EAV_DATE_TIME + "." + Jdbc.EavDateTime.DOCUMENT_ID;
                 }
                 // eav varchar
-                if (attributeType == AttributeTypeEnum.String) {
+                if (type == TypeEnum.String) {
                     eavTable = Jdbc.EAV_VARCHAR;
                     eavField = Jdbc.EAV_VARCHAR + "." + Jdbc.EavVarchar.DOCUMENT_ID;
                 }
                 // eav character
-                if (attributeType == AttributeTypeEnum.Character) {
+                if (type == TypeEnum.Character) {
                     eavTable = Jdbc.EAV_CHARACTER;
                     eavField = Jdbc.EAV_CHARACTER + "." + Jdbc.EavCharacter.DOCUMENT_ID;
                 }
                 // eav decimal
-                if (attributeType == AttributeTypeEnum.Float
-                        || attributeType == AttributeTypeEnum.Double) {
+                if (type == TypeEnum.Double) {
                     eavTable = Jdbc.EAV_DECIMAL;
                     eavField = Jdbc.EAV_DECIMAL + "." + Jdbc.EavDecimal.DOCUMENT_ID;
                 }
                 // eav boolean
-                if (attributeType == AttributeTypeEnum.Boolean) {
+                if (type == TypeEnum.Boolean) {
                     eavTable = Jdbc.EAV_BOOLEAN;
                     eavField = Jdbc.EAV_BOOLEAN + "." + Jdbc.EavBoolean.DOCUMENT_ID;
                 }
                 // eav integer
-                if (attributeType == AttributeTypeEnum.Byte
-                        || attributeType == AttributeTypeEnum.Short
-                        || attributeType == AttributeTypeEnum.Integer
-                        || attributeType == AttributeTypeEnum.Long) {
+                if (type == TypeEnum.Long) {
                     eavTable = Jdbc.EAV_INTEGER;
                     eavField = Jdbc.EAV_INTEGER + "." + Jdbc.EavInteger.DOCUMENT_ID;
                 }
                 // eav text
-                if (attributeType == AttributeTypeEnum.Text) {
+                if (type == TypeEnum.Text) {
                     eavTable = Jdbc.EAV_TEXT;
                     eavField = Jdbc.EAV_TEXT + "." + Jdbc.EavText.DOCUMENT_ID;
                 }
@@ -133,11 +127,9 @@ public class DocumentModifyPage extends MasterPage {
         }
 
         List<String> selectFields = new ArrayList<>();
-        RepeatingView fields = new RepeatingView("fields");
         for (Map<String, Object> attribute : attributes) {
-            TextFieldPanel fieldPanel = new TextFieldPanel(fields.newChildId(), (String) attribute.get(Jdbc.Attribute.ATTRIBUTE_TYPE), (String) attribute.get(Jdbc.Attribute.NAME), this.fields);
-            fields.add(fieldPanel);
-            selectFields.add((String) attribute.get(Jdbc.Attribute.NAME));
+            String name = (String) attribute.get(Jdbc.Attribute.NAME);
+            selectFields.add(name);
         }
 
         String documentIdField = collection.get(Jdbc.Collection.NAME) + "." + collection.get(Jdbc.Collection.NAME) + "_id";
@@ -148,6 +140,58 @@ public class DocumentModifyPage extends MasterPage {
             } else {
                 String query = "SELECT " + StringUtils.join(names, ", ") + " FROM " + collection.get(Jdbc.Collection.NAME) + " WHERE " + documentIdField + " = ?";
                 this.fields.putAll(jdbcTemplate.queryForMap(query, documentId));
+            }
+        }
+
+        RepeatingView fields = new RepeatingView("fields");
+        for (Map<String, Object> attribute : attributes) {
+            TypeEnum type = TypeEnum.valueOf((String) attribute.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
+            String name = (String) attribute.get(Jdbc.Attribute.NAME);
+            if ("Boolean".equals(type.getLiteral())) {
+                BooleanPanel fieldPanel = new BooleanPanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("Character".equals(type.getLiteral())) {
+                CharacterPanel fieldPanel = new CharacterPanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+                if (this.fields.get(name) != null) {
+                    this.fields.put(name, ((String) this.fields.get(name)).charAt(0));
+                }
+            } else if ("String".equals(type.getLiteral())) {
+                StringPanel fieldPanel = new StringPanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("Text".equals(type.getLiteral())) {
+                TextPanel fieldPanel = new TextPanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+            } else if ("Long".equals(type.getLiteral())) {
+                LongPanel fieldPanel = new LongPanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+                if (this.fields.get(name) != null) {
+                    this.fields.put(name, ((Number) this.fields.get(name)).longValue());
+                }
+            } else if ("Double".equals(type.getLiteral())) {
+                DoublePanel fieldPanel = new DoublePanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+                if (this.fields.get(name) != null) {
+                    this.fields.put(name, ((Number) this.fields.get(name)).doubleValue());
+                }
+            } else if ("DateTime".equals(type.getLiteral())) {
+                DateTimePanel fieldPanel = new DateTimePanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+                if (this.fields.get(name) != null) {
+                    this.fields.put(name, new Date(((Date) this.fields.get(name)).getTime()));
+                }
+            } else if ("Date".equals(type.getLiteral())) {
+                DatePanel fieldPanel = new DatePanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+                if (this.fields.get(name) != null) {
+                    this.fields.put(name, new Date(((Date) this.fields.get(name)).getTime()));
+                }
+            } else if ("Time".equals(type.getLiteral())) {
+                TimePanel fieldPanel = new TimePanel(fields.newChildId(), name, this.fields);
+                fields.add(fieldPanel);
+                if (this.fields.get(name) != null) {
+                    this.fields.put(name, new Date(((Date) this.fields.get(name)).getTime()));
+                }
             }
         }
 
@@ -175,7 +219,7 @@ public class DocumentModifyPage extends MasterPage {
         DocumentModifyRequest requestBody = new DocumentModifyRequest();
         requestBody.setDocument(this.fields);
 
-        DocumentFunction.modifyDocument(jdbcTemplate, (String) collectionRecord.get(Jdbc.Collection.COLLECTION_ID), (String) collectionRecord.get(Jdbc.Collection.NAME), this.documentId, requestBody);
+        DocumentFunction.internalModifyDocument(jdbcTemplate, (String) collectionRecord.get(Jdbc.Collection.COLLECTION_ID), (String) collectionRecord.get(Jdbc.Collection.NAME), this.documentId, requestBody);
 
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", collectionId);

@@ -43,6 +43,8 @@ public class Jdbc {
     public static final String SOCKET = "socket";
     public static final String ENUM = "enum";
     public static final String ENUM_ITEM = "enum_item";
+    public static final String JSON = "json";
+    public static final String JSON_FIELD = "json_field";
 
     public static final class User {
         public static final String USER_ID = USER + "_id";
@@ -445,5 +447,18 @@ public class Jdbc {
         public static final String ENUM_ITEM_ID = ENUM_ITEM + "_id";
         public static final String ENUM_ID = Enum.ENUM_ID;
         public static final String VALUE = "value";
+    }
+
+    public static final class Json {
+        public static final String JSON_ID = JSON + "_id";
+        public static final String NAME = "name";
+        public static final String DESCRIPTION = "description";
+    }
+
+    public static final class JsonField {
+        public static final String JSON_FIELD_ID = JSON_FIELD + "_id";
+        public static final String JSON_ID = Json.JSON_ID;
+        public static final String NAME = "name";
+        public static final String DESCRIPTION = "description";
     }
 }

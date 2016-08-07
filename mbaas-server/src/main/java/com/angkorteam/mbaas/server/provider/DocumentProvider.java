@@ -2,7 +2,7 @@ package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.Application;
@@ -50,28 +50,20 @@ public class DocumentProvider extends JooqProvider {
         Table<Record> table = DSL.table(this.collectionName);
 
         for (Map<String, Object> attributeRecord : attributeRecords) {
-            AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
-            if (AttributeTypeEnum.Boolean == attributeType) {
+            TypeEnum attributeType = TypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
+            if (TypeEnum.Boolean == attributeType) {
                 boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), Boolean.class));
-            } else if (AttributeTypeEnum.Byte == attributeType) {
-                boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), Byte.class));
-            } else if (AttributeTypeEnum.Short == attributeType) {
-                boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), Short.class));
-            } else if (AttributeTypeEnum.Integer == attributeType) {
-                boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), Integer.class));
-            } else if (AttributeTypeEnum.Long == attributeType) {
+            } else if (TypeEnum.Long == attributeType) {
                 boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), Long.class));
-            } else if (AttributeTypeEnum.Float == attributeType) {
-                boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), Float.class));
-            } else if (AttributeTypeEnum.Double == attributeType) {
+            } else if (TypeEnum.Double == attributeType) {
                 boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), Double.class));
-            } else if (AttributeTypeEnum.Character == attributeType) {
+            } else if (TypeEnum.Character == attributeType) {
                 boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), String.class));
-            } else if (AttributeTypeEnum.String == attributeType || AttributeTypeEnum.Text == attributeType) {
+            } else if (TypeEnum.String == attributeType || TypeEnum.Text == attributeType) {
                 boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), String.class));
-            } else if (AttributeTypeEnum.Time == attributeType
-                    || AttributeTypeEnum.Date == attributeType
-                    || AttributeTypeEnum.DateTime == attributeType) {
+            } else if (TypeEnum.Time == attributeType
+                    || TypeEnum.Date == attributeType
+                    || TypeEnum.DateTime == attributeType) {
                 boardField((String) attributeRecord.get(Jdbc.Attribute.NAME), DSL.field(collectionName + "." + attributeRecord.get(Jdbc.Attribute.NAME), Date.class));
             }
         }

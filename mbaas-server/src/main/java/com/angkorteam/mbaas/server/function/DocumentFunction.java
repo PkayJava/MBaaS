@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.function;
 
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
 import com.angkorteam.mbaas.plain.request.document.DocumentModifyRequest;
 import com.angkorteam.mbaas.server.Jdbc;
@@ -21,7 +21,7 @@ public class DocumentFunction {
         jdbcTemplate.update("DELETE FROM `" + collection + "` WHERE " + collection + "_id = ?", documentId);
     }
 
-    public static boolean modifyDocument(JdbcTemplate jdbcTemplate, String collectionId, String collectionName, String documentId, DocumentModifyRequest requestBody) {
+    public static boolean internalModifyDocument(JdbcTemplate jdbcTemplate, String collectionId, String collectionName, String documentId, DocumentModifyRequest requestBody) {
         Map<String, Map<String, Object>> attributeRecords = new LinkedHashMap<>();
 
         for (Map<String, Object> attributeRecord : jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ?", collectionId)) {
@@ -45,11 +45,14 @@ public class DocumentFunction {
 
         Map<String, Object> goodDocument = new HashMap<>();
         if (good) {
-            // checkData Type
-            good = CommonFunction.checkDataTypes(attributeRecords, requestBody.getDocument(), goodDocument);
-        }
+            for (Map.Entry<String, Object> item : requestBody.getDocument().entrySet()) {
+                if (item.getValue() != null && item.getValue() instanceof Character) {
+                    goodDocument.put(item.getKey(), String.valueOf((Character) item.getValue()));
+                } else {
+                    goodDocument.put(item.getKey(), item.getValue());
+                }
+            }
 
-        if (good) {
             List<String> columns = new LinkedList<>();
             Map<String, Object> values = new LinkedHashMap<>();
             for (Map.Entry<String, Object> entry : goodDocument.entrySet()) {
@@ -77,7 +80,7 @@ public class DocumentFunction {
                 }
                 Map<String, Object> attributeRecord = attributeRecords.get(entry.getKey());
                 if ((boolean) attributeRecord.get(Jdbc.Attribute.EAV)) {
-                    AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
+                    TypeEnum attributeType = TypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
                     String eavTable = attributeType.getEavTable();
                     int effect = jdbcTemplate.update("UPDATE " + eavTable + " SET EAV_VALUE = ? WHERE COLLECTION_ID = ? AND ATTRIBUTE_ID = ? AND DOCUMENT_ID = ?", entry.getValue(), collectionId, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID), documentId);
                     if (effect == 0) {
@@ -88,7 +91,7 @@ public class DocumentFunction {
             for (String nul : nulls) {
                 Map<String, Object> attributeRecord = attributeRecords.get(nul);
                 if ((boolean) attributeRecord.get(Jdbc.Attribute.EAV)) {
-                    AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
+                    TypeEnum attributeType = TypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
                     String eavTable = attributeType.getEavTable();
                     int effect = jdbcTemplate.update("UPDATE " + eavTable + " SET EAV_VALUE = ? WHERE COLLECTION_ID = ? AND ATTRIBUTE_ID = ? AND DOCUMENT_ID = ?", null, collectionId, attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID), documentId);
                     if (effect == 0) {
@@ -100,7 +103,7 @@ public class DocumentFunction {
         return good;
     }
 
-    public static boolean insertDocument(JdbcTemplate jdbcTemplate, String ownerApplicationUserId, String documentId, String collectionId, String collectionName, DocumentCreateRequest requestBody) {
+    public static boolean internalInsertDocument(JdbcTemplate jdbcTemplate, String ownerApplicationUserId, String documentId, String collectionId, String collectionName, DocumentCreateRequest requestBody) {
         Map<String, Map<String, Object>> attributeRecords = new LinkedHashMap<>();
         for (Map<String, Object> attributeRecord : jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ?", collectionId)) {
             attributeRecords.put((String) attributeRecord.get(Jdbc.Attribute.NAME), attributeRecord);
@@ -111,10 +114,14 @@ public class DocumentFunction {
 
         Map<String, Object> goodDocument = new HashMap<>();
         if (good) {
-            // checkData Type
-            good = CommonFunction.checkDataTypes(attributeRecords, requestBody.getDocument(), goodDocument);
-        }
-        if (good) {
+            for (Map.Entry<String, Object> item : requestBody.getDocument().entrySet()) {
+                if (item.getValue() != null && item.getValue() instanceof Character) {
+                    goodDocument.put(item.getKey(), String.valueOf((Character) item.getValue()));
+                } else {
+                    goodDocument.put(item.getKey(), item.getValue());
+                }
+            }
+
             XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
             // ownerUserId column
             String jdbcColumnOwnerApplicationUserId = configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID);
@@ -141,14 +148,15 @@ public class DocumentFunction {
             Map<String, Object> eavs = new HashMap<>();
             for (Map.Entry<String, Object> item : goodDocument.entrySet()) {
                 Map<String, Object> attributeRecord = attributeRecords.get(item.getKey());
-                if (!(boolean) attributeRecord.get(Jdbc.Attribute.EAV)) {
+                boolean eav = (boolean) attributeRecord.get(Jdbc.Attribute.EAV);
+                if (!eav) {
                     fields.add(item.getKey());
                     values.add(":" + item.getKey());
                 } else {
                     eavs.put(item.getKey(), item.getValue());
                 }
             }
-            String jdbc = "INSERT INTO " + collectionName + "(" + StringUtils.join(fields, ",") + ") VALUES(" + StringUtils.join(values, ",") + ")";
+            String jdbc = "INSERT INTO " + collectionName + "(" + StringUtils.join(fields, ", ") + ") VALUES(" + StringUtils.join(values, ", ") + ")";
             NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(jdbcTemplate);
             template.update(jdbc, goodDocument);
             if (!eavs.isEmpty()) {

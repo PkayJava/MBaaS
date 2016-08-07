@@ -18,18 +18,21 @@ import java.text.ParseException;
 public class EnumItemValueValidator implements IValidator<String> {
 
     private TypeEnum type;
+    private String enumId;
     private String enumItemId;
     private String applicationCode;
 
-    public EnumItemValueValidator(String applicationCode, TypeEnum type) {
+    public EnumItemValueValidator(String applicationCode, String enumId, TypeEnum type) {
         this.type = type;
         this.applicationCode = applicationCode;
+        this.enumId = enumId;
     }
 
-    public EnumItemValueValidator(String applicationCode, TypeEnum type, String enumItemId) {
+    public EnumItemValueValidator(String applicationCode, String enumId, TypeEnum type, String enumItemId) {
         this.type = type;
         this.applicationCode = applicationCode;
         this.enumItemId = enumItemId;
+        this.enumId = enumId;
     }
 
     @Override
@@ -41,9 +44,9 @@ public class EnumItemValueValidator implements IValidator<String> {
 
             int count = 0;
             if (this.enumItemId == null || "".equals(this.enumItemId)) {
-                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.ENUM_ITEM + " WHERE " + Jdbc.EnumItem.VALUE + " = ?", int.class, value);
+                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.ENUM_ITEM + " WHERE " + Jdbc.EnumItem.ENUM_ID + " = ? AND " + Jdbc.EnumItem.VALUE + " = ?", int.class, this.enumId, value);
             } else {
-                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.ENUM_ITEM + " WHERE " + Jdbc.EnumItem.VALUE + " = ? AND " + Jdbc.EnumItem.ENUM_ITEM_ID + " != ?", int.class, value, this.enumItemId);
+                count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.ENUM_ITEM + " WHERE " + Jdbc.EnumItem.ENUM_ID + " = ? AND " + Jdbc.EnumItem.ENUM_ITEM_ID + " != ? AND " + Jdbc.EnumItem.VALUE + " = ?", int.class, this.enumId, this.enumItemId, value);
             }
             if (count > 0) {
                 validatable.error(new ValidationError(this, "duplicated"));

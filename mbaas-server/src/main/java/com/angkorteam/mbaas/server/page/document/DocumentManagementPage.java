@@ -7,7 +7,7 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
@@ -74,7 +74,7 @@ public class DocumentManagementPage extends MasterPage implements ActionFiltered
             if (attributeRecord.get(Jdbc.Attribute.NAME).equals(jdbcColumnOwnerApplicationUserId) || attributeRecord.get(Jdbc.Attribute.NAME).equals(collectionName + "_id")) {
                 continue;
             }
-            AttributeTypeEnum attributeType = AttributeTypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
+            TypeEnum attributeType = TypeEnum.valueOf((String) attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
             ProviderUtils.addColumn(provider, columns, attributeRecord, attributeType, this);
         }
 

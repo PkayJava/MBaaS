@@ -3,7 +3,7 @@ package com.angkorteam.mbaas.server.page.attribute;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.plain.enums.AttributeTypeEnum;
+import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
@@ -81,14 +81,14 @@ public class AttributeCreatePage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        List<String> attributeTypes = new ArrayList<>();
-        for (AttributeTypeEnum attributeTypeEnum : AttributeTypeEnum.values()) {
-            if (attributeTypeEnum.isExposed()) {
-                attributeTypes.add(attributeTypeEnum.getLiteral());
+        List<String> types = new ArrayList<>();
+        for (TypeEnum type : TypeEnum.values()) {
+            if (type.isAttributeType() && type.isExposed()) {
+                types.add(type.getLiteral());
             }
         }
-        this.attributeType = AttributeTypeEnum.String.getLiteral();
-        this.attributeTypeField = new DropDownChoice<>("attributeTypeField", new PropertyModel<>(this, "attributeType"), attributeTypes);
+        this.attributeType = TypeEnum.String.getLiteral();
+        this.attributeTypeField = new DropDownChoice<>("attributeTypeField", new PropertyModel<>(this, "attributeType"), types);
         this.attributeTypeField.setRequired(true);
         this.form.add(this.attributeTypeField);
         this.attributeTypeFeedback = new TextFeedbackPanel("attributeTypeFeedback", this.attributeTypeField);
@@ -108,7 +108,7 @@ public class AttributeCreatePage extends MasterPage {
         this.eavFeedback = new TextFeedbackPanel("eavFeedback", this.eavField);
         this.form.add(this.eavFeedback);
 
-        this.length = AttributeTypeEnum.String.getLength();
+        this.length = TypeEnum.String.getLength();
         this.lengthField = new TextField<>("lengthField", new PropertyModel<>(this, "length"));
         this.form.add(this.lengthField);
         this.lengthFeedback = new TextFeedbackPanel("lengthFeedback", this.lengthField);
@@ -132,11 +132,22 @@ public class AttributeCreatePage extends MasterPage {
         requestBody.setEav("Yes".equals(this.eav));
         requestBody.setAttributeType(this.attributeType);
         requestBody.setCollectionName(this.collectionName);
-        if (this.length == null || "".equals(this.length)) {
-            requestBody.setLength(AttributeTypeEnum.valueOf(this.attributeType).getLength());
-        } else {
-            requestBody.setLength(this.length);
+        TypeEnum type = TypeEnum.valueOf(this.attributeType);
+        if (TypeEnum.Boolean == type
+                || TypeEnum.Character == type
+                || TypeEnum.Long == type
+                || TypeEnum.Double == type
+                || TypeEnum.Text == type
+                || TypeEnum.Time == type
+                || TypeEnum.Date == type
+                || TypeEnum.DateTime == type) {
+            this.length = type.getLength();
+        } else if (TypeEnum.String == type) {
+            if (this.length == null || "".equals(this.length)) {
+                this.length = TypeEnum.String.getLength();
+            }
         }
+        requestBody.setLength(this.length);
 
         AttributeFunction.createAttribute(getApplicationSchema(), jdbcTemplate, getSession().getApplicationCode(), UUID.randomUUID().toString(), requestBody);
 
