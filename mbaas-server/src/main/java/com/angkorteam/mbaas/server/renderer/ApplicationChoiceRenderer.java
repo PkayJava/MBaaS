@@ -23,9 +23,9 @@ public class ApplicationChoiceRenderer implements IChoiceRenderer<ApplicationPoj
 
     @Override
     public ApplicationPojo getObject(String id, IModel<? extends List<? extends ApplicationPojo>> choices) {
-        for (ApplicationPojo application : choices.getObject()) {
-            if (application.getApplicationId().equals(id)) {
-                return application;
+        for (ApplicationPojo choice : choices.getObject()) {
+            if (choice.getApplicationId().equals(id)) {
+                return choice;
             }
         }
         return null;

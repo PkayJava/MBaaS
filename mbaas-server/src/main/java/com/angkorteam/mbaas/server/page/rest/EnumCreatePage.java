@@ -58,7 +58,12 @@ public class EnumCreatePage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        List<String> types = Arrays.asList(TypeEnum.Boolean.getLiteral(), TypeEnum.Long.getLiteral(), TypeEnum.Double.getLiteral(), TypeEnum.String.getLiteral(), TypeEnum.Time.getLiteral(), TypeEnum.Date.getLiteral(), TypeEnum.DateTime.getLiteral(), TypeEnum.Character.getLiteral());
+        List<String> types = new ArrayList<>();
+        for (TypeEnum type : TypeEnum.values()) {
+            if (type.isEnumType()) {
+                types.add(type.getLiteral());
+            }
+        }
         this.typeField = new DropDownChoice<>("typeField", new PropertyModel<>(this, "type"), types);
         this.typeField.setRequired(true);
         this.form.add(this.typeField);

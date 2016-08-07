@@ -24,9 +24,9 @@ public class CollectionChoiceRenderer implements IChoiceRenderer<Map<String, Obj
 
     @Override
     public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
-        for (Map<String, Object> collection : choices.getObject()) {
-            if (collection.get(Jdbc.Collection.COLLECTION_ID).equals(id)) {
-                return collection;
+        for (Map<String, Object> choice : choices.getObject()) {
+            if (choice.get(Jdbc.Collection.COLLECTION_ID).equals(id)) {
+                return choice;
             }
         }
         return null;

@@ -18,10 +18,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 8/3/16.
@@ -72,7 +69,12 @@ public class EnumModifyPage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        List<String> types = Arrays.asList(TypeEnum.Boolean.getLiteral(), TypeEnum.Long.getLiteral(), TypeEnum.Double.getLiteral(), TypeEnum.String.getLiteral(), TypeEnum.Time.getLiteral(), TypeEnum.Date.getLiteral(), TypeEnum.DateTime.getLiteral(), TypeEnum.Character.getLiteral());
+        List<String> types = new ArrayList<>();
+        for (TypeEnum type : TypeEnum.values()) {
+            if (type.isEnumType()) {
+                types.add(type.getLiteral());
+            }
+        }
         this.type = (String) enumRecord.get(Jdbc.Enum.TYPE);
         this.typeField = new DropDownChoice<>("typeField", new PropertyModel<>(this, "type"), types);
         this.typeField.setRequired(true);

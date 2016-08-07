@@ -24,9 +24,9 @@ public class ClientChoiceRenderer implements IChoiceRenderer<Map<String, Object>
 
     @Override
     public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
-        for (Map<String, Object> client : choices.getObject()) {
-            if (client.get(Jdbc.Client.CLIENT_ID).equals(id)) {
-                return client;
+        for (Map<String, Object> choice : choices.getObject()) {
+            if (choice.get(Jdbc.Client.CLIENT_ID).equals(id)) {
+                return choice;
             }
         }
         return null;

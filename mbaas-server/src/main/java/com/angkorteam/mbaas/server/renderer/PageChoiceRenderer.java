@@ -24,9 +24,9 @@ public class PageChoiceRenderer implements IChoiceRenderer<Map<String, Object>> 
 
     @Override
     public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
-        for (Map<String, Object> page : choices.getObject()) {
-            if (page.get(Jdbc.Page.PAGE_ID).equals(id)) {
-                return page;
+        for (Map<String, Object> choice : choices.getObject()) {
+            if (choice.get(Jdbc.Page.PAGE_ID).equals(id)) {
+                return choice;
             }
         }
         return null;

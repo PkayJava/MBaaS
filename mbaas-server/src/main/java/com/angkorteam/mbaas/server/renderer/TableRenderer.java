@@ -22,8 +22,8 @@ public class TableRenderer implements IChoiceRenderer<String> {
 
     @Override
     public String getObject(String id, IModel<? extends List<? extends String>> choices) {
-        for (String item : choices.getObject()) {
-            if (item.equals(id)) {
+        for (String choice : choices.getObject()) {
+            if (choice.equals(id)) {
                 return id;
             }
         }

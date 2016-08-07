@@ -460,5 +460,9 @@ public class Jdbc {
         public static final String JSON_ID = Json.JSON_ID;
         public static final String NAME = "name";
         public static final String DESCRIPTION = "description";
+        public static final String TYPE = "type";
+        public static final String SUB_TYPE = "sub_type";
+        public static final String MAP_JSON_ID = "map_" + Json.JSON_ID;
+        public static final String ENUM_ID = Enum.ENUM_ID;
     }
 }

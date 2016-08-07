@@ -7,7 +7,6 @@ import java.io.Serializable;
  */
 public enum ColumnEnum implements Serializable {
     TABLE_SCHEMA("TABLE_SCHEMA"),
-    TABLE_SCHEM("TABLE_SCHEM"),
     TABLE_NAME("TABLE_NAME"),
     COLUMN_NAME("COLUMN_NAME"),
     DATA_TYPE("DATA_TYPE"),

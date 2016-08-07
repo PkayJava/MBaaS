@@ -10,22 +10,22 @@ import java.util.Map;
 /**
  * Created by socheat on 3/3/16.
  */
-public class MenuChoiceRenderer implements IChoiceRenderer<Map<String, Object>> {
+public class EnumChoiceRenderer implements IChoiceRenderer<Map<String, Object>> {
 
     @Override
     public Object getDisplayValue(Map<String, Object> object) {
-        return object.get(Jdbc.Menu.TITLE);
+        return object.get(Jdbc.Enum.NAME);
     }
 
     @Override
     public String getIdValue(Map<String, Object> object, int index) {
-        return (String) object.get(Jdbc.Menu.MENU_ID);
+        return (String) object.get(Jdbc.Enum.ENUM_ID);
     }
 
     @Override
     public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
         for (Map<String, Object> choice : choices.getObject()) {
-            if (choice.get(Jdbc.Menu.MENU_ID).equals(id)) {
+            if (choice.get(Jdbc.Enum.ENUM_ID).equals(id)) {
                 return choice;
             }
         }

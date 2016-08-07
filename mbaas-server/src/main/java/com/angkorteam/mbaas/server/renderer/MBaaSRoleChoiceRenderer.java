@@ -23,9 +23,9 @@ public class MBaaSRoleChoiceRenderer implements IChoiceRenderer<MbaasRolePojo> {
 
     @Override
     public MbaasRolePojo getObject(String id, IModel<? extends List<? extends MbaasRolePojo>> choices) {
-        for (MbaasRolePojo role : choices.getObject()) {
-            if (role.getMbaasRoleId().equals(id)) {
-                return role;
+        for (MbaasRolePojo choice : choices.getObject()) {
+            if (choice.getMbaasRoleId().equals(id)) {
+                return choice;
             }
         }
         return null;
