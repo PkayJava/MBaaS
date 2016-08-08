@@ -8,11 +8,15 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.validator.JsonNameValidator;
 import com.angkorteam.mbaas.server.wicket.*;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,6 +31,11 @@ public class BodyModifyPage extends MasterPage {
     private String name;
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
+
+    private List<String> contentTypes = new ArrayList<>();
+    private String contentType;
+    private DropDownChoice<String> contentTypeField;
+    private TextFeedbackPanel contentTypeFeedback;
 
     private String description;
     private TextField<String> descriptionField;
@@ -60,6 +69,16 @@ public class BodyModifyPage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
+        this.contentTypes.add(MediaType.MULTIPART_FORM_DATA_VALUE);
+        this.contentTypes.add(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+        this.contentTypes.add(MediaType.APPLICATION_JSON_VALUE);
+        this.contentTypes.add(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        this.contentTypeField = new DropDownChoice<>("contentTypeField", new PropertyModel<>(this, "contentType"), new PropertyModel<>(this, "contentTypes"));
+        this.contentTypeField.setRequired(true);
+        this.form.add(this.contentTypeField);
+        this.contentTypeFeedback = new TextFeedbackPanel("contentTypeFeedback", this.contentTypeField);
+        this.form.add(this.contentTypeFeedback);
+
         this.description = (String) jsonRecord.get(Jdbc.Json.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.descriptionField.setRequired(true);
@@ -81,8 +100,9 @@ public class BodyModifyPage extends MasterPage {
         Map<String, Object> wheres = new HashMap<>();
         wheres.put(Jdbc.Json.JSON_ID, this.jsonId);
         Map<String, Object> fields = new HashMap<>();
-        fields.put(Jdbc.Enum.NAME, this.name);
-        fields.put(Jdbc.Enum.DESCRIPTION, this.description);
+        fields.put(Jdbc.Json.CONTENT_TYPE, this.contentType);
+        fields.put(Jdbc.Json.NAME, this.name);
+        fields.put(Jdbc.Json.DESCRIPTION, this.description);
         jdbcUpdate.execute(fields, wheres);
         setResponsePage(BodyManagementPage.class);
     }

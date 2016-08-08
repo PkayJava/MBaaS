@@ -452,6 +452,7 @@ public class Jdbc {
     public static final class Json {
         public static final String JSON_ID = JSON + "_id";
         public static final String NAME = "name";
+        public static final String CONTENT_TYPE = "content_type";
         public static final String DESCRIPTION = "description";
     }
 
