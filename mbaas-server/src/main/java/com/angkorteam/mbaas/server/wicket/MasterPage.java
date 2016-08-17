@@ -131,6 +131,7 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuClientClass = "";
     private String mmenuEnumClass = "";
     private String mmenuBodyClass = "";
+    private String mmenuHttpHeaderClass = "";
 
     private String mmenuJobClass = "";
     private String mmenuRestoreClass = "";
@@ -291,6 +292,10 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuBody = new WebMarkupContainer("mmenuBody");
             mmenuBody.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuBodyClass")));
             this.menuLogicConsole.add(mmenuBody);
+
+            WebMarkupContainer mmenuHttpHeader = new WebMarkupContainer("mmenuHttpHeader");
+            mmenuHttpHeader.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuHttpHeaderClass")));
+            this.menuLogicConsole.add(mmenuHttpHeader);
 
             WebMarkupContainer mmenuClient = new WebMarkupContainer("mmenuClient");
             mmenuClient.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuClientClass")));
@@ -530,7 +535,7 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             this.mmenuBodyClass = "";
         }
-        if (getPage() instanceof EnumManagementPage || getPage() instanceof EnumCreatePage || getPage() instanceof EnumModifyPage) {
+        if (getPage() instanceof EnumManagementPage || getPage() instanceof EnumCreatePage || getPage() instanceof EnumModifyPage || getPage() instanceof EnumValueCreatePage || getPage() instanceof EnumValueModifyPage || getPage() instanceof EnumValueManagementPage) {
             this.mmenuEnumClass = "active";
         } else {
             this.mmenuEnumClass = "";

@@ -45,6 +45,8 @@ public class Jdbc {
     public static final String ENUM_ITEM = "enum_item";
     public static final String JSON = "json";
     public static final String JSON_FIELD = "json_field";
+    public static final String HTTP_HEADER = "http_header";
+    public static final String HTTP_QUERY = "http_query";
 
     public static final class User {
         public static final String USER_ID = USER + "_id";
@@ -466,4 +468,23 @@ public class Jdbc {
         public static final String MAP_JSON_ID = "map_" + Json.JSON_ID;
         public static final String ENUM_ID = Enum.ENUM_ID;
     }
+
+    public static final class HttpHeader {
+        public static final String HTTP_HEADER_ID = HTTP_HEADER + "_id";
+        public static final String NAME = "name";
+        public static final String TYPE = "type";
+        public static final String SUB_TYPE = "sub_type";
+        public static final String ENUM_ID = Enum.ENUM_ID;
+        public static final String DESCRIPTION = "description";
+        public static final String FORMAT = "format";
+    }
+
+    public static final class HttpQuery {
+        public static final String HTTP_QUERY_ID = HTTP_QUERY + "_id";
+        public static final String NAME = "name";
+        public static final String TYPE = "type";
+        public static final String ENUM_ID = Enum.ENUM_ID;
+        public static final String DESCRIPTION = "description";
+    }
+
 }

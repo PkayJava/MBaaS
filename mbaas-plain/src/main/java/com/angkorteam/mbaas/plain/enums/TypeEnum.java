@@ -10,26 +10,25 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.io.File;
 
 /**
  * Created by socheat on 3/10/16.
  */
 public enum TypeEnum implements Serializable {
 
-    Boolean(/*  */"Boolean", /*  */Boolean.class, /*  */"BIT", /*     */"1", /*   */"eav_boolean", /*  */true, true, true, true, true, true, true),
-    Long(/*     */"Long", /*     */Long.class, /*     */"INT", /*     */"11", /*  */"eav_integer", /*  */true, true, true, true, true, true, true),
-    Double(/*   */"Double", /*   */Double.class, /*   */"DECIMAL", /* */"15,4", /**/"eav_decimal", /*  */true, true, true, true, true, true, true),
-    Character(/**/"Character", /**/Character.class, /**/"VARCHAR", /* */"1", /*   */"eav_character", /**/true, true, false, false, true, false, false),
-    String(/*   */"String", /*   */String.class, /*   */"VARCHAR", /* */"255", /* */"eav_varchar", /*  */true, true, true, true, true, true, true),
-    Text(/*     */"Text", /*     */String.class, /*   */"TEXT", /*    */"", /*    */"eav_text", /*     */true, true, false, false, false, false, false),
-    Time(/*     */"Time", /*     */Time.class, /*     */"TIME", /*    */"", /*    */"eav_time", /*     */true, true, true, true, true, true, true),
-    Date(/*     */"Date", /*     */Date.class, /*     */"DATE", /*    */"", /*    */"eav_date", /*     */true, true, true, true, true, true, true),
-    DateTime(/* */"DateTime", /* */Timestamp.class, /**/"DATETIME", /**/"", /*    */"eav_datetime", /* */true, true, true, true, true, true, true),
-    List(/*     */"List", /*     */List.class, /*     */"", /*        */"", /*    */"", /*             */false, false, true, true, false, true, false),
-    Map(/*      */"Map", /*      */Map.class, /*      */"", /*        */"", /*    */"", /*             */false, false, true, true, false, true, true),
-    Enum(/*     */"Enum", /*     */Enum.class, /*     */"", /*        */"", /*    */"", /*             */false, false, false, false, false, true, true),
-    File(/*     */"File", /*     */File.class, /*     */"", /*        */"", /*    */"", /*             */false, false, false, false, false, true, false);
+    Boolean(/*  */"Boolean", /*  */Boolean.class, /*  */"BIT", /*     */"1", /*   */"eav_boolean", /*  */true, true, true, true, true, true, true, true, true),
+    Long(/*     */"Long", /*     */Long.class, /*     */"INT", /*     */"11", /*  */"eav_integer", /*  */true, true, true, true, true, true, true, true, true),
+    Double(/*   */"Double", /*   */Double.class, /*   */"DECIMAL", /* */"15,4", /**/"eav_decimal", /*  */true, true, true, true, true, true, true, true, true),
+    Character(/**/"Character", /**/Character.class, /**/"VARCHAR", /* */"1", /*   */"eav_character", /**/true, true, false, false, true, false, false, false, false),
+    String(/*   */"String", /*   */String.class, /*   */"VARCHAR", /* */"255", /* */"eav_varchar", /*  */true, true, true, true, true, true, true, true, true),
+    Text(/*     */"Text", /*     */String.class, /*   */"TEXT", /*    */"", /*    */"eav_text", /*     */true, true, false, false, false, false, false, false, false),
+    Time(/*     */"Time", /*     */Time.class, /*     */"TIME", /*    */"", /*    */"eav_time", /*     */true, true, true, true, true, true, true, true, true),
+    Date(/*     */"Date", /*     */Date.class, /*     */"DATE", /*    */"", /*    */"eav_date", /*     */true, true, true, true, true, true, true, true, true),
+    DateTime(/* */"DateTime", /* */Timestamp.class, /**/"DATETIME", /**/"", /*    */"eav_datetime", /* */true, true, true, true, true, true, true, true, true),
+    List(/*     */"List", /*     */List.class, /*     */"", /*        */"", /*    */"", /*             */false, false, true, true, false, true, false, true, false),
+    Map(/*      */"Map", /*      */Map.class, /*      */"", /*        */"", /*    */"", /*             */false, false, true, true, false, true, true, false, false),
+    Enum(/*     */"Enum", /*     */Enum.class, /*     */"", /*        */"", /*    */"", /*             */false, false, false, false, false, true, true, true, true),
+    File(/*     */"File", /*     */File.class, /*     */"", /*        */"", /*    */"", /*             */false, false, false, false, false, true, false, false, false);
 
     private final String literal;
 
@@ -55,6 +54,10 @@ public enum TypeEnum implements Serializable {
 
     private final boolean bodySubType;
 
+    private final boolean httpHeaderType;
+
+    private final boolean httpHeaderSubType;
+
     TypeEnum(String literal,
              Class<?> javaType,
              String sqlType,
@@ -66,7 +69,9 @@ public enum TypeEnum implements Serializable {
              boolean querySubType,
              boolean enumType,
              boolean bodyType,
-             boolean bodySubType) {
+             boolean bodySubType,
+             boolean httpHeaderType,
+             boolean httpHeaderSubType) {
         this.literal = literal;
         this.javaType = javaType;
         this.length = length;
@@ -76,9 +81,15 @@ public enum TypeEnum implements Serializable {
         this.attributeType = attributeType;
         this.queryType = queryType;
         this.querySubType = querySubType;
-        this.bodyType = bodyType;
         this.enumType = enumType;
+        this.bodyType = bodyType;
         this.bodySubType = bodySubType;
+        this.httpHeaderType = httpHeaderType;
+        this.httpHeaderSubType = httpHeaderSubType;
+    }
+
+    public boolean isHttpHeaderSubType() {
+        return httpHeaderSubType;
     }
 
     public boolean isBodyType() {
@@ -127,6 +138,10 @@ public enum TypeEnum implements Serializable {
 
     public boolean isQuerySubType() {
         return querySubType;
+    }
+
+    public boolean isHttpHeaderType() {
+        return httpHeaderType;
     }
 
     public static final TypeEnum parseExternalType(Object object) {
