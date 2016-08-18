@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.server.page.rest;
 
-import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
@@ -10,6 +9,7 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.renderer.EnumChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.validator.HttpHeaderNameValidator;
+import com.angkorteam.mbaas.server.validator.HttpQueryNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
@@ -25,10 +25,8 @@ import java.util.*;
  * Created by socheat on 8/14/16.
  */
 @AuthorizeInstantiation({"administrator"})
-@Mount("/http/header/modify")
-public class HttpHeaderModifyPage extends MasterPage {
-
-    private String httpHeaderId;
+@Mount("/http/query/create")
+public class HttpQueryCreatePage extends MasterPage {
 
     private String name;
     private TextField<String> nameField;
@@ -61,29 +59,23 @@ public class HttpHeaderModifyPage extends MasterPage {
 
     @Override
     public String getPageHeader() {
-        return "Modify Http Header";
+        return "Create New Http Query";
     }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
 
-        this.httpHeaderId = getPageParameters().get("httpHeaderId").toString("");
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        Map<String, Object> httpHeaderRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " = ?", this.httpHeaderId);
-
         this.form = new Form<>("form");
         this.add(this.form);
 
-        this.name = (String) httpHeaderRecord.get(Jdbc.HttpHeader.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
-        this.nameField.add(new HttpHeaderNameValidator(getSession().getApplicationCode(), this.httpHeaderId));
         this.nameField.setRequired(true);
+        this.nameField.add(new HttpQueryNameValidator(getSession().getApplicationCode()));
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        this.format = (String) httpHeaderRecord.get(Jdbc.HttpHeader.FORMAT);
         this.formatField = new TextField<>("formatField", new PropertyModel<>(this, "format"));
         this.form.add(this.formatField);
         this.formatFeedback = new TextFeedbackPanel("formatFeedback", this.formatField);
@@ -91,11 +83,10 @@ public class HttpHeaderModifyPage extends MasterPage {
 
         this.types = new ArrayList<>();
         for (TypeEnum type : TypeEnum.values()) {
-            if (type.isHttpHeaderType()) {
+            if (type.isHttpQueryType()) {
                 this.types.add(type.getLiteral());
             }
         }
-        this.type = (String) httpHeaderRecord.get(Jdbc.HttpHeader.TYPE);
         this.typeField = new DropDownChoice<String>("typeField", new PropertyModel<>(this, "type"), new PropertyModel<>(this, "types")) {
             @Override
             protected boolean wantOnSelectionChangedNotifications() {
@@ -107,7 +98,7 @@ public class HttpHeaderModifyPage extends MasterPage {
                 if (TypeEnum.List.getLiteral().equals(newSelection)) {
                     subTypes.clear();
                     for (TypeEnum type : TypeEnum.values()) {
-                        if (type.isHttpHeaderSubType()) {
+                        if (type.isHttpQuerySubType()) {
                             subTypes.add(type.getLiteral());
                         }
                     }
@@ -130,25 +121,20 @@ public class HttpHeaderModifyPage extends MasterPage {
 
         this.subTypes = new ArrayList<>();
         for (TypeEnum type : TypeEnum.values()) {
-            if (type.isHttpHeaderSubType()) {
+            if (type.isHttpQuerySubType()) {
                 this.subTypes.add(type.getLiteral());
             }
         }
-        this.subType = (String) httpHeaderRecord.get(Jdbc.HttpHeader.SUB_TYPE);
         this.subTypeField = new DropDownChoice<>("subTypeField", new PropertyModel<>(this, "subType"), new PropertyModel<>(this, "subTypes"));
         this.form.add(this.subTypeField);
         this.subTypeFeedback = new TextFeedbackPanel("subTypeFeedback", this.subTypeField);
         this.form.add(this.subTypeFeedback);
 
-        this.description = (String) httpHeaderRecord.get(Jdbc.HttpHeader.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
         this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        if (httpHeaderRecord.get(Jdbc.HttpHeader.ENUM_ID) != null) {
-            this.enumType = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " = ?", httpHeaderRecord.get(Jdbc.HttpHeader.ENUM_ID));
-        }
         this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()), new EnumChoiceRenderer());
         this.form.add(enumTypeField);
         this.enumTypeFeedback = new TextFeedbackPanel("enumTypeFeedback", this.enumTypeField);
@@ -161,23 +147,26 @@ public class HttpHeaderModifyPage extends MasterPage {
 
     private void saveButtonOnSubmit(Button button) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
-        jdbcUpdate.withTableName(Jdbc.HTTP_HEADER);
-
-        Map<String, Object> wheres = new HashMap<>();
-        wheres.put(Jdbc.HttpHeader.HTTP_HEADER_ID, this.httpHeaderId);
-
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.HTTP_QUERY);
+        jdbcInsert.usingColumns(Jdbc.HttpQuery.HTTP_QUERY_ID,
+                Jdbc.HttpQuery.DESCRIPTION,
+                Jdbc.HttpQuery.ENUM_ID,
+                Jdbc.HttpQuery.NAME,
+                Jdbc.HttpQuery.SUB_TYPE,
+                Jdbc.HttpQuery.TYPE);
         Map<String, Object> fields = new HashMap<>();
-        fields.put(Jdbc.HttpHeader.NAME, this.name);
-        fields.put(Jdbc.HttpHeader.TYPE, this.type);
-        fields.put(Jdbc.HttpHeader.SUB_TYPE, this.subType);
-        fields.put(Jdbc.HttpHeader.DESCRIPTION, this.description);
+        fields.put(Jdbc.HttpQuery.NAME, this.name);
+        fields.put(Jdbc.HttpQuery.TYPE, this.type);
+        fields.put(Jdbc.HttpQuery.SUB_TYPE, this.subType);
+        fields.put(Jdbc.HttpQuery.DESCRIPTION, this.description);
         if (this.enumType != null) {
-            fields.put(Jdbc.HttpHeader.ENUM_ID, this.enumType.get(Jdbc.HttpHeader.ENUM_ID));
+            fields.put(Jdbc.HttpQuery.ENUM_ID, this.enumType.get(Jdbc.HttpQuery.ENUM_ID));
         }
-        jdbcUpdate.execute(fields, wheres);
+        fields.put(Jdbc.HttpQuery.HTTP_QUERY_ID, UUID.randomUUID().toString());
+        jdbcInsert.execute(fields);
 
-        setResponsePage(HttpHeaderManagementPage.class);
+        setResponsePage(HttpQueryManagementPage.class);
     }
 
 }

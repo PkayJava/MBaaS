@@ -132,6 +132,7 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuEnumClass = "";
     private String mmenuBodyClass = "";
     private String mmenuHttpHeaderClass = "";
+    private String mmenuHttpQueryClass = "";
 
     private String mmenuJobClass = "";
     private String mmenuRestoreClass = "";
@@ -296,6 +297,10 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuHttpHeader = new WebMarkupContainer("mmenuHttpHeader");
             mmenuHttpHeader.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuHttpHeaderClass")));
             this.menuLogicConsole.add(mmenuHttpHeader);
+
+            WebMarkupContainer mmenuHttpQuery = new WebMarkupContainer("mmenuHttpQuery");
+            mmenuHttpQuery.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuHttpQueryClass")));
+            this.menuLogicConsole.add(mmenuHttpQuery);
 
             WebMarkupContainer mmenuClient = new WebMarkupContainer("mmenuClient");
             mmenuClient.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuClientClass")));
@@ -534,6 +539,16 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuBodyClass = "active";
         } else {
             this.mmenuBodyClass = "";
+        }
+        if (getPage() instanceof HttpHeaderManagementPage || getPage() instanceof HttpHeaderCreatePage || getPage() instanceof HttpHeaderModifyPage) {
+            this.mmenuHttpHeaderClass = "active";
+        } else {
+            this.mmenuHttpHeaderClass = "";
+        }
+        if (getPage() instanceof HttpQueryManagementPage || getPage() instanceof HttpQueryCreatePage || getPage() instanceof HttpQueryModifyPage) {
+            this.mmenuHttpQueryClass = "active";
+        } else {
+            this.mmenuHttpQueryClass = "";
         }
         if (getPage() instanceof EnumManagementPage || getPage() instanceof EnumCreatePage || getPage() instanceof EnumModifyPage || getPage() instanceof EnumValueCreatePage || getPage() instanceof EnumValueModifyPage || getPage() instanceof EnumValueManagementPage) {
             this.mmenuEnumClass = "active";

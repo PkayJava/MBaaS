@@ -6,8 +6,7 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.provider.EnumValueProvider;
-import com.angkorteam.mbaas.server.provider.HttpHeaderProvider;
+import com.angkorteam.mbaas.server.provider.HttpQueryProvider;
 import com.angkorteam.mbaas.server.wicket.*;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
@@ -24,20 +23,20 @@ import java.util.Map;
  * Created by socheat on 8/5/16.
  */
 @AuthorizeInstantiation({"administrator"})
-@Mount("/http/header/management")
-public class HttpHeaderManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
+@Mount("/http/query/management")
+public class HttpQueryManagementPage extends MasterPage implements ActionFilteredJooqColumn.Event {
 
     @Override
     public String getPageHeader() {
-        return "Http Header Management";
+        return "Http Query Management";
     }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
 
-        HttpHeaderProvider provider = new HttpHeaderProvider(getSession().getApplicationCode());
-        provider.selectField(String.class, "httpHeaderId");
+        HttpQueryProvider provider = new HttpQueryProvider(getSession().getApplicationCode());
+        provider.selectField(String.class, "httpQueryId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -58,7 +57,7 @@ public class HttpHeaderManagementPage extends MasterPage implements ActionFilter
         BookmarkablePageLink<Void> createLink = new BookmarkablePageLink<>("createLink", HttpHeaderCreatePage.class);
         add(createLink);
 
-        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", HttpHeaderManagementPage.class);
+        BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", HttpQueryManagementPage.class);
         add(refreshLink);
     }
 
@@ -76,15 +75,15 @@ public class HttpHeaderManagementPage extends MasterPage implements ActionFilter
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        String httpHeaderId = (String) object.get("httpHeaderId");
+        String httpQueryId = (String) object.get("httpQueryId");
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
-            parameters.add("httpHeaderId", httpHeaderId);
-            setResponsePage(HttpHeaderModifyPage.class, parameters);
+            parameters.add("httpQueryId", httpQueryId);
+            setResponsePage(HttpQueryModifyPage.class, parameters);
             return;
         }
         if ("Delete".equals(link)) {
-            jdbcTemplate.update("DELETE FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " = ?", httpHeaderId);
+            jdbcTemplate.update("DELETE FROM " + Jdbc.HTTP_QUERY + " WHERE " + Jdbc.HttpQuery.HTTP_QUERY_ID + " = ?", httpQueryId);
             return;
         }
     }
