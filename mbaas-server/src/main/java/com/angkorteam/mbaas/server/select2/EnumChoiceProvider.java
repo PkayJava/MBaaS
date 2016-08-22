@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.google.gson.Gson;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
@@ -25,6 +26,9 @@ public class EnumChoiceProvider extends SingleChoiceProvider<Map<String, Object>
 
     @Override
     public Map<String, Object> toChoice(String id) {
+        if (com.google.common.base.Strings.isNullOrEmpty(id)) {
+            return null;
+        }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
         return jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " = ?", id);
     }

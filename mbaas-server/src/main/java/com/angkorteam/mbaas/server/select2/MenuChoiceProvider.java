@@ -37,7 +37,7 @@ public class MenuChoiceProvider extends SingleChoiceProvider<Map<String, Object>
 
     @Override
     public Map<String, Object> toChoice(String id) {
-        if (id == null || id.length() == 0) {
+        if (com.google.common.base.Strings.isNullOrEmpty(id)) {
             return null;
         }
         Application application = ApplicationUtils.getApplication();

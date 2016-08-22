@@ -25,8 +25,12 @@ public class HttpHeaderChoiceProvider extends MultipleChoiceProvider<Map<String,
 
     @Override
     public List<Map<String, Object>> toChoices(String[] ids) {
+        if (ids == null || ids.length == 0) {
+            return null;
+        }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-        return jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (?)", (Object) ids);
+        List<Map<String, Object>> choices = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (?)", ids);
+        return choices;
     }
 
     @Override

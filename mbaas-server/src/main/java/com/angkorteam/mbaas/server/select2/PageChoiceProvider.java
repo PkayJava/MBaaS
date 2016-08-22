@@ -25,6 +25,9 @@ public class PageChoiceProvider extends SingleChoiceProvider<Map<String, Object>
 
     @Override
     public Map<String, Object> toChoice(String id) {
+        if (com.google.common.base.Strings.isNullOrEmpty(id)) {
+            return null;
+        }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
         return jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", id);
     }

@@ -20,6 +20,13 @@
                 </div>
                 <div class="clearfix"></div>
 
+                <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <label wicket:for="descriptionField">Description</label>
+                    <input wicket:id="descriptionField" type="text" class="form-control"/>
+                    <span wicket:id="descriptionFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+
                 <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
                     <label wicket:for="requestContentTypeField">Request Content Type</label>
                     <select wicket:id="requestContentTypeField" class="form-control"/>
@@ -111,6 +118,13 @@
                     <label wicket:for="responseHeaderOptionalField">Response Header Optional</label>
                     <select wicket:id="responseHeaderOptionalField" style="width:100%"></select>
                     <span wicket:id="responseHeaderOptionalFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <label wicket:for="scriptField">Javascript</label>
+                    <textarea wicket:id="scriptField" rows="25" class="form-control"/>
+                    <span wicket:id="scriptFeedback" class="help-block"/>
                 </div>
                 <div class="clearfix"></div>
             </div>

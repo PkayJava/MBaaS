@@ -13,12 +13,17 @@ import com.angkorteam.mbaas.server.renderer.JsonChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.select2.HttpHeaderChoiceProvider;
 import com.angkorteam.mbaas.server.select2.HttpQueryChoiceProvider;
-import com.angkorteam.mbaas.server.select2.JsonChoiceProvider;
+import com.angkorteam.mbaas.server.select2.RestJsonChoiceProvider;
+import com.angkorteam.mbaas.server.validator.RestHttpHeaderValidator;
+import com.angkorteam.mbaas.server.validator.RestHttpQueryValidator;
+import com.angkorteam.mbaas.server.validator.RestNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
 import com.angkorteam.mbaas.server.wicket.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
@@ -46,6 +51,10 @@ public class RestCreatePage extends MasterPage {
     private DropDownChoice<String> methodField;
     private TextFeedbackPanel methodFeedback;
 
+    private String description;
+    private TextField<String> descriptionField;
+    private TextFeedbackPanel descriptionFeedback;
+
     private List<String> requestContentTypes;
     private String requestContentType;
     private DropDownChoice<String> requestContentTypeField;
@@ -61,6 +70,7 @@ public class RestCreatePage extends MasterPage {
     private DropDownChoice<String> requestBodySubTypeField;
     private TextFeedbackPanel requestBodySubTypeFeedback;
 
+    private RestJsonChoiceProvider requestBodyMapJsonProvider;
     private Map<String, Object> requestBodyMapJson;
     private Select2SingleChoice<Map<String, Object>> requestBodyMapJsonField;
     private TextFeedbackPanel requestBodyMapJsonFeedback;
@@ -128,6 +138,7 @@ public class RestCreatePage extends MasterPage {
         super.onInitialize();
 
         this.form = new Form<>("form");
+        this.form.setOnError(this::formOnError);
         this.add(this.form);
 
         this.methods = Arrays.asList(HttpMethod.GET.name(), HttpMethod.DELETE.name(), HttpMethod.POST.name(), HttpMethod.PUT.name());
@@ -145,6 +156,13 @@ public class RestCreatePage extends MasterPage {
         this.form.add(this.requestPathField);
         this.requestPathFeedback = new TextFeedbackPanel("requestPathFeedback", this.requestPathField);
         this.form.add(this.requestPathFeedback);
+
+        this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
+        this.descriptionField.setOutputMarkupId(true);
+        this.descriptionField.setRequired(true);
+        this.form.add(this.descriptionField);
+        this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
+        this.form.add(this.descriptionFeedback);
 
         this.requestContentTypes = new ArrayList<>();
         this.requestContentTypeField = new DropDownChoice<>("requestContentTypeField", new PropertyModel<>(this, "requestContentType"), new PropertyModel<>(this, "requestContentTypes"));
@@ -170,7 +188,8 @@ public class RestCreatePage extends MasterPage {
         this.requestBodySubTypeFeedback = new TextFeedbackPanel("requestBodySubTypeFeedback", this.requestBodySubTypeField);
         this.form.add(this.requestBodySubTypeFeedback);
 
-        this.requestBodyMapJsonField = new Select2SingleChoice<>("requestBodyMapJsonField", new PropertyModel<>(this, "requestBodyMapJson"), new JsonChoiceProvider(getSession().getApplicationCode()), new JsonChoiceRenderer());
+        this.requestBodyMapJsonProvider = new RestJsonChoiceProvider(getSession().getApplicationCode());
+        this.requestBodyMapJsonField = new Select2SingleChoice<>("requestBodyMapJsonField", new PropertyModel<>(this, "requestBodyMapJson"), this.requestBodyMapJsonProvider, new JsonChoiceRenderer());
         this.requestBodyMapJsonField.setOutputMarkupId(true);
         this.form.add(this.requestBodyMapJsonField);
         this.requestBodyMapJsonFeedback = new TextFeedbackPanel("requestBodyMapJsonFeedback", this.requestBodyMapJsonField);
@@ -232,7 +251,7 @@ public class RestCreatePage extends MasterPage {
         this.responseBodySubTypeFeedback = new TextFeedbackPanel("responseBodySubTypeFeedback", this.responseBodySubTypeField);
         this.form.add(this.responseBodySubTypeFeedback);
 
-        this.responseBodyMapJsonField = new Select2SingleChoice<>("responseBodyMapJsonField", new PropertyModel<>(this, "responseBodyMapJson"), new JsonChoiceProvider(getSession().getApplicationCode()), new JsonChoiceRenderer());
+        this.responseBodyMapJsonField = new Select2SingleChoice<>("responseBodyMapJsonField", new PropertyModel<>(this, "responseBodyMapJson"), new RestJsonChoiceProvider(getSession().getApplicationCode(), MediaType.APPLICATION_JSON_VALUE), new JsonChoiceRenderer());
         this.responseBodyMapJsonField.setOutputMarkupId(true);
         this.form.add(this.responseBodyMapJsonField);
         this.responseBodyMapJsonFeedback = new TextFeedbackPanel("responseBodyMapJsonFeedback", this.responseBodyMapJsonField);
@@ -256,8 +275,31 @@ public class RestCreatePage extends MasterPage {
         this.responseHeaderOptionalFeedback = new TextFeedbackPanel("responseHeaderOptionalFeedback", this.responseHeaderOptionalField);
         this.form.add(this.responseHeaderOptionalFeedback);
 
+        this.script = getString("javascript.script");
+        this.scriptField = new JavascriptTextArea("scriptField", new PropertyModel<>(this, "script"));
+        this.scriptField.setRequired(true);
+        this.form.add(this.scriptField);
+        this.scriptFeedback = new TextFeedbackPanel("scriptFeedback", this.scriptField);
+        this.form.add(this.scriptFeedback);
+
+        this.form.add(new RestNameValidator(getSession().getApplicationCode(), this.requestPathField, this.methodField));
+        this.form.add(new RestHttpHeaderValidator(getSession().getApplicationCode(), this.requestHeaderRequiredField, this.requestHeaderOptionalField));
+        this.form.add(new RestHttpHeaderValidator(getSession().getApplicationCode(), this.responseHeaderRequiredField, this.responseHeaderOptionalField));
+        this.form.add(new RestHttpQueryValidator(getSession().getApplicationCode(), this.requestQueryRequiredField, this.requestQueryOptionalField));
+
         this.saveButton = new Button("saveButton");
+        this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(this.saveButton);
+    }
+
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        super.renderHead(response);
+        response.render(CssHeaderItem.forCSS(".CodeMirror-fullscreen {padding-left:230px !important; padding-top:50px !important;}", "CodeMirror-fullscreen"));
+    }
+
+    private void saveButtonOnSubmit(Button button) {
+
     }
 
     private void requestBodySubTypeFieldAjaxUpdate(AjaxRequestTarget target) {
@@ -353,6 +395,7 @@ public class RestCreatePage extends MasterPage {
     }
 
     private void requestContentTypeFieldAjaxUpdate(AjaxRequestTarget target) {
+        this.requestBodyMapJsonProvider.setContentType(this.requestContentType);
         target.add(this.requestBodyTypeField);
         target.add(this.requestContentTypeField);
         if (MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(this.requestContentType)) {
@@ -425,6 +468,10 @@ public class RestCreatePage extends MasterPage {
             this.requestContentTypeField.setRequired(true);
             this.requestBodyTypeField.setRequired(true);
         }
+    }
+
+    private void formOnError(Form<Void> form) {
+        System.out.println("");
     }
 
 }
