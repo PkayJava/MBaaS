@@ -5,16 +5,16 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import java.io.Serializable;
 
 /**
- * Created by socheat on 7/14/16.
+ * Created by socheat on 8/21/16.
  */
-public class OnChangeAjaxBehavior extends org.apache.wicket.ajax.form.OnChangeAjaxBehavior {
+public class AjaxFormChoiceComponentUpdatingBehavior extends org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior {
 
     private IOnUpdate onUpdate;
 
-    public OnChangeAjaxBehavior() {
+    public AjaxFormChoiceComponentUpdatingBehavior() {
     }
 
-    public OnChangeAjaxBehavior(IOnUpdate onUpdate) {
+    public AjaxFormChoiceComponentUpdatingBehavior(IOnUpdate onUpdate) {
         this.onUpdate = onUpdate;
     }
 
@@ -36,4 +36,5 @@ public class OnChangeAjaxBehavior extends org.apache.wicket.ajax.form.OnChangeAj
     public interface IOnUpdate extends Serializable {
         void onUpdate(AjaxRequestTarget target);
     }
+
 }

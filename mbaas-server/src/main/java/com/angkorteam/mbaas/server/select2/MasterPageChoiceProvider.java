@@ -28,9 +28,9 @@ public class MasterPageChoiceProvider extends SingleChoiceProvider<Map<String, O
         List<Option> options = new ArrayList<>();
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-        List<Map<String, Object>> masterPageRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE LOWER(" + Jdbc.MasterPage.CODE + ")  LIKE LOWER(?) ORDER BY " + Jdbc.MasterPage.DATE_CREATED + " ASC LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
-        for (Map<String, Object> masterPageRecord : masterPageRecords) {
-            options.add(new Option((String) masterPageRecord.get(Jdbc.MasterPage.MASTER_PAGE_ID), (String) masterPageRecord.get(Jdbc.MasterPage.CODE)));
+        List<Map<String, Object>> records = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE LOWER(" + Jdbc.MasterPage.CODE + ")  LIKE LOWER(?) ORDER BY " + Jdbc.MasterPage.DATE_CREATED + " ASC LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
+        for (Map<String, Object> record : records) {
+            options.add(new Option((String) record.get(Jdbc.MasterPage.MASTER_PAGE_ID), (String) record.get(Jdbc.MasterPage.CODE)));
         }
         return options;
     }

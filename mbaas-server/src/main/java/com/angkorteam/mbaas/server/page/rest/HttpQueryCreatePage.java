@@ -12,6 +12,8 @@ import com.angkorteam.mbaas.server.validator.HttpHeaderNameValidator;
 import com.angkorteam.mbaas.server.validator.HttpQueryNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
+import com.angkorteam.mbaas.server.wicket.OnChangeAjaxBehavior;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
@@ -87,33 +89,9 @@ public class HttpQueryCreatePage extends MasterPage {
                 this.types.add(type.getLiteral());
             }
         }
-        this.typeField = new DropDownChoice<String>("typeField", new PropertyModel<>(this, "type"), new PropertyModel<>(this, "types")) {
-            @Override
-            protected boolean wantOnSelectionChangedNotifications() {
-                return true;
-            }
-
-            @Override
-            protected void onSelectionChanged(String newSelection) {
-                if (TypeEnum.List.getLiteral().equals(newSelection)) {
-                    subTypes.clear();
-                    for (TypeEnum type : TypeEnum.values()) {
-                        if (type.isHttpQuerySubType()) {
-                            subTypes.add(type.getLiteral());
-                        }
-                    }
-                    subTypeField.setRequired(true);
-                } else {
-                    subTypeField.setRequired(false);
-                    subTypes.clear();
-                }
-                if (TypeEnum.Enum.getLiteral().equals(newSelection)) {
-                    enumTypeField.setRequired(true);
-                } else {
-                    enumTypeField.setRequired(false);
-                }
-            }
-        };
+        this.typeField = new DropDownChoice<>("typeField", new PropertyModel<>(this, "type"), new PropertyModel<>(this, "types"));
+        this.typeField.setOutputMarkupId(true);
+        this.typeField.add(new OnChangeAjaxBehavior(this::typeFieldAjaxUpdate));
         this.typeField.setRequired(true);
         this.form.add(this.typeField);
         this.typeFeedback = new TextFeedbackPanel("typeFeedback", this.typeField);
@@ -126,6 +104,7 @@ public class HttpQueryCreatePage extends MasterPage {
             }
         }
         this.subTypeField = new DropDownChoice<>("subTypeField", new PropertyModel<>(this, "subType"), new PropertyModel<>(this, "subTypes"));
+        this.subTypeField.setOutputMarkupId(true);
         this.form.add(this.subTypeField);
         this.subTypeFeedback = new TextFeedbackPanel("subTypeFeedback", this.subTypeField);
         this.form.add(this.subTypeFeedback);
@@ -143,6 +122,27 @@ public class HttpQueryCreatePage extends MasterPage {
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(this.saveButton);
+    }
+
+    private void typeFieldAjaxUpdate(AjaxRequestTarget target) {
+        target.add(this.subTypeField);
+        if (TypeEnum.List.getLiteral().equals(this.type)) {
+            this.subTypes.clear();
+            for (TypeEnum type : TypeEnum.values()) {
+                if (type.isHttpQuerySubType()) {
+                    this.subTypes.add(type.getLiteral());
+                }
+            }
+            this.subTypeField.setRequired(true);
+        } else {
+            this.subTypeField.setRequired(false);
+            this.subTypes.clear();
+        }
+        if (TypeEnum.Enum.getLiteral().equals(this.type)) {
+            this.enumTypeField.setRequired(true);
+        } else {
+            this.enumTypeField.setRequired(false);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

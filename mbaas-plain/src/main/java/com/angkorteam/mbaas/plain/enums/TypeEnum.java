@@ -16,19 +16,20 @@ import java.util.Map;
  */
 public enum TypeEnum implements Serializable {
 
-    Boolean(/*  */"Boolean", /*  */Boolean.class, /*  */"BIT", /*     */"1", /*   */"eav_boolean", /*  */true, true, true, true, true, true, true, true, true, true, true),
-    Long(/*     */"Long", /*     */Long.class, /*     */"INT", /*     */"11", /*  */"eav_integer", /*  */true, true, true, true, true, true, true, true, true, true, true),
-    Double(/*   */"Double", /*   */Double.class, /*   */"DECIMAL", /* */"15,4", /**/"eav_decimal", /*  */true, true, true, true, true, true, true, true, true, true, true),
-    Character(/**/"Character", /**/Character.class, /**/"VARCHAR", /* */"1", /*   */"eav_character", /**/true, true, false, false, true, false, false, false, false, false, false),
-    String(/*   */"String", /*   */String.class, /*   */"VARCHAR", /* */"255", /* */"eav_varchar", /*  */true, true, true, true, true, true, true, true, true, true, true),
-    Text(/*     */"Text", /*     */String.class, /*   */"TEXT", /*    */"", /*    */"eav_text", /*     */true, true, false, false, false, false, false, false, false, false, false),
-    Time(/*     */"Time", /*     */Time.class, /*     */"TIME", /*    */"", /*    */"eav_time", /*     */true, true, true, true, true, true, true, true, true, true, true),
-    Date(/*     */"Date", /*     */Date.class, /*     */"DATE", /*    */"", /*    */"eav_date", /*     */true, true, true, true, true, true, true, true, true, true, true),
-    DateTime(/* */"DateTime", /* */Timestamp.class, /**/"DATETIME", /**/"", /*    */"eav_datetime", /* */true, true, true, true, true, true, true, true, true, true, true),
-    List(/*     */"List", /*     */List.class, /*     */"", /*        */"", /*    */"", /*             */false, false, true, true, false, true, false, true, false, true, false),
-    Map(/*      */"Map", /*      */Map.class, /*      */"", /*        */"", /*    */"", /*             */false, false, true, true, false, true, true, false, false, false, false),
-    Enum(/*     */"Enum", /*     */Enum.class, /*     */"", /*        */"", /*    */"", /*             */false, false, false, false, false, true, true, true, true, true, true),
-    File(/*     */"File", /*     */File.class, /*     */"", /*        */"", /*    */"", /*             */false, false, false, false, false, true, false, false, false, false, false);
+    Boolean(/*  */"Boolean", /*  */Boolean.class, /*  */"BIT", /*     */"1", /*   */"eav_boolean", /*  */true, true, true, true, true, true, true, true, true, true, true, true, true),
+    Byte(/*     */"Byte", /*     */Byte.class, /*     */"", /*        */"",  /*   */"", /*             */false, false, false, false, false, false, true, false, false, false, false, true, true),
+    Long(/*     */"Long", /*     */Long.class, /*     */"INT", /*     */"11", /*  */"eav_integer", /*  */true, true, true, true, true, true, true, true, true, true, true, true, true),
+    Double(/*   */"Double", /*   */Double.class, /*   */"DECIMAL", /* */"15,4", /**/"eav_decimal", /*  */true, true, true, true, true, true, true, true, true, true, true, true, true),
+    Character(/**/"Character", /**/Character.class, /**/"VARCHAR", /* */"1", /*   */"eav_character", /**/true, true, false, false, true, false, false, false, false, false, false, true, true),
+    String(/*   */"String", /*   */String.class, /*   */"VARCHAR", /* */"255", /* */"eav_varchar", /*  */true, true, true, true, true, true, true, true, true, true, true, true, true),
+    Text(/*     */"Text", /*     */String.class, /*   */"TEXT", /*    */"", /*    */"eav_text", /*     */true, true, false, false, false, false, false, false, false, false, false, true, true),
+    Time(/*     */"Time", /*     */Time.class, /*     */"TIME", /*    */"", /*    */"eav_time", /*     */true, true, true, true, true, true, true, true, true, true, true, true, true),
+    Date(/*     */"Date", /*     */Date.class, /*     */"DATE", /*    */"", /*    */"eav_date", /*     */true, true, true, true, true, true, true, true, true, true, true, true, true),
+    DateTime(/* */"DateTime", /* */Timestamp.class, /**/"DATETIME", /**/"", /*    */"eav_datetime", /* */true, true, true, true, true, true, true, true, true, true, true, true, true),
+    List(/*     */"List", /*     */List.class, /*     */"", /*        */"", /*    */"", /*             */false, false, true, true, false, true, false, true, false, true, false, true, true),
+    Map(/*      */"Map", /*      */Map.class, /*      */"", /*        */"", /*    */"", /*             */false, false, true, true, false, true, true, false, false, false, false, true, true),
+    Enum(/*     */"Enum", /*     */Enum.class, /*     */"", /*        */"", /*    */"", /*             */false, false, false, false, false, true, true, true, true, true, true, true, true),
+    File(/*     */"File", /*     */File.class, /*     */"", /*        */"", /*    */"", /*             */false, false, false, false, false, true, false, false, false, false, false, true, true);
 
     private final String literal;
 
@@ -48,9 +49,9 @@ public enum TypeEnum implements Serializable {
 
     private final boolean querySubType;
 
-    private final boolean bodyType;
-
     private final boolean enumType;
+
+    private final boolean bodyType;
 
     private final boolean bodySubType;
 
@@ -61,6 +62,10 @@ public enum TypeEnum implements Serializable {
     private final boolean httpQueryType;
 
     private final boolean httpQuerySubType;
+
+    private final boolean apiType;
+
+    private final boolean apiSubType;
 
     TypeEnum(String literal,
              Class<?> javaType,
@@ -77,7 +82,9 @@ public enum TypeEnum implements Serializable {
              boolean httpHeaderType,
              boolean httpHeaderSubType,
              boolean httpQueryType,
-             boolean httpQuerySubType) {
+             boolean httpQuerySubType,
+             boolean apiType,
+             boolean apiSubType) {
         this.literal = literal;
         this.javaType = javaType;
         this.length = length;
@@ -94,6 +101,8 @@ public enum TypeEnum implements Serializable {
         this.httpHeaderSubType = httpHeaderSubType;
         this.httpQueryType = httpQueryType;
         this.httpQuerySubType = httpQuerySubType;
+        this.apiType = apiType;
+        this.apiSubType = apiSubType;
     }
 
     public boolean isHttpHeaderSubType() {

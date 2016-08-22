@@ -34,9 +34,9 @@ public class JsonChoiceProvider extends SingleChoiceProvider<Map<String, Object>
         List<Option> options = new ArrayList<>();
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-        List<Map<String, Object>> jsonRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON + " WHERE LOWER(" + Jdbc.Json.NAME + ") LIKE LOWER(?) LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
-        for (Map<String, Object> jsonRecord : jsonRecords) {
-            options.add(new Option((String) jsonRecord.get(Jdbc.Json.JSON_ID), (String) jsonRecord.get(Jdbc.Json.NAME)));
+        List<Map<String, Object>> records = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON + " WHERE LOWER(" + Jdbc.Json.NAME + ") LIKE LOWER(?) LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
+        for (Map<String, Object> record : records) {
+            options.add(new Option((String) record.get(Jdbc.Json.JSON_ID), (String) record.get(Jdbc.Json.NAME)));
         }
         return options;
     }

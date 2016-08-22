@@ -133,6 +133,7 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuBodyClass = "";
     private String mmenuHttpHeaderClass = "";
     private String mmenuHttpQueryClass = "";
+    private String mmenuApiClass = "";
 
     private String mmenuJobClass = "";
     private String mmenuRestoreClass = "";
@@ -301,6 +302,10 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuHttpQuery = new WebMarkupContainer("mmenuHttpQuery");
             mmenuHttpQuery.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuHttpQueryClass")));
             this.menuLogicConsole.add(mmenuHttpQuery);
+
+            WebMarkupContainer mmenuApi = new WebMarkupContainer("mmenuApi");
+            mmenuApi.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuApiClass")));
+            this.menuLogicConsole.add(mmenuApi);
 
             WebMarkupContainer mmenuClient = new WebMarkupContainer("mmenuClient");
             mmenuClient.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuClientClass")));

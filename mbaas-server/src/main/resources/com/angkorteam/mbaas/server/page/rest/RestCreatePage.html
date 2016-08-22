@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<wicket:extend>
+    <div class="box box-primary">
+        <form role="form" wicket:id="form">
+            <div class="box-body">
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <label wicket:for="methodField">Method</label>
+                    <select wicket:id="methodField" class="form-control"/>
+                    <span wicket:id="methodFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-8 col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                    <label wicket:for="requestPathField">Path</label>
+                    <input wicket:id="requestPathField" type="text" class="form-control"/>
+                    <span wicket:id="requestPathFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <label wicket:for="requestContentTypeField">Request Content Type</label>
+                    <select wicket:id="requestContentTypeField" class="form-control"/>
+                    <span wicket:id="requestContentTypeFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <label wicket:for="requestBodyTypeField">Request Body Type</label>
+                    <select wicket:id="requestBodyTypeField" class="form-control"/>
+                    <span wicket:id="requestBodyTypeFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <label wicket:for="requestBodySubTypeField">Request Body SubType</label>
+                    <select wicket:id="requestBodySubTypeField" class="form-control"/>
+                    <span wicket:id="requestBodySubTypeFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="requestBodyMapJsonField">Request Body Map</label>
+                    <select wicket:id="requestBodyMapJsonField" style="width:100%"></select>
+                    <span wicket:id="requestBodyMapJsonFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="requestBodyEnumField">Request Body Enum</label>
+                    <select wicket:id="requestBodyEnumField" style="width:100%"></select>
+                    <span wicket:id="requestBodyEnumFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="requestHeaderRequiredField">Request Header Required</label>
+                    <select wicket:id="requestHeaderRequiredField" style="width:100%"></select>
+                    <span wicket:id="requestHeaderRequiredFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="requestHeaderOptionalField">Request Header Optional</label>
+                    <select wicket:id="requestHeaderOptionalField" style="width:100%"></select>
+                    <span wicket:id="requestHeaderOptionalFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="requestQueryRequiredField">Request Query Required</label>
+                    <select wicket:id="requestQueryRequiredField" style="width:100%"></select>
+                    <span wicket:id="requestQueryRequiredFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="requestQueryOptionalField">Request Query Optional</label>
+                    <select wicket:id="requestQueryOptionalField" style="width:100%"></select>
+                    <span wicket:id="requestQueryOptionalFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <label wicket:for="responseContentTypeField">Response Content Type</label>
+                    <select wicket:id="responseContentTypeField" class="form-control"/>
+                    <span wicket:id="responseContentTypeFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <label wicket:for="responseBodyTypeField">Response Body Type</label>
+                    <select wicket:id="responseBodyTypeField" class="form-control"/>
+                    <span wicket:id="responseBodyTypeFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <label wicket:for="responseBodySubTypeField">Response Body SubType</label>
+                    <select wicket:id="responseBodySubTypeField" class="form-control"/>
+                    <span wicket:id="responseBodySubTypeFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="responseBodyMapJsonField">Response Body Map</label>
+                    <select wicket:id="responseBodyMapJsonField" style="width:100%"></select>
+                    <span wicket:id="responseBodyMapJsonFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="responseBodyEnumField">Response Body Enum</label>
+                    <select wicket:id="responseBodyEnumField" style="width:100%"></select>
+                    <span wicket:id="responseBodyEnumFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="responseHeaderRequiredField">Response Header Required</label>
+                    <select wicket:id="responseHeaderRequiredField" style="width:100%"></select>
+                    <span wicket:id="responseHeaderRequiredFeedback" class="help-block"/>
+                </div>
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label wicket:for="responseHeaderOptionalField">Response Header Optional</label>
+                    <select wicket:id="responseHeaderOptionalField" style="width:100%"></select>
+                    <span wicket:id="responseHeaderOptionalFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="box-footer">
+                <wicket:link>
+                    <a class="btn btn-default" href="RestManagementPage.html">Close</a>
+                </wicket:link>
+                <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">Save</button>
+            </div>
+        </form>
+    </div>
+</wicket:extend>
+</body>
+</html>

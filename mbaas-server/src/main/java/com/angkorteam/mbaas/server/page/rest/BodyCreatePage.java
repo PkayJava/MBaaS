@@ -27,7 +27,7 @@ public class BodyCreatePage extends MasterPage {
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
 
-    private List<String> contentTypes = new ArrayList<>();
+    private List<String> contentTypes;
     private String contentType;
     private DropDownChoice<String> contentTypeField;
     private TextFeedbackPanel contentTypeFeedback;
@@ -57,10 +57,10 @@ public class BodyCreatePage extends MasterPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
+        this.contentTypes = new ArrayList<>();
         this.contentTypes.add(MediaType.MULTIPART_FORM_DATA_VALUE);
         this.contentTypes.add(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
         this.contentTypes.add(MediaType.APPLICATION_JSON_VALUE);
-        this.contentTypes.add(MediaType.APPLICATION_OCTET_STREAM_VALUE);
         this.contentTypeField = new DropDownChoice<>("contentTypeField", new PropertyModel<>(this, "contentType"), new PropertyModel<>(this, "contentTypes"));
         this.contentTypeField.setRequired(true);
         this.form.add(this.contentTypeField);
@@ -84,7 +84,7 @@ public class BodyCreatePage extends MasterPage {
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
         jdbcInsert.withTableName(Jdbc.JSON);
-        jdbcInsert.usingColumns(Jdbc.Json.NAME, Jdbc.Json.JSON_ID, Jdbc.Json.DESCRIPTION);
+        jdbcInsert.usingColumns(Jdbc.Json.JSON_ID, Jdbc.Json.NAME, Jdbc.Json.CONTENT_TYPE, Jdbc.Json.DESCRIPTION);
         Map<String, Object> fields = new HashMap<>();
         fields.put(Jdbc.Json.JSON_ID, UUID.randomUUID().toString());
         fields.put(Jdbc.Json.NAME, this.name);

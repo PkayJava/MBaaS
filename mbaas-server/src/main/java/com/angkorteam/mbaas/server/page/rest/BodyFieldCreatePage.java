@@ -10,10 +10,8 @@ import com.angkorteam.mbaas.server.renderer.EnumChoiceRenderer;
 import com.angkorteam.mbaas.server.renderer.JsonChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.select2.JsonChoiceProvider;
-import com.angkorteam.mbaas.server.wicket.Application;
-import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
-import com.angkorteam.mbaas.server.wicket.MasterPage;
-import com.angkorteam.mbaas.server.wicket.Mount;
+import com.angkorteam.mbaas.server.wicket.*;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -93,77 +91,27 @@ public class BodyFieldCreatePage extends MasterPage {
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
-
-        this.types.clear();
         for (TypeEnum type : TypeEnum.values()) {
             if (type.isBodyType()) {
                 types.add(type.getLiteral());
             }
         }
-        this.typeField = new DropDownChoice<String>("typeField", new PropertyModel<>(this, "type"), new PropertyModel<>(this, "types")) {
-            @Override
-            protected boolean wantOnSelectionChangedNotifications() {
-                return true;
-            }
-
-            @Override
-            protected void onSelectionChanged(String newSelection) {
-                if (TypeEnum.List.getLiteral().equals(newSelection)) {
-                    subTypes.clear();
-                    for (TypeEnum type : TypeEnum.values()) {
-                        if (type.isBodySubType()) {
-                            subTypes.add(type.getLiteral());
-                        }
-                    }
-                    subTypeField.setRequired(true);
-                } else {
-                    subTypeField.setRequired(false);
-                    subTypes.clear();
-                }
-                if (TypeEnum.Enum.getLiteral().equals(newSelection)) {
-                    enumTypeField.setRequired(true);
-                } else {
-                    enumTypeField.setRequired(false);
-                }
-                if (TypeEnum.Map.getLiteral().equals(newSelection)) {
-                    mapTypeField.setRequired(true);
-                } else {
-                    mapTypeField.setRequired(false);
-                }
-            }
-        };
+        this.typeField = new DropDownChoice<>("typeField", new PropertyModel<>(this, "type"), new PropertyModel<>(this, "types"));
+        this.typeField.setOutputMarkupId(true);
+        this.typeField.add(new OnChangeAjaxBehavior(this::typeFieldAjaxUpdate));
         this.typeField.setRequired(true);
         this.form.add(this.typeField);
         this.typeFeedback = new TextFeedbackPanel("typeFeedback", this.typeField);
         this.form.add(this.typeFeedback);
 
-
-        this.subTypes.clear();
         for (TypeEnum type : TypeEnum.values()) {
             if (type.isBodySubType()) {
                 subTypes.add(type.getLiteral());
             }
         }
-        this.subTypeField = new DropDownChoice<String>("subTypeField", new PropertyModel<>(this, "subType"), new PropertyModel<>(this, "subTypes")) {
-            @Override
-            protected boolean wantOnSelectionChangedNotifications() {
-                return true;
-            }
-
-            @Override
-            protected void onSelectionChanged(String newSelection) {
-                if (TypeEnum.Enum.getLiteral().equals(newSelection)) {
-                    enumTypeField.setRequired(true);
-                } else {
-                    enumTypeField.setRequired(false);
-                }
-                if (TypeEnum.Map.getLiteral().equals(newSelection)) {
-                    mapTypeField.setRequired(true);
-                } else {
-                    mapTypeField.setRequired(false);
-                }
-            }
-        };
+        this.subTypeField = new DropDownChoice<>("subTypeField", new PropertyModel<>(this, "subType"), new PropertyModel<>(this, "subTypes"));
+        this.subTypeField.setOutputMarkupId(true);
+        this.subTypeField.add(new OnChangeAjaxBehavior(this::subTypeFieldAjaxUpdate));
         this.form.add(this.subTypeField);
         this.subTypeFeedback = new TextFeedbackPanel("subTypeFeedback", this.subTypeField);
         this.form.add(this.subTypeFeedback);
@@ -193,6 +141,45 @@ public class BodyFieldCreatePage extends MasterPage {
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(this.saveButton);
+    }
+
+    private void subTypeFieldAjaxUpdate(AjaxRequestTarget target) {
+        if (TypeEnum.Enum.getLiteral().equals(this.subType)) {
+            this.enumTypeField.setRequired(true);
+        } else {
+            this.enumTypeField.setRequired(false);
+        }
+        if (TypeEnum.Map.getLiteral().equals(this.subType)) {
+            this.mapTypeField.setRequired(true);
+        } else {
+            this.mapTypeField.setRequired(false);
+        }
+    }
+
+    private void typeFieldAjaxUpdate(AjaxRequestTarget target) {
+        target.add(this.subTypeField);
+        if (TypeEnum.List.getLiteral().equals(this.type)) {
+            this.subTypes.clear();
+            for (TypeEnum type : TypeEnum.values()) {
+                if (type.isBodySubType()) {
+                    this.subTypes.add(type.getLiteral());
+                }
+            }
+            this.subTypeField.setRequired(true);
+        } else {
+            this.subTypeField.setRequired(false);
+            this.subTypes.clear();
+        }
+        if (TypeEnum.Enum.getLiteral().equals(this.type)) {
+            this.enumTypeField.setRequired(true);
+        } else {
+            this.enumTypeField.setRequired(false);
+        }
+        if (TypeEnum.Map.getLiteral().equals(this.type)) {
+            this.mapTypeField.setRequired(true);
+        } else {
+            this.mapTypeField.setRequired(false);
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {

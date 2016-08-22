@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.select2;
 
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.MultipleChoiceProvider;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
-import com.angkorteam.framework.extension.wicket.markup.html.form.select2.SingleChoiceProvider;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
@@ -13,20 +13,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by socheat on 8/7/16.
+ * Created by socheat on 8/22/16.
  */
-public class EnumChoiceProvider extends SingleChoiceProvider<Map<String, Object>> {
+public class HttpQueryChoiceProvider extends MultipleChoiceProvider<Map<String, Object>> {
 
     private String applicationCode;
 
-    public EnumChoiceProvider(String applicationCode) {
+    public HttpQueryChoiceProvider(String applicationCode) {
         this.applicationCode = applicationCode;
     }
 
     @Override
-    public Map<String, Object> toChoice(String id) {
+    public List<Map<String, Object>> toChoices(String[] ids) {
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-        return jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " = ?", id);
+        return jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_QUERY + " WHERE " + Jdbc.HttpQuery.HTTP_QUERY_ID + " in (?)", (Object) ids);
     }
 
     @Override
@@ -34,9 +34,9 @@ public class EnumChoiceProvider extends SingleChoiceProvider<Map<String, Object>
         List<Option> options = new ArrayList<>();
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-        List<Map<String, Object>> records = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ENUM + " WHERE LOWER(" + Jdbc.Enum.NAME + ") LIKE LOWER(?) LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
+        List<Map<String, Object>> records = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_QUERY + " WHERE LOWER(" + Jdbc.HttpQuery.NAME + ") LIKE LOWER(?) LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
         for (Map<String, Object> record : records) {
-            options.add(new Option((String) record.get(Jdbc.Enum.ENUM_ID), (String) record.get(Jdbc.Enum.NAME)));
+            options.add(new Option((String) record.get(Jdbc.HttpQuery.HTTP_QUERY_ID), (String) record.get(Jdbc.HttpQuery.NAME)));
         }
         return options;
     }
@@ -45,7 +45,7 @@ public class EnumChoiceProvider extends SingleChoiceProvider<Map<String, Object>
     public boolean hasMore(String term, int page) {
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-        int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM (SELECT * FROM " + Jdbc.ENUM + " WHERE LOWER(" + Jdbc.Enum.NAME + ") LIKE LOWER(?) LIMIT " + (page * LIMIT) + "," + LIMIT + ") pp", int.class, term + "%");
+        int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM (SELECT * FROM " + Jdbc.HTTP_QUERY + " WHERE LOWER(" + Jdbc.HttpQuery.NAME + ") LIKE LOWER(?) LIMIT " + (page * LIMIT) + "," + LIMIT + ") pp", int.class, term + "%");
         return count > 0;
     }
 

@@ -34,9 +34,9 @@ public class PageChoiceProvider extends SingleChoiceProvider<Map<String, Object>
         List<Option> options = new ArrayList<>();
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-        List<Map<String, Object>> pageRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.PAGE + " WHERE LOWER(" + Jdbc.Page.CODE + ") LIKE LOWER(?) LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
-        for (Map<String, Object> pageRecord : pageRecords) {
-            options.add(new Option((String) pageRecord.get(Jdbc.Page.PAGE_ID), (String) pageRecord.get(Jdbc.Page.CODE)));
+        List<Map<String, Object>> records = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.PAGE + " WHERE LOWER(" + Jdbc.Page.CODE + ") LIKE LOWER(?) LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
+        for (Map<String, Object> record : records) {
+            options.add(new Option((String) record.get(Jdbc.Page.PAGE_ID), (String) record.get(Jdbc.Page.CODE)));
         }
         return options;
     }

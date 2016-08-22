@@ -47,6 +47,10 @@ public class Jdbc {
     public static final String JSON_FIELD = "json_field";
     public static final String HTTP_HEADER = "http_header";
     public static final String HTTP_QUERY = "http_query";
+    public static final String REST = "rest";
+    public static final String REST_REQUEST_HEADER = "rest_request_header";
+    public static final String REST_REQUEST_QUERY = "rest_request_query";
+    public static final String REST_RESPONSE_HEADER = "rest_response_header";
 
     public static final class User {
         public static final String USER_ID = USER + "_id";
@@ -487,6 +491,49 @@ public class Jdbc {
         public static final String ENUM_ID = Enum.ENUM_ID;
         public static final String DESCRIPTION = "description";
         public static final String FORMAT = "format";
+    }
+
+    public static final class Rest {
+        public static final String REST_ID = REST + "_id";
+        public static final String METHOD = "method";
+        public static final String PATH = "path";
+        public static final String NAME = "name";
+        public static final String DESCRIPTION = "description";
+        public static final String SCRIPT = "script";
+        public static final String DATE_CREATED = "date_created";
+        public static final String SECURITY = "security";
+        public static final String USER_ID = User.USER_ID;
+        public static final String REQUEST_CONTENT_TYPE = "request_content_type";
+        public static final String REQUEST_BODY_TYPE = "request_body_type";
+        public static final String REQUEST_BODY_SUB_TYPE = "request_body_sub_type";
+        public static final String REQUEST_BODY_ENUM_ID = "request_body_" + Enum.ENUM_ID;
+        public static final String REQUEST_BODY_MAP_JSON_ID = "request_body_map_" + Json.JSON_ID;
+        public static final String RESPONSE_CONTENT_TYPE = "response_content_type";
+        public static final String RESPONSE_BODY_TYPE = "response_body_type";
+        public static final String RESPONSE_BODY_SUB_TYPE = "response_body_sub_type";
+        public static final String RESPONSE_BODY_ENUM_ID = "response_body_" + Enum.ENUM_ID;
+        public static final String RESPONSE_BODY_MAP_JSON_ID = "response_body_map_" + Json.JSON_ID;
+    }
+
+    public static final class RestRequestHeader {
+        public static final String REST_REQUEST_HEADER_ID = REST_REQUEST_HEADER + "_id";
+        public static final String REST_ID = Rest.REST_ID;
+        public static final String HTTP_HEADER_ID = HttpHeader.HTTP_HEADER_ID;
+        public static final String REQUIRED = "required";
+    }
+
+    public static final class RestRequestQuery {
+        public static final String REST_REQUEST_QUERY_ID = REST_REQUEST_QUERY + "_id";
+        public static final String REST_ID = Rest.REST_ID;
+        public static final String HTTP_QUERY_ID = HttpQuery.HTTP_QUERY_ID;
+        public static final String REQUIRED = "required";
+    }
+
+    public static final class RestResponseHeader {
+        public static final String REST_RESPONSE_HEADER_ID = REST_RESPONSE_HEADER + "_id";
+        public static final String REST_ID = Rest.REST_ID;
+        public static final String HTTP_HEADER_ID = HttpHeader.HTTP_HEADER_ID;
+        public static final String REQUIRED = "required ";
     }
 
 }

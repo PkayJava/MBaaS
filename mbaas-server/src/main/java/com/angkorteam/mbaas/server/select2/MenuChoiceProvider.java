@@ -28,9 +28,9 @@ public class MenuChoiceProvider extends SingleChoiceProvider<Map<String, Object>
         List<Option> options = new ArrayList<>();
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-        List<Map<String, Object>> menuRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.MENU + " WHERE " + Jdbc.Menu.PARENT_MENU_ID + " IS NOT NULL AND LOWER(" + Jdbc.Menu.TITLE + ") LIKE LOWER(?) ORDER BY " + Jdbc.Page.DATE_CREATED + " ASC LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
-        for (Map<String, Object> menuRecord : menuRecords) {
-            options.add(new Option((String) menuRecord.get(Jdbc.Menu.MENU_ID), (String) menuRecord.get(Jdbc.Menu.TITLE)));
+        List<Map<String, Object>> records = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.MENU + " WHERE " + Jdbc.Menu.PARENT_MENU_ID + " IS NOT NULL AND LOWER(" + Jdbc.Menu.TITLE + ") LIKE LOWER(?) ORDER BY " + Jdbc.Page.DATE_CREATED + " ASC LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
+        for (Map<String, Object> record : records) {
+            options.add(new Option((String) record.get(Jdbc.Menu.MENU_ID), (String) record.get(Jdbc.Menu.TITLE)));
         }
         return options;
     }

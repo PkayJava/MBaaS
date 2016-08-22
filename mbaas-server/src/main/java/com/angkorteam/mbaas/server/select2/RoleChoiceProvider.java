@@ -29,9 +29,9 @@ public class RoleChoiceProvider extends MultipleChoiceProvider<Map<String, Objec
         List<Option> options = new ArrayList<>();
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-        List<Map<String, Object>> roleRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE + " WHERE LOWER(" + Jdbc.Role.NAME + ") LIKE LOWER(?) LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
-        for (Map<String, Object> roleRecord : roleRecords) {
-            options.add(new Option((String) roleRecord.get(Jdbc.Role.ROLE_ID), (String) roleRecord.get(Jdbc.Role.NAME)));
+        List<Map<String, Object>> records = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE + " WHERE LOWER(" + Jdbc.Role.NAME + ") LIKE LOWER(?) LIMIT " + ((page - 1) * LIMIT) + "," + LIMIT, term + "%");
+        for (Map<String, Object> record : records) {
+            options.add(new Option((String) record.get(Jdbc.Role.ROLE_ID), (String) record.get(Jdbc.Role.NAME)));
         }
         return options;
     }
