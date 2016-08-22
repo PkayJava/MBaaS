@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.page.rest;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
+import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
@@ -116,7 +117,7 @@ public class RestCreatePage extends MasterPage {
     private TextFeedbackPanel responseHeaderOptionalFeedback;
 
     private String script;
-    private TextField<String> scriptField;
+    private JavascriptTextArea scriptField;
     private TextFeedbackPanel scriptFeedback;
 
     private Form<Void> form;
