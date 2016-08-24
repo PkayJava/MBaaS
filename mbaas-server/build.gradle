@@ -101,6 +101,7 @@ dependencies {
 
     compile 'commons-cli:commons-cli:' + commonscliVersion
     compile 'org.apache.commons:commons-exec:' + commonsexecVersion
+    compile 'org.javassist:javassist:' + javassistVersion
 
     compile 'com.googlecode.wicked-charts:wicked-charts-wicket7:2.0.0'
     compile 'com.mashape.unirest:unirest-java:' + unirestVersion

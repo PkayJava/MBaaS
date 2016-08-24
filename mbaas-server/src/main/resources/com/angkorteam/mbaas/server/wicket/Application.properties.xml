@@ -25,6 +25,7 @@
     <entry key="JobNameValidator.duplicated">is taken</entry>
     <entry key="JobCronValidator.format">is bad format</entry>
 
+    <entry key="Duplicated">is duplicated</entry>
     <entry key="Conflicted">is conflicted</entry>
     <entry key="Required"> is required.</entry>
     <entry key="IConverter">The value of '${label}' is not a valid ${type}.</entry>

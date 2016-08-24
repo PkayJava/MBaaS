@@ -139,6 +139,11 @@ public class RestCreatePage extends MasterPage {
     private Button saveButton;
 
     @Override
+    public String getPageHeader() {
+        return "Create New API";
+    }
+
+    @Override
     protected void onInitialize() {
         super.onInitialize();
 
