@@ -6,7 +6,9 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptText
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
+import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
+import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.renderer.HttpHeaderRenderer;
 import com.angkorteam.mbaas.server.renderer.HttpQueryRenderer;
 import com.angkorteam.mbaas.server.renderer.JsonChoiceRenderer;
@@ -29,11 +31,10 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 8/3/16.
@@ -50,6 +51,10 @@ public class RestCreatePage extends MasterPage {
     private String method;
     private DropDownChoice<String> methodField;
     private TextFeedbackPanel methodFeedback;
+
+    private String name;
+    private TextField<String> nameField;
+    private TextFeedbackPanel nameFeedback;
 
     private String description;
     private TextField<String> descriptionField;
@@ -138,7 +143,6 @@ public class RestCreatePage extends MasterPage {
         super.onInitialize();
 
         this.form = new Form<>("form");
-        this.form.setOnError(this::formOnError);
         this.add(this.form);
 
         this.methods = Arrays.asList(HttpMethod.GET.name(), HttpMethod.DELETE.name(), HttpMethod.POST.name(), HttpMethod.PUT.name());
@@ -163,6 +167,13 @@ public class RestCreatePage extends MasterPage {
         this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
+
+        this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
+        this.nameField.setOutputMarkupId(true);
+        this.nameField.setRequired(true);
+        this.form.add(this.nameField);
+        this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
+        this.form.add(this.nameFeedback);
 
         this.requestContentTypes = new ArrayList<>();
         this.requestContentTypeField = new DropDownChoice<>("requestContentTypeField", new PropertyModel<>(this, "requestContentType"), new PropertyModel<>(this, "requestContentTypes"));
@@ -299,7 +310,144 @@ public class RestCreatePage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
+        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName(Jdbc.REST);
+        jdbcInsert.usingColumns(Jdbc.Rest.REST_ID,
+                Jdbc.Rest.DATE_CREATED,
+                Jdbc.Rest.DESCRIPTION,
+                Jdbc.Rest.METHOD,
+                Jdbc.Rest.NAME,
+                Jdbc.Rest.PATH,
+                Jdbc.Rest.SECURITY,
+                Jdbc.Rest.SCRIPT,
+                Jdbc.Rest.REQUEST_BODY_ENUM_ID,
+                Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID,
+                Jdbc.Rest.REQUEST_BODY_SUB_TYPE,
+                Jdbc.Rest.REQUEST_BODY_TYPE,
+                Jdbc.Rest.REQUEST_CONTENT_TYPE,
+                Jdbc.Rest.RESPONSE_BODY_ENUM_ID,
+                Jdbc.Rest.RESPONSE_BODY_MAP_JSON_ID,
+                Jdbc.Rest.RESPONSE_BODY_SUB_TYPE,
+                Jdbc.Rest.RESPONSE_BODY_TYPE,
+                Jdbc.Rest.RESPONSE_CONTENT_TYPE);
+        String restId = UUID.randomUUID().toString();
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(Jdbc.Rest.REST_ID, restId);
+        fields.put(Jdbc.Rest.DATE_CREATED, new Date());
+        fields.put(Jdbc.Rest.DESCRIPTION, this.description);
+        fields.put(Jdbc.Rest.METHOD, this.method);
+        fields.put(Jdbc.Rest.NAME, this.name);
+        fields.put(Jdbc.Rest.PATH, this.requestPath);
+        fields.put(Jdbc.Rest.SECURITY, SecurityEnum.Granted.getLiteral());
+        fields.put(Jdbc.Rest.SCRIPT, this.script);
 
+        fields.put(Jdbc.Rest.REQUEST_CONTENT_TYPE, this.requestContentType);
+        fields.put(Jdbc.Rest.REQUEST_BODY_TYPE, this.requestBodyType);
+        fields.put(Jdbc.Rest.REQUEST_BODY_SUB_TYPE, this.requestBodySubType);
+        if (this.requestBodyEnum != null) {
+            fields.put(Jdbc.Rest.REQUEST_BODY_ENUM_ID, this.requestBodyEnum.get(Jdbc.Enum.ENUM_ID));
+        }
+        if (this.requestBodyMapJson != null) {
+            fields.put(Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID, this.requestBodyMapJson.get(Jdbc.Json.JSON_ID));
+        }
+        fields.put(Jdbc.Rest.RESPONSE_CONTENT_TYPE, this.responseContentType);
+        fields.put(Jdbc.Rest.RESPONSE_BODY_TYPE, this.responseBodyType);
+        fields.put(Jdbc.Rest.RESPONSE_BODY_SUB_TYPE, this.requestBodySubType);
+        if (this.responseBodyEnum != null) {
+            fields.put(Jdbc.Rest.RESPONSE_BODY_ENUM_ID, this.responseBodyEnum.get(Jdbc.Enum.ENUM_ID));
+        }
+        if (this.responseBodyMapJson != null) {
+            fields.put(Jdbc.Rest.RESPONSE_BODY_MAP_JSON_ID, this.responseBodyMapJson.get(Jdbc.Json.JSON_ID));
+        }
+        jdbcInsert.execute(fields);
+
+        if (this.requestHeaderRequired != null && !this.requestHeaderRequired.isEmpty()) {
+            jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+            jdbcInsert.withTableName(Jdbc.REST_REQUEST_HEADER);
+            jdbcInsert.usingColumns(Jdbc.RestRequestHeader.HTTP_HEADER_ID, Jdbc.RestRequestHeader.REQUIRED, Jdbc.RestRequestHeader.REST_ID, Jdbc.RestRequestHeader.REST_REQUEST_HEADER_ID);
+            for (Map<String, Object> header : this.requestHeaderRequired) {
+                String headerId = (String) header.get(Jdbc.HttpHeader.HTTP_HEADER_ID);
+                Map<String, Object> record = new HashMap<>();
+                record.put(Jdbc.RestRequestHeader.REST_REQUEST_HEADER_ID, UUID.randomUUID().toString());
+                record.put(Jdbc.RestRequestHeader.HTTP_HEADER_ID, headerId);
+                record.put(Jdbc.RestRequestHeader.REQUIRED, true);
+                record.put(Jdbc.RestRequestHeader.REST_ID, restId);
+                jdbcInsert.execute(record);
+            }
+        }
+        if (this.requestHeaderOptional != null && !this.requestHeaderOptional.isEmpty()) {
+            jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+            jdbcInsert.withTableName(Jdbc.REST_REQUEST_HEADER);
+            jdbcInsert.usingColumns(Jdbc.RestRequestHeader.HTTP_HEADER_ID, Jdbc.RestRequestHeader.REQUIRED, Jdbc.RestRequestHeader.REST_ID, Jdbc.RestRequestHeader.REST_REQUEST_HEADER_ID);
+            for (Map<String, Object> header : this.requestHeaderOptional) {
+                String headerId = (String) header.get(Jdbc.HttpHeader.HTTP_HEADER_ID);
+                Map<String, Object> record = new HashMap<>();
+                record.put(Jdbc.RestRequestHeader.REST_REQUEST_HEADER_ID, UUID.randomUUID().toString());
+                record.put(Jdbc.RestRequestHeader.HTTP_HEADER_ID, headerId);
+                record.put(Jdbc.RestRequestHeader.REQUIRED, false);
+                record.put(Jdbc.RestRequestHeader.REST_ID, restId);
+                jdbcInsert.execute(record);
+            }
+        }
+        if (this.requestQueryRequired != null && !this.requestQueryRequired.isEmpty()) {
+            jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+            jdbcInsert.withTableName(Jdbc.REST_REQUEST_QUERY);
+            jdbcInsert.usingColumns(Jdbc.RestRequestQuery.HTTP_QUERY_ID, Jdbc.RestRequestQuery.REQUIRED, Jdbc.RestRequestQuery.REST_ID, Jdbc.RestRequestQuery.REST_REQUEST_QUERY_ID);
+            for (Map<String, Object> query : this.requestQueryRequired) {
+                String queryId = (String) query.get(Jdbc.HttpQuery.HTTP_QUERY_ID);
+                Map<String, Object> record = new HashMap<>();
+                record.put(Jdbc.RestRequestQuery.REST_REQUEST_QUERY_ID, UUID.randomUUID().toString());
+                record.put(Jdbc.RestRequestQuery.HTTP_QUERY_ID, queryId);
+                record.put(Jdbc.RestRequestQuery.REQUIRED, true);
+                record.put(Jdbc.RestRequestQuery.REST_ID, restId);
+                jdbcInsert.execute(record);
+            }
+        }
+        if (this.requestQueryOptional != null && !this.requestQueryOptional.isEmpty()) {
+            jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+            jdbcInsert.withTableName(Jdbc.REST_REQUEST_QUERY);
+            jdbcInsert.usingColumns(Jdbc.RestRequestQuery.HTTP_QUERY_ID, Jdbc.RestRequestQuery.REQUIRED, Jdbc.RestRequestQuery.REST_ID, Jdbc.RestRequestQuery.REST_REQUEST_QUERY_ID);
+            for (Map<String, Object> query : this.requestQueryOptional) {
+                String queryId = (String) query.get(Jdbc.HttpQuery.HTTP_QUERY_ID);
+                Map<String, Object> record = new HashMap<>();
+                record.put(Jdbc.RestRequestQuery.REST_REQUEST_QUERY_ID, UUID.randomUUID().toString());
+                record.put(Jdbc.RestRequestQuery.HTTP_QUERY_ID, queryId);
+                record.put(Jdbc.RestRequestQuery.REQUIRED, false);
+                record.put(Jdbc.RestRequestQuery.REST_ID, restId);
+                jdbcInsert.execute(record);
+            }
+        }
+        if (this.responseHeaderRequired != null && !this.responseHeaderRequired.isEmpty()) {
+            jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+            jdbcInsert.withTableName(Jdbc.REST_RESPONSE_HEADER);
+            jdbcInsert.usingColumns(Jdbc.RestResponseHeader.HTTP_HEADER_ID, Jdbc.RestResponseHeader.REQUIRED, Jdbc.RestResponseHeader.REST_ID, Jdbc.RestResponseHeader.REST_RESPONSE_HEADER_ID);
+            for (Map<String, Object> header : this.responseHeaderRequired) {
+                String headerId = (String) header.get(Jdbc.HttpHeader.HTTP_HEADER_ID);
+                Map<String, Object> record = new HashMap<>();
+                record.put(Jdbc.RestResponseHeader.REST_RESPONSE_HEADER_ID, UUID.randomUUID().toString());
+                record.put(Jdbc.RestResponseHeader.HTTP_HEADER_ID, headerId);
+                record.put(Jdbc.RestResponseHeader.REQUIRED, true);
+                record.put(Jdbc.RestResponseHeader.REST_ID, restId);
+                jdbcInsert.execute(record);
+            }
+        }
+        if (this.responseHeaderOptional != null && !this.responseHeaderOptional.isEmpty()) {
+            jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+            jdbcInsert.withTableName(Jdbc.REST_RESPONSE_HEADER);
+            jdbcInsert.usingColumns(Jdbc.RestResponseHeader.HTTP_HEADER_ID, Jdbc.RestResponseHeader.REQUIRED, Jdbc.RestResponseHeader.REST_ID, Jdbc.RestResponseHeader.REST_RESPONSE_HEADER_ID);
+            for (Map<String, Object> header : this.responseHeaderOptional) {
+                String headerId = (String) header.get(Jdbc.HttpHeader.HTTP_HEADER_ID);
+                Map<String, Object> record = new HashMap<>();
+                record.put(Jdbc.RestResponseHeader.REST_RESPONSE_HEADER_ID, UUID.randomUUID().toString());
+                record.put(Jdbc.RestResponseHeader.HTTP_HEADER_ID, headerId);
+                record.put(Jdbc.RestResponseHeader.REQUIRED, false);
+                record.put(Jdbc.RestResponseHeader.REST_ID, restId);
+                jdbcInsert.execute(record);
+            }
+        }
+
+        setResponsePage(RestManagementPage.class);
     }
 
     private void requestBodySubTypeFieldAjaxUpdate(AjaxRequestTarget target) {
@@ -468,10 +616,6 @@ public class RestCreatePage extends MasterPage {
             this.requestContentTypeField.setRequired(true);
             this.requestBodyTypeField.setRequired(true);
         }
-    }
-
-    private void formOnError(Form<Void> form) {
-        System.out.println("");
     }
 
 }

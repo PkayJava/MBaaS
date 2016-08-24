@@ -502,7 +502,6 @@ public class Jdbc {
         public static final String SCRIPT = "script";
         public static final String DATE_CREATED = "date_created";
         public static final String SECURITY = "security";
-        public static final String USER_ID = User.USER_ID;
         public static final String REQUEST_CONTENT_TYPE = "request_content_type";
         public static final String REQUEST_BODY_TYPE = "request_body_type";
         public static final String REQUEST_BODY_SUB_TYPE = "request_body_sub_type";

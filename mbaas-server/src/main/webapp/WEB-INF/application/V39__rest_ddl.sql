@@ -8,7 +8,6 @@ CREATE TABLE rest (
   script                    TEXT,
   date_created              DATETIME     NOT NULL DEFAULT NOW(),
   security                  VARCHAR(15)  NOT NULL,
-  user_id                   VARCHAR(100),
   request_content_type      VARCHAR(100),
   request_body_type         VARCHAR(100),
   request_body_sub_type     VARCHAR(100),
@@ -26,6 +25,5 @@ CREATE TABLE rest (
   FULLTEXT (script),
   INDEX (date_created),
   INDEX (security),
-  INDEX (user_id),
   PRIMARY KEY (rest_id)
 );
