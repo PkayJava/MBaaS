@@ -746,15 +746,15 @@ var element = factory.createRadioChoice(container, 'elementId', optionListModel,
                     <label class="label label-danger">28. Create Select2SingleChoice</label>
                 </p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var element = factory.createSelect2SingleChoice('elementId', optionChoiceRenderer);
-var element = factory.createSelect2SingleChoice(container, 'elementId', optionChoiceRenderer);</code></pre>
+                    <pre><code class="language-java" data-lang="java">var element = factory.createSelect2SingleChoice('elementId', 'idField', 'displayField');
+var element = factory.createSelect2SingleChoice(container, 'elementId', 'idField', 'displayField');</code></pre>
                 </figure>
                 <p>
                     <label class="label label-danger">29. Create Select2MultipleChoice</label>
                 </p>
                 <figure class="highlight">
-                    <pre><code class="language-java" data-lang="java">var element = factory.createSelect2MultipleChoice('elementId', optionChoiceRenderer);
-var element = factory.createSelect2MultipleChoice(container, 'elementId', optionChoiceRenderer);</code></pre>
+                    <pre><code class="language-java" data-lang="java">var element = factory.createSelect2MultipleChoice('elementId', 'idField', 'displayField');
+var element = factory.createSelect2MultipleChoice(container, 'elementId', 'idField', 'displayField');</code></pre>
                 </figure>
                 <p>
                     <label class="label label-danger">30. Create CheckBoxMultipleChoice</label>
@@ -2027,8 +2027,7 @@ Page onInitialize
 */
 function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
   var form = factory.createForm(&quot;form&quot;);
-  var renderer = factory.createChoiceRenderer(Jdbc.Menu.MENU_ID,Jdbc.Menu.TITLE);
-  var tags = factory.createSelect2MultipleChoice(form, &quot;tags&quot;, renderer)
+  var tags = factory.createSelect2MultipleChoice(form, &quot;tags&quot;, Jdbc.Menu.MENU_ID, Jdbc.Menu.TITLE);
 }
 
 function tags__query(jdbcTemplate, factory, term, page) {
@@ -2047,6 +2046,14 @@ function tags__has_more(jdbcTemplate, term, page){
 
 function tags__to_choices(jdbcTemplate, ids) {
   return jdbcTemplate.queryForList(&quot;select * from &quot; + Jdbc.MENU + &quot; WHERE &quot; + Jdbc.Menu.MENU_ID + &quot; in (?)&quot;,ids);
+}
+
+function tags__size(jdbcTemplate) {
+  return jdbcTemplate.queryForObject(&quot;select count(*) from &quot; + Jdbc.MENU, Integer.class);
+}
+
+function tags__get(jdbcTemplate, index){
+  return jdbcTemplate.queryForObject(&quot;select * from &quot; + Jdbc.MENU + &quot; limit &quot; + index + &quot;,1&quot;);
 }
 
 /*
@@ -2082,8 +2089,7 @@ Page onInitialize
 */
 function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
   var form = factory.createForm(&quot;form&quot;);
-  var renderer = factory.createChoiceRenderer(Jdbc.Menu.MENU_ID,Jdbc.Menu.TITLE);
-  var choice = factory.createSelect2SingleChoice(form, &quot;choice&quot;, renderer)
+  var choice = factory.createSelect2SingleChoice(form, &quot;choice&quot;, Jdbc.Menu.MENU_ID, Jdbc.Menu.TITLE)
 }
 
 function choice__query(jdbcTemplate, factory, term, page) {
@@ -2102,6 +2108,14 @@ function choice__has_more(jdbcTemplate, term, page){
 
 function choice__to_choice(jdbcTemplate, id) {
   return jdbcTemplate.queryForMap(&quot;select * from &quot; + Jdbc.MENU + &quot; WHERE &quot; + Jdbc.Menu.MENU_ID + &quot; = ?&quot;,id);
+}
+
+function choice__size(jdbcTemplate) {
+  return jdbcTemplate.queryForObject(&quot;select count(*) from &quot; + Jdbc.MENU, Integer.class);
+}
+
+function choice__get(jdbcTemplate, index){
+  return jdbcTemplate.queryForObject(&quot;select * from &quot; + Jdbc.MENU + &quot; limit &quot; + index + &quot;,1&quot;);
 }
 
 /*

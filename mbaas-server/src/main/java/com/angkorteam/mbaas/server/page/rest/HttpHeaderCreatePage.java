@@ -6,7 +6,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.EnumChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.validator.HttpHeaderNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -114,7 +113,7 @@ public class HttpHeaderCreatePage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()), new EnumChoiceRenderer());
+        this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()));
         this.form.add(enumTypeField);
         this.enumTypeFeedback = new TextFeedbackPanel("enumTypeFeedback", this.enumTypeField);
         this.form.add(this.enumTypeFeedback);

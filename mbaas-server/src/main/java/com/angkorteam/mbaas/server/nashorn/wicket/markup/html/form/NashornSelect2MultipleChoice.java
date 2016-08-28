@@ -27,8 +27,8 @@ public class NashornSelect2MultipleChoice extends Select2MultipleChoice<Map<Stri
 
     private Map<String, Object> pageModel;
 
-    public NashornSelect2MultipleChoice(String id, IModel<List<Map<String, Object>>> object, MultipleChoiceProvider<Map<String, Object>> provider, IChoiceRenderer<Map<String, Object>> renderer) {
-        super(id, object, provider, renderer);
+    public NashornSelect2MultipleChoice(String id, IModel<List<Map<String, Object>>> object, MultipleChoiceProvider<Map<String, Object>> provider) {
+        super(id, object, provider);
         setOutputMarkupId(true);
     }
 

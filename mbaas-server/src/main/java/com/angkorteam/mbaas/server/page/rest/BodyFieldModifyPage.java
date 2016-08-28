@@ -7,8 +7,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.EnumChoiceRenderer;
-import com.angkorteam.mbaas.server.renderer.JsonChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.select2.JsonChoiceProvider;
 import com.angkorteam.mbaas.server.wicket.*;
@@ -139,7 +137,7 @@ public class BodyFieldModifyPage extends MasterPage {
         if (jsonFieldRecord.get(Jdbc.JsonField.MAP_JSON_ID) != null) {
             this.mapType = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JSON + " WHERE " + Jdbc.Json.JSON_ID + " = ?", jsonFieldRecord.get(Jdbc.JsonField.MAP_JSON_ID));
         }
-        this.mapTypeField = new Select2SingleChoice<>("mapTypeField", new PropertyModel<>(this, "mapType"), new JsonChoiceProvider(getSession().getApplicationCode()), new JsonChoiceRenderer());
+        this.mapTypeField = new Select2SingleChoice<>("mapTypeField", new PropertyModel<>(this, "mapType"), new JsonChoiceProvider(getSession().getApplicationCode()));
         this.form.add(mapTypeField);
         this.mapTypeFeedback = new TextFeedbackPanel("mapTypeFeedback", this.mapTypeField);
         this.form.add(mapTypeFeedback);
@@ -147,7 +145,7 @@ public class BodyFieldModifyPage extends MasterPage {
         if (jsonFieldRecord.get(Jdbc.JsonField.ENUM_ID) != null) {
             this.enumType = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " = ?", jsonFieldRecord.get(Jdbc.JsonField.ENUM_ID));
         }
-        this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()), new EnumChoiceRenderer());
+        this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()));
         this.form.add(enumTypeField);
         this.enumTypeFeedback = new TextFeedbackPanel("enumTypeFeedback", this.enumTypeField);
         this.form.add(enumTypeFeedback);

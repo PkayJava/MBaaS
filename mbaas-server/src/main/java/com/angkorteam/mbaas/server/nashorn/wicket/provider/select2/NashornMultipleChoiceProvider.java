@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.angkorteam.mbaas.server.wicket.Session;
 import com.google.gson.Gson;
 import org.apache.wicket.WicketRuntimeException;
+import org.apache.wicket.model.IModel;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -28,14 +29,20 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
 
     private final String script;
 
-    public NashornMultipleChoiceProvider(Factory factory, String id, String script) {
+    private NashornChoiceRenderer renderer;
+
+    public NashornMultipleChoiceProvider(Factory factory, String id, String script, String idField, String displayField) {
         this.factory = factory;
         this.id = id;
         this.script = script;
+        this.renderer = new NashornChoiceRenderer(idField, displayField);
     }
 
     @Override
-    public final List<Map<String, Object>> toChoices(String[] ids) {
+    public final List<Map<String, Object>> toChoices(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return null;
+        }
         Session session = (Session) Session.get();
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
@@ -50,7 +57,7 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
         }
         Invocable invocable = (Invocable) scriptEngine;
         try {
-            return (List<Map<String, Object>>) invocable.invokeFunction(this.id + "__to_choices", jdbcTemplate, ids);
+            return (List<Map<String, Object>>) invocable.invokeFunction(this.id + "__to_choices", jdbcTemplate, ids.toArray());
         } catch (ScriptException e) {
             throw new WicketRuntimeException(e);
         } catch (NoSuchMethodException e) {
@@ -113,6 +120,69 @@ public class NashornMultipleChoiceProvider extends MultipleChoiceProvider<Map<St
     @Override
     public final Gson getGson() {
         return ApplicationUtils.getApplication().getGson();
+    }
+
+    @Override
+    public int size() {
+        Session session = (Session) Session.get();
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
+
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null && !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            return (int) invocable.invokeFunction(this.id + "__size", jdbcTemplate);
+        } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException("function " + this.id + "__size(jdbcTemplate){} is missing");
+        }
+    }
+
+    @Override
+    public Map<String, Object> get(int index) {
+        Session session = (Session) Session.get();
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(session.getApplicationCode());
+
+        ScriptEngine scriptEngine = ApplicationUtils.getApplication().getScriptEngine();
+        if (this.script != null && !"".equals(this.script)) {
+            try {
+                scriptEngine.eval(this.script);
+            } catch (ScriptException e) {
+                throw new WicketRuntimeException(e);
+            }
+        }
+        Invocable invocable = (Invocable) scriptEngine;
+        try {
+            return (Map<String, Object>) invocable.invokeFunction(this.id + "__get", jdbcTemplate, index);
+        } catch (ScriptException e) {
+            throw new WicketRuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new WicketRuntimeException("function " + this.id + "__get(jdbcTemplate, index){} is missing");
+        }
+    }
+
+    @Override
+    public Object getDisplayValue(Map<String, Object> object) {
+        return this.renderer.getDisplayValue(object);
+    }
+
+    @Override
+    public String getIdValue(Map<String, Object> object, int index) {
+        return this.renderer.getIdValue(object, index);
+    }
+
+    @Override
+    public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
+        return this.renderer.getObject(id, choices);
     }
 
 }

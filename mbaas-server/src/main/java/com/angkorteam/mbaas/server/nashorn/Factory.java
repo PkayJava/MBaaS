@@ -366,14 +366,14 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornSelect2MultipleChoice createSelect2MultipleChoice(String id, IChoiceRenderer<Map<String, Object>> renderer) {
-        return createSelect2MultipleChoice(container, id, renderer);
+    public NashornSelect2MultipleChoice createSelect2MultipleChoice(String id, String idField, String displayField) {
+        return createSelect2MultipleChoice(container, id, idField, displayField);
     }
 
     @Override
-    public NashornSelect2MultipleChoice createSelect2MultipleChoice(MarkupContainer container, String id, IChoiceRenderer<Map<String, Object>> renderer) {
-        NashornMultipleChoiceProvider provider = new NashornMultipleChoiceProvider(this, id, this.script);
-        NashornSelect2MultipleChoice object = new NashornSelect2MultipleChoice(id, createPropertyModel(this.pageModel, id), provider, renderer);
+    public NashornSelect2MultipleChoice createSelect2MultipleChoice(MarkupContainer container, String id, String idField, String displayField) {
+        NashornMultipleChoiceProvider provider = new NashornMultipleChoiceProvider(this, id, this.script, idField, displayField);
+        NashornSelect2MultipleChoice object = new NashornSelect2MultipleChoice(id, createPropertyModel(this.pageModel, id), provider);
         object.setScript(this.script);
         object.setDisk(this.disk);
         object.setFactory(this);
@@ -384,14 +384,14 @@ public class Factory implements Serializable,
     }
 
     @Override
-    public NashornSelect2SingleChoice createSelect2SingleChoice(String id, IChoiceRenderer<Map<String, Object>> renderer) {
-        return createSelect2SingleChoice(container, id, renderer);
+    public NashornSelect2SingleChoice createSelect2SingleChoice(String id, String idField, String displayField) {
+        return createSelect2SingleChoice(container, id, idField, displayField);
     }
 
     @Override
-    public NashornSelect2SingleChoice createSelect2SingleChoice(MarkupContainer container, String id, IChoiceRenderer<Map<String, Object>> renderer) {
-        NashornSingleChoiceProvider provider = new NashornSingleChoiceProvider(this, id, this.script);
-        NashornSelect2SingleChoice object = new NashornSelect2SingleChoice(id, createPropertyModel(this.pageModel, id), provider, renderer);
+    public NashornSelect2SingleChoice createSelect2SingleChoice(MarkupContainer container, String id, String idField, String displayField) {
+        NashornSingleChoiceProvider provider = new NashornSingleChoiceProvider(this, id, this.script, idField, displayField);
+        NashornSelect2SingleChoice object = new NashornSelect2SingleChoice(id, createPropertyModel(this.pageModel, id), provider);
         object.setPageModel(this.pageModel);
         object.setDisk(this.disk);
         object.setFactory(this);

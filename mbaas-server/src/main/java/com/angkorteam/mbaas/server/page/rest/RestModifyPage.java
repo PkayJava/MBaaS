@@ -10,9 +10,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackP
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.HttpHeaderRenderer;
-import com.angkorteam.mbaas.server.renderer.HttpQueryRenderer;
-import com.angkorteam.mbaas.server.renderer.JsonChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.select2.HttpHeaderChoiceProvider;
 import com.angkorteam.mbaas.server.select2.HttpQueryChoiceProvider;
@@ -33,6 +30,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.util.*;
@@ -151,6 +149,7 @@ public class RestModifyPage extends MasterPage {
         super.onInitialize();
 
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        NamedParameterJdbcTemplate named = new NamedParameterJdbcTemplate(jdbcTemplate);
 
         this.restId = getPageParameters().get("restId").toString("");
 
@@ -220,7 +219,7 @@ public class RestModifyPage extends MasterPage {
         if (restRecord.get(Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID) != null) {
             this.requestBodyMapJson = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JSON + " WHERE " + Jdbc.Json.JSON_ID + " = ?", restRecord.get(Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID));
         }
-        this.requestBodyMapJsonField = new Select2SingleChoice<>("requestBodyMapJsonField", new PropertyModel<>(this, "requestBodyMapJson"), this.requestBodyMapJsonProvider, new JsonChoiceRenderer());
+        this.requestBodyMapJsonField = new Select2SingleChoice<>("requestBodyMapJsonField", new PropertyModel<>(this, "requestBodyMapJson"), this.requestBodyMapJsonProvider);
         this.requestBodyMapJsonField.setOutputMarkupId(true);
         this.form.add(this.requestBodyMapJsonField);
         this.requestBodyMapJsonFeedback = new TextFeedbackPanel("requestBodyMapJsonFeedback", this.requestBodyMapJsonField);
@@ -229,7 +228,7 @@ public class RestModifyPage extends MasterPage {
         if (restRecord.get(Jdbc.Rest.REQUEST_BODY_ENUM_ID) != null) {
             this.requestBodyEnum = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " = ?", restRecord.get(Jdbc.Rest.REQUEST_BODY_ENUM_ID));
         }
-        this.requestBodyEnumField = new Select2SingleChoice<>("requestBodyEnumField", new PropertyModel<>(this, "requestBodyEnum"), new EnumChoiceProvider(getSession().getApplicationCode()), new JsonChoiceRenderer());
+        this.requestBodyEnumField = new Select2SingleChoice<>("requestBodyEnumField", new PropertyModel<>(this, "requestBodyEnum"), new EnumChoiceProvider(getSession().getApplicationCode()));
         this.requestBodyEnumField.setOutputMarkupId(true);
         this.form.add(this.requestBodyEnumField);
         this.requestBodyEnumFeedback = new TextFeedbackPanel("requestBodyEnumFeedback", this.requestBodyEnumField);
@@ -237,9 +236,11 @@ public class RestModifyPage extends MasterPage {
 
         List<String> requestHeaderRequiredIds = jdbcTemplate.queryForList("SELECT " + Jdbc.RestRequestHeader.HTTP_HEADER_ID + " FROM " + Jdbc.REST_REQUEST_HEADER + " WHERE " + Jdbc.RestRequestHeader.REST_ID + " = ? AND " + Jdbc.RestRequestHeader.REQUIRED + " = true", String.class, restRecord.get(Jdbc.Rest.REST_ID));
         if (requestHeaderRequiredIds != null && !requestHeaderRequiredIds.isEmpty()) {
-            this.requestHeaderRequired = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (?)", requestHeaderRequiredIds.toArray());
+            Map<String, Object> where = new HashMap<>();
+            where.put(Jdbc.HttpHeader.HTTP_HEADER_ID, requestHeaderRequiredIds);
+            this.requestHeaderRequired = named.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (:" + Jdbc.HttpHeader.HTTP_HEADER_ID + ")", where);
         }
-        this.requestHeaderRequiredField = new Select2MultipleChoice<>("requestHeaderRequiredField", new PropertyModel<>(this, "requestHeaderRequired"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()), new HttpHeaderRenderer());
+        this.requestHeaderRequiredField = new Select2MultipleChoice<>("requestHeaderRequiredField", new PropertyModel<>(this, "requestHeaderRequired"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()));
         this.requestHeaderRequiredField.setOutputMarkupId(true);
         this.form.add(this.requestHeaderRequiredField);
         this.requestHeaderRequiredFeedback = new TextFeedbackPanel("requestHeaderRequiredFeedback", this.requestHeaderRequiredField);
@@ -247,9 +248,11 @@ public class RestModifyPage extends MasterPage {
 
         List<String> requestHeaderOptionalIds = jdbcTemplate.queryForList("SELECT " + Jdbc.RestRequestHeader.HTTP_HEADER_ID + " FROM " + Jdbc.REST_REQUEST_HEADER + " WHERE " + Jdbc.RestRequestHeader.REST_ID + " = ? AND " + Jdbc.RestRequestHeader.REQUIRED + " = false", String.class, restRecord.get(Jdbc.Rest.REST_ID));
         if (requestHeaderOptionalIds != null && !requestHeaderOptionalIds.isEmpty()) {
-            this.requestHeaderOptional = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (?)", requestHeaderOptionalIds.toArray());
+            Map<String, Object> where = new HashMap<>();
+            where.put(Jdbc.HttpHeader.HTTP_HEADER_ID, requestHeaderOptionalIds);
+            this.requestHeaderOptional = named.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (:" + Jdbc.HttpHeader.HTTP_HEADER_ID + ")", where);
         }
-        this.requestHeaderOptionalField = new Select2MultipleChoice<>("requestHeaderOptionalField", new PropertyModel<>(this, "requestHeaderOptional"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()), new HttpHeaderRenderer());
+        this.requestHeaderOptionalField = new Select2MultipleChoice<>("requestHeaderOptionalField", new PropertyModel<>(this, "requestHeaderOptional"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()));
         this.requestHeaderOptionalField.setOutputMarkupId(true);
         this.form.add(this.requestHeaderOptionalField);
         this.requestHeaderOptionalFeedback = new TextFeedbackPanel("requestHeaderOptionalFeedback", this.requestHeaderOptionalField);
@@ -257,9 +260,11 @@ public class RestModifyPage extends MasterPage {
 
         List<String> requestQueryRequiredIds = jdbcTemplate.queryForList("SELECT " + Jdbc.RestRequestQuery.HTTP_QUERY_ID + " FROM " + Jdbc.REST_REQUEST_QUERY + " WHERE " + Jdbc.RestRequestQuery.REST_ID + " = ? AND " + Jdbc.RestRequestQuery.REQUIRED + " = true", String.class, restRecord.get(Jdbc.Rest.REST_ID));
         if (requestQueryRequiredIds != null && !requestQueryRequiredIds.isEmpty()) {
-            this.requestQueryRequired = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_QUERY + " WHERE " + Jdbc.HttpQuery.HTTP_QUERY_ID + " in (?)", requestQueryRequiredIds.toArray());
+            Map<String, Object> where = new HashMap<>();
+            where.put(Jdbc.HttpQuery.HTTP_QUERY_ID, requestQueryRequiredIds);
+            this.requestQueryRequired = named.queryForList("SELECT * FROM " + Jdbc.HTTP_QUERY + " WHERE " + Jdbc.HttpQuery.HTTP_QUERY_ID + " in (:" + Jdbc.HttpQuery.HTTP_QUERY_ID + ")", where);
         }
-        this.requestQueryRequiredField = new Select2MultipleChoice<>("requestQueryRequiredField", new PropertyModel<>(this, "requestQueryRequired"), new HttpQueryChoiceProvider(getSession().getApplicationCode()), new HttpQueryRenderer());
+        this.requestQueryRequiredField = new Select2MultipleChoice<>("requestQueryRequiredField", new PropertyModel<>(this, "requestQueryRequired"), new HttpQueryChoiceProvider(getSession().getApplicationCode()));
         this.requestQueryRequiredField.setOutputMarkupId(true);
         this.form.add(this.requestQueryRequiredField);
         this.requestQueryRequiredFeedback = new TextFeedbackPanel("requestQueryRequiredFeedback", this.requestQueryRequiredField);
@@ -267,9 +272,11 @@ public class RestModifyPage extends MasterPage {
 
         List<String> requestQueryOptionalIds = jdbcTemplate.queryForList("SELECT " + Jdbc.RestRequestQuery.HTTP_QUERY_ID + " FROM " + Jdbc.REST_REQUEST_QUERY + " WHERE " + Jdbc.RestRequestQuery.REST_ID + " = ? AND " + Jdbc.RestRequestQuery.REQUIRED + " = false", String.class, restRecord.get(Jdbc.Rest.REST_ID));
         if (requestQueryOptionalIds != null && !requestQueryOptionalIds.isEmpty()) {
-            this.requestQueryOptional = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_QUERY + " WHERE " + Jdbc.HttpQuery.HTTP_QUERY_ID + " in (?)", requestQueryOptionalIds.toArray());
+            Map<String, Object> where = new HashMap<>();
+            where.put(Jdbc.HttpQuery.HTTP_QUERY_ID, requestQueryOptionalIds);
+            this.requestQueryOptional = named.queryForList("SELECT * FROM " + Jdbc.HTTP_QUERY + " WHERE " + Jdbc.HttpQuery.HTTP_QUERY_ID + " in (:" + Jdbc.HttpQuery.HTTP_QUERY_ID + ")", where);
         }
-        this.requestQueryOptionalField = new Select2MultipleChoice<>("requestQueryOptionalField", new PropertyModel<>(this, "requestQueryOptional"), new HttpQueryChoiceProvider(getSession().getApplicationCode()), new HttpQueryRenderer());
+        this.requestQueryOptionalField = new Select2MultipleChoice<>("requestQueryOptionalField", new PropertyModel<>(this, "requestQueryOptional"), new HttpQueryChoiceProvider(getSession().getApplicationCode()));
         this.requestQueryOptionalField.setOutputMarkupId(true);
         this.form.add(this.requestQueryOptionalField);
         this.requestQueryOptionalFeedback = new TextFeedbackPanel("requestQueryOptionalFeedback", this.requestQueryOptionalField);
@@ -307,7 +314,7 @@ public class RestModifyPage extends MasterPage {
         if (restRecord.get(Jdbc.Rest.RESPONSE_BODY_MAP_JSON_ID) != null) {
             this.responseBodyMapJson = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JSON + " WHERE " + Jdbc.Json.JSON_ID + " = ?", restRecord.get(Jdbc.Rest.RESPONSE_BODY_MAP_JSON_ID));
         }
-        this.responseBodyMapJsonField = new Select2SingleChoice<>("responseBodyMapJsonField", new PropertyModel<>(this, "responseBodyMapJson"), new RestJsonChoiceProvider(getSession().getApplicationCode(), MediaType.APPLICATION_JSON_VALUE), new JsonChoiceRenderer());
+        this.responseBodyMapJsonField = new Select2SingleChoice<>("responseBodyMapJsonField", new PropertyModel<>(this, "responseBodyMapJson"), new RestJsonChoiceProvider(getSession().getApplicationCode(), MediaType.APPLICATION_JSON_VALUE));
         this.responseBodyMapJsonField.setOutputMarkupId(true);
         this.form.add(this.responseBodyMapJsonField);
         this.responseBodyMapJsonFeedback = new TextFeedbackPanel("responseBodyMapJsonFeedback", this.responseBodyMapJsonField);
@@ -316,7 +323,7 @@ public class RestModifyPage extends MasterPage {
         if (restRecord.get(Jdbc.Rest.RESPONSE_BODY_ENUM_ID) != null) {
             this.responseBodyEnum = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " = ?", restRecord.get(Jdbc.Rest.RESPONSE_BODY_ENUM_ID));
         }
-        this.responseBodyEnumField = new Select2SingleChoice<>("responseBodyEnumField", new PropertyModel<>(this, "responseBodyEnum"), new EnumChoiceProvider(getSession().getApplicationCode()), new JsonChoiceRenderer());
+        this.responseBodyEnumField = new Select2SingleChoice<>("responseBodyEnumField", new PropertyModel<>(this, "responseBodyEnum"), new EnumChoiceProvider(getSession().getApplicationCode()));
         this.responseBodyEnumField.setOutputMarkupId(true);
         this.form.add(this.responseBodyEnumField);
         this.responseBodyEnumFeedback = new TextFeedbackPanel("responseBodyEnumFeedback", this.responseBodyEnumField);
@@ -326,7 +333,7 @@ public class RestModifyPage extends MasterPage {
         if (responseHeaderRequiredIds != null && !responseHeaderRequiredIds.isEmpty()) {
             this.responseHeaderRequired = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (?)", responseHeaderRequiredIds.toArray());
         }
-        this.responseHeaderRequiredField = new Select2MultipleChoice<>("responseHeaderRequiredField", new PropertyModel<>(this, "responseHeaderRequired"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()), new HttpHeaderRenderer());
+        this.responseHeaderRequiredField = new Select2MultipleChoice<>("responseHeaderRequiredField", new PropertyModel<>(this, "responseHeaderRequired"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()));
         this.responseHeaderRequiredField.setOutputMarkupId(true);
         this.form.add(this.responseHeaderRequiredField);
         this.responseHeaderRequiredFeedback = new TextFeedbackPanel("responseHeaderRequiredFeedback", this.responseHeaderRequiredField);
@@ -336,13 +343,13 @@ public class RestModifyPage extends MasterPage {
         if (responseHeaderOptionalIds != null && !responseHeaderOptionalIds.isEmpty()) {
             this.responseHeaderOptional = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (?)", responseHeaderOptionalIds.toArray());
         }
-        this.responseHeaderOptionalField = new Select2MultipleChoice<>("responseHeaderOptionalField", new PropertyModel<>(this, "responseHeaderOptional"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()), new HttpHeaderRenderer());
+        this.responseHeaderOptionalField = new Select2MultipleChoice<>("responseHeaderOptionalField", new PropertyModel<>(this, "responseHeaderOptional"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()));
         this.responseHeaderOptionalField.setOutputMarkupId(true);
         this.form.add(this.responseHeaderOptionalField);
         this.responseHeaderOptionalFeedback = new TextFeedbackPanel("responseHeaderOptionalFeedback", this.responseHeaderOptionalField);
         this.form.add(this.responseHeaderOptionalFeedback);
 
-        this.script = (String) restRecord.get(Jdbc.Rest.SCRIPT);
+        this.script = (String) restRecord.get(Jdbc.Rest.STAGE_SCRIPT);
         this.scriptField = new JavascriptTextArea("scriptField", new PropertyModel<>(this, "script"));
         this.scriptField.setRequired(true);
         this.form.add(this.scriptField);
@@ -391,9 +398,18 @@ public class RestModifyPage extends MasterPage {
         fields.put(Jdbc.Rest.DESCRIPTION, this.description);
         fields.put(Jdbc.Rest.METHOD, this.method);
         fields.put(Jdbc.Rest.NAME, this.name);
+        if (!"/".equals(this.requestPath)) {
+            if (!this.requestPath.startsWith("/")) {
+                this.requestPath = "/" + this.requestPath;
+            }
+            if (this.requestPath.endsWith("/")) {
+                this.requestPath = this.requestPath.substring(0, this.requestPath.length() - 1);
+            }
+        }
         fields.put(Jdbc.Rest.PATH, this.requestPath);
         fields.put(Jdbc.Rest.SECURITY, SecurityEnum.Granted.getLiteral());
-        fields.put(Jdbc.Rest.SCRIPT, this.script);
+        fields.put(Jdbc.Rest.STAGE_SCRIPT, this.script);
+        fields.put(Jdbc.Rest.MODIFIED, true);
 
         fields.put(Jdbc.Rest.REQUEST_CONTENT_TYPE, this.requestContentType);
         fields.put(Jdbc.Rest.REQUEST_BODY_TYPE, this.requestBodyType);

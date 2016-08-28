@@ -7,7 +7,6 @@ import com.angkorteam.mbaas.server.nashorn.Factory;
 import com.angkorteam.mbaas.server.nashorn.wicket.ajax.form.NashornOnChangeAjaxBehavior;
 import com.angkorteam.mbaas.server.nashorn.wicket.validation.NashornValidator;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 
 import java.util.HashMap;
@@ -26,8 +25,8 @@ public class NashornSelect2SingleChoice extends Select2SingleChoice<Map<String, 
 
     private Map<String, Object> pageModel;
 
-    public NashornSelect2SingleChoice(String id, IModel<Map<String, Object>> model, SingleChoiceProvider<Map<String, Object>> provider, IChoiceRenderer<Map<String, Object>> renderer) {
-        super(id, model, provider, renderer);
+    public NashornSelect2SingleChoice(String id, IModel<Map<String, Object>> model, SingleChoiceProvider<Map<String, Object>> provider) {
+        super(id, model, provider);
         setOutputMarkupId(true);
     }
 

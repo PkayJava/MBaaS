@@ -9,9 +9,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackP
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.HttpHeaderRenderer;
-import com.angkorteam.mbaas.server.renderer.HttpQueryRenderer;
-import com.angkorteam.mbaas.server.renderer.JsonChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.select2.HttpHeaderChoiceProvider;
 import com.angkorteam.mbaas.server.select2.HttpQueryChoiceProvider;
@@ -205,37 +202,37 @@ public class RestCreatePage extends MasterPage {
         this.form.add(this.requestBodySubTypeFeedback);
 
         this.requestBodyMapJsonProvider = new RestJsonChoiceProvider(getSession().getApplicationCode());
-        this.requestBodyMapJsonField = new Select2SingleChoice<>("requestBodyMapJsonField", new PropertyModel<>(this, "requestBodyMapJson"), this.requestBodyMapJsonProvider, new JsonChoiceRenderer());
+        this.requestBodyMapJsonField = new Select2SingleChoice<>("requestBodyMapJsonField", new PropertyModel<>(this, "requestBodyMapJson"), this.requestBodyMapJsonProvider);
         this.requestBodyMapJsonField.setOutputMarkupId(true);
         this.form.add(this.requestBodyMapJsonField);
         this.requestBodyMapJsonFeedback = new TextFeedbackPanel("requestBodyMapJsonFeedback", this.requestBodyMapJsonField);
         this.form.add(this.requestBodyMapJsonFeedback);
 
-        this.requestBodyEnumField = new Select2SingleChoice<>("requestBodyEnumField", new PropertyModel<>(this, "requestBodyEnum"), new EnumChoiceProvider(getSession().getApplicationCode()), new JsonChoiceRenderer());
+        this.requestBodyEnumField = new Select2SingleChoice<>("requestBodyEnumField", new PropertyModel<>(this, "requestBodyEnum"), new EnumChoiceProvider(getSession().getApplicationCode()));
         this.requestBodyEnumField.setOutputMarkupId(true);
         this.form.add(this.requestBodyEnumField);
         this.requestBodyEnumFeedback = new TextFeedbackPanel("requestBodyEnumFeedback", this.requestBodyEnumField);
         this.form.add(this.requestBodyEnumFeedback);
 
-        this.requestHeaderRequiredField = new Select2MultipleChoice<>("requestHeaderRequiredField", new PropertyModel<>(this, "requestHeaderRequired"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()), new HttpHeaderRenderer());
+        this.requestHeaderRequiredField = new Select2MultipleChoice<>("requestHeaderRequiredField", new PropertyModel<>(this, "requestHeaderRequired"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()));
         this.requestHeaderRequiredField.setOutputMarkupId(true);
         this.form.add(this.requestHeaderRequiredField);
         this.requestHeaderRequiredFeedback = new TextFeedbackPanel("requestHeaderRequiredFeedback", this.requestHeaderRequiredField);
         this.form.add(this.requestHeaderRequiredFeedback);
 
-        this.requestHeaderOptionalField = new Select2MultipleChoice<>("requestHeaderOptionalField", new PropertyModel<>(this, "requestHeaderOptional"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()), new HttpHeaderRenderer());
+        this.requestHeaderOptionalField = new Select2MultipleChoice<>("requestHeaderOptionalField", new PropertyModel<>(this, "requestHeaderOptional"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()));
         this.requestHeaderOptionalField.setOutputMarkupId(true);
         this.form.add(this.requestHeaderOptionalField);
         this.requestHeaderOptionalFeedback = new TextFeedbackPanel("requestHeaderOptionalFeedback", this.requestHeaderOptionalField);
         this.form.add(this.requestHeaderOptionalFeedback);
 
-        this.requestQueryRequiredField = new Select2MultipleChoice<>("requestQueryRequiredField", new PropertyModel<>(this, "requestQueryRequired"), new HttpQueryChoiceProvider(getSession().getApplicationCode()), new HttpQueryRenderer());
+        this.requestQueryRequiredField = new Select2MultipleChoice<>("requestQueryRequiredField", new PropertyModel<>(this, "requestQueryRequired"), new HttpQueryChoiceProvider(getSession().getApplicationCode()));
         this.requestQueryRequiredField.setOutputMarkupId(true);
         this.form.add(this.requestQueryRequiredField);
         this.requestQueryRequiredFeedback = new TextFeedbackPanel("requestQueryRequiredFeedback", this.requestQueryRequiredField);
         this.form.add(this.requestQueryRequiredFeedback);
 
-        this.requestQueryOptionalField = new Select2MultipleChoice<>("requestQueryOptionalField", new PropertyModel<>(this, "requestQueryOptional"), new HttpQueryChoiceProvider(getSession().getApplicationCode()), new HttpQueryRenderer());
+        this.requestQueryOptionalField = new Select2MultipleChoice<>("requestQueryOptionalField", new PropertyModel<>(this, "requestQueryOptional"), new HttpQueryChoiceProvider(getSession().getApplicationCode()));
         this.requestQueryOptionalField.setOutputMarkupId(true);
         this.form.add(this.requestQueryOptionalField);
         this.requestQueryOptionalFeedback = new TextFeedbackPanel("requestQueryOptionalFeedback", this.requestQueryOptionalField);
@@ -267,25 +264,25 @@ public class RestCreatePage extends MasterPage {
         this.responseBodySubTypeFeedback = new TextFeedbackPanel("responseBodySubTypeFeedback", this.responseBodySubTypeField);
         this.form.add(this.responseBodySubTypeFeedback);
 
-        this.responseBodyMapJsonField = new Select2SingleChoice<>("responseBodyMapJsonField", new PropertyModel<>(this, "responseBodyMapJson"), new RestJsonChoiceProvider(getSession().getApplicationCode(), MediaType.APPLICATION_JSON_VALUE), new JsonChoiceRenderer());
+        this.responseBodyMapJsonField = new Select2SingleChoice<>("responseBodyMapJsonField", new PropertyModel<>(this, "responseBodyMapJson"), new RestJsonChoiceProvider(getSession().getApplicationCode(), MediaType.APPLICATION_JSON_VALUE));
         this.responseBodyMapJsonField.setOutputMarkupId(true);
         this.form.add(this.responseBodyMapJsonField);
         this.responseBodyMapJsonFeedback = new TextFeedbackPanel("responseBodyMapJsonFeedback", this.responseBodyMapJsonField);
         this.form.add(this.responseBodyMapJsonFeedback);
 
-        this.responseBodyEnumField = new Select2SingleChoice<>("responseBodyEnumField", new PropertyModel<>(this, "responseBodyEnum"), new EnumChoiceProvider(getSession().getApplicationCode()), new JsonChoiceRenderer());
+        this.responseBodyEnumField = new Select2SingleChoice<>("responseBodyEnumField", new PropertyModel<>(this, "responseBodyEnum"), new EnumChoiceProvider(getSession().getApplicationCode()));
         this.responseBodyEnumField.setOutputMarkupId(true);
         this.form.add(this.responseBodyEnumField);
         this.responseBodyEnumFeedback = new TextFeedbackPanel("responseBodyEnumFeedback", this.responseBodyEnumField);
         this.form.add(this.responseBodyEnumFeedback);
 
-        this.responseHeaderRequiredField = new Select2MultipleChoice<>("responseHeaderRequiredField", new PropertyModel<>(this, "responseHeaderRequired"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()), new HttpHeaderRenderer());
+        this.responseHeaderRequiredField = new Select2MultipleChoice<>("responseHeaderRequiredField", new PropertyModel<>(this, "responseHeaderRequired"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()));
         this.responseHeaderRequiredField.setOutputMarkupId(true);
         this.form.add(this.responseHeaderRequiredField);
         this.responseHeaderRequiredFeedback = new TextFeedbackPanel("responseHeaderRequiredFeedback", this.responseHeaderRequiredField);
         this.form.add(this.responseHeaderRequiredFeedback);
 
-        this.responseHeaderOptionalField = new Select2MultipleChoice<>("responseHeaderOptionalField", new PropertyModel<>(this, "responseHeaderOptional"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()), new HttpHeaderRenderer());
+        this.responseHeaderOptionalField = new Select2MultipleChoice<>("responseHeaderOptionalField", new PropertyModel<>(this, "responseHeaderOptional"), new HttpHeaderChoiceProvider(getSession().getApplicationCode()));
         this.responseHeaderOptionalField.setOutputMarkupId(true);
         this.form.add(this.responseHeaderOptionalField);
         this.responseHeaderOptionalFeedback = new TextFeedbackPanel("responseHeaderOptionalFeedback", this.responseHeaderOptionalField);
@@ -324,8 +321,9 @@ public class RestCreatePage extends MasterPage {
                 Jdbc.Rest.METHOD,
                 Jdbc.Rest.NAME,
                 Jdbc.Rest.PATH,
+                Jdbc.Rest.MODIFIED,
                 Jdbc.Rest.SECURITY,
-                Jdbc.Rest.SCRIPT,
+                Jdbc.Rest.STAGE_SCRIPT,
                 Jdbc.Rest.REQUEST_BODY_ENUM_ID,
                 Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID,
                 Jdbc.Rest.REQUEST_BODY_SUB_TYPE,
@@ -343,9 +341,18 @@ public class RestCreatePage extends MasterPage {
         fields.put(Jdbc.Rest.DESCRIPTION, this.description);
         fields.put(Jdbc.Rest.METHOD, this.method);
         fields.put(Jdbc.Rest.NAME, this.name);
+        if (!"/".equals(this.requestPath)) {
+            if (!this.requestPath.startsWith("/")) {
+                this.requestPath = "/" + this.requestPath;
+            }
+            if (this.requestPath.endsWith("/")) {
+                this.requestPath = this.requestPath.substring(0, this.requestPath.length() - 1);
+            }
+        }
         fields.put(Jdbc.Rest.PATH, this.requestPath);
         fields.put(Jdbc.Rest.SECURITY, SecurityEnum.Granted.getLiteral());
-        fields.put(Jdbc.Rest.SCRIPT, this.script);
+        fields.put(Jdbc.Rest.STAGE_SCRIPT, this.script);
+        fields.put(Jdbc.Rest.MODIFIED, true);
 
         fields.put(Jdbc.Rest.REQUEST_CONTENT_TYPE, this.requestContentType);
         fields.put(Jdbc.Rest.REQUEST_BODY_TYPE, this.requestBodyType);

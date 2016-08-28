@@ -4,7 +4,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.PageChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.PageChoiceProvider;
 import com.angkorteam.mbaas.server.validator.RoleNameValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
@@ -91,7 +90,7 @@ public class RoleModifyPage extends MasterPage {
             this.homePage = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", roleRecord.get(Jdbc.Role.HOME_PAGE_ID));
         } catch (DataAccessException e) {
         }
-        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "homePage"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
+        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "homePage"), new PageChoiceProvider(getSession().getApplicationCode()));
         this.pageField.setLabel(JooqUtils.lookup("page", this));
         this.form.add(this.pageField);
         this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);

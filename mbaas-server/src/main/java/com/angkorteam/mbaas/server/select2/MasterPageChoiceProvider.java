@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.google.gson.Gson;
+import org.apache.wicket.model.IModel;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
@@ -56,5 +57,39 @@ public class MasterPageChoiceProvider extends SingleChoiceProvider<Map<String, O
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
         int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM (SELECT * FROM " + Jdbc.MASTER_PAGE + " WHERE LOWER(" + Jdbc.MasterPage.CODE + ") LIKE LOWER(?) ORDER BY " + Jdbc.MasterPage.DATE_CREATED + " ASC LIMIT " + (page * LIMIT) + "," + LIMIT + ") pp", int.class, term + "%");
         return count > 0;
+    }
+
+    @Override
+    public int size() {
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        return jdbcTemplate.queryForObject("SELECT count(*) FROM " + Jdbc.MASTER_PAGE, int.class);
+    }
+
+    @Override
+    public Map<String, Object> get(int index) {
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        return jdbcTemplate.queryForMap("SELECT * from " + Jdbc.MASTER_PAGE + " LIMIT " + index + ",1");
+    }
+
+    @Override
+    public Object getDisplayValue(Map<String, Object> object) {
+        return object.get(Jdbc.MasterPage.CODE);
+    }
+
+    @Override
+    public String getIdValue(Map<String, Object> object, int index) {
+        return (String) object.get(Jdbc.MasterPage.MASTER_PAGE_ID);
+    }
+
+    @Override
+    public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
+        for (Map<String, Object> choice : choices.getObject()) {
+            if (choice.get(Jdbc.MasterPage.MASTER_PAGE_ID).equals(id)) {
+                return choice;
+            }
+        }
+        return null;
     }
 }

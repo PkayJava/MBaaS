@@ -6,6 +6,8 @@ CREATE TABLE rest (
   name                      VARCHAR(255) NOT NULL,
   description               VARCHAR(255) NOT NULL,
   script                    TEXT,
+  stage_script              TEXT,
+  modified                  BIT(1)       NOT NULL,
   date_created              DATETIME     NOT NULL DEFAULT NOW(),
   security                  VARCHAR(15)  NOT NULL,
   request_content_type      VARCHAR(100),

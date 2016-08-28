@@ -6,9 +6,12 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.google.gson.Gson;
+import org.apache.wicket.model.IModel;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +27,15 @@ public class HttpHeaderChoiceProvider extends MultipleChoiceProvider<Map<String,
     }
 
     @Override
-    public List<Map<String, Object>> toChoices(String[] ids) {
-        if (ids == null || ids.length == 0) {
+    public List<Map<String, Object>> toChoices(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
             return null;
         }
         JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(this.applicationCode);
-        List<Map<String, Object>> choices = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (?)", ids);
+        NamedParameterJdbcTemplate named = new NamedParameterJdbcTemplate(jdbcTemplate);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Jdbc.HttpHeader.HTTP_HEADER_ID, ids);
+        List<Map<String, Object>> choices = named.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (:" + Jdbc.HttpHeader.HTTP_HEADER_ID + ")", params);
         return choices;
     }
 
@@ -56,5 +62,39 @@ public class HttpHeaderChoiceProvider extends MultipleChoiceProvider<Map<String,
     @Override
     public Gson getGson() {
         return ApplicationUtils.getApplication().getGson();
+    }
+
+    @Override
+    public int size() {
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        return jdbcTemplate.queryForObject("SELECT count(*) FROM " + Jdbc.HTTP_HEADER, int.class);
+    }
+
+    @Override
+    public Map<String, Object> get(int index) {
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        return jdbcTemplate.queryForMap("SELECT * from " + Jdbc.HTTP_HEADER + " LIMIT " + index + ",1");
+    }
+
+    @Override
+    public Object getDisplayValue(Map<String, Object> object) {
+        return object.get(Jdbc.HttpHeader.NAME);
+    }
+
+    @Override
+    public String getIdValue(Map<String, Object> object, int index) {
+        return (String) object.get(Jdbc.HttpHeader.HTTP_HEADER_ID);
+    }
+
+    @Override
+    public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
+        for (Map<String, Object> choice : choices.getObject()) {
+            if (choice.get(Jdbc.HttpHeader.HTTP_HEADER_ID).equals(id)) {
+                return choice;
+            }
+        }
+        return null;
     }
 }

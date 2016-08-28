@@ -4,7 +4,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.PageChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.PageChoiceProvider;
 import com.angkorteam.mbaas.server.validator.RoleNameValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
@@ -71,7 +70,7 @@ public class RoleCreatePage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "homePage"), new PageChoiceProvider(getSession().getApplicationCode()), new PageChoiceRenderer());
+        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "homePage"), new PageChoiceProvider(getSession().getApplicationCode()));
         this.pageField.setLabel(JooqUtils.lookup("page", this));
         this.form.add(this.pageField);
         this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);

@@ -14,11 +14,13 @@ public interface ISelect2MultipleChoiceFactory extends Serializable {
 
     NashornSelect2MultipleChoice createSelect2MultipleChoice(
             String id,
-            IChoiceRenderer<Map<String, Object>> renderer);
+            String idField,
+            String displayField);
 
     NashornSelect2MultipleChoice createSelect2MultipleChoice(
             MarkupContainer container,
             String id,
-            IChoiceRenderer<Map<String, Object>> renderer);
+            String idField,
+            String displayField);
 
 }

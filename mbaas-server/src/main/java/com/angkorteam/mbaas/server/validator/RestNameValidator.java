@@ -48,6 +48,14 @@ public class RestNameValidator extends JooqFormValidator {
         String requestPath = this.requestPathField.getConvertedInput();
         String method = this.methodField.getConvertedInput();
         if (requestPath != null && !"".equals(requestPath) && method != null && !"".equals(method)) {
+            if (!"/".equals(requestPath)) {
+                if (!requestPath.startsWith("/")) {
+                    requestPath = "/" + requestPath;
+                }
+                if (requestPath.endsWith("/")) {
+                    requestPath = requestPath.substring(0, requestPath.length() - 1);
+                }
+            }
             Application application = ApplicationUtils.getApplication();
             JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
             int count = 0;

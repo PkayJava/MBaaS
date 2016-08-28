@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.google.gson.Gson;
+import org.apache.wicket.model.IModel;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
@@ -76,5 +77,39 @@ public class RestJsonChoiceProvider extends SingleChoiceProvider<Map<String, Obj
     @Override
     public Gson getGson() {
         return ApplicationUtils.getApplication().getGson();
+    }
+
+    @Override
+    public int size() {
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        return jdbcTemplate.queryForObject("SELECT count(*) FROM " + Jdbc.JSON, int.class);
+    }
+
+    @Override
+    public Map<String, Object> get(int index) {
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        return jdbcTemplate.queryForMap("SELECT * from " + Jdbc.JSON + " LIMIT " + index + ",1");
+    }
+
+    @Override
+    public Object getDisplayValue(Map<String, Object> object) {
+        return object.get(Jdbc.Json.NAME);
+    }
+
+    @Override
+    public String getIdValue(Map<String, Object> object, int index) {
+        return (String) object.get(Jdbc.Json.JSON_ID);
+    }
+
+    @Override
+    public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
+        for (Map<String, Object> choice : choices.getObject()) {
+            if (choice.get(Jdbc.Json.JSON_ID).equals(id)) {
+                return choice;
+            }
+        }
+        return null;
     }
 }

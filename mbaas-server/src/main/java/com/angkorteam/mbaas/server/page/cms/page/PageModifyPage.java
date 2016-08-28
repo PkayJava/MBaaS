@@ -10,9 +10,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.page.PagePage;
-import com.angkorteam.mbaas.server.renderer.MasterPageChoiceRenderer;
-import com.angkorteam.mbaas.server.renderer.MenuChoiceRenderer;
-import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.MasterPageChoiceProvider;
 import com.angkorteam.mbaas.server.select2.MenuChoiceProvider;
 import com.angkorteam.mbaas.server.select2.RoleChoiceProvider;
@@ -102,18 +99,18 @@ public class PageModifyPage extends MasterPage {
 
         this.pageId = getPageParameters().get("pageId").toString("");
 
-        this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RoleChoiceProvider(getSession().getApplicationCode()), new RoleChoiceRenderer());
+        this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RoleChoiceProvider(getSession().getApplicationCode()));
         this.form.add(this.roleField);
         this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);
         this.form.add(this.roleFeedback);
 
-        this.masterPageField = new Select2SingleChoice<>("masterPageField", new PropertyModel<>(this, "masterPage"), new MasterPageChoiceProvider(getSession().getApplicationCode()), new MasterPageChoiceRenderer());
+        this.masterPageField = new Select2SingleChoice<>("masterPageField", new PropertyModel<>(this, "masterPage"), new MasterPageChoiceProvider(getSession().getApplicationCode()));
         this.masterPageField.setRequired(true);
         this.form.add(this.masterPageField);
         this.masterPageFeedback = new TextFeedbackPanel("masterPageFeedback", this.masterPageField);
         this.form.add(this.masterPageFeedback);
 
-        this.menuField = new Select2SingleChoice<>("menuField", new PropertyModel<>(this, "menu"), new MenuChoiceProvider(getSession().getApplicationCode()), new MenuChoiceRenderer());
+        this.menuField = new Select2SingleChoice<>("menuField", new PropertyModel<>(this, "menu"), new MenuChoiceProvider(getSession().getApplicationCode()));
         this.menuField.setRequired(true);
         this.form.add(this.menuField);
         this.menuFeedback = new TextFeedbackPanel("menuFeedback", this.menuField);

@@ -5,7 +5,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackP
 import com.angkorteam.mbaas.plain.enums.AuthenticationEnum;
 import com.angkorteam.mbaas.plain.enums.UserStatusEnum;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
+import com.angkorteam.mbaas.server.select2.RoleChoiceProvider;
 import com.angkorteam.mbaas.server.validator.UserLoginValidator;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -100,7 +100,7 @@ public class UserCreatePage extends MasterPage {
         this.form.add(new EqualPasswordInputValidator(this.passwordField, this.retypePasswordField));
 
         List<Map<String, Object>> roles = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE);
-        this.roleField = new DropDownChoice<>("roleField", new PropertyModel<>(this, "role"), roles, new RoleChoiceRenderer());
+        this.roleField = new DropDownChoice<>("roleField", new PropertyModel<>(this, "role"), roles, new RoleChoiceProvider(getSession().getApplicationCode()));
         this.roleField.setRequired(true);
         this.roleField.setLabel(JooqUtils.lookup("role", this));
         this.form.add(roleField);

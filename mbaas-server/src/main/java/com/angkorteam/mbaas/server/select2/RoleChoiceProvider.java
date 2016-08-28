@@ -6,10 +6,12 @@ import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.google.gson.Gson;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.model.IModel;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,13 +39,17 @@ public class RoleChoiceProvider extends MultipleChoiceProvider<Map<String, Objec
     }
 
     @Override
-    public List<Map<String, Object>> toChoices(String[] ids) {
-        if (ids == null || ids.length == 0) {
+    public List<Map<String, Object>> toChoices(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
             return null;
         }
         Application application = ApplicationUtils.getApplication();
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-        return jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " IN (" + StringUtils.repeat("?", ", ", ids.length) + ")", (Object[]) ids);
+        NamedParameterJdbcTemplate named = new NamedParameterJdbcTemplate(jdbcTemplate);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Jdbc.Role.ROLE_ID, ids);
+        List<Map<String, Object>> choices = named.queryForList("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " in (:" + Jdbc.Role.ROLE_ID + ")", params);
+        return choices;
     }
 
     @Override
@@ -57,5 +63,39 @@ public class RoleChoiceProvider extends MultipleChoiceProvider<Map<String, Objec
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
         int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM (SELECT * FROM " + Jdbc.ROLE + " WHERE LOWER(" + Jdbc.Role.NAME + ") LIKE LOWER(?) LIMIT " + (page * LIMIT) + "," + LIMIT + ") pp", int.class, term + "%");
         return count > 0;
+    }
+
+    @Override
+    public int size() {
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        return jdbcTemplate.queryForObject("SELECT count(*) FROM " + Jdbc.ROLE, int.class);
+    }
+
+    @Override
+    public Map<String, Object> get(int index) {
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        return jdbcTemplate.queryForMap("SELECT * from " + Jdbc.ROLE + " LIMIT " + index + ",1");
+    }
+
+    @Override
+    public Object getDisplayValue(Map<String, Object> object) {
+        return object.get(Jdbc.Role.NAME);
+    }
+
+    @Override
+    public String getIdValue(Map<String, Object> object, int index) {
+        return (String) object.get(Jdbc.Role.ROLE_ID);
+    }
+
+    @Override
+    public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
+        for (Map<String, Object> choice : choices.getObject()) {
+            if (choice.get(Jdbc.Role.ROLE_ID).equals(id)) {
+                return choice;
+            }
+        }
+        return null;
     }
 }

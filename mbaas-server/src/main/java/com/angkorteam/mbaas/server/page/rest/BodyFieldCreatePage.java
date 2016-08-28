@@ -6,8 +6,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.EnumChoiceRenderer;
-import com.angkorteam.mbaas.server.renderer.JsonChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.select2.JsonChoiceProvider;
 import com.angkorteam.mbaas.server.wicket.*;
@@ -122,12 +120,12 @@ public class BodyFieldCreatePage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        this.mapTypeField = new Select2SingleChoice<>("mapTypeField", new PropertyModel<>(this, "mapType"), new JsonChoiceProvider(getSession().getApplicationCode()), new JsonChoiceRenderer());
+        this.mapTypeField = new Select2SingleChoice<>("mapTypeField", new PropertyModel<>(this, "mapType"), new JsonChoiceProvider(getSession().getApplicationCode()));
         this.form.add(mapTypeField);
         this.mapTypeFeedback = new TextFeedbackPanel("mapTypeFeedback", this.mapTypeField);
         this.form.add(mapTypeFeedback);
 
-        this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()), new EnumChoiceRenderer());
+        this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()));
         this.form.add(enumTypeField);
         this.enumTypeFeedback = new TextFeedbackPanel("enumTypeFeedback", this.enumTypeField);
         this.form.add(enumTypeFeedback);

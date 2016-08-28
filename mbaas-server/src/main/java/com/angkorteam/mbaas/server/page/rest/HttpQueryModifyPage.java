@@ -7,7 +7,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.EnumChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.validator.HttpQueryNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -130,7 +129,7 @@ public class HttpQueryModifyPage extends MasterPage {
         if (httpQueryRecord.get(Jdbc.HttpQuery.ENUM_ID) != null) {
             this.enumType = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " = ?", httpQueryRecord.get(Jdbc.HttpQuery.ENUM_ID));
         }
-        this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()), new EnumChoiceRenderer());
+        this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()));
         this.form.add(enumTypeField);
         this.enumTypeFeedback = new TextFeedbackPanel("enumTypeFeedback", this.enumTypeField);
         this.form.add(this.enumTypeFeedback);

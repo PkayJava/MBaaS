@@ -4,7 +4,7 @@ import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.RoleChoiceRenderer;
+import com.angkorteam.mbaas.server.select2.RoleChoiceProvider;
 import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
 import com.angkorteam.mbaas.server.wicket.Mount;
@@ -79,7 +79,7 @@ public class UserModifyPage extends MasterPage {
 
         this.role = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", userRecord.get(Jdbc.User.ROLE_ID));
         List<Map<String, Object>> roles = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE);
-        this.roleField = new DropDownChoice<>("roleField", new PropertyModel<>(this, "role"), roles, new RoleChoiceRenderer());
+        this.roleField = new DropDownChoice<>("roleField", new PropertyModel<>(this, "role"), roles, new RoleChoiceProvider(getSession().getApplicationCode()));
         this.roleField.setRequired(true);
         this.roleField.setLabel(JooqUtils.lookup("role", this));
         this.form.add(this.roleField);

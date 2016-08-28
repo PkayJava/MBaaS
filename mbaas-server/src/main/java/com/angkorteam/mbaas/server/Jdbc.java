@@ -500,6 +500,8 @@ public class Jdbc {
         public static final String NAME = "name";
         public static final String DESCRIPTION = "description";
         public static final String SCRIPT = "script";
+        public static final String STAGE_SCRIPT = "stage_script";
+        public static final String MODIFIED = "modified";
         public static final String DATE_CREATED = "date_created";
         public static final String SECURITY = "security";
         public static final String REQUEST_CONTENT_TYPE = "request_content_type";

@@ -7,7 +7,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.renderer.EnumChoiceRenderer;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.validator.HttpHeaderNameValidator;
 import com.angkorteam.mbaas.server.wicket.MasterPage;
@@ -19,9 +18,11 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 8/14/16.
@@ -128,7 +129,7 @@ public class HttpHeaderModifyPage extends MasterPage {
         if (httpHeaderRecord.get(Jdbc.HttpHeader.ENUM_ID) != null) {
             this.enumType = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " = ?", httpHeaderRecord.get(Jdbc.HttpHeader.ENUM_ID));
         }
-        this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()), new EnumChoiceRenderer());
+        this.enumTypeField = new Select2SingleChoice<>("enumTypeField", new PropertyModel<>(this, "enumType"), new EnumChoiceProvider(getSession().getApplicationCode()));
         this.form.add(enumTypeField);
         this.enumTypeFeedback = new TextFeedbackPanel("enumTypeFeedback", this.enumTypeField);
         this.form.add(this.enumTypeFeedback);
