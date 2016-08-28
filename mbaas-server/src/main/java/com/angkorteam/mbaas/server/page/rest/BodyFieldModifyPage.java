@@ -13,6 +13,7 @@ import com.angkorteam.mbaas.server.wicket.*;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -46,6 +47,9 @@ public class BodyFieldModifyPage extends MasterPage {
     private String type;
     private DropDownChoice<String> typeField;
     private TextFeedbackPanel typeFeedback;
+
+    private boolean required = true;
+    private CheckBox requiredField;
 
     private List<String> subTypes = new ArrayList<>();
     private String subType;
@@ -90,6 +94,11 @@ public class BodyFieldModifyPage extends MasterPage {
         this.jsonName = (String) jsonRecord.get(Jdbc.Json.NAME);
         this.jsonNameLabel = new Label("jsonNameLabel", new PropertyModel<>(this, "jsonName"));
         this.form.add(jsonNameLabel);
+
+        this.required = (Boolean) jsonFieldRecord.get(Jdbc.JsonField.REQUIRED);
+        this.requiredField = new CheckBox("requiredField", new PropertyModel<>(this, "required"));
+        this.requiredField.setRequired(true);
+        this.form.add(this.requiredField);
 
         this.name = (String) jsonFieldRecord.get(Jdbc.JsonField.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
@@ -212,6 +221,7 @@ public class BodyFieldModifyPage extends MasterPage {
         fields.put(Jdbc.JsonField.NAME, this.name);
         fields.put(Jdbc.JsonField.DESCRIPTION, this.description);
         fields.put(Jdbc.JsonField.TYPE, this.type);
+        fields.put(Jdbc.JsonField.REQUIRED, this.required);
         fields.put(Jdbc.JsonField.SUB_TYPE, this.subType);
         if (this.mapType != null) {
             fields.put(Jdbc.JsonField.MAP_JSON_ID, this.mapType.get(Jdbc.Json.JSON_ID));

@@ -14,27 +14,38 @@ import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.web.firewall.FirewalledRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.ServletRequestUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.script.*;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -44,6 +55,8 @@ import java.util.*;
 @RequestMapping(path = "/javascript")
 public class JavascriptController {
 
+    private static final DateFormat HTTP_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+
     @Autowired
     private ServletContext servletContext;
 
@@ -52,8 +65,11 @@ public class JavascriptController {
     @RequestMapping(path = "/**")
     public ResponseEntity<JavaScriptExecuteResponse> execute(
             HttpServletRequest req,
+            @RequestBody(required = false) byte[] requestBody,
             Identity identity
     ) throws IOException, ServletException {
+
+        // region stage, pathInfo
         boolean stage = ServletRequestUtils.getBooleanParameter(req, "stage", false);
         String pathInfo = req.getPathInfo().substring(11);
         if ("".equals(pathInfo)) {
@@ -81,14 +97,23 @@ public class JavascriptController {
         if (jdbcTemplate == null) {
             return null;
         }
-        Map<String, Object> restRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.REST + " WHERE " + Jdbc.Rest.PATH + " = ? AND " + Jdbc.Rest.METHOD + " = ?", pathInfo, StringUtils.upperCase(req.getMethod()));
+        NamedParameterJdbcTemplate named = new NamedParameterJdbcTemplate(jdbcTemplate);
+        // endregion
+
+        // region restRecord
+        Map<String, Object> restRecord = null;
+        try {
+            restRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.REST + " WHERE " + Jdbc.Rest.PATH + " = ? AND " + Jdbc.Rest.METHOD + " = ?", pathInfo, StringUtils.upperCase(req.getMethod()));
+        } catch (EmptyResultDataAccessException e) {
+        }
         if (restRecord == null) {
             return null;
         }
+        // endregion
 
+        // region http
         Http http = null;
         ScriptEngine scriptEngine = getScriptEngine(context);
-
         String stageScript = (String) restRecord.get(Jdbc.Rest.STAGE_SCRIPT);
         String script = (String) restRecord.get(Jdbc.Rest.SCRIPT);
         if (stage) {
@@ -116,31 +141,33 @@ public class JavascriptController {
                 http = invocable.getInterface(Http.class);
             }
         }
-        String method = (String) restRecord.get(Jdbc.Rest.METHOD);
-        if (method.equals(HttpMethod.PUT.name()) || method.equals(HttpMethod.POST.name())) {
-            String contentType = (String) restRecord.get(Jdbc.Rest.REQUEST_CONTENT_TYPE);
-            if (!contentType.equalsIgnoreCase(req.getContentType())) {
-                return null;
-            }
-        }
+        // endregion
 
+        // region nobody
         List<String> headerIds = new ArrayList<>();
         List<String> enumIds = new ArrayList<>();
         List<String> queryIds = new ArrayList<>();
         List<String> jsonIds = new ArrayList<>();
+        // endregion
+
+        // region requestHeaderRecords
         List<Map<String, Object>> requestHeaderRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.REST_REQUEST_HEADER + " WHERE " + Jdbc.RestRequestHeader.REST_ID + " = ?", restRecord.get(Jdbc.Rest.REST_ID));
         for (Map<String, Object> header : requestHeaderRecords) {
             headerIds.add((String) header.get(Jdbc.RestRequestHeader.HTTP_HEADER_ID));
         }
+        // endregion
+
+        // region responseHeaderRecords
         List<Map<String, Object>> responseHeaderRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.REST_RESPONSE_HEADER + " WHERE " + Jdbc.RestResponseHeader.REST_ID + " = ?", restRecord.get(Jdbc.Rest.REST_ID));
         for (Map<String, Object> header : responseHeaderRecords) {
             headerIds.add((String) header.get(Jdbc.RestResponseHeader.HTTP_HEADER_ID));
         }
-        List<Map<String, Object>> headerRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (?)", headerIds.toArray());
-        Map<String, Map<String, Object>> headerDictionary = new HashMap<>();
-        for (Map<String, Object> headerRecord : headerRecords) {
-            headerDictionary.put((String) headerRecord.get(Jdbc.HttpHeader.HTTP_HEADER_ID), headerRecord);
-        }
+        // endregion
+
+        // region nobody
+        Map<String, Object> where = new HashMap<>();
+        where.put(Jdbc.HttpHeader.HTTP_HEADER_ID, headerIds);
+        List<Map<String, Object>> headerRecords = named.queryForList("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " in (:" + Jdbc.HttpHeader.HTTP_HEADER_ID + ")", where);
         for (Map<String, Object> header : headerRecords) {
             if (header.get(Jdbc.HttpHeader.ENUM_ID) != null && !"".equals(header.get(Jdbc.HttpHeader.ENUM_ID))) {
                 if (!enumIds.contains((String) header.get(Jdbc.HttpHeader.ENUM_ID))) {
@@ -148,13 +175,25 @@ public class JavascriptController {
                 }
             }
         }
+        // endregion
+
+        // region headerDictionary
+        Map<String, Map<String, Object>> headerDictionary = new HashMap<>();
+        for (Map<String, Object> headerRecord : headerRecords) {
+            headerDictionary.put((String) headerRecord.get(Jdbc.HttpHeader.HTTP_HEADER_ID), headerRecord);
+        }
         List<Map<String, Object>> requestQueryRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.REST_REQUEST_QUERY + " WHERE " + Jdbc.RestRequestQuery.REST_ID + " = ?", restRecord.get(Jdbc.Rest.REST_ID));
         for (Map<String, Object> query : requestQueryRecords) {
             if (!queryIds.contains((String) query.get(Jdbc.RestRequestQuery.HTTP_QUERY_ID))) {
                 queryIds.add((String) query.get(Jdbc.RestRequestQuery.HTTP_QUERY_ID));
             }
         }
-        List<Map<String, Object>> queryRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.HTTP_QUERY + " WHERE " + Jdbc.HttpQuery.HTTP_QUERY_ID + " in (?)", queryIds.toArray());
+        // endregion
+
+        // region httpQueryDictionary
+        where.clear();
+        where.put(Jdbc.HttpQuery.HTTP_QUERY_ID, queryIds);
+        List<Map<String, Object>> queryRecords = named.queryForList("SELECT * FROM " + Jdbc.HTTP_QUERY + " WHERE " + Jdbc.HttpQuery.HTTP_QUERY_ID + " in (:" + Jdbc.HttpQuery.HTTP_QUERY_ID + ")", where);
         Map<String, Map<String, Object>> httpQueryDictionary = new HashMap<>();
         for (Map<String, Object> queryRecord : queryRecords) {
             httpQueryDictionary.put((String) queryRecord.get(Jdbc.HttpQuery.HTTP_QUERY_ID), queryRecord);
@@ -167,14 +206,18 @@ public class JavascriptController {
                 }
             }
         }
+        // endregion
 
+        // region nobody
         if (restRecord.get(Jdbc.Rest.RESPONSE_BODY_ENUM_ID) != null && !"".equals(restRecord.get(Jdbc.Rest.RESPONSE_BODY_ENUM_ID))) {
             if (!enumIds.contains((String) restRecord.get(Jdbc.Rest.RESPONSE_BODY_ENUM_ID))) {
                 enumIds.add((String) restRecord.get(Jdbc.Rest.RESPONSE_BODY_ENUM_ID));
             }
         }
 
-        Map<String, Object> requestBody = null;
+        String method = (String) restRecord.get(Jdbc.Rest.METHOD);
+
+        Map<String, Object> requestBodyRecord = null;
         if (method.equals(HttpMethod.PUT.name()) || method.equals(HttpMethod.POST.name())) {
             if (restRecord.get(Jdbc.Rest.REQUEST_BODY_ENUM_ID) != null && !"".equals(restRecord.get(Jdbc.Rest.REQUEST_BODY_ENUM_ID))) {
                 if (!enumIds.contains((String) restRecord.get(Jdbc.Rest.REQUEST_BODY_ENUM_ID))) {
@@ -182,12 +225,12 @@ public class JavascriptController {
                 }
             }
             if (restRecord.get(Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID) != null && !"".equals(restRecord.get(Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID))) {
-                requestBody = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JSON + " WHERE " + Jdbc.Json.JSON_ID + " = ?", restRecord.get(Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID));
+                requestBodyRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JSON + " WHERE " + Jdbc.Json.JSON_ID + " = ?", restRecord.get(Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID));
             }
         }
-        Map<String, Object> responseBody = null;
+        Map<String, Object> responseBodyRecord = null;
         if (restRecord.get(Jdbc.Rest.RESPONSE_BODY_MAP_JSON_ID) != null && !"".equals(restRecord.get(Jdbc.Rest.RESPONSE_BODY_MAP_JSON_ID))) {
-            responseBody = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JSON + " WHERE " + Jdbc.Json.JSON_ID + " = ?", restRecord.get(Jdbc.Rest.RESPONSE_BODY_MAP_JSON_ID));
+            responseBodyRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.JSON + " WHERE " + Jdbc.Json.JSON_ID + " = ?", restRecord.get(Jdbc.Rest.RESPONSE_BODY_MAP_JSON_ID));
         }
         if (restRecord.get(Jdbc.Rest.RESPONSE_BODY_ENUM_ID) != null && !"".equals(restRecord.get(Jdbc.Rest.RESPONSE_BODY_ENUM_ID))) {
             if (!enumIds.contains((String) restRecord.get(Jdbc.Rest.RESPONSE_BODY_ENUM_ID))) {
@@ -195,11 +238,11 @@ public class JavascriptController {
             }
         }
 
-        if (requestBody != null) {
-            if (!jsonIds.contains((String) requestBody.get(Jdbc.Json.JSON_ID))) {
-                jsonIds.add((String) requestBody.get(Jdbc.Json.JSON_ID));
+        if (requestBodyRecord != null) {
+            if (!jsonIds.contains((String) requestBodyRecord.get(Jdbc.Json.JSON_ID))) {
+                jsonIds.add((String) requestBodyRecord.get(Jdbc.Json.JSON_ID));
             }
-            List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", requestBody.get(Jdbc.Json.JSON_ID));
+            List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", requestBodyRecord.get(Jdbc.Json.JSON_ID));
             if (jsonFields != null && !jsonFields.isEmpty()) {
                 for (Map<String, Object> jsonField : jsonFields) {
                     processJsonField(jdbcTemplate, jsonIds, enumIds, jsonField);
@@ -207,11 +250,11 @@ public class JavascriptController {
             }
         }
 
-        if (responseBody != null) {
-            if (!jsonIds.contains((String) responseBody.get(Jdbc.Json.JSON_ID))) {
-                jsonIds.add((String) responseBody.get(Jdbc.Json.JSON_ID));
+        if (responseBodyRecord != null) {
+            if (!jsonIds.contains((String) responseBodyRecord.get(Jdbc.Json.JSON_ID))) {
+                jsonIds.add((String) responseBodyRecord.get(Jdbc.Json.JSON_ID));
             }
-            List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", responseBody.get(Jdbc.Json.JSON_ID));
+            List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", responseBodyRecord.get(Jdbc.Json.JSON_ID));
             if (jsonFields != null && !jsonFields.isEmpty()) {
                 for (Map<String, Object> jsonField : jsonFields) {
                     processJsonField(jdbcTemplate, jsonIds, enumIds, jsonField);
@@ -219,12 +262,32 @@ public class JavascriptController {
             }
         }
 
-        List<Map<String, Object>> enumRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " in (?)", enumIds.toArray());
+        List<Map<String, Object>> enumRecords = new ArrayList<>();
+        if (!enumIds.isEmpty()) {
+            where.clear();
+            where.put(Jdbc.Enum.ENUM_ID, enumIds);
+            enumRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " in (:" + Jdbc.Enum.ENUM_ID + ")", where);
+        }
+
+        // endregion
+
+        // region enumDictionary
         Map<String, Map<String, Object>> enumDictionary = new HashMap<>();
         for (Map<String, Object> enumRecord : enumRecords) {
             enumDictionary.put((String) enumRecord.get(Jdbc.Enum.ENUM_ID), enumRecord);
         }
-        List<Map<String, Object>> enumItemRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ENUM_ITEM + " WHERE " + Jdbc.EnumItem.ENUM_ID + " in (?)", enumIds.toArray());
+        // endregion
+
+        // region nobody
+        List<Map<String, Object>> enumItemRecords = new ArrayList<>();
+        if (!enumIds.isEmpty()) {
+            where.clear();
+            where.put(Jdbc.EnumItem.ENUM_ID, enumIds);
+            enumItemRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ENUM_ITEM + " WHERE " + Jdbc.EnumItem.ENUM_ID + " in (:" + Jdbc.EnumItem.ENUM_ID + ")", where);
+        }
+        // endregion
+
+        // region enumItemDictionary
         Map<String, List<String>> enumItemDictionary = new HashMap<>();
         for (Map<String, Object> enumItemRecord : enumItemRecords) {
             String item = (String) enumItemRecord.get(Jdbc.EnumItem.VALUE);
@@ -237,7 +300,9 @@ public class JavascriptController {
                 items.add(item);
             }
         }
+        // endregion
 
+        // region requestQueryDictionary
         Map<String, List<String>> requestQueryDictionary = new HashMap<>();
         String queryString = req.getQueryString();
         if (queryString != null && !"".equals(queryString)) {
@@ -256,8 +321,76 @@ public class JavascriptController {
                 }
             }
         }
+        // endregion
 
-        // Request Query Parameter Validation
+        // region requestHeaderDictionary
+        Map<String, List<String>> requestHeaderDictionary = new HashMap<>();
+        Enumeration<String> headerNames = req.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            Enumeration<String> tempValues = req.getHeaders(headerName);
+            List<String> headerValues = new ArrayList<>();
+            while (tempValues.hasMoreElements()) {
+                headerValues.add(tempValues.nextElement());
+            }
+            requestHeaderDictionary.put(headerName, headerValues);
+        }
+        // endregion
+
+        // region requestBodyFormDictionary
+        Map<String, List<String>> requestBodyFormDictionary = new HashMap<>();
+        if (MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(req.getContentType())) {
+            String bodyString = "";
+            if (requestBody != null && requestBody.length > 0) {
+                bodyString = IOUtils.toString(requestBody, "UTF-8");
+            }
+            if (bodyString != null && !"".equals(bodyString)) {
+                String[] params = StringUtils.split(bodyString, '&');
+                for (String param : params) {
+                    String tmp[] = StringUtils.split(param, '=');
+                    String name = tmp[0];
+                    String value = tmp[1];
+                    if (!requestBodyFormDictionary.containsKey(name)) {
+                        List<String> values = new ArrayList<>();
+                        values.add(value);
+                        requestBodyFormDictionary.put(name, values);
+                    } else {
+                        List<String> values = requestBodyFormDictionary.get(name);
+                        values.add(value);
+                    }
+                }
+            }
+        }
+        // endregion
+
+        // region requestBodyFormDataDictionary, requestBodyFormFileDictionary
+        Map<String, List<String>> requestBodyFormDataDictionary = new HashMap<>();
+        Map<String, List<MultipartFile>> requestBodyFormFileDictionary = new HashMap<>();
+        if (ServletFileUpload.isMultipartContent(req)) {
+            MultipartHttpServletRequest request = (MultipartHttpServletRequest) ((FirewalledRequest) req).getRequest();
+            if (request.getParameterMap() != null && !request.getParameterMap().isEmpty()) {
+                for (Map.Entry<String, String[]> item : request.getParameterMap().entrySet()) {
+                    if (!requestQueryDictionary.containsKey(item.getKey())) {
+                        requestBodyFormDataDictionary.put(item.getKey(), Arrays.asList(item.getValue()));
+                    }
+                }
+            }
+            if (request.getFileMap() != null && !request.getFileMap().isEmpty()) {
+                for (Map.Entry<String, MultipartFile> item : request.getFileMap().entrySet()) {
+                    if (!requestBodyFormFileDictionary.containsKey(item.getKey())) {
+                        List<MultipartFile> values = new ArrayList<>();
+                        values.add(item.getValue());
+                        requestBodyFormFileDictionary.put(item.getKey(), values);
+                    } else {
+                        List<MultipartFile> values = requestBodyFormFileDictionary.get(item.getKey());
+                        values.add(item.getValue());
+                    }
+                }
+            }
+        }
+        // endregion
+
+        // region Request Query Parameter Validation
         Map<String, String> requestQueryErrors = new HashMap<>();
         for (Map<String, Object> requestQueryRecord : requestQueryRecords) {
             String queryId = (String) requestQueryRecord.get(Jdbc.RestRequestQuery.HTTP_QUERY_ID);
@@ -616,6 +749,388 @@ public class JavascriptController {
                 }
             }
         }
+        // endregion
+
+        // region Request Header Validation
+        Map<String, String> requestHeaderErrors = new HashMap<>();
+        for (Map<String, Object> requestHeaderRecord : requestHeaderRecords) {
+            String headerId = (String) requestHeaderRecord.get(Jdbc.RestRequestHeader.HTTP_HEADER_ID);
+            Boolean required = (Boolean) requestHeaderRecord.get(Jdbc.RestRequestHeader.REQUIRED);
+            Map<String, Object> httpHeader = headerDictionary.get(headerId);
+            String name = (String) httpHeader.get(Jdbc.HttpHeader.NAME);
+            String enumId = (String) httpHeader.get(Jdbc.HttpHeader.ENUM_ID);
+            String type = (String) httpHeader.get(Jdbc.HttpHeader.TYPE);
+            String subType = (String) httpHeader.get(Jdbc.HttpHeader.SUB_TYPE);
+            if (required) {
+                if (!TypeEnum.List.getLiteral().equals(type)) {
+                    if (requestHeaderDictionary.get(name) != null && !requestHeaderDictionary.get(name).isEmpty()) {
+                        if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                                requestHeaderErrors.put(name, "is required");
+                            } else {
+                                if (!"true".equals(value) || !"false".equals(value)) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.Long.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                                requestHeaderErrors.put(name, "is required");
+                            } else {
+                                try {
+                                    Long.valueOf(value);
+                                } catch (NumberFormatException e) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.Double.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                                requestHeaderErrors.put(name, "is required");
+                            } else {
+                                try {
+                                    Double.valueOf(value);
+                                } catch (NumberFormatException e) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.String.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                                requestHeaderErrors.put(name, "is required");
+                            }
+                        } else if (TypeEnum.Time.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                                requestHeaderErrors.put(name, "is required");
+                            } else {
+                                try {
+                                    DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                                } catch (ParseException e) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.Date.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                                requestHeaderErrors.put(name, "is required");
+                            } else {
+                                try {
+                                    DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                                } catch (ParseException e) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                                requestHeaderErrors.put(name, "is required");
+                            } else {
+                                try {
+                                    HTTP_DATE_FORMAT.parse(value);
+                                } catch (ParseException e) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.Enum.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            List<String> enumItems = enumItemDictionary.get(enumId);
+                            if (!enumItems.contains(value)) {
+                                requestHeaderErrors.put(name, "is invalid");
+                            }
+                        }
+                    } else {
+                        requestHeaderErrors.put(name, "is required");
+                    }
+                } else {
+                    if (requestHeaderDictionary.get(name) != null && !requestHeaderDictionary.get(name).isEmpty()) {
+                        if (TypeEnum.Boolean.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                    requestHeaderErrors.put(name, "is required");
+                                    break;
+                                } else {
+                                    if (!"true".equals(value) || !"false".equals(value)) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.Long.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                    requestHeaderErrors.put(name, "is required");
+                                    break;
+                                } else {
+                                    try {
+                                        Long.valueOf(value);
+                                    } catch (NumberFormatException e) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.Double.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                    requestHeaderErrors.put(name, "is required");
+                                    break;
+                                } else {
+                                    try {
+                                        Double.valueOf(value);
+                                    } catch (NumberFormatException e) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.String.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                    requestHeaderErrors.put(name, "is required");
+                                    break;
+                                }
+                            }
+                        } else if (TypeEnum.Time.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                    requestHeaderErrors.put(name, "is required");
+                                    break;
+                                } else {
+                                    try {
+                                        DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.Date.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                    requestHeaderErrors.put(name, "is required");
+                                    break;
+                                } else {
+                                    try {
+                                        DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                    requestHeaderErrors.put(name, "is required");
+                                    break;
+                                } else {
+                                    try {
+                                        HTTP_DATE_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                List<String> enumItems = enumItemDictionary.get(enumId);
+                                if (!enumItems.contains(value)) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        requestHeaderErrors.put(name, "is required");
+                    }
+                }
+            } else {
+                if (!TypeEnum.List.getLiteral().equals(type)) {
+                    if (requestHeaderDictionary.get(name) != null && !requestHeaderDictionary.get(name).isEmpty()) {
+                        if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                            } else {
+                                if (!"true".equals(value) || !"false".equals(value)) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.Long.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                            } else {
+                                try {
+                                    Long.valueOf(value);
+                                } catch (NumberFormatException e) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.Double.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                            } else {
+                                try {
+                                    Double.valueOf(value);
+                                } catch (NumberFormatException e) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.String.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                            }
+                        } else if (TypeEnum.Time.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                            } else {
+                                try {
+                                    DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                                } catch (ParseException e) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.Date.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                            } else {
+                                try {
+                                    DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                                } catch (ParseException e) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            if (value == null || "".equals(value)) {
+                            } else {
+                                try {
+                                    HTTP_DATE_FORMAT.parse(value);
+                                } catch (ParseException e) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                }
+                            }
+                        } else if (TypeEnum.Enum.getLiteral().equals(type)) {
+                            String value = requestHeaderDictionary.get(name).get(0);
+                            List<String> enumItems = enumItemDictionary.get(enumId);
+                            if (!enumItems.contains(value)) {
+                                requestHeaderErrors.put(name, "is invalid");
+                            }
+                        }
+                    }
+                } else {
+                    if (requestHeaderDictionary.get(name) != null && !requestHeaderDictionary.get(name).isEmpty()) {
+                        if (TypeEnum.Boolean.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                } else {
+                                    if (!"true".equals(value) || !"false".equals(value)) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.Long.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                } else {
+                                    try {
+                                        Long.valueOf(value);
+                                    } catch (NumberFormatException e) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.Double.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                } else {
+                                    try {
+                                        Double.valueOf(value);
+                                    } catch (NumberFormatException e) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.String.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                }
+                            }
+                        } else if (TypeEnum.Time.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                } else {
+                                    try {
+                                        DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.Date.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                } else {
+                                    try {
+                                        DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                if (value == null || "".equals(value)) {
+                                } else {
+                                    try {
+                                        HTTP_DATE_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        requestHeaderErrors.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
+                            for (String value : requestHeaderDictionary.get(name)) {
+                                List<String> enumItems = enumItemDictionary.get(enumId);
+                                if (!enumItems.contains(value)) {
+                                    requestHeaderErrors.put(name, "is invalid");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // endregion
+
+        // region Request Body Validation
+        Map<String, String> requestBodyErrors = new HashMap<>();
+        if (method.equals(HttpMethod.PUT.name()) || method.equals(HttpMethod.POST.name())) {
+            String contentType = (String) restRecord.get(Jdbc.Rest.REQUEST_CONTENT_TYPE);
+            if (req.getContentType() == null || "".equals(req.getContentType())) {
+                return null;
+            }
+            if (!contentType.equals(req.getContentType())) {
+                return null;
+            }
+            if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)) {
+                List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", requestBodyRecord.get(Jdbc.Json.JSON_ID));
+                for (Map<String, Object> jsonField : jsonFields) {
+                }
+            } else if (contentType.equals(MediaType.MULTIPART_FORM_DATA_VALUE)) {
+                List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", requestBodyRecord.get(Jdbc.Json.JSON_ID));
+            }
+        }
+        // endregion
 
         return null;
     }

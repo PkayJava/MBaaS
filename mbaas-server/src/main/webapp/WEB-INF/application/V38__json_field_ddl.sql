@@ -4,6 +4,7 @@ CREATE TABLE json_field (
   json_id       VARCHAR(100) NOT NULL,
   name          VARCHAR(100) NOT NULL,
   description   VARCHAR(255) NOT NULL,
+  required      BIT(1)       NOT NULL,
   type          VARCHAR(255) NOT NULL,
   sub_type      VARCHAR(255),
   map_json_id   VARCHAR(100),

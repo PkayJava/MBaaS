@@ -12,6 +12,7 @@ import com.angkorteam.mbaas.server.wicket.*;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -42,6 +43,9 @@ public class BodyFieldCreatePage extends MasterPage {
     private String type;
     private DropDownChoice<String> typeField;
     private TextFeedbackPanel typeFeedback;
+
+    private boolean required = true;
+    private CheckBox requiredField;
 
     private List<String> subTypes = new ArrayList<>();
     private String subType;
@@ -83,6 +87,11 @@ public class BodyFieldCreatePage extends MasterPage {
         this.jsonName = (String) jsonRecord.get(Jdbc.Json.NAME);
         this.jsonNameLabel = new Label("jsonNameLabel", new PropertyModel<>(this, "jsonName"));
         this.form.add(jsonNameLabel);
+
+        this.required = true;
+        this.requiredField = new CheckBox("requiredField", new PropertyModel<>(this, "required"));
+        this.requiredField.setRequired(true);
+        this.form.add(this.requiredField);
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
@@ -185,11 +194,12 @@ public class BodyFieldCreatePage extends MasterPage {
         JdbcTemplate jdbcTemplate = application.getJdbcTemplate(getSession().getApplicationCode());
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
         jdbcInsert.withTableName(Jdbc.JSON_FIELD);
-        jdbcInsert.usingColumns(Jdbc.JsonField.JSON_ID, Jdbc.JsonField.JSON_FIELD_ID, Jdbc.JsonField.NAME, Jdbc.JsonField.DESCRIPTION, Jdbc.JsonField.TYPE, Jdbc.JsonField.SUB_TYPE, Jdbc.JsonField.MAP_JSON_ID, Jdbc.JsonField.ENUM_ID);
+        jdbcInsert.usingColumns(Jdbc.JsonField.JSON_ID, Jdbc.JsonField.REQUIRED, Jdbc.JsonField.JSON_FIELD_ID, Jdbc.JsonField.NAME, Jdbc.JsonField.DESCRIPTION, Jdbc.JsonField.TYPE, Jdbc.JsonField.SUB_TYPE, Jdbc.JsonField.MAP_JSON_ID, Jdbc.JsonField.ENUM_ID);
         Map<String, Object> fields = new HashMap<>();
         fields.put(Jdbc.JsonField.JSON_FIELD_ID, UUID.randomUUID().toString());
         fields.put(Jdbc.JsonField.JSON_ID, this.jsonId);
         fields.put(Jdbc.JsonField.NAME, this.name);
+        fields.put(Jdbc.JsonField.REQUIRED, this.required);
         fields.put(Jdbc.JsonField.DESCRIPTION, this.description);
         fields.put(Jdbc.JsonField.TYPE, this.type);
         fields.put(Jdbc.JsonField.SUB_TYPE, this.subType);

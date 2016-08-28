@@ -41,7 +41,7 @@
 
     <filter>
         <filter-name>multipartFilter</filter-name>
-        <filter-class>org.springframework.web.multipart.support.MultipartFilter</filter-class>
+        <filter-class>com.angkorteam.mbaas.server.spring.MultipartFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>multipartFilter</filter-name>
