@@ -19,6 +19,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class BodyFieldModifyPage extends MasterPage {
 
     private String jsonId;
     private String jsonFieldId;
+    private String contentType;
 
     private String jsonName;
     private Label jsonNameLabel;
@@ -91,6 +93,7 @@ public class BodyFieldModifyPage extends MasterPage {
         this.form = new Form<>("form");
         this.add(this.form);
 
+        this.contentType = (String) jsonRecord.get(Jdbc.Json.CONTENT_TYPE);
         this.jsonName = (String) jsonRecord.get(Jdbc.Json.NAME);
         this.jsonNameLabel = new Label("jsonNameLabel", new PropertyModel<>(this, "jsonName"));
         this.form.add(jsonNameLabel);
@@ -118,7 +121,10 @@ public class BodyFieldModifyPage extends MasterPage {
         this.types.clear();
         for (TypeEnum type : TypeEnum.values()) {
             if (type.isBodyType()) {
-                types.add(type.getLiteral());
+                if ((type == TypeEnum.Map && !this.contentType.equals(MediaType.APPLICATION_JSON_VALUE)) || (type == TypeEnum.File && !this.contentType.equals(MediaType.MULTIPART_FORM_DATA_VALUE))) {
+                } else {
+                    types.add(type.getLiteral());
+                }
             }
         }
         this.typeField = new DropDownChoice<>("typeField", new PropertyModel<>(this, "type"), new PropertyModel<>(this, "types"));

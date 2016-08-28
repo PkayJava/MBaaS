@@ -75,6 +75,7 @@ public class BodyModifyPage extends MasterPage {
         this.contentTypes.add(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
         this.contentType = (String) jsonRecord.get(Jdbc.Json.CONTENT_TYPE);
         this.contentTypeField = new DropDownChoice<>("contentTypeField", new PropertyModel<>(this, "contentType"), new PropertyModel<>(this, "contentTypes"));
+        this.contentTypeField.setEnabled(false);
         this.contentTypeField.setRequired(true);
         this.form.add(this.contentTypeField);
         this.contentTypeFeedback = new TextFeedbackPanel("contentTypeFeedback", this.contentTypeField);
