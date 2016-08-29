@@ -22,4 +22,5 @@ public class MultipartFilter extends org.springframework.web.multipart.support.M
     protected MultipartResolver lookupMultipartResolver(HttpServletRequest request) {
         return this.resolver;
     }
+
 }

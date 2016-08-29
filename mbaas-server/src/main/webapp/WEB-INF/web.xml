@@ -27,6 +27,15 @@
     </session-config>
 
     <filter>
+        <filter-name>Cache Filter</filter-name>
+        <filter-class>com.angkorteam.mbaas.server.spring.CacheFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>Cache Filter</filter-name>
+        <servlet-name>MBaaS API</servlet-name>
+    </filter-mapping>
+
+    <filter>
         <filter-name>MBaaS Web</filter-name>
         <filter-class>org.apache.wicket.protocol.ws.javax.JavaxWebSocketFilter</filter-class>
         <init-param>

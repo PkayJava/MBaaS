@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.server.wicket.Application;
 import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
 import com.google.gson.Gson;
 import org.apache.wicket.model.IModel;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -90,11 +91,12 @@ public class HttpHeaderChoiceProvider extends MultipleChoiceProvider<Map<String,
 
     @Override
     public Map<String, Object> getObject(String id, IModel<? extends List<? extends Map<String, Object>>> choices) {
-        for (Map<String, Object> choice : choices.getObject()) {
-            if (choice.get(Jdbc.HttpHeader.HTTP_HEADER_ID).equals(id)) {
-                return choice;
-            }
+        Application application = ApplicationUtils.getApplication();
+        JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
+        try {
+            return jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.HTTP_HEADER + " WHERE " + Jdbc.HttpHeader.HTTP_HEADER_ID + " = ?", id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
-        return null;
     }
 }
