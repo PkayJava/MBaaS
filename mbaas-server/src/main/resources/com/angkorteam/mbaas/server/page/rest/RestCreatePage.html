@@ -33,17 +33,25 @@
                 </div>
                 <div class="clearfix"></div>
 
-                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="form-group col-xl-3 col-lg-3 col-md-3 col-sm-3 col-xs-3">
                     <label wicket:for="requestContentTypeField">Request Content Type</label>
                     <select wicket:id="requestContentTypeField" class="form-control"/>
                     <span wicket:id="requestContentTypeFeedback" class="help-block"/>
                 </div>
-                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="form-group col-xl-3 col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                    <label>Request Content Type</label>
+                    <div>
+                        <label>
+                            <input type="checkbox" wicket:id="requestBodyRequiredField"/> is required ?
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-xl-3 col-lg-3 col-md-3 col-sm-3 col-xs-3">
                     <label wicket:for="requestBodyTypeField">Request Body Type</label>
                     <select wicket:id="requestBodyTypeField" class="form-control"/>
                     <span wicket:id="requestBodyTypeFeedback" class="help-block"/>
                 </div>
-                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="form-group col-xl-3 col-lg-3 col-md-3 col-sm-3 col-xs-3">
                     <label wicket:for="requestBodySubTypeField">Request Body SubType</label>
                     <select wicket:id="requestBodySubTypeField" class="form-control"/>
                     <span wicket:id="requestBodySubTypeFeedback" class="help-block"/>
@@ -86,17 +94,25 @@
                 </div>
                 <div class="clearfix"></div>
 
-                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="form-group col-xl-3 col-lg-3 col-md-3 col-sm-3 col-xs-3">
                     <label wicket:for="responseContentTypeField">Response Content Type</label>
                     <select wicket:id="responseContentTypeField" class="form-control"/>
                     <span wicket:id="responseContentTypeFeedback" class="help-block"/>
                 </div>
-                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="form-group col-xl-3 col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                    <label>Response Content Type</label>
+                    <div>
+                        <label>
+                            <input type="checkbox" wicket:id="responseBodyRequiredField"/> is required ?
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-xl-3 col-lg-3 col-md-3 col-sm-3 col-xs-3">
                     <label wicket:for="responseBodyTypeField">Response Body Type</label>
                     <select wicket:id="responseBodyTypeField" class="form-control"/>
                     <span wicket:id="responseBodyTypeFeedback" class="help-block"/>
                 </div>
-                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <div class="form-group col-xl-3 col-lg-3 col-md-3 col-sm-3 col-xs-3">
                     <label wicket:for="responseBodySubTypeField">Response Body SubType</label>
                     <select wicket:id="responseBodySubTypeField" class="form-control"/>
                     <span wicket:id="responseBodySubTypeFeedback" class="help-block"/>

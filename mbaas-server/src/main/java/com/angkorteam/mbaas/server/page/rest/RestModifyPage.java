@@ -24,6 +24,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
@@ -66,6 +67,9 @@ public class RestModifyPage extends MasterPage {
     private DropDownChoice<String> requestContentTypeField;
     private TextFeedbackPanel requestContentTypeFeedback;
 
+    private boolean requestBodyRequired;
+    private CheckBox requestBodyRequiredField;
+
     private List<String> requestBodyTypes;
     private String requestBodyType;
     private DropDownChoice<String> requestBodyTypeField;
@@ -105,6 +109,9 @@ public class RestModifyPage extends MasterPage {
     private String responseContentType;
     private DropDownChoice<String> responseContentTypeField;
     private TextFeedbackPanel responseContentTypeFeedback;
+
+    private boolean responseBodyRequired;
+    private CheckBox responseBodyRequiredField;
 
     private List<String> responseBodyTypes;
     private String responseBodyType;
@@ -199,6 +206,10 @@ public class RestModifyPage extends MasterPage {
         this.requestContentTypeFeedback = new TextFeedbackPanel("requestContentTypeFeedback", this.requestContentTypeField);
         this.form.add(this.requestContentTypeFeedback);
 
+        this.requestBodyRequired = (Boolean) restRecord.get(Jdbc.Rest.RESPONSE_BODY_REQUIRED);
+        this.requestBodyRequiredField = new CheckBox("requestBodyRequiredField", new PropertyModel<>(this, "requestBodyRequired"));
+        this.form.add(this.requestBodyRequiredField);
+
         this.requestBodyTypes = new ArrayList<>();
         this.requestBodyTypeField = new DropDownChoice<>("requestBodyTypeField", new PropertyModel<>(this, "requestBodyType"), new PropertyModel<>(this, "requestBodyTypes"));
         this.requestBodyTypeField.setOutputMarkupId(true);
@@ -292,6 +303,10 @@ public class RestModifyPage extends MasterPage {
         this.form.add(this.responseContentTypeField);
         this.responseContentTypeFeedback = new TextFeedbackPanel("responseContentTypeFeedback", this.responseContentTypeField);
         this.form.add(this.responseContentTypeFeedback);
+
+        this.responseBodyRequired = (Boolean) restRecord.get(Jdbc.Rest.RESPONSE_BODY_REQUIRED);
+        this.responseBodyRequiredField = new CheckBox("responseBodyRequiredField", new PropertyModel<>(this, "responseBodyRequired"));
+        this.form.add(this.responseBodyRequiredField);
 
         this.responseBodyTypes = new ArrayList<>();
         this.responseBodyType = (String) restRecord.get(Jdbc.Rest.RESPONSE_BODY_TYPE);
@@ -410,7 +425,8 @@ public class RestModifyPage extends MasterPage {
         fields.put(Jdbc.Rest.SECURITY, SecurityEnum.Granted.getLiteral());
         fields.put(Jdbc.Rest.STAGE_SCRIPT, this.script);
         fields.put(Jdbc.Rest.MODIFIED, true);
-
+        fields.put(Jdbc.Rest.REQUEST_BODY_REQUIRED, this.requestBodyRequired);
+        fields.put(Jdbc.Rest.RESPONSE_BODY_REQUIRED, this.responseBodyRequired);
         fields.put(Jdbc.Rest.REQUEST_CONTENT_TYPE, this.requestContentType);
         fields.put(Jdbc.Rest.REQUEST_BODY_TYPE, this.requestBodyType);
         fields.put(Jdbc.Rest.REQUEST_BODY_SUB_TYPE, this.requestBodySubType);

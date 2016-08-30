@@ -1951,6 +1951,8 @@ public class JavascriptController {
                     requestBodyErrors.put("requestBody", "is required");
                 }
                 // endregion
+            } else if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
+                String type = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_TYPE);
             }
         }
         // endregion

@@ -506,11 +506,13 @@ public class Jdbc {
         public static final String DATE_CREATED = "date_created";
         public static final String SECURITY = "security";
         public static final String REQUEST_CONTENT_TYPE = "request_content_type";
+        public static final String REQUEST_BODY_REQUIRED = "request_body_required";
         public static final String REQUEST_BODY_TYPE = "request_body_type";
         public static final String REQUEST_BODY_SUB_TYPE = "request_body_sub_type";
         public static final String REQUEST_BODY_ENUM_ID = "request_body_" + Enum.ENUM_ID;
         public static final String REQUEST_BODY_MAP_JSON_ID = "request_body_map_" + Json.JSON_ID;
         public static final String RESPONSE_CONTENT_TYPE = "response_content_type";
+        public static final String RESPONSE_BODY_REQUIRED = "response_body_required";
         public static final String RESPONSE_BODY_TYPE = "response_body_type";
         public static final String RESPONSE_BODY_SUB_TYPE = "response_body_sub_type";
         public static final String RESPONSE_BODY_ENUM_ID = "response_body_" + Enum.ENUM_ID;

@@ -23,6 +23,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
@@ -61,6 +62,9 @@ public class RestCreatePage extends MasterPage {
     private String requestContentType;
     private DropDownChoice<String> requestContentTypeField;
     private TextFeedbackPanel requestContentTypeFeedback;
+
+    private boolean requestBodyRequired;
+    private CheckBox requestBodyRequiredField;
 
     private List<String> requestBodyTypes;
     private String requestBodyType;
@@ -101,6 +105,9 @@ public class RestCreatePage extends MasterPage {
     private String responseContentType;
     private DropDownChoice<String> responseContentTypeField;
     private TextFeedbackPanel responseContentTypeFeedback;
+
+    private boolean responseBodyRequired;
+    private CheckBox responseBodyRequiredField;
 
     private List<String> responseBodyTypes;
     private String responseBodyType;
@@ -185,6 +192,10 @@ public class RestCreatePage extends MasterPage {
         this.requestContentTypeFeedback = new TextFeedbackPanel("requestContentTypeFeedback", this.requestContentTypeField);
         this.form.add(this.requestContentTypeFeedback);
 
+        this.requestBodyRequired = true;
+        this.requestBodyRequiredField = new CheckBox("requestBodyRequiredField", new PropertyModel<>(this, "requestBodyRequired"));
+        this.form.add(this.requestBodyRequiredField);
+
         this.requestBodyTypes = new ArrayList<>();
         this.requestBodyTypeField = new DropDownChoice<>("requestBodyTypeField", new PropertyModel<>(this, "requestBodyType"), new PropertyModel<>(this, "requestBodyTypes"));
         this.requestBodyTypeField.setOutputMarkupId(true);
@@ -247,6 +258,10 @@ public class RestCreatePage extends MasterPage {
         this.form.add(this.responseContentTypeField);
         this.responseContentTypeFeedback = new TextFeedbackPanel("responseContentTypeFeedback", this.responseContentTypeField);
         this.form.add(this.responseContentTypeFeedback);
+
+        this.responseBodyRequired = true;
+        this.responseBodyRequiredField = new CheckBox("responseBodyRequiredField", new PropertyModel<>(this, "responseBodyRequired"));
+        this.form.add(this.responseBodyRequiredField);
 
         this.responseBodyTypes = new ArrayList<>();
         this.responseBodyTypeField = new DropDownChoice<>("responseBodyTypeField", new PropertyModel<>(this, "responseBodyType"), new PropertyModel<>(this, "responseBodyTypes"));
@@ -324,15 +339,17 @@ public class RestCreatePage extends MasterPage {
                 Jdbc.Rest.MODIFIED,
                 Jdbc.Rest.SECURITY,
                 Jdbc.Rest.STAGE_SCRIPT,
+                Jdbc.Rest.REQUEST_CONTENT_TYPE,
+                Jdbc.Rest.REQUEST_BODY_REQUIRED,
                 Jdbc.Rest.REQUEST_BODY_ENUM_ID,
                 Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID,
                 Jdbc.Rest.REQUEST_BODY_SUB_TYPE,
                 Jdbc.Rest.REQUEST_BODY_TYPE,
-                Jdbc.Rest.REQUEST_CONTENT_TYPE,
                 Jdbc.Rest.RESPONSE_BODY_ENUM_ID,
                 Jdbc.Rest.RESPONSE_BODY_MAP_JSON_ID,
                 Jdbc.Rest.RESPONSE_BODY_SUB_TYPE,
                 Jdbc.Rest.RESPONSE_BODY_TYPE,
+                Jdbc.Rest.RESPONSE_BODY_REQUIRED,
                 Jdbc.Rest.RESPONSE_CONTENT_TYPE);
         String restId = UUID.randomUUID().toString();
         Map<String, Object> fields = new HashMap<>();
@@ -341,6 +358,8 @@ public class RestCreatePage extends MasterPage {
         fields.put(Jdbc.Rest.DESCRIPTION, this.description);
         fields.put(Jdbc.Rest.METHOD, this.method);
         fields.put(Jdbc.Rest.NAME, this.name);
+        fields.put(Jdbc.Rest.REQUEST_BODY_REQUIRED, this.requestBodyRequired);
+        fields.put(Jdbc.Rest.RESPONSE_BODY_REQUIRED, this.responseBodyRequired);
         if (!"/".equals(this.requestPath)) {
             if (!this.requestPath.startsWith("/")) {
                 this.requestPath = "/" + this.requestPath;
