@@ -13,7 +13,7 @@ import com.angkorteam.mbaas.server.nashorn.JavaFilter;
 import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonSyntaxException;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -45,9 +45,7 @@ import javax.script.*;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -64,9 +62,6 @@ public class JavascriptController {
 
     @Autowired
     private ServletContext servletContext;
-
-    private TypeToken<Map<String, Object>> typeToken = new TypeToken<Map<String, Object>>() {
-    };
 
     @Autowired
     private Gson gson;
@@ -356,7 +351,7 @@ public class JavascriptController {
         }
         // endregion
 
-        // region requestBodyJson, requestBodyFormDictionary, requestBodyFormDataDictionary, requestBodyFormFileDictionary
+        // region requestBodyJsonDictionary, requestBodyFormDictionary, requestBodyFormDataDictionary, requestBodyFormFileDictionary
         Map<String, List<String>> requestBodyFormDictionary = new HashMap<>();
         if (MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(req.getContentType())) {
             String bodyString = "";
@@ -406,11 +401,11 @@ public class JavascriptController {
             }
         }
 
-        Map<String, Object> requestBodyJson = new HashMap<>();
-        if (MediaType.APPLICATION_JSON_VALUE.equals(req.getContentType()) && requestBody != null && requestBody.length > 0) {
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(requestBody);
-            InputStreamReader reader = new InputStreamReader(inputStream);
-            requestBodyJson = this.gson.fromJson(reader, typeToken.getType());
+        String json = "";
+        if (MediaType.APPLICATION_JSON_VALUE.equals(req.getContentType()) && !"".equals(json)) {
+            if (requestBody != null && requestBody.length > 0) {
+                json = new String(requestBody, "UTF-8");
+            }
         }
         // endregion
 
@@ -1156,6 +1151,12 @@ public class JavascriptController {
             }
             if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)) {
                 // region application/x-www-form-urlencoded
+                Boolean bodyRequired = (Boolean) restRecord.get(Jdbc.Rest.REQUEST_BODY_REQUIRED);
+                if (bodyRequired) {
+                    if (requestBodyFormDictionary == null || requestBodyFormDictionary.isEmpty()) {
+                        requestBodyErrors.put("requestBody", "is required");
+                    }
+                }
                 List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", requestBodyRecord.get(Jdbc.Json.JSON_ID));
                 for (Map<String, Object> jsonField : jsonFields) {
                     String name = (String) jsonField.get(Jdbc.JsonField.NAME);
@@ -1519,6 +1520,12 @@ public class JavascriptController {
                 // endregion
             } else if (contentType.equals(MediaType.MULTIPART_FORM_DATA_VALUE)) {
                 // region multipart/form-data
+                Boolean bodyRequired = (Boolean) restRecord.get(Jdbc.Rest.REQUEST_BODY_REQUIRED);
+                if (bodyRequired) {
+                    if ((requestBodyFormDataDictionary == null || requestBodyFormDataDictionary.isEmpty()) && (requestBodyFormFileDictionary == null || requestBodyFormFileDictionary.isEmpty())) {
+                        requestBodyErrors.put("requestBody", "is required");
+                    }
+                }
                 List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", requestBodyRecord.get(Jdbc.Json.JSON_ID));
                 for (Map<String, Object> jsonField : jsonFields) {
                     String name = (String) jsonField.get(Jdbc.JsonField.NAME);
@@ -1947,12 +1954,64 @@ public class JavascriptController {
                 // endregion
             } else if (contentType.equals(MediaType.APPLICATION_OCTET_STREAM_VALUE)) {
                 // region application/octet-stream
-                if (requestBody == null || requestBody.length == 0) {
-                    requestBodyErrors.put("requestBody", "is required");
+                Boolean bodyRequired = (Boolean) restRecord.get(Jdbc.Rest.REQUEST_BODY_REQUIRED);
+                if (bodyRequired) {
+                    if (requestBody == null || requestBody.length == 0) {
+                        requestBodyErrors.put("requestBody", "is required");
+                    }
                 }
                 // endregion
             } else if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
                 String type = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_TYPE);
+                if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                    try {
+                        gson.fromJson(json, Boolean.class);
+                    } catch (JsonSyntaxException e) {
+                        requestBodyErrors.put("requestBody", "is invalid");
+                    }
+                } else if (TypeEnum.Long.getLiteral().equals(type)) {
+                    try {
+                        gson.fromJson(json, Long.class);
+                    } catch (JsonSyntaxException e) {
+                        requestBodyErrors.put("requestBody", "is invalid");
+                    }
+                } else if (TypeEnum.Double.getLiteral().equals(type)) {
+                    try {
+                        gson.fromJson(json, Double.class);
+                    } catch (JsonSyntaxException e) {
+                        requestBodyErrors.put("requestBody", "is invalid");
+                    }
+                } else if (TypeEnum.String.getLiteral().equals(type)) {
+                    try {
+                        gson.fromJson(json, String.class);
+                    } catch (JsonSyntaxException e) {
+                        requestBodyErrors.put("requestBody", "is invalid");
+                    }
+                } else if (TypeEnum.Date.getLiteral().equals(type)) {
+                    try {
+                        String value = gson.fromJson(json, String.class);
+                    } catch (JsonSyntaxException e) {
+                        requestBodyErrors.put("requestBody", "is invalid");
+                    }
+                } else if (TypeEnum.Time.getLiteral().equals(type)) {
+                    try {
+                        String value = gson.fromJson(json, String.class);
+                    } catch (JsonSyntaxException e) {
+                        requestBodyErrors.put("requestBody", "is invalid");
+                    }
+                } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
+                    try {
+                        String value = gson.fromJson(json, String.class);
+                    } catch (JsonSyntaxException e) {
+                        requestBodyErrors.put("requestBody", "is invalid");
+                    }
+                } else if (TypeEnum.Enum.getLiteral().equals(type)) {
+                    // find enum type
+                } else if (TypeEnum.Map.getLiteral().equals(type)) {
+                    // find map type
+                } else if (TypeEnum.List.getLiteral().equals(type)) {
+                    // find subtype and repeat subtype checking again
+                }
             }
         }
         // endregion
