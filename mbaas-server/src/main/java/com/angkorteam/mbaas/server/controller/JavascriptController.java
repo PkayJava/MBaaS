@@ -1963,54 +1963,94 @@ public class JavascriptController {
                 // endregion
             } else if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
                 String type = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_TYPE);
-                if (TypeEnum.Boolean.getLiteral().equals(type)) {
-                    try {
-                        gson.fromJson(json, Boolean.class);
-                    } catch (JsonSyntaxException e) {
-                        requestBodyErrors.put("requestBody", "is invalid");
+                String enumId = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_ENUM_ID);
+                Boolean bodyRequired = (Boolean) restRecord.get(Jdbc.Rest.REQUEST_BODY_REQUIRED);
+                if (bodyRequired && (json == null || "".equals(json))) {
+                    requestBodyErrors.put("requestBody", "is required");
+                }
+                if (json != null && !"".equals(json)) {
+                    if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                        try {
+                            gson.fromJson(json, Boolean.class);
+                        } catch (JsonSyntaxException e) {
+                            requestBodyErrors.put("requestBody", "is invalid");
+                        }
+                    } else if (TypeEnum.Long.getLiteral().equals(type)) {
+                        try {
+                            gson.fromJson(json, Long.class);
+                        } catch (JsonSyntaxException e) {
+                            requestBodyErrors.put("requestBody", "is invalid");
+                        }
+                    } else if (TypeEnum.Double.getLiteral().equals(type)) {
+                        try {
+                            gson.fromJson(json, Double.class);
+                        } catch (JsonSyntaxException e) {
+                            requestBodyErrors.put("requestBody", "is invalid");
+                        }
+                    } else if (TypeEnum.String.getLiteral().equals(type)) {
+                        try {
+                            gson.fromJson(json, String.class);
+                        } catch (JsonSyntaxException e) {
+                            requestBodyErrors.put("requestBody", "is invalid");
+                        }
+                    } else if (TypeEnum.Date.getLiteral().equals(type)) {
+                        try {
+                            String value = gson.fromJson(json, String.class);
+                            DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                        } catch (JsonSyntaxException | ParseException e) {
+                            requestBodyErrors.put("requestBody", "is invalid");
+                        }
+                    } else if (TypeEnum.Time.getLiteral().equals(type)) {
+                        try {
+                            String value = gson.fromJson(json, String.class);
+                            DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                        } catch (JsonSyntaxException | ParseException e) {
+                            requestBodyErrors.put("requestBody", "is invalid");
+                        }
+                    } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
+                        try {
+                            String value = gson.fromJson(json, String.class);
+                            DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                        } catch (JsonSyntaxException | ParseException e) {
+                            requestBodyErrors.put("requestBody", "is invalid");
+                        }
+                    } else if (TypeEnum.Enum.getLiteral().equals(type)) {
+                        Map<String, Object> enumRecord = enumDictionary.get(enumId);
+                        String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
+                        if (TypeEnum.Boolean.getLiteral().equals(enumType)) {
+                            try {
+                                Boolean value = gson.fromJson(json, Boolean.class);
+                            } catch (JsonSyntaxException e) {
+                                requestBodyErrors.put("requestBody", "is invalid");
+                            }
+                        } else if (TypeEnum.Long.getLiteral().equals(enumType)) {
+                            try {
+                                Long value = gson.fromJson(json, Long.class);
+                            } catch (JsonSyntaxException e) {
+                                requestBodyErrors.put("requestBody", "is invalid");
+                            }
+                        } else if (TypeEnum.Double.getLiteral().equals(enumType)) {
+                            try {
+                                Double value = gson.fromJson(json, Double.class);
+                            } catch (JsonSyntaxException e) {
+                                requestBodyErrors.put("requestBody", "is invalid");
+                            }
+                        } else if (TypeEnum.Character.getLiteral().equals(enumType)
+                                || TypeEnum.String.getLiteral().equals(enumType)
+                                || TypeEnum.Time.getLiteral().equals(enumType)
+                                || TypeEnum.Date.getLiteral().equals(enumType)
+                                || TypeEnum.DateTime.getLiteral().equals(enumType)) {
+                            try {
+                                String value = gson.fromJson(json, String.class);
+                            } catch (JsonSyntaxException e) {
+                                requestBodyErrors.put("requestBody", "is invalid");
+                            }
+                        }
+                    } else if (TypeEnum.Map.getLiteral().equals(type)) {
+                        // find map type
+                    } else if (TypeEnum.List.getLiteral().equals(type)) {
+                        // find subtype and repeat subtype checking again
                     }
-                } else if (TypeEnum.Long.getLiteral().equals(type)) {
-                    try {
-                        gson.fromJson(json, Long.class);
-                    } catch (JsonSyntaxException e) {
-                        requestBodyErrors.put("requestBody", "is invalid");
-                    }
-                } else if (TypeEnum.Double.getLiteral().equals(type)) {
-                    try {
-                        gson.fromJson(json, Double.class);
-                    } catch (JsonSyntaxException e) {
-                        requestBodyErrors.put("requestBody", "is invalid");
-                    }
-                } else if (TypeEnum.String.getLiteral().equals(type)) {
-                    try {
-                        gson.fromJson(json, String.class);
-                    } catch (JsonSyntaxException e) {
-                        requestBodyErrors.put("requestBody", "is invalid");
-                    }
-                } else if (TypeEnum.Date.getLiteral().equals(type)) {
-                    try {
-                        String value = gson.fromJson(json, String.class);
-                    } catch (JsonSyntaxException e) {
-                        requestBodyErrors.put("requestBody", "is invalid");
-                    }
-                } else if (TypeEnum.Time.getLiteral().equals(type)) {
-                    try {
-                        String value = gson.fromJson(json, String.class);
-                    } catch (JsonSyntaxException e) {
-                        requestBodyErrors.put("requestBody", "is invalid");
-                    }
-                } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
-                    try {
-                        String value = gson.fromJson(json, String.class);
-                    } catch (JsonSyntaxException e) {
-                        requestBodyErrors.put("requestBody", "is invalid");
-                    }
-                } else if (TypeEnum.Enum.getLiteral().equals(type)) {
-                    // find enum type
-                } else if (TypeEnum.Map.getLiteral().equals(type)) {
-                    // find map type
-                } else if (TypeEnum.List.getLiteral().equals(type)) {
-                    // find subtype and repeat subtype checking again
                 }
             }
         }
