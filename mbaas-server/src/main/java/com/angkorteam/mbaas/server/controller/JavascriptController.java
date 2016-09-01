@@ -14,6 +14,8 @@ import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -46,6 +48,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,6 +68,12 @@ public class JavascriptController {
 
     @Autowired
     private Gson gson;
+
+    private Type mapType = new TypeToken<Map<String, Object>>() {
+    }.getType();
+
+    private Type listType = new TypeToken<List<Object>>() {
+    }.getType();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(com.angkorteam.mbaas.server.MBaaS.class);
 
@@ -1140,7 +1149,7 @@ public class JavascriptController {
         // endregion
 
         // region Validation Request Body
-        Map<String, String> requestBodyErrors = new HashMap<>();
+        Map<String, Object> requestBodyErrors = new HashMap<>();
         if (method.equals(HttpMethod.PUT.name()) || method.equals(HttpMethod.POST.name())) {
             String contentType = (String) restRecord.get(Jdbc.Rest.REQUEST_CONTENT_TYPE);
             if (req.getContentType() == null || "".equals(req.getContentType())) {
@@ -2017,21 +2026,31 @@ public class JavascriptController {
                     } else if (TypeEnum.Enum.getLiteral().equals(type)) {
                         Map<String, Object> enumRecord = enumDictionary.get(enumId);
                         String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
+                        List<String> enumValues = enumItemDictionary.get(enumId);
                         if (TypeEnum.Boolean.getLiteral().equals(enumType)) {
                             try {
-                                Boolean value = gson.fromJson(json, Boolean.class);
+                                String value = String.valueOf(gson.fromJson(json, Boolean.class));
+                                if (!enumValues.contains(value)) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
                             } catch (JsonSyntaxException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
                         } else if (TypeEnum.Long.getLiteral().equals(enumType)) {
                             try {
-                                Long value = gson.fromJson(json, Long.class);
+                                String value = String.valueOf(gson.fromJson(json, Long.class));
+                                if (!enumValues.contains(value)) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
                             } catch (JsonSyntaxException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
                         } else if (TypeEnum.Double.getLiteral().equals(enumType)) {
                             try {
-                                Double value = gson.fromJson(json, Double.class);
+                                String value = String.valueOf(gson.fromJson(json, Double.class));
+                                if (!enumValues.contains(value)) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
                             } catch (JsonSyntaxException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
@@ -2042,11 +2061,20 @@ public class JavascriptController {
                                 || TypeEnum.DateTime.getLiteral().equals(enumType)) {
                             try {
                                 String value = gson.fromJson(json, String.class);
+                                if (!enumValues.contains(value)) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
                             } catch (JsonSyntaxException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
                         }
                     } else if (TypeEnum.Map.getLiteral().equals(type)) {
+                        String jsonId = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID);
+                        List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonId);
+                        Map<String, Object> jsonObject = gson.fromJson(json, mapType);
+                        for (Map<String, Object> jsonField : jsonFields) {
+                            validateJsonField(requestBodyErrors, jdbcTemplate, jsonObject, jsonField);
+                        }
                         // find map type
                     } else if (TypeEnum.List.getLiteral().equals(type)) {
                         // find subtype and repeat subtype checking again
@@ -2059,6 +2087,70 @@ public class JavascriptController {
         return null;
     }
 
+    private void validateJsonField(Map<String, Object> errors, JdbcTemplate jdbcTemplate, Map<String, Object> parentJson, Map<String, Object> jsonField) {
+        String type = (String) jsonField.get(Jdbc.JsonField.TYPE);
+        String name = (String) jsonField.get(Jdbc.JsonField.NAME);
+        String enumId = (String) jsonField.get(Jdbc.JsonField.ENUM_ID);
+        String jsonId = (String) jsonField.get(Jdbc.JsonField.MAP_JSON_ID);
+        String subType = (String) jsonField.get(Jdbc.JsonField.SUB_TYPE);
+        Boolean required = (Boolean) jsonField.get(Jdbc.JsonField.REQUIRED);
+        if (required) {
+            if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                Boolean value = (Boolean) parentJson.get(name);
+                if (value == null) {
+                    errors.put(name, "is required");
+                }
+            } else if (TypeEnum.Long.getLiteral().equals(type)) {
+                Long value = (Long) parentJson.get(name);
+                if (value == null) {
+                    errors.put(name, "is required");
+                }
+            } else if (TypeEnum.Double.getLiteral().equals(type)) {
+                Double value = (Double) parentJson.get(name);
+                if (value == null) {
+                    errors.put(name, "is required");
+                }
+            } else if (TypeEnum.Time.getLiteral().equals(type)) {
+                String value = (String) parentJson.get(name);
+                if (value == null || "".equals(value)) {
+                    errors.put(name, "is required");
+                }
+            } else if (TypeEnum.Date.getLiteral().equals(type)) {
+                String value = (String) parentJson.get(name);
+                if (value == null || "".equals(value)) {
+                    errors.put(name, "is required");
+                }
+            } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
+                String value = (String) parentJson.get(name);
+                if (value == null || "".equals(value)) {
+                    errors.put(name, "is required");
+                }
+            } else if (TypeEnum.Enum.getLiteral().equals(type)) {
+                String value = (String) parentJson.get(name);
+                if (value == null || "".equals(value)) {
+                    errors.put(name, "is required");
+                }
+            } else if (TypeEnum.Map.getLiteral().equals(type)) {
+                Map<String, Object> childJson = (Map<String, Object>) parentJson.get(name);
+            } else if (TypeEnum.List.getLiteral().equals(type)) {
+                List<Object> values = (List<Object>) parentJson.get(name);
+                for (Object value : values) {
+                    
+                }
+            }
+        } else {
+
+        }
+    }
+
+    /**
+     * process to build enumId
+     *
+     * @param jdbcTemplate
+     * @param jsonIdList
+     * @param enumIdList
+     * @param jsonField
+     */
     private void processJsonField(JdbcTemplate jdbcTemplate, List<String> jsonIdList, List<String> enumIdList, Map<String, Object> jsonField) {
         if (jsonField.get(Jdbc.JsonField.ENUM_ID) != null && !"".equals(jsonField.get(Jdbc.JsonField.ENUM_ID))) {
             if (!enumIdList.contains((String) jsonField.get(Jdbc.JsonField.ENUM_ID))) {
