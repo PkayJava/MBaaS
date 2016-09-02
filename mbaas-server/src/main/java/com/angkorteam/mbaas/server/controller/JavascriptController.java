@@ -2073,7 +2073,7 @@ public class JavascriptController {
                         List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonId);
                         Map<String, Object> jsonObject = gson.fromJson(json, mapType);
                         for (Map<String, Object> jsonField : jsonFields) {
-                            validateJsonField(requestBodyErrors, jdbcTemplate, jsonObject, jsonField);
+                            validateJsonField(jdbcTemplate, requestBodyErrors, jsonObject, jsonField, enumItemDictionary);
                         }
                         // find map type
                     } else if (TypeEnum.List.getLiteral().equals(type)) {
@@ -2087,7 +2087,7 @@ public class JavascriptController {
         return null;
     }
 
-    private void validateJsonField(Map<String, Object> errors, JdbcTemplate jdbcTemplate, Map<String, Object> parentJson, Map<String, Object> jsonField) {
+    private void validateJsonField(JdbcTemplate jdbcTemplate, Map<String, Object> error, Map<String, Object> json, Map<String, Object> jsonField, Map<String, List<String>> enumItemDictionary) {
         String type = (String) jsonField.get(Jdbc.JsonField.TYPE);
         String name = (String) jsonField.get(Jdbc.JsonField.NAME);
         String enumId = (String) jsonField.get(Jdbc.JsonField.ENUM_ID);
@@ -2095,51 +2095,220 @@ public class JavascriptController {
         String subType = (String) jsonField.get(Jdbc.JsonField.SUB_TYPE);
         Boolean required = (Boolean) jsonField.get(Jdbc.JsonField.REQUIRED);
         if (required) {
+            // region required
             if (TypeEnum.Boolean.getLiteral().equals(type)) {
-                Boolean value = (Boolean) parentJson.get(name);
+                Boolean value = (Boolean) json.get(name);
                 if (value == null) {
-                    errors.put(name, "is required");
+                    error.put(name, "is required");
                 }
             } else if (TypeEnum.Long.getLiteral().equals(type)) {
-                Long value = (Long) parentJson.get(name);
+                Long value = (Long) json.get(name);
                 if (value == null) {
-                    errors.put(name, "is required");
+                    error.put(name, "is required");
                 }
             } else if (TypeEnum.Double.getLiteral().equals(type)) {
-                Double value = (Double) parentJson.get(name);
+                Double value = (Double) json.get(name);
                 if (value == null) {
-                    errors.put(name, "is required");
+                    error.put(name, "is required");
                 }
             } else if (TypeEnum.Time.getLiteral().equals(type)) {
-                String value = (String) parentJson.get(name);
+                String value = (String) json.get(name);
                 if (value == null || "".equals(value)) {
-                    errors.put(name, "is required");
+                    error.put(name, "is required");
                 }
             } else if (TypeEnum.Date.getLiteral().equals(type)) {
-                String value = (String) parentJson.get(name);
+                String value = (String) json.get(name);
                 if (value == null || "".equals(value)) {
-                    errors.put(name, "is required");
+                    error.put(name, "is required");
                 }
             } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
-                String value = (String) parentJson.get(name);
+                String value = (String) json.get(name);
                 if (value == null || "".equals(value)) {
-                    errors.put(name, "is required");
+                    error.put(name, "is required");
                 }
             } else if (TypeEnum.Enum.getLiteral().equals(type)) {
-                String value = (String) parentJson.get(name);
+                String value = (String) json.get(name);
                 if (value == null || "".equals(value)) {
-                    errors.put(name, "is required");
+                    error.put(name, "is required");
+                } else {
+                    List<String> enumItemValues = enumItemDictionary.get(enumId);
+                    if (!enumItemValues.contains(value)) {
+                        error.put(name, "is invalid");
+                    }
                 }
             } else if (TypeEnum.Map.getLiteral().equals(type)) {
-                Map<String, Object> childJson = (Map<String, Object>) parentJson.get(name);
+                Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
+                Map<String, Object> fieldError = new HashMap<>();
+                List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.JSON_ID));
+                for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                    validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                }
             } else if (TypeEnum.List.getLiteral().equals(type)) {
-                List<Object> values = (List<Object>) parentJson.get(name);
-                for (Object value : values) {
-                    
+                if (TypeEnum.Boolean.getLiteral().equals(subType)) {
+                    List<Boolean> values = (List<Boolean>) json.get(name);
+                    for (Boolean value : values) {
+                        if (value == null) {
+                            error.put(name, "is required");
+                            break;
+                        }
+                    }
+                } else if (TypeEnum.Long.getLiteral().equals(subType)) {
+                    List<Long> values = (List<Long>) json.get(name);
+                    for (Long value : values) {
+                        if (value == null) {
+                            error.put(name, "is required");
+                            break;
+                        }
+                    }
+                } else if (TypeEnum.Double.getLiteral().equals(subType)) {
+                    List<Double> values = (List<Double>) json.get(name);
+                    for (Double value : values) {
+                        if (value == null) {
+                            error.put(name, "is required");
+                            break;
+                        }
+                    }
+                } else if (TypeEnum.String.getLiteral().equals(subType)) {
+                    List<String> values = (List<String>) json.get(name);
+                    for (String value : values) {
+                        if (value == null || "".equals(value)) {
+                            error.put(name, "is required");
+                            break;
+                        }
+                    }
+                } else if (TypeEnum.Time.getLiteral().equals(subType)) {
+                    List<String> values = (List<String>) json.get(name);
+                    for (String value : values) {
+                        if (value == null || "".equals(value)) {
+                            error.put(name, "is required");
+                            break;
+                        }
+                    }
+                } else if (TypeEnum.Date.getLiteral().equals(subType)) {
+                    List<String> values = (List<String>) json.get(name);
+                    for (String value : values) {
+                        if (value == null || "".equals(value)) {
+                            error.put(name, "is required");
+                            break;
+                        }
+                    }
+                } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
+                    List<String> values = (List<String>) json.get(name);
+                    for (String value : values) {
+                        if (value == null || "".equals(value)) {
+                            error.put(name, "is required");
+                            break;
+                        }
+                    }
+                } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
+                    List<String> values = (List<String>) json.get(name);
+                    for (String value : values) {
+                        if (value == null || "".equals(value)) {
+                            error.put(name, "is required");
+                            break;
+                        } else {
+                            List<String> enumItemValues = enumItemDictionary.get(enumId);
+                            if (!enumItemValues.contains(value)) {
+                                error.put(name, "is invalid");
+                                break;
+                            }
+                        }
+                    }
+                } else if (TypeEnum.Map.getLiteral().equals(subType)) {
+                    Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
+                    Map<String, Object> fieldError = new HashMap<>();
+                    error.put(name, fieldError);
+                    List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.JSON_ID));
+                    for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                        validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                    }
                 }
             }
+            // endregion
         } else {
-
+            // region not required
+            if (TypeEnum.Time.getLiteral().equals(type)) {
+                String value = (String) json.get(name);
+                if (value == null || "".equals(value)) {
+                    error.put(name, "is required");
+                }
+            } else if (TypeEnum.Date.getLiteral().equals(type)) {
+                String value = (String) json.get(name);
+                if (value == null || "".equals(value)) {
+                    error.put(name, "is required");
+                }
+            } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
+                String value = (String) json.get(name);
+                if (value == null || "".equals(value)) {
+                    error.put(name, "is required");
+                }
+            } else if (TypeEnum.Enum.getLiteral().equals(type)) {
+                String value = (String) json.get(name);
+                if (value == null || "".equals(value)) {
+                    error.put(name, "is required");
+                } else {
+                    List<String> enumItemValues = enumItemDictionary.get(enumId);
+                    if (!enumItemValues.contains(value)) {
+                        error.put(name, "is invalid");
+                    }
+                }
+            } else if (TypeEnum.Map.getLiteral().equals(type)) {
+                Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
+                Map<String, Object> fieldError = new HashMap<>();
+                List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.JSON_ID));
+                for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                    validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                }
+            } else if (TypeEnum.List.getLiteral().equals(type)) {
+                if (TypeEnum.Time.getLiteral().equals(subType)) {
+                    List<String> values = (List<String>) json.get(name);
+                    for (String value : values) {
+                        if (value == null || "".equals(value)) {
+                            error.put(name, "is required");
+                            break;
+                        }
+                    }
+                } else if (TypeEnum.Date.getLiteral().equals(subType)) {
+                    List<String> values = (List<String>) json.get(name);
+                    for (String value : values) {
+                        if (value == null || "".equals(value)) {
+                            error.put(name, "is required");
+                            break;
+                        }
+                    }
+                } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
+                    List<String> values = (List<String>) json.get(name);
+                    for (String value : values) {
+                        if (value == null || "".equals(value)) {
+                            error.put(name, "is required");
+                            break;
+                        }
+                    }
+                } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
+                    List<String> values = (List<String>) json.get(name);
+                    for (String value : values) {
+                        if (value == null || "".equals(value)) {
+                            error.put(name, "is required");
+                            break;
+                        } else {
+                            List<String> enumItemValues = enumItemDictionary.get(enumId);
+                            if (!enumItemValues.contains(value)) {
+                                error.put(name, "is invalid");
+                                break;
+                            }
+                        }
+                    }
+                } else if (TypeEnum.Map.getLiteral().equals(subType)) {
+                    Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
+                    Map<String, Object> fieldError = new HashMap<>();
+                    error.put(name, fieldError);
+                    List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.JSON_ID));
+                    for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                        validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                    }
+                }
+            }
+            // endregion
         }
     }
 
