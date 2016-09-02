@@ -15,7 +15,6 @@ import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -2115,16 +2114,34 @@ public class JavascriptController {
                 String value = (String) json.get(name);
                 if (value == null || "".equals(value)) {
                     error.put(name, "is required");
+                } else {
+                    try {
+                        DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                    } catch (ParseException e) {
+                        error.put(name, "is invalid");
+                    }
                 }
             } else if (TypeEnum.Date.getLiteral().equals(type)) {
                 String value = (String) json.get(name);
                 if (value == null || "".equals(value)) {
                     error.put(name, "is required");
+                } else {
+                    try {
+                        DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                    } catch (ParseException e) {
+                        error.put(name, "is invalid");
+                    }
                 }
             } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
                 String value = (String) json.get(name);
                 if (value == null || "".equals(value)) {
                     error.put(name, "is required");
+                } else {
+                    try {
+                        DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                    } catch (ParseException e) {
+                        error.put(name, "is invalid");
+                    }
                 }
             } else if (TypeEnum.Enum.getLiteral().equals(type)) {
                 String value = (String) json.get(name);
@@ -2138,10 +2155,15 @@ public class JavascriptController {
                 }
             } else if (TypeEnum.Map.getLiteral().equals(type)) {
                 Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
-                Map<String, Object> fieldError = new HashMap<>();
-                List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.JSON_ID));
-                for (Map<String, Object> fieldJsonField : fieldJsonFields) {
-                    validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                if (fieldJson != null && !fieldJson.isEmpty()) {
+                    Map<String, Object> fieldError = new HashMap<>();
+                    error.put(name, fieldError);
+                    List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.JSON_ID));
+                    for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                        validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                    }
+                } else {
+                    error.put(name, "is required");
                 }
             } else if (TypeEnum.List.getLiteral().equals(type)) {
                 if (TypeEnum.Boolean.getLiteral().equals(subType)) {
@@ -2182,6 +2204,13 @@ public class JavascriptController {
                         if (value == null || "".equals(value)) {
                             error.put(name, "is required");
                             break;
+                        } else {
+                            try {
+                                DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                            } catch (ParseException e) {
+                                error.put(name, "is invalid");
+                                break;
+                            }
                         }
                     }
                 } else if (TypeEnum.Date.getLiteral().equals(subType)) {
@@ -2190,6 +2219,13 @@ public class JavascriptController {
                         if (value == null || "".equals(value)) {
                             error.put(name, "is required");
                             break;
+                        } else {
+                            try {
+                                DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                            } catch (ParseException e) {
+                                error.put(name, "is invalid");
+                                break;
+                            }
                         }
                     }
                 } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
@@ -2198,6 +2234,12 @@ public class JavascriptController {
                         if (value == null || "".equals(value)) {
                             error.put(name, "is required");
                             break;
+                        } else {
+                            try {
+                                DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                            } catch (ParseException e) {
+                                error.put(name, "is invalid");
+                            }
                         }
                     }
                 } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
@@ -2215,12 +2257,23 @@ public class JavascriptController {
                         }
                     }
                 } else if (TypeEnum.Map.getLiteral().equals(subType)) {
-                    Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
-                    Map<String, Object> fieldError = new HashMap<>();
-                    error.put(name, fieldError);
-                    List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.JSON_ID));
-                    for (Map<String, Object> fieldJsonField : fieldJsonFields) {
-                        validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                    List<Map<String, Object>> fieldJsons = (List<Map<String, Object>>) json.get(name);
+                    if (fieldJsons != null && !fieldJsons.isEmpty()) {
+                        for (Map<String, Object> fieldJson : fieldJsons) {
+                            if (fieldJson != null && !fieldJson.isEmpty()) {
+                                Map<String, Object> fieldError = new HashMap<>();
+                                error.put(name, fieldError);
+                                List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.JSON_ID));
+                                for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                                    validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                                }
+                            } else {
+                                error.put(name, "is required");
+                                break;
+                            }
+                        }
+                    } else {
+                        error.put(name, "is required");
                     }
                 }
             }
@@ -2229,24 +2282,34 @@ public class JavascriptController {
             // region not required
             if (TypeEnum.Time.getLiteral().equals(type)) {
                 String value = (String) json.get(name);
-                if (value == null || "".equals(value)) {
-                    error.put(name, "is required");
+                if (value != null) {
+                    try {
+                        DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                    } catch (ParseException e) {
+                        error.put(name, "is invalid");
+                    }
                 }
             } else if (TypeEnum.Date.getLiteral().equals(type)) {
                 String value = (String) json.get(name);
-                if (value == null || "".equals(value)) {
-                    error.put(name, "is required");
+                if (value != null) {
+                    try {
+                        DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                    } catch (ParseException e) {
+                        error.put(name, "is invalid");
+                    }
                 }
             } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
                 String value = (String) json.get(name);
-                if (value == null || "".equals(value)) {
-                    error.put(name, "is required");
+                if (value != null) {
+                    try {
+                        DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                    } catch (ParseException e) {
+                        error.put(name, "is invalid");
+                    }
                 }
             } else if (TypeEnum.Enum.getLiteral().equals(type)) {
                 String value = (String) json.get(name);
-                if (value == null || "".equals(value)) {
-                    error.put(name, "is required");
-                } else {
+                if (value != null && !"".equals(value)) {
                     List<String> enumItemValues = enumItemDictionary.get(enumId);
                     if (!enumItemValues.contains(value)) {
                         error.put(name, "is invalid");
@@ -2254,43 +2317,54 @@ public class JavascriptController {
                 }
             } else if (TypeEnum.Map.getLiteral().equals(type)) {
                 Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
-                Map<String, Object> fieldError = new HashMap<>();
-                List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.JSON_ID));
-                for (Map<String, Object> fieldJsonField : fieldJsonFields) {
-                    validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                if (fieldJson != null && !fieldJson.isEmpty()) {
+                    Map<String, Object> fieldError = new HashMap<>();
+                    List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.JSON_ID));
+                    for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                        validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                    }
                 }
             } else if (TypeEnum.List.getLiteral().equals(type)) {
                 if (TypeEnum.Time.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     for (String value : values) {
-                        if (value == null || "".equals(value)) {
-                            error.put(name, "is required");
-                            break;
+                        if (value != null) {
+                            try {
+                                DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                            } catch (ParseException e) {
+                                error.put(name, "is invalid");
+                                break;
+                            }
                         }
                     }
                 } else if (TypeEnum.Date.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     for (String value : values) {
-                        if (value == null || "".equals(value)) {
-                            error.put(name, "is required");
-                            break;
+                        if (value != null) {
+                            try {
+                                DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                            } catch (ParseException e) {
+                                error.put(name, "is invalid");
+                                break;
+                            }
                         }
                     }
                 } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     for (String value : values) {
-                        if (value == null || "".equals(value)) {
-                            error.put(name, "is required");
-                            break;
+                        if (value != null) {
+                            try {
+                                DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                            } catch (ParseException e) {
+                                error.put(name, "is invalid");
+                                break;
+                            }
                         }
                     }
                 } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     for (String value : values) {
-                        if (value == null || "".equals(value)) {
-                            error.put(name, "is required");
-                            break;
-                        } else {
+                        if (value != null && !"".equals(value)) {
                             List<String> enumItemValues = enumItemDictionary.get(enumId);
                             if (!enumItemValues.contains(value)) {
                                 error.put(name, "is invalid");
@@ -2299,12 +2373,18 @@ public class JavascriptController {
                         }
                     }
                 } else if (TypeEnum.Map.getLiteral().equals(subType)) {
-                    Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
-                    Map<String, Object> fieldError = new HashMap<>();
-                    error.put(name, fieldError);
-                    List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.JSON_ID));
-                    for (Map<String, Object> fieldJsonField : fieldJsonFields) {
-                        validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                    List<Map<String, Object>> fieldJsons = (List<Map<String, Object>>) json.get(name);
+                    if (fieldJsons != null && !fieldJsons.isEmpty()) {
+                        for (Map<String, Object> fieldJson : fieldJsons) {
+                            if (fieldJson != null && !fieldJson.isEmpty()) {
+                                Map<String, Object> fieldError = new HashMap<>();
+                                error.put(name, fieldError);
+                                List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.JSON_ID));
+                                for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                                    validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary);
+                                }
+                            }
+                        }
                     }
                 }
             }
