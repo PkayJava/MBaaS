@@ -13,12 +13,14 @@ import com.angkorteam.mbaas.server.nashorn.JavaFilter;
 import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.jooq.DSLContext;
@@ -48,6 +50,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -82,6 +85,11 @@ public class JavascriptController {
             Identity identity
     ) throws IOException, ServletException {
         byte[] requestBody = null;
+
+        String springRequestContentType = req.getContentType();
+        if (springRequestContentType.contains(";")) {
+            springRequestContentType = StringUtils.split(springRequestContentType, ';')[0];
+        }
 
         if (ServletFileUpload.isMultipartContent(req)) {
             requestBody = ((ContentCachingRequestWrapper) ((AbstractMultipartHttpServletRequest) ((FirewalledRequest) req).getRequest()).getRequest()).getContentAsByteArray();
@@ -288,7 +296,7 @@ public class JavascriptController {
         if (!enumIds.isEmpty()) {
             where.clear();
             where.put(Jdbc.Enum.ENUM_ID, enumIds);
-            enumRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " in (:" + Jdbc.Enum.ENUM_ID + ")", where);
+            enumRecords = named.queryForList("SELECT * FROM " + Jdbc.ENUM + " WHERE " + Jdbc.Enum.ENUM_ID + " in (:" + Jdbc.Enum.ENUM_ID + ")", where);
         }
 
         // endregion
@@ -305,7 +313,7 @@ public class JavascriptController {
         if (!enumIds.isEmpty()) {
             where.clear();
             where.put(Jdbc.EnumItem.ENUM_ID, enumIds);
-            enumItemRecords = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ENUM_ITEM + " WHERE " + Jdbc.EnumItem.ENUM_ID + " in (:" + Jdbc.EnumItem.ENUM_ID + ")", where);
+            enumItemRecords = named.queryForList("SELECT * FROM " + Jdbc.ENUM_ITEM + " WHERE " + Jdbc.EnumItem.ENUM_ID + " in (:" + Jdbc.EnumItem.ENUM_ID + ")", where);
         }
         // endregion
 
@@ -361,17 +369,20 @@ public class JavascriptController {
 
         // region requestBodyJsonDictionary, requestBodyFormDictionary, requestBodyFormDataDictionary, requestBodyFormFileDictionary
         Map<String, List<String>> requestBodyFormDictionary = new HashMap<>();
-        if (MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(req.getContentType())) {
+        if (MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(springRequestContentType)) {
             String bodyString = "";
             if (requestBody != null && requestBody.length > 0) {
-                bodyString = IOUtils.toString(requestBody, "UTF-8");
+                bodyString = URLDecoder.decode(IOUtils.toString(requestBody, "UTF-8"), "UTF-8");
             }
             if (bodyString != null && !"".equals(bodyString)) {
                 String[] params = StringUtils.split(bodyString, '&');
                 for (String param : params) {
                     String tmp[] = StringUtils.split(param, '=');
                     String name = tmp[0];
-                    String value = tmp[1];
+                    String value = null;
+                    if (tmp.length >= 2) {
+                        value = tmp[1];
+                    }
                     if (!requestBodyFormDictionary.containsKey(name)) {
                         List<String> values = new ArrayList<>();
                         values.add(value);
@@ -410,7 +421,7 @@ public class JavascriptController {
         }
 
         String json = "";
-        if (MediaType.APPLICATION_JSON_VALUE.equals(req.getContentType()) && !"".equals(json)) {
+        if (MediaType.APPLICATION_JSON_VALUE.equals(springRequestContentType) && !"".equals(json)) {
             if (requestBody != null && requestBody.length > 0) {
                 json = new String(requestBody, "UTF-8");
             }
@@ -436,7 +447,7 @@ public class JavascriptController {
                             if (value == null || "".equals(value)) {
                                 requestQueryErrors.put(name, "is required");
                             } else {
-                                if (!"true".equals(value) || !"false".equals(value)) {
+                                if (!"true".equals(value) && !"false".equals(value)) {
                                     requestQueryErrors.put(name, "is invalid");
                                 }
                             }
@@ -518,7 +529,7 @@ public class JavascriptController {
                                     requestQueryErrors.put(name, "is required");
                                     break;
                                 } else {
-                                    if (!"true".equals(value) || !"false".equals(value)) {
+                                    if (!"true".equals(value) && !"false".equals(value)) {
                                         requestQueryErrors.put(name, "is invalid");
                                         break;
                                     }
@@ -623,7 +634,7 @@ public class JavascriptController {
                             String value = requestQueryDictionary.get(name).get(0);
                             if (value == null || "".equals(value)) {
                             } else {
-                                if (!"true".equals(value) || !"false".equals(value)) {
+                                if (!"true".equals(value) && !"false".equals(value)) {
                                     requestQueryErrors.put(name, "is invalid");
                                 }
                             }
@@ -695,7 +706,7 @@ public class JavascriptController {
                             for (String value : requestQueryDictionary.get(name)) {
                                 if (value == null || "".equals(value)) {
                                 } else {
-                                    if (!"true".equals(value) || !"false".equals(value)) {
+                                    if (!"true".equals(value) && !"false".equals(value)) {
                                         requestQueryErrors.put(name, "is invalid");
                                         break;
                                     }
@@ -801,7 +812,7 @@ public class JavascriptController {
                             if (value == null || "".equals(value)) {
                                 requestHeaderErrors.put(name, "is required");
                             } else {
-                                if (!"true".equals(value) || !"false".equals(value)) {
+                                if (!"true".equals(value) && !"false".equals(value)) {
                                     requestHeaderErrors.put(name, "is invalid");
                                 }
                             }
@@ -883,7 +894,7 @@ public class JavascriptController {
                                     requestHeaderErrors.put(name, "is required");
                                     break;
                                 } else {
-                                    if (!"true".equals(value) || !"false".equals(value)) {
+                                    if (!"true".equals(value) && !"false".equals(value)) {
                                         requestHeaderErrors.put(name, "is invalid");
                                         break;
                                     }
@@ -988,7 +999,7 @@ public class JavascriptController {
                             String value = requestHeaderDictionary.get(name).get(0);
                             if (value == null || "".equals(value)) {
                             } else {
-                                if (!"true".equals(value) || !"false".equals(value)) {
+                                if (!"true".equals(value) && !"false".equals(value)) {
                                     requestHeaderErrors.put(name, "is invalid");
                                 }
                             }
@@ -1060,7 +1071,7 @@ public class JavascriptController {
                             for (String value : requestHeaderDictionary.get(name)) {
                                 if (value == null || "".equals(value)) {
                                 } else {
-                                    if (!"true".equals(value) || !"false".equals(value)) {
+                                    if (!"true".equals(value) && !"false".equals(value)) {
                                         requestHeaderErrors.put(name, "is invalid");
                                         break;
                                     }
@@ -1154,7 +1165,7 @@ public class JavascriptController {
             if (req.getContentType() == null || "".equals(req.getContentType())) {
                 return null;
             }
-            if (!contentType.equals(req.getContentType())) {
+            if (!contentType.equals(springRequestContentType)) {
                 return null;
             }
             if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)) {
@@ -1181,7 +1192,7 @@ public class JavascriptController {
                                     if (value == null || "".equals(value)) {
                                         requestBodyErrors.put(name, "is required");
                                     } else {
-                                        if (!"true".equals(value) || !"false".equals(value)) {
+                                        if (!"true".equals(value) && !"false".equals(value)) {
                                             requestBodyErrors.put(name, "is invalid");
                                         }
                                     }
@@ -1263,7 +1274,7 @@ public class JavascriptController {
                                             requestBodyErrors.put(name, "is required");
                                             break;
                                         } else {
-                                            if (!"true".equals(value) || !"false".equals(value)) {
+                                            if (!"true".equals(value) && !"false".equals(value)) {
                                                 requestBodyErrors.put(name, "is invalid");
                                                 break;
                                             }
@@ -1368,7 +1379,7 @@ public class JavascriptController {
                                     String value = requestBodyFormDictionary.get(name).get(0);
                                     if (value == null || "".equals(value)) {
                                     } else {
-                                        if (!"true".equals(value) || !"false".equals(value)) {
+                                        if (!"true".equals(value) && !"false".equals(value)) {
                                             requestBodyErrors.put(name, "is invalid");
                                         }
                                     }
@@ -1440,7 +1451,7 @@ public class JavascriptController {
                                     for (String value : requestBodyFormDictionary.get(name)) {
                                         if (value == null || "".equals(value)) {
                                         } else {
-                                            if (!"true".equals(value) || !"false".equals(value)) {
+                                            if (!"true".equals(value) && !"false".equals(value)) {
                                                 requestBodyErrors.put(name, "is invalid");
                                                 break;
                                             }
@@ -1558,7 +1569,7 @@ public class JavascriptController {
                                         if (value == null || "".equals(value)) {
                                             requestBodyErrors.put(name, "is required");
                                         } else {
-                                            if (!"true".equals(value) || !"false".equals(value)) {
+                                            if (!"true".equals(value) && !"false".equals(value)) {
                                                 requestBodyErrors.put(name, "is invalid");
                                             }
                                         }
@@ -1658,7 +1669,7 @@ public class JavascriptController {
                                                 requestBodyErrors.put(name, "is required");
                                                 break;
                                             } else {
-                                                if (!"true".equals(value) || !"false".equals(value)) {
+                                                if (!"true".equals(value) && !"false".equals(value)) {
                                                     requestBodyErrors.put(name, "is invalid");
                                                     break;
                                                 }
@@ -1783,7 +1794,7 @@ public class JavascriptController {
                                         String value = requestBodyFormDataDictionary.get(name).get(0);
                                         if (value == null || "".equals(value)) {
                                         } else {
-                                            if (!"true".equals(value) || !"false".equals(value)) {
+                                            if (!"true".equals(value) && !"false".equals(value)) {
                                                 requestBodyErrors.put(name, "is invalid");
                                             }
                                         }
@@ -1868,7 +1879,7 @@ public class JavascriptController {
                                         for (String value : requestBodyFormDataDictionary.get(name)) {
                                             if (value == null || "".equals(value)) {
                                             } else {
-                                                if (!"true".equals(value) || !"false".equals(value)) {
+                                                if (!"true".equals(value) && !"false".equals(value)) {
                                                     requestBodyErrors.put(name, "is invalid");
                                                     break;
                                                 }
@@ -2082,6 +2093,10 @@ public class JavascriptController {
             }
         }
         // endregion
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        System.out.println(requestBodyErrors.size());
+        System.out.println(gson.toJson(requestBodyErrors));
 
         return null;
     }
