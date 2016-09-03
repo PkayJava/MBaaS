@@ -198,6 +198,15 @@ public class BodyFieldModifyPage extends MasterPage {
                     this.subTypes.add(type.getLiteral());
                 }
             }
+            if (MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(this.contentType)) {
+                this.subTypes.remove(TypeEnum.Byte.getLiteral());
+                this.subTypes.remove(TypeEnum.Map.getLiteral());
+            }
+            if (MediaType.MULTIPART_FORM_DATA_VALUE.equals(this.contentType)) {
+                this.subTypes.remove(TypeEnum.Byte.getLiteral());
+                this.subTypes.remove(TypeEnum.Map.getLiteral());
+                this.subTypes.add(TypeEnum.File.getLiteral());
+            }
             this.subTypeField.setRequired(true);
         } else {
             this.subTypeField.setRequired(false);
