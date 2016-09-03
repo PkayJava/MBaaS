@@ -6,6 +6,7 @@ import com.mashape.unirest.request.HttpRequestWithBody;
 import com.mashape.unirest.request.body.MultipartBody;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * Created by socheat on 9/3/16.
  */
-public class TestRestValidation {
+public class MultipartFormData {
     public static void main(String[] args) throws UnirestException {
         HttpRequestWithBody requestBody = Unirest.post("http://demo.ddns.net:9080/api/javascript/hello");
         MultipartBody body = null;
@@ -22,6 +23,18 @@ public class TestRestValidation {
         }
         {
             body = body.field("string_optional", "no error anymore");
+        }
+        {
+            body.field("file_optional", new File("/home/socheat/Documents/country.txt"));
+        }
+        {
+            body.field("file_required", new File("/home/socheat/Documents/country.txt"));
+        }
+        {
+            body.field("list_file_required", new File("/home/socheat/Documents/country.txt"));
+        }
+        {
+            body.field("list_file_optional", new File("/home/socheat/Documents/country.txt"));
         }
         {
             List<String> list_datetime_required = new ArrayList<>();
@@ -39,6 +52,16 @@ public class TestRestValidation {
             List<String> boolean_enum_required = new ArrayList<>();
             boolean_enum_required.add("true");
             body = body.field("boolean_enum_required", boolean_enum_required);
+        }
+        {
+            List<String> string_enum_required = new ArrayList<>();
+            string_enum_required.add("people");
+            body = body.field("string_enum_required", string_enum_required);
+        }
+        {
+            List<String> string_enum_optional = new ArrayList<>();
+            string_enum_optional.add("people");
+            body = body.field("string_enum_optional", string_enum_optional);
         }
         {
             List<String> boolean_enum_optional = new ArrayList<>();
@@ -128,6 +151,16 @@ public class TestRestValidation {
             list_long_required.add("2");
             list_long_required.add("-2");
             body = body.field("list_long_required", list_long_required);
+        }
+        {
+            List<String> list_date_required = new ArrayList<>();
+            list_date_required.add("2016-12-30");
+            body = body.field("list_date_required", list_date_required);
+        }
+        {
+            List<String> list_date_optional = new ArrayList<>();
+            list_date_optional.add("2016-12-30");
+            body = body.field("list_date_optional", list_date_optional);
         }
         {
             List<String> list_long_optional = new ArrayList<>();
