@@ -424,7 +424,7 @@ public class JavascriptController {
             }
 
             String json = "";
-            if (MediaType.APPLICATION_JSON_VALUE.equals(springRequestContentType) && !"".equals(json)) {
+            if (MediaType.APPLICATION_JSON_VALUE.equals(springRequestContentType)) {
                 if (requestBody != null && requestBody.length > 0) {
                     json = new String(requestBody, "UTF-8");
                 }
@@ -1986,6 +1986,7 @@ public class JavascriptController {
                     }
                     // endregion
                 } else if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
+                    // region application/json
                     String type = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_TYPE);
                     String enumId = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_ENUM_ID);
                     Boolean bodyRequired = (Boolean) restRecord.get(Jdbc.Rest.REQUEST_BODY_REQUIRED);
@@ -1995,13 +1996,23 @@ public class JavascriptController {
                     if (json != null && !"".equals(json)) {
                         if (TypeEnum.Boolean.getLiteral().equals(type)) {
                             try {
-                                gson.fromJson(json, Boolean.class);
+                                String value = gson.fromJson(json, String.class);
+                                if (value == null || "".equals(value)) {
+                                    requestBodyErrors.put("requestBody", "is required");
+                                } else {
+                                    if (!value.equals("true") && !value.equals("false")) {
+                                        requestBodyErrors.put("requestBody", "is invalid");
+                                    }
+                                }
                             } catch (JsonSyntaxException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
                         } else if (TypeEnum.Long.getLiteral().equals(type)) {
                             try {
-                                gson.fromJson(json, Long.class);
+                                Long value = gson.fromJson(json, Long.class);
+                                if (value == null) {
+                                    requestBodyErrors.put("requestBody", "is required");
+                                }
                             } catch (JsonSyntaxException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
@@ -2095,6 +2106,7 @@ public class JavascriptController {
                             // find subtype and repeat subtype checking again
                         }
                     }
+                    // endregion
                 }
             }
             // endregion
@@ -2103,7 +2115,10 @@ public class JavascriptController {
             System.out.println(requestBodyErrors.size());
             System.out.println(gson.toJson(requestBodyErrors));
 
-        } catch (Throwable e) {
+        } catch (
+                Throwable e)
+
+        {
             e.printStackTrace();
         }
         return null;
