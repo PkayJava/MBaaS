@@ -581,7 +581,6 @@ public class RestModifyPage extends MasterPage {
             this.requestBodySubType = null;
             this.requestBodySubTypes.clear();
             this.requestBodySubTypes.add(TypeEnum.Boolean.getLiteral());
-            this.requestBodySubTypes.add(TypeEnum.Byte.getLiteral());
             this.requestBodySubTypes.add(TypeEnum.Long.getLiteral());
             this.requestBodySubTypes.add(TypeEnum.Double.getLiteral());
             this.requestBodySubTypes.add(TypeEnum.String.getLiteral());
@@ -590,6 +589,7 @@ public class RestModifyPage extends MasterPage {
             this.requestBodySubTypes.add(TypeEnum.DateTime.getLiteral());
             this.requestBodySubTypes.add(TypeEnum.Enum.getLiteral());
             this.requestBodySubTypes.add(TypeEnum.Map.getLiteral());
+            this.requestBodySubTypes.add(TypeEnum.File.getLiteral());
             this.requestBodySubTypeField.setRequired(true);
         } else {
             this.requestBodySubTypeField.setRequired(false);

@@ -58,6 +58,7 @@ allprojects {
         retrofitVersion = '2.1.0'
         reactivexVersion = '1.1.6'
         javassistVersion = '3.20.0-GA'
+        jsonVersion = '20160810'
     }
 
 }

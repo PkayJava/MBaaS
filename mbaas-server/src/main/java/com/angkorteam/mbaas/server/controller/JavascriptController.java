@@ -20,7 +20,6 @@ import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.jooq.DSLContext;
@@ -74,7 +73,22 @@ public class JavascriptController {
     private Type mapType = new TypeToken<Map<String, Object>>() {
     }.getType();
 
-    private Type listType = new TypeToken<List<Object>>() {
+    private Type listMapType = new TypeToken<List<Map<String, Object>>>() {
+    }.getType();
+
+    private Type listBooleanType = new TypeToken<List<Boolean>>() {
+    }.getType();
+
+    private Type listLongType = new TypeToken<List<Long>>() {
+    }.getType();
+
+    private Type listDoubleType = new TypeToken<List<Double>>() {
+    }.getType();
+
+    private Type listStringType = new TypeToken<List<String>>() {
+    }.getType();
+
+    private Type listBytesType = new TypeToken<List<byte[]>>() {
     }.getType();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(com.angkorteam.mbaas.server.MBaaS.class);
@@ -1988,6 +2002,7 @@ public class JavascriptController {
                 } else if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
                     // region application/json
                     String type = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_TYPE);
+                    String subType = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_SUB_TYPE);
                     String enumId = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_ENUM_ID);
                     Boolean bodyRequired = (Boolean) restRecord.get(Jdbc.Rest.REQUEST_BODY_REQUIRED);
                     if (bodyRequired && (json == null || "".equals(json))) {
@@ -2018,34 +2033,52 @@ public class JavascriptController {
                             }
                         } else if (TypeEnum.Double.getLiteral().equals(type)) {
                             try {
-                                gson.fromJson(json, Double.class);
+                                Double value = gson.fromJson(json, Double.class);
+                                if (value == null) {
+                                    requestBodyErrors.put("requestBody", "is required");
+                                }
                             } catch (JsonSyntaxException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
                         } else if (TypeEnum.String.getLiteral().equals(type)) {
                             try {
-                                gson.fromJson(json, String.class);
+                                String value = gson.fromJson(json, String.class);
+                                if (value == null || "".equals(value)) {
+                                    requestBodyErrors.put("requestBody", "is required");
+                                }
                             } catch (JsonSyntaxException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
                         } else if (TypeEnum.Date.getLiteral().equals(type)) {
                             try {
                                 String value = gson.fromJson(json, String.class);
-                                DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                                if (value == null || "".equals(value)) {
+                                    requestBodyErrors.put("requestBody", "is required");
+                                } else {
+                                    DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                                }
                             } catch (JsonSyntaxException | ParseException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
                         } else if (TypeEnum.Time.getLiteral().equals(type)) {
                             try {
                                 String value = gson.fromJson(json, String.class);
-                                DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                                if (value == null || "".equals(value)) {
+                                    requestBodyErrors.put("requestBody", "is required");
+                                } else {
+                                    DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                                }
                             } catch (JsonSyntaxException | ParseException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
                         } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
                             try {
                                 String value = gson.fromJson(json, String.class);
-                                DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                                if (value == null || "".equals(value)) {
+                                    requestBodyErrors.put("requestBody", "is required");
+                                } else {
+                                    DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                                }
                             } catch (JsonSyntaxException | ParseException e) {
                                 requestBodyErrors.put("requestBody", "is invalid");
                             }
@@ -2053,42 +2086,22 @@ public class JavascriptController {
                             Map<String, Object> enumRecord = enumDictionary.get(enumId);
                             String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
                             List<String> enumValues = enumItemDictionary.get(enumId);
-                            if (TypeEnum.Boolean.getLiteral().equals(enumType)) {
-                                try {
-                                    String value = String.valueOf(gson.fromJson(json, Boolean.class));
-                                    if (!enumValues.contains(value)) {
-                                        requestBodyErrors.put("requestBody", "is invalid");
-                                    }
-                                } catch (JsonSyntaxException e) {
-                                    requestBodyErrors.put("requestBody", "is invalid");
-                                }
-                            } else if (TypeEnum.Long.getLiteral().equals(enumType)) {
-                                try {
-                                    String value = String.valueOf(gson.fromJson(json, Long.class));
-                                    if (!enumValues.contains(value)) {
-                                        requestBodyErrors.put("requestBody", "is invalid");
-                                    }
-                                } catch (JsonSyntaxException e) {
-                                    requestBodyErrors.put("requestBody", "is invalid");
-                                }
-                            } else if (TypeEnum.Double.getLiteral().equals(enumType)) {
-                                try {
-                                    String value = String.valueOf(gson.fromJson(json, Double.class));
-                                    if (!enumValues.contains(value)) {
-                                        requestBodyErrors.put("requestBody", "is invalid");
-                                    }
-                                } catch (JsonSyntaxException e) {
-                                    requestBodyErrors.put("requestBody", "is invalid");
-                                }
-                            } else if (TypeEnum.Character.getLiteral().equals(enumType)
+                            if (TypeEnum.Boolean.getLiteral().equals(enumType)
+                                    || TypeEnum.Long.getLiteral().equals(enumType)
+                                    || TypeEnum.Double.getLiteral().equals(enumType)
+                                    || TypeEnum.Character.getLiteral().equals(enumType)
                                     || TypeEnum.String.getLiteral().equals(enumType)
                                     || TypeEnum.Time.getLiteral().equals(enumType)
                                     || TypeEnum.Date.getLiteral().equals(enumType)
                                     || TypeEnum.DateTime.getLiteral().equals(enumType)) {
                                 try {
                                     String value = gson.fromJson(json, String.class);
-                                    if (!enumValues.contains(value)) {
-                                        requestBodyErrors.put("requestBody", "is invalid");
+                                    if (value == null || "".equals(value)) {
+                                        requestBodyErrors.put("requestBody", "is required");
+                                    } else {
+                                        if (!enumValues.contains(value)) {
+                                            requestBodyErrors.put("requestBody", "is invalid");
+                                        }
                                     }
                                 } catch (JsonSyntaxException e) {
                                     requestBodyErrors.put("requestBody", "is invalid");
@@ -2101,9 +2114,175 @@ public class JavascriptController {
                             for (Map<String, Object> jsonField : jsonFields) {
                                 validateJsonField(jdbcTemplate, requestBodyErrors, jsonObject, jsonField, enumItemDictionary);
                             }
-                            // find map type
                         } else if (TypeEnum.List.getLiteral().equals(type)) {
-                            // find subtype and repeat subtype checking again
+                            if (TypeEnum.Boolean.getLiteral().equals(subType)) {
+                                try {
+                                    List<String> values = gson.fromJson(json, this.listStringType);
+                                    for (String value : values) {
+                                        if (value == null || "".equals(value)) {
+                                            requestBodyErrors.put("requestBody", "is required");
+                                            break;
+                                        } else {
+                                            if (!value.equals("true") && !value.equals("false")) {
+                                                requestBodyErrors.put("requestBody", "is invalid");
+                                                break;
+                                            }
+                                        }
+                                    }
+                                } catch (JsonSyntaxException | ClassCastException e) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
+                            } else if (TypeEnum.Long.getLiteral().equals(subType)) {
+                                try {
+                                    List<Long> values = gson.fromJson(json, this.listLongType);
+                                    for (Long value : values) {
+                                        if (value == null) {
+                                            requestBodyErrors.put("requestBody", "is required");
+                                            break;
+                                        }
+                                    }
+                                } catch (JsonSyntaxException | ClassCastException e) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
+                            } else if (TypeEnum.Double.getLiteral().equals(subType)) {
+                                try {
+                                    List<Double> values = gson.fromJson(json, this.listDoubleType);
+                                    for (Double value : values) {
+                                        if (value == null) {
+                                            requestBodyErrors.put("requestBody", "is required");
+                                            break;
+                                        }
+                                    }
+                                } catch (JsonSyntaxException | ClassCastException e) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
+                            } else if (TypeEnum.String.getLiteral().equals(subType)) {
+                                try {
+                                    List<String> values = gson.fromJson(json, this.listStringType);
+                                    for (String value : values) {
+                                        if (value == null || "".equals(value)) {
+                                            requestBodyErrors.put("requestBody", "is required");
+                                            break;
+                                        }
+                                    }
+                                } catch (JsonSyntaxException | ClassCastException e) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
+                            } else if (TypeEnum.Date.getLiteral().equals(subType)) {
+                                try {
+                                    List<String> values = gson.fromJson(json, this.listStringType);
+                                    for (String value : values) {
+                                        if (value == null || "".equals(value)) {
+                                            requestBodyErrors.put("requestBody", "is required");
+                                            break;
+                                        } else {
+                                            try {
+                                                DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                                            } catch (JsonSyntaxException | ParseException e) {
+                                                requestBodyErrors.put("requestBody", "is invalid");
+                                                break;
+                                            }
+
+                                        }
+                                    }
+                                } catch (JsonSyntaxException | ClassCastException e) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
+                            } else if (TypeEnum.Time.getLiteral().equals(subType)) {
+                                try {
+                                    List<String> values = gson.fromJson(json, this.listStringType);
+                                    for (String value : values) {
+                                        if (value == null || "".equals(value)) {
+                                            requestBodyErrors.put("requestBody", "is required");
+                                            break;
+                                        } else {
+                                            try {
+                                                DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                                            } catch (JsonSyntaxException | ParseException e) {
+                                                requestBodyErrors.put("requestBody", "is invalid");
+                                                break;
+                                            }
+
+                                        }
+                                    }
+                                } catch (JsonSyntaxException | ClassCastException e) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
+                            } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
+                                try {
+                                    List<String> values = gson.fromJson(json, this.listStringType);
+                                    for (String value : values) {
+                                        if (value == null || "".equals(value)) {
+                                            requestBodyErrors.put("requestBody", "is required");
+                                            break;
+                                        } else {
+                                            try {
+                                                DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                                            } catch (JsonSyntaxException | ParseException e) {
+                                                requestBodyErrors.put("requestBody", "is invalid");
+                                                break;
+                                            }
+
+                                        }
+                                    }
+                                } catch (JsonSyntaxException | ClassCastException e) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
+                            } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
+                                Map<String, Object> enumRecord = enumDictionary.get(enumId);
+                                String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
+                                List<String> enumValues = enumItemDictionary.get(enumId);
+                                if (TypeEnum.Boolean.getLiteral().equals(enumType)
+                                        || TypeEnum.Long.getLiteral().equals(enumType)
+                                        || TypeEnum.Double.getLiteral().equals(enumType)
+                                        || TypeEnum.Character.getLiteral().equals(enumType)
+                                        || TypeEnum.String.getLiteral().equals(enumType)
+                                        || TypeEnum.Time.getLiteral().equals(enumType)
+                                        || TypeEnum.Date.getLiteral().equals(enumType)
+                                        || TypeEnum.DateTime.getLiteral().equals(enumType)) {
+                                    try {
+                                        List<String> values = gson.fromJson(json, listStringType);
+                                        for (String value : values) {
+                                            if (value == null || "".equals(value)) {
+                                                requestBodyErrors.put("requestBody", "is required");
+                                                break;
+                                            } else {
+                                                if (!enumValues.contains(value)) {
+                                                    requestBodyErrors.put("requestBody", "is invalid");
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    } catch (JsonSyntaxException | ClassCastException e) {
+                                        requestBodyErrors.put("requestBody", "is invalid");
+                                    }
+                                }
+                            } else if (TypeEnum.File.getLiteral().equals(subType)) {
+                                try {
+                                    List<byte[]> values = gson.fromJson(json, this.listBytesType);
+                                    for (byte[] value : values) {
+                                        if (value == null || value.length == 0) {
+                                            requestBodyErrors.put("requestBody", "is required");
+                                            break;
+                                        }
+                                    }
+                                } catch (JsonSyntaxException | ClassCastException e) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
+                            } else if (TypeEnum.Map.getLiteral().equals(subType)) {
+                                String jsonId = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID);
+                                List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonId);
+                                try {
+                                    List<Map<String, Object>> values = gson.fromJson(json, listMapType);
+                                    for (Map<String, Object> value : values) {
+                                        for (Map<String, Object> jsonField : jsonFields) {
+                                            validateJsonField(jdbcTemplate, requestBodyErrors, value, jsonField, enumItemDictionary);
+                                        }
+                                    }
+                                } catch (JsonSyntaxException | ClassCastException e) {
+                                    requestBodyErrors.put("requestBody", "is invalid");
+                                }
+                            }
                         }
                     }
                     // endregion
@@ -2203,6 +2382,11 @@ public class JavascriptController {
                 } else {
                     error.put(name, "is required");
                 }
+            } else if (TypeEnum.File.getLiteral().equals(type)) {
+                byte[] value = (byte[]) json.get(name);
+                if (value == null || value.length == 0) {
+                    error.put(name, "is required");
+                }
             } else if (TypeEnum.List.getLiteral().equals(type)) {
                 if (TypeEnum.Boolean.getLiteral().equals(subType)) {
                     List<Boolean> values = (List<Boolean>) json.get(name);
@@ -2292,6 +2476,14 @@ public class JavascriptController {
                                 error.put(name, "is invalid");
                                 break;
                             }
+                        }
+                    }
+                } else if (TypeEnum.File.getLiteral().equals(subType)) {
+                    List<byte[]> values = (List<byte[]>) json.get(name);
+                    for (byte[] value : values) {
+                        if (value == null || value.length == 0) {
+                            error.put(name, "is required");
+                            break;
                         }
                     }
                 } else if (TypeEnum.Map.getLiteral().equals(subType)) {
