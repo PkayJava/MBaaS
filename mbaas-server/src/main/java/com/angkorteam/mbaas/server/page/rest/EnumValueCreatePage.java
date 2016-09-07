@@ -124,7 +124,13 @@ public class EnumValueCreatePage extends MasterPage {
         Map<String, Object> fields = new HashMap<>();
         fields.put(Jdbc.EnumItem.ENUM_ITEM_ID, UUID.randomUUID().toString());
         fields.put(Jdbc.EnumItem.ENUM_ID, this.enumId);
-        fields.put(Jdbc.EnumItem.VALUE, this.value);
+        if (TypeEnum.Long.getLiteral().equals(this.type)) {
+            fields.put(Jdbc.EnumItem.VALUE, String.valueOf(Long.valueOf(this.value)));
+        } else if (TypeEnum.Double.getLiteral().equals(this.type)) {
+            fields.put(Jdbc.EnumItem.VALUE, String.valueOf(Double.valueOf(this.value)));
+        } else {
+            fields.put(Jdbc.EnumItem.VALUE, this.value);
+        }
         jdbcInsert.execute(fields);
         PageParameters parameters = new PageParameters();
         parameters.add("enumId", this.enumId);
