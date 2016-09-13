@@ -71,7 +71,7 @@ public class ApplicationFunction {
             for (File ddl : ddls) {
                 if (ddl.isFile() && "sql".equalsIgnoreCase(FilenameUtils.getExtension(ddl.getName()))) {
                     try {
-                        applicationJdbcTemplate.execute(FileUtils.readFileToString(ddl));
+                        applicationJdbcTemplate.execute(FileUtils.readFileToString(ddl, "UTF-8"));
                         LOGGER.info("{} {}", applicationCode, ddl.getName());
                     } catch (IOException e) {
                         throw new WicketRuntimeException(e);

@@ -43,7 +43,11 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
-import javax.script.*;
+import javax.script.Bindings;
+import javax.script.Invocable;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -53,7 +57,13 @@ import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 2/27/16.
@@ -2454,149 +2464,237 @@ public class JavascriptController {
         if (required) {
             // region required
             if (TypeEnum.Boolean.getLiteral().equals(type)) {
-                Boolean value = (Boolean) json.get(name);
-                if (value == null) {
-                    error.put(name, "is required");
+                try {
+                    Boolean value = (Boolean) json.get(name);
+                    if (value == null) {
+                        error.put(name, "is required");
+                    }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.Long.getLiteral().equals(type)) {
-                Long value = (Long) json.get(name);
-                if (value == null) {
-                    error.put(name, "is required");
+                try {
+                    Double value = (Double) json.get(name);
+                    if (value == null) {
+                        error.put(name, "is required");
+                    } else {
+                        String longValue = String.valueOf(value);
+                        if (longValue.endsWith(".0")) {
+                            longValue = longValue.substring(0, longValue.length() - 2);
+                            try {
+                                Long.valueOf(longValue);
+                            } catch (NumberFormatException e) {
+                                error.put(name, "is invalid");
+                            }
+                        }
+                    }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.Double.getLiteral().equals(type)) {
-                Double value = (Double) json.get(name);
-                if (value == null) {
-                    error.put(name, "is required");
+                try {
+                    Double value = (Double) json.get(name);
+                    if (value == null) {
+                        error.put(name, "is required");
+                    }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
+                }
+            } else if (TypeEnum.String.getLiteral().equals(type)) {
+                try {
+                    String value = (String) json.get(name);
+                    if (value == null || "".equals(value)) {
+                        error.put(name, "is required");
+                    }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.Time.getLiteral().equals(type)) {
-                String value = (String) json.get(name);
-                if (value == null || "".equals(value)) {
-                    error.put(name, "is required");
-                } else {
-                    try {
-                        DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
-                    } catch (ParseException e) {
-                        error.put(name, "is invalid");
+                try {
+                    String value = (String) json.get(name);
+                    if (value == null || "".equals(value)) {
+                        error.put(name, "is required");
+                    } else {
+                        try {
+                            DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                        } catch (ParseException e) {
+                            error.put(name, "is invalid");
+                        }
                     }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.Date.getLiteral().equals(type)) {
-                String value = (String) json.get(name);
-                if (value == null || "".equals(value)) {
-                    error.put(name, "is required");
-                } else {
-                    try {
-                        DateFormatUtils.ISO_DATE_FORMAT.parse(value);
-                    } catch (ParseException e) {
-                        error.put(name, "is invalid");
+                try {
+                    String value = (String) json.get(name);
+                    if (value == null || "".equals(value)) {
+                        error.put(name, "is required");
+                    } else {
+                        try {
+                            DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                        } catch (ParseException e) {
+                            error.put(name, "is invalid");
+                        }
                     }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
-                String value = (String) json.get(name);
-                if (value == null || "".equals(value)) {
-                    error.put(name, "is required");
-                } else {
-                    try {
-                        DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
-                    } catch (ParseException e) {
-                        error.put(name, "is invalid");
+                try {
+                    String value = (String) json.get(name);
+                    if (value == null || "".equals(value)) {
+                        error.put(name, "is required");
+                    } else {
+                        try {
+                            DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                        } catch (ParseException e) {
+                            error.put(name, "is invalid");
+                        }
                     }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.Enum.getLiteral().equals(type)) {
                 Object value = json.get(name);
                 Map<String, Object> enumRecord = enumDictionary.get(enumId);
                 String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
                 if (TypeEnum.Boolean.getLiteral().equals(enumType)) {
-                    Boolean enumValue = (Boolean) value;
-                    if (enumValue == null) {
-                        error.put(name, "is required");
-                    } else {
-                        List<String> enumItemValues = enumItemDictionary.get(enumId);
-                        if (!enumItemValues.contains(String.valueOf(enumValue))) {
-                            error.put(name, "is invalid");
+                    try {
+                        Boolean enumValue = (Boolean) value;
+                        if (enumValue == null) {
+                            error.put(name, "is required");
+                        } else {
+                            List<String> enumItemValues = enumItemDictionary.get(enumId);
+                            if (!enumItemValues.contains(String.valueOf(enumValue))) {
+                                error.put(name, "is invalid");
+                            }
                         }
+                    } catch (ClassCastException e) {
+                        error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Character.getLiteral().equals(enumType)
                         || TypeEnum.String.getLiteral().equals(enumType)
                         || TypeEnum.Time.getLiteral().equals(enumType)
                         || TypeEnum.Date.getLiteral().equals(enumType)
                         || TypeEnum.DateTime.getLiteral().equals(enumType)) {
-                    String enumValue = (String) value;
-                    if (enumValue == null || "".equals(enumValue)) {
-                        error.put(name, "is required");
-                    } else {
-                        List<String> enumItemValues = enumItemDictionary.get(enumId);
-                        if (!enumItemValues.contains(enumValue)) {
-                            error.put(name, "is invalid");
+                    try {
+                        String enumValue = (String) value;
+                        if (enumValue == null || "".equals(enumValue)) {
+                            error.put(name, "is required");
+                        } else {
+                            List<String> enumItemValues = enumItemDictionary.get(enumId);
+                            if (!enumItemValues.contains(enumValue)) {
+                                error.put(name, "is invalid");
+                            }
                         }
+                    } catch (ClassCastException e) {
+                        error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Long.getLiteral().equals(enumType)) {
-                    Double doubleValue = (Double) value;
-                    if (value == null) {
-                        error.put(name, "is required");
-                    } else {
-                        try {
-                            String stringValue = String.valueOf(doubleValue);
-                            if (stringValue.endsWith(".0")) {
-                                stringValue = stringValue.substring(0, stringValue.length() - 2);
+                    try {
+                        Double doubleValue = (Double) value;
+                        if (value == null) {
+                            error.put(name, "is required");
+                        } else {
+                            try {
+                                String stringValue = String.valueOf(doubleValue);
+                                if (stringValue.endsWith(".0")) {
+                                    stringValue = stringValue.substring(0, stringValue.length() - 2);
+                                }
+                                Long enumValue = Long.valueOf(stringValue);
+                                List<String> enumItemValues = enumItemDictionary.get(enumId);
+                                if (!enumItemValues.contains(String.valueOf(enumValue))) {
+                                    error.put(name, "is invalid");
+                                }
+                            } catch (NumberFormatException e) {
+                                error.put(name, "is invalid");
                             }
-                            Long enumValue = Long.valueOf(stringValue);
+                        }
+                    } catch (ClassCastException e) {
+                        error.put(name, "is invalid");
+                    }
+                } else if (TypeEnum.Double.getLiteral().equals(enumType)) {
+                    try {
+                        Double enumValue = (Double) value;
+                        if (enumValue == null) {
+                            error.put(name, "is required");
+                        } else {
                             List<String> enumItemValues = enumItemDictionary.get(enumId);
                             if (!enumItemValues.contains(String.valueOf(enumValue))) {
                                 error.put(name, "is invalid");
                             }
-                        } catch (NumberFormatException e) {
-                            error.put(name, "is invalid");
                         }
-                    }
-                } else if (TypeEnum.Double.getLiteral().equals(enumType)) {
-                    Double enumValue = (Double) value;
-                    if (enumValue == null) {
-                        error.put(name, "is required");
-                    } else {
-                        List<String> enumItemValues = enumItemDictionary.get(enumId);
-                        if (!enumItemValues.contains(String.valueOf(enumValue))) {
-                            error.put(name, "is invalid");
-                        }
+                    } catch (ClassCastException e) {
+                        error.put(name, "is invalid");
                     }
                 }
             } else if (TypeEnum.Map.getLiteral().equals(type)) {
-                Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
-                if (fieldJson != null && !fieldJson.isEmpty()) {
-                    Map<String, Object> fieldError = new HashMap<>();
-                    error.put(name, fieldError);
-                    List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.JSON_ID));
-                    for (Map<String, Object> fieldJsonField : fieldJsonFields) {
-                        validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
+                try {
+                    Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
+                    if (fieldJson != null) {
+                        Map<String, Object> fieldError = new HashMap<>();
+                        List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.MAP_JSON_ID));
+                        for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                            validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
+                        }
+                        if (!fieldError.isEmpty()) {
+                            error.put(name, fieldError);
+                        }
+                    } else {
+                        error.put(name, "is required");
                     }
-                } else {
-                    error.put(name, "is required");
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.File.getLiteral().equals(type)) {
-                List<Object> value = (List<Object>) json.get(name);
-                if (value == null || value.isEmpty()) {
-                    error.put(name, "is required");
+                try {
+                    List<Object> value = (List<Object>) json.get(name);
+                    if (value == null || value.isEmpty()) {
+                        error.put(name, "is required");
+                    }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.List.getLiteral().equals(type)) {
                 if (TypeEnum.Boolean.getLiteral().equals(subType)) {
                     List<Boolean> values = (List<Boolean>) json.get(name);
                     if (values != null && !values.isEmpty()) {
-                        for (Boolean value : values) {
-                            if (value == null) {
-                                error.put(name, "is required");
-                                break;
+                        try {
+                            for (Boolean value : values) {
+                                if (value == null) {
+                                    error.put(name, "is required");
+                                    break;
+                                }
                             }
+                        } catch (ClassCastException e) {
+                            error.put(name, "is invalid");
                         }
                     } else {
                         error.put(name, "is required");
                     }
                 } else if (TypeEnum.Long.getLiteral().equals(subType)) {
-                    List<Long> values = (List<Long>) json.get(name);
+                    List<Double> values = (List<Double>) json.get(name);
                     if (values != null && !values.isEmpty()) {
-                        for (Long value : values) {
-                            if (value == null) {
-                                error.put(name, "is required");
-                                break;
+                        try {
+                            for (Double value : values) {
+                                if (value == null) {
+                                    error.put(name, "is required");
+                                    break;
+                                } else {
+                                    try {
+                                        String longValue = String.valueOf(value);
+                                        if (longValue.endsWith(".0")) {
+                                            longValue = longValue.substring(0, longValue.length() - 2);
+                                        }
+                                        Long.valueOf(longValue);
+                                    } catch (NumberFormatException e) {
+                                        error.put(name, "is invalid");
+                                        break;
+                                    }
+                                }
                             }
+                        } catch (ClassCastException e) {
+                            error.put(name, "is invalid");
                         }
                     } else {
                         error.put(name, "is required");
@@ -2604,11 +2702,15 @@ public class JavascriptController {
                 } else if (TypeEnum.Double.getLiteral().equals(subType)) {
                     List<Double> values = (List<Double>) json.get(name);
                     if (values != null && !values.isEmpty()) {
-                        for (Double value : values) {
-                            if (value == null) {
-                                error.put(name, "is required");
-                                break;
+                        try {
+                            for (Double value : values) {
+                                if (value == null) {
+                                    error.put(name, "is required");
+                                    break;
+                                }
                             }
+                        } catch (ClassCastException e) {
+                            error.put(name, "is invalid");
                         }
                     } else {
                         error.put(name, "is required");
@@ -2616,11 +2718,15 @@ public class JavascriptController {
                 } else if (TypeEnum.String.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     if (values != null && !values.isEmpty()) {
-                        for (String value : values) {
-                            if (value == null || "".equals(value)) {
-                                error.put(name, "is required");
-                                break;
+                        try {
+                            for (String value : values) {
+                                if (value == null || "".equals(value)) {
+                                    error.put(name, "is required");
+                                    break;
+                                }
                             }
+                        } catch (ClassCastException e) {
+                            error.put(name, "is invalid");
                         }
                     } else {
                         error.put(name, "is required");
@@ -2628,18 +2734,22 @@ public class JavascriptController {
                 } else if (TypeEnum.Time.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     if (values != null && !values.isEmpty()) {
-                        for (String value : values) {
-                            if (value == null || "".equals(value)) {
-                                error.put(name, "is required");
-                                break;
-                            } else {
-                                try {
-                                    DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
-                                } catch (ParseException e) {
-                                    error.put(name, "is invalid");
+                        try {
+                            for (String value : values) {
+                                if (value == null || "".equals(value)) {
+                                    error.put(name, "is required");
                                     break;
+                                } else {
+                                    try {
+                                        DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        error.put(name, "is invalid");
+                                        break;
+                                    }
                                 }
                             }
+                        } catch (ClassCastException e) {
+                            error.put(name, "is invalid");
                         }
                     } else {
                         error.put(name, "is required");
@@ -2647,18 +2757,22 @@ public class JavascriptController {
                 } else if (TypeEnum.Date.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     if (values != null && !values.isEmpty()) {
-                        for (String value : values) {
-                            if (value == null || "".equals(value)) {
-                                error.put(name, "is required");
-                                break;
-                            } else {
-                                try {
-                                    DateFormatUtils.ISO_DATE_FORMAT.parse(value);
-                                } catch (ParseException e) {
-                                    error.put(name, "is invalid");
+                        try {
+                            for (String value : values) {
+                                if (value == null || "".equals(value)) {
+                                    error.put(name, "is required");
                                     break;
+                                } else {
+                                    try {
+                                        DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        error.put(name, "is invalid");
+                                        break;
+                                    }
                                 }
                             }
+                        } catch (ClassCastException e) {
+                            error.put(name, "is invalid");
                         }
                     } else {
                         error.put(name, "is required");
@@ -2666,17 +2780,21 @@ public class JavascriptController {
                 } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     if (values != null && !values.isEmpty()) {
-                        for (String value : values) {
-                            if (value == null || "".equals(value)) {
-                                error.put(name, "is required");
-                                break;
-                            } else {
-                                try {
-                                    DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
-                                } catch (ParseException e) {
-                                    error.put(name, "is invalid");
+                        try {
+                            for (String value : values) {
+                                if (value == null || "".equals(value)) {
+                                    error.put(name, "is required");
+                                    break;
+                                } else {
+                                    try {
+                                        DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        error.put(name, "is invalid");
+                                    }
                                 }
                             }
+                        } catch (ClassCastException e) {
+                            error.put(name, "is invalid");
                         }
                     } else {
                         error.put(name, "is required");
@@ -2688,15 +2806,20 @@ public class JavascriptController {
                     if (values != null && !values.isEmpty()) {
                         for (Object value : values) {
                             if (TypeEnum.Boolean.getLiteral().equals(enumType)) {
-                                Boolean enumValue = (Boolean) value;
-                                if (enumValue != null) {
-                                    List<String> enumItemValues = enumItemDictionary.get(enumId);
-                                    if (!enumItemValues.contains(String.valueOf(value))) {
-                                        error.put(name, "is invalid");
+                                try {
+                                    Boolean enumValue = (Boolean) value;
+                                    if (enumValue != null) {
+                                        List<String> enumItemValues = enumItemDictionary.get(enumId);
+                                        if (!enumItemValues.contains(String.valueOf(value))) {
+                                            error.put(name, "is invalid");
+                                            break;
+                                        }
+                                    } else {
+                                        error.put(name, "is required");
                                         break;
                                     }
-                                } else {
-                                    error.put(name, "is required");
+                                } catch (ClassCastException e) {
+                                    error.put(name, "is invalid");
                                     break;
                                 }
                             } else if (TypeEnum.Character.getLiteral().equals(enumType)
@@ -2704,49 +2827,64 @@ public class JavascriptController {
                                     || TypeEnum.Time.getLiteral().equals(enumType)
                                     || TypeEnum.Date.getLiteral().equals(enumType)
                                     || TypeEnum.DateTime.getLiteral().equals(enumType)) {
-                                String enumValue = (String) value;
-                                if (enumValue != null && !"".equals(enumValue)) {
-                                    List<String> enumItemValues = enumItemDictionary.get(enumId);
-                                    if (!enumItemValues.contains(enumValue)) {
-                                        error.put(name, "is invalid");
+                                try {
+                                    String enumValue = (String) value;
+                                    if (enumValue != null && !"".equals(enumValue)) {
+                                        List<String> enumItemValues = enumItemDictionary.get(enumId);
+                                        if (!enumItemValues.contains(enumValue)) {
+                                            error.put(name, "is invalid");
+                                            break;
+                                        }
+                                    } else {
+                                        error.put(name, "is required");
                                         break;
                                     }
-                                } else {
-                                    error.put(name, "is required");
+                                } catch (ClassCastException e) {
+                                    error.put(name, "is invalid");
                                     break;
                                 }
                             } else if (TypeEnum.Long.getLiteral().equals(enumType)) {
-                                Double doubleValue = (Double) value;
-                                if (value != null) {
-                                    try {
-                                        String stringValue = String.valueOf(doubleValue);
-                                        if (stringValue.endsWith(".0")) {
-                                            stringValue = stringValue.substring(0, stringValue.length() - 2);
+                                try {
+                                    Double doubleValue = (Double) value;
+                                    if (value != null) {
+                                        try {
+                                            String stringValue = String.valueOf(doubleValue);
+                                            if (stringValue.endsWith(".0")) {
+                                                stringValue = stringValue.substring(0, stringValue.length() - 2);
+                                            }
+                                            Long enumValue = Long.valueOf(stringValue);
+                                            List<String> enumItemValues = enumItemDictionary.get(enumId);
+                                            if (!enumItemValues.contains(String.valueOf(enumValue))) {
+                                                error.put(name, "is invalid");
+                                                break;
+                                            }
+                                        } catch (NumberFormatException e) {
+                                            error.put(name, "is invalid");
+                                            break;
                                         }
-                                        Long enumValue = Long.valueOf(stringValue);
+                                    } else {
+                                        error.put(name, "is required");
+                                        break;
+                                    }
+                                } catch (ClassCastException e) {
+                                    error.put(name, "is invalid");
+                                    break;
+                                }
+                            } else if (TypeEnum.Double.getLiteral().equals(enumType)) {
+                                try {
+                                    Double enumValue = (Double) value;
+                                    if (enumValue != null) {
                                         List<String> enumItemValues = enumItemDictionary.get(enumId);
                                         if (!enumItemValues.contains(String.valueOf(enumValue))) {
                                             error.put(name, "is invalid");
                                             break;
                                         }
-                                    } catch (NumberFormatException e) {
-                                        error.put(name, "is invalid");
+                                    } else {
+                                        error.put(name, "is required");
                                         break;
                                     }
-                                } else {
-                                    error.put(name, "is required");
-                                    break;
-                                }
-                            } else if (TypeEnum.Double.getLiteral().equals(enumType)) {
-                                Double enumValue = (Double) value;
-                                if (enumValue != null) {
-                                    List<String> enumItemValues = enumItemDictionary.get(enumId);
-                                    if (!enumItemValues.contains(String.valueOf(enumValue))) {
-                                        error.put(name, "is invalid");
-                                        break;
-                                    }
-                                } else {
-                                    error.put(name, "is required");
+                                } catch (ClassCastException e) {
+                                    error.put(name, "is invalid");
                                     break;
                                 }
                             }
@@ -2777,23 +2915,29 @@ public class JavascriptController {
                         error.put(name, "is required");
                     }
                 } else if (TypeEnum.Map.getLiteral().equals(subType)) {
-                    List<Map<String, Object>> fieldJsons = (List<Map<String, Object>>) json.get(name);
-                    if (fieldJsons != null && !fieldJsons.isEmpty()) {
-                        for (Map<String, Object> fieldJson : fieldJsons) {
-                            if (fieldJson != null && !fieldJson.isEmpty()) {
-                                Map<String, Object> fieldError = new HashMap<>();
-                                error.put(name, fieldError);
-                                List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.JSON_ID));
-                                for (Map<String, Object> fieldJsonField : fieldJsonFields) {
-                                    validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
+                    try {
+                        List<Map<String, Object>> fieldJsons = (List<Map<String, Object>>) json.get(name);
+                        if (fieldJsons != null) {
+                            for (Map<String, Object> fieldJson : fieldJsons) {
+                                if (fieldJson != null) {
+                                    Map<String, Object> fieldError = new HashMap<>();
+                                    List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.MAP_JSON_ID));
+                                    for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                                        validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
+                                    }
+                                    if (!fieldError.isEmpty()) {
+                                        error.put(name, fieldError);
+                                    }
+                                } else {
+                                    error.put(name, "is required");
+                                    break;
                                 }
-                            } else {
-                                error.put(name, "is required");
-                                break;
                             }
+                        } else {
+                            error.put(name, "is required");
                         }
-                    } else {
-                        error.put(name, "is required");
+                    } catch (ClassCastException e) {
+                        error.put(name, "is invalid");
                     }
                 }
             }
@@ -2801,132 +2945,179 @@ public class JavascriptController {
         } else {
             // region not required
             if (TypeEnum.Time.getLiteral().equals(type)) {
-                String value = (String) json.get(name);
-                if (value != null) {
-                    try {
-                        DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
-                    } catch (ParseException e) {
-                        error.put(name, "is invalid");
+                try {
+                    String value = (String) json.get(name);
+                    if (value != null) {
+                        try {
+                            DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                        } catch (ParseException e) {
+                            error.put(name, "is invalid");
+                        }
                     }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.Date.getLiteral().equals(type)) {
-                String value = (String) json.get(name);
-                if (value != null) {
-                    try {
-                        DateFormatUtils.ISO_DATE_FORMAT.parse(value);
-                    } catch (ParseException e) {
-                        error.put(name, "is invalid");
+                try {
+                    String value = (String) json.get(name);
+                    if (value != null) {
+                        try {
+                            DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                        } catch (ParseException e) {
+                            error.put(name, "is invalid");
+                        }
                     }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
-                String value = (String) json.get(name);
-                if (value != null) {
-                    try {
-                        DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
-                    } catch (ParseException e) {
-                        error.put(name, "is invalid");
+                try {
+                    String value = (String) json.get(name);
+                    if (value != null) {
+                        try {
+                            DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                        } catch (ParseException e) {
+                            error.put(name, "is invalid");
+                        }
                     }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.Enum.getLiteral().equals(type)) {
                 Object value = json.get(name);
                 Map<String, Object> enumRecord = enumDictionary.get(enumId);
                 String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
                 if (TypeEnum.Boolean.getLiteral().equals(enumType)) {
-                    Boolean enumValue = (Boolean) value;
-                    if (enumValue != null) {
-                        List<String> enumItemValues = enumItemDictionary.get(enumId);
-                        if (!enumItemValues.contains(String.valueOf(value))) {
-                            error.put(name, "is invalid");
+                    try {
+                        Boolean enumValue = (Boolean) value;
+                        if (enumValue != null) {
+                            List<String> enumItemValues = enumItemDictionary.get(enumId);
+                            if (!enumItemValues.contains(String.valueOf(value))) {
+                                error.put(name, "is invalid");
+                            }
                         }
+                    } catch (ClassCastException e) {
+                        error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Character.getLiteral().equals(enumType)
                         || TypeEnum.String.getLiteral().equals(enumType)
                         || TypeEnum.Time.getLiteral().equals(enumType)
                         || TypeEnum.Date.getLiteral().equals(enumType)
                         || TypeEnum.DateTime.getLiteral().equals(enumType)) {
-                    String enumValue = (String) value;
-                    if (enumValue != null && !"".equals(enumValue)) {
-                        List<String> enumItemValues = enumItemDictionary.get(enumId);
-                        if (!enumItemValues.contains(enumValue)) {
-                            error.put(name, "is invalid");
+                    try {
+                        String enumValue = (String) value;
+                        if (enumValue != null && !"".equals(enumValue)) {
+                            List<String> enumItemValues = enumItemDictionary.get(enumId);
+                            if (!enumItemValues.contains(enumValue)) {
+                                error.put(name, "is invalid");
+                            }
                         }
+                    } catch (ClassCastException e) {
+                        error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Long.getLiteral().equals(enumType)) {
-                    Double doubleValue = (Double) value;
-                    if (value != null) {
-                        try {
-                            String stringValue = String.valueOf(doubleValue);
-                            if (stringValue.endsWith(".0")) {
-                                stringValue = stringValue.substring(0, stringValue.length() - 2);
+                    try {
+                        Double doubleValue = (Double) value;
+                        if (value != null) {
+                            try {
+                                String stringValue = String.valueOf(doubleValue);
+                                if (stringValue.endsWith(".0")) {
+                                    stringValue = stringValue.substring(0, stringValue.length() - 2);
+                                }
+                                Long enumValue = Long.valueOf(stringValue);
+                                List<String> enumItemValues = enumItemDictionary.get(enumId);
+                                if (!enumItemValues.contains(String.valueOf(enumValue))) {
+                                    error.put(name, "is invalid");
+                                }
+                            } catch (NumberFormatException e) {
+                                error.put(name, "is invalid");
                             }
-                            Long enumValue = Long.valueOf(stringValue);
+                        }
+                    } catch (ClassCastException e) {
+                        error.put(name, "is invalid");
+                    }
+                } else if (TypeEnum.Double.getLiteral().equals(enumType)) {
+                    try {
+                        Double enumValue = (Double) value;
+                        if (enumValue != null) {
                             List<String> enumItemValues = enumItemDictionary.get(enumId);
                             if (!enumItemValues.contains(String.valueOf(enumValue))) {
                                 error.put(name, "is invalid");
                             }
-                        } catch (NumberFormatException e) {
-                            error.put(name, "is invalid");
                         }
-                    }
-                } else if (TypeEnum.Double.getLiteral().equals(enumType)) {
-                    Double enumValue = (Double) value;
-                    if (enumValue != null) {
-                        List<String> enumItemValues = enumItemDictionary.get(enumId);
-                        if (!enumItemValues.contains(String.valueOf(enumValue))) {
-                            error.put(name, "is invalid");
-                        }
+                    } catch (ClassCastException e) {
+                        error.put(name, "is invalid");
                     }
                 }
             } else if (TypeEnum.Map.getLiteral().equals(type)) {
-                Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
-                if (fieldJson != null && !fieldJson.isEmpty()) {
-                    Map<String, Object> fieldError = new HashMap<>();
-                    List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.JSON_ID));
-                    for (Map<String, Object> fieldJsonField : fieldJsonFields) {
-                        validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
+                try {
+                    Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
+                    if (fieldJson != null) {
+                        Map<String, Object> fieldError = new HashMap<>();
+                        List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.MAP_JSON_ID));
+                        for (Map<String, Object> fieldJsonField : fieldJsonFields) {
+                            validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
+                        }
+                        if (!fieldError.isEmpty()) {
+                            error.put(name, fieldError);
+                        }
                     }
+                } catch (ClassCastException e) {
+                    error.put(name, "is invalid");
                 }
             } else if (TypeEnum.List.getLiteral().equals(type)) {
                 if (TypeEnum.Time.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     if (values != null && !values.isEmpty()) {
-                        for (String value : values) {
-                            if (value != null) {
-                                try {
-                                    DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
-                                } catch (ParseException e) {
-                                    error.put(name, "is invalid");
-                                    break;
+                        try {
+                            for (String value : values) {
+                                if (value != null) {
+                                    try {
+                                        DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        error.put(name, "is invalid");
+                                        break;
+                                    }
                                 }
                             }
+                        } catch (ClassCastException e) {
+                            error.put(name, "is invalid");
                         }
                     }
                 } else if (TypeEnum.Date.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     if (values != null && !values.isEmpty()) {
-                        for (String value : values) {
-                            if (value != null) {
-                                try {
-                                    DateFormatUtils.ISO_DATE_FORMAT.parse(value);
-                                } catch (ParseException e) {
-                                    error.put(name, "is invalid");
-                                    break;
+                        try {
+                            for (String value : values) {
+                                if (value != null) {
+                                    try {
+                                        DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        error.put(name, "is invalid");
+                                        break;
+                                    }
                                 }
                             }
+                        } catch (ClassCastException e) {
+                            error.put(name, "is invalid");
                         }
                     }
                 } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
                     List<String> values = (List<String>) json.get(name);
                     if (values != null && !values.isEmpty()) {
-                        for (String value : values) {
-                            if (value != null) {
-                                try {
-                                    DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
-                                } catch (ParseException e) {
-                                    error.put(name, "is invalid");
-                                    break;
+                        try {
+                            for (String value : values) {
+                                if (value != null) {
+                                    try {
+                                        DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                                    } catch (ParseException e) {
+                                        error.put(name, "is invalid");
+                                        break;
+                                    }
                                 }
                             }
+                        } catch (ClassCastException e) {
+                            error.put(name, "is invalid");
                         }
                     }
                 } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
@@ -2990,14 +3181,16 @@ public class JavascriptController {
                     }
                 } else if (TypeEnum.Map.getLiteral().equals(subType)) {
                     List<Map<String, Object>> fieldJsons = (List<Map<String, Object>>) json.get(name);
-                    if (fieldJsons != null && !fieldJsons.isEmpty()) {
+                    if (fieldJsons != null) {
                         for (Map<String, Object> fieldJson : fieldJsons) {
-                            if (fieldJson != null && !fieldJson.isEmpty()) {
+                            if (fieldJson != null) {
                                 Map<String, Object> fieldError = new HashMap<>();
-                                error.put(name, fieldError);
-                                List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.JSON_ID));
+                                List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", fieldJson.get(Jdbc.JsonField.MAP_JSON_ID));
                                 for (Map<String, Object> fieldJsonField : fieldJsonFields) {
                                     validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
+                                }
+                                if (!fieldError.isEmpty()) {
+                                    error.put(name, fieldError);
                                 }
                             }
                         }
@@ -3016,6 +3209,7 @@ public class JavascriptController {
      * @param enumIdList
      * @param jsonField
      */
+
     private void processJsonField(JdbcTemplate jdbcTemplate, List<String> jsonIdList, List<String> enumIdList, Map<String, Object> jsonField) {
         if (jsonField.get(Jdbc.JsonField.ENUM_ID) != null && !"".equals(jsonField.get(Jdbc.JsonField.ENUM_ID))) {
             if (!enumIdList.contains((String) jsonField.get(Jdbc.JsonField.ENUM_ID))) {
