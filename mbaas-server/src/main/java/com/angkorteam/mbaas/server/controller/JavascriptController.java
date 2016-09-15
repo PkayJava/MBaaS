@@ -2441,14 +2441,77 @@ public class JavascriptController {
             }
             // endregion
 
+            if (requestQueryErrors.isEmpty() || requestBodyErrors.isEmpty() || requestHeaderErrors.isEmpty()) {
+                return null;
+            }
+
+            Map<String, Object> responseBodyErrors = new HashMap<>();
+            String responseContentType = (String) restRecord.get(Jdbc.Rest.RESPONSE_CONTENT_TYPE);
+            String responseBodyType = (String) restRecord.get(Jdbc.Rest.RESPONSE_BODY_TYPE);
+            String responseBodySubType = (String) restRecord.get(Jdbc.Rest.RESPONSE_BODY_SUB_TYPE);
+            boolean responseBodyRequired = (boolean) restRecord.get(Jdbc.Rest.RESPONSE_BODY_REQUIRED);
+            Object response = http.http(null, null);
+            if (MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(responseContentType)) {
+                if (responseBodyRequired) {
+                    if (response == null) {
+                        responseBodyErrors.put("responseBody", "is required");
+                    } else {
+                        if (response instanceof byte[]) {
+                            if (((byte[]) response).length == 0) {
+                                responseBodyErrors.put("responseBody", "is required");
+                            }
+                        } else {
+                            responseBodyErrors.put("responseBody", "is invalid");
+                        }
+                    }
+                } else {
+                    if (response == null) {
+
+                    } else {
+                        if (response instanceof byte[]) {
+
+                        } else {
+
+                        }
+                    }
+                }
+            } else if (MediaType.APPLICATION_JSON_VALUE.equals(responseContentType)) {
+                if (responseBodyRequired) {
+                    if (TypeEnum.Boolean.getLiteral().equals(responseBodyType)) {
+                    } else if (TypeEnum.Long.getLiteral().equals(responseBodyType)) {
+                    } else if (TypeEnum.Double.getLiteral().equals(responseBodyType)) {
+                    } else if (TypeEnum.String.getLiteral().equals(responseBodyType)) {
+                    } else if (TypeEnum.Time.getLiteral().equals(responseBodyType)) {
+                    } else if (TypeEnum.Date.getLiteral().equals(responseBodyType)) {
+                    } else if (TypeEnum.DateTime.getLiteral().equals(responseBodyType)) {
+                    } else if (TypeEnum.Map.getLiteral().equals(responseBodyType)) {
+                    } else if (TypeEnum.Enum.getLiteral().equals(responseBodyType)) {
+                    } else if (TypeEnum.List.getLiteral().equals(responseBodyType)) {
+                        if (TypeEnum.Boolean.getLiteral().equals(responseBodySubType)) {
+                        } else if (TypeEnum.Long.getLiteral().equals(responseBodySubType)) {
+                        } else if (TypeEnum.Double.getLiteral().equals(responseBodyType)) {
+                        } else if (TypeEnum.String.getLiteral().equals(responseBodyType)) {
+                        } else if (TypeEnum.Time.getLiteral().equals(responseBodyType)) {
+                        } else if (TypeEnum.Date.getLiteral().equals(responseBodyType)) {
+                        } else if (TypeEnum.DateTime.getLiteral().equals(responseBodyType)) {
+                        } else if (TypeEnum.Map.getLiteral().equals(responseBodyType)) {
+                        } else if (TypeEnum.Enum.getLiteral().equals(responseBodyType)) {
+                        } else if (TypeEnum.List.getLiteral().equals(responseBodyType)) {
+                        }
+                    }
+                } else {
+
+                }
+            }
+
+            if (responseBodyErrors.isEmpty()) {
+            }
+
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             System.out.println(requestBodyErrors.size());
             System.out.println(gson.toJson(requestBodyErrors));
 
-        } catch (
-                Throwable e)
-
-        {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
         return null;
@@ -3209,7 +3272,6 @@ public class JavascriptController {
      * @param enumIdList
      * @param jsonField
      */
-
     private void processJsonField(JdbcTemplate jdbcTemplate, List<String> jsonIdList, List<String> enumIdList, Map<String, Object> jsonField) {
         if (jsonField.get(Jdbc.JsonField.ENUM_ID) != null && !"".equals(jsonField.get(Jdbc.JsonField.ENUM_ID))) {
             if (!enumIdList.contains((String) jsonField.get(Jdbc.JsonField.ENUM_ID))) {

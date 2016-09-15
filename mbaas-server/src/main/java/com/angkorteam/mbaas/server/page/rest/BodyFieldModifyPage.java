@@ -9,7 +9,12 @@ import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.server.Jdbc;
 import com.angkorteam.mbaas.server.select2.EnumChoiceProvider;
 import com.angkorteam.mbaas.server.select2.JsonChoiceProvider;
-import com.angkorteam.mbaas.server.wicket.*;
+import com.angkorteam.mbaas.server.wicket.Application;
+import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import com.angkorteam.mbaas.server.wicket.MasterPage;
+import com.angkorteam.mbaas.server.wicket.Mount;
+import com.angkorteam.mbaas.server.wicket.OnChangeAjaxBehavior;
+import com.angkorteam.mbaas.server.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
@@ -45,7 +50,7 @@ public class BodyFieldModifyPage extends MasterPage {
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
 
-    private List<String> types = new ArrayList<>();
+    private List<String> types = null;
     private String type;
     private DropDownChoice<String> typeField;
     private TextFeedbackPanel typeFeedback;
@@ -76,6 +81,86 @@ public class BodyFieldModifyPage extends MasterPage {
     @Override
     public String getPageHeader() {
         return "Modify Body Field";
+    }
+
+    private void loadTypes() {
+        this.types = new ArrayList<>();
+        if (this.contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
+            this.types.add(TypeEnum.Boolean.getLiteral());
+            this.types.add(TypeEnum.Long.getLiteral());
+            this.types.add(TypeEnum.Double.getLiteral());
+            this.types.add(TypeEnum.String.getLiteral());
+            this.types.add(TypeEnum.Time.getLiteral());
+            this.types.add(TypeEnum.Date.getLiteral());
+            this.types.add(TypeEnum.DateTime.getLiteral());
+            this.types.add(TypeEnum.Map.getLiteral());
+            this.types.add(TypeEnum.File.getLiteral());
+            this.types.add(TypeEnum.Enum.getLiteral());
+            this.types.add(TypeEnum.List.getLiteral());
+        } else if (this.contentType.equals(MediaType.MULTIPART_FORM_DATA_VALUE)) {
+            this.types.add(TypeEnum.Boolean.getLiteral());
+            this.types.add(TypeEnum.Long.getLiteral());
+            this.types.add(TypeEnum.Double.getLiteral());
+            this.types.add(TypeEnum.String.getLiteral());
+            this.types.add(TypeEnum.Time.getLiteral());
+            this.types.add(TypeEnum.Date.getLiteral());
+            this.types.add(TypeEnum.DateTime.getLiteral());
+            this.types.add(TypeEnum.File.getLiteral());
+            this.types.add(TypeEnum.Enum.getLiteral());
+            this.types.add(TypeEnum.List.getLiteral());
+        } else if (this.contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)) {
+            this.types.add(TypeEnum.Boolean.getLiteral());
+            this.types.add(TypeEnum.Long.getLiteral());
+            this.types.add(TypeEnum.Double.getLiteral());
+            this.types.add(TypeEnum.String.getLiteral());
+            this.types.add(TypeEnum.Time.getLiteral());
+            this.types.add(TypeEnum.Date.getLiteral());
+            this.types.add(TypeEnum.DateTime.getLiteral());
+            this.types.add(TypeEnum.Enum.getLiteral());
+            this.types.add(TypeEnum.List.getLiteral());
+        }
+    }
+
+    private void loadSubTypes(String contentType, String type) {
+        this.subTypes = new ArrayList<>();
+        if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
+
+        } else if (contentType.equals(MediaType.MULTIPART_FORM_DATA_VALUE)) {
+            if (type.equals(TypeEnum.List.getLiteral())) {
+                this.subTypes.add(TypeEnum.Boolean.getLiteral());
+                this.subTypes.add(TypeEnum.Long.getLiteral());
+                this.subTypes.add(TypeEnum.Double.getLiteral());
+                this.subTypes.add(TypeEnum.String.getLiteral());
+                this.subTypes.add(TypeEnum.Time.getLiteral());
+                this.subTypes.add(TypeEnum.Date.getLiteral());
+                this.subTypes.add(TypeEnum.DateTime.getLiteral());
+                this.subTypes.add(TypeEnum.Enum.getLiteral());
+                this.subTypes.add(TypeEnum.File.getLiteral());
+            }
+        } else if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)) {
+            if (type.equals(TypeEnum.List.getLiteral())) {
+                this.subTypes.add(TypeEnum.Boolean.getLiteral());
+                this.subTypes.add(TypeEnum.Long.getLiteral());
+                this.subTypes.add(TypeEnum.Double.getLiteral());
+                this.subTypes.add(TypeEnum.String.getLiteral());
+                this.subTypes.add(TypeEnum.Time.getLiteral());
+                this.subTypes.add(TypeEnum.Date.getLiteral());
+                this.subTypes.add(TypeEnum.DateTime.getLiteral());
+                this.subTypes.add(TypeEnum.Enum.getLiteral());
+            }
+        }
+        this.subTypeField.setRequired(false);
+        if (TypeEnum.List.getLiteral().equals(this.type)) {
+            this.subTypeField.setRequired(true);
+        }
+        this.enumTypeField.setRequired(false);
+        if (TypeEnum.Enum.getLiteral().equals(this.type)) {
+            this.enumTypeField.setRequired(true);
+        }
+        this.mapTypeField.setRequired(false);
+        if (TypeEnum.Map.getLiteral().equals(this.type)) {
+            this.mapTypeField.setRequired(true);
+        }
     }
 
     @Override
@@ -117,16 +202,8 @@ public class BodyFieldModifyPage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
+        loadTypes();
         this.type = (String) jsonFieldRecord.get(Jdbc.JsonField.TYPE);
-        this.types.clear();
-        for (TypeEnum type : TypeEnum.values()) {
-            if (type.isBodyType()) {
-                if ((type == TypeEnum.Map && !this.contentType.equals(MediaType.APPLICATION_JSON_VALUE)) || (type == TypeEnum.File && !this.contentType.equals(MediaType.MULTIPART_FORM_DATA_VALUE))) {
-                } else {
-                    types.add(type.getLiteral());
-                }
-            }
-        }
         this.typeField = new DropDownChoice<>("typeField", new PropertyModel<>(this, "type"), new PropertyModel<>(this, "types"));
         this.typeField.setOutputMarkupId(true);
         this.typeField.add(new OnChangeAjaxBehavior(this::typeFieldAjaxUpdate));
@@ -135,13 +212,8 @@ public class BodyFieldModifyPage extends MasterPage {
         this.typeFeedback = new TextFeedbackPanel("typeFeedback", this.typeField);
         this.form.add(this.typeFeedback);
 
+        loadSubTypes(this.contentType, this.type);
         this.subType = (String) jsonFieldRecord.get(Jdbc.JsonField.SUB_TYPE);
-        this.subTypes.clear();
-        for (TypeEnum type : TypeEnum.values()) {
-            if (type.isBodySubType()) {
-                subTypes.add(type.getLiteral());
-            }
-        }
         this.subTypeField = new DropDownChoice<>("subTypeField", new PropertyModel<>(this, "subType"), new PropertyModel<>(this, "subTypes"));
         this.subTypeField.setOutputMarkupId(true);
         this.subTypeField.add(new OnChangeAjaxBehavior(this::subTypeFieldAjaxUpdate));
@@ -177,51 +249,19 @@ public class BodyFieldModifyPage extends MasterPage {
     }
 
     private void subTypeFieldAjaxUpdate(AjaxRequestTarget target) {
+        this.enumTypeField.setRequired(false);
         if (TypeEnum.Enum.getLiteral().equals(this.subType)) {
             this.enumTypeField.setRequired(true);
-        } else {
-            this.enumTypeField.setRequired(false);
         }
+        this.mapTypeField.setRequired(false);
         if (TypeEnum.Map.getLiteral().equals(this.subType)) {
             this.mapTypeField.setRequired(true);
-        } else {
-            this.mapTypeField.setRequired(false);
         }
     }
 
     private void typeFieldAjaxUpdate(AjaxRequestTarget target) {
         target.add(this.subTypeField);
-        if (TypeEnum.List.getLiteral().equals(this.type)) {
-            this.subTypes.clear();
-            for (TypeEnum type : TypeEnum.values()) {
-                if (type.isBodySubType()) {
-                    this.subTypes.add(type.getLiteral());
-                }
-            }
-            if (MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(this.contentType)) {
-                this.subTypes.remove(TypeEnum.Byte.getLiteral());
-                this.subTypes.remove(TypeEnum.Map.getLiteral());
-            }
-            if (MediaType.MULTIPART_FORM_DATA_VALUE.equals(this.contentType)) {
-                this.subTypes.remove(TypeEnum.Byte.getLiteral());
-                this.subTypes.remove(TypeEnum.Map.getLiteral());
-                this.subTypes.add(TypeEnum.File.getLiteral());
-            }
-            this.subTypeField.setRequired(true);
-        } else {
-            this.subTypeField.setRequired(false);
-            this.subTypes.clear();
-        }
-        if (TypeEnum.Enum.getLiteral().equals(this.type)) {
-            this.enumTypeField.setRequired(true);
-        } else {
-            this.enumTypeField.setRequired(false);
-        }
-        if (TypeEnum.Map.getLiteral().equals(this.type)) {
-            this.mapTypeField.setRequired(true);
-        } else {
-            this.mapTypeField.setRequired(false);
-        }
+        loadSubTypes(this.contentType, this.type);
     }
 
     private void saveButtonOnSubmit(Button button) {

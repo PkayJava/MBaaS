@@ -481,113 +481,117 @@ public class RestCreatePage extends MasterPage {
         setResponsePage(RestManagementPage.class);
     }
 
+    // reviewed
     private void requestBodySubTypeFieldAjaxUpdate(AjaxRequestTarget target) {
+        this.requestBodyMapJsonField.setRequired(false);
         if (TypeEnum.Map.getLiteral().equals(this.requestBodySubType)) {
             this.requestBodyMapJsonField.setRequired(true);
-        } else {
-            this.requestBodyMapJsonField.setRequired(false);
         }
+        this.requestBodyEnumField.setRequired(false);
         if (TypeEnum.Enum.getLiteral().equals(this.requestBodySubType)) {
             this.requestBodyEnumField.setRequired(true);
-        } else {
-            this.requestBodyEnumField.setRequired(false);
         }
     }
 
+    // reviewed
     private void responseBodySubTypeFieldAjaxUpdate(AjaxRequestTarget target) {
+        this.responseBodyMapJsonField.setRequired(false);
+        this.responseBodyEnumField.setRequired(false);
         if (TypeEnum.Map.getLiteral().equals(this.responseBodySubType)) {
             this.responseBodyMapJsonField.setRequired(true);
-        } else {
-            this.responseBodyMapJsonField.setRequired(false);
         }
         if (TypeEnum.Enum.getLiteral().equals(this.responseBodySubType)) {
             this.responseBodyEnumField.setRequired(true);
-        } else {
-            this.responseBodyEnumField.setRequired(false);
         }
     }
 
+    // reviewed
     private void requestBodyTypeFieldAjaxUpdate(AjaxRequestTarget target) {
         target.add(this.requestBodySubTypeField);
+        this.requestBodySubType = null;
+        this.requestBodySubTypes.clear();
+        this.requestBodySubTypeField.setRequired(false);
         if (TypeEnum.List.getLiteral().equals(this.requestBodyType)) {
-            this.requestBodySubType = null;
-            this.requestBodySubTypes.clear();
-            this.requestBodySubTypes.add(TypeEnum.Boolean.getLiteral());
-            this.requestBodySubTypes.add(TypeEnum.Long.getLiteral());
-            this.requestBodySubTypes.add(TypeEnum.Double.getLiteral());
-            this.requestBodySubTypes.add(TypeEnum.String.getLiteral());
-            this.requestBodySubTypes.add(TypeEnum.Date.getLiteral());
-            this.requestBodySubTypes.add(TypeEnum.Time.getLiteral());
-            this.requestBodySubTypes.add(TypeEnum.DateTime.getLiteral());
-            this.requestBodySubTypes.add(TypeEnum.Enum.getLiteral());
-            this.requestBodySubTypes.add(TypeEnum.Map.getLiteral());
-            this.requestBodySubTypes.add(TypeEnum.File.getLiteral());
-            this.requestBodySubTypeField.setRequired(true);
-        } else {
-            this.requestBodySubTypeField.setRequired(false);
-            this.requestBodySubType = null;
-            this.requestBodySubTypes.clear();
+            if (MediaType.MULTIPART_FORM_DATA_VALUE.equals(this.requestContentType)) {
+            } else if (MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(this.requestContentType)) {
+            } else if (MediaType.APPLICATION_JSON_VALUE.equals(this.requestContentType)) {
+                this.requestBodySubTypes.add(TypeEnum.Boolean.getLiteral());
+                this.requestBodySubTypes.add(TypeEnum.Long.getLiteral());
+                this.requestBodySubTypes.add(TypeEnum.Double.getLiteral());
+                this.requestBodySubTypes.add(TypeEnum.String.getLiteral());
+                this.requestBodySubTypes.add(TypeEnum.Time.getLiteral());
+                this.requestBodySubTypes.add(TypeEnum.Date.getLiteral());
+                this.requestBodySubTypes.add(TypeEnum.DateTime.getLiteral());
+                this.requestBodySubTypes.add(TypeEnum.Enum.getLiteral());
+                this.requestBodySubTypes.add(TypeEnum.Map.getLiteral());
+                this.requestBodySubTypes.add(TypeEnum.File.getLiteral());
+                this.requestBodySubTypeField.setRequired(true);
+            }
         }
+
+        this.requestBodyMapJsonField.setRequired(false);
         if (TypeEnum.Map.getLiteral().equals(this.requestBodyType)) {
             this.requestBodyMapJsonField.setRequired(true);
-        } else {
-            this.requestBodyMapJsonField.setRequired(false);
         }
+        this.requestBodyEnumField.setRequired(false);
         if (TypeEnum.Enum.getLiteral().equals(this.requestBodyType)) {
             this.requestBodyEnumField.setRequired(true);
-        } else {
-            this.requestBodyEnumField.setRequired(false);
         }
     }
 
+    // reviewed
     private void responseBodyTypeFieldAjaxUpdate(AjaxRequestTarget target) {
         target.add(this.responseBodySubTypeField);
+        this.responseBodySubType = null;
+        this.responseBodySubTypes.clear();
+        this.responseBodySubTypeField.setRequired(false);
         if (TypeEnum.List.getLiteral().equals(this.responseBodyType)) {
-            this.responseBodySubType = null;
-            this.responseBodySubTypes.clear();
-            this.responseBodySubTypes.add(TypeEnum.Boolean.getLiteral());
-            this.responseBodySubTypes.add(TypeEnum.Byte.getLiteral());
-            this.responseBodySubTypes.add(TypeEnum.Long.getLiteral());
-            this.responseBodySubTypes.add(TypeEnum.Double.getLiteral());
-            this.responseBodySubTypes.add(TypeEnum.String.getLiteral());
-            this.responseBodySubTypes.add(TypeEnum.Date.getLiteral());
-            this.responseBodySubTypes.add(TypeEnum.Time.getLiteral());
-            this.responseBodySubTypes.add(TypeEnum.DateTime.getLiteral());
-            this.responseBodySubTypes.add(TypeEnum.Enum.getLiteral());
-            this.responseBodySubTypes.add(TypeEnum.Map.getLiteral());
-            this.responseBodySubTypeField.setRequired(true);
-        } else {
-            this.responseBodySubTypeField.setRequired(false);
-            this.responseBodySubType = null;
-            this.responseBodySubTypes.clear();
+            if (MediaType.APPLICATION_JSON_VALUE.equals(this.responseContentType)) {
+                this.responseBodySubTypes.add(TypeEnum.Boolean.getLiteral());
+                this.responseBodySubTypes.add(TypeEnum.Long.getLiteral());
+                this.responseBodySubTypes.add(TypeEnum.Double.getLiteral());
+                this.responseBodySubTypes.add(TypeEnum.String.getLiteral());
+                this.responseBodySubTypes.add(TypeEnum.Time.getLiteral());
+                this.responseBodySubTypes.add(TypeEnum.Date.getLiteral());
+                this.responseBodySubTypes.add(TypeEnum.DateTime.getLiteral());
+                this.responseBodySubTypes.add(TypeEnum.Enum.getLiteral());
+                this.responseBodySubTypes.add(TypeEnum.Map.getLiteral());
+                this.responseBodySubTypes.add(TypeEnum.File.getLiteral());
+                this.responseBodySubTypeField.setRequired(true);
+            }
         }
+        this.responseBodyMapJsonField.setRequired(false);
         if (TypeEnum.Map.getLiteral().equals(this.responseBodyType)) {
             this.responseBodyMapJsonField.setRequired(true);
-        } else {
-            this.responseBodyMapJsonField.setRequired(false);
         }
+        this.responseBodyEnumField.setRequired(false);
         if (TypeEnum.Enum.getLiteral().equals(this.responseBodyType)) {
             this.responseBodyEnumField.setRequired(true);
-        } else {
-            this.responseBodyEnumField.setRequired(false);
         }
     }
 
+    // reviewed
     private void requestContentTypeFieldAjaxUpdate(AjaxRequestTarget target) {
-        this.requestBodyMapJsonProvider.setContentType(this.requestContentType);
         target.add(this.requestBodyTypeField);
-        target.add(this.requestContentTypeField);
+        target.add(this.requestBodySubTypeField);
+        this.requestBodyMapJsonProvider.setContentType(this.requestContentType);
+        this.requestBodySubType = null;
+        this.requestBodySubTypes.clear();
+        this.requestBodySubTypeField.setRequired(false);
+        this.requestBodyType = null;
+        this.requestBodyTypes.clear();
+        this.requestBodyTypeField.setRequired(true);
+        this.requestBodyMapJson = null;
+        this.requestBodyMapJsonField.setRequired(false);
         if (MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(this.requestContentType)) {
             this.requestBodyType = TypeEnum.File.getLiteral();
-            this.requestBodyTypes.clear();
             this.requestBodyTypes.add(TypeEnum.File.getLiteral());
-        } else if (MediaType.MULTIPART_FORM_DATA_VALUE.equals(this.requestContentType) || MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(this.requestContentType)) {
+        } else if (MediaType.MULTIPART_FORM_DATA_VALUE.equals(this.requestContentType)
+                || MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(this.requestContentType)) {
             this.requestBodyType = TypeEnum.Map.getLiteral();
-            this.requestBodyTypes.clear();
             this.requestBodyTypes.add(TypeEnum.Map.getLiteral());
+            this.requestBodyMapJsonField.setRequired(true);
         } else if (MediaType.APPLICATION_JSON_VALUE.equals(this.requestContentType)) {
-            this.requestBodyType = null;
-            this.requestBodyTypes.clear();
             this.requestBodyTypes.add(TypeEnum.Boolean.getLiteral());
             this.requestBodyTypes.add(TypeEnum.Long.getLiteral());
             this.requestBodyTypes.add(TypeEnum.Double.getLiteral());
@@ -595,26 +599,34 @@ public class RestCreatePage extends MasterPage {
             this.requestBodyTypes.add(TypeEnum.Date.getLiteral());
             this.requestBodyTypes.add(TypeEnum.Time.getLiteral());
             this.requestBodyTypes.add(TypeEnum.DateTime.getLiteral());
-            this.requestBodyTypes.add(TypeEnum.Enum.getLiteral());
             this.requestBodyTypes.add(TypeEnum.Map.getLiteral());
+            this.requestBodyTypes.add(TypeEnum.File.getLiteral());
+            this.requestBodyTypes.add(TypeEnum.Enum.getLiteral());
             this.requestBodyTypes.add(TypeEnum.List.getLiteral());
         }
     }
 
+    // reviewed
     private void responseContentTypeFieldAjaxUpdate(AjaxRequestTarget target) {
         target.add(this.responseBodyTypeField);
-        target.add(this.responseContentTypeField);
+        target.add(this.responseBodySubTypeField);
+        this.responseBodySubType = null;
+        this.responseBodySubTypes.clear();
+        this.responseBodySubTypeField.setRequired(false);
+        this.responseBodyType = null;
+        this.responseBodyTypes.clear();
+        this.responseBodyTypeField.setRequired(true);
+        this.responseBodyMapJson = null;
+        this.responseBodyMapJsonField.setRequired(false);
         if (MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(this.responseContentType)) {
             this.responseBodyType = TypeEnum.File.getLiteral();
-            this.responseBodyTypes.clear();
             this.responseBodyTypes.add(TypeEnum.File.getLiteral());
-        } else if (MediaType.MULTIPART_FORM_DATA_VALUE.equals(this.responseContentType) || MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(this.responseContentType)) {
+        } else if (MediaType.MULTIPART_FORM_DATA_VALUE.equals(this.responseContentType)
+                || MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(this.responseContentType)) {
             this.responseBodyType = TypeEnum.Map.getLiteral();
-            this.responseBodyTypes.clear();
             this.responseBodyTypes.add(TypeEnum.Map.getLiteral());
+            this.responseBodyMapJsonField.setRequired(true);
         } else if (MediaType.APPLICATION_JSON_VALUE.equals(this.responseContentType)) {
-            this.responseBodyType = null;
-            this.responseBodyTypes.clear();
             this.responseBodyTypes.add(TypeEnum.Boolean.getLiteral());
             this.responseBodyTypes.add(TypeEnum.Long.getLiteral());
             this.responseBodyTypes.add(TypeEnum.Double.getLiteral());
@@ -622,24 +634,32 @@ public class RestCreatePage extends MasterPage {
             this.responseBodyTypes.add(TypeEnum.Date.getLiteral());
             this.responseBodyTypes.add(TypeEnum.Time.getLiteral());
             this.responseBodyTypes.add(TypeEnum.DateTime.getLiteral());
-            this.responseBodyTypes.add(TypeEnum.Enum.getLiteral());
             this.responseBodyTypes.add(TypeEnum.Map.getLiteral());
+            this.responseBodyTypes.add(TypeEnum.File.getLiteral());
+            this.responseBodyTypes.add(TypeEnum.Enum.getLiteral());
             this.responseBodyTypes.add(TypeEnum.List.getLiteral());
         }
     }
 
+    // reviewed
     private void methodFieldAjaxUpdate(AjaxRequestTarget target) {
         target.add(this.requestContentTypeField);
         target.add(this.methodField);
-        if (this.method.equals(HttpMethod.GET.name()) || this.method.equals(HttpMethod.DELETE.name())) {
-            this.requestContentType = null;
-            this.requestContentTypes.clear();
-            this.requestContentTypeField.setRequired(false);
-            this.requestBodyTypeField.setRequired(false);
-            this.requestBodySubTypeField.setRequired(false);
-        } else if (this.method.equals(HttpMethod.PUT.name()) || this.method.equals(HttpMethod.POST.name())) {
-            this.requestContentType = null;
-            this.requestContentTypes.clear();
+        target.add(this.requestBodyTypeField);
+        target.add(this.requestBodySubTypeField);
+        this.requestContentType = null;
+        this.requestContentTypes.clear();
+        this.requestContentTypeField.setRequired(false);
+        this.requestBodyType = null;
+        this.requestBodyTypeField.setRequired(false);
+        this.requestBodySubType = null;
+        this.requestBodySubTypes.clear();
+        this.requestBodySubTypeField.setRequired(false);
+        this.requestBodyMapJson = null;
+        this.requestBodyMapJsonField.setRequired(false);
+        this.requestBodyEnum = null;
+        this.requestBodyEnumField.setRequired(true);
+        if (this.method.equals(HttpMethod.PUT.name()) || this.method.equals(HttpMethod.POST.name())) {
             this.requestContentTypes.add(MediaType.MULTIPART_FORM_DATA_VALUE);
             this.requestContentTypes.add(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
             this.requestContentTypes.add(MediaType.APPLICATION_JSON_VALUE);
