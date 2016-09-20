@@ -10,17 +10,3 @@ version = '1.0'
 dependencies {
     compile 'com.google.code.gson:gson:' + gsonVersion
 }
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "http://pkayjava.ddns.net:8081/repository/maven-releases/") {
-                authentication(userName: "admin", password: "admin123")
-            }
-            pom.groupId = 'com.angkorteam.mbaas.plain';
-            pom.artifactId = 'mbaas-plain'
-            pom.version = '1.0'
-            pom.packaging = 'jar'
-        }
-    }
-}

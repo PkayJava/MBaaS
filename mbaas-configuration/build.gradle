@@ -11,17 +11,3 @@ dependencies {
     compile 'commons-configuration:commons-configuration:' + commonsconfigurationVersion
     compile 'org.apache.commons:commons-lang3:' + commonslang3Version
 }
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "http://pkayjava.ddns.net:8081/repository/maven-releases/") {
-                authentication(userName: "admin", password: "admin123")
-            }
-            pom.groupId = 'com.angkorteam.mbaas.configuration';
-            pom.artifactId = 'mbaas-configuration'
-            pom.version = '1.0'
-            pom.packaging = 'jar'
-        }
-    }
-}

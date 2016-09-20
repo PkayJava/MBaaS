@@ -2,11 +2,12 @@ buildscript {
     dependencies {
         classpath 'mysql:mysql-connector-java:' + mysqlVersion
         classpath 'org.flywaydb:flyway-gradle-plugin:' + flywayVersion
-        classpath 'com.angkorteam.gradle:plugin-task:1.0'
+        classpath 'com.angkorteam.gradle:plugintask:' + plugintaskVersion
     }
     repositories {
-        maven { url "http://pkayjava.ddns.net:8081/repository/maven-public/" }
+        maven { url "http://dl.bintray.com/socheat/maven" }
         jcenter();
+        mavenCentral()
     }
 }
 
@@ -24,7 +25,7 @@ version = '1.0'
 dependencies {
     compile 'org.jooq:jooq:' + jooqVersion
     compile 'joda-time:joda-time:' + jodatimeVersion
-    compile 'com.angkorteam.gradle:plugin-task:1.0'
+    compile 'com.angkorteam.gradle:plugintask:' + plugintaskVersion
 }
 
 sourceSets {
@@ -56,18 +57,4 @@ jooq {
     dialect = project.ext.get('temp.jdbc.dialect')
     packageName = 'com.angkorteam.mbaas.model.entity'
     outputDirectory = 'buildSrc/src/main/java'
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "http://pkayjava.ddns.net:8081/repository/maven-releases/") {
-                authentication(userName: 'admin', password: 'admin123')
-            }
-            pom.groupId = 'com.angkorteam.mbaas.jooq';
-            pom.artifactId = 'mbaas-jooq'
-            pom.version = '1.0'
-            pom.packaging = 'jar'
-        }
-    }
 }

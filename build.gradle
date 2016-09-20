@@ -15,10 +15,12 @@ allprojects {
     }
 
     repositories {
-        maven { url "http://pkayjava.ddns.net:8081/repository/maven-public/" }
+        maven { url "http://dl.bintray.com/socheat/maven" }
+        jcenter()
         mavenCentral()
     }
     ext {
+        plugintaskVersion = '1.0.0'
         commonsioVersion = '2.5'
         commonsconfigurationVersion = '1.10'
         commonslang3Version = '3.4'
@@ -26,7 +28,7 @@ allprojects {
         jodatimeVersion = '2.9.4'
         jooqVersion = '3.8.4'
         flywayVersion = '4.0.3'
-        frameworkextensionVersion = '1.0'
+        frameworkextensionVersion = '1.0.0'
         wicketVersion = '7.4.0'
         springVersion = '4.3.2.RELEASE'
         springIntegrationVersion = '4.3.1.RELEASE'

@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        maven { url "http://pkayjava.ddns.net:8081/repository/maven-public/" }
         jcenter()
         mavenCentral()
     }
@@ -15,8 +14,6 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'war'
 apply plugin: 'maven'
-//apply plugin: 'org.asciidoctor.convert'
-//apply plugin: 'io.github.robwin.swagger2markup'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -84,7 +81,7 @@ dependencies {
 
     compile 'mysql:mysql-connector-java:' + mysqlVersion
 
-    compile 'hyperic-sigar:sigar-java:' + sigarVersion
+    compile 'org.gridkit.lab:sigar-lib:' + sigarVersion
     compile 'org.reflections:reflections:' + reflectionsVersion
     compile 'org.jasypt:jasypt:' + jasyptVersion
     compile 'commons-codec:commons-codec:' + commonscodecVersion
@@ -114,17 +111,3 @@ dependencies {
 }
 
 mainClassName = 'com.angkorteam.mbaas.server.Start'
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "http://pkayjava.ddns.net:8081/repository/maven-releases/") {
-                authentication(userName: "admin", password: "admin123")
-            }
-            pom.groupId = 'com.angkorteam.mbaas.server';
-            pom.artifactId = 'mbaas-server'
-            pom.version = '1.0'
-            pom.packaging = 'war'
-        }
-    }
-}
