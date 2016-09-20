@@ -853,7 +853,7 @@ public class JavascriptController {
 
             Map<String, Object> newRequestHeader = new TreeMap<>();
             Map<String, Object> newRequestBody = new TreeMap<>();
-            Map<String, Object> newRequestParameter = new TreeMap<>();
+            Map<String, Object> newQueryParameter = new TreeMap<>();
 
             // region http
             Http http = null;
@@ -1180,6 +1180,7 @@ public class JavascriptController {
                     enumItems = enumItemDictionary.get(enumId);
                 }
                 try {
+                    List<Object> values = new ArrayList<>();
                     for (String string : strings) {
                         Object value = null;
                         if (TypeEnum.Boolean.getLiteral().equals(newType)) {
@@ -1199,6 +1200,54 @@ public class JavascriptController {
                         } else if (TypeEnum.Enum.getLiteral().equals(newType)) {
                             value = parseStringToEnum(required, enumType, enumItems, string);
                         }
+                        if (value != null) {
+                            values.add(value);
+                        }
+                    }
+
+                    if (TypeEnum.Boolean.getLiteral().equals(type)
+                            || TypeEnum.Long.getLiteral().equals(type)
+                            || TypeEnum.Double.getLiteral().equals(type)
+                            || TypeEnum.String.getLiteral().equals(type)
+                            || TypeEnum.Time.getLiteral().equals(type)
+                            || TypeEnum.Date.getLiteral().equals(type)
+                            || TypeEnum.DateTime.getLiteral().equals(type)
+                            || TypeEnum.Enum.getLiteral().equals(type)) {
+                        newQueryParameter.put(name, values.isEmpty() ? null : values.get(0));
+                    } else if (TypeEnum.List.getLiteral().equals(type)) {
+                        Object newValues = null;
+                        if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                            newValues = Array.newInstance(Boolean.class, values.size());
+                        } else if (TypeEnum.Long.getLiteral().equals(subType)) {
+                            newValues = Array.newInstance(Boolean.class, values.size());
+                        } else if (TypeEnum.Double.getLiteral().equals(subType)) {
+                            newValues = Array.newInstance(Boolean.class, values.size());
+                        } else if (TypeEnum.String.getLiteral().equals(subType)) {
+                            newValues = Array.newInstance(Boolean.class, values.size());
+                        } else if (TypeEnum.Time.getLiteral().equals(subType)
+                                || TypeEnum.Date.getLiteral().equals(subType)
+                                || TypeEnum.DateTime.getLiteral().equals(subType)) {
+                            newValues = Array.newInstance(Date.class, values.size());
+                        } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
+                            if (enumType.equals(TypeEnum.Boolean.getLiteral())) {
+                                newValues = Array.newInstance(Boolean.class, values.size());
+                            } else if (enumType.equals(TypeEnum.Long.getLiteral())) {
+                                newValues = Array.newInstance(Long.class, values.size());
+                            } else if (enumType.equals(TypeEnum.Double.getLiteral())) {
+                                newValues = Array.newInstance(Double.class, values.size());
+                            } else if (enumType.equals(TypeEnum.Character.getLiteral())
+                                    || enumType.equals(TypeEnum.String.getLiteral())) {
+                                newValues = Array.newInstance(String.class, values.size());
+                            } else if (enumType.equals(TypeEnum.Time.getLiteral())
+                                    || enumType.equals(TypeEnum.Date.getLiteral())
+                                    || enumType.equals(TypeEnum.DateTime.getLiteral())) {
+                                newValues = Array.newInstance(Date.class, values.size());
+                            }
+                        }
+                        for (int i = 0; i < values.size(); i++) {
+                            Array.set(newValues, i, values.get(i));
+                        }
+                        newQueryParameter.put(name, newValues);
                     }
                 } catch (IllegalArgumentException e) {
                     requestQueryErrors.put(name, e.getMessage());
@@ -1244,6 +1293,8 @@ public class JavascriptController {
                     enumItems = enumItemDictionary.get(enumId);
                 }
                 try {
+
+                    List<Object> values = new ArrayList<>();
                     for (String string : strings) {
                         Object value = null;
                         if (TypeEnum.Boolean.getLiteral().equals(newType)) {
@@ -1263,7 +1314,56 @@ public class JavascriptController {
                         } else if (TypeEnum.Enum.getLiteral().equals(newType)) {
                             value = parseStringToEnum(required, enumType, enumItems, string);
                         }
+                        if (value != null) {
+                            values.add(value);
+                        }
                     }
+
+                    if (TypeEnum.Boolean.getLiteral().equals(type)
+                            || TypeEnum.Long.getLiteral().equals(type)
+                            || TypeEnum.Double.getLiteral().equals(type)
+                            || TypeEnum.String.getLiteral().equals(type)
+                            || TypeEnum.Time.getLiteral().equals(type)
+                            || TypeEnum.Date.getLiteral().equals(type)
+                            || TypeEnum.DateTime.getLiteral().equals(type)
+                            || TypeEnum.Enum.getLiteral().equals(type)) {
+                        newRequestHeader.put(name, values.isEmpty() ? null : values.get(0));
+                    } else if (TypeEnum.List.getLiteral().equals(type)) {
+                        Object newValues = null;
+                        if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                            newValues = Array.newInstance(Boolean.class, values.size());
+                        } else if (TypeEnum.Long.getLiteral().equals(subType)) {
+                            newValues = Array.newInstance(Boolean.class, values.size());
+                        } else if (TypeEnum.Double.getLiteral().equals(subType)) {
+                            newValues = Array.newInstance(Boolean.class, values.size());
+                        } else if (TypeEnum.String.getLiteral().equals(subType)) {
+                            newValues = Array.newInstance(Boolean.class, values.size());
+                        } else if (TypeEnum.Time.getLiteral().equals(subType)
+                                || TypeEnum.Date.getLiteral().equals(subType)
+                                || TypeEnum.DateTime.getLiteral().equals(subType)) {
+                            newValues = Array.newInstance(Date.class, values.size());
+                        } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
+                            if (enumType.equals(TypeEnum.Boolean.getLiteral())) {
+                                newValues = Array.newInstance(Boolean.class, values.size());
+                            } else if (enumType.equals(TypeEnum.Long.getLiteral())) {
+                                newValues = Array.newInstance(Long.class, values.size());
+                            } else if (enumType.equals(TypeEnum.Double.getLiteral())) {
+                                newValues = Array.newInstance(Double.class, values.size());
+                            } else if (enumType.equals(TypeEnum.Character.getLiteral())
+                                    || enumType.equals(TypeEnum.String.getLiteral())) {
+                                newValues = Array.newInstance(String.class, values.size());
+                            } else if (enumType.equals(TypeEnum.Time.getLiteral())
+                                    || enumType.equals(TypeEnum.Date.getLiteral())
+                                    || enumType.equals(TypeEnum.DateTime.getLiteral())) {
+                                newValues = Array.newInstance(Date.class, values.size());
+                            }
+                        }
+                        for (int i = 0; i < values.size(); i++) {
+                            Array.set(newValues, i, values.get(i));
+                        }
+                        newRequestHeader.put(name, newValues);
+                    }
+
                 } catch (IllegalArgumentException e) {
                     requestHeaderErrors.put(name, e.getMessage());
                 }
@@ -1324,6 +1424,7 @@ public class JavascriptController {
                         }
 
                         try {
+                            List<Object> values = new ArrayList<>();
                             for (String string : strings) {
                                 Object value = null;
                                 if (TypeEnum.Boolean.getLiteral().equals(newType)) {
@@ -1343,6 +1444,54 @@ public class JavascriptController {
                                 } else if (TypeEnum.Enum.getLiteral().equals(newType)) {
                                     value = parseStringToEnum(required, enumType, enumItems, string);
                                 }
+                                if (value != null) {
+                                    values.add(value);
+                                }
+                            }
+
+                            if (TypeEnum.Boolean.getLiteral().equals(type)
+                                    || TypeEnum.Long.getLiteral().equals(type)
+                                    || TypeEnum.Double.getLiteral().equals(type)
+                                    || TypeEnum.String.getLiteral().equals(type)
+                                    || TypeEnum.Time.getLiteral().equals(type)
+                                    || TypeEnum.Date.getLiteral().equals(type)
+                                    || TypeEnum.DateTime.getLiteral().equals(type)
+                                    || TypeEnum.Enum.getLiteral().equals(type)) {
+                                newRequestBody.put(name, values.isEmpty() ? null : values.get(0));
+                            } else if (TypeEnum.List.getLiteral().equals(type)) {
+                                Object newValues = null;
+                                if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                } else if (TypeEnum.Long.getLiteral().equals(subType)) {
+                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                } else if (TypeEnum.Double.getLiteral().equals(subType)) {
+                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                } else if (TypeEnum.String.getLiteral().equals(subType)) {
+                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                } else if (TypeEnum.Time.getLiteral().equals(subType)
+                                        || TypeEnum.Date.getLiteral().equals(subType)
+                                        || TypeEnum.DateTime.getLiteral().equals(subType)) {
+                                    newValues = Array.newInstance(Date.class, values.size());
+                                } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
+                                    if (enumType.equals(TypeEnum.Boolean.getLiteral())) {
+                                        newValues = Array.newInstance(Boolean.class, values.size());
+                                    } else if (enumType.equals(TypeEnum.Long.getLiteral())) {
+                                        newValues = Array.newInstance(Long.class, values.size());
+                                    } else if (enumType.equals(TypeEnum.Double.getLiteral())) {
+                                        newValues = Array.newInstance(Double.class, values.size());
+                                    } else if (enumType.equals(TypeEnum.Character.getLiteral())
+                                            || enumType.equals(TypeEnum.String.getLiteral())) {
+                                        newValues = Array.newInstance(String.class, values.size());
+                                    } else if (enumType.equals(TypeEnum.Time.getLiteral())
+                                            || enumType.equals(TypeEnum.Date.getLiteral())
+                                            || enumType.equals(TypeEnum.DateTime.getLiteral())) {
+                                        newValues = Array.newInstance(Date.class, values.size());
+                                    }
+                                }
+                                for (int i = 0; i < values.size(); i++) {
+                                    Array.set(newValues, i, values.get(i));
+                                }
+                                newRequestBody.put(name, newValues);
                             }
                         } catch (IllegalArgumentException e) {
                             requestBodyErrors.put(name, e.getMessage());
@@ -1400,6 +1549,7 @@ public class JavascriptController {
                         }
 
                         try {
+                            List<Object> values = new ArrayList<>();
                             for (Object object : objects) {
                                 Object value = null;
                                 if (TypeEnum.Boolean.getLiteral().equals(newType)) {
@@ -1421,6 +1571,60 @@ public class JavascriptController {
                                 } else if (TypeEnum.File.getLiteral().equals(newType)) {
                                     value = parseMultipartFileToByteArray(required, (MultipartFile) object);
                                 }
+                                if (value != null) {
+                                    values.add(value);
+                                }
+                            }
+
+
+                            // TODO : to check testing with file upload
+
+                            if (TypeEnum.Boolean.getLiteral().equals(type)
+                                    || TypeEnum.Long.getLiteral().equals(type)
+                                    || TypeEnum.Double.getLiteral().equals(type)
+                                    || TypeEnum.String.getLiteral().equals(type)
+                                    || TypeEnum.Time.getLiteral().equals(type)
+                                    || TypeEnum.Date.getLiteral().equals(type)
+                                    || TypeEnum.DateTime.getLiteral().equals(type)
+                                    || TypeEnum.File.getLiteral().equals(type)
+                                    || TypeEnum.Enum.getLiteral().equals(type)) {
+                                newRequestBody.put(name, values.isEmpty() ? null : values.get(0));
+                            } else if (TypeEnum.List.getLiteral().equals(type)) {
+                                Object newValues = null;
+                                if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                } else if (TypeEnum.Long.getLiteral().equals(subType)) {
+                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                } else if (TypeEnum.Double.getLiteral().equals(subType)) {
+                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                } else if (TypeEnum.String.getLiteral().equals(subType)) {
+                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                } else if (TypeEnum.Time.getLiteral().equals(subType)
+                                        || TypeEnum.Date.getLiteral().equals(subType)
+                                        || TypeEnum.DateTime.getLiteral().equals(subType)) {
+                                    newValues = Array.newInstance(Date.class, values.size());
+                                } else if (TypeEnum.File.getLiteral().equals(subType)) {
+                                    newValues = Array.newInstance(byte[].class, values.size());
+                                } else if (TypeEnum.Enum.getLiteral().equals(subType)) {
+                                    if (enumType.equals(TypeEnum.Boolean.getLiteral())) {
+                                        newValues = Array.newInstance(Boolean.class, values.size());
+                                    } else if (enumType.equals(TypeEnum.Long.getLiteral())) {
+                                        newValues = Array.newInstance(Long.class, values.size());
+                                    } else if (enumType.equals(TypeEnum.Double.getLiteral())) {
+                                        newValues = Array.newInstance(Double.class, values.size());
+                                    } else if (enumType.equals(TypeEnum.Character.getLiteral())
+                                            || enumType.equals(TypeEnum.String.getLiteral())) {
+                                        newValues = Array.newInstance(String.class, values.size());
+                                    } else if (enumType.equals(TypeEnum.Time.getLiteral())
+                                            || enumType.equals(TypeEnum.Date.getLiteral())
+                                            || enumType.equals(TypeEnum.DateTime.getLiteral())) {
+                                        newValues = Array.newInstance(Date.class, values.size());
+                                    }
+                                }
+                                for (int i = 0; i < values.size(); i++) {
+                                    Array.set(newValues, i, values.get(i));
+                                }
+                                newRequestBody.put(name, newValues);
                             }
                         } catch (IllegalArgumentException e) {
                             requestBodyErrors.put(name, e.getMessage());
@@ -1687,7 +1891,7 @@ public class JavascriptController {
             String responseBodySubType = (String) restRecord.get(Jdbc.Rest.RESPONSE_BODY_SUB_TYPE);
             boolean responseBodyRequired = (boolean) restRecord.get(Jdbc.Rest.RESPONSE_BODY_REQUIRED);
 
-            Object response = http.http(null, null, null, null);
+            Object response = http.http(req, newQueryParameter, newRequestHeader, newRequestBody);
 
             if (MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(responseContentType)) {
                 if (responseBodyRequired) {
@@ -2068,7 +2272,7 @@ public class JavascriptController {
     }
 
     public interface Http {
-        Object http(HttpServletRequest request, Map<String, Object> requestParameter, Map<String, Object> requestHeader, Object requestBody);
+        Object http(HttpServletRequest request, Map<String, Object> queryParameter, Map<String, Object> requestHeader, Object requestBody);
     }
 
 }
