@@ -14,7 +14,6 @@ import com.angkorteam.mbaas.server.nashorn.JavascripUtils;
 import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import jdk.nashorn.api.scripting.JSObject;
@@ -792,12 +791,14 @@ public class JavascriptController {
     }
 
     @RequestMapping(path = "/**")
-    public ResponseEntity<JavaScriptExecuteResponse> execute(
+    public ResponseEntity<Map<String, Object>> execute(
             HttpServletRequest req,
             Identity identity
     ) throws IOException, ServletException {
 
         String debugName = null;
+
+        Map<String, Object> responseEntity = new HashMap<>();
 
         try {
 
@@ -859,7 +860,7 @@ public class JavascriptController {
             // endregion
 
             Map<String, Object> newRequestHeader = new TreeMap<>();
-            Map<String, Object> newRequestBody = new TreeMap<>();
+            Object newRequestBody = null;
             Map<String, Object> newQueryParameter = new TreeMap<>();
 
             // region http
@@ -1389,6 +1390,7 @@ public class JavascriptController {
                 }
                 if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)) {
                     // region application/x-www-form-urlencoded
+                    Map<String, Object> iRequestBody = new TreeMap<>();
                     Boolean bodyRequired = (Boolean) restRecord.get(Jdbc.Rest.REQUEST_BODY_REQUIRED);
                     if (bodyRequired) {
                         if (requestBodyFormDictionary == null || requestBodyFormDictionary.isEmpty()) {
@@ -1465,7 +1467,7 @@ public class JavascriptController {
                                     || TypeEnum.Date.getLiteral().equals(type)
                                     || TypeEnum.DateTime.getLiteral().equals(type)
                                     || TypeEnum.Enum.getLiteral().equals(type)) {
-                                newRequestBody.put(name, values.isEmpty() ? null : values.get(0));
+                                iRequestBody.put(name, values.isEmpty() ? null : values.get(0));
                             } else if (TypeEnum.List.getLiteral().equals(type)) {
                                 Object newValues = null;
                                 if (TypeEnum.Boolean.getLiteral().equals(subType)) {
@@ -1499,15 +1501,17 @@ public class JavascriptController {
                                 for (int i = 0; i < values.size(); i++) {
                                     Array.set(newValues, i, values.get(i));
                                 }
-                                newRequestBody.put(name, newValues);
+                                iRequestBody.put(name, newValues);
                             }
                         } catch (IllegalArgumentException e) {
                             requestBodyErrors.put(name, e.getMessage());
                         }
                     }
+                    newRequestBody = iRequestBody;
                     // endregion
                 } else if (contentType.equals(MediaType.MULTIPART_FORM_DATA_VALUE)) {
                     // region multipart/form-data
+                    Map<String, Object> iRequestBody = new HashMap<>();
                     Boolean bodyRequired = (Boolean) restRecord.get(Jdbc.Rest.REQUEST_BODY_REQUIRED);
                     if (bodyRequired) {
                         if ((requestBodyFormDataDictionary == null || requestBodyFormDataDictionary.isEmpty()) && (requestBodyFormFileDictionary == null || requestBodyFormFileDictionary.isEmpty())) {
@@ -1594,7 +1598,7 @@ public class JavascriptController {
                                     || TypeEnum.DateTime.getLiteral().equals(type)
                                     || TypeEnum.File.getLiteral().equals(type)
                                     || TypeEnum.Enum.getLiteral().equals(type)) {
-                                newRequestBody.put(name, values.isEmpty() ? null : values.get(0));
+                                iRequestBody.put(name, values.isEmpty() ? null : values.get(0));
                             } else if (TypeEnum.List.getLiteral().equals(type)) {
                                 Object newValues = null;
                                 if (TypeEnum.Boolean.getLiteral().equals(subType)) {
@@ -1630,12 +1634,13 @@ public class JavascriptController {
                                 for (int i = 0; i < values.size(); i++) {
                                     Array.set(newValues, i, values.get(i));
                                 }
-                                newRequestBody.put(name, newValues);
+                                iRequestBody.put(name, newValues);
                             }
                         } catch (IllegalArgumentException e) {
                             requestBodyErrors.put(name, e.getMessage());
                         }
                     }
+                    newRequestBody = iRequestBody;
                     // endregion
                 } else if (contentType.equals(MediaType.APPLICATION_OCTET_STREAM_VALUE)) {
                     // region application/octet-stream
@@ -1645,6 +1650,7 @@ public class JavascriptController {
                             requestBodyErrors.put("requestBody", "is required");
                         }
                     }
+                    newRequestBody = requestBody;
                     // endregion
                 } else if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
                     // region application/json
@@ -1662,6 +1668,7 @@ public class JavascriptController {
                             try {
                                 try {
                                     Boolean value = parseObjectToBoolean(bodyRequired, gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (IllegalArgumentException e) {
                                     requestBodyErrors.put("requestBody", e.getMessage());
                                 }
@@ -1674,6 +1681,7 @@ public class JavascriptController {
                             try {
                                 try {
                                     Long value = parseObjectToLong(bodyRequired, gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (IllegalArgumentException e) {
                                     requestBodyErrors.put("requestBody", e.getMessage());
                                 }
@@ -1686,6 +1694,7 @@ public class JavascriptController {
                             try {
                                 try {
                                     Double value = parseObjectToDouble(bodyRequired, gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (IllegalArgumentException e) {
                                     requestBodyErrors.put("requestBody", e.getMessage());
                                 }
@@ -1698,6 +1707,7 @@ public class JavascriptController {
                             try {
                                 try {
                                     String value = parseObjectToString(bodyRequired, gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (IllegalArgumentException e) {
                                     requestBodyErrors.put("requestBody", e.getMessage());
                                 }
@@ -1710,6 +1720,7 @@ public class JavascriptController {
                             try {
                                 try {
                                     Date value = parseObjectToTime(bodyRequired, gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (IllegalArgumentException e) {
                                     requestBodyErrors.put("requestBody", e.getMessage());
                                 }
@@ -1722,6 +1733,7 @@ public class JavascriptController {
                             try {
                                 try {
                                     Date value = parseObjectToDate(bodyRequired, gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (IllegalArgumentException e) {
                                     requestBodyErrors.put("requestBody", e.getMessage());
                                 }
@@ -1734,6 +1746,7 @@ public class JavascriptController {
                             try {
                                 try {
                                     Date value = parseObjectToDateTime(bodyRequired, gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (IllegalArgumentException e) {
                                     requestBodyErrors.put("requestBody", e.getMessage());
                                 }
@@ -1749,6 +1762,7 @@ public class JavascriptController {
                             try {
                                 try {
                                     Object value = parseObjectToEnum(bodyRequired, enumType, enumItems, gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (IllegalArgumentException e) {
                                     requestBodyErrors.put("requestBody", e.getMessage());
                                 }
@@ -1760,20 +1774,23 @@ public class JavascriptController {
                             // region nobody
                             String jsonId = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_MAP_JSON_ID);
                             List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonId);
+                            Map<String, Object> iRequestBody = new HashMap<>();
                             Map<String, Object> jsonObject = gson.fromJson(json, mapType);
                             if (jsonObject.isEmpty()) {
                                 requestBodyErrors.put("requestBody", "is required");
                             } else {
                                 for (Map<String, Object> jsonField : jsonFields) {
-                                    validateJsonField(jdbcTemplate, requestBodyErrors, jsonObject, jsonField, enumItemDictionary, enumDictionary);
+                                    validateJsonField(jdbcTemplate, iRequestBody, requestBodyErrors, jsonObject, jsonField, enumItemDictionary, enumDictionary);
                                 }
                             }
+                            newRequestBody = iRequestBody;
                             // endregion
                         } else if (TypeEnum.File.getLiteral().equals(type)) {
                             // region nobody
                             try {
                                 try {
                                     byte[] value = parseObjectToByteArray(bodyRequired, gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (IllegalArgumentException e) {
                                     requestBodyErrors.put("requestBody", e.getMessage());
                                 }
@@ -1787,6 +1804,7 @@ public class JavascriptController {
                                 // region nobody
                                 try {
                                     Boolean[] value = parseObjectToBooleanArray(bodyRequired, (List<Object>) gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (JsonSyntaxException | ClassCastException e) {
                                     requestBodyErrors.put("requestBody", "is invalid");
                                 }
@@ -1795,6 +1813,7 @@ public class JavascriptController {
                                 // region nobody
                                 try {
                                     Long[] value = parseObjectToLongArray(bodyRequired, (List<Object>) gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (JsonSyntaxException | ClassCastException e) {
                                     requestBodyErrors.put("requestBody", "is invalid");
                                 }
@@ -1803,6 +1822,7 @@ public class JavascriptController {
                                 // region nobody
                                 try {
                                     Double[] value = parseObjectToDoubleArray(bodyRequired, (List<Object>) gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (JsonSyntaxException | ClassCastException e) {
                                     requestBodyErrors.put("requestBody", "is invalid");
                                 }
@@ -1811,6 +1831,7 @@ public class JavascriptController {
                                 // region nobody
                                 try {
                                     String[] value = parseObjectToStringArray(bodyRequired, (List<Object>) gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (JsonSyntaxException | ClassCastException e) {
                                     requestBodyErrors.put("requestBody", "is invalid");
                                 }
@@ -1819,6 +1840,7 @@ public class JavascriptController {
                                 // region nobody
                                 try {
                                     Date[] value = parseObjectToDateArray(bodyRequired, (List<Object>) gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (JsonSyntaxException | ClassCastException e) {
                                     requestBodyErrors.put("requestBody", "is invalid");
                                 }
@@ -1827,6 +1849,7 @@ public class JavascriptController {
                                 // region nobody
                                 try {
                                     Date[] value = parseObjectToTimeArray(bodyRequired, (List<Object>) gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (JsonSyntaxException | ClassCastException e) {
                                     requestBodyErrors.put("requestBody", "is invalid");
                                 }
@@ -1835,6 +1858,7 @@ public class JavascriptController {
                                 // region nobody
                                 try {
                                     Date[] value = parseObjectToDateTimeArray(bodyRequired, (List<Object>) gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (JsonSyntaxException | ClassCastException e) {
                                     requestBodyErrors.put("requestBody", "is invalid");
                                 }
@@ -1845,11 +1869,12 @@ public class JavascriptController {
                                 String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
                                 List<String> enumValues = enumItemDictionary.get(enumId);
                                 Object value = parseObjectToEnumArray(bodyRequired, enumType, enumValues, (List<Object>) gson.fromJson(json, Object.class));
-                                // endregion
+                                newRequestBody = value;                                // endregion
                             } else if (TypeEnum.File.getLiteral().equals(subType)) {
                                 // region nobody
                                 try {
                                     Object value = parseObjectToByteArrayArray(bodyRequired, (List<Object>) gson.fromJson(json, Object.class));
+                                    newRequestBody = value;
                                 } catch (JsonSyntaxException | ClassCastException e) {
                                     requestBodyErrors.put("requestBody", "is invalid");
                                 }
@@ -1860,16 +1885,20 @@ public class JavascriptController {
                                 List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonId);
                                 try {
                                     List<Object> objects = gson.fromJson(json, listType);
+                                    List<Map<String, Object>> iRequestBody = new ArrayList<>();
                                     for (Object object : objects) {
                                         if (object instanceof Map) {
+                                            Map<String, Object> i = new HashMap<>();
                                             for (Map<String, Object> jsonField : jsonFields) {
-                                                validateJsonField(jdbcTemplate, requestBodyErrors, (Map) object, jsonField, enumItemDictionary, enumDictionary);
+                                                validateJsonField(jdbcTemplate, i, requestBodyErrors, (Map) object, jsonField, enumItemDictionary, enumDictionary);
                                             }
+                                            iRequestBody.add(i);
                                         } else {
                                             requestBodyErrors.put("requestBody", "is invalid");
                                             break;
                                         }
                                     }
+                                    newRequestBody = iRequestBody;
                                 } catch (JsonSyntaxException | ClassCastException e) {
                                     requestBodyErrors.put("requestBody", "is invalid");
                                 }
@@ -1883,13 +1912,17 @@ public class JavascriptController {
             }
             // endregion
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-            System.out.println(requestBodyErrors.size());
-            System.out.println(gson.toJson(requestBodyErrors));
-
             if (requestQueryErrors.isEmpty() || requestBodyErrors.isEmpty() || requestHeaderErrors.isEmpty()) {
-                return null;
+                if (requestQueryErrors != null && !requestQueryErrors.isEmpty()) {
+                    responseEntity.put("requestQueryParameterErrors", requestQueryErrors);
+                }
+                if (requestBodyErrors != null && !requestBodyErrors.isEmpty()) {
+                    responseEntity.put("requestBodyErrors", requestBodyErrors);
+                }
+                if (requestHeaderErrors != null && !requestHeaderErrors.isEmpty()) {
+                    responseEntity.put("requestHeaderErrors", requestHeaderErrors);
+                }
+                return ResponseEntity.ok(responseEntity);
             }
 
             Map<String, Object> responseBodyErrors = new HashMap<>();
@@ -1959,7 +1992,7 @@ public class JavascriptController {
                         requestBodyErrors.put("responseBody", "is required");
                     } else {
                         for (Map<String, Object> jsonField : jsonFields) {
-                            validateJsonField(jdbcTemplate, requestBodyErrors, jsonObject, jsonField, enumItemDictionary, enumDictionary);
+                            validateJsonField(jdbcTemplate, new HashMap<>(), requestBodyErrors, jsonObject, jsonField, enumItemDictionary, enumDictionary);
                         }
                     }
                     // endregion
@@ -2010,7 +2043,7 @@ public class JavascriptController {
                             for (Object object : objects) {
                                 if (object instanceof Map) {
                                     for (Map<String, Object> jsonField : jsonFields) {
-                                        validateJsonField(jdbcTemplate, requestBodyErrors, (Map) object, jsonField, enumItemDictionary, enumDictionary);
+                                        validateJsonField(jdbcTemplate, new HashMap<>(), requestBodyErrors, (Map) object, jsonField, enumItemDictionary, enumDictionary);
                                     }
                                 } else {
                                     requestBodyErrors.put("responseBody", "is invalid");
@@ -2034,57 +2067,74 @@ public class JavascriptController {
                 }
             }
 
-
-            System.out.println(responseBodyErrors.size());
-            System.out.println(gson.toJson(responseBodyErrors));
-
-            if (responseBodyErrors.isEmpty()) {
-                return null;
+            if (!responseBodyErrors.isEmpty()) {
+                responseEntity.put("responseBodyErrors", responseBodyErrors);
+                return ResponseEntity.ok(responseEntity);
             }
 
+            responseEntity.put("response", response);
+            return ResponseEntity.ok(responseEntity);
+
         } catch (Throwable e) {
-            System.out.println("debugName : " + debugName);
-            e.printStackTrace();
+            List<String> stackTraces = new ArrayList<>();
+            for (StackTraceElement element : e.getStackTrace()) {
+                stackTraces.add(element.getClassName() + "->" + element.getMethodName() + " at " + element.getLineNumber() + " in " + element.getFileName());
+            }
+            responseEntity.put("stackTrace", stackTraces);
+            if (debugName != null && !"".equals(debugName)) {
+                responseEntity.put("debugMessage", e.getMessage() + " name " + debugName);
+            } else {
+                responseEntity.put("debugMessage", e.getMessage());
+            }
+            return ResponseEntity.ok(responseEntity);
         }
-        return null;
     }
 
-    private void validateJsonField(JdbcTemplate jdbcTemplate, Map<String, Object> error, Map<String, Object> json, Map<String, Object> jsonField, Map<String, List<String>> enumItemDictionary, Map<String, Map<String, Object>> enumDictionary) {
+    private void validateJsonField(JdbcTemplate jdbcTemplate, Map<String, Object> iRequestBody, Map<String, Object> error, Map<String, Object> json, Map<String, Object> jsonField, Map<String, List<String>> enumItemDictionary, Map<String, Map<String, Object>> enumDictionary) {
         String type = (String) jsonField.get(Jdbc.JsonField.TYPE);
         String name = (String) jsonField.get(Jdbc.JsonField.NAME);
         String enumId = (String) jsonField.get(Jdbc.JsonField.ENUM_ID);
-        String jsonId = (String) jsonField.get(Jdbc.JsonField.MAP_JSON_ID);
         String subType = (String) jsonField.get(Jdbc.JsonField.SUB_TYPE);
         Boolean required = (Boolean) jsonField.get(Jdbc.JsonField.REQUIRED);
         try {
             if (TypeEnum.Boolean.getLiteral().equals(type)) {
                 Boolean value = parseObjectToBoolean(required, json.get(name));
+                iRequestBody.put(name, value);
             } else if (TypeEnum.Long.getLiteral().equals(type)) {
                 Long value = parseObjectToLong(required, json.get(name));
+                iRequestBody.put(name, value);
             } else if (TypeEnum.Double.getLiteral().equals(type)) {
                 Double value = parseObjectToDouble(required, json.get(name));
+                iRequestBody.put(name, value);
             } else if (TypeEnum.String.getLiteral().equals(type)) {
                 String value = parseObjectToString(required, json.get(name));
+                iRequestBody.put(name, value);
             } else if (TypeEnum.Time.getLiteral().equals(type)) {
                 Date value = parseObjectToTime(required, json.get(name));
+                iRequestBody.put(name, value);
             } else if (TypeEnum.Date.getLiteral().equals(type)) {
                 Date value = parseObjectToDate(required, json.get(name));
+                iRequestBody.put(name, value);
             } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
                 Date value = parseObjectToDateTime(required, json.get(name));
+                iRequestBody.put(name, value);
             } else if (TypeEnum.Enum.getLiteral().equals(type)) {
                 Map<String, Object> enumRecord = enumDictionary.get(enumId);
                 String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
                 List<String> enumItemValues = enumItemDictionary.get(enumId);
                 Object value = parseObjectToEnum(required, enumType, enumItemValues, json.get(name));
+                iRequestBody.put(name, value);
             } else if (TypeEnum.Map.getLiteral().equals(type)) {
                 try {
                     Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
                     if (fieldJson != null) {
+                        Map<String, Object> i = new HashMap<>();
                         Map<String, Object> fieldError = new HashMap<>();
                         List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.MAP_JSON_ID));
                         for (Map<String, Object> fieldJsonField : fieldJsonFields) {
-                            validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
+                            validateJsonField(jdbcTemplate, i, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
                         }
+                        iRequestBody.put(name, i);
                         if (!fieldError.isEmpty()) {
                             error.put(name, fieldError);
                         }
@@ -2096,46 +2146,54 @@ public class JavascriptController {
                 }
             } else if (TypeEnum.File.getLiteral().equals(type)) {
                 byte[] value = parseObjectToByteArray(required, json.get(name));
+                iRequestBody.put(name, value);
             } else if (TypeEnum.List.getLiteral().equals(type)) {
                 if (TypeEnum.Boolean.getLiteral().equals(subType)) {
                     try {
                         Boolean[] value = parseObjectToBooleanArray(required, (List<Object>) json.get(name));
+                        iRequestBody.put(name, value);
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Long.getLiteral().equals(subType)) {
                     try {
                         Long[] value = parseObjectToLongArray(required, (List<Object>) json.get(name));
+                        iRequestBody.put(name, value);
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Double.getLiteral().equals(subType)) {
                     try {
                         Double[] value = parseObjectToDoubleArray(required, (List<Object>) json.get(name));
+                        iRequestBody.put(name, value);
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.String.getLiteral().equals(subType)) {
                     try {
                         String[] value = parseObjectToStringArray(required, (List<Object>) json.get(name));
+                        iRequestBody.put(name, value);
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Time.getLiteral().equals(subType)) {
                     try {
                         Date[] value = parseObjectToTimeArray(required, (List<Object>) json.get(name));
+                        iRequestBody.put(name, value);
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Date.getLiteral().equals(subType)) {
                     try {
                         Date[] value = parseObjectToDateArray(required, (List<Object>) json.get(name));
+                        iRequestBody.put(name, value);
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
                     try {
                         Date[] value = parseObjectToDateTimeArray(required, (List<Object>) json.get(name));
+                        iRequestBody.put(name, value);
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
@@ -2145,12 +2203,14 @@ public class JavascriptController {
                     List<String> enumItemValues = enumItemDictionary.get(enumId);
                     try {
                         Object value = parseObjectToEnumArray(required, enumType, enumItemValues, (List<Object>) json.get(name));
+                        iRequestBody.put(name, value);
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.File.getLiteral().equals(subType)) {
                     try {
                         Object value = parseObjectToByteArrayArray(required, (List<Object>) json.get(name));
+                        iRequestBody.put(name, value);
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
@@ -2158,13 +2218,16 @@ public class JavascriptController {
                     try {
                         List<Map<String, Object>> fieldJsons = (List<Map<String, Object>>) json.get(name);
                         if (fieldJsons != null) {
+                            List<Map<String, Object>> is = new ArrayList<>();
                             for (Map<String, Object> fieldJson : fieldJsons) {
                                 if (fieldJson != null) {
+                                    Map<String, Object> i = new HashMap<>();
                                     Map<String, Object> fieldError = new HashMap<>();
                                     List<Map<String, Object>> fieldJsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", jsonField.get(Jdbc.JsonField.MAP_JSON_ID));
                                     for (Map<String, Object> fieldJsonField : fieldJsonFields) {
-                                        validateJsonField(jdbcTemplate, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
+                                        validateJsonField(jdbcTemplate, i, fieldError, fieldJson, fieldJsonField, enumItemDictionary, enumDictionary);
                                     }
+                                    is.add(i);
                                     if (!fieldError.isEmpty()) {
                                         error.put(name, fieldError);
                                     }
@@ -2173,6 +2236,7 @@ public class JavascriptController {
                                     break;
                                 }
                             }
+                            iRequestBody.put(name, is);
                         } else {
                             error.put(name, "is required");
                         }
