@@ -34,7 +34,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by socheat on 8/3/16.
@@ -206,7 +211,7 @@ public class RestModifyPage extends MasterPage {
         this.requestContentTypeFeedback = new TextFeedbackPanel("requestContentTypeFeedback", this.requestContentTypeField);
         this.form.add(this.requestContentTypeFeedback);
 
-        this.requestBodyRequired = (Boolean) restRecord.get(Jdbc.Rest.RESPONSE_BODY_REQUIRED);
+        this.requestBodyRequired = (Boolean) restRecord.get(Jdbc.Rest.REQUEST_BODY_REQUIRED);
         this.requestBodyRequiredField = new CheckBox("requestBodyRequiredField", new PropertyModel<>(this, "requestBodyRequired"));
         this.form.add(this.requestBodyRequiredField);
 
@@ -576,7 +581,9 @@ public class RestModifyPage extends MasterPage {
         if (target != null) {
             target.add(this.requestBodySubTypeField);
         }
-        this.requestBodySubType = null;
+        if (target != null) {
+            this.requestBodySubType = null;
+        }
         this.requestBodySubTypes.clear();
         this.requestBodySubTypeField.setRequired(false);
         if (TypeEnum.List.getLiteral().equals(this.requestBodyType)) {
@@ -612,7 +619,9 @@ public class RestModifyPage extends MasterPage {
         if (target != null) {
             target.add(this.responseBodySubTypeField);
         }
-        this.responseBodySubType = null;
+        if (target != null) {
+            this.responseBodySubType = null;
+        }
         this.responseBodySubTypes.clear();
         this.responseBodySubTypeField.setRequired(false);
         if (TypeEnum.List.getLiteral().equals(this.responseBodyType)) {
@@ -646,14 +655,16 @@ public class RestModifyPage extends MasterPage {
             target.add(this.requestBodyTypeField);
             target.add(this.requestBodySubTypeField);
         }
+        if (target != null) {
+            this.requestBodySubType = null;
+            this.requestBodyType = null;
+            this.requestBodyMapJson = null;
+        }
         this.requestBodyMapJsonProvider.setContentType(this.requestContentType);
-        this.requestBodySubType = null;
         this.requestBodySubTypes.clear();
         this.requestBodySubTypeField.setRequired(false);
-        this.requestBodyType = null;
         this.requestBodyTypes.clear();
         this.requestBodyTypeField.setRequired(true);
-        this.requestBodyMapJson = null;
         this.requestBodyMapJsonField.setRequired(false);
         if (MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(this.requestContentType)) {
             this.requestBodyType = TypeEnum.File.getLiteral();
@@ -684,13 +695,15 @@ public class RestModifyPage extends MasterPage {
             target.add(this.responseBodyTypeField);
             target.add(this.responseContentTypeField);
         }
-        this.responseBodySubType = null;
+        if (target != null) {
+            this.responseBodySubType = null;
+            this.responseBodyType = null;
+            this.responseBodyMapJson = null;
+        }
         this.responseBodySubTypes.clear();
         this.responseBodySubTypeField.setRequired(false);
-        this.responseBodyType = null;
         this.responseBodyTypes.clear();
         this.responseBodyTypeField.setRequired(true);
-        this.responseBodyMapJson = null;
         this.responseBodyMapJsonField.setRequired(false);
         if (MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(this.responseContentType)) {
             this.responseBodyType = TypeEnum.File.getLiteral();
@@ -723,15 +736,17 @@ public class RestModifyPage extends MasterPage {
             target.add(this.requestBodyTypeField);
             target.add(this.requestBodySubTypeField);
         }
-        this.requestContentType = null;
         this.requestContentTypes.clear();
         this.requestContentTypeField.setRequired(false);
-        this.requestBodyType = null;
         this.requestBodyTypeField.setRequired(false);
-        this.requestBodySubType = null;
         this.requestBodySubTypes.clear();
         this.requestBodySubTypeField.setRequired(false);
-        this.requestBodyMapJson = null;
+        if (target != null) {
+            this.requestContentType = null;
+            this.requestBodyType = null;
+            this.requestBodySubType = null;
+            this.requestBodyMapJson = null;
+        }
         this.requestBodyMapJsonField.setRequired(false);
         this.requestBodyEnum = null;
         this.requestBodyEnumField.setRequired(true);
