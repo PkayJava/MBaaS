@@ -2,14 +2,17 @@ package com.angkorteam.mbaas.server.wicket;
 
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.HttpRequest;
 import com.mashape.unirest.request.HttpRequestWithBody;
 import com.mashape.unirest.request.body.MultipartBody;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by socheat on 9/3/16.
@@ -17,6 +20,11 @@ import java.util.List;
 public class MultipartFormData {
     public static void main(String[] args) throws UnirestException {
         HttpRequestWithBody requestBody = Unirest.post("http://demo.ddns.net:9080/api/javascript/hello");
+        requestBody = requestBody.header("user-agent", "hello");
+        requestBody = requestBody.header("authorization", "hello");
+        requestBody = requestBody.header("dob", DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
+        HttpRequest httpRequest = requestBody.queryString("game", Arrays.asList(DateFormatUtils.ISO_DATE_FORMAT.format(new Date()), DateFormatUtils.ISO_DATE_FORMAT.format(new Date())));
+        httpRequest.queryString("sessionId", UUID.randomUUID().toString());
         MultipartBody body = null;
         {
             body = requestBody.field("string_required", "no error anymore");

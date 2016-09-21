@@ -307,46 +307,51 @@ public class JavascriptController {
                 || enumType.equals(TypeEnum.Time.getLiteral())
                 || enumType.equals(TypeEnum.Date.getLiteral())
                 || enumType.equals(TypeEnum.DateTime.getLiteral())) {
-            if (!enumItems.contains(value)) {
+            String newValue = value;
+            if (enumType.equals(TypeEnum.Double.getLiteral())) {
+                newValue = String.valueOf(Double.valueOf(newValue));
+            }
+            if (!enumItems.contains(newValue)) {
                 throw new IllegalArgumentException("is invalid");
             }
             if (enumType.equals(TypeEnum.Boolean.getLiteral())) {
-                return Boolean.valueOf(value);
+                return Boolean.valueOf(newValue);
             } else if (enumType.equals(TypeEnum.Double.getLiteral())) {
-                return Double.valueOf(value);
+                return Double.valueOf(newValue);
             } else if (enumType.equals(TypeEnum.Character.getLiteral()) || enumType.equals(TypeEnum.String.getLiteral())) {
-                return value;
+                return newValue;
             } else if (enumType.equals(TypeEnum.Time.getLiteral())) {
                 try {
-                    return DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(value);
+                    return DateFormatUtils.ISO_TIME_NO_T_FORMAT.parse(newValue);
                 } catch (ParseException e) {
                     throw new IllegalArgumentException("is invalid");
                 }
             } else if (enumType.equals(TypeEnum.Date.getLiteral())) {
                 try {
-                    return DateFormatUtils.ISO_DATE_FORMAT.parse(value);
+                    return DateFormatUtils.ISO_DATE_FORMAT.parse(newValue);
                 } catch (ParseException e) {
                     throw new IllegalArgumentException("is invalid");
                 }
             } else if (enumType.equals(TypeEnum.DateTime.getLiteral())) {
                 try {
                     if (dateFormat == null) {
-                        return DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(value);
+                        return DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.parse(newValue);
                     } else {
-                        return dateFormat.parse(value);
+                        return dateFormat.parse(newValue);
                     }
                 } catch (ParseException e) {
                     throw new IllegalArgumentException("is invalid");
                 }
             }
         } else if (enumType.equals(TypeEnum.Long.getLiteral())) {
-            if (value.endsWith(".0")) {
-                value = value.substring(0, value.length() - 2);
+            String newValue = value;
+            if (newValue.endsWith(".0")) {
+                newValue = newValue.substring(0, value.length() - 2);
             }
-            if (!enumItems.contains(value)) {
+            if (!enumItems.contains(newValue)) {
                 throw new IllegalArgumentException("is invalid");
             }
-            return Long.valueOf(value);
+            return Long.valueOf(newValue);
         }
         return null;
     }
@@ -792,6 +797,8 @@ public class JavascriptController {
             Identity identity
     ) throws IOException, ServletException {
 
+        String debugName = null;
+
         try {
 
             byte[] requestBody = null;
@@ -1216,14 +1223,14 @@ public class JavascriptController {
                         newQueryParameter.put(name, values.isEmpty() ? null : values.get(0));
                     } else if (TypeEnum.List.getLiteral().equals(type)) {
                         Object newValues = null;
-                        if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                        if (TypeEnum.Boolean.getLiteral().equals(subType)) {
                             newValues = Array.newInstance(Boolean.class, values.size());
                         } else if (TypeEnum.Long.getLiteral().equals(subType)) {
-                            newValues = Array.newInstance(Boolean.class, values.size());
+                            newValues = Array.newInstance(Long.class, values.size());
                         } else if (TypeEnum.Double.getLiteral().equals(subType)) {
-                            newValues = Array.newInstance(Boolean.class, values.size());
+                            newValues = Array.newInstance(Double.class, values.size());
                         } else if (TypeEnum.String.getLiteral().equals(subType)) {
-                            newValues = Array.newInstance(Boolean.class, values.size());
+                            newValues = Array.newInstance(String.class, values.size());
                         } else if (TypeEnum.Time.getLiteral().equals(subType)
                                 || TypeEnum.Date.getLiteral().equals(subType)
                                 || TypeEnum.DateTime.getLiteral().equals(subType)) {
@@ -1330,14 +1337,14 @@ public class JavascriptController {
                         newRequestHeader.put(name, values.isEmpty() ? null : values.get(0));
                     } else if (TypeEnum.List.getLiteral().equals(type)) {
                         Object newValues = null;
-                        if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                        if (TypeEnum.Boolean.getLiteral().equals(subType)) {
                             newValues = Array.newInstance(Boolean.class, values.size());
                         } else if (TypeEnum.Long.getLiteral().equals(subType)) {
-                            newValues = Array.newInstance(Boolean.class, values.size());
+                            newValues = Array.newInstance(Long.class, values.size());
                         } else if (TypeEnum.Double.getLiteral().equals(subType)) {
-                            newValues = Array.newInstance(Boolean.class, values.size());
+                            newValues = Array.newInstance(Double.class, values.size());
                         } else if (TypeEnum.String.getLiteral().equals(subType)) {
-                            newValues = Array.newInstance(Boolean.class, values.size());
+                            newValues = Array.newInstance(String.class, values.size());
                         } else if (TypeEnum.Time.getLiteral().equals(subType)
                                 || TypeEnum.Date.getLiteral().equals(subType)
                                 || TypeEnum.DateTime.getLiteral().equals(subType)) {
@@ -1391,6 +1398,7 @@ public class JavascriptController {
                     List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", requestBodyRecord.get(Jdbc.Json.JSON_ID));
                     for (Map<String, Object> jsonField : jsonFields) {
                         String name = (String) jsonField.get(Jdbc.JsonField.NAME);
+                        debugName = name;
                         boolean required = (boolean) jsonField.get(Jdbc.JsonField.REQUIRED);
                         String type = (String) jsonField.get(Jdbc.JsonField.TYPE);
                         String subType = (String) jsonField.get(Jdbc.JsonField.SUB_TYPE);
@@ -1460,14 +1468,14 @@ public class JavascriptController {
                                 newRequestBody.put(name, values.isEmpty() ? null : values.get(0));
                             } else if (TypeEnum.List.getLiteral().equals(type)) {
                                 Object newValues = null;
-                                if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                                if (TypeEnum.Boolean.getLiteral().equals(subType)) {
                                     newValues = Array.newInstance(Boolean.class, values.size());
                                 } else if (TypeEnum.Long.getLiteral().equals(subType)) {
-                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                    newValues = Array.newInstance(Long.class, values.size());
                                 } else if (TypeEnum.Double.getLiteral().equals(subType)) {
-                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                    newValues = Array.newInstance(Double.class, values.size());
                                 } else if (TypeEnum.String.getLiteral().equals(subType)) {
-                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                    newValues = Array.newInstance(String.class, values.size());
                                 } else if (TypeEnum.Time.getLiteral().equals(subType)
                                         || TypeEnum.Date.getLiteral().equals(subType)
                                         || TypeEnum.DateTime.getLiteral().equals(subType)) {
@@ -1509,6 +1517,7 @@ public class JavascriptController {
                     List<Map<String, Object>> jsonFields = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.JSON_FIELD + " WHERE " + Jdbc.JsonField.JSON_ID + " = ?", requestBodyRecord.get(Jdbc.Json.JSON_ID));
                     for (Map<String, Object> jsonField : jsonFields) {
                         String name = (String) jsonField.get(Jdbc.JsonField.NAME);
+                        debugName = name;
                         boolean required = (boolean) jsonField.get(Jdbc.JsonField.REQUIRED);
                         String type = (String) jsonField.get(Jdbc.JsonField.TYPE);
                         String subType = (String) jsonField.get(Jdbc.JsonField.SUB_TYPE);
@@ -1576,9 +1585,6 @@ public class JavascriptController {
                                 }
                             }
 
-
-                            // TODO : to check testing with file upload
-
                             if (TypeEnum.Boolean.getLiteral().equals(type)
                                     || TypeEnum.Long.getLiteral().equals(type)
                                     || TypeEnum.Double.getLiteral().equals(type)
@@ -1591,14 +1597,14 @@ public class JavascriptController {
                                 newRequestBody.put(name, values.isEmpty() ? null : values.get(0));
                             } else if (TypeEnum.List.getLiteral().equals(type)) {
                                 Object newValues = null;
-                                if (TypeEnum.Boolean.getLiteral().equals(type)) {
+                                if (TypeEnum.Boolean.getLiteral().equals(subType)) {
                                     newValues = Array.newInstance(Boolean.class, values.size());
                                 } else if (TypeEnum.Long.getLiteral().equals(subType)) {
-                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                    newValues = Array.newInstance(Long.class, values.size());
                                 } else if (TypeEnum.Double.getLiteral().equals(subType)) {
-                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                    newValues = Array.newInstance(Double.class, values.size());
                                 } else if (TypeEnum.String.getLiteral().equals(subType)) {
-                                    newValues = Array.newInstance(Boolean.class, values.size());
+                                    newValues = Array.newInstance(String.class, values.size());
                                 } else if (TypeEnum.Time.getLiteral().equals(subType)
                                         || TypeEnum.Date.getLiteral().equals(subType)
                                         || TypeEnum.DateTime.getLiteral().equals(subType)) {
@@ -1642,6 +1648,7 @@ public class JavascriptController {
                     // endregion
                 } else if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
                     // region application/json
+                    // TODO : need to be checked
                     String type = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_TYPE);
                     String subType = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_SUB_TYPE);
                     String enumId = (String) restRecord.get(Jdbc.Rest.REQUEST_BODY_ENUM_ID);
@@ -2036,6 +2043,7 @@ public class JavascriptController {
             }
 
         } catch (Throwable e) {
+            System.out.println("debugName : " + debugName);
             e.printStackTrace();
         }
         return null;

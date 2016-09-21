@@ -23,7 +23,7 @@ public class ApplicationFormUrlEncoded {
         requestBody = requestBody.header("authorization", "hello");
         requestBody = requestBody.header("dob", DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
         HttpRequest httpRequest = requestBody.queryString("game", Arrays.asList(DateFormatUtils.ISO_DATE_FORMAT.format(new Date()), DateFormatUtils.ISO_DATE_FORMAT.format(new Date())));
-        httpRequest = httpRequest.queryString("sessionId", UUID.randomUUID().toString());
+        httpRequest.queryString("sessionId", UUID.randomUUID().toString());
         MultipartBody body = null;
         {
             body = requestBody.field("string_required", "no error anymore");
