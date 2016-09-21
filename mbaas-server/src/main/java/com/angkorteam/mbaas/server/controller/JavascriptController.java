@@ -1912,7 +1912,7 @@ public class JavascriptController {
             }
             // endregion
 
-            if (requestQueryErrors.isEmpty() || requestBodyErrors.isEmpty() || requestHeaderErrors.isEmpty()) {
+            if (!requestQueryErrors.isEmpty() || !requestBodyErrors.isEmpty() || !requestHeaderErrors.isEmpty()) {
                 if (requestQueryErrors != null && !requestQueryErrors.isEmpty()) {
                     responseEntity.put("requestQueryParameterErrors", requestQueryErrors);
                 }

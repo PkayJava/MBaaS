@@ -66,6 +66,10 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        if (ex != null) {
+            ex.printStackTrace();
+            throw ex;
+        }
         String id = request.getSession(true).getId();
         double consume = executions.remove(id);
         LOGGER.info("{} consumed {} ss", request.getRequestURI(), consume / 1000f);
