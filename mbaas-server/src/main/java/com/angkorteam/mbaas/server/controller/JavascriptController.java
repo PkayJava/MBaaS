@@ -918,7 +918,7 @@ public class JavascriptController {
                                 for (Object object : objects) {
                                     if (object instanceof Map) {
                                         for (Map<String, Object> jsonField : jsonFields) {
-                                            JavascriptControllerUtils.validateMapField(jdbcTemplate, new HashMap<>(), requestBodyErrors, (Map) object, jsonField, enumItemMetaData, enumMetaData);
+                                            JavascriptControllerUtils.validateMapField(jdbcTemplate, requestBodyErrors, (Map) object, jsonField, enumItemMetaData, enumMetaData);
                                         }
                                     } else {
                                         responseBodyErrors.put("responseBody", "is invalid");
@@ -965,11 +965,7 @@ public class JavascriptController {
                 stackTraces.add(element.getClassName() + "." + element.getMethodName() + " at " + element.getLineNumber() + " in " + element.getFileName());
             }
             responseEntity.setStackTrace(stackTraces);
-            if (debugName != null && !"".equals(debugName)) {
-                responseEntity.setDebugMessage(e.getMessage() + " name " + debugName);
-            } else {
-                responseEntity.setDebugMessage(e.getMessage());
-            }
+            responseEntity.setDebugMessage(e.getMessage());
             return ResponseEntity.ok(responseEntity);
         }
     }
@@ -1048,3 +1044,4 @@ public class JavascriptController {
     }
 
 }
+

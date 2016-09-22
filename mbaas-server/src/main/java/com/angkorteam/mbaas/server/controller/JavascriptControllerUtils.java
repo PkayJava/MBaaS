@@ -1890,20 +1890,17 @@ public class JavascriptControllerUtils {
                 }
             }
         }
-        // TODO : checked
         if (required) {
-            if (object == null) {
+            if (Strings.isNullOrEmpty(stringValue)) {
                 throw new IllegalArgumentException("is required");
             } else {
-                if (object instanceof Date) {
-                } else {
+                if (!enumItems.contains(stringValue)) {
                     throw new IllegalArgumentException("is invalid");
                 }
             }
         } else {
-            if (object != null) {
-                if (object instanceof Date) {
-                } else {
+            if (!Strings.isNullOrEmpty(stringValue)) {
+                if (!enumItems.contains(stringValue)) {
                     throw new IllegalArgumentException("is invalid");
                 }
             }
@@ -2044,5 +2041,113 @@ public class JavascriptControllerUtils {
         }
     }
 
+    public static void validateBooleanArray(boolean required, List<Object> objects) {
+        if (required) {
+            if (objects == null || objects.isEmpty()) {
+                throw new IllegalArgumentException("is required");
+            } else {
+                for (Object object : objects) {
+                    validateBoolean(required, object);
+                }
+            }
+        } else {
+            if (objects != null && !objects.isEmpty()) {
+                for (Object object : objects) {
+                    validateBoolean(required, object);
+                }
+            }
+        }
+    }
+
+    public static void validateLongArray(boolean required, List<Object> objects) {
+        if (required) {
+            if (objects == null || objects.isEmpty()) {
+                throw new IllegalArgumentException("is required");
+            } else {
+                for (Object object : objects) {
+                    validateLong(required, object);
+                }
+            }
+        } else {
+            if (objects != null && !objects.isEmpty()) {
+                for (Object object : objects) {
+                    validateLong(required, object);
+                }
+            }
+        }
+    }
+
+    public static void validateDoubleArray(boolean required, List<Object> objects) {
+        if (required) {
+            if (objects == null || objects.isEmpty()) {
+                throw new IllegalArgumentException("is required");
+            } else {
+                for (Object object : objects) {
+                    validateDouble(required, object);
+                }
+            }
+        } else {
+            if (objects != null && !objects.isEmpty()) {
+                for (Object object : objects) {
+                    validateDouble(required, object);
+                }
+            }
+        }
+    }
+
+    public static void validateStringArray(boolean required, List<Object> objects) {
+        if (required) {
+            if (objects == null || objects.isEmpty()) {
+                throw new IllegalArgumentException("is required");
+            } else {
+                for (Object object : objects) {
+                    validateString(required, object);
+                }
+            }
+        } else {
+            if (objects != null && !objects.isEmpty()) {
+                for (Object object : objects) {
+                    validateString(required, object);
+                }
+            }
+        }
+    }
+
+    public static void validateDateArray(boolean required, List<Object> objects) {
+        if (required) {
+            if (objects == null || objects.isEmpty()) {
+                throw new IllegalArgumentException("is required");
+            } else {
+                for (Object object : objects) {
+                    validateDate(required, object);
+                }
+            }
+        } else {
+            if (objects != null && !objects.isEmpty()) {
+                for (Object object : objects) {
+                    validateDate(required, object);
+                }
+            }
+        }
+    }
+
+    public static void validateEnumArray(boolean required, String enumType, List<String> enumItems, List<Object> objects) {
+        if (required) {
+            if (objects == null || objects.isEmpty()) {
+                throw new IllegalArgumentException("is required");
+            } else {
+                for (Object object : objects) {
+                    validateEnum(required, enumType, enumItems, object);
+                }
+            }
+        } else {
+            if (objects != null && !objects.isEmpty()) {
+                for (Object object : objects) {
+                    validateEnum(required, enumType, enumItems, object);
+                }
+            }
+        }
+    }
 
 }
+
