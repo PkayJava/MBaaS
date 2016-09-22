@@ -32,8 +32,8 @@ public class ResponseUtils {
         }
         responseBody.setVersion(configuration.getString(Constants.APP_VERSION));
         responseBody.setMethod(request.getMethod());
-        responseBody.setHttpCode(httpStatus.value());
-        responseBody.setResult(httpStatus.getReasonPhrase());
+        responseBody.setResultCode(httpStatus.value());
+        responseBody.setResultMessage(httpStatus.getReasonPhrase());
         return responseBody;
     }
 }

@@ -38,18 +38,18 @@ public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
         Response responseBody = body;
         if (body == null) {
             responseBody = new UnknownResponse();
-            responseBody.setHttpCode(HttpStatus.OK.value());
-            responseBody.setResult(HttpStatus.OK.getReasonPhrase());
+            responseBody.setResultCode(HttpStatus.OK.value());
+            responseBody.setResultMessage(HttpStatus.OK.getReasonPhrase());
         } else {
-            if (responseBody.getHttpCode() == null) {
-                responseBody.setHttpCode(HttpStatus.OK.value());
-                responseBody.setResult(HttpStatus.OK.getReasonPhrase());
+            if (responseBody.getResultCode() == null) {
+                responseBody.setResultCode(HttpStatus.OK.value());
+                responseBody.setResultMessage(HttpStatus.OK.getReasonPhrase());
             }
-            if (responseBody.getResult() == null) {
+            if (responseBody.getResultMessage() == null) {
                 try {
-                    responseBody.setResult(HttpStatus.valueOf(responseBody.getHttpCode()).getReasonPhrase());
+                    responseBody.setResultMessage(HttpStatus.valueOf(responseBody.getResultCode()).getReasonPhrase());
                 } catch (IllegalArgumentException e) {
-                    responseBody.setResult("Unknown");
+                    responseBody.setResultMessage("Unknown");
                 }
             }
         }

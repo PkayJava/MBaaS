@@ -40,6 +40,7 @@ public class RestManagementPage extends MasterPage implements ActionFilteredJooq
 
         RestProvider provider = new RestProvider(getSession().getApplicationCode());
         provider.selectField(String.class, "restId");
+        provider.selectField(Boolean.class, "modified");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         add(filterForm);
@@ -49,7 +50,7 @@ public class RestManagementPage extends MasterPage implements ActionFilteredJooq
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("description", this), "description", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("path", this), "path", provider));
         columns.add(new TextFilteredJooqColumn(String.class, JooqUtils.lookup("method", this), "method", provider));
-        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Delete"));
+        columns.add(new ActionFilteredJooqColumn(JooqUtils.lookup("action", this), JooqUtils.lookup("filter", this), JooqUtils.lookup("clear", this), this, "Edit", "Delete", "Go Live"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -68,6 +69,9 @@ public class RestManagementPage extends MasterPage implements ActionFilteredJooq
             return "btn-xs btn-info";
         }
         if ("Delete".equals(link)) {
+            return "btn-xs btn-danger";
+        }
+        if ("Go Live".equals(link)) {
             return "btn-xs btn-danger";
         }
         return "";
@@ -90,15 +94,33 @@ public class RestManagementPage extends MasterPage implements ActionFilteredJooq
             jdbcTemplate.update("DELETE FROM " + Jdbc.REST + " WHERE " + Jdbc.Rest.REST_ID + " = ?", restId);
             return;
         }
+        if ("Go Live".equals(link)) {
+            jdbcTemplate.update("UPDATE " + Jdbc.REST + " SET " + Jdbc.Rest.SCRIPT + " = " + Jdbc.Rest.STAGE_SCRIPT + ", " + Jdbc.Rest.MODIFIED + " = FALSE WHERE " + Jdbc.Rest.REST_ID + " = ?", restId);
+            return;
+        }
     }
 
     @Override
     public boolean isClickableEventLink(String link, Map<String, Object> object) {
-        return true;
+        return hasAccess(link, object);
     }
 
     @Override
     public boolean isVisibleEventLink(String link, Map<String, Object> object) {
-        return true;
+        return hasAccess(link, object);
+    }
+
+    private boolean hasAccess(String link, Map<String, Object> object) {
+        if ("Edit".equals(link)) {
+            return true;
+        }
+        if ("Delete".equals(link)) {
+            return true;
+        }
+        if ("Go Live".equals(link) || "Stage Preview".equals(link)) {
+            boolean modified = (boolean) object.get("modified");
+            return modified;
+        }
+        return false;
     }
 }

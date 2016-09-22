@@ -14,24 +14,48 @@ import java.util.Map;
 public abstract class Response<T> implements Serializable {
 
     @Expose
-    @SerializedName("result")
-    private String result;
+    @SerializedName("resultMessage")
+    private String resultMessage;
 
     @Expose
-    @SerializedName("http_code")
-    private Integer httpCode;
+    @SerializedName("resultCode")
+    private Integer resultCode;
 
     @Expose
-    @SerializedName("error_messages")
-    private Map<String, String> errorMessages = new LinkedHashMap<>();
+    @SerializedName("requestHeader")
+    private Map<String, List<String>> requestHeader = new LinkedHashMap<>();
+
+    @Expose
+    @SerializedName("requestQueryParameterErrors")
+    private Map<String, String> requestQueryParameterErrors = null;
+
+    @Expose
+    @SerializedName("requestHeaderErrors")
+    private Map<String, String> requestHeaderErrors = null;
+
+    @Expose
+    @SerializedName("requestBodyErrors")
+    private Map<String, Object> requestBodyErrors = null;
+
+    @Expose
+    @SerializedName("responseHeaderErrors")
+    private Map<String, String> responseHeaderErrors = null;
+
+    @Expose
+    @SerializedName("responseBodyErrors")
+    private Map<String, Object> responseBodyErrors = null;
+
+    @Expose
+    @SerializedName("stackTrace")
+    private List<String> stackTrace = null;
+
+    @Expose
+    @SerializedName("debugMessage")
+    private String debugMessage;
 
     @Expose
     @SerializedName("method")
     private String method;
-
-    @Expose
-    @SerializedName("request_header")
-    private Map<String, List<String>> requestHeader = new LinkedHashMap<>();
 
     @Expose
     @SerializedName("version")
@@ -49,17 +73,6 @@ public abstract class Response<T> implements Serializable {
         this.data = data;
     }
 
-    public void setHttpCode(Integer httpCode) {
-        this.httpCode = httpCode;
-    }
-
-    public Map<String, String> getErrorMessages() {
-        return errorMessages;
-    }
-
-    public void setErrorMessages(Map<String, String> errorMessages) {
-        this.errorMessages = errorMessages;
-    }
 
     public String getMethod() {
         return method;
@@ -85,19 +98,79 @@ public abstract class Response<T> implements Serializable {
         this.version = version;
     }
 
-    public Integer getHttpCode() {
-        return httpCode;
+    public String getResultMessage() {
+        return resultMessage;
     }
 
-    public void setHttpCode(int httpCode) {
-        this.httpCode = httpCode;
+    public void setResultMessage(String resultMessage) {
+        this.resultMessage = resultMessage;
     }
 
-    public String getResult() {
-        return result;
+    public Integer getResultCode() {
+        return resultCode;
     }
 
-    public void setResult(String result) {
-        this.result = result;
+    public void setResultCode(Integer resultCode) {
+        this.resultCode = resultCode;
+    }
+
+    public void setResultCode(int resultCode) {
+        this.resultCode = resultCode;
+    }
+
+    public Map<String, String> getRequestQueryParameterErrors() {
+        return requestQueryParameterErrors;
+    }
+
+    public void setRequestQueryParameterErrors(Map<String, String> requestQueryParameterErrors) {
+        this.requestQueryParameterErrors = requestQueryParameterErrors;
+    }
+
+    public Map<String, Object> getRequestBodyErrors() {
+        return requestBodyErrors;
+    }
+
+    public List<String> getStackTrace() {
+        return stackTrace;
+    }
+
+    public void setStackTrace(List<String> stackTrace) {
+        this.stackTrace = stackTrace;
+    }
+
+    public String getDebugMessage() {
+        return debugMessage;
+    }
+
+    public void setDebugMessage(String debugMessage) {
+        this.debugMessage = debugMessage;
+    }
+
+    public Map<String, Object> getResponseBodyErrors() {
+        return responseBodyErrors;
+    }
+
+    public void setResponseBodyErrors(Map<String, Object> responseBodyErrors) {
+        this.responseBodyErrors = responseBodyErrors;
+    }
+
+    public void setRequestBodyErrors(Map<String, Object> requestBodyErrors) {
+        this.requestBodyErrors = requestBodyErrors;
+    }
+
+    public Map<String, String> getRequestHeaderErrors() {
+        return requestHeaderErrors;
+    }
+
+    public void setRequestHeaderErrors(Map<String, String> requestHeaderErrors) {
+        this.requestHeaderErrors = requestHeaderErrors;
+    }
+
+    public Map<String, String> getResponseHeaderErrors() {
+        return responseHeaderErrors;
+    }
+
+    public void setResponseHeaderErrors(Map<String, String> responseHeaderErrors) {
+        this.responseHeaderErrors = responseHeaderErrors;
     }
 }

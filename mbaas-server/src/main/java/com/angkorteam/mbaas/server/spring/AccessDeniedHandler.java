@@ -27,8 +27,8 @@ public class AccessDeniedHandler implements org.springframework.security.web.acc
         UnknownResponse responseBody = new UnknownResponse();
         responseBody.setVersion(configuration.getString(Constants.APP_VERSION));
         responseBody.setMethod(request.getMethod());
-        responseBody.setResult(org.springframework.http.HttpStatus.FORBIDDEN.getReasonPhrase());
-        responseBody.setHttpCode(org.springframework.http.HttpStatus.FORBIDDEN.value());
+        responseBody.setResultMessage(org.springframework.http.HttpStatus.FORBIDDEN.getReasonPhrase());
+        responseBody.setResultCode(org.springframework.http.HttpStatus.FORBIDDEN.value());
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
         this.gson.toJson(responseBody, response.getWriter());

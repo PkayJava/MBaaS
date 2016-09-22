@@ -1,5 +1,7 @@
 package com.angkorteam.mbaas.server.wicket;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.HttpRequest;
@@ -366,7 +368,9 @@ public class MultipartFormData {
             body = body.field("date_optional", date_optional);
         }
 
-        System.out.println(requestBody.asString());
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Object pp = gson.fromJson(requestBody.asString().getBody(), Object.class);
+        System.out.println(gson.toJson(pp));
     }
 
 }

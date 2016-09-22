@@ -34,6 +34,10 @@ public class RestProvider extends JooqProvider {
         return DSL.field(this.restTable.getName() + "." + Jdbc.Rest.METHOD, String.class);
     }
 
+    public Field<Boolean> getModified() {
+        return DSL.field(this.restTable.getName() + "." + Jdbc.Rest.MODIFIED, Boolean.class);
+    }
+
     public Field<String> getPath() {
         return DSL.field(this.restTable.getName() + "." + Jdbc.Rest.PATH, String.class);
     }
