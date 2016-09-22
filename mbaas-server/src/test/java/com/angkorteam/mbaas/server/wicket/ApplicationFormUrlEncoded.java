@@ -353,7 +353,7 @@ public class ApplicationFormUrlEncoded {
             body = body.field("date_optional", date_optional);
         }
 
-        System.out.println(requestBody.asString());
+        System.out.println(requestBody.asString().getBody());
     }
 
 }

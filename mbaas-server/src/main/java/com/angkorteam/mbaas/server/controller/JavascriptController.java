@@ -169,7 +169,7 @@ public class JavascriptController {
                     return null;
                 }
                 if (!contentType.equals(springRequestContentType)) {
-                    return null;
+                    throw new IllegalArgumentException("requestBody is invalid");
                 }
                 if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)) {
                     // region application/x-www-form-urlencoded
@@ -713,6 +713,9 @@ public class JavascriptController {
 
             CollectionFactory collectionFactory = new CollectionFactory();
             Map<String, Object> responseHeaderDictionary = new HashMap<>();
+
+            // TODO : for date/time/datetime encapsulation
+            Object newResponse = null;
             Object response = http.http(collectionFactory, req, responseHeaderDictionary, newQueryParameter, newRequestHeader, newRequestBody);
 
             HttpHeaders newResponseHeader = new HttpHeaders();
