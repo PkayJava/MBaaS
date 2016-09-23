@@ -713,11 +713,11 @@ public class JavascriptController {
             boolean responseBodyRequired = (boolean) restObject.get(Jdbc.Rest.RESPONSE_BODY_REQUIRED);
 
             Map<String, Object> responseHeaderDictionary = new HashMap<>();
-            Map<String, Object> businessErrors = new HashMap<>();
-            Object response = http.http(req, responseHeaderDictionary, newQueryParameter, newRequestHeader, newRequestBody, businessErrors);
+            Map<String, Object> businessError = new HashMap<>();
+            Object response = http.http(req, newQueryParameter, newRequestHeader, newRequestBody, responseHeaderDictionary, businessError);
 
-            if (businessErrors != null && !businessErrors.isEmpty()) {
-                responseEntity.setBusinessErrors(businessErrors);
+            if (businessError != null && !businessError.isEmpty()) {
+                responseEntity.setBusinessErrors(businessError);
                 return ResponseEntity.ok(responseEntity);
             }
 
@@ -1089,7 +1089,7 @@ public class JavascriptController {
     }
 
     public interface Http {
-        Object http(HttpServletRequest request, Map<String, Object> responseHeader, Map<String, Object> queryParameter, Map<String, Object> requestHeader, Object requestBody, Map<String, Object> businessErrors);
+        Object http(HttpServletRequest request, Map<String, Object> queryParameter, Map<String, Object> requestHeader, Object requestBody, Map<String, Object> responseHeader, Map<String, Object> businessError);
     }
 
 }
