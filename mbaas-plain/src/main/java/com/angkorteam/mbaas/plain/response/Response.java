@@ -38,6 +38,10 @@ public abstract class Response<T> implements Serializable {
     private Map<String, Object> requestBodyErrors = null;
 
     @Expose
+    @SerializedName("businessErrors")
+    private Map<String, Object> businessErrors = null;
+
+    @Expose
     @SerializedName("responseHeaderErrors")
     private Map<String, String> responseHeaderErrors = null;
 
@@ -172,5 +176,13 @@ public abstract class Response<T> implements Serializable {
 
     public void setResponseHeaderErrors(Map<String, String> responseHeaderErrors) {
         this.responseHeaderErrors = responseHeaderErrors;
+    }
+
+    public Map<String, Object> getBusinessErrors() {
+        return businessErrors;
+    }
+
+    public void setBusinessErrors(Map<String, Object> businessErrors) {
+        this.businessErrors = businessErrors;
     }
 }

@@ -713,8 +713,13 @@ public class JavascriptController {
             boolean responseBodyRequired = (boolean) restObject.get(Jdbc.Rest.RESPONSE_BODY_REQUIRED);
 
             Map<String, Object> responseHeaderDictionary = new HashMap<>();
+            Map<String, Object> businessErrors = new HashMap<>();
+            Object response = http.http(req, responseHeaderDictionary, newQueryParameter, newRequestHeader, newRequestBody, businessErrors);
 
-            Object response = http.http(req, responseHeaderDictionary, newQueryParameter, newRequestHeader, newRequestBody);
+            if (businessErrors != null && !businessErrors.isEmpty()) {
+                responseEntity.setBusinessErrors(businessErrors);
+                return ResponseEntity.ok(responseEntity);
+            }
 
             HttpHeaders newResponseHeader = new HttpHeaders();
             // region Validation Response Header
@@ -1084,7 +1089,7 @@ public class JavascriptController {
     }
 
     public interface Http {
-        Object http(HttpServletRequest request, Map<String, Object> responseHeader, Map<String, Object> queryParameter, Map<String, Object> requestHeader, Object requestBody);
+        Object http(HttpServletRequest request, Map<String, Object> responseHeader, Map<String, Object> queryParameter, Map<String, Object> requestHeader, Object requestBody, Map<String, Object> businessErrors);
     }
 
 }
