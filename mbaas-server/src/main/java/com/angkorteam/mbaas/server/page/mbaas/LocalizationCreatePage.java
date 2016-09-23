@@ -19,7 +19,7 @@ import java.util.UUID;
 /**
  * Created by socheat on 3/13/16.
  */
-@AuthorizeInstantiation("mbaas.system")
+@AuthorizeInstantiation({"mbaas.administrator", "mbaas.system"})
 @Mount("/mbaas/localization/create")
 public class LocalizationCreatePage extends MBaaSPage {
 

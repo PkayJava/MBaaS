@@ -17,7 +17,7 @@ import org.jooq.DSLContext;
 /**
  * Created by socheat on 3/13/16.
  */
-@AuthorizeInstantiation("mbaas.system")
+@AuthorizeInstantiation({"mbaas.administrator", "mbaas.system"})
 @Mount("/mbaas/localization/modify")
 public class LocalizationModifyPage extends MBaaSPage {
 

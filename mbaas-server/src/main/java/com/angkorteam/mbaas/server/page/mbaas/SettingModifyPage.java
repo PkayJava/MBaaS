@@ -18,7 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation("mbaas.system")
+@AuthorizeInstantiation({"mbaas.administrator", "mbaas.system"})
 @Mount("/mbaas/setting/modify")
 public class SettingModifyPage extends MBaaSPage {
 

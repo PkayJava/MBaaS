@@ -17,7 +17,7 @@ import org.jooq.DSLContext;
 /**
  * Created by socheat on 3/10/16.
  */
-@AuthorizeInstantiation("mbaas.system")
+@AuthorizeInstantiation({"mbaas.administrator", "mbaas.system"})
 @Mount("/mbaas/setting/create")
 public class SettingCreatePage extends MBaaSPage{
 

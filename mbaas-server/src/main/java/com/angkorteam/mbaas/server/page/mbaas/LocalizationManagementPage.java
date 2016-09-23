@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/13/16.
  */
-@AuthorizeInstantiation("mbaas.system")
+@AuthorizeInstantiation({"mbaas.administrator", "mbaas.system"})
 @Mount("/mbaas/localization/management")
 public class LocalizationManagementPage extends MBaaSPage implements ActionFilteredJooqColumn.Event {
 

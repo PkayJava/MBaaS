@@ -160,12 +160,13 @@ public abstract class MasterPage extends AdminLTEPage {
     private String mmenuMenuClass = "";
     private String mmenuBlockClass = "";
 
-    private WebMarkupContainer menuGeneral;
+    private WebMarkupContainer adminConsole;
     private WebMarkupContainer menuProfile;
     private WebMarkupContainer menuSecurity;
     private WebMarkupContainer menuSession;
     private WebMarkupContainer menuContentManagement;
     private WebMarkupContainer menuRestManagement;
+
 
     private WebMarkupContainer menuLogicConsole;
 
@@ -246,6 +247,8 @@ public abstract class MasterPage extends AdminLTEPage {
         }
 
         {
+            this.adminConsole = new WebMarkupContainer("adminConsole");
+            add(this.adminConsole);
             this.menuProfile = new WebMarkupContainer("menuProfile");
             this.menuProfile.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuProfileClass")));
             add(this.menuProfile);
@@ -421,12 +424,14 @@ public abstract class MasterPage extends AdminLTEPage {
         JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
         boolean isAdministrator = getSession().isAdministrator();
         boolean isRegistered = getSession().isRegistered();
+        this.menuProfile.setVisible(getSession().isSignedIn());
         this.menuSecurity.setVisible(isAdministrator);
         this.menuSession.setVisible(isAdministrator);
         this.menuLogicConsole.setVisible(isAdministrator);
         this.mmenuFile.setVisible(isAdministrator);
         this.mmenuAsset.setVisible(isAdministrator);
         this.menuStorage.setVisible(this.mmenuAsset.isVisible() || this.mmenuFile.isVisible());
+        this.adminConsole.setVisible(this.menuProfile.isVisible() || this.menuSecurity.isVisible() || this.menuStorage.isVisible() || this.menuSession.isVisible());
 
         // Parent Menu
         for (String key : this.mmenuItems.keySet()) {
