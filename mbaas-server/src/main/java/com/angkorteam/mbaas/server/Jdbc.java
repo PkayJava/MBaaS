@@ -15,7 +15,6 @@ public class Jdbc {
     public static final String QUERY_PARAMETER = "query_parameter";
     public static final String FILE = "file";
     public static final String ASSET = "asset";
-    public static final String JAVASCRIPT = "javascript";
     public static final String JOB = "job";
     public static final String CLIENT = "client";
     public static final String VISIBLE_BY_FRIEND = "visible_by_friend";
@@ -181,17 +180,6 @@ public class Jdbc {
         public static final String DATE_CREATED = "date_created";
         public static final String USER_ID = User.USER_ID;
         public static final String CLIENT_ID = Client.CLIENT_ID;
-    }
-
-    public static final class Javascript {
-        public static final String JAVASCRIPT_ID = JAVASCRIPT + "_id";
-        public static final String PATH = "path";
-        public static final String DESCRIPTION = "description";
-        public static final String SCRIPT = "script";
-        public static final String DATE_CREATED = "date_created";
-        public static final String SECURITY = "security";
-        public static final String USER_ID = User.USER_ID;
-        public static final String APPLICATION_CODE = "application_code";
     }
 
     public static final class Job {

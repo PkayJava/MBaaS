@@ -36,9 +36,6 @@ import com.angkorteam.mbaas.server.page.document.DocumentModifyPage;
 import com.angkorteam.mbaas.server.page.file.FileCreatePage;
 import com.angkorteam.mbaas.server.page.file.FileManagementPage;
 import com.angkorteam.mbaas.server.page.file.FileModifyPage;
-import com.angkorteam.mbaas.server.page.javascript.JavascriptCreatePage;
-import com.angkorteam.mbaas.server.page.javascript.JavascriptManagementPage;
-import com.angkorteam.mbaas.server.page.javascript.JavascriptModifyPage;
 import com.angkorteam.mbaas.server.page.job.JobCreatePage;
 import com.angkorteam.mbaas.server.page.job.JobManagementPage;
 import com.angkorteam.mbaas.server.page.job.JobModifyPage;
@@ -53,7 +50,27 @@ import com.angkorteam.mbaas.server.page.query.QueryCreatePage;
 import com.angkorteam.mbaas.server.page.query.QueryManagementPage;
 import com.angkorteam.mbaas.server.page.query.QueryModifyPage;
 import com.angkorteam.mbaas.server.page.query.QueryParameterModifyPage;
-import com.angkorteam.mbaas.server.page.rest.*;
+import com.angkorteam.mbaas.server.page.rest.BodyCreatePage;
+import com.angkorteam.mbaas.server.page.rest.BodyFieldCreatePage;
+import com.angkorteam.mbaas.server.page.rest.BodyFieldManagementPage;
+import com.angkorteam.mbaas.server.page.rest.BodyFieldModifyPage;
+import com.angkorteam.mbaas.server.page.rest.BodyManagementPage;
+import com.angkorteam.mbaas.server.page.rest.BodyModifyPage;
+import com.angkorteam.mbaas.server.page.rest.EnumCreatePage;
+import com.angkorteam.mbaas.server.page.rest.EnumManagementPage;
+import com.angkorteam.mbaas.server.page.rest.EnumModifyPage;
+import com.angkorteam.mbaas.server.page.rest.EnumValueCreatePage;
+import com.angkorteam.mbaas.server.page.rest.EnumValueManagementPage;
+import com.angkorteam.mbaas.server.page.rest.EnumValueModifyPage;
+import com.angkorteam.mbaas.server.page.rest.HttpHeaderCreatePage;
+import com.angkorteam.mbaas.server.page.rest.HttpHeaderManagementPage;
+import com.angkorteam.mbaas.server.page.rest.HttpHeaderModifyPage;
+import com.angkorteam.mbaas.server.page.rest.HttpQueryCreatePage;
+import com.angkorteam.mbaas.server.page.rest.HttpQueryManagementPage;
+import com.angkorteam.mbaas.server.page.rest.HttpQueryModifyPage;
+import com.angkorteam.mbaas.server.page.rest.RestCreatePage;
+import com.angkorteam.mbaas.server.page.rest.RestManagementPage;
+import com.angkorteam.mbaas.server.page.rest.RestModifyPage;
 import com.angkorteam.mbaas.server.page.restore.RestoreManagementPage;
 import com.angkorteam.mbaas.server.page.role.RoleCreatePage;
 import com.angkorteam.mbaas.server.page.role.RoleManagementPage;
@@ -109,6 +126,8 @@ public abstract class MasterPage extends AdminLTEPage {
     private String menuStorageClass = "treeview";
     private String menuSessionClass = "treeview";
     private String menuPluginClass = "treeview";
+    private String menuContentManagementClass = "treeview";
+    private String menuRestManagementClass = "treeview";
 
     private String mmenuInformationClass = "";
     private String mmenuOneTimePasswordClass = "";
@@ -127,7 +146,6 @@ public abstract class MasterPage extends AdminLTEPage {
 
     private String mmenuMobileClass = "";
 
-    private String mmenuJavascriptClass = "";
     private String mmenuClientClass = "";
     private String mmenuEnumClass = "";
     private String mmenuBodyClass = "";
@@ -146,6 +164,8 @@ public abstract class MasterPage extends AdminLTEPage {
     private WebMarkupContainer menuProfile;
     private WebMarkupContainer menuSecurity;
     private WebMarkupContainer menuSession;
+    private WebMarkupContainer menuContentManagement;
+    private WebMarkupContainer menuRestManagement;
 
     private WebMarkupContainer menuLogicConsole;
 
@@ -283,29 +303,53 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuLogicConsole = new WebMarkupContainer("menuLogicConsole");
             add(this.menuLogicConsole);
 
-            WebMarkupContainer mmenuJavascript = new WebMarkupContainer("mmenuJavascript");
-            mmenuJavascript.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuJavascriptClass")));
-            this.menuLogicConsole.add(mmenuJavascript);
+            {
+                this.menuContentManagement = new WebMarkupContainer("menuContentManagement");
+                this.menuContentManagement.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuContentManagementClass")));
+                this.menuLogicConsole.add(this.menuContentManagement);
 
-            WebMarkupContainer mmenuEnum = new WebMarkupContainer("mmenuEnum");
-            mmenuEnum.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuEnumClass")));
-            this.menuLogicConsole.add(mmenuEnum);
+                WebMarkupContainer mmenuMenu = new WebMarkupContainer("mmenuMenu");
+                mmenuMenu.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMenuClass")));
+                this.menuContentManagement.add(mmenuMenu);
 
-            WebMarkupContainer mmenuBody = new WebMarkupContainer("mmenuBody");
-            mmenuBody.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuBodyClass")));
-            this.menuLogicConsole.add(mmenuBody);
+                WebMarkupContainer mmenuBlock = new WebMarkupContainer("mmenuBlock");
+                mmenuBlock.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuBlockClass")));
+                this.menuContentManagement.add(mmenuBlock);
 
-            WebMarkupContainer mmenuHttpHeader = new WebMarkupContainer("mmenuHttpHeader");
-            mmenuHttpHeader.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuHttpHeaderClass")));
-            this.menuLogicConsole.add(mmenuHttpHeader);
+                WebMarkupContainer mmenuPage = new WebMarkupContainer("mmenuPage");
+                mmenuPage.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuPageClass")));
+                this.menuContentManagement.add(mmenuPage);
 
-            WebMarkupContainer mmenuHttpQuery = new WebMarkupContainer("mmenuHttpQuery");
-            mmenuHttpQuery.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuHttpQueryClass")));
-            this.menuLogicConsole.add(mmenuHttpQuery);
+                WebMarkupContainer mmenuMaster = new WebMarkupContainer("mmenuMaster");
+                mmenuMaster.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMasterClass")));
+                this.menuContentManagement.add(mmenuMaster);
+            }
 
-            WebMarkupContainer mmenuApi = new WebMarkupContainer("mmenuApi");
-            mmenuApi.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuApiClass")));
-            this.menuLogicConsole.add(mmenuApi);
+            {
+                this.menuRestManagement = new WebMarkupContainer("menuRestManagement");
+                this.menuRestManagement.add(AttributeModifier.replace("class", new PropertyModel<>(this, "menuRestManagementClass")));
+                this.menuLogicConsole.add(this.menuRestManagement);
+
+                WebMarkupContainer mmenuEnum = new WebMarkupContainer("mmenuEnum");
+                mmenuEnum.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuEnumClass")));
+                this.menuRestManagement.add(mmenuEnum);
+
+                WebMarkupContainer mmenuBody = new WebMarkupContainer("mmenuBody");
+                mmenuBody.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuBodyClass")));
+                this.menuRestManagement.add(mmenuBody);
+
+                WebMarkupContainer mmenuHttpHeader = new WebMarkupContainer("mmenuHttpHeader");
+                mmenuHttpHeader.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuHttpHeaderClass")));
+                this.menuRestManagement.add(mmenuHttpHeader);
+
+                WebMarkupContainer mmenuHttpQuery = new WebMarkupContainer("mmenuHttpQuery");
+                mmenuHttpQuery.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuHttpQueryClass")));
+                this.menuRestManagement.add(mmenuHttpQuery);
+
+                WebMarkupContainer mmenuApi = new WebMarkupContainer("mmenuApi");
+                mmenuApi.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuApiClass")));
+                this.menuRestManagement.add(mmenuApi);
+            }
 
             WebMarkupContainer mmenuClient = new WebMarkupContainer("mmenuClient");
             mmenuClient.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuClientClass")));
@@ -326,22 +370,6 @@ public abstract class MasterPage extends AdminLTEPage {
             WebMarkupContainer mmenuRestore = new WebMarkupContainer("mmenuRestore");
             mmenuJob.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuRestoreClass")));
             this.menuLogicConsole.add(mmenuRestore);
-
-            WebMarkupContainer mmenuPage = new WebMarkupContainer("mmenuPage");
-            mmenuPage.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuPageClass")));
-            this.menuLogicConsole.add(mmenuPage);
-
-            WebMarkupContainer mmenuMaster = new WebMarkupContainer("mmenuMaster");
-            mmenuMaster.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMasterClass")));
-            this.menuLogicConsole.add(mmenuMaster);
-
-            WebMarkupContainer mmenuBlock = new WebMarkupContainer("mmenuBlock");
-            mmenuBlock.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuBlockClass")));
-            this.menuLogicConsole.add(mmenuBlock);
-
-            WebMarkupContainer mmenuMenu = new WebMarkupContainer("mmenuMenu");
-            mmenuMenu.add(AttributeModifier.replace("class", new PropertyModel<>(this, "mmenuMenuClass")));
-            this.menuLogicConsole.add(mmenuMenu);
         }
 
         String rootMenuId = null;
@@ -449,12 +477,6 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuStorageClass = "treeview";
         }
 
-        if (getPage() instanceof JavascriptManagementPage || getPage() instanceof JavascriptCreatePage || getPage() instanceof JavascriptModifyPage) {
-            this.menuPluginClass = "treeview active";
-        } else {
-            this.menuPluginClass = "treeview";
-        }
-
         // Menu
         if (getPage() instanceof ClientManagementPage
                 || getPage() instanceof ClientModifyPage
@@ -540,7 +562,7 @@ public abstract class MasterPage extends AdminLTEPage {
             this.menuSessionClass = "treeview";
             this.mmenuMobileClass = "";
         }
-        if (getPage() instanceof BodyManagementPage || getPage() instanceof BodyCreatePage || getPage() instanceof BodyModifyPage) {
+        if (getPage() instanceof BodyManagementPage || getPage() instanceof BodyCreatePage || getPage() instanceof BodyModifyPage || getPage() instanceof BodyFieldManagementPage || getPage() instanceof BodyFieldCreatePage || getPage() instanceof BodyFieldModifyPage) {
             this.mmenuBodyClass = "active";
         } else {
             this.mmenuBodyClass = "";
@@ -560,11 +582,22 @@ public abstract class MasterPage extends AdminLTEPage {
         } else {
             this.mmenuEnumClass = "";
         }
-        if (getPage() instanceof JavascriptManagementPage || getPage() instanceof JavascriptCreatePage || getPage() instanceof JavascriptModifyPage) {
-            this.mmenuJavascriptClass = "active";
+        if (getPage() instanceof RestManagementPage || getPage() instanceof RestCreatePage || getPage() instanceof RestModifyPage) {
+            this.mmenuApiClass = "active";
         } else {
-            this.mmenuJavascriptClass = "";
+            this.mmenuApiClass = "";
         }
+
+        if (getPage() instanceof EnumManagementPage || getPage() instanceof EnumCreatePage || getPage() instanceof EnumModifyPage || getPage() instanceof EnumValueCreatePage || getPage() instanceof EnumValueModifyPage || getPage() instanceof EnumValueManagementPage
+                || getPage() instanceof BodyManagementPage || getPage() instanceof BodyCreatePage || getPage() instanceof BodyModifyPage || getPage() instanceof BodyFieldManagementPage || getPage() instanceof BodyFieldCreatePage || getPage() instanceof BodyFieldModifyPage
+                || getPage() instanceof HttpHeaderManagementPage || getPage() instanceof HttpHeaderCreatePage || getPage() instanceof HttpHeaderModifyPage
+                || getPage() instanceof RestManagementPage || getPage() instanceof RestCreatePage || getPage() instanceof RestModifyPage
+                || getPage() instanceof HttpQueryManagementPage || getPage() instanceof HttpQueryCreatePage || getPage() instanceof HttpQueryModifyPage) {
+            this.menuRestManagementClass = "treeview active";
+        } else {
+            this.menuRestManagementClass = "treeview";
+        }
+
         if (getPage() instanceof JobManagementPage || getPage() instanceof JobCreatePage || getPage() instanceof JobModifyPage) {
             this.mmenuJobClass = "active";
         } else {
@@ -575,6 +608,15 @@ public abstract class MasterPage extends AdminLTEPage {
             this.mmenuRestoreClass = "active";
         } else {
             this.mmenuRestoreClass = "";
+        }
+
+        if (getPage() instanceof PageCreatePage || getPage() instanceof PageManagementPage || getPage() instanceof PageModifyPage
+                || getPage() instanceof BlockCreatePage || getPage() instanceof BlockManagementPage || getPage() instanceof BlockModifyPage
+                || getPage() instanceof MasterCreatePage || getPage() instanceof MasterManagementPage || getPage() instanceof MasterModifyPage
+                || getPage() instanceof MenuCreatePage || getPage() instanceof MenuManagementPage || getPage() instanceof MenuModifyPage) {
+            this.menuContentManagementClass = "treeview active";
+        } else {
+            this.menuContentManagementClass = "treeview";
         }
 
         if (getPage() instanceof PageCreatePage || getPage() instanceof PageManagementPage || getPage() instanceof PageModifyPage) {
