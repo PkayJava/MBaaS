@@ -384,7 +384,7 @@ public class RestCreatePage extends MasterPage {
         }
         fields.put(Jdbc.Rest.RESPONSE_CONTENT_TYPE, this.responseContentType);
         fields.put(Jdbc.Rest.RESPONSE_BODY_TYPE, this.responseBodyType);
-        fields.put(Jdbc.Rest.RESPONSE_BODY_SUB_TYPE, this.requestBodySubType);
+        fields.put(Jdbc.Rest.RESPONSE_BODY_SUB_TYPE, this.responseBodySubType);
         if (this.responseBodyEnum != null) {
             fields.put(Jdbc.Rest.RESPONSE_BODY_ENUM_ID, this.responseBodyEnum.get(Jdbc.Enum.ENUM_ID));
         }

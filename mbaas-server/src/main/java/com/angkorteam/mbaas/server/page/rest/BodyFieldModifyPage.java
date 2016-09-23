@@ -202,7 +202,6 @@ public class BodyFieldModifyPage extends MasterPage {
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
 
-        loadTypes();
         this.type = (String) jsonFieldRecord.get(Jdbc.JsonField.TYPE);
         this.typeField = new DropDownChoice<>("typeField", new PropertyModel<>(this, "type"), new PropertyModel<>(this, "types"));
         this.typeField.setOutputMarkupId(true);
@@ -212,7 +211,6 @@ public class BodyFieldModifyPage extends MasterPage {
         this.typeFeedback = new TextFeedbackPanel("typeFeedback", this.typeField);
         this.form.add(this.typeFeedback);
 
-        loadSubTypes(this.contentType, this.type);
         this.subType = (String) jsonFieldRecord.get(Jdbc.JsonField.SUB_TYPE);
         this.subTypeField = new DropDownChoice<>("subTypeField", new PropertyModel<>(this, "subType"), new PropertyModel<>(this, "subTypes"));
         this.subTypeField.setOutputMarkupId(true);
@@ -236,6 +234,9 @@ public class BodyFieldModifyPage extends MasterPage {
         this.form.add(enumTypeField);
         this.enumTypeFeedback = new TextFeedbackPanel("enumTypeFeedback", this.enumTypeField);
         this.form.add(enumTypeFeedback);
+
+        loadTypes();
+        loadSubTypes(this.contentType, this.type);
 
         PageParameters parameters = new PageParameters();
         parameters.add("jsonId", this.jsonId);

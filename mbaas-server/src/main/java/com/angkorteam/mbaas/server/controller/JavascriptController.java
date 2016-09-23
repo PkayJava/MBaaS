@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -906,6 +907,11 @@ public class JavascriptController {
                         }
                         // endregion
                     } else if (TypeEnum.List.getLiteral().equals(responseBodyType)) {
+                        if (response != null && response instanceof ScriptObjectMirror) {
+                            if (((ScriptObjectMirror) response).isArray()) {
+                                response = new ArrayList<>(((ScriptObjectMirror) response).values());
+                            }
+                        }
                         // region nobody
                         if (TypeEnum.Boolean.getLiteral().equals(responseBodySubType)) {
                             JavascriptControllerUtils.validateBooleanArray(responseBodyRequired, (List<Object>) response);
@@ -952,7 +958,7 @@ public class JavascriptController {
                                 for (Object object : objects) {
                                     if (object instanceof Map) {
                                         for (Map<String, Object> jsonField : jsonFields) {
-                                            JavascriptControllerUtils.validateMapField(jdbcTemplate, requestBodyErrors, (Map) object, jsonField, enumItemMetaData, enumMetaData);
+                                            JavascriptControllerUtils.validateMapField(jdbcTemplate, responseBodyErrors, (Map) object, jsonField, enumItemMetaData, enumMetaData);
                                         }
                                     } else {
                                         responseBodyErrors.put("responseBody", "is invalid");

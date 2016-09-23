@@ -1,8 +1,10 @@
 package com.angkorteam.mbaas.server.wicket;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.HttpRequest;
 import com.mashape.unirest.request.HttpRequestWithBody;
 import com.mashape.unirest.request.body.MultipartBody;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -17,9 +19,14 @@ import java.util.*;
  */
 public class ApplicationJson {
     public static void main(String[] args) throws UnirestException {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         HttpRequestWithBody requestBody = Unirest.post("http://demo.ddns.net:9080/api/javascript/hello");
-        requestBody.header("content-type", MediaType.APPLICATION_JSON_VALUE);
+        requestBody = requestBody.header("content-type", MediaType.APPLICATION_JSON_VALUE);
+        requestBody = requestBody.header("user-agent", "hello");
+        requestBody = requestBody.header("authorization", "hello");
+        requestBody = requestBody.header("dob", DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
+        HttpRequest httpRequest = requestBody.queryString("game", Arrays.asList(DateFormatUtils.ISO_DATE_FORMAT.format(new Date()), DateFormatUtils.ISO_DATE_FORMAT.format(new Date())));
+        httpRequest.queryString("sessionId", UUID.randomUUID().toString());
         Map<String, Object> body = new HashMap<>();
         {
             body.put("list_datetime_required", Arrays.asList(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date())));
@@ -163,7 +170,7 @@ public class ApplicationJson {
             body.put("date_optional", DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
         }
         requestBody.body(gson.toJson(body));
-        System.out.println(requestBody.asString());
+        System.out.println(gson.toJson(gson.fromJson(requestBody.asString().getBody(), Object.class)));
     }
 
 }
