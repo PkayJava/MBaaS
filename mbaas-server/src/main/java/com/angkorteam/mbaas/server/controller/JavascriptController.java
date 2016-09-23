@@ -714,8 +714,6 @@ public class JavascriptController {
             CollectionFactory collectionFactory = new CollectionFactory();
             Map<String, Object> responseHeaderDictionary = new HashMap<>();
 
-            // TODO : for date/time/datetime encapsulation
-            Object newResponse = null;
             Object response = http.http(collectionFactory, req, responseHeaderDictionary, newQueryParameter, newRequestHeader, newRequestBody);
 
             HttpHeaders newResponseHeader = new HttpHeaders();
@@ -867,6 +865,15 @@ public class JavascriptController {
                             || TypeEnum.DateTime.getLiteral().equals(responseBodyType)) {
                         // region nobody
                         JavascriptControllerUtils.validateDate(responseBodyRequired, response);
+                        if (response != null) {
+                            if (TypeEnum.Time.getLiteral().equals(responseBodyType)) {
+                                response = DateFormatUtils.ISO_TIME_NO_T_FORMAT.format((Date) response);
+                            } else if (TypeEnum.Date.getLiteral().equals(responseBodyType)) {
+                                response = DateFormatUtils.ISO_DATE_FORMAT.format((Date) response);
+                            } else if (TypeEnum.DateTime.getLiteral().equals(responseBodyType)) {
+                                response = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format((Date) response);
+                            }
+                        }
                         // endregion
                     } else if (TypeEnum.Map.getLiteral().equals(responseBodyType)) {
                         // region nobody
@@ -888,6 +895,15 @@ public class JavascriptController {
                         String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
                         List<String> enumItems = enumItemMetaData.get(enumId);
                         JavascriptControllerUtils.validateEnum(responseBodyRequired, enumType, enumItems, response);
+                        if (response != null) {
+                            if (enumType.equals(TypeEnum.Time.getLiteral())) {
+                                response = DateFormatUtils.ISO_TIME_NO_T_FORMAT.format((Date) response);
+                            } else if (enumType.equals(TypeEnum.Date.getLiteral())) {
+                                response = DateFormatUtils.ISO_DATE_FORMAT.format((Date) response);
+                            } else if (enumType.equals(TypeEnum.DateTime.getLiteral())) {
+                                response = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format((Date) response);
+                            }
+                        }
                         // endregion
                     } else if (TypeEnum.List.getLiteral().equals(responseBodyType)) {
                         // region nobody
@@ -911,6 +927,21 @@ public class JavascriptController {
                                 || TypeEnum.DateTime.getLiteral().equals(responseBodySubType)) {
                             // region nobody
                             JavascriptControllerUtils.validateDateArray(responseBodyRequired, (List<Object>) response);
+                            if (response != null) {
+                                List<String> newResponses = new ArrayList<>();
+                                for (Date date : (List<Date>) response) {
+                                    if (date != null) {
+                                        if (TypeEnum.Time.getLiteral().equals(responseBodySubType)) {
+                                            newResponses.add(DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(date));
+                                        } else if (TypeEnum.Date.getLiteral().equals(responseBodySubType)) {
+                                            newResponses.add(DateFormatUtils.ISO_DATE_FORMAT.format(date));
+                                        } else if (TypeEnum.DateTime.getLiteral().equals(responseBodySubType)) {
+                                            newResponses.add(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(date));
+                                        }
+                                    }
+                                }
+                                response = newResponses;
+                            }
                             // endregion
                         } else if (TypeEnum.Map.getLiteral().equals(responseBodySubType)) {
                             // region nobody
@@ -939,6 +970,23 @@ public class JavascriptController {
                             String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
                             List<String> enumItems = enumItemMetaData.get(enumId);
                             JavascriptControllerUtils.validateEnumArray(responseBodyRequired, enumType, enumItems, (List<Object>) response);
+                            if (response != null) {
+                                List<Object> newResponses = new ArrayList<>();
+                                for (Object object : (List<Object>) response) {
+                                    if (object != null) {
+                                        if (TypeEnum.Time.getLiteral().equals(responseBodySubType)) {
+                                            newResponses.add(DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(object));
+                                        } else if (TypeEnum.Date.getLiteral().equals(responseBodySubType)) {
+                                            newResponses.add(DateFormatUtils.ISO_DATE_FORMAT.format(object));
+                                        } else if (TypeEnum.DateTime.getLiteral().equals(responseBodySubType)) {
+                                            newResponses.add(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(object));
+                                        } else {
+                                            newResponses.add(object);
+                                        }
+                                    }
+                                }
+                                response = newResponses;
+                            }
                             // endregion
                         }
                         // endregion

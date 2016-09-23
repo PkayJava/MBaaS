@@ -1780,6 +1780,48 @@ public class JavascriptControllerUtils {
         }
     }
 
+    public static void validateFile(boolean required, Object object) {
+        if (required) {
+            if (object == null) {
+                throw new IllegalArgumentException("is required");
+            } else {
+                if (object instanceof byte[]) {
+                    if (((byte[]) object).length == 0) {
+                        throw new IllegalArgumentException("is required");
+                    }
+                } else if (object instanceof long[]) {
+                    if (((long[]) object).length == 0) {
+                        throw new IllegalArgumentException("is required");
+                    }
+                } else if (object instanceof int[]) {
+                    if (((long[]) object).length == 0) {
+                        throw new IllegalArgumentException("is required");
+                    }
+                } else {
+                    throw new IllegalArgumentException("is invalid");
+                }
+            }
+        } else {
+            if (object != null) {
+                if (object instanceof byte[]) {
+                    if (((byte[]) object).length == 0) {
+                        throw new IllegalArgumentException("is required");
+                    }
+                } else if (object instanceof long[]) {
+                    if (((long[]) object).length == 0) {
+                        throw new IllegalArgumentException("is required");
+                    }
+                } else if (object instanceof int[]) {
+                    if (((long[]) object).length == 0) {
+                        throw new IllegalArgumentException("is required");
+                    }
+                } else {
+                    throw new IllegalArgumentException("is invalid");
+                }
+            }
+        }
+    }
+
     public static void validateDouble(boolean required, Object object) {
         if (required) {
             if (object == null) {
@@ -1926,11 +1968,27 @@ public class JavascriptControllerUtils {
                     || TypeEnum.Date.getLiteral().equals(type)
                     || TypeEnum.DateTime.getLiteral().equals(type)) {
                 validateDate(required, json.get(name));
+                if (TypeEnum.Time.getLiteral().equals(type)) {
+                    json.put(name, DateFormatUtils.ISO_TIME_NO_T_FORMAT.format((Date) json.get(name)));
+                } else if (TypeEnum.Date.getLiteral().equals(type)) {
+                    json.put(name, DateFormatUtils.ISO_DATE_FORMAT.format((Date) json.get(name)));
+                } else if (TypeEnum.DateTime.getLiteral().equals(type)) {
+                    json.put(name, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format((Date) json.get(name)));
+                }
             } else if (TypeEnum.Enum.getLiteral().equals(type)) {
                 Map<String, Object> enumRecord = enumDictionary.get(enumId);
                 String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
                 List<String> enumItemValues = enumItemDictionary.get(enumId);
-                Object value = parseObjectToEnum(required, enumType, enumItemValues, json.get(name));
+                validateEnum(required, enumType, enumItemValues, json.get(name));
+                if (json.get(name) != null) {
+                    if (enumType.equals(TypeEnum.Time.getLiteral())) {
+                        json.put(name, DateFormatUtils.ISO_TIME_NO_T_FORMAT.format((Date) json.get(name)));
+                    } else if (enumType.equals(TypeEnum.Date.getLiteral())) {
+                        json.put(name, DateFormatUtils.ISO_DATE_FORMAT.format((Date) json.get(name)));
+                    } else if (enumType.equals(TypeEnum.DateTime.getLiteral())) {
+                        json.put(name, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format((Date) json.get(name)));
+                    }
+                }
             } else if (TypeEnum.Map.getLiteral().equals(type)) {
                 try {
                     Map<String, Object> fieldJson = (Map<String, Object>) json.get(name);
@@ -1950,47 +2008,68 @@ public class JavascriptControllerUtils {
                     error.put(name, "is invalid");
                 }
             } else if (TypeEnum.File.getLiteral().equals(type)) {
-                byte[] value = parseObjectToByteArray(required, json.get(name));
+                validateFile(required, json.get(name));
             } else if (TypeEnum.List.getLiteral().equals(type)) {
                 if (TypeEnum.Boolean.getLiteral().equals(subType)) {
                     try {
-                        Boolean[] value = parseObjectToBooleanArray(required, (List<Object>) json.get(name));
+                        validateBooleanArray(required, (List<Object>) json.get(name));
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Long.getLiteral().equals(subType)) {
                     try {
-                        Long[] value = parseObjectToLongArray(required, (List<Object>) json.get(name));
+                        validateLongArray(required, (List<Object>) json.get(name));
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Double.getLiteral().equals(subType)) {
                     try {
-                        Double[] value = parseObjectToDoubleArray(required, (List<Object>) json.get(name));
+                        validateDoubleArray(required, (List<Object>) json.get(name));
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.String.getLiteral().equals(subType)) {
                     try {
-                        String[] value = parseObjectToStringArray(required, (List<Object>) json.get(name));
+                        validateStringArray(required, (List<Object>) json.get(name));
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Time.getLiteral().equals(subType)) {
                     try {
-                        Date[] value = parseObjectToTimeArray(required, (List<Object>) json.get(name));
+                        validateDateArray(required, (List<Object>) json.get(name));
+                        if (json.get(name) != null) {
+                            List<String> newValue = new ArrayList<>();
+                            for (Date date : (List<Date>) json.get(name)) {
+                                newValue.add(DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(date));
+                            }
+                            json.put(name, newValue);
+                        }
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.Date.getLiteral().equals(subType)) {
                     try {
-                        Date[] value = parseObjectToDateArray(required, (List<Object>) json.get(name));
+                        validateDateArray(required, (List<Object>) json.get(name));
+                        if (json.get(name) != null) {
+                            List<String> newValue = new ArrayList<>();
+                            for (Date date : (List<Date>) json.get(name)) {
+                                newValue.add(DateFormatUtils.ISO_DATETIME_FORMAT.format(date));
+                            }
+                            json.put(name, newValue);
+                        }
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.DateTime.getLiteral().equals(subType)) {
                     try {
-                        Date[] value = parseObjectToDateTimeArray(required, (List<Object>) json.get(name));
+                        validateDateArray(required, (List<Object>) json.get(name));
+                        if (json.get(name) != null) {
+                            List<String> newValue = new ArrayList<>();
+                            for (Date date : (List<Date>) json.get(name)) {
+                                newValue.add(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(date));
+                            }
+                            json.put(name, newValue);
+                        }
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
@@ -1999,13 +2078,30 @@ public class JavascriptControllerUtils {
                     String enumType = (String) enumRecord.get(Jdbc.Enum.TYPE);
                     List<String> enumItemValues = enumItemDictionary.get(enumId);
                     try {
-                        Object value = parseObjectToEnumArray(required, enumType, enumItemValues, (List<Object>) json.get(name));
+                        validateEnumArray(required, enumType, enumItemValues, (List<Object>) json.get(name));
+                        if (json.get(name) != null) {
+                            List<Object> newValues = new ArrayList<>();
+                            for (Object object : (List<Object>) json.get(name)) {
+                                if (object != null) {
+                                    if (enumType.equals(TypeEnum.Time.getLiteral())) {
+                                        newValues.add(DateFormatUtils.ISO_TIME_NO_T_FORMAT.format((Date) object));
+                                    } else if (enumType.equals(TypeEnum.Date.getLiteral())) {
+                                        newValues.add(DateFormatUtils.ISO_DATE_FORMAT.format((Date) object));
+                                    } else if (enumType.equals(TypeEnum.DateTime.getLiteral())) {
+                                        newValues.add(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format((Date) object));
+                                    } else {
+                                        newValues.add(object);
+                                    }
+                                }
+                            }
+                            json.put(name, newValues);
+                        }
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
                 } else if (TypeEnum.File.getLiteral().equals(subType)) {
                     try {
-                        Object value = parseObjectToByteArrayArray(required, (List<Object>) json.get(name));
+                        validateFileArray(required, (List<Object>) json.get(name));
                     } catch (ClassCastException e) {
                         error.put(name, "is invalid");
                     }
@@ -2054,6 +2150,24 @@ public class JavascriptControllerUtils {
             if (objects != null && !objects.isEmpty()) {
                 for (Object object : objects) {
                     validateBoolean(required, object);
+                }
+            }
+        }
+    }
+
+    public static void validateFileArray(boolean required, List<Object> objects) {
+        if (required) {
+            if (objects == null || objects.isEmpty()) {
+                throw new IllegalArgumentException("is required");
+            } else {
+                for (Object object : objects) {
+                    validateFile(required, object);
+                }
+            }
+        } else {
+            if (objects != null && !objects.isEmpty()) {
+                for (Object object : objects) {
+                    validateFile(required, object);
                 }
             }
         }
