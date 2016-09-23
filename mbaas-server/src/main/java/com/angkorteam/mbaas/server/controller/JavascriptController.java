@@ -712,10 +712,9 @@ public class JavascriptController {
             String responseBodySubType = (String) restObject.get(Jdbc.Rest.RESPONSE_BODY_SUB_TYPE);
             boolean responseBodyRequired = (boolean) restObject.get(Jdbc.Rest.RESPONSE_BODY_REQUIRED);
 
-            CollectionFactory collectionFactory = new CollectionFactory();
             Map<String, Object> responseHeaderDictionary = new HashMap<>();
 
-            Object response = http.http(collectionFactory, req, responseHeaderDictionary, newQueryParameter, newRequestHeader, newRequestBody);
+            Object response = http.http(req, responseHeaderDictionary, newQueryParameter, newRequestHeader, newRequestBody);
 
             HttpHeaders newResponseHeader = new HttpHeaders();
             // region Validation Response Header
@@ -1085,19 +1084,7 @@ public class JavascriptController {
     }
 
     public interface Http {
-        Object http(CollectionFactory collectionFactory, HttpServletRequest request, Map<String, Object> responseHeader, Map<String, Object> queryParameter, Map<String, Object> requestHeader, Object requestBody);
-    }
-
-    public static class CollectionFactory implements Serializable {
-
-        public List<Object> createList() {
-            return new ArrayList<>();
-        }
-
-        public Map<String, Object> createMap() {
-            return new HashMap<>();
-        }
-
+        Object http(HttpServletRequest request, Map<String, Object> responseHeader, Map<String, Object> queryParameter, Map<String, Object> requestHeader, Object requestBody);
     }
 
 }

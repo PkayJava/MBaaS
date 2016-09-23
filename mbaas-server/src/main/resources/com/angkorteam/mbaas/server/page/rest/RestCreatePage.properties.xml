@@ -11,8 +11,8 @@ for more reference
 https://wiki.openjdk.java.net/display/Nashorn/Nashorn+extensions
 https://github.com/PkayJava/MBaaS/wiki
 */
-function http (collection, request, queryParameter, requestHeader, requestBody) {
-        // body
-        return "Rock Your Script";
+function http (request, queryParameter, requestHeader, requestBody) {
+   // body
+   return "Rock Your Script";
 }]]></entry>
 </properties>
