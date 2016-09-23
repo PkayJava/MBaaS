@@ -3,7 +3,7 @@
 <properties>
     <entry key="javascript.script"><![CDATA[/*
 Java Signature
-(Map || Array || String || Number || Boolean || Date) http (javax.servlet.http.HttpServletRequest request, Map<String,Object> header, Map<String,Object> body);
+(Map || Array || String || Number || Boolean || Date) http (javax.servlet.http.HttpServletRequest request, Map<String,Object> queryParameter, Map<String,Object> requestHeader, Object requestBody);
 */
 
 /*
@@ -12,7 +12,7 @@ https://wiki.openjdk.java.net/display/Nashorn/Nashorn+extensions
 https://github.com/PkayJava/MBaaS/wiki
 */
 function http (request, queryParameter, requestHeader, requestBody) {
-   // body
-   return "Rock Your Script";
+  // body
+  return "Rock Your Script";
 }]]></entry>
 </properties>
