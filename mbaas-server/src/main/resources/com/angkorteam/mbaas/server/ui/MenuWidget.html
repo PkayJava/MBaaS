@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<html xmlns:wicket="http://wicket.apache.org">
+<body>
+<wicket:panel>
+    <li wicket:id="menuContainer" class="">
+        <a href="#">
+            <i wicket:id="menuIcon" class=""></i> <span wicket:id="menuTitle"/>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+        </a>
+        <ul class="treeview-menu">
+            <wicket:container wicket:id="itemWidgets">
+                <wicket:container wicket:id="itemWidget"/>
+            </wicket:container>
+        </ul>
+    </li>
+</wicket:panel>
+</body>
+</html>

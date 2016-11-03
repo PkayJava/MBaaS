@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.1.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd">
+
+    <context:component-scan base-package="com.angkorteam.mbaas.server"/>
+
+    <context:property-placeholder location="file:${user.home}/.xml/mbaas.properties.xml" file-encoding="UTF-8"/>
+
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter">
+                <property name="gson" ref="gson"/>
+            </bean>
+        </mvc:message-converters>
+        <mvc:path-matching path-matcher="pathMatcher" suffix-pattern="false" registered-suffixes-only="true"/>
+    </mvc:annotation-driven>
+
+    <mvc:interceptors>
+        <ref bean="interceptor"/>
+    </mvc:interceptors>
+
+    <mvc:resources mapping="/resource/**" location="file:${resource.repo}/" cache-period="604800"/>
+
+    <task:annotation-driven executor="executor" scheduler="scheduler"/>
+
+    <security:global-method-security secured-annotations="enabled"/>
+
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/security/signup"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/security/login"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/oauth2/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/resource/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/qr"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/javascript"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/javascript/**"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/otp"/>
+    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/rest/registry/**"/>
+    <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager" entry-point-ref="authenticationEntryPoint" create-session="stateless">
+        <security:csrf disabled="true"/>
+        <!-- SecurityExpressionRoot -->
+        <security:access-denied-handler ref="accessDeniedHandler"/>
+        <security:custom-filter ref="authenticationFilter" before="ANONYMOUS_FILTER"/>
+        <security:intercept-url access="fullyAuthenticated" pattern="/api/monitor/**"/>
+        <!--<security:intercept-url access="fullyAuthenticated" pattern="/api/javascript/**"/>-->
+        <security:intercept-url access="fullyAuthenticated" pattern="/api/file/**"/>
+        <security:intercept-url access="fullyAuthenticated" pattern="/api/**"/>
+    </security:http>
+
+    <security:authentication-manager alias="providerManager" erase-credentials="true"/>
+
+    <bean id="authenticationFilter" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationFilter">
+        <constructor-arg index="0" ref="authenticationManager"/>
+        <constructor-arg index="1" ref="authenticationEntryPoint"/>
+        <property name="gson" ref="gson"/>
+    </bean>
+
+    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationEntryPoint">
+        <property name="gson" ref="gson"/>
+    </bean>
+
+    <bean id="accessDeniedHandler" class="com.angkorteam.mbaas.server.spring.AccessDeniedHandler">
+        <property name="gson" ref="gson"/>
+    </bean>
+
+    <bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
+        <constructor-arg index="0">
+            <list>
+                <ref bean="authenticationProvider"/>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="1" ref="providerManager"/>
+    </bean>
+
+    <bean id="authenticationProvider" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationProvider"/>
+
+    <bean id="interceptor" class="com.angkorteam.mbaas.server.spring.ExecutionTimeHandlerInterceptor">
+        <property name="gson" ref="gson"/>
+    </bean>
+
+    <bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
+        <property name="caseSensitive" value="false"/>
+    </bean>
+
+    <bean id="contentNegotiationManager"
+          class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="favorPathExtension" value="false"/>
+        <property name="favorParameter" value="true"/>
+        <property name="mediaTypes">
+            <props>
+                <prop key="json">application/json</prop>
+                <prop key="xml">application/xml</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="gson" class="org.springframework.http.converter.json.GsonFactoryBean">
+        <property name="base64EncodeByteArrays" value="false"/>
+        <property name="dateFormatPattern" value="${pattern.datetime}"/>
+        <property name="disableHtmlEscaping" value="true"/>
+        <property name="prettyPrinting" value="false"/>
+        <property name="serializeNulls" value="false"/>
+    </bean>
+
+    <bean id="jdbcGson" class="org.springframework.http.converter.json.GsonFactoryBean">
+        <property name="base64EncodeByteArrays" value="false"/>
+        <property name="dateFormatPattern" value="yyyy-MM-dd hh:mm:ss"/>
+        <property name="disableHtmlEscaping" value="true"/>
+        <property name="prettyPrinting" value="false"/>
+        <property name="serializeNulls" value="false"/>
+    </bean>
+
+    <bean id="dataSource" class="com.angkorteam.mbaas.server.factory.DataSourceFactoryBean"/>
+
+    <bean id="configuration" class="com.angkorteam.mbaas.server.factory.ConfigurationFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="context" class="com.angkorteam.mbaas.server.factory.DSLContextFactoryBean">
+        <property name="configuration" ref="configuration"/>
+    </bean>
+
+    <bean class="com.angkorteam.mbaas.server.spring.SessionDestroyedListener"/>
+
+    <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"/>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="stringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+        <property name="algorithm" value="PBEWithMD5AndDES"/>
+        <property name="password" value="${encryption.password}"/>
+        <property name="stringOutputType" value="${encryption.output}"/>
+    </bean>
+
+    <bean id="flyway" class="com.angkorteam.mbaas.server.factory.FlywayFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="dbSupport" ref="dbSupport"/>
+        <property name="jdbcTemplate" ref="jdbcTemplate"/>
+        <property name="location">
+            <array>
+                <value>classpath:db/migration</value>
+                <value>WEB-INF/db/migration</value>
+            </array>
+        </property>
+    </bean>
+
+    <bean id="system" class="com.angkorteam.mbaas.server.factory.SystemFactoryBean">
+        <property name="context" ref="context"/>
+        <property name="jdbcTemplate" ref="jdbcTemplate"/>
+    </bean>
+
+    <bean id="executor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="${executor.pool_size}"/>
+        <property name="maxPoolSize" value="${executor.pool_size}"/>
+        <property name="queueCapacity" value="${executor.queue_capacity}"/>
+        <property name="daemon" value="true"/>
+        <property name="beanName" value="executor"/>
+    </bean>
+
+    <bean id="scheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
+        <property name="beanName" value="scheduler"/>
+        <property name="daemon" value="true"/>
+        <property name="poolSize" value="${executor.pool_size}"/>
+    </bean>
+
+    <bean id="authorizationStrategy" class="com.angkorteam.mbaas.server.factory.AuthorizationStrategyFactoryBean">
+        <property name="context" ref="context"/>
+        <property name="system" ref="system"/>
+    </bean>
+
+    <bean id="dbSupport" class="com.angkorteam.mbaas.server.factory.DbSupportFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="groovyClassLoader" class="com.angkorteam.mbaas.server.factory.GroovyClassLoaderFactoryBean"/>
+
+    <bean id="classResolver" class="com.angkorteam.mbaas.server.factory.ClassResolverFactoryBean">
+        <property name="classLoader" ref="groovyClassLoader"/>
+    </bean>
+
+</beans>
