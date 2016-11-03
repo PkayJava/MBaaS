@@ -16,6 +16,7 @@ import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.select2.PagesChoiceProvider;
 import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
@@ -45,11 +46,16 @@ public class RoleCreatePage extends MBaaSPage {
     private BookmarkablePageLink<Void> closeButton;
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    public String getPageUUID() {
+        return RoleCreatePage.class.getName();
+    }
+
+    @Override
+    protected void doInitialize(Border layout) {
+        add(layout);
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.pageField = new Select2MultipleChoice<>("pageField", new PropertyModel<>(this, "cmsPage"), new PagesChoiceProvider());
         this.form.add(this.pageField);
@@ -100,11 +106,6 @@ public class RoleCreatePage extends MBaaSPage {
         }
 
         setResponsePage(RoleBrowsePage.class);
-    }
-
-    @Override
-    public String getPageUUID() {
-        return RoleCreatePage.class.getName();
     }
 
 }

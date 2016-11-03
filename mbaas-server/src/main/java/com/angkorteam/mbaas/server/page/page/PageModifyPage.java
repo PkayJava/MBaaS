@@ -26,6 +26,7 @@ import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
 import com.angkorteam.mbaas.server.validator.MountPathValidator;
 import groovy.lang.GroovyCodeSource;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -81,8 +82,13 @@ public class PageModifyPage extends MBaaSPage {
     private BookmarkablePageLink<Void> closeButton;
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    public String getPageUUID() {
+        return PageModifyPage.class.getName();
+    }
+
+    @Override
+    protected void doInitialize(Border layout) {
+        add(layout);
 
         PageParameters parameters = getPageParameters();
 
@@ -106,7 +112,7 @@ public class PageModifyPage extends MBaaSPage {
         this.role = context.select(roleTable.fields()).from(roleTable).innerJoin(pageRoleTable).on(roleTable.ROLE_ID.eq(pageRoleTable.ROLE_ID)).where(pageRoleTable.PAGE_ID.eq(this.pageUuid)).fetchInto(RolePojo.class);
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RolesChoiceProvider());
         this.form.add(this.roleField);
@@ -150,7 +156,7 @@ public class PageModifyPage extends MBaaSPage {
         this.htmlFeedback = new TextFeedbackPanel("htmlFeedback", this.htmlField);
         this.form.add(this.htmlFeedback);
 
-        this.layouts = context.select(layoutTable.fields()).from(layoutTable).where(layoutTable.SYSTEM.eq(false)).fetchInto(LayoutPojo.class);
+        this.layouts = context.select(layoutTable.fields()).from(layoutTable).fetchInto(LayoutPojo.class);
         this.layoutField = new DropDownChoice<>("layoutField", new PropertyModel<>(this, "layout"), new PropertyModel<>(this, "layouts"), new LayoutChoiceRenderer());
         this.layoutField.setRequired(true);
         this.form.add(this.layoutField);
@@ -218,10 +224,5 @@ public class PageModifyPage extends MBaaSPage {
         getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
 
         setResponsePage(PageBrowsePage.class);
-    }
-
-    @Override
-    public String getPageUUID() {
-        return PageModifyPage.class.getName();
     }
 }

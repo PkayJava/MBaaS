@@ -13,6 +13,7 @@ import com.angkorteam.mbaas.server.page.document.DocumentBrowsePage;
 import com.angkorteam.mbaas.server.provider.CollectionProvider;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -27,14 +28,18 @@ import java.util.Map;
 public class CollectionBrowsePage extends MBaaSPage implements ActionFilteredJooqColumn.Event {
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    public String getPageUUID() {
+        return CollectionBrowsePage.class.getName();
+    }
 
+    @Override
+    protected void doInitialize(Border layout) {
+        add(layout);
         CollectionProvider provider = new CollectionProvider();
         provider.selectField(String.class, "collectionId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
-        add(filterForm);
+        layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, Model.of("name"), "name", this, provider));
@@ -48,15 +53,10 @@ public class CollectionBrowsePage extends MBaaSPage implements ActionFilteredJoo
         filterForm.add(dataTable);
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", CollectionBrowsePage.class);
-        add(refreshLink);
+        layout.add(refreshLink);
 
         BookmarkablePageLink<Void> createLink = new BookmarkablePageLink<>("createLink", CollectionCreatePage.class);
-        add(createLink);
-    }
-
-    @Override
-    public String getPageUUID() {
-        return CollectionBrowsePage.class.getName();
+        layout.add(createLink);
     }
 
     @Override

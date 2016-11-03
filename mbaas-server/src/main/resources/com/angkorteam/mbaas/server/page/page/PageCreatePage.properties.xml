@@ -8,9 +8,11 @@
 </head>
 <body>
 <wicket:extend>
-    <div wicket:id="layout">
-        <!-- your page content go here -->
-    </div>
+    <body class="hold-transition skin-blue sidebar-mini">
+        <div wicket:id="layout">
+            <!-- your page content go here -->
+        </div>
+    </body>
 </wicket:extend>
 </body>
 </html>
@@ -22,8 +24,7 @@ import org.apache.wicket.markup.html.border.Border
 class ExamplePage extends CmsPage {
 
     @Override
-    protected void doInitialize() {
-        Border layout = getLayout();
+    protected void doInitialize(Border layout) {
         add(layout);
         // place your initialization logic here
     }

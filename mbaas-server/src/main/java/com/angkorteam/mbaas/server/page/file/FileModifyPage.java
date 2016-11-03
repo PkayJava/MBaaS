@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.FilePojo;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -49,8 +50,9 @@ public class FileModifyPage extends MBaaSPage {
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    protected void doInitialize(Border layout) {
+        add(layout);
+
         DSLContext context = Spring.getBean(DSLContext.class);
         FileTable fileTable = Tables.FILE.as("fileTable");
 
@@ -60,7 +62,7 @@ public class FileModifyPage extends MBaaSPage {
         FilePojo fileRecord = context.select(fileTable.fields()).from(fileTable).where(fileTable.FILE_ID.eq(fileId)).fetchOneInto(FilePojo.class);
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.name = fileRecord.getName();
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));

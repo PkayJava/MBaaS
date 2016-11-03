@@ -16,6 +16,7 @@ import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.model.Model;
@@ -38,13 +39,13 @@ public class FileBrowsePage extends MBaaSPage implements ActionFilteredJooqColum
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    protected void doInitialize(Border layout) {
+        add(layout);
 
         FileProvider provider = new FileProvider();
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
-        add(filterForm);
+        layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, Model.of("fileId"), "fileId", this, provider));
@@ -58,7 +59,7 @@ public class FileBrowsePage extends MBaaSPage implements ActionFilteredJooqColum
         filterForm.add(dataTable);
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", FileBrowsePage.class);
-        add(refreshLink);
+        layout.add(refreshLink);
     }
 
     @Override

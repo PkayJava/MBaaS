@@ -16,6 +16,7 @@ import com.angkorteam.mbaas.server.page.MBaaSPage;
 import groovy.lang.GroovyCodeSource;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
@@ -58,9 +59,8 @@ public class LayoutModifyPage extends MBaaSPage {
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
-
+    protected void doInitialize(Border content) {
+        add(content);
         PageParameters parameters = getPageParameters();
 
         this.layoutUuid = parameters.get("layoutId").toString("");
@@ -75,7 +75,7 @@ public class LayoutModifyPage extends MBaaSPage {
         this.groovy = layout.getGroovy();
 
         this.form = new Form<>("form");
-        add(this.form);
+        content.add(this.form);
 
         this.titleField = new TextField<>("titleField", new PropertyModel<>(this, "title"));
         this.titleField.setRequired(true);

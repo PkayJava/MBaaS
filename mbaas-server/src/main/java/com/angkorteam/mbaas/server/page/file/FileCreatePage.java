@@ -13,6 +13,7 @@ import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -49,10 +50,11 @@ public class FileCreatePage extends MBaaSPage {
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    protected void doInitialize(Border layout) {
+        add(layout);
+
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);

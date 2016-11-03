@@ -11,9 +11,8 @@ import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.page.CmsPage;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
-import com.angkorteam.mbaas.server.wicket.RoleAuthorizationStrategy;
 import groovy.lang.GroovyCodeSource;
-import org.apache.wicket.IPageFactory;
+import org.apache.logging.log4j.util.Strings;
 import org.apache.wicket.Page;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
@@ -117,17 +116,19 @@ public class Application extends AuthenticatedWebApplication {
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
         List<LayoutPojo> layouts = context.select(layoutTable.fields()).from(layoutTable).fetchInto(LayoutPojo.class);
         for (LayoutPojo layout : layouts) {
-            String groovy = layout.getGroovy();
-            StringBuffer newGroovy = new StringBuffer(groovy.substring(0, groovy.lastIndexOf("}")));
-            newGroovy.append("\n @Override\n" +
-                    "        public final String getLayoutUUID () {\n" +
-                    "            return \"" + layout.getLayoutId() + "\";\n" +
-                    "        } }");
+            if (!layout.getSystem() && !Strings.isEmpty(layout.getGroovy())) {
+                String groovy = layout.getGroovy();
+                StringBuffer newGroovy = new StringBuffer(groovy.substring(0, groovy.lastIndexOf("}")));
+                newGroovy.append("\n @Override\n" +
+                        "        public final String getLayoutUUID () {\n" +
+                        "            return \"" + layout.getLayoutId() + "\";\n" +
+                        "        } }");
 
 
-            GroovyCodeSource source = new GroovyCodeSource(newGroovy.toString(), GroovyClassLoader.LAYOUT + layout.getLayoutId(), "/groovy/script");
-            source.setCachable(true);
-            classLoader.parseClass(source, true);
+                GroovyCodeSource source = new GroovyCodeSource(newGroovy.toString(), GroovyClassLoader.LAYOUT + layout.getLayoutId(), "/groovy/script");
+                source.setCachable(true);
+                classLoader.parseClass(source, true);
+            }
         }
     }
 

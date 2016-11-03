@@ -13,6 +13,7 @@ import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.function.AttributeFunction;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.validator.AttributeNameValidator;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
@@ -75,9 +76,8 @@ public class AttributeCreatePage extends MBaaSPage {
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
-
+    protected void doInitialize(Border layout) {
+        add(layout);
         DSLContext context = Spring.getBean(DSLContext.class);
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
 
@@ -87,7 +87,7 @@ public class AttributeCreatePage extends MBaaSPage {
         this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collectionId)).fetchOneInto(CollectionPojo.class);
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);

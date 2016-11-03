@@ -22,6 +22,7 @@ import com.angkorteam.mbaas.server.template.StringPanel;
 import com.angkorteam.mbaas.server.template.TextPanel;
 import com.angkorteam.mbaas.server.template.TimePanel;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -56,8 +57,9 @@ public class DocumentModifyPage extends MBaaSPage {
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    protected void doInitialize(Border layout) {
+        add(layout);
+
         DSLContext context = Spring.getBean(DSLContext.class);
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
         JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
@@ -168,7 +170,7 @@ public class DocumentModifyPage extends MBaaSPage {
         }
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         RepeatingView fields = new RepeatingView("fields");
         this.form.add(fields);

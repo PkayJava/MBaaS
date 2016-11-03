@@ -22,6 +22,7 @@ import com.angkorteam.mbaas.server.template.LongPanel;
 import com.angkorteam.mbaas.server.template.StringPanel;
 import com.angkorteam.mbaas.server.template.TextPanel;
 import com.angkorteam.mbaas.server.template.TimePanel;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -42,6 +43,7 @@ public class DocumentCreatePage extends MBaaSPage {
     private Map<String, Object> fields;
 
     private Form<Void> form;
+    private Button saveButton;
 
     @Override
     public String getPageUUID() {
@@ -49,8 +51,9 @@ public class DocumentCreatePage extends MBaaSPage {
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    protected void doInitialize(Border layout) {
+        add(layout);
+
         this.fields = new HashMap<>();
 
         DSLContext context = Spring.getBean(DSLContext.class);
@@ -65,6 +68,9 @@ public class DocumentCreatePage extends MBaaSPage {
                 .and(attributeTable.NAME.notEqual(this.collection.getName() + "_id"))
                 .and(attributeTable.NAME.notEqual("system"))
                 .fetchInto(AttributePojo.class);
+
+        this.form = new Form<>("form");
+        layout.add(this.form);
 
         RepeatingView fields = new RepeatingView("fields");
         for (AttributePojo attribute : attributes) {
@@ -102,19 +108,15 @@ public class DocumentCreatePage extends MBaaSPage {
                 fields.add(fieldPanel);
             }
         }
+        this.form.add(fields);
 
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collection.getCollectionId());
-        BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", DocumentBrowsePage.class, parameters);
+        BookmarkablePageLink<Void> closeButton = new BookmarkablePageLink<>("closeButton", DocumentBrowsePage.class, parameters);
+        this.form.add(closeButton);
 
-        Button saveButton = new Button("saveButton");
-        saveButton.setOnSubmit(this::saveButtonOnSubmit);
-
-        this.form = new Form<>("form");
-        add(this.form);
-
-        this.form.add(fields);
-        this.form.add(closeLink);
+        this.saveButton = new Button("saveButton");
+        this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(saveButton);
     }
 

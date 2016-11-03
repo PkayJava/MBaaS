@@ -51,12 +51,12 @@ public class MountPathValidator implements IValidator<String> {
                 return;
             }
             DSLContext context = Spring.getBean(DSLContext.class);
-            PageTable attributeTable = Tables.PAGE.as("attributeTable");
+            PageTable pageTable = Tables.PAGE.as("pageTable");
             int count = 0;
             if (this.pageId == null || "".equals(this.pageId)) {
-                count = context.selectCount().from(attributeTable).where(attributeTable.PATH.eq(path)).fetchOneInto(int.class);
+                count = context.selectCount().from(pageTable).where(pageTable.PATH.eq(path)).fetchOneInto(int.class);
             } else {
-                count = context.selectCount().from(attributeTable).where(attributeTable.PATH.eq(path)).and(attributeTable.PAGE_ID.eq(this.pageId)).fetchOneInto(int.class);
+                count = context.selectCount().from(pageTable).where(pageTable.PATH.eq(path)).and(pageTable.PAGE_ID.notEqual(this.pageId)).fetchOneInto(int.class);
             }
             if (count > 0) {
                 validatable.error(new ValidationError(this, "duplicated"));

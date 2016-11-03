@@ -3,12 +3,12 @@ package com.angkorteam.mbaas.server.page.user;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.UserPojo;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
@@ -51,10 +51,10 @@ public class UserPasswordPage extends MBaaSPage {
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    protected void doInitialize(Border layout) {
+        add(layout);
+
         DSLContext context = Spring.getBean(DSLContext.class);
-        RoleTable roleTable = Tables.ROLE.as("roleTable");
         UserTable userTable = Tables.USER.as("userTable");
 
         PageParameters parameters = getPageParameters();
@@ -63,7 +63,7 @@ public class UserPasswordPage extends MBaaSPage {
         UserPojo user = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.userId)).fetchOneInto(UserPojo.class);
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.fullName = user.getFullName();
         this.fullNameLabel = new Label("fullNameLabel", new PropertyModel<>(this, "fullName"));

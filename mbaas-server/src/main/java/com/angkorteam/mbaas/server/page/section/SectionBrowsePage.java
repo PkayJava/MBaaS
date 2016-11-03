@@ -10,6 +10,7 @@ import com.angkorteam.mbaas.server.provider.LayoutProvider;
 import com.angkorteam.mbaas.server.provider.SectionProvider;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -24,14 +25,19 @@ import java.util.Map;
 public class SectionBrowsePage extends MBaaSPage implements ActionFilteredJooqColumn.Event {
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    public String getPageUUID() {
+        return SectionBrowsePage.class.getName();
+    }
+
+    @Override
+    protected void doInitialize(Border layout) {
+        add(layout);
 
         SectionProvider provider = new SectionProvider();
         provider.selectField(String.class, "sectionId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
-        add(filterForm);
+        layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, Model.of("title"), "title", this, provider));
@@ -43,10 +49,10 @@ public class SectionBrowsePage extends MBaaSPage implements ActionFilteredJooqCo
         filterForm.add(dataTable);
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", SectionBrowsePage.class);
-        add(refreshLink);
+        layout.add(refreshLink);
 
         BookmarkablePageLink<Void> createLink = new BookmarkablePageLink<>("createLink", SectionCreatePage.class);
-        add(createLink);
+        layout.add(createLink);
     }
 
     @Override
@@ -80,11 +86,6 @@ public class SectionBrowsePage extends MBaaSPage implements ActionFilteredJooqCo
     @Override
     public boolean isVisibleEventLink(String s, Map<String, Object> map) {
         return true;
-    }
-
-    @Override
-    public String getPageUUID() {
-        return SectionBrowsePage.class.getName();
     }
 
 }

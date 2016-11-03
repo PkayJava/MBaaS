@@ -5,17 +5,19 @@
 </head>
 <body>
 <wicket:extend>
-    <div class="box box-primary">
-        <div class="box-header with-border">
-            <a wicket:id="refreshLink">Refresh</a> |
-            <a wicket:id="createLink">New Role</a>
+    <wicket:container wicket:id="layout">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <a wicket:id="refreshLink">Refresh</a> |
+                <a wicket:id="createLink">New Role</a>
+            </div>
+            <div class="box-body">
+                <form wicket:id="filter-form">
+                    <table wicket:id="table"/>
+                </form>
+            </div>
         </div>
-        <div class="box-body">
-            <form wicket:id="filter-form">
-                <table wicket:id="table"/>
-            </form>
-        </div>
-    </div>
+    </wicket:container>
 </wicket:extend>
 </body>
 </html>

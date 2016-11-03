@@ -18,6 +18,7 @@ import com.angkorteam.mbaas.server.provider.DocumentProvider;
 import com.angkorteam.mbaas.server.wicket.ProviderUtils;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -42,8 +43,8 @@ public class DocumentBrowsePage extends MBaaSPage implements ActionFilteredJooqC
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    protected void doInitialize(Border layout) {
+        add(layout);
 
         DSLContext context = Spring.getBean(DSLContext.class);
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
@@ -56,7 +57,7 @@ public class DocumentBrowsePage extends MBaaSPage implements ActionFilteredJooqC
         this.provider = new DocumentProvider(collectionId);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", this.provider);
-        add(filterForm);
+        layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         for (AttributePojo attribute : attributes) {
@@ -71,13 +72,13 @@ public class DocumentBrowsePage extends MBaaSPage implements ActionFilteredJooqC
         filterForm.add(dataTable);
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", DocumentBrowsePage.class, getPageParameters());
-        add(refreshLink);
+        layout.add(refreshLink);
 
         BookmarkablePageLink<Void> createLink = new BookmarkablePageLink<>("createLink", DocumentCreatePage.class, getPageParameters());
-        add(createLink);
+        layout.add(createLink);
 
         BookmarkablePageLink<Void> collectionBrowseLink = new BookmarkablePageLink<>("collectionBrowseLink", CollectionBrowsePage.class);
-        add(collectionBrowseLink);
+        layout.add(collectionBrowseLink);
     }
 
     @Override

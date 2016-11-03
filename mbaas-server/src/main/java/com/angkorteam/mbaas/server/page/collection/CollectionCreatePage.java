@@ -8,6 +8,7 @@ import com.angkorteam.mbaas.plain.request.collection.CollectionCreateRequest;
 import com.angkorteam.mbaas.server.function.CollectionFunction;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.validator.CollectionNameValidator;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -32,11 +33,11 @@ public class CollectionCreatePage extends MBaaSPage {
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    protected void doInitialize(Border layout) {
+        add(layout);
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.add(new CollectionNameValidator());

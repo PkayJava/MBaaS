@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.provider.PageProvider;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -23,14 +24,19 @@ import java.util.Map;
 public class PageBrowsePage extends MBaaSPage implements ActionFilteredJooqColumn.Event {
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    public String getPageUUID() {
+        return PageBrowsePage.class.getName();
+    }
+
+    @Override
+    protected void doInitialize(Border layout) {
+        add(layout);
 
         PageProvider provider = new PageProvider();
         provider.selectField(String.class, "pageId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
-        add(filterForm);
+        layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, Model.of("title"), "title", this, provider));
@@ -44,10 +50,10 @@ public class PageBrowsePage extends MBaaSPage implements ActionFilteredJooqColum
         filterForm.add(dataTable);
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", PageBrowsePage.class);
-        add(refreshLink);
+        layout.add(refreshLink);
 
         BookmarkablePageLink<Void> createLink = new BookmarkablePageLink<>("createLink", PageCreatePage.class);
-        add(createLink);
+        layout.add(createLink);
     }
 
     @Override
@@ -81,11 +87,6 @@ public class PageBrowsePage extends MBaaSPage implements ActionFilteredJooqColum
     @Override
     public boolean isVisibleEventLink(String s, Map<String, Object> map) {
         return true;
-    }
-
-    @Override
-    public String getPageUUID() {
-        return PageBrowsePage.class.getName();
     }
 
 }

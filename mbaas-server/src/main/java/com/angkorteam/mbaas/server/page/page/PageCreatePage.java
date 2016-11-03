@@ -24,6 +24,7 @@ import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
 import com.angkorteam.mbaas.server.validator.MountPathValidator;
 import groovy.lang.GroovyCodeSource;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -76,10 +77,16 @@ public class PageCreatePage extends MBaaSPage {
     private BookmarkablePageLink<Void> closeButton;
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    public String getPageUUID() {
+        return PageCreatePage.class.getName();
+    }
+
+    @Override
+    protected void doInitialize(Border layout) {
+        add(layout);
+
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RolesChoiceProvider());
         this.form.add(this.roleField);
@@ -127,7 +134,7 @@ public class PageCreatePage extends MBaaSPage {
 
         DSLContext context = Spring.getBean(DSLContext.class);
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
-        this.layouts = context.select(layoutTable.fields()).from(layoutTable).where(layoutTable.SYSTEM.eq(false)).fetchInto(LayoutPojo.class);
+        this.layouts = context.select(layoutTable.fields()).from(layoutTable).fetchInto(LayoutPojo.class);
         this.layoutField = new DropDownChoice<>("layoutField", new PropertyModel<>(this, "layout"), new PropertyModel<>(this, "layouts"), new LayoutChoiceRenderer());
         this.layoutField.setRequired(true);
         this.form.add(this.layoutField);
@@ -191,10 +198,5 @@ public class PageCreatePage extends MBaaSPage {
         }
 
         setResponsePage(PageBrowsePage.class);
-    }
-
-    @Override
-    public String getPageUUID() {
-        return PageCreatePage.class.getName();
     }
 }

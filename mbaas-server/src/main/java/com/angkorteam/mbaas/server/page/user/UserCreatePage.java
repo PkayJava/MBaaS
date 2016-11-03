@@ -12,6 +12,7 @@ import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.choice.RoleChoiceRenderer;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
@@ -61,13 +62,14 @@ public class UserCreatePage extends MBaaSPage {
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    protected void doInitialize(Border layout) {
+        add(layout);
+
         DSLContext context = Spring.getBean(DSLContext.class);
         RoleTable roleTable = Tables.ROLE.as("roleTable");
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.fullNameField = new TextField<>("fullNameField", new PropertyModel<>(this, "fullName"));
         this.fullNameField.setRequired(true);

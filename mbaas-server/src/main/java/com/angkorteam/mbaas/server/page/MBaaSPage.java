@@ -2,28 +2,26 @@ package com.angkorteam.mbaas.server.page;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
 import com.angkorteam.mbaas.model.entity.tables.MenuItemTable;
 import com.angkorteam.mbaas.model.entity.tables.MenuTable;
 import com.angkorteam.mbaas.model.entity.tables.PageTable;
-import com.angkorteam.mbaas.model.entity.tables.SectionTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.LayoutPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.MenuItemPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.MenuPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.SectionPojo;
 import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.function.HttpFunction;
-import com.angkorteam.mbaas.server.ui.SectionWidget;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.markup.html.border.Border;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -31,43 +29,60 @@ import java.util.List;
  */
 public abstract class MBaaSPage extends AdminLTEPage implements UUIDPage {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CmsPage.class);
+
     private List<String> breadcrumb;
 
-    private WebMarkupContainer headerContainer;
+    private Border layout;
 
     @Override
-    protected void onInitialize() {
+    protected final void onInitialize() {
         super.onInitialize();
         this.breadcrumb = initBreadcrumb();
-        this.headerContainer = new WebMarkupContainer("headerContainer");
-        add(this.headerContainer);
-        String htmlPageTitle = getHtmlPageTitle();
-        String htmlPageDescription = getHtmlPageDescription();
-        Label headerTitle = new Label("headerTitle", new PropertyModel<>(this, "htmlPageTitle"));
-        this.headerContainer.add(headerTitle);
-        Label headerDescription = new Label("headerDescription", new PropertyModel<>(this, "htmlPageDescription"));
-        this.headerContainer.add(headerDescription);
-        this.headerContainer.setVisible(!(Strings.isNullOrEmpty(htmlPageTitle) && Strings.isNullOrEmpty(htmlPageDescription)));
 
         DSLContext context = Spring.getBean(DSLContext.class);
+        PageTable pageTable = Tables.PAGE.as("pageTable");
+        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
 
-        SectionTable sectionTable = Tables.SECTION.as("sectionTable");
-        List<SectionPojo> sectionPojos = context.select(sectionTable.fields()).from(sectionTable).orderBy(sectionTable.ORDER.asc()).fetchInto(SectionPojo.class);
-        ListView<SectionPojo> sectionWidgets = new ListView<SectionPojo>("sectionWidgets", sectionPojos) {
+        PagePojo page = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(getPageUUID())).fetchOneInto(PagePojo.class);
+        LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
+        LayoutPojo layout = context.select(layoutTable.fields()).from(layoutTable).where(layoutTable.LAYOUT_ID.eq(page.getLayoutId())).fetchOneInto(LayoutPojo.class);
 
-            @Override
-            protected void populateItem(ListItem<SectionPojo> item) {
-                SectionPojo sectionPojo = item.getModelObject();
-                SectionWidget sectionWidget = new SectionWidget("sectionWidget", sectionPojo.getSectionId());
-                item.add(sectionWidget);
-            }
+        Class<? extends Border> layoutClass = null;
+        try {
+            layoutClass = (Class<? extends Border>) classLoader.loadClass(layout.getJavaClass());
+        } catch (ClassNotFoundException e) {
+            LOGGER.error(e.getMessage());
+        }
+        Constructor<? extends Border> constructor = null;
+        try {
+            constructor = layoutClass.getConstructor(String.class);
+        } catch (NoSuchMethodException e) {
+            LOGGER.error(e.getMessage());
+        }
+        Border cmsLayout = null;
+        try {
+            cmsLayout = constructor.newInstance("layout");
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            LOGGER.error(e.getMessage());
+        }
+        this.layout = cmsLayout;
 
-        };
-        add(sectionWidgets);
+        doInitialize(this.layout);
+    }
 
-        BookmarkablePageLink<Void> logoutPage = new BookmarkablePageLink<>("logoutPage", LogoutPage.class);
-        add(logoutPage);
+    protected abstract void doInitialize(Border layout);
 
+    protected final Border getLayout() {
+        return this.layout;
+    }
+
+    public MenuItemPojo getMenuItem() {
+        String pageId = getPageUUID();
+        DSLContext context = Spring.getBean(DSLContext.class);
+        MenuItemTable menuItemTable = Tables.MENU_ITEM.as("menuItemTable");
+        MenuItemPojo menuItemPojo = context.select(menuItemTable.fields()).from(menuItemTable).where(menuItemTable.PAGE_ID.eq(pageId)).fetchOneInto(MenuItemPojo.class);
+        return menuItemPojo;
     }
 
     protected List<String> initBreadcrumb() {
@@ -106,22 +121,6 @@ public abstract class MBaaSPage extends AdminLTEPage implements UUIDPage {
         return breadcrumb;
     }
 
-    public String getHtmlPageTitle() {
-        String pageId = getPageUUID();
-        DSLContext context = Spring.getBean(DSLContext.class);
-        PageTable pageTable = Tables.PAGE.as("pageTable");
-        PagePojo pagePojo = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(pageId)).fetchOneInto(PagePojo.class);
-        return pagePojo != null ? pagePojo.getTitle() : "";
-    }
-
-    public String getHtmlPageDescription() {
-        String pageId = getPageUUID();
-        DSLContext context = Spring.getBean(DSLContext.class);
-        PageTable pageTable = Tables.PAGE.as("pageTable");
-        PagePojo pagePojo = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(pageId)).fetchOneInto(PagePojo.class);
-        return pagePojo != null ? pagePojo.getDescription() : "";
-    }
-
     public boolean isMenuWidgetSelected(String menuId) {
         if (this.breadcrumb == null) {
             this.breadcrumb = initBreadcrumb();
@@ -134,14 +133,6 @@ public abstract class MBaaSPage extends AdminLTEPage implements UUIDPage {
             this.breadcrumb = initBreadcrumb();
         }
         return this.breadcrumb.contains("MenuItemId:" + menuItemId);
-    }
-
-    public MenuItemPojo getMenuItem() {
-        String pageId = getPageUUID();
-        DSLContext context = Spring.getBean(DSLContext.class);
-        MenuItemTable menuItemTable = Tables.MENU_ITEM.as("menuItemTable");
-        MenuItemPojo menuItemPojo = context.select(menuItemTable.fields()).from(menuItemTable).where(menuItemTable.PAGE_ID.eq(pageId)).fetchOneInto(MenuItemPojo.class);
-        return menuItemPojo;
     }
 
     public String getHttpAddress() {

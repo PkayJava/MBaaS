@@ -16,6 +16,7 @@ import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.select2.PagesChoiceProvider;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
@@ -48,8 +49,14 @@ public class RoleModifyPage extends MBaaSPage {
     private BookmarkablePageLink<Void> closeButton;
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    public String getPageUUID() {
+        return RoleModifyPage.class.getName();
+    }
+
+    @Override
+    protected void doInitialize(Border layout) {
+        add(layout);
+
         DSLContext context = Spring.getBean(DSLContext.class);
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         PageTable pageTable = Tables.PAGE.as("pageTable");
@@ -64,7 +71,7 @@ public class RoleModifyPage extends MBaaSPage {
         this.cmsPage = context.select(pageTable.fields()).from(pageTable).innerJoin(pageRoleTable).on(pageTable.PAGE_ID.eq(pageRoleTable.PAGE_ID)).where(pageRoleTable.ROLE_ID.eq(this.roleId)).fetchInto(PagePojo.class);
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.pageField = new Select2MultipleChoice<>("pageField", new PropertyModel<>(this, "cmsPage"), new PagesChoiceProvider());
         this.form.add(this.pageField);
@@ -114,11 +121,6 @@ public class RoleModifyPage extends MBaaSPage {
         }
 
         setResponsePage(RoleBrowsePage.class);
-    }
-
-    @Override
-    public String getPageUUID() {
-        return RoleModifyPage.class.getName();
     }
 
 }

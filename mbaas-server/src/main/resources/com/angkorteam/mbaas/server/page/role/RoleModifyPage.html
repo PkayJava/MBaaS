@@ -5,37 +5,39 @@
 </head>
 <body>
 <wicket:extend>
-    <div class="box box-primary">
-        <form role="form" wicket:id="form">
-            <div class="box-body">
-                <!-- Row -->
-                <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <label wicket:for="nameField">Name</label>
-                    <input wicket:id="nameField" type="text" class="form-control"/>
-                    <span wicket:id="nameFeedback" class="help-block"/>
+    <wicket:container wicket:id="layout">
+        <div class="box box-primary">
+            <form role="form" wicket:id="form">
+                <div class="box-body">
+                    <!-- Row -->
+                    <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label wicket:for="nameField">Name</label>
+                        <input wicket:id="nameField" type="text" class="form-control"/>
+                        <span wicket:id="nameFeedback" class="help-block"/>
+                    </div>
+                    <div class="clearfix"></div>
+                    <!-- Row -->
+                    <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label wicket:for="descriptionField">Description</label>
+                        <input wicket:id="descriptionField" type="text" class="form-control"/>
+                        <span wicket:id="descriptionFeedback" class="help-block"/>
+                    </div>
+                    <div class="clearfix"></div>
+                    <!-- Row -->
+                    <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label wicket:for="pageField">Page</label>
+                        <select wicket:id="pageField" class="form-control select2" style="width: 100%;"></select>
+                        <span wicket:id="pageFeedback" class="help-block"/>
+                    </div>
+                    <div class="clearfix"></div>
                 </div>
-                <div class="clearfix"></div>
-                <!-- Row -->
-                <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <label wicket:for="descriptionField">Description</label>
-                    <input wicket:id="descriptionField" type="text" class="form-control"/>
-                    <span wicket:id="descriptionFeedback" class="help-block"/>
+                <div class="box-footer">
+                    <a wicket:id="closeButton" class="btn btn-default">Close</a>
+                    <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">Save</button>
                 </div>
-                <div class="clearfix"></div>
-                <!-- Row -->
-                <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <label wicket:for="pageField">Page</label>
-                    <select wicket:id="pageField" class="form-control select2" style="width: 100%;"></select>
-                    <span wicket:id="pageFeedback" class="help-block"/>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-            <div class="box-footer">
-                <a wicket:id="closeButton" class="btn btn-default">Close</a>
-                <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">Save</button>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
+    </wicket:container>
 </wicket:extend>
 </body>
 </html>

@@ -17,6 +17,7 @@ import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.provider.AttributeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -41,9 +42,8 @@ public class AttributeBrowsePage extends MBaaSPage implements ActionFilteredJooq
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
-
+    protected void doInitialize(Border layout) {
+        add(layout);
         DSLContext context = Spring.getBean(DSLContext.class);
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
 
@@ -56,7 +56,7 @@ public class AttributeBrowsePage extends MBaaSPage implements ActionFilteredJooq
         provider.selectField(String.class, "attributeId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
-        add(filterForm);
+        layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
 
@@ -77,13 +77,10 @@ public class AttributeBrowsePage extends MBaaSPage implements ActionFilteredJooq
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collectionId);
         BookmarkablePageLink<Void> createLink = new BookmarkablePageLink<>("createLink", AttributeCreatePage.class, parameters);
-        add(createLink);
+        layout.add(createLink);
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", AttributeBrowsePage.class, parameters);
-        add(refreshLink);
-
-//        BookmarkablePageLink<Void> documentLink = new BookmarkablePageLink<>("documentLink", DocumentManagementPage.class, getPageParameters());
-//        add(documentLink);
+        layout.add(refreshLink);
     }
 
     @Override

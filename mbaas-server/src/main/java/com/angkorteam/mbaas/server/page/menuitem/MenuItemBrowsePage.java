@@ -10,6 +10,7 @@ import com.angkorteam.mbaas.server.provider.MenuItemProvider;
 import com.angkorteam.mbaas.server.provider.MenuProvider;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -24,14 +25,19 @@ import java.util.Map;
 public class MenuItemBrowsePage extends MBaaSPage implements ActionFilteredJooqColumn.Event {
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    public String getPageUUID() {
+        return MenuItemBrowsePage.class.getName();
+    }
+
+    @Override
+    protected void doInitialize(Border layout) {
+        add(layout);
 
         MenuItemProvider provider = new MenuItemProvider();
         provider.selectField(String.class, "menuItemId");
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
-        add(filterForm);
+        layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
         columns.add(new TextFilteredJooqColumn(String.class, Model.of("title"), "title", this, provider));
@@ -47,10 +53,10 @@ public class MenuItemBrowsePage extends MBaaSPage implements ActionFilteredJooqC
         filterForm.add(dataTable);
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", MenuItemBrowsePage.class);
-        add(refreshLink);
+        layout.add(refreshLink);
 
         BookmarkablePageLink<Void> createLink = new BookmarkablePageLink<>("createLink", MenuItemCreatePage.class);
-        add(createLink);
+        layout.add(createLink);
     }
 
     @Override
@@ -84,11 +90,6 @@ public class MenuItemBrowsePage extends MBaaSPage implements ActionFilteredJooqC
     @Override
     public boolean isVisibleEventLink(String s, Map<String, Object> map) {
         return true;
-    }
-
-    @Override
-    public String getPageUUID() {
-        return MenuItemBrowsePage.class.getName();
     }
 
 }

@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.SectionPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.SectionRecord;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
@@ -35,8 +36,13 @@ public class SectionModifyPage extends MBaaSPage {
     private BookmarkablePageLink<Void> closeButton;
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    public String getPageUUID() {
+        return SectionModifyPage.class.getName();
+    }
+
+    @Override
+    protected void doInitialize(Border layout) {
+        add(layout);
 
         DSLContext context = Spring.getBean(DSLContext.class);
         SectionTable sectionTable = Tables.SECTION.as("sectionTable");
@@ -48,7 +54,7 @@ public class SectionModifyPage extends MBaaSPage {
         this.title = section.getTitle();
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.titleField = new TextField<>("titleField", new PropertyModel<>(this, "title"));
         this.titleField.setRequired(true);
@@ -78,11 +84,6 @@ public class SectionModifyPage extends MBaaSPage {
         sectionRecord.setOrder(this.order);
         sectionRecord.update();
         setResponsePage(SectionBrowsePage.class);
-    }
-
-    @Override
-    public String getPageUUID() {
-        return SectionModifyPage.class.getName();
     }
 
 }

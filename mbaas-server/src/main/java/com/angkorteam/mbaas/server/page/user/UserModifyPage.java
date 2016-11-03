@@ -12,6 +12,7 @@ import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.choice.RoleChoiceRenderer;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -52,8 +53,9 @@ public class UserModifyPage extends MBaaSPage {
     }
 
     @Override
-    protected void onInitialize() {
-        super.onInitialize();
+    protected void doInitialize(Border layout) {
+        add(layout);
+
         DSLContext context = Spring.getBean(DSLContext.class);
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         UserTable userTable = Tables.USER.as("userTable");
@@ -64,7 +66,7 @@ public class UserModifyPage extends MBaaSPage {
         UserPojo user = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.userId)).fetchOneInto(UserPojo.class);
 
         this.form = new Form<>("form");
-        add(this.form);
+        layout.add(this.form);
 
         this.fullName = user.getFullName();
         this.fullNameField = new TextField<>("fullNameField", new PropertyModel<>(this, "fullName"));
