@@ -11,7 +11,7 @@ CREATE TABLE query (
   user_id          VARCHAR(100),
   application_code VARCHAR(100) NOT NULL,
 
-  UNIQUE KEY (name),
+  UNIQUE (name),
   INDEX (description),
   FULLTEXT (script),
   INDEX (return_type),

@@ -1,33 +1,36 @@
 package com.angkorteam.mbaas.server.factory;
 
-import com.angkorteam.mbaas.server.spring.ApplicationContext;
+import jdk.nashorn.api.scripting.ClassFilter;
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.context.ServletContextAware;
 
-import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngine;
 import javax.servlet.ServletContext;
 
 /**
  * Created by socheat on 5/31/16.
  */
-public class ScriptEngineFactoryBean implements FactoryBean<ScriptEngineFactory>, InitializingBean, ServletContextAware {
+public class ScriptEngineFactoryBean implements FactoryBean<ScriptEngine>, InitializingBean, ServletContextAware {
 
-    private ScriptEngineFactory scriptEngineFactory;
+    private ScriptEngine scriptEngine;
 
     private ServletContext servletContext;
+
+    private ClassFilter classFilter;
 
     public ScriptEngineFactoryBean() {
     }
 
     @Override
-    public ScriptEngineFactory getObject() throws Exception {
-        return this.scriptEngineFactory;
+    public ScriptEngine getObject() throws Exception {
+        return this.scriptEngine;
     }
 
     @Override
     public Class<?> getObjectType() {
-        return ScriptEngineFactory.class;
+        return ScriptEngine.class;
     }
 
     @Override
@@ -37,8 +40,12 @@ public class ScriptEngineFactoryBean implements FactoryBean<ScriptEngineFactory>
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        ApplicationContext applicationContext = ApplicationContext.get(this.servletContext);
-        this.scriptEngineFactory = applicationContext.getScriptEngineFactory();
+        NashornScriptEngineFactory scriptEngineFactory = new NashornScriptEngineFactory();
+        this.scriptEngine = scriptEngineFactory.getScriptEngine(this.classFilter);
+    }
+
+    public void setClassFilter(ClassFilter classFilter) {
+        this.classFilter = classFilter;
     }
 
     @Override

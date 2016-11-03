@@ -1,174 +1,127 @@
 package com.angkorteam.mbaas.server.function;
 
-import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
+import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
+import com.angkorteam.mbaas.model.entity.tables.IndexAttributeTable;
+import com.angkorteam.mbaas.model.entity.tables.InstanceAttributeTable;
+import com.angkorteam.mbaas.model.entity.tables.PrimaryAttributeTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
+import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.CollectionRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.IndexAttributeRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.PrimaryAttributeRecord;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
-import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionDeleteRequest;
-import com.angkorteam.mbaas.server.Jdbc;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
-import org.flywaydb.core.internal.dbsupport.Schema;
+import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.System;
+import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * Created by socheat on 3/3/16.
  */
 public class CollectionFunction {
 
-    public static void deleteCollection(Schema schema, JdbcTemplate jdbcTemplate, CollectionDeleteRequest requestBody) {
-        Map<String, Object> collectionRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.NAME + " = ?", requestBody.getCollectionName());
-        if (collectionRecord != null) {
-            jdbcTemplate.update("DELETE FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ?", collectionRecord.get(Jdbc.Collection.COLLECTION_ID));
-            jdbcTemplate.update("DELETE FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.COLLECTION_ID + " = ?", collectionRecord.get(Jdbc.Collection.COLLECTION_ID));
-            schema.getTable(requestBody.getCollectionName()).drop();
+    public static void deleteCollection(CollectionDeleteRequest requestBody) {
+        DSLContext context = Spring.getBean(DSLContext.class);
+        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        IndexAttributeTable indexAttributeTable = Tables.INDEX_ATTRIBUTE.as("indexAttributeTable");
+        PrimaryAttributeTable primaryAttributeTable = Tables.PRIMARY_ATTRIBUTE.as("primaryAttributeTable");
+        InstanceAttributeTable instanceAttributeTable = Tables.INSTANCE_ATTRIBUTE.as("instanceAttributeTable");
+        CollectionPojo collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(CollectionPojo.class);
+        if (collection != null) {
+            context.delete(attributeTable).where(attributeTable.COLLECTION_ID.eq(collection.getCollectionId())).execute();
+            context.delete(indexAttributeTable).where(indexAttributeTable.COLLECTION_ID.eq(collection.getCollectionId())).execute();
+            context.delete(primaryAttributeTable).where(primaryAttributeTable.COLLECTION_ID.eq(collection.getCollectionId())).execute();
+            context.delete(instanceAttributeTable).where(instanceAttributeTable.COLLECTION_ID.eq(collection.getCollectionId())).execute();
+            context.delete(collectionTable).where(collectionTable.COLLECTION_ID.eq(collection.getCollectionId())).execute();
+            jdbcTemplate.execute("drop table `" + collection.getName() + "`");
         }
     }
 
-    public static void createCollection(JdbcTemplate jdbcTemplate, String applicationCode, String ownerUserId, CollectionCreateRequest requestBody) {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+    public static void createCollection(CollectionCreateRequest requestBody) {
         String primaryName = requestBody.getCollectionName() + "_id";
         StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE TABLE `").append(requestBody.getCollectionName()).append("` (");
         buffer.append("`").append(primaryName).append("` VARCHAR(100) NOT NULL, ");
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
-            TypeEnum attributeType = TypeEnum.valueOf(attribute.getAttributeType());
-            if (attributeType == TypeEnum.Boolean
-                    || attributeType == TypeEnum.Long
-                    || attributeType == TypeEnum.Double
-                    || attributeType == TypeEnum.Time
-                    || attributeType == TypeEnum.Date
-                    || attributeType == TypeEnum.DateTime
-                    || attributeType == TypeEnum.Character
-                    ) {
-                buffer.append("`").append(attribute.getName()).append("` " + attributeType.getSqlType() + ", ");
-                buffer.append("INDEX(`").append(attribute.getName()).append("`), ");
-            } else if (attributeType == TypeEnum.String) {
-                buffer.append("`").append(attribute.getName()).append("` " + attributeType.getSqlType() + ", ");
-                buffer.append("FULLTEXT(`").append(attribute.getName()).append("`), ");
-            } else if (attributeType == TypeEnum.Text) {
-                buffer.append("`").append(attribute.getName()).append("` " + attributeType.getSqlType() + ", ");
-                buffer.append("FULLTEXT(`").append(attribute.getName()).append("`), ");
-            }
+            TypeEnum attributeType = TypeEnum.valueOf(attribute.getType());
+            buffer.append("`").append(attribute.getName()).append("` " + attributeType.getSqlType() + ", ");
+            buffer.append(attribute.getIndex() + "(`").append(attribute.getName()).append("`), ");
         }
-        buffer.append("`").append(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID)).append("` VARCHAR(100) NOT NULL, ");
-        buffer.append("`").append(configuration.getString(Constants.JDBC_COLUMN_DELETED)).append("` BIT(1) NOT NULL DEFAULT 0, ");
-        buffer.append("`").append(configuration.getString(Constants.JDBC_COLUMN_DATE_CREATED)).append("` DATETIME NOT NULL DEFAULT NOW(), ");
-        buffer.append("INDEX(`").append(configuration.getString(Constants.JDBC_COLUMN_DATE_CREATED)).append("`), ");
-        buffer.append("INDEX(`").append(configuration.getString(Constants.JDBC_COLUMN_DELETED)).append("`), ");
-        buffer.append("INDEX(`").append(configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID)).append("`), ");
         buffer.append("PRIMARY KEY (`").append(primaryName).append("`)");
         buffer.append(" )");
+        DSLContext context = Spring.getBean(DSLContext.class);
+        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
+        System system = Spring.getBean(System.class);
         jdbcTemplate.execute(buffer.toString());
-        String collectionId = UUID.randomUUID().toString();
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        String collectionId = system.randomUUID();
         {
-            Map<String, Object> fields = new HashMap<>();
-            fields.put(Jdbc.Collection.COLLECTION_ID, collectionId);
-            fields.put(Jdbc.Collection.NAME, requestBody.getCollectionName());
-            fields.put(Jdbc.Collection.SYSTEM, false);
-            fields.put(Jdbc.Collection.SYSTEM, false);
-            fields.put(Jdbc.Collection.LOCKED, true);
-            fields.put(Jdbc.Collection.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Collection.OWNER_USER_ID, ownerUserId);
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-            jdbcInsert.withTableName(Jdbc.COLLECTION);
-            jdbcInsert.execute(fields);
+            CollectionRecord collectionRecord = context.newRecord(collectionTable);
+            collectionRecord.setCollectionId(collectionId);
+            collectionRecord.setName(requestBody.getCollectionName());
+            collectionRecord.setSystem(false);
+            collectionRecord.setLocked(false);
+            collectionRecord.setMutable(false);
+            collectionRecord.store();
         }
 
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        PrimaryAttributeTable primaryAttributeTable = Tables.PRIMARY_ATTRIBUTE.as("primaryAttributeTable");
+        IndexAttributeTable indexAttributeTable = Tables.INDEX_ATTRIBUTE.as("indexAttributeTable");
         {
-            Map<String, Object> fields = new HashMap<>();
-            fields.put(Jdbc.Attribute.ATTRIBUTE_ID, UUID.randomUUID().toString());
-            fields.put(Jdbc.Attribute.COLLECTION_ID, collectionId);
-            fields.put(Jdbc.Attribute.NAME, primaryName);
-            fields.put(Jdbc.Attribute.EXTRA, AttributeExtraEnum.PRIMARY | AttributeExtraEnum.AUTO_INCREMENT | AttributeExtraEnum.EXPOSED);
-            fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Shown.getLiteral());
-            fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, TypeEnum.String.getLiteral());
-            fields.put(Jdbc.Attribute.SYSTEM, true);
-            fields.put(Jdbc.Attribute.EAV, false);
-            fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-            jdbcInsert.withTableName(Jdbc.ATTRIBUTE);
-            jdbcInsert.execute(fields);
-        }
+            String attributeId = system.randomUUID();
+            AttributeRecord attributeRecord = context.newRecord(attributeTable);
+            attributeRecord.setAttributeId(attributeId);
+            attributeRecord.setCollectionId(collectionId);
+            attributeRecord.setName(primaryName);
+            attributeRecord.setSystem(true);
+            attributeRecord.setAllowNull(false);
+            attributeRecord.setEav(false);
+            attributeRecord.setType(TypeEnum.String.getLiteral());
+            attributeRecord.setLength(100);
+            attributeRecord.setOrder(1);
+            attributeRecord.setPrecision(0);
+            attributeRecord.store();
 
-        {
-            Map<String, Object> fields = new HashMap<>();
-            fields.put(Jdbc.Attribute.ATTRIBUTE_ID, UUID.randomUUID().toString());
-            fields.put(Jdbc.Attribute.COLLECTION_ID, collectionId);
-            fields.put(Jdbc.Attribute.NAME, configuration.getString(Constants.JDBC_COLUMN_DATE_CREATED));
-            fields.put(Jdbc.Attribute.EXTRA, AttributeExtraEnum.EXPOSED);
-            fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
-            fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, TypeEnum.DateTime.getLiteral());
-            fields.put(Jdbc.Attribute.SYSTEM, true);
-            fields.put(Jdbc.Attribute.EAV, false);
-            fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-            jdbcInsert.withTableName(Jdbc.ATTRIBUTE);
-            jdbcInsert.execute(fields);
-        }
-
-        {
-            Map<String, Object> fields = new HashMap<>();
-            fields.put(Jdbc.Attribute.ATTRIBUTE_ID, UUID.randomUUID().toString());
-            fields.put(Jdbc.Attribute.COLLECTION_ID, collectionId);
-            fields.put(Jdbc.Attribute.NAME, configuration.getString(Constants.JDBC_COLUMN_DELETED));
-            fields.put(Jdbc.Attribute.EXTRA, 0);
-            fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
-            fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, TypeEnum.Boolean.getLiteral());
-            fields.put(Jdbc.Attribute.SYSTEM, true);
-            fields.put(Jdbc.Attribute.EAV, false);
-            fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-            jdbcInsert.withTableName(Jdbc.ATTRIBUTE);
-            jdbcInsert.execute(fields);
-        }
-        {
-            Map<String, Object> fields = new HashMap<>();
-            fields.put(Jdbc.Attribute.ATTRIBUTE_ID, UUID.randomUUID().toString());
-            fields.put(Jdbc.Attribute.COLLECTION_ID, collectionId);
-            fields.put(Jdbc.Attribute.NAME, configuration.getString(Constants.JDBC_COLUMN_OWNER_USER_ID));
-            fields.put(Jdbc.Attribute.EXTRA, 0);
-            fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
-            fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, TypeEnum.String.getLiteral());
-            fields.put(Jdbc.Attribute.SYSTEM, true);
-            fields.put(Jdbc.Attribute.EAV, false);
-            fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-            jdbcInsert.withTableName(Jdbc.ATTRIBUTE);
-            jdbcInsert.execute(fields);
+            PrimaryAttributeRecord primaryAttributeRecord = context.newRecord(primaryAttributeTable);
+            primaryAttributeRecord.setPrimaryAttributeId(system.randomUUID());
+            primaryAttributeRecord.setCollectionId(collectionId);
+            primaryAttributeRecord.setAttributeId(attributeId);
+            primaryAttributeRecord.store();
         }
 
         for (CollectionCreateRequest.Attribute attribute : requestBody.getAttributes()) {
-            TypeEnum attributeType = TypeEnum.valueOf(attribute.getAttributeType());
-            Map<String, Object> fields = new HashMap<>();
-            fields.put(Jdbc.Attribute.ATTRIBUTE_ID, UUID.randomUUID().toString());
-            fields.put(Jdbc.Attribute.COLLECTION_ID, collectionId);
-            fields.put(Jdbc.Attribute.NAME, attribute.getName());
-            if (attribute.isNullable()) {
-                fields.put(Jdbc.Attribute.EXTRA, AttributeExtraEnum.NULLABLE | AttributeExtraEnum.EXPOSED);
+            String attributeId = system.randomUUID();
+            AttributeRecord attributeRecord = context.newRecord(attributeTable);
+            attributeRecord.setAttributeId(attributeId);
+            attributeRecord.setCollectionId(collectionId);
+            attributeRecord.setName(attribute.getName());
+            if (attributeRecord.getName().equals("system")) {
+                attributeRecord.setSystem(true);
             } else {
-                fields.put(Jdbc.Attribute.EXTRA, AttributeExtraEnum.EXPOSED);
+                attributeRecord.setSystem(false);
             }
-            fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
-            fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, attributeType.getLiteral());
-            fields.put(Jdbc.Attribute.SYSTEM, false);
-            fields.put(Jdbc.Attribute.EAV, false);
-            fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-            jdbcInsert.withTableName(Jdbc.ATTRIBUTE);
-            jdbcInsert.execute(fields);
+            attributeRecord.setAllowNull(attribute.isNullable());
+            attributeRecord.setEav(false);
+            attributeRecord.setType(attribute.getType());
+            attributeRecord.setLength(attribute.getLength());
+            attributeRecord.setOrder(attribute.getOrder());
+            attributeRecord.setPrecision(attribute.getPrecision());
+            attributeRecord.store();
+
+            IndexAttributeRecord indexAttributeRecord = context.newRecord(indexAttributeTable);
+            indexAttributeRecord.setIndexAttributeId(system.randomUUID());
+            indexAttributeRecord.setCollectionId(collectionId);
+            indexAttributeRecord.setAttributeId(attributeId);
+            indexAttributeRecord.setName(attribute.getIndex() + "_" + system.randomUUID());
+            indexAttributeRecord.setType(attribute.getIndex());
+            indexAttributeRecord.store();
         }
-        jdbcTemplate.update("UPDATE " + Jdbc.COLLECTION + " SET " + Jdbc.Collection.LOCKED + " = ? WHERE " + Jdbc.Collection.COLLECTION_ID + " = ?", false, collectionId);
     }
 }

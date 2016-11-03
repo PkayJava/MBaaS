@@ -1,107 +1,113 @@
 package com.angkorteam.mbaas.server.page.user;
 
-import com.angkorteam.framework.extension.spring.SimpleJdbcUpdate;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.select2.RoleChoiceProvider;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
-import com.angkorteam.mbaas.server.wicket.MasterPage;
-import com.angkorteam.mbaas.server.wicket.Mount;
-import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.UserPojo;
+import com.angkorteam.mbaas.model.entity.tables.records.UserRecord;
+import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.choice.RoleChoiceRenderer;
+import com.angkorteam.mbaas.server.page.MBaaSPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.jooq.DSLContext;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by socheat on 3/1/16.
  */
-@AuthorizeInstantiation("administrator")
-@Mount("/user/modify")
-public class UserModifyPage extends MasterPage {
 
-    private String applicationUserId;
+public class UserModifyPage extends MBaaSPage {
 
-    private String login;
-    private Label loginLabel;
+    private String userId;
 
     private String fullName;
     private TextField<String> fullNameField;
     private TextFeedbackPanel fullNameFeedback;
 
-    private Map<String, Object> role;
-    private DropDownChoice<Map<String, Object>> roleField;
+    private String login;
+    private Label loginLabel;
+
+    private List<RolePojo> roles;
+    private RolePojo role;
+    private DropDownChoice<RolePojo> roleField;
     private TextFeedbackPanel roleFeedback;
 
     private Button saveButton;
-
     private Form<Void> form;
+    private BookmarkablePageLink<Void> closeButton;
 
     @Override
-    public String getPageHeader() {
-        return "Modify User Role";
+    public String getPageUUID() {
+        return UserModifyPage.class.getName();
     }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
+        DSLContext context = Spring.getBean(DSLContext.class);
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        UserTable userTable = Tables.USER.as("userTable");
+
+        PageParameters parameters = getPageParameters();
+        this.userId = parameters.get("userId").toString("");
+
+        UserPojo user = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.userId)).fetchOneInto(UserPojo.class);
 
         this.form = new Form<>("form");
         add(this.form);
 
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-
-        PageParameters parameters = getPageParameters();
-        this.applicationUserId = parameters.get("applicationUserId").toString();
-
-        Map<String, Object> userRecord = null;
-        userRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.USER + " WHERE " + Jdbc.User.USER_ID + " = ?", this.applicationUserId);
-
-        this.fullName = (String) userRecord.get(Jdbc.User.FULL_NAME);
+        this.fullName = user.getFullName();
         this.fullNameField = new TextField<>("fullNameField", new PropertyModel<>(this, "fullName"));
         this.fullNameField.setRequired(true);
-        this.fullNameField.setLabel(JooqUtils.lookup("fullName", this));
         this.form.add(fullNameField);
         this.fullNameFeedback = new TextFeedbackPanel("fullNameFeedback", this.fullNameField);
         this.form.add(fullNameFeedback);
 
-        this.login = (String) userRecord.get(Jdbc.User.LOGIN);
+        this.login = user.getLogin();
         this.loginLabel = new Label("loginLabel", new PropertyModel<>(this, "login"));
-        this.form.add(this.loginLabel);
+        this.form.add(loginLabel);
 
-        this.role = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", userRecord.get(Jdbc.User.ROLE_ID));
-        List<Map<String, Object>> roles = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ROLE);
-        this.roleField = new DropDownChoice<>("roleField", new PropertyModel<>(this, "role"), roles, new RoleChoiceProvider(getSession().getApplicationCode()));
+        if (user.getRoleId() != null) {
+            this.role = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(user.getRoleId())).fetchOneInto(RolePojo.class);
+        }
+        this.roles = context.select(roleTable.fields()).from(roleTable).fetchInto(RolePojo.class);
+        this.roleField = new DropDownChoice<>("roleField", new PropertyModel<>(this, "role"), new PropertyModel<>(this, "roles"), new RoleChoiceRenderer());
         this.roleField.setRequired(true);
-        this.roleField.setLabel(JooqUtils.lookup("role", this));
-        this.form.add(this.roleField);
+        this.form.add(roleField);
         this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);
-        this.form.add(this.roleFeedback);
+        this.form.add(roleFeedback);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(this.saveButton);
+
+        this.closeButton = new BookmarkablePageLink<>("closeButton", UserBrowsePage.class);
+        this.form.add(this.closeButton);
     }
 
     private void saveButtonOnSubmit(Button button) {
-        Map<String, Object> wheres = new HashMap<>();
-        wheres.put(Jdbc.User.USER_ID, this.applicationUserId);
-        Map<String, Object> fields = new HashMap<>();
-        fields.put(Jdbc.User.FULL_NAME, this.fullName);
-        fields.put(Jdbc.User.ROLE_ID, this.role.get(Jdbc.Role.ROLE_ID));
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        SimpleJdbcUpdate jdbcUpdate = new SimpleJdbcUpdate(jdbcTemplate);
-        jdbcUpdate.withTableName(Jdbc.USER);
-        jdbcUpdate.execute(fields, wheres);
-        setResponsePage(UserManagementPage.class);
-    }
+        DSLContext context = Spring.getBean(DSLContext.class);
+        UserTable userTable = Tables.USER.as("userTable");
 
+        UserRecord userRecord = context.select(userTable.fields()).from(userTable).where(userTable.USER_ID.eq(this.userId)).fetchOneInto(userTable);
+        userRecord.setFullName(this.fullName);
+        if (this.role != null) {
+            userRecord.setRoleId(this.role.getRoleId());
+        } else {
+            userRecord.setRoleId(null);
+        }
+        userRecord.update();
+
+        setResponsePage(UserBrowsePage.class);
+    }
 }

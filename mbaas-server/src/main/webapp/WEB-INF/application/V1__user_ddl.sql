@@ -19,7 +19,7 @@ CREATE TABLE user (
   password_reset_token              VARCHAR(255),
   password_reset_token_expired_date DATETIME,
 
-  UNIQUE KEY (login),
+  UNIQUE (login),
   INDEX (full_name),
   INDEX (password),
   INDEX (role_id),

@@ -1,15 +1,15 @@
 package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
-import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.wicket.Application;
-import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
-import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
-import org.jooq.*;
-import org.jooq.impl.DSL;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
+import com.angkorteam.mbaas.server.Spring;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.TableLike;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,48 +17,52 @@ import java.util.List;
  */
 public class AttributeProvider extends JooqProvider {
 
-    private Table<?> attributeTable;
+    private AttributeTable attributeTable;
 
     private TableLike<?> from;
 
     private String collectionId;
 
-    private final String applicationCode;
-
-    public AttributeProvider(String applicationCode, String collectionId) {
-        this.applicationCode = applicationCode;
-        this.attributeTable = DSL.table(Jdbc.ATTRIBUTE).as("attributeTable");
+    public AttributeProvider(String collectionId) {
+        this.attributeTable = Tables.ATTRIBUTE.as("attributeTable");
         this.collectionId = collectionId;
-        this.from = attributeTable;
-        setSort("dateCreated", SortOrder.ASCENDING);
+        this.from = this.attributeTable;
     }
 
     public Field<String> getName() {
-        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.NAME, String.class);
+        return this.attributeTable.NAME;
     }
 
     public Field<String> getAttributeId() {
-        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.ATTRIBUTE_ID, String.class);
+        return this.attributeTable.ATTRIBUTE_ID;
     }
 
-    public Field<String> getAttributeType() {
-        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.ATTRIBUTE_TYPE, String.class);
-    }
-
-    public Field<Date> getDateCreated() {
-        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.DATE_CREATED, Date.class);
+    public Field<String> getType() {
+        return this.attributeTable.TYPE;
     }
 
     public Field<Boolean> getSystem() {
-        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.SYSTEM, Boolean.class);
+        return this.attributeTable.SYSTEM;
     }
 
-    public Field<Integer> getExtra() {
-        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.EXTRA, Integer.class);
+    public Field<Integer> getLength() {
+        return this.attributeTable.LENGTH;
     }
 
-    public Field<String> getVisibility() {
-        return DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.VISIBILITY, String.class);
+    public Field<Integer> getPrecision() {
+        return this.attributeTable.PRECISION;
+    }
+
+    public Field<Integer> getOrder() {
+        return this.attributeTable.ORDER;
+    }
+
+    public Field<Boolean> getEav() {
+        return this.attributeTable.EAV;
+    }
+
+    public Field<Boolean> getNullable() {
+        return this.attributeTable.ALLOW_NULL;
     }
 
     @Override
@@ -69,14 +73,13 @@ public class AttributeProvider extends JooqProvider {
     @Override
     protected List<Condition> where() {
         List<Condition> where = new ArrayList<>();
-        where.add(DSL.field(this.attributeTable.getName() + "." + Jdbc.Attribute.COLLECTION_ID, String.class).eq(this.collectionId));
+        where.add(this.attributeTable.COLLECTION_ID.eq(this.collectionId));
         return where;
     }
 
     @Override
     protected DSLContext getDSLContext() {
-        Application application = ApplicationUtils.getApplication();
-        return application.getDSLContext(this.applicationCode);
+        return Spring.getBean(DSLContext.class);
     }
 
     @Override

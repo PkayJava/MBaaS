@@ -20,6 +20,6 @@ CREATE TABLE `attribute` (
   INDEX (system),
   INDEX (extra),
   INDEX (date_created),
-  UNIQUE KEY (name, collection_id),
+  UNIQUE (name, collection_id),
   PRIMARY KEY (attribute_id)
 );

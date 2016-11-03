@@ -1,24 +1,21 @@
 package com.angkorteam.mbaas.server.factory;
 
-import com.angkorteam.mbaas.server.spring.ApplicationContext;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
+import org.flywaydb.core.internal.dbsupport.DbSupportFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.web.context.ServletContextAware;
 
-import javax.servlet.ServletContext;
+import javax.sql.DataSource;
+import java.sql.Connection;
 
 /**
- * Created by socheat on 5/21/16.
+ * Created by socheat on 10/23/16.
  */
-public class DbSupportFactoryBean implements FactoryBean<DbSupport>, InitializingBean, ServletContextAware {
-
-    private ServletContext servletContext;
+public class DbSupportFactoryBean implements FactoryBean<DbSupport>, InitializingBean {
 
     private DbSupport dbSupport;
 
-    public DbSupportFactoryBean() {
-    }
+    private DataSource dataSource;
 
     @Override
     public DbSupport getObject() throws Exception {
@@ -37,12 +34,12 @@ public class DbSupportFactoryBean implements FactoryBean<DbSupport>, Initializin
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        ApplicationContext applicationContext = ApplicationContext.get(this.servletContext);
-        this.dbSupport = applicationContext.getDbSupport();
+        Connection connection = this.dataSource.getConnection();
+        this.dbSupport = DbSupportFactory.createDbSupport(connection, true);
     }
 
-    @Override
-    public void setServletContext(ServletContext servletContext) {
-        this.servletContext = servletContext;
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
+
 }

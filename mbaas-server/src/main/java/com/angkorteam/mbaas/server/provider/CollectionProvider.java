@@ -1,13 +1,15 @@
 package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
-import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.wicket.Application;
-import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
-import org.jooq.*;
-import org.jooq.impl.DSL;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
+import com.angkorteam.mbaas.server.Spring;
+import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.TableLike;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,36 +19,32 @@ public class CollectionProvider extends JooqProvider {
 
     private TableLike<?> from;
 
-    private final String applicationCode;
+    private CollectionTable collectionTable;
 
-    private Table<?> collectionTable;
-    private Table<?> userTable;
-
-    public CollectionProvider(String applicationCode) {
-        this.applicationCode = applicationCode;
-        this.collectionTable = DSL.table(Jdbc.COLLECTION).as("collectionTable");
-        this.userTable = DSL.table(Jdbc.USER).as("userTable");
-        this.from = this.collectionTable.join(this.userTable).on(DSL.field(this.collectionTable.getName() + "." + Jdbc.Collection.OWNER_USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
-    }
-
-    public Field<String> getApplicationUser() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
-    }
-
-    public Field<String> getApplicationUserId() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class);
+    public CollectionProvider() {
+        this.collectionTable = Tables.COLLECTION.as("collectionTable");
+        this.from = this.collectionTable;
+        setSort("name", SortOrder.ASCENDING);
     }
 
     public Field<Boolean> getSystem() {
-        return DSL.field(this.collectionTable.getName() + "." + Jdbc.User.SYSTEM, Boolean.class);
+        return this.collectionTable.SYSTEM;
     }
 
     public Field<String> getName() {
-        return DSL.field(this.collectionTable.getName() + "." + Jdbc.Collection.NAME, String.class);
+        return this.collectionTable.NAME;
     }
 
     public Field<String> getCollectionId() {
-        return DSL.field(this.collectionTable.getName() + "." + Jdbc.Collection.COLLECTION_ID, String.class);
+        return this.collectionTable.COLLECTION_ID;
+    }
+
+    public Field<Boolean> getLocked() {
+        return this.collectionTable.LOCKED;
+    }
+
+    public Field<Boolean> getMutable() {
+        return this.collectionTable.MUTABLE;
     }
 
     @Override
@@ -56,15 +54,12 @@ public class CollectionProvider extends JooqProvider {
 
     @Override
     protected List<Condition> where() {
-        List<Condition> where = new ArrayList<>();
-        where.add(DSL.field(this.collectionTable.getName() + "." + Jdbc.Collection.SYSTEM, Boolean.class).eq(false));
-        return where;
+        return null;
     }
 
     @Override
     protected DSLContext getDSLContext() {
-        Application application = ApplicationUtils.getApplication();
-        return application.getDSLContext(this.applicationCode);
+        return Spring.getBean(DSLContext.class);
     }
 
     @Override

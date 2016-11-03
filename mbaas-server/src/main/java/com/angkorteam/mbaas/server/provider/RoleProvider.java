@@ -1,11 +1,13 @@
 package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
-import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.wicket.Application;
-import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
-import org.jooq.*;
-import org.jooq.impl.DSL;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.server.Spring;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.TableLike;
 
 import java.util.List;
 
@@ -14,38 +16,34 @@ import java.util.List;
  */
 public class RoleProvider extends JooqProvider {
 
-    private final String applicationCode;
-
-    private Table<?> roleTable;
+    private RoleTable roleTable;
 
     private TableLike<?> from;
 
-    public RoleProvider(String applicationCode) {
-        this.applicationCode = applicationCode;
-        this.roleTable = DSL.table("role").as("roleTable");
+    public RoleProvider() {
+        this.roleTable = Tables.ROLE.as("roleTable");
         this.from = this.roleTable;
     }
 
     public Field<String> getRoleId() {
-        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.ROLE_ID, String.class);
+        return this.roleTable.ROLE_ID;
     }
 
     public Field<Boolean> getSystem() {
-        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.SYSTEM, Boolean.class);
+        return this.roleTable.SYSTEM;
     }
 
     public Field<String> getName() {
-        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.NAME, String.class);
+        return this.roleTable.NAME;
     }
 
     public Field<String> getDescription() {
-        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.DESCRIPTION, String.class);
+        return this.roleTable.DESCRIPTION;
     }
 
     @Override
     protected DSLContext getDSLContext() {
-        Application application = ApplicationUtils.getApplication();
-        return application.getDSLContext(this.applicationCode);
+        return Spring.getBean(DSLContext.class);
     }
 
     @Override

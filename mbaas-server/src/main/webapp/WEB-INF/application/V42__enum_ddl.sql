@@ -9,6 +9,6 @@ CREATE TABLE enum (
   INDEX (type),
   INDEX (format),
   INDEX (description),
-  UNIQUE KEY (name),
+  UNIQUE (name),
   PRIMARY KEY (enum_id)
 );

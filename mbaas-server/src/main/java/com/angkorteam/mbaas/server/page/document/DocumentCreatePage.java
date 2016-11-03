@@ -2,56 +2,74 @@ package com.angkorteam.mbaas.server.page.document;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
+import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
 import com.angkorteam.mbaas.plain.request.document.DocumentCreateRequest;
-import com.angkorteam.mbaas.server.Jdbc;
+import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.function.DocumentFunction;
-import com.angkorteam.mbaas.server.template.*;
-import com.angkorteam.mbaas.server.wicket.MasterPage;
-import com.angkorteam.mbaas.server.wicket.Mount;
-import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import com.angkorteam.mbaas.server.page.MBaaSPage;
+import com.angkorteam.mbaas.server.template.BooleanPanel;
+import com.angkorteam.mbaas.server.template.CharacterPanel;
+import com.angkorteam.mbaas.server.template.DatePanel;
+import com.angkorteam.mbaas.server.template.DateTimePanel;
+import com.angkorteam.mbaas.server.template.DoublePanel;
+import com.angkorteam.mbaas.server.template.LongPanel;
+import com.angkorteam.mbaas.server.template.StringPanel;
+import com.angkorteam.mbaas.server.template.TextPanel;
+import com.angkorteam.mbaas.server.template.TimePanel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.jooq.DSLContext;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 3/7/16.
  */
-@Mount("/document/create")
-@AuthorizeInstantiation({"administrator"})
-public class DocumentCreatePage extends MasterPage {
+public class DocumentCreatePage extends MBaaSPage {
 
-    private String collectionId;
-    private Map<String, Object> collection;
+    private CollectionPojo collection;
 
     private Map<String, Object> fields;
 
     private Form<Void> form;
 
     @Override
-    public String getPageHeader() {
-        return "Create New Document :: " + this.collection.get(Jdbc.Collection.NAME);
+    public String getPageUUID() {
+        return DocumentCreatePage.class.getName();
     }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
         this.fields = new HashMap<>();
-        this.collectionId = getPageParameters().get("collectionId").toString();
 
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        DSLContext context = Spring.getBean(DSLContext.class);
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
 
-        this.collection = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.COLLECTION_ID + " = ?", this.collectionId);
-
-        List<Map<String, Object>> attributes = jdbcTemplate.queryForList("SELECT * FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ? AND " + Jdbc.Attribute.SYSTEM + " = ?", this.collectionId, false);
+        String collectionId = getPageParameters().get("collectionId").toString();
+        this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(collectionId)).fetchOneInto(CollectionPojo.class);
+        List<AttributePojo> attributes = context.select(attributeTable.fields())
+                .from(attributeTable)
+                .where(attributeTable.COLLECTION_ID.eq(collectionId))
+                .and(attributeTable.NAME.notEqual(this.collection.getName() + "_id"))
+                .and(attributeTable.NAME.notEqual("system"))
+                .fetchInto(AttributePojo.class);
 
         RepeatingView fields = new RepeatingView("fields");
-        for (Map<String, Object> attribute : attributes) {
-            TypeEnum type = TypeEnum.valueOf((String) attribute.get(Jdbc.Attribute.ATTRIBUTE_TYPE));
-            String name = (String) attribute.get(Jdbc.Attribute.NAME);
+        for (AttributePojo attribute : attributes) {
+            TypeEnum type = TypeEnum.valueOf(attribute.getType());
+            String name = attribute.getName();
             if ("Boolean".equals(type.getLiteral())) {
                 BooleanPanel fieldPanel = new BooleanPanel(fields.newChildId(), name, this.fields);
                 fields.add(fieldPanel);
@@ -86,8 +104,8 @@ public class DocumentCreatePage extends MasterPage {
         }
 
         PageParameters parameters = new PageParameters();
-        parameters.add("collectionId", this.collectionId);
-        BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", DocumentManagementPage.class, parameters);
+        parameters.add("collectionId", this.collection.getCollectionId());
+        BookmarkablePageLink<Void> closeLink = new BookmarkablePageLink<>("closeLink", DocumentBrowsePage.class, parameters);
 
         Button saveButton = new Button("saveButton");
         saveButton.setOnSubmit(this::saveButtonOnSubmit);
@@ -101,13 +119,14 @@ public class DocumentCreatePage extends MasterPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
+        System system = Spring.getBean(System.class);
         DocumentCreateRequest requestBody = new DocumentCreateRequest();
+        fields.put(this.collection.getName() + "_id", system.randomUUID());
+        fields.put("system", false);
         requestBody.setDocument(fields);
-        String documentId = UUID.randomUUID().toString();
-        DocumentFunction.internalInsertDocument(jdbcTemplate, getSession().getApplicationUserId(), documentId, this.collectionId, (String) this.collection.get(Jdbc.Collection.NAME), requestBody);
+        DocumentFunction.internalInsertDocument(this.collection.getCollectionId(), requestBody);
         PageParameters parameters = new PageParameters();
-        parameters.add("collectionId", collectionId);
-        setResponsePage(DocumentManagementPage.class, parameters);
+        parameters.add("collectionId", this.collection.getCollectionId());
+        setResponsePage(DocumentBrowsePage.class, parameters);
     }
 }

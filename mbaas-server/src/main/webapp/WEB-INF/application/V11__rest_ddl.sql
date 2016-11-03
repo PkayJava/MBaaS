@@ -23,7 +23,7 @@ CREATE TABLE rest (
   response_body_map_json_id VARCHAR(100),
   response_body_enum_id     VARCHAR(100),
 
-  UNIQUE KEY (path, method),
+  UNIQUE (path, method),
   INDEX (description),
   INDEX (name),
   FULLTEXT (script),

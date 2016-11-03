@@ -12,13 +12,6 @@
         <p class="login-box-msg">Mobile Backend as a Service</p>
 
         <form wicket:id="form">
-            <wicket:enclosure child="hostnameField">
-            <div class="form-group">
-                <label wicket:for="hostnameField">Hostname</label>
-                <input wicket:id="hostnameField" type="text" class="form-control"/>
-                <span wicket:id="hostnameFeedback" class="help-block"/>
-            </div>
-            </wicket:enclosure>
             <div class="form-group">
                 <label wicket:for="loginField">Login</label>
                 <input wicket:id="loginField" type="text" class="form-control"/>
@@ -30,11 +23,6 @@
                 <span wicket:id="passwordFeedback" class="help-block"/>
             </div>
             <div class="row">
-                <div class="col-xs-6">
-                    <wicket:link>
-                        <a href="RegisterPage.html" class="btn btn-primary btn-block btn-flat">Register</a>
-                    </wicket:link>
-                </div>
                 <div class="col-xs-6">
                     <button wicket:id="loginButton" type="submit" class="btn btn-primary btn-block btn-flat">Login</button>
                 </div>

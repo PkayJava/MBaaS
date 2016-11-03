@@ -2,10 +2,13 @@
 <html xmlns:wicket="http://wicket.apache.org">
 <body>
 <wicket:panel>
-    <div class="checkbox">
-        <label>
-            <input wicket:id="field" type="checkbox"> <wicket:container wicket:id="label"/>
-        </label>
+    <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <label wicket:id="label"/>
+        <div>
+            <label>
+                <input type="checkbox" wicket:id="field"/> is <wicket:container wicket:id="inlineLabel"/> ?
+            </label>
+        </div>
     </div>
 </wicket:panel>
 </body>

@@ -1,11 +1,11 @@
 package com.angkorteam.mbaas.server.template;
 
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 import java.util.Map;
@@ -33,7 +33,7 @@ public class CharacterPanel extends Panel {
         TextField<Character> field = new TextField<>("field", new PropertyModel<>(this.fields, this.name), Character.class);
         field.add(AttributeModifier.replace("maxlength", "1"));
         field.setType(Character.class);
-        field.setLabel(JooqUtils.lookup(this.name, getPage()));
+        field.setLabel(Model.of(name));
         TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
         this.add(field);
         this.add(feedback);

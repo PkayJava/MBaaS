@@ -1,12 +1,15 @@
 package com.angkorteam.mbaas.server.wicket;
 
-import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.page.PagePage;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.PageRoleTable;
+import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.page.CmsPage;
 import org.apache.wicket.authroles.authorization.strategies.role.IRoleCheckingStrategy;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.component.IRequestableComponent;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.jooq.DSLContext;
 
 import java.util.List;
 
@@ -21,26 +24,14 @@ public class AnnotationsRoleAuthorizationStrategy extends org.apache.wicket.auth
 
     @Override
     public <T extends IRequestableComponent> boolean isInstantiationAuthorized(Class<T> componentClass) {
-        if (componentClass == PagePage.class) {
+        if (componentClass == CmsPage.class) {
             RequestCycle requestCycle = RequestCycle.get();
-            String applicationCode = ((Session) Session.get()).getApplicationCode();
-            if (applicationCode == null || "".equals(applicationCode)) {
-                return false;
-            }
             String pageId = requestCycle.getRequest().getQueryParameters().getParameterValue("pageId").toString("");
-            if (pageId == null || "".equals(pageId)) {
-                pageId = ((Session) Session.get()).getHomePageId();
-            }
-            if (pageId == null || "".equals(pageId)) {
-                return false;
-            }
-            JdbcTemplate jdbcTemplate = ApplicationUtils.getApplication().getJdbcTemplate(applicationCode);
-            List<String> roles = jdbcTemplate.queryForList("SELECT " + Jdbc.Role.NAME + " FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " IN (SELECT " + Jdbc.PageRole.ROLE_ID + " FROM " + Jdbc.PAGE_ROLE + " WHERE " + Jdbc.PageRole.PAGE_ID + " = ?" + ")", String.class, pageId);
+            PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
+            RoleTable roleTable = Tables.ROLE.as("roleTable");
+            DSLContext context = Spring.getBean(DSLContext.class);
+            List<String> roles = context.select(roleTable.NAME).from(roleTable).innerJoin(pageRoleTable).on(roleTable.ROLE_ID.eq(pageRoleTable.ROLE_ID)).where(pageRoleTable.PAGE_ID.eq(pageId)).fetchInto(String.class);
             Roles r = new Roles();
-//            if (roles != null && !roles.isEmpty()) {
-//                XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-//                roles.remove(configuration.getString(Constants.ROLE_ANONYMOUS));
-//            }
             if (roles != null && !roles.isEmpty()) {
                 r.addAll(roles);
             }

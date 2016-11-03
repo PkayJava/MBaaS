@@ -1,93 +1,136 @@
 package com.angkorteam.mbaas.server.function;
 
-import com.angkorteam.mbaas.plain.enums.AttributeExtraEnum;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
+import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
+import com.angkorteam.mbaas.model.entity.tables.IndexAttributeTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.AttributePojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.CollectionPojo;
+import com.angkorteam.mbaas.model.entity.tables.records.AttributeRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.IndexAttributeRecord;
 import com.angkorteam.mbaas.plain.enums.TypeEnum;
-import com.angkorteam.mbaas.plain.enums.VisibilityEnum;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeCreateRequest;
 import com.angkorteam.mbaas.plain.request.collection.CollectionAttributeDeleteRequest;
-import com.angkorteam.mbaas.server.Jdbc;
-import org.flywaydb.core.internal.dbsupport.Schema;
-import org.flywaydb.core.internal.dbsupport.Table;
+import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.System;
+import com.google.common.base.Strings;
+import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by socheat on 3/8/16.
  */
 public class AttributeFunction {
 
-    public static void deleteAttribute(JdbcTemplate jdbcTemplate, CollectionAttributeDeleteRequest requestBody) {
-        Map<String, Object> collectionRecord = null;
-        collectionRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.NAME + " = ?", requestBody.getCollectionName());
+    public static void deleteAttribute(CollectionAttributeDeleteRequest requestBody) {
+        DSLContext context = Spring.getBean(DSLContext.class);
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        IndexAttributeTable indexAttributeTable = Tables.INDEX_ATTRIBUTE.as("indexAttributeTable");
+        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
 
-        Map<String, Object> attributeRecord = null;
-        attributeRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.NAME + " = ? AND " + Jdbc.Attribute.COLLECTION_ID + " = ?", requestBody.getAttributeName(), collectionRecord.get(Jdbc.Collection.COLLECTION_ID));
+        CollectionPojo collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(CollectionPojo.class);
+        AttributePojo attribute = context.select(attributeTable.fields()).from(attributeTable).where(attributeTable.NAME.eq(requestBody.getAttributeName())).and(attributeTable.COLLECTION_ID.eq(collection.getCollectionId())).fetchOneInto(AttributePojo.class);
 
-        if (!(boolean) attributeRecord.get(Jdbc.Attribute.EAV)) {
+        if (!attribute.getEav()) {
             jdbcTemplate.execute("ALTER TABLE `" + requestBody.getCollectionName() + "` DROP COLUMN `" + requestBody.getAttributeName() + "`");
         }
-        jdbcTemplate.update("DELETE FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.ATTRIBUTE_ID + " = ?", attributeRecord.get(Jdbc.Attribute.ATTRIBUTE_ID));
+        context.delete(attributeTable).where(attributeTable.ATTRIBUTE_ID.eq(attribute.getAttributeId())).execute();
+        context.delete(indexAttributeTable).where(indexAttributeTable.ATTRIBUTE_ID.eq(attribute.getAttributeId())).and(indexAttributeTable.COLLECTION_ID.eq(collection.getCollectionId())).execute();
     }
 
-    public static boolean createAttribute(Schema schema, JdbcTemplate jdbcTemplate, String applicationCode, String attributeId, CollectionAttributeCreateRequest requestBody) {
-        Map<String, Object> collectionRecord = null;
-        collectionRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.NAME + " = ?", requestBody.getCollectionName());
+    public static boolean createAttribute(CollectionAttributeCreateRequest requestBody) {
+        DSLContext context = Spring.getBean(DSLContext.class);
+        CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+        AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+        IndexAttributeTable indexAttributeTable = Tables.INDEX_ATTRIBUTE.as("indexAttributeTable");
+        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
 
-        boolean good = collectionRecord != null;
+        CollectionPojo collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.NAME.eq(requestBody.getCollectionName())).fetchOneInto(CollectionPojo.class);
+
+        boolean good = collection != null;
         if (good) {
-            Table table = schema.getTable(requestBody.getCollectionName());
-            good = !table.hasColumn(requestBody.getAttributeName());
-        }
-        if (good) {
-            int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.COLLECTION_ID + " = ? AND " + Jdbc.Attribute.NAME + " = ?", int.class, collectionRecord.get(Jdbc.Collection.COLLECTION_ID), requestBody.getAttributeName());
+            int count = context.selectCount().from(attributeTable).where(attributeTable.NAME.eq(requestBody.getAttributeName())).and(attributeTable.COLLECTION_ID.eq(collection.getCollectionId())).fetchOneInto(int.class);
             good = count <= 0;
         }
         if (good) {
-            int extra = 0;
+            TypeEnum attributeType = TypeEnum.valueOf(requestBody.getType());
 
-            TypeEnum attributeType = TypeEnum.valueOf(requestBody.getAttributeType());
-
+            String indexName = null;
             if (!requestBody.isEav()) {
-                String jdbc;
-                if (attributeType == TypeEnum.Text
-                        || attributeType == TypeEnum.String) {
-                    if (requestBody.getLength() == null || "".equals(requestBody.getLength())) {
-                        jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD FULLTEXT (`" + requestBody.getAttributeName() + "`);";
-                    } else {
-                        jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(" + requestBody.getLength() + ")" + " , ADD FULLTEXT (`" + requestBody.getAttributeName() + "`);";
+                String jdbc = null;
+                String notNull = "";
+                if (!requestBody.isNullable()) {
+                    notNull = " NOT NULL";
+                }
+                if (Strings.isNullOrEmpty(requestBody.getIndex())) {
+                    if (attributeType == TypeEnum.Text) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + notNull + ";";
+                    } else if (attributeType == TypeEnum.Long) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(" + requestBody.getLength() + ")" + notNull + ";";
+                    } else if (attributeType == TypeEnum.String) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(" + requestBody.getLength() + ")" + notNull + ";";
+                    } else if (attributeType == TypeEnum.Double) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(" + requestBody.getLength() + "," + requestBody.getPrecision() + ")" + notNull + ";";
+                    } else if (attributeType == TypeEnum.Boolean || attributeType == TypeEnum.Character) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(1)" + notNull + ";";
+                    } else if (attributeType == TypeEnum.Time || attributeType == TypeEnum.Date || attributeType == TypeEnum.DateTime) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + notNull + ";";
                     }
                 } else {
-                    if (requestBody.getLength() == null || "".equals(requestBody.getLength())) {
-                        jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + " , ADD INDEX (`" + requestBody.getAttributeName() + "`);";
-                    } else {
-                        jdbc = "ALTER TABLE " + collectionRecord.get(Jdbc.Collection.NAME) + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(" + requestBody.getLength() + ")" + " , ADD INDEX (`" + requestBody.getAttributeName() + "`);";
+                    String index = null;
+                    if (requestBody.getIndex().equals("KEY")) {
+                        indexName = "index__" + collection.getName() + "__" + requestBody.getAttributeName();
+                        index = "KEY `" + indexName + "` (`" + requestBody.getAttributeName() + "`);";
+                    } else if (requestBody.getIndex().equals("UNIQUE KEY")) {
+                        indexName = "unique__" + collection.getName() + "__" + requestBody.getAttributeName();
+                        index = "UNIQUE KEY `" + indexName + "` (`" + requestBody.getAttributeName() + "`);";
+                    } else if (requestBody.getIndex().equals("FULLTEXT KEY")) {
+                        indexName = "fulltext__" + collection.getName() + "__" + requestBody.getAttributeName();
+                        index = "FULLTEXT KEY `" + indexName + "` (`" + requestBody.getAttributeName() + "`);";
+                    }
+                    if (attributeType == TypeEnum.Text) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + notNull + " , ADD " + index;
+                    } else if (attributeType == TypeEnum.Long) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(" + requestBody.getLength() + ")" + notNull + " , ADD " + index;
+                    } else if (attributeType == TypeEnum.String) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(" + requestBody.getLength() + ")" + notNull + " , ADD " + index;
+                    } else if (attributeType == TypeEnum.Double) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(" + requestBody.getLength() + "," + requestBody.getPrecision() + ")" + notNull + " , ADD " + index;
+                    } else if (attributeType == TypeEnum.Boolean || attributeType == TypeEnum.Character) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + "(1)" + notNull + " , ADD " + index;
+                    } else if (attributeType == TypeEnum.Time || attributeType == TypeEnum.Date || attributeType == TypeEnum.DateTime) {
+                        jdbc = "ALTER TABLE " + collection.getName() + " ADD `" + requestBody.getAttributeName() + "` " + attributeType.getSqlType() + notNull + " , ADD " + index;
                     }
                 }
-                jdbcTemplate.execute(jdbc);
+                if (!Strings.isNullOrEmpty(jdbc)) {
+                    jdbcTemplate.execute(jdbc);
+                }
             }
 
-            if (requestBody.isNullable()) {
-                extra = extra | AttributeExtraEnum.NULLABLE;
+            System system = Spring.getBean(System.class);
+            String attributeId = system.randomUUID();
+            AttributeRecord attributeRecord = context.newRecord(attributeTable);
+            attributeRecord.setAttributeId(attributeId);
+            attributeRecord.setCollectionId(collection.getCollectionId());
+            attributeRecord.setName(requestBody.getAttributeName());
+            attributeRecord.setType(attributeType.getLiteral());
+            attributeRecord.setEav(requestBody.isEav());
+            attributeRecord.setAllowNull(requestBody.isNullable());
+            attributeRecord.setSystem(false);
+            attributeRecord.setLength(requestBody.getLength());
+            attributeRecord.setPrecision(requestBody.getPrecision());
+            attributeRecord.setOrder(requestBody.getOrder());
+            attributeRecord.store();
+
+            if (!Strings.isNullOrEmpty(requestBody.getIndex())) {
+                IndexAttributeRecord indexAttributeRecord = context.newRecord(indexAttributeTable);
+                indexAttributeRecord.setIndexAttributeId(system.randomUUID());
+                indexAttributeRecord.setType(requestBody.getIndex());
+                indexAttributeRecord.setCollectionId(collection.getCollectionId());
+                indexAttributeRecord.setAttributeId(attributeId);
+                indexAttributeRecord.setName(indexName);
             }
-            extra = extra | AttributeExtraEnum.EXPOSED;
-            Map<String, Object> fields = new HashMap<>();
-            fields.put(Jdbc.Attribute.ATTRIBUTE_ID, attributeId);
-            fields.put(Jdbc.Attribute.EXTRA, extra);
-            fields.put(Jdbc.Attribute.APPLICATION_CODE, applicationCode);
-            fields.put(Jdbc.Attribute.DATE_CREATED, new Date());
-            fields.put(Jdbc.Attribute.COLLECTION_ID, collectionRecord.get(Jdbc.Collection.COLLECTION_ID));
-            fields.put(Jdbc.Attribute.NAME, requestBody.getAttributeName());
-            fields.put(Jdbc.Attribute.VISIBILITY, VisibilityEnum.Hided.getLiteral());
-            fields.put(Jdbc.Attribute.ATTRIBUTE_TYPE, attributeType.getLiteral());
-            fields.put(Jdbc.Attribute.EAV, requestBody.isEav());
-            fields.put(Jdbc.Attribute.SYSTEM, false);
-            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-            jdbcInsert.withTableName(Jdbc.ATTRIBUTE);
-            jdbcInsert.execute(fields);
         }
         return good;
     }

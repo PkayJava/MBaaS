@@ -1,59 +1,55 @@
 package com.angkorteam.mbaas.server.validator;
 
-import com.angkorteam.framework.extension.share.validation.JooqValidator;
-import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.wicket.Application;
-import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
+import com.angkorteam.mbaas.server.Application;
+import com.angkorteam.mbaas.server.Spring;
 import org.apache.wicket.validation.IValidatable;
+import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
-import org.flywaydb.core.internal.dbsupport.Schema;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.util.regex.Pattern;
+import org.jooq.DSLContext;
 
 /**
  * Created by socheat on 3/3/16.
  */
-public class CollectionNameValidator extends JooqValidator<String> {
-
-    private final String applicationCode;
+public class CollectionNameValidator implements IValidator<String> {
 
     private String collectionId;
 
-    public CollectionNameValidator(String applicationCode) {
-        this.applicationCode = applicationCode;
+    public CollectionNameValidator() {
     }
 
-    public CollectionNameValidator(String applicationCode, String collectionId) {
+    public CollectionNameValidator(String collectionId) {
         this.collectionId = collectionId;
-        this.applicationCode = applicationCode;
     }
 
     @Override
     public void validate(IValidatable<String> validatable) {
         String name = validatable.getValue();
         if (name != null && !"".equals(name)) {
-            Pattern patternCollectionName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_COLLECTION_NAME));
-            if (!patternCollectionName.matcher(name).matches()) {
+            if (!Application.CHARACTERS.contains(name.charAt(0))) {
                 validatable.error(new ValidationError(this, "format"));
+                return;
+            }
+            if (name.length() > 1) {
+                for (int i = 1; i < name.length(); i++) {
+                    char ch = name.charAt(i);
+                    if (ch != '_' && !Application.CHARACTERS.contains(ch) && !Application.NUMBERS.contains(ch)) {
+                        validatable.error(new ValidationError(this, "format"));
+                        return;
+                    }
+                }
+            }
+            int count = 0;
+            DSLContext context = Spring.getBean(DSLContext.class);
+            CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
+            if (collectionId == null || "".equals(collectionId)) {
+                count = context.selectCount().from(collectionTable).where(collectionTable.NAME.eq(name)).fetchOneInto(int.class);
             } else {
-                Application application = ApplicationUtils.getApplication();
-                Schema schema = application.getSchema(this.applicationCode);
-                if (schema.getTable(name).exists()) {
-                    validatable.error(new ValidationError(this, "duplicated"));
-                    return;
-                }
-                JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-                int count = 0;
-                if (collectionId == null || "".equals(collectionId)) {
-                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.NAME + " = ?", int.class, name);
-                } else {
-                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.COLLECTION + " WHERE " + Jdbc.Collection.NAME + " = ? AND " + Jdbc.Collection.COLLECTION_ID + " != ?", int.class, name, this.collectionId);
-                }
-                if (count > 0) {
-                    validatable.error(new ValidationError(this, "duplicated"));
-                }
+                count = context.selectCount().from(collectionTable).where(collectionTable.NAME.eq(name)).and(collectionTable.COLLECTION_ID.notEqual(this.collectionId)).fetchOneInto(int.class);
+            }
+            if (count > 0) {
+                validatable.error(new ValidationError(this, "duplicated"));
             }
         }
     }

@@ -6,6 +6,6 @@ CREATE TABLE json (
   content_type VARCHAR(100) NOT NULL,
 
   INDEX (description),
-  UNIQUE KEY (name),
+  UNIQUE (name),
   PRIMARY KEY (json_id)
 );

@@ -2,9 +2,9 @@ package com.angkorteam.mbaas.server.template;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.TimeTextField;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 import java.util.Date;
@@ -32,7 +32,7 @@ public class TimePanel extends Panel {
         this.add(label);
         TimeTextField field = new TimeTextField("field", new PropertyModel<>(this.fields, this.name));
         field.setType(Date.class);
-        field.setLabel(JooqUtils.lookup(this.name, getPage()));
+        field.setLabel(Model.of(name));
         TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
         this.add(field);
         this.add(feedback);

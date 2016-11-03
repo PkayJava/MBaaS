@@ -25,20 +25,24 @@ public class CollectionAttributeCreateRequest {
     private boolean eav = true;
 
     @Expose
-    @SerializedName("attributeType")
-    private String attributeType;
+    @SerializedName("type")
+    private String type;
 
     @Expose
     @SerializedName("length")
-    private String length;
+    private int length;
 
-    public String getLength() {
-        return length;
-    }
+    @Expose
+    @SerializedName("index")
+    private String index;
 
-    public void setLength(String length) {
-        this.length = length;
-    }
+    @Expose
+    @SerializedName("order")
+    private int order;
+
+    @Expose
+    @SerializedName("precision")
+    private int precision;
 
     public boolean isEav() {
         return eav;
@@ -64,19 +68,51 @@ public class CollectionAttributeCreateRequest {
         this.attributeName = attributeName;
     }
 
-    public String getAttributeType() {
-        return attributeType;
-    }
-
-    public void setAttributeType(String attributeType) {
-        this.attributeType = attributeType;
-    }
-
     public boolean isNullable() {
         return nullable;
     }
 
     public void setNullable(boolean nullable) {
         this.nullable = nullable;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public int getPrecision() {
+        return precision;
+    }
+
+    public void setPrecision(int precision) {
+        this.precision = precision;
+    }
+
+    public String getIndex() {
+        return index;
+    }
+
+    public void setIndex(String index) {
+        this.index = index;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

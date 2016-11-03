@@ -1,11 +1,13 @@
 package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
-import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.wicket.Application;
-import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
-import org.jooq.*;
-import org.jooq.impl.DSL;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.QueryTable;
+import com.angkorteam.mbaas.server.Spring;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.TableLike;
 
 import java.util.Date;
 import java.util.List;
@@ -15,52 +17,38 @@ import java.util.List;
  */
 public class QueryProvider extends JooqProvider {
 
-    private Table<?> queryTable;
-    private Table<?> userTable;
+    private QueryTable queryTable;
 
     private TableLike<?> from;
 
-    private final String applicationCode;
-
-    public QueryProvider(String applicationCode) {
-        this.applicationCode = applicationCode;
-        this.queryTable = DSL.table(Jdbc.QUERY).as("queryTable");
-        this.userTable = DSL.table(Jdbc.USER).as("userTable");
-        this.from = this.queryTable.join(this.userTable).on(DSL.field(this.queryTable.getName() + "." + Jdbc.Query.USER_ID, String.class).eq(DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class)));
+    public QueryProvider() {
+        this.queryTable = Tables.QUERY.as("queryTable");
+        this.from = this.queryTable;
     }
 
     public Field<String> getQueryId() {
-        return DSL.field(this.queryTable.getName() + "." + Jdbc.Query.QUERY_ID, String.class);
+        return this.queryTable.QUERY_ID;
     }
 
     public Field<String> getName() {
-        return DSL.field(this.queryTable.getName() + "." + Jdbc.Query.NAME, String.class);
+        return this.queryTable.NAME;
     }
 
     public Field<String> getDescription() {
-        return DSL.field(this.queryTable.getName() + "." + Jdbc.Query.DESCRIPTION, String.class);
+        return this.queryTable.DESCRIPTION;
     }
 
     public Field<Date> getDateCreated() {
-        return DSL.field(this.queryTable.getName() + "." + Jdbc.Query.DATE_CREATED, Date.class);
+        return this.queryTable.DATE_CREATED;
     }
 
     public Field<String> getSecurity() {
-        return DSL.field(this.queryTable.getName() + "." + Jdbc.Query.SECURITY, String.class);
-    }
-
-    public Field<String> getApplicationUser() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
-    }
-
-    public Field<String> getApplicationUserId() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class);
+        return this.queryTable.SECURITY;
     }
 
     @Override
     protected DSLContext getDSLContext() {
-        Application application = ApplicationUtils.getApplication();
-        return application.getDSLContext(this.applicationCode);
+        return Spring.getBean(DSLContext.class);
     }
 
     @Override

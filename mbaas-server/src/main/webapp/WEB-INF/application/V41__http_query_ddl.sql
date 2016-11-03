@@ -10,6 +10,6 @@ CREATE TABLE http_query (
   description   VARCHAR(100),
   format        VARCHAR(255),
 
-  UNIQUE KEY (name),
+  UNIQUE (name),
   PRIMARY KEY (http_query_id)
 );

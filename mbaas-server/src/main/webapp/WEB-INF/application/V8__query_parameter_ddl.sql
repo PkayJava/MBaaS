@@ -7,7 +7,7 @@ CREATE TABLE query_parameter (
   type               VARCHAR(50),
   sub_type           VARCHAR(50),
 
-  UNIQUE KEY (name, query_id),
+  UNIQUE (name, query_id),
   INDEX (query_id),
   INDEX (application_code),
   INDEX (name),

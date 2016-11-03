@@ -1,30 +1,33 @@
 package com.angkorteam.mbaas.server.page.role;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
-import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice;
+import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.select2.PageChoiceProvider;
-import com.angkorteam.mbaas.server.validator.RoleNameValidator;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
-import com.angkorteam.mbaas.server.wicket.MasterPage;
-import com.angkorteam.mbaas.server.wicket.Mount;
-import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
-import org.apache.wicket.markup.html.form.Form;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.PageRoleTable;
+import com.angkorteam.mbaas.model.entity.tables.PageTable;
+import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
+import com.angkorteam.mbaas.model.entity.tables.records.PageRoleRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
+import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.System;
+import com.angkorteam.mbaas.server.page.MBaaSPage;
+import com.angkorteam.mbaas.server.select2.PagesChoiceProvider;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.jooq.DSLContext;
 
-import java.util.Map;
+import java.util.List;
 
 /**
- * Created by socheat on 3/1/16.
+ * Created by socheat on 10/24/16.
  */
-@AuthorizeInstantiation("administrator")
-@Mount("/role/modify")
-public class RoleModifyPage extends MasterPage {
+public class RoleModifyPage extends MBaaSPage {
 
     private String roleId;
 
@@ -36,80 +39,86 @@ public class RoleModifyPage extends MasterPage {
     private TextField<String> descriptionField;
     private TextFeedbackPanel descriptionFeedback;
 
-    private Map<String, Object> homePage;
-    private Select2SingleChoice<Map<String, Object>> pageField;
+    private List<PagePojo> cmsPage;
+    private Select2MultipleChoice<PagePojo> pageField;
     private TextFeedbackPanel pageFeedback;
 
-    private Button saveButton;
-
     private Form<Void> form;
-
-    @Override
-    public String getPageHeader() {
-        return "Modify Role";
-    }
+    private Button saveButton;
+    private BookmarkablePageLink<Void> closeButton;
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
+        DSLContext context = Spring.getBean(DSLContext.class);
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        PageTable pageTable = Tables.PAGE.as("pageTable");
+        PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
+
+        PageParameters parameters = getPageParameters();
+        this.roleId = parameters.get("roleId").toString("");
+
+        RolePojo role = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(this.roleId)).fetchOneInto(RolePojo.class);
+        this.name = role.getName();
+        this.description = role.getDescription();
+        this.cmsPage = context.select(pageTable.fields()).from(pageTable).innerJoin(pageRoleTable).on(pageTable.PAGE_ID.eq(pageRoleTable.PAGE_ID)).where(pageRoleTable.ROLE_ID.eq(this.roleId)).fetchInto(PagePojo.class);
 
         this.form = new Form<>("form");
         add(this.form);
 
-        PageParameters parameters = getPageParameters();
-        this.roleId = parameters.get("roleId").toString();
+        this.pageField = new Select2MultipleChoice<>("pageField", new PropertyModel<>(this, "cmsPage"), new PagesChoiceProvider());
+        this.form.add(this.pageField);
+        this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);
+        this.form.add(this.pageFeedback);
 
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-
-        Map<String, Object> roleRecord = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.ROLE + " WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.roleId);
-
-        this.name = (String) roleRecord.get(Jdbc.Role.NAME);
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
-        if ((Boolean) roleRecord.get(Jdbc.Role.SYSTEM)) {
-            this.nameField.setEnabled(false);
-        }
-        this.nameField.add(new RoleNameValidator(getSession().getApplicationCode(), this.roleId));
-        this.nameField.setLabel(JooqUtils.lookup("name", this));
         this.form.add(this.nameField);
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        this.description = (String) roleRecord.get(Jdbc.Role.DESCRIPTION);
         this.descriptionField = new TextField<>("descriptionField", new PropertyModel<>(this, "description"));
-        if ((Boolean) roleRecord.get(Jdbc.Role.SYSTEM)) {
-            this.descriptionField.setEnabled(false);
-        }
         this.descriptionField.setRequired(true);
-        this.descriptionField.setLabel(JooqUtils.lookup("description", this));
         this.form.add(this.descriptionField);
         this.descriptionFeedback = new TextFeedbackPanel("descriptionFeedback", this.descriptionField);
         this.form.add(this.descriptionFeedback);
-
-        try {
-            this.homePage = jdbcTemplate.queryForMap("SELECT * FROM " + Jdbc.PAGE + " WHERE " + Jdbc.Page.PAGE_ID + " = ?", roleRecord.get(Jdbc.Role.HOME_PAGE_ID));
-        } catch (DataAccessException e) {
-        }
-        this.pageField = new Select2SingleChoice<>("pageField", new PropertyModel<>(this, "homePage"), new PageChoiceProvider(getSession().getApplicationCode()));
-        this.pageField.setLabel(JooqUtils.lookup("page", this));
-        this.form.add(this.pageField);
-        this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);
-        this.form.add(this.pageFeedback);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(this.saveButton);
 
+        this.closeButton = new BookmarkablePageLink<>("closeButton", RoleBrowsePage.class);
+        this.form.add(this.closeButton);
     }
 
     private void saveButtonOnSubmit(Button button) {
-        JdbcTemplate jdbcTemplate = getApplicationJdbcTemplate();
-        if (this.homePage != null) {
-            jdbcTemplate.update("UPDATE " + Jdbc.ROLE + " SET " + Jdbc.Role.NAME + " = ?, " + Jdbc.Role.DESCRIPTION + " = ?, " + Jdbc.Role.HOME_PAGE_ID + " = ? WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.name, this.description, this.homePage.get(Jdbc.Page.PAGE_ID), this.roleId);
-        } else {
-            jdbcTemplate.update("UPDATE " + Jdbc.ROLE + " SET " + Jdbc.Role.NAME + " = ?, " + Jdbc.Role.DESCRIPTION + " = ?, " + Jdbc.Role.HOME_PAGE_ID + " = ? WHERE " + Jdbc.Role.ROLE_ID + " = ?", this.name, this.description, null, this.roleId);
+        DSLContext context = Spring.getBean(DSLContext.class);
+        System system = Spring.getBean(System.class);
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
+        RoleRecord roleRecord = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(this.roleId)).fetchOneInto(roleTable);
+        roleRecord.setName(this.name);
+        roleRecord.setDescription(this.description);
+        roleRecord.update();
+
+        context.delete(pageRoleTable).where(pageRoleTable.ROLE_ID.eq(this.roleId)).execute();
+
+        if (this.cmsPage != null && !this.cmsPage.isEmpty()) {
+            for (PagePojo page : this.cmsPage) {
+                PageRoleRecord pageRoleRecord = context.newRecord(pageRoleTable);
+                pageRoleRecord.setPageRoleId(system.randomUUID());
+                pageRoleRecord.setPageId(page.getPageId());
+                pageRoleRecord.setRoleId(this.roleId);
+                pageRoleRecord.store();
+            }
         }
-        setResponsePage(RoleManagementPage.class);
+
+        setResponsePage(RoleBrowsePage.class);
+    }
+
+    @Override
+    public String getPageUUID() {
+        return RoleModifyPage.class.getName();
     }
 
 }

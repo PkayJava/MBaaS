@@ -1,57 +1,59 @@
 package com.angkorteam.mbaas.server.validator;
 
-import com.angkorteam.framework.extension.share.validation.JooqValidator;
-import com.angkorteam.mbaas.configuration.Constants;
-import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.wicket.Application;
-import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
+import com.angkorteam.mbaas.server.Application;
+import com.angkorteam.mbaas.server.Spring;
 import org.apache.wicket.validation.IValidatable;
+import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.util.regex.Pattern;
+import org.jooq.DSLContext;
 
 /**
  * Created by socheat on 3/8/16.
  */
-public class AttributeNameValidator extends JooqValidator<String> {
+public class AttributeNameValidator implements IValidator<String> {
 
-    private final String applicationCode;
-
-    private String collectionId;
+    private final String collectionId;
 
     private String attributeId;
 
-    public AttributeNameValidator(String applicationCode, String collectionId) {
+    public AttributeNameValidator(String collectionId) {
         this.collectionId = collectionId;
-        this.applicationCode = applicationCode;
     }
 
-    public AttributeNameValidator(String applicationCode, String collectionId, String attributeId) {
+    public AttributeNameValidator(String collectionId, String attributeId) {
         this.collectionId = collectionId;
         this.attributeId = attributeId;
-        this.applicationCode = applicationCode;
     }
 
     @Override
     public void validate(IValidatable<String> validatable) {
         String name = validatable.getValue();
         if (name != null && !"".equals(name)) {
-            Pattern patternAttributeName = Pattern.compile(Constants.getXmlPropertiesConfiguration().getString(Constants.PATTERN_ATTRIBUTE_NAME));
-            if (!patternAttributeName.matcher(name).matches()) {
+            if (!Application.CHARACTERS.contains(name.charAt(0))) {
                 validatable.error(new ValidationError(this, "format"));
+                return;
+            }
+            if (name.length() > 1) {
+                for (int i = 1; i < name.length(); i++) {
+                    char ch = name.charAt(i);
+                    if (ch != '_' && !Application.CHARACTERS.contains(ch) && !Application.NUMBERS.contains(ch)) {
+                        validatable.error(new ValidationError(this, "format"));
+                        return;
+                    }
+                }
+            }
+            DSLContext context = Spring.getBean(DSLContext.class);
+            AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+            int count = 0;
+            if (this.attributeId == null || "".equals(this.attributeId)) {
+                count = context.selectCount().from(attributeTable).where(attributeTable.NAME.eq(name)).and(attributeTable.COLLECTION_ID.eq(this.collectionId)).fetchOneInto(int.class);
             } else {
-                Application application = ApplicationUtils.getApplication();
-                JdbcTemplate jdbcTemplate = application.getJdbcTemplate(this.applicationCode);
-                int count = 0;
-                if (attributeId == null || "".equals(attributeId)) {
-                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.NAME + " = ? AND " + Jdbc.Attribute.COLLECTION_ID + " = ?", int.class, name, this.collectionId);
-                } else {
-                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + Jdbc.ATTRIBUTE + " WHERE " + Jdbc.Attribute.NAME + " = ? AND " + Jdbc.Attribute.COLLECTION_ID + " = ? AND " + Jdbc.Attribute.ATTRIBUTE_ID + " != ?", int.class, name, this.collectionId, this.attributeId);
-                }
-                if (count > 0) {
-                    validatable.error(new ValidationError(this, "duplicated"));
-                }
+                count = context.selectCount().from(attributeTable).where(attributeTable.NAME.eq(name)).and(attributeTable.COLLECTION_ID.eq(this.collectionId)).and(attributeTable.ATTRIBUTE_ID.notEqual(this.attributeId)).fetchOneInto(int.class);
+            }
+            if (count > 0) {
+                validatable.error(new ValidationError(this, "duplicated"));
             }
         }
     }

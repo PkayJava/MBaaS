@@ -46,8 +46,24 @@ public class CollectionCreateRequest {
         private boolean nullable = true;
 
         @Expose
-        @SerializedName("attributeType")
-        private String attributeType;
+        @SerializedName("length")
+        private int length;
+
+        @Expose
+        @SerializedName("precision")
+        private int precision;
+
+        @Expose
+        @SerializedName("type")
+        private String type;
+
+        @Expose
+        @SerializedName("order")
+        private int order;
+
+        @Expose
+        @SerializedName("index")
+        private String index;
 
         public String getName() {
             return name;
@@ -65,12 +81,44 @@ public class CollectionCreateRequest {
             this.nullable = nullable;
         }
 
-        public String getAttributeType() {
-            return attributeType;
+        public int getLength() {
+            return length;
         }
 
-        public void setAttributeType(String attributeType) {
-            this.attributeType = attributeType;
+        public void setLength(int length) {
+            this.length = length;
+        }
+
+        public int getPrecision() {
+            return precision;
+        }
+
+        public void setPrecision(int precision) {
+            this.precision = precision;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public int getOrder() {
+            return order;
+        }
+
+        public void setOrder(int order) {
+            this.order = order;
+        }
+
+        public String getIndex() {
+            return index;
+        }
+
+        public void setIndex(String index) {
+            this.index = index;
         }
     }
 }

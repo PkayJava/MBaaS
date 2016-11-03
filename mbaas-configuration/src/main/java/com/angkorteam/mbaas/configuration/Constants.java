@@ -82,7 +82,6 @@ public class Constants {
     public static final String PATTERN_DATE = "pattern.date";
     public static final String PATTERN_FOLDER = "pattern.folder";
     public static final String PATTERN_ATTRIBUTE_NAME = "pattern.attribute.name";
-    public static final String PATTERN_COLLECTION_NAME = "pattern.collection.name";
     public static final String PATTERN_OAUTH_ROLE_NAME = "pattern.oauth.role.name";
     public static final String PATTERN_PATH = "pattern.path";
     public static final String PATTERN_QUERY_PARAMETER_NAME = "pattern.query.parameter.name";

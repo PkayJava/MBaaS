@@ -26,6 +26,10 @@ dependencies {
     compile 'org.jooq:jooq:' + jooqVersion
     compile 'joda-time:joda-time:' + jodatimeVersion
     compile 'com.angkorteam.gradle:plugintask:' + plugintaskVersion
+    compile 'mysql:mysql-connector-java:' + mysqlVersion
+    compile 'org.apache.commons:commons-dbcp2:' + commonsdbcp2Version
+    compile 'org.apache.commons:commons-lang3:' + commonslang3Version
+    compile 'commons-io:commons-io:' + commonsioVersion
 }
 
 sourceSets {

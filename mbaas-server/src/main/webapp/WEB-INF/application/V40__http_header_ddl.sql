@@ -10,6 +10,6 @@ CREATE TABLE http_header (
   description    VARCHAR(100),
   format         VARCHAR(255),
 
-  UNIQUE KEY (name),
+  UNIQUE (name),
   PRIMARY KEY (http_header_id)
 );

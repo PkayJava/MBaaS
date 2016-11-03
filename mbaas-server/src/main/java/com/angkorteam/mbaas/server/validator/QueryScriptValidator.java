@@ -1,13 +1,13 @@
 package com.angkorteam.mbaas.server.validator;
 
-import com.angkorteam.framework.extension.share.validation.JooqValidator;
 import org.apache.wicket.validation.IValidatable;
+import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
 
 /**
  * Created by socheat on 3/3/16.
  */
-public class QueryScriptValidator extends JooqValidator<String> {
+public class QueryScriptValidator implements IValidator<String> {
 
 
     public QueryScriptValidator() {

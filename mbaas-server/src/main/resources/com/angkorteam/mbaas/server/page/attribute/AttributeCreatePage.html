@@ -8,35 +8,62 @@
     <div class="box box-primary">
         <form role="form" wicket:id="form">
             <div class="box-body">
-                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                <!-- Row -->
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
                     <label wicket:for="nameField">Name</label>
                     <input wicket:id="nameField" type="text" class="form-control"/>
                     <span wicket:id="nameFeedback" class="help-block"/>
                 </div>
-                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                    <label wicket:for="attributeTypeField">Attribute Type</label>
-                    <select wicket:id="attributeTypeField" class="form-control"/>
-                    <span wicket:id="attributeTypeFeedback" class="help-block"/>
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <label wicket:for="typeField">Type</label>
+                    <select wicket:id="typeField" class="form-control"/>
+                    <span wicket:id="typeFeedback" class="help-block"/>
                 </div>
+                <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <label wicket:for="indexField">Index</label>
+                    <select wicket:id="indexField" class="form-control"/>
+                    <span wicket:id="indexFeedback" class="help-block"/>
+                </div>
+                <div class="clearfix"></div>
+                <!-- Row -->
                 <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
                     <label wicket:for="lengthField">Length</label>
                     <input type="text" wicket:id="lengthField" class="form-control"/>
                     <span wicket:id="lengthFeedback" class="help-block"/>
                 </div>
                 <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                    <label wicket:for="eavField">EAV</label>
-                    <select wicket:id="eavField" class="form-control"/>
-                    <span wicket:id="eavFeedback" class="help-block"/>
+                    <label wicket:for="precisionField">Precision</label>
+                    <input type="text" wicket:id="precisionField" class="form-control"/>
+                    <span wicket:id="precisionFeedback" class="help-block"/>
                 </div>
                 <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                    <label wicket:for="nullableField">Nullable</label>
-                    <select wicket:id="nullableField" class="form-control"/>
-                    <span wicket:id="nullableFeedback" class="help-block"/>
+                    <label wicket:for="orderField">Order</label>
+                    <input type="text" wicket:id="orderField" class="form-control"/>
+                    <span wicket:id="orderFeedback" class="help-block"/>
                 </div>
+                <div class="clearfix"></div>
+                <!-- Row -->
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label>Nullable</label>
+                    <div>
+                        <label>
+                            <input type="checkbox" wicket:id="nullableField"/> is nullable ?
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label>EAV</label>
+                    <div>
+                        <label>
+                            <input type="checkbox" wicket:id="eavField"/> is EAV ?
+                        </label>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
             </div>
 
             <div class="box-footer">
-                <a class="btn btn-default" wicket:id="closeLink">Close</a>
+                <a wicket:id="closeButton" class="btn btn-default">Close</a>
                 <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">Save</button>
             </div>
 

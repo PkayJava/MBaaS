@@ -7,7 +7,7 @@ CREATE TABLE `collection` (
   system           BIT(1)       NOT NULL DEFAULT 0,
   owner_user_id    VARCHAR(100),
 
-  UNIQUE KEY (name),
+  UNIQUE (name),
   INDEX (locked),
   INDEX (application_code),
   INDEX (system),

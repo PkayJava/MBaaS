@@ -1,11 +1,11 @@
 package com.angkorteam.mbaas.server.template;
 
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.wicket.datetime.markup.html.form.DateTextField;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 import java.util.Date;
@@ -33,7 +33,7 @@ public class DateTimePanel extends Panel {
         DateTextField field = DateTextField.forDatePattern("field", new PropertyModel<>(this.fields, this.name), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
         field.setType(Date.class);
         this.fields.put(this.name, new Date());
-        field.setLabel(JooqUtils.lookup(this.name, getPage()));
+        field.setLabel(Model.of(name));
         TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
         this.add(field);
         this.add(feedback);

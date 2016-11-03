@@ -6,7 +6,7 @@ CREATE TABLE role (
   description  VARCHAR(255),
   home_page_id VARCHAR(100),
 
-  UNIQUE KEY (name),
+  UNIQUE (name),
   INDEX (system),
   INDEX (home_page_id),
   INDEX (description),

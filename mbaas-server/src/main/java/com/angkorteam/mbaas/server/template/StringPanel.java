@@ -1,10 +1,10 @@
 package com.angkorteam.mbaas.server.template;
 
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.server.wicket.JooqUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.validator.StringValidator;
 
@@ -31,7 +31,7 @@ public class StringPanel extends Panel {
         Label label = new Label("label", this.name);
         this.add(label);
         TextField<String> field = new TextField<>("field", new PropertyModel<>(this.fields, this.name));
-        field.setLabel(JooqUtils.lookup(this.name, getPage()));
+        field.setLabel(Model.of(name));
         field.add(StringValidator.maximumLength(255));
         TextFeedbackPanel feedback = new TextFeedbackPanel("feedback", field);
         this.add(field);

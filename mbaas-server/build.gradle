@@ -32,6 +32,7 @@ dependencies {
     //compile 'io.github.robwin:swagger2markup-gradle-plugin:0.9.2'
 
     compile 'org.flywaydb:flyway-core:' + flywayVersion
+    compile 'org.elasticsearch:elasticsearch:' + elasticsearchVersion
 
     compile 'com.angkorteam.framework.extension:framework-extension:' + frameworkextensionVersion
     compile 'org.apache.wicket:wicket-core:' + wicketVersion
@@ -49,18 +50,12 @@ dependencies {
 
     compile 'org.json:json:' + jsonVersion
 
-    //compile 'org.apache.wicket:wicket-native-websocket-tomcat:' + wicketVersion
-    //compile 'org.apache.wicket:wicket-native-websocket-jetty9:' + wicketVersion
-    //compile 'org.eclipse.jetty.aggregate:jetty-all:' + jetty9Version
-    //compile 'org.eclipse.jetty.websocket:javax-websocket-server-impl:' + jetty9Version
-    //compile 'org.eclipse.jetty:jetty-webapp:' + jetty9Version
-    //compile 'org.eclipse.jetty:jetty-server:' + jetty9Version
-
     compile 'org.springframework:spring-core:' + springVersion
     compile 'org.springframework:spring-context:' + springVersion
     compile 'org.springframework:spring-context-support:' + springVersion
     compile 'org.springframework:spring-jdbc:' + springVersion
     compile 'org.springframework:spring-webmvc:' + springVersion
+    compile 'org.springframework:spring-web:' + springVersion
 
     compile 'org.springframework.integration:spring-integration-core:' + springIntegrationVersion
     compile 'org.springframework.integration:spring-integration-mail:' + springIntegrationVersion
@@ -81,14 +76,11 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp-apache:' + okhttp3Version
     compile 'io.reactivex:rxjava:' + reactivexVersion
 
-    compile 'mysql:mysql-connector-java:' + mysqlVersion
-
-    compile 'org.gridkit.lab:sigar-lib:' + sigarVersion
     compile 'org.reflections:reflections:' + reflectionsVersion
     compile 'org.jasypt:jasypt:' + jasyptVersion
     compile 'commons-codec:commons-codec:' + commonscodecVersion
-    compile 'net.glxn.qrgen:javase:' + qrVersion
 
+    compile 'mysql:mysql-connector-java:' + mysqlVersion
     compile 'org.apache.commons:commons-dbcp2:' + commonsdbcp2Version
     compile 'org.apache.commons:commons-lang3:' + commonslang3Version
     compile 'commons-io:commons-io:' + commonsioVersion
@@ -108,8 +100,7 @@ dependencies {
     compile 'com.googlecode.wicked-charts:wicked-charts-wicket7:2.0.0'
     compile 'com.mashape.unirest:unirest-java:' + unirestVersion
     compile 'org.apache.commons:commons-compress:' + commonscompressVersion
-    compile 'org.apache.vysper:vysper-core:' + vysperVersion
-    compile 'io.netty:netty-all:' + nettyVersion
+    compile 'org.codehaus.groovy:groovy-all:' + groovyVersion
 }
 
 mainClassName = 'com.angkorteam.mbaas.server.Start'

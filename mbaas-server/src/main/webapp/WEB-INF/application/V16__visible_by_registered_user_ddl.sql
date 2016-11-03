@@ -6,6 +6,6 @@ CREATE TABLE visible_by_registered_user (
 
   INDEX (user_id),
   INDEX (attribute_id),
-  UNIQUE KEY (user_id, attribute_id),
+  UNIQUE (user_id, attribute_id),
   PRIMARY KEY (visible_by_registered_user_id)
 );

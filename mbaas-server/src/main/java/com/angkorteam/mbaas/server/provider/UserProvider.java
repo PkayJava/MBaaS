@@ -1,11 +1,14 @@
 package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.JooqProvider;
-import com.angkorteam.mbaas.server.Jdbc;
-import com.angkorteam.mbaas.server.wicket.Application;
-import com.angkorteam.mbaas.server.wicket.ApplicationUtils;
-import org.jooq.*;
-import org.jooq.impl.DSL;
+import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.model.entity.tables.UserTable;
+import com.angkorteam.mbaas.server.Spring;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.TableLike;
 
 import java.util.List;
 
@@ -14,53 +17,49 @@ import java.util.List;
  */
 public class UserProvider extends JooqProvider {
 
-    private final String applicationCode;
-
     private TableLike<?> from;
 
-    private Table<?> userTable;
+    private UserTable userTable;
 
-    private Table<?> roleTable;
+    private RoleTable roleTable;
 
-    public UserProvider(String applicationCode) {
-        this.applicationCode = applicationCode;
-        this.userTable = DSL.table(Jdbc.USER).as("userTable");
-        this.roleTable = DSL.table(Jdbc.ROLE).as("roleTable");
-        this.from = this.userTable.join(this.roleTable).on(DSL.field(this.userTable.getName() + "." + Jdbc.User.ROLE_ID, String.class).eq(DSL.field(this.roleTable.getName() + "." + Jdbc.User.ROLE_ID, String.class)));
+    public UserProvider() {
+        this.userTable = Tables.USER.as("userTable");
+        this.roleTable = Tables.ROLE.as("roleTable");
+        this.from = this.userTable.join(this.roleTable).on(this.userTable.ROLE_ID.eq(this.roleTable.ROLE_ID));
     }
 
     @Override
     protected DSLContext getDSLContext() {
-        Application application = ApplicationUtils.getApplication();
-        return application.getDSLContext(this.applicationCode);
+        return Spring.getBean(DSLContext.class);
+    }
+
+    public Field<String> getUserId() {
+        return this.userTable.USER_ID;
     }
 
     public Field<String> getLogin() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.User.LOGIN, String.class);
-    }
-
-    public Field<String> getApplicationUserId() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.User.USER_ID, String.class);
+        return this.userTable.LOGIN;
     }
 
     public Field<String> getFullName() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.User.FULL_NAME, String.class);
+        return this.userTable.FULL_NAME;
     }
 
     public Field<String> getRoleName() {
-        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.NAME, String.class);
+        return this.roleTable.NAME;
     }
 
     public Field<String> getRoleId() {
-        return DSL.field(this.roleTable.getName() + "." + Jdbc.Role.ROLE_ID, String.class);
+        return this.roleTable.ROLE_ID;
     }
 
     public Field<String> getStatus() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.User.STATUS, String.class);
+        return this.userTable.STATUS;
     }
 
     public Field<Boolean> getSystem() {
-        return DSL.field(this.userTable.getName() + "." + Jdbc.User.SYSTEM, Boolean.class);
+        return this.userTable.SYSTEM;
     }
 
     @Override

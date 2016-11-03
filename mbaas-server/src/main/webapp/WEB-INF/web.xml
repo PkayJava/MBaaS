@@ -7,11 +7,11 @@
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:/application-context.xml</param-value>
+        <param-value>/WEB-INF/api-context.xml</param-value>
     </context-param>
 
     <listener>
-        <listener-class>com.angkorteam.mbaas.server.spring.ApplicationContext</listener-class>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
     <listener>
@@ -40,12 +40,12 @@
         <filter-class>org.apache.wicket.protocol.ws.javax.JavaxWebSocketFilter</filter-class>
         <init-param>
             <param-name>applicationClassName</param-name>
-            <param-value>com.angkorteam.mbaas.server.wicket.Application</param-value>
+            <param-value>com.angkorteam.mbaas.server.Application</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>MBaaS Web</filter-name>
-        <url-pattern>/web/*</url-pattern>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
 
     <filter>
@@ -66,9 +66,10 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
+
     <servlet-mapping>
-        <servlet-name>MBaaS API</servlet-name>
         <url-pattern>/api/*</url-pattern>
+        <servlet-name>MBaaS API</servlet-name>
     </servlet-mapping>
 
     <filter>

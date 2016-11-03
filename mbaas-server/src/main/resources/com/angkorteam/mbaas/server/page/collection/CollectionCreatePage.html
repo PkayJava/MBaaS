@@ -8,17 +8,17 @@
     <div class="box box-primary">
         <form role="form" wicket:id="form">
             <div class="box-body">
-                <div class="form-group">
+                <!-- Row -->
+                <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <label wicket:for="nameField">Name</label>
                     <input wicket:id="nameField" type="text" class="form-control"/>
                     <span wicket:id="nameFeedback" class="help-block"/>
                 </div>
+                <div class="clearfix"></div>
             </div>
 
             <div class="box-footer">
-                <wicket:link>
-                    <a class="btn btn-default" href="CollectionManagementPage.html">Close</a>
-                </wicket:link>
+                <a wicket:id="closeButton" class="btn btn-default">Close</a>
                 <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">Save</button>
             </div>
         </form>

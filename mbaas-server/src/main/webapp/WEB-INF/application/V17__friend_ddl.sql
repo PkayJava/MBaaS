@@ -12,7 +12,7 @@ CREATE TABLE friend (
   INDEX (subscription),
   INDEX (ask_subscription),
   INDEX (date_created),
-  UNIQUE KEY (user_id, friend_user_id),
+  UNIQUE (user_id, friend_user_id),
   PRIMARY KEY (friend_id)
 
 );

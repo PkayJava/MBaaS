@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="layout.html"><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>
+<html xmlns:wicket="http://wicket.apache.org">
+<wicket:border>
+
+    <!-- header -->
+
+    <wicket:body/>
+
+    <!-- footer-->
+
+</wicket:border>
+</html>
+]]></entry>
+    <entry key="layout.groovy"><![CDATA[package com.angkorteam.mbaas.server.cms.layout
+import com.angkorteam.mbaas.server.page.CmsLayout
+
+class ExampleLayout extends CmsLayout {
+
+    ExampleLayout(String id) {
+        super(id)
+    }
+
+    @Override
+    protected void doInitialize() {
+        // place your initialization logic here
+    }
+}
+]]></entry>
+</properties>

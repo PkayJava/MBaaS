@@ -10,6 +10,6 @@ CREATE TABLE json_field (
   map_json_id   VARCHAR(100),
   enum_id       VARCHAR(100),
 
-  UNIQUE KEY (json_id, name),
+  UNIQUE (json_id, name),
   PRIMARY KEY (json_field_id)
 );
