@@ -25,14 +25,14 @@ class ExamplePage extends CmsPage {
 
     @Override
     protected void doInitialize(Border layout) {
-        add(layout);
+        add(layout)
         // place your initialization logic here
     }
 
     @Override
     public final String getPageUUID() {
         // DO NOT MODIFIED
-        return "%s";
+        return "%s"
     }
 
 }

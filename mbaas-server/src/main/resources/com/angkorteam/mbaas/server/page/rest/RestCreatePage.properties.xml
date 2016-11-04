@@ -17,14 +17,14 @@ import javax.servlet.http.HttpServletRequest
 class SampleService implements GroovyService {
 
     @Autowired
-    private System system;
+    private System system
 
     @Override
     ResponseEntity<GroovyResponse> service(HttpServletRequest request) throws Throwable {
         // enjoy your logic here
-        GroovyResponse response = new GroovyResponse();
-        response.setData(system.randomUUID());
-        return ResponseEntity.ok(response);
+        GroovyResponse response = new GroovyResponse()
+        response.setData(system.randomUUID())
+        return ResponseEntity.ok(response)
     }
 
 }

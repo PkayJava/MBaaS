@@ -31,7 +31,7 @@ class ExampleLayout extends CmsLayout {
     @Override
     public final String getLayoutUUID () {
         // DO NOT MODIFIED
-        return "%s";
+        return "%s"
     }
 
 }
