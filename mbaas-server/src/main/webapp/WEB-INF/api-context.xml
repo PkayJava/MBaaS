@@ -39,7 +39,7 @@
         <security:csrf disabled="true"/>
         <security:http-basic/>
         <security:intercept-url access="permitAll" pattern="/api/resource/**"/>
-        <security:intercept-url access="hasAnyRole('service','admin')" pattern="/api/**"/>
+        <security:intercept-url access="hasAnyAuthority('service', 'administrator')" pattern="/api/**"/>
     </security:http>
 
     <security:authentication-manager erase-credentials="true">
