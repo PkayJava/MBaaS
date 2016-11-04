@@ -6,13 +6,16 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.HtmlTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.LayoutPojo;
+import com.angkorteam.mbaas.model.entity.tables.records.GroovyRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.LayoutRecord;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
-import com.angkorteam.mbaas.server.page.CmsLayout;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
+import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import groovy.lang.GroovyCodeSource;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -31,6 +34,8 @@ import java.util.Date;
 public class LayoutModifyPage extends MBaaSPage {
 
     private String layoutUuid;
+    private String groovyId;
+    private String javaClass;
 
     private String title;
     private TextField<String> titleField;
@@ -67,12 +72,17 @@ public class LayoutModifyPage extends MBaaSPage {
 
         DSLContext context = Spring.getBean(DSLContext.class);
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+
         LayoutPojo layout = context.select(layoutTable.fields()).from(layoutTable).where(layoutTable.LAYOUT_ID.eq(this.layoutUuid)).fetchOneInto(LayoutPojo.class);
+        GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layout.getGroovyId())).fetchOneInto(GroovyPojo.class);
 
         this.title = layout.getTitle();
         this.description = layout.getDescription();
         this.html = layout.getHtml();
-        this.groovy = layout.getGroovy();
+        this.groovy = groovy.getScript();
+        this.groovyId = groovy.getGroovyId();
+        this.javaClass = groovy.getJavaClass();
 
         this.form = new Form<>("form");
         content.add(this.form);
@@ -85,6 +95,7 @@ public class LayoutModifyPage extends MBaaSPage {
 
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
         this.groovyField.setRequired(true);
+        this.groovyField.add(new GroovyScriptValidator(this.groovyId));
         this.form.add(this.groovyField);
         this.groovyFeedback = new TextFeedbackPanel("groovyFeedback", this.groovyField);
         this.form.add(this.groovyFeedback);
@@ -113,31 +124,29 @@ public class LayoutModifyPage extends MBaaSPage {
 
         DSLContext context = Spring.getBean(DSLContext.class);
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+
         LayoutRecord layoutRecord = context.select(layoutTable.fields()).from(layoutTable).where(layoutTable.LAYOUT_ID.eq(this.layoutUuid)).fetchOneInto(layoutTable);
 
-        StringBuffer newGroovy = new StringBuffer(this.groovy.substring(0, this.groovy.lastIndexOf("}")));
-        newGroovy.append("\n @Override\n" +
-                "        public final String getLayoutUUID () {\n" +
-                "            return \"" + this.layoutUuid + "\";\n" +
-                "        } }");
-
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
-        classLoader.removeSourceCache(GroovyClassLoader.LAYOUT + this.layoutUuid);
-        classLoader.removeClassCache(layoutRecord.getJavaClass());
-        String cacheKey = layoutRecord.getJavaClass() + "_" + layoutRecord.getLayoutId() + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+        classLoader.removeSourceCache(this.groovyId);
+        classLoader.removeClassCache(this.javaClass);
+        String cacheKey = this.javaClass + "_" + layoutRecord.getLayoutId() + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
         getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
 
-        GroovyCodeSource source = new GroovyCodeSource(newGroovy.toString(), GroovyClassLoader.LAYOUT + this.layoutUuid, "/groovy/script");
+        GroovyCodeSource source = new GroovyCodeSource(this.groovy, this.layoutUuid, "/groovy/script");
         source.setCachable(true);
-        Class<? extends CmsLayout> layoutClass = classLoader.parseClass(source, true);
+        Class<?> layoutClass = classLoader.parseClass(source, true);
 
+        GroovyRecord groovyRecord = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layoutRecord.getGroovyId())).fetchOneInto(groovyTable);
+        groovyRecord.setJavaClass(layoutClass.getName());
+        groovyRecord.setScript(this.groovy);
+        groovyRecord.update();
 
         layoutRecord.setTitle(this.title);
         layoutRecord.setDescription(this.description);
         layoutRecord.setHtml(this.html);
-        layoutRecord.setGroovy(this.groovy);
         layoutRecord.setModified(true);
-        layoutRecord.setJavaClass(layoutClass.getName());
         layoutRecord.setDateModified(new Date());
         layoutRecord.update();
 

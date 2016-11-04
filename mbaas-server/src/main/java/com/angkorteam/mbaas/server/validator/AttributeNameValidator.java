@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.server.Application;
 import com.angkorteam.mbaas.server.Spring;
+import com.google.common.base.Strings;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
@@ -30,7 +31,7 @@ public class AttributeNameValidator implements IValidator<String> {
     @Override
     public void validate(IValidatable<String> validatable) {
         String name = validatable.getValue();
-        if (name != null && !"".equals(name)) {
+        if (!Strings.isNullOrEmpty(name)) {
             if (!Application.CHARACTERS.contains(name.charAt(0))) {
                 validatable.error(new ValidationError(this, "format"));
                 return;
@@ -47,7 +48,7 @@ public class AttributeNameValidator implements IValidator<String> {
             DSLContext context = Spring.getBean(DSLContext.class);
             AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
             int count = 0;
-            if (this.attributeId == null || "".equals(this.attributeId)) {
+            if (Strings.isNullOrEmpty(this.attributeId)) {
                 count = context.selectCount().from(attributeTable).where(attributeTable.NAME.eq(name)).and(attributeTable.COLLECTION_ID.eq(this.collectionId)).fetchOneInto(int.class);
             } else {
                 count = context.selectCount().from(attributeTable).where(attributeTable.NAME.eq(name)).and(attributeTable.COLLECTION_ID.eq(this.collectionId)).and(attributeTable.ATTRIBUTE_ID.notEqual(this.attributeId)).fetchOneInto(int.class);

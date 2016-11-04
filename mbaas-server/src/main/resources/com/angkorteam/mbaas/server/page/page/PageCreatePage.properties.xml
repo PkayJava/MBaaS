@@ -17,7 +17,7 @@
 </body>
 </html>
 ]]></entry>
-    <entry key="page.groovy"><![CDATA[package com.angkorteam.mbaas.server.cms.page
+    <entry key="page.groovy"><![CDATA[package com.angkorteam.mbaas.server.groovy
 import com.angkorteam.mbaas.server.page.CmsPage
 import org.apache.wicket.markup.html.border.Border
 
@@ -27,6 +27,12 @@ class ExamplePage extends CmsPage {
     protected void doInitialize(Border layout) {
         add(layout);
         // place your initialization logic here
+    }
+
+    @Override
+    public final String getPageUUID() {
+        // DO NOT MODIFIED
+        return "%s";
     }
 
 }

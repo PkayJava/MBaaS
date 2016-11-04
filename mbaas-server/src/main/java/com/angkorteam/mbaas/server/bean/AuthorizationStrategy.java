@@ -2,9 +2,11 @@ package com.angkorteam.mbaas.server.bean;
 
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.PageRoleTable;
 import com.angkorteam.mbaas.model.entity.tables.PageTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
 import com.angkorteam.mbaas.server.Session;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
@@ -50,9 +52,14 @@ public class AuthorizationStrategy implements IAuthorizationStrategy {
             roles = new Roles();
         }
         PageTable pageTable = Tables.PAGE.as("pageTable");
-        PagePojo page = context.select(pageTable.fields()).from(pageTable).where(pageTable.JAVA_CLASS.eq(componentClass.getName())).fetchOneInto(PagePojo.class);
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+        GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.JAVA_CLASS.eq(componentClass.getName())).fetchOneInto(GroovyPojo.class);
+        PagePojo page = null;
+        if (groovy != null) {
+            page = context.select(pageTable.fields()).from(pageTable).where(pageTable.GROOVY_ID.eq(groovy.getGroovyId())).fetchOneInto(PagePojo.class);
+        }
         if (page != null) {
-            PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageTablpageRoleTable");
+            PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
             RoleTable roleTable = Tables.ROLE.as("roleTable");
             List<String> pageRoles = context.select(roleTable.NAME).from(roleTable).innerJoin(pageRoleTable).on(roleTable.ROLE_ID.eq(pageRoleTable.ROLE_ID)).and(pageRoleTable.PAGE_ID.eq(page.getPageId())).fetchInto(String.class);
             if (pageRoles != null && !pageRoles.isEmpty()) {
@@ -66,13 +73,11 @@ public class AuthorizationStrategy implements IAuthorizationStrategy {
 
     @Override
     public boolean isActionAuthorized(Component component, Action action) {
-        LOGGER.info(component.getClass().getName());
         return true;
     }
 
     @Override
     public boolean isResourceAuthorized(IResource resource, PageParameters parameters) {
-        LOGGER.info(resource.getClass().getName());
         return true;
     }
 

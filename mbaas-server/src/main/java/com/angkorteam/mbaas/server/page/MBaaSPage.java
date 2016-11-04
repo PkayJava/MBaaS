@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.page;
 
 import com.angkorteam.framework.extension.wicket.AdminLTEPage;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
 import com.angkorteam.mbaas.model.entity.tables.MenuItemTable;
 import com.angkorteam.mbaas.model.entity.tables.MenuTable;
@@ -50,7 +51,13 @@ public abstract class MBaaSPage extends AdminLTEPage implements UUIDPage {
 
         Class<? extends Border> layoutClass = null;
         try {
-            layoutClass = (Class<? extends Border>) classLoader.loadClass(layout.getJavaClass());
+            if (layout.getSystem()) {
+                layoutClass = (Class<? extends Border>) classLoader.loadClass(layout.getLayoutId());
+            } else {
+                GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+                String javaClass = context.select(groovyTable.JAVA_CLASS).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layout.getGroovyId())).fetchOneInto(String.class);
+                layoutClass = (Class<? extends Border>) classLoader.loadClass(javaClass);
+            }
         } catch (ClassNotFoundException e) {
             LOGGER.error(e.getMessage());
         }

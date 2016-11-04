@@ -7,13 +7,16 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptText
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
 import com.angkorteam.mbaas.model.entity.tables.PageRoleTable;
 import com.angkorteam.mbaas.model.entity.tables.PageTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.LayoutPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
+import com.angkorteam.mbaas.model.entity.tables.records.GroovyRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.PageRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.PageRoleRecord;
 import com.angkorteam.mbaas.server.Application;
@@ -21,11 +24,11 @@ import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.choice.LayoutChoiceRenderer;
-import com.angkorteam.mbaas.server.page.CmsPage;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
-import com.angkorteam.mbaas.server.validator.MountPathValidator;
+import com.angkorteam.mbaas.server.validator.PagePathValidator;
 import groovy.lang.GroovyCodeSource;
+import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
@@ -43,6 +46,8 @@ import java.util.List;
 public class PageModifyPage extends MBaaSPage {
 
     private String pageUuid;
+    private String groovyId;
+    private String javaClass;
 
     private String mountPath;
     private TextField<String> pathField;
@@ -99,11 +104,15 @@ public class PageModifyPage extends MBaaSPage {
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
         PagePojo page = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(this.pageUuid)).fetchOneInto(PagePojo.class);
+        GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(page.getGroovyId())).fetchOneInto(GroovyPojo.class);
+        this.groovyId = groovy.getGroovyId();
+        this.javaClass = groovy.getJavaClass();
         this.title = page.getTitle();
         this.description = page.getDescription();
         this.html = page.getHtml();
-        this.groovy = page.getGroovy();
+        this.groovy = groovy.getScript();
         this.code = page.getCode();
         this.mountPath = page.getPath();
         if (page.getLayoutId() != null) {
@@ -121,7 +130,7 @@ public class PageModifyPage extends MBaaSPage {
 
         this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "mountPath"));
         this.pathField.setRequired(true);
-        this.pathField.add(new MountPathValidator(this.pageUuid));
+        this.pathField.add(new PagePathValidator(this.pageUuid));
         this.form.add(this.pathField);
         this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
         this.form.add(this.pathFeedback);
@@ -176,35 +185,34 @@ public class PageModifyPage extends MBaaSPage {
         DSLContext context = Spring.getBean(DSLContext.class);
         PageTable pageTable = Tables.PAGE.as("pageTable");
         PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+
         PageRecord pageRecord = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(this.pageUuid)).fetchOneInto(pageTable);
 
-        StringBuffer newGroovy = new StringBuffer(this.groovy.substring(0, this.groovy.lastIndexOf("}")));
-        newGroovy.append("\n @Override\n" +
-                "        public final String getPageUUID () {\n" +
-                "            return \"" + this.pageUuid + "\";\n" +
-                "        } }");
-
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
-        classLoader.removeSourceCache(GroovyClassLoader.PAGE + this.pageUuid);
-        classLoader.removeClassCache(pageRecord.getJavaClass());
+        classLoader.removeSourceCache(this.groovyId);
+        classLoader.removeClassCache(this.javaClass);
 
-        String cacheKey = pageRecord.getJavaClass() + "_" + pageRecord.getPageId() + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
+        String cacheKey = this.javaClass + "_" + pageRecord.getPageId() + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
         getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
 
-        GroovyCodeSource source = new GroovyCodeSource(newGroovy.toString(), GroovyClassLoader.PAGE + this.pageUuid, "/groovy/script");
+        GroovyCodeSource source = new GroovyCodeSource(this.groovy, this.groovyId, "/groovy/script");
         source.setCachable(true);
-        Class<? extends CmsPage> pageClass = classLoader.parseClass(source, true);
+        Class<?> pageClass = classLoader.parseClass(source, true);
+
+        GroovyRecord groovyRecord = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(pageRecord.getGroovyId())).fetchOneInto(groovyTable);
+        groovyRecord.setScript(this.groovy);
+        groovyRecord.setJavaClass(pageClass.getName());
+        groovyRecord.update();
 
         context.delete(pageRoleTable).where(pageRoleTable.PAGE_ID.eq(this.pageUuid)).execute();
 
-        Application.get().mountPage(this.mountPath, pageClass);
+        Application.get().mountPage(this.mountPath, (Class<? extends Page>) pageClass);
         pageRecord.setTitle(this.title);
         pageRecord.setDescription(this.description);
         pageRecord.setHtml(this.html);
-        pageRecord.setGroovy(this.groovy);
         pageRecord.setModified(true);
         pageRecord.setDateModified(new Date());
-        pageRecord.setJavaClass(pageClass.getName());
         pageRecord.setPath(this.mountPath);
         if (this.layout != null) {
             pageRecord.setLayoutId(this.layout.getLayoutId());

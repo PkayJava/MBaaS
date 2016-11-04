@@ -1,19 +1,17 @@
 package com.angkorteam.mbaas.server.validator;
 
-import com.angkorteam.framework.extension.wicket.markup.html.form.validation.JooqFormValidator;
 import com.angkorteam.mbaas.model.entity.tables.pojos.MenuPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.SectionPojo;
-import com.angkorteam.mbaas.server.Spring;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
+import org.apache.wicket.markup.html.form.validation.AbstractFormValidator;
 import org.apache.wicket.validation.ValidationError;
-import org.jooq.DSLContext;
 
 /**
  * Created by socheat on 10/28/16.
  */
-public class MenuFormValidator extends JooqFormValidator {
+public class MenuFormValidator extends AbstractFormValidator {
 
     private DropDownChoice<MenuPojo> menuField;
 
@@ -57,10 +55,5 @@ public class MenuFormValidator extends JooqFormValidator {
                 this.sectionField.error(error);
             }
         }
-    }
-
-    @Override
-    protected DSLContext getDSLContext() {
-        return Spring.getBean(DSLContext.class);
     }
 }

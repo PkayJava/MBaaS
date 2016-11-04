@@ -35,52 +35,22 @@
 
     <security:global-method-security secured-annotations="enabled"/>
 
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/security/signup"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/security/login"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/oauth2/**"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/resource/**"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/qr"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/javascript"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/javascript/**"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/otp"/>
-    <security:http realm="api" use-expressions="true" create-session="stateless" security="none" pattern="/api/rest/registry/**"/>
-    <security:http realm="api" use-expressions="true" authentication-manager-ref="authenticationManager" entry-point-ref="authenticationEntryPoint" create-session="stateless">
+    <security:http realm="MBaaS Service" use-expressions="true" create-session="stateless">
         <security:csrf disabled="true"/>
-        <!-- SecurityExpressionRoot -->
-        <security:access-denied-handler ref="accessDeniedHandler"/>
-        <security:custom-filter ref="authenticationFilter" before="ANONYMOUS_FILTER"/>
-        <security:intercept-url access="fullyAuthenticated" pattern="/api/monitor/**"/>
-        <!--<security:intercept-url access="fullyAuthenticated" pattern="/api/javascript/**"/>-->
-        <security:intercept-url access="fullyAuthenticated" pattern="/api/file/**"/>
-        <security:intercept-url access="fullyAuthenticated" pattern="/api/**"/>
+        <security:http-basic/>
+        <security:intercept-url access="permitAll" pattern="/api/resource/**"/>
+        <security:intercept-url access="hasRole('service','admin')" pattern="/api/**"/>
     </security:http>
 
-    <security:authentication-manager alias="providerManager" erase-credentials="true"/>
+    <security:authentication-manager erase-credentials="true">
+        <security:authentication-provider user-service-ref="userDetailsService">
+            <security:password-encoder hash="md5"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
 
-    <bean id="authenticationFilter" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationFilter">
-        <constructor-arg index="0" ref="authenticationManager"/>
-        <constructor-arg index="1" ref="authenticationEntryPoint"/>
-        <property name="gson" ref="gson"/>
+    <bean id="userDetailsService" class="com.angkorteam.mbaas.server.spring.UserDetailsService">
+        <property name="context" ref="context"/>
     </bean>
-
-    <bean id="authenticationEntryPoint" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationEntryPoint">
-        <property name="gson" ref="gson"/>
-    </bean>
-
-    <bean id="accessDeniedHandler" class="com.angkorteam.mbaas.server.spring.AccessDeniedHandler">
-        <property name="gson" ref="gson"/>
-    </bean>
-
-    <bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
-        <constructor-arg index="0">
-            <list>
-                <ref bean="authenticationProvider"/>
-            </list>
-        </constructor-arg>
-        <constructor-arg index="1" ref="providerManager"/>
-    </bean>
-
-    <bean id="authenticationProvider" class="com.angkorteam.mbaas.server.spring.BearerAuthenticationProvider"/>
 
     <bean id="interceptor" class="com.angkorteam.mbaas.server.spring.ExecutionTimeHandlerInterceptor">
         <property name="gson" ref="gson"/>

@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.server.Application;
 import com.angkorteam.mbaas.server.Spring;
+import com.google.common.base.Strings;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
@@ -26,7 +27,7 @@ public class CollectionNameValidator implements IValidator<String> {
     @Override
     public void validate(IValidatable<String> validatable) {
         String name = validatable.getValue();
-        if (name != null && !"".equals(name)) {
+        if (!Strings.isNullOrEmpty(name)) {
             if (!Application.CHARACTERS.contains(name.charAt(0))) {
                 validatable.error(new ValidationError(this, "format"));
                 return;
@@ -43,7 +44,7 @@ public class CollectionNameValidator implements IValidator<String> {
             int count = 0;
             DSLContext context = Spring.getBean(DSLContext.class);
             CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-            if (collectionId == null || "".equals(collectionId)) {
+            if (Strings.isNullOrEmpty(this.collectionId)) {
                 count = context.selectCount().from(collectionTable).where(collectionTable.NAME.eq(name)).fetchOneInto(int.class);
             } else {
                 count = context.selectCount().from(collectionTable).where(collectionTable.NAME.eq(name)).and(collectionTable.COLLECTION_ID.notEqual(this.collectionId)).fetchOneInto(int.class);

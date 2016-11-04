@@ -33,4 +33,6 @@ VALUES
   (30, 'com.angkorteam.mbaas.server.page.user.UserBrowsePage', '2', TRUE),
   (31, 'com.angkorteam.mbaas.server.page.user.UserCreatePage', '2', TRUE),
   (32, 'com.angkorteam.mbaas.server.page.user.UserModifyPage', '2', TRUE),
-  (33, 'com.angkorteam.mbaas.server.page.user.UserPassowrdPage', '2', TRUE);
+  (34, 'com.angkorteam.mbaas.server.page.rest.RestBrowsePage', '2', TRUE),
+  (35, 'com.angkorteam.mbaas.server.page.rest.RestCreatePage', '2', TRUE),
+  (36, 'com.angkorteam.mbaas.server.page.rest.RestModifyPage', '2', TRUE);

@@ -6,13 +6,15 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.HtmlTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
+import com.angkorteam.mbaas.model.entity.tables.records.GroovyRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.LayoutRecord;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.bean.System;
-import com.angkorteam.mbaas.server.page.CmsLayout;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
+import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import groovy.lang.GroovyCodeSource;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -28,6 +30,8 @@ import java.util.Date;
  * Created by socheatkhauv on 10/26/16.
  */
 public class LayoutCreatePage extends MBaaSPage {
+
+    private String layoutUuid;
 
     private String title;
     private TextField<String> titleField;
@@ -64,6 +68,9 @@ public class LayoutCreatePage extends MBaaSPage {
     protected void doInitialize(Border layout) {
         add(layout);
 
+        System system = Spring.getBean(System.class);
+        this.layoutUuid = system.randomUUID();
+
         this.form = new Form<>("form");
         layout.add(this.form);
 
@@ -73,9 +80,10 @@ public class LayoutCreatePage extends MBaaSPage {
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);
 
-        this.groovy = getString("layout.groovy");
+        this.groovy = String.format(getString("layout.groovy"), this.layoutUuid);
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
         this.groovyField.setRequired(true);
+        this.groovyField.add(new GroovyScriptValidator());
         this.form.add(this.groovyField);
         this.groovyFeedback = new TextFeedbackPanel("groovyFeedback", this.groovyField);
         this.form.add(this.groovyFeedback);
@@ -103,29 +111,32 @@ public class LayoutCreatePage extends MBaaSPage {
 
     private void saveButtonOnSubmit(Button button) {
         System system = Spring.getBean(System.class);
-        String uuid = system.randomUUID();
-
-        StringBuffer newGroovy = new StringBuffer(this.groovy.substring(0, this.groovy.lastIndexOf("}")));
-        newGroovy.append("\n @Override\n" +
-                "        public final String getLayoutUUID () {\n" +
-                "            return \"" + uuid + "\";\n" +
-                "        } }");
-
-        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
-        GroovyCodeSource source = new GroovyCodeSource(newGroovy.toString(), GroovyClassLoader.LAYOUT + uuid, "/groovy/script");
-        source.setCachable(true);
-        Class<? extends CmsLayout> layout = classLoader.parseClass(source, true);
-
         DSLContext context = Spring.getBean(DSLContext.class);
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+
+        String groovyId = system.randomUUID();
+
+        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+        GroovyCodeSource source = new GroovyCodeSource(this.groovy, groovyId, "/groovy/script");
+        source.setCachable(true);
+        Class<?> layoutClass = classLoader.parseClass(source, true);
+
+        GroovyRecord groovyRecord = context.newRecord(groovyTable);
+        groovyRecord.setGroovyId(groovyId);
+        groovyRecord.setSystem(false);
+        groovyRecord.setJavaClass(layoutClass.getName());
+        groovyRecord.setScript(this.groovy);
+        groovyRecord.store();
+
+
         LayoutRecord layoutRecord = context.newRecord(layoutTable);
-        layoutRecord.setLayoutId(uuid);
+        layoutRecord.setLayoutId(this.layoutUuid);
+        layoutRecord.setGroovyId(groovyId);
         layoutRecord.setDateCreated(new Date());
         layoutRecord.setDateModified(new Date());
         layoutRecord.setTitle(this.title);
         layoutRecord.setHtml(this.html);
-        layoutRecord.setJavaClass(layout.getName());
-        layoutRecord.setGroovy(this.groovy);
         layoutRecord.setDescription(this.description);
         layoutRecord.setSystem(false);
         layoutRecord.setModified(true);

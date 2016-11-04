@@ -1,18 +1,20 @@
 package com.angkorteam.mbaas.server;
 
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
 import com.angkorteam.mbaas.model.entity.tables.PageTable;
+import com.angkorteam.mbaas.model.entity.tables.RestTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.LayoutPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.RestPojo;
 import com.angkorteam.mbaas.server.bean.AuthorizationStrategy;
 import com.angkorteam.mbaas.server.bean.ClassResolver;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
-import com.angkorteam.mbaas.server.page.CmsPage;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import groovy.lang.GroovyCodeSource;
-import org.apache.logging.log4j.util.Strings;
 import org.apache.wicket.Page;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
@@ -93,6 +95,7 @@ public class Application extends AuthenticatedWebApplication {
         getJavaScriptLibrarySettings().setJQueryReference(new DynamicJQueryResourceReference());
         initLayout();
         initPageMount();
+        initService();
     }
 
     @Override
@@ -110,22 +113,30 @@ public class Application extends AuthenticatedWebApplication {
         return DashboardPage.class;
     }
 
+    protected void initService() {
+        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+        DSLContext context = Spring.getBean(DSLContext.class);
+        RestTable restTable = Tables.REST.as("restTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+        List<RestPojo> rests = context.select(restTable.fields()).from(restTable).fetchInto(RestPojo.class);
+        for (RestPojo rest : rests) {
+            GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(rest.getGroovyId())).fetchOneInto(GroovyPojo.class);
+            GroovyCodeSource source = new GroovyCodeSource(groovy.getScript(), groovy.getGroovyId(), "/groovy/script");
+            source.setCachable(true);
+            classLoader.parseClass(source, true);
+        }
+    }
+
     protected void initLayout() {
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         DSLContext context = Spring.getBean(DSLContext.class);
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
         List<LayoutPojo> layouts = context.select(layoutTable.fields()).from(layoutTable).fetchInto(LayoutPojo.class);
         for (LayoutPojo layout : layouts) {
-            if (!layout.getSystem() && !Strings.isEmpty(layout.getGroovy())) {
-                String groovy = layout.getGroovy();
-                StringBuffer newGroovy = new StringBuffer(groovy.substring(0, groovy.lastIndexOf("}")));
-                newGroovy.append("\n @Override\n" +
-                        "        public final String getLayoutUUID () {\n" +
-                        "            return \"" + layout.getLayoutId() + "\";\n" +
-                        "        } }");
-
-
-                GroovyCodeSource source = new GroovyCodeSource(newGroovy.toString(), GroovyClassLoader.LAYOUT + layout.getLayoutId(), "/groovy/script");
+            if (!layout.getSystem()) {
+                GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layout.getGroovyId())).fetchOneInto(GroovyPojo.class);
+                GroovyCodeSource source = new GroovyCodeSource(groovy.getScript(), groovy.getGroovyId(), "/groovy/script");
                 source.setCachable(true);
                 classLoader.parseClass(source, true);
             }
@@ -136,26 +147,21 @@ public class Application extends AuthenticatedWebApplication {
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         DSLContext context = Spring.getBean(DSLContext.class);
         PageTable pageTable = Tables.PAGE.as("pageTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
         List<PagePojo> pages = context.select(pageTable.fields()).from(pageTable).fetchInto(PagePojo.class);
         for (PagePojo page : pages) {
             if (!page.getCmsPage()) {
                 try {
-                    mountPage(page.getPath(), (Class<WebPage>) Class.forName(page.getJavaClass()));
+                    mountPage(page.getPath(), (Class<WebPage>) Class.forName(page.getPageId()));
                 } catch (ClassNotFoundException e) {
                     throw new WicketRuntimeException(e);
                 }
             } else {
-                String groovy = page.getGroovy();
-                StringBuffer newGroovy = new StringBuffer(groovy.substring(0, groovy.lastIndexOf("}")));
-                newGroovy.append("\n @Override\n" +
-                        "        public final String getPageUUID () {\n" +
-                        "            return \"" + page.getPageId() + "\";\n" +
-                        "        } }");
-
-                GroovyCodeSource source = new GroovyCodeSource(newGroovy.toString(), GroovyClassLoader.PAGE + page.getPageId(), "/groovy/script");
+                GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(page.getGroovyId())).fetchOneInto(GroovyPojo.class);
+                GroovyCodeSource source = new GroovyCodeSource(groovy.getScript(), groovy.getGroovyId(), "/groovy/script");
                 source.setCachable(true);
-                Class<? extends CmsPage> pageClass = classLoader.parseClass(source, true);
-                Application.get().mountPage(page.getPath(), pageClass);
+                Class<?> pageClass = classLoader.parseClass(source, true);
+                mountPage(page.getPath(), (Class<? extends Page>) pageClass);
             }
         }
     }

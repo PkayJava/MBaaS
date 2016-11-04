@@ -5,9 +5,6 @@ package com.angkorteam.mbaas.server.bean;
  */
 public class GroovyClassLoader extends groovy.lang.GroovyClassLoader {
 
-    public static final String PAGE = "page_";
-    public static final String LAYOUT = "layout_";
-
     public void removeClassCache(String key) {
         if (this.classCache != null) {
             this.classCache.remove(key);

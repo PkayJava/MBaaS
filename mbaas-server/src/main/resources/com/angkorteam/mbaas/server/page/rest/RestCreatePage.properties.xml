@@ -1,18 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-    <entry key="javascript.script"><![CDATA[/*
-Java Signature
-(Map || Array || String || Number || Boolean || Date) http (javax.servlet.http.HttpServletRequest request, Map<String,Object> queryParameter, Map<String,Object> requestHeader, Object requestBody, Map<String,Object> responseHeader, Map<String,Object> businessError);
-*/
+    <entry key="groovy.script"><![CDATA[package com.angkorteam.mbaas.server.groovy
 
-/*
-for more reference
-https://wiki.openjdk.java.net/display/Nashorn/Nashorn+extensions
-https://github.com/PkayJava/MBaaS/wiki
-*/
-function http (request, queryParameter, requestHeader, requestBody, responseHeader, businessError) {
-  // body
-  return "Rock Your Script";
-}]]></entry>
+import com.angkorteam.mbaas.plain.response.GroovyResponse
+import com.angkorteam.mbaas.server.bean.System
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
+import com.angkorteam.mbaas.server.spring.GroovyService
+
+import javax.servlet.http.HttpServletRequest
+
+/**
+ * Created by socheat on 11/4/16.
+ */
+class SampleService implements GroovyService {
+
+    @Autowired
+    private System system;
+
+    @Override
+    ResponseEntity<GroovyResponse> service(HttpServletRequest request) throws Throwable {
+        // enjoy your logic here
+        GroovyResponse response = new GroovyResponse();
+        response.setData(system.randomUUID());
+        return ResponseEntity.ok(response);
+    }
+
+}
+]]></entry>
 </properties>

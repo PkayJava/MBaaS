@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.ui;
 
 import com.angkorteam.mbaas.model.entity.Tables;
+import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.MenuItemTable;
 import com.angkorteam.mbaas.model.entity.tables.PageTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.MenuItemPojo;
@@ -47,17 +48,20 @@ public class MenuItemWidget extends Panel {
         MenuItemPojo menuItemPojo = context.select(menuItemTable.fields()).from(menuItemTable).where(menuItemTable.MENU_ITEM_ID.eq(this.menuItemId)).fetchOneInto(MenuItemPojo.class);
 
         PageTable pageTable = Tables.PAGE.as("pageTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+
         PagePojo pagePojo = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(menuItemPojo.getPageId())).fetchOneInto(PagePojo.class);
 
         Class<? extends WebPage> page = null;
         if (!pagePojo.getCmsPage()) {
             try {
-                page = (Class<? extends WebPage>) Class.forName(pagePojo.getJavaClass());
+                page = (Class<? extends WebPage>) Class.forName(pagePojo.getPageId());
             } catch (ClassNotFoundException e) {
             }
         } else {
             try {
-                page = (Class<? extends WebPage>) Class.forName(pagePojo.getJavaClass());
+                String javaClass = context.select(groovyTable.JAVA_CLASS).from(groovyTable).where(groovyTable.GROOVY_ID.eq(pagePojo.getGroovyId())).fetchOneInto(String.class);
+                page = (Class<? extends WebPage>) Class.forName(javaClass);
             } catch (ClassNotFoundException e) {
             }
         }

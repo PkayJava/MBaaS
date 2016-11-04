@@ -5,15 +5,14 @@ CREATE TABLE layout (
   title         VARCHAR(100) NOT NULL, #INSTANCE
   description   VARCHAR(255) NOT NULL,
   system        BIT(1)       NOT NULL,
-  groovy        TEXT,
+  groovy_id     VARCHAR(100),
   html          TEXT,
-  java_class    VARCHAR(255) NOT NULL,
   modified      BIT(1)       NOT NULL,
   date_created  DATETIME     NOT NULL,
   date_modified DATETIME     NOT NULL,
 
   UNIQUE KEY `unique__layout__title` (title),
-  UNIQUE KEY `unique__layout__java_class` (java_class),
+  UNIQUE KEY `unique__layout__groovy_id` (groovy_id),
   KEY `index__layout__modified` (modified),
   KEY `index__layout__description` (description),
   KEY `index__layout__date_created` (date_created),

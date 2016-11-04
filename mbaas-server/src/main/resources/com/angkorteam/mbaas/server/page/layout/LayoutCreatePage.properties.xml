@@ -14,7 +14,7 @@
 </wicket:border>
 </html>
 ]]></entry>
-    <entry key="layout.groovy"><![CDATA[package com.angkorteam.mbaas.server.cms.layout
+    <entry key="layout.groovy"><![CDATA[package com.angkorteam.mbaas.server.groovy
 import com.angkorteam.mbaas.server.page.CmsLayout
 
 class ExampleLayout extends CmsLayout {
@@ -27,6 +27,13 @@ class ExampleLayout extends CmsLayout {
     protected void doInitialize() {
         // place your initialization logic here
     }
+
+    @Override
+    public final String getLayoutUUID () {
+        // DO NOT MODIFIED
+        return "%s";
+    }
+
 }
 ]]></entry>
 </properties>

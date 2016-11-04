@@ -86,7 +86,7 @@ public class FileBrowsePage extends MBaaSPage implements ActionFilteredJooqColum
         }
         if ("View".equals(link)) {
             StringBuffer address = new StringBuffer();
-            address.append(getHttpAddress()).append("/api/resource/").append(fileRecord.getPath()).append("/").append(fileRecord.getName());
+            address.append(getHttpAddress()).append("/api/resource").append(fileRecord.getPath()).append("/").append(fileRecord.getName());
             RedirectPage page = new RedirectPage(address);
             setResponsePage(page);
             return;
