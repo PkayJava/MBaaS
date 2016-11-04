@@ -29,7 +29,7 @@ public class UserDetailsService implements org.springframework.security.core.use
         }
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         RolePojo rolePojo = context.select(roleTable.fields()).from(roleTable).where(roleTable.ROLE_ID.eq(userPojo.getRoleId())).fetchOneInto(RolePojo.class);
-        User user = new User(username, userPojo.getPassword(), Arrays.asList(new SimpleGrantedAuthority("ROLE_" + rolePojo.getName())));
+        User user = new User(username, userPojo.getPassword(), Arrays.asList(new SimpleGrantedAuthority(rolePojo.getName())));
         return user;
     }
 
