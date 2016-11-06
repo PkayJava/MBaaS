@@ -27,6 +27,8 @@ import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.PagePathValidator;
 import groovy.lang.GroovyCodeSource;
 import org.apache.wicket.Page;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
@@ -85,6 +87,12 @@ public class PageCreatePage extends MBaaSPage {
     @Override
     public String getPageUUID() {
         return PageCreatePage.class.getName();
+    }
+
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        super.renderHead(response);
+        response.render(CssHeaderItem.forCSS(".CodeMirror-fullscreen {padding-left:230px !important; padding-top:50px !important;}", "CodeMirror-fullscreen"));
     }
 
     @Override
