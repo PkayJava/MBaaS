@@ -2,9 +2,10 @@ package com.angkorteam.mbaas.server.page.user;
 
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.event.TableEvent;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredColumn;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.server.Spring;
@@ -25,7 +26,7 @@ import java.util.Map;
 /**
  * Created by socheat on 10/24/16.
  */
-public class UserBrowsePage extends MBaaSPage implements ActionFilteredJooqColumn.Event {
+public class UserBrowsePage extends MBaaSPage implements TableEvent {
 
     @Override
     public String getPageUUID() {
@@ -37,18 +38,18 @@ public class UserBrowsePage extends MBaaSPage implements ActionFilteredJooqColum
         add(layout);
 
         UserProvider provider = new UserProvider();
-        provider.selectField(String.class, "userId");
+        provider.selectField("userId", String.class);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredJooqColumn(String.class, Model.of("fullName"), "fullName", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, Model.of("login"), "login", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, Model.of("roleName"), "roleName", this, provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, Model.of("status"), "status", provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, Model.of("system"), "system", provider));
-        columns.add(new ActionFilteredJooqColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "Reset PWD", "Edit", "Delete"));
+        columns.add(new TextFilteredColumn(String.class, Model.of("fullName"), "fullName", this, provider));
+        columns.add(new TextFilteredColumn(String.class, Model.of("login"), "login", this, provider));
+        columns.add(new TextFilteredColumn(String.class, Model.of("roleName"), "roleName", this, provider));
+        columns.add(new TextFilteredColumn(Boolean.class, Model.of("status"), "status", provider));
+        columns.add(new TextFilteredColumn(Boolean.class, Model.of("system"), "system", provider));
+        columns.add(new ActionFilteredColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "Reset PWD", "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));

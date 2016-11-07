@@ -140,6 +140,8 @@
         <property name="system" ref="system"/>
     </bean>
 
+    <bean id="dataSourceProvider" class="com.angkorteam.mbaas.server.factory.DataSourceProviderFactoryBean"/>
+
     <bean id="dbSupport" class="com.angkorteam.mbaas.server.factory.DbSupportFactoryBean">
         <property name="dataSource" ref="dataSource"/>
     </bean>

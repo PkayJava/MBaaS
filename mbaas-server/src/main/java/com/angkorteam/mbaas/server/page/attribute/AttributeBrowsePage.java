@@ -2,9 +2,10 @@ package com.angkorteam.mbaas.server.page.attribute;
 
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.event.TableEvent;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredColumn;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredColumn;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
@@ -30,7 +31,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/7/16.
  */
-public class AttributeBrowsePage extends MBaaSPage implements ActionFilteredJooqColumn.Event {
+public class AttributeBrowsePage extends MBaaSPage implements TableEvent {
 
     private String collectionId;
 
@@ -53,22 +54,22 @@ public class AttributeBrowsePage extends MBaaSPage implements ActionFilteredJooq
         this.collection = context.select(collectionTable.fields()).from(collectionTable).where(collectionTable.COLLECTION_ID.eq(this.collectionId)).fetchOneInto(CollectionPojo.class);
 
         AttributeProvider provider = new AttributeProvider(this.collectionId);
-        provider.selectField(String.class, "attributeId");
+        provider.selectField("attributeId", String.class);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
 
-        columns.add(new TextFilteredJooqColumn(String.class, Model.of("name"), "name", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, Model.of("type"), "type", this, provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, Model.of("eav"), "eav", this, provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, Model.of("system"), "system", this, provider));
-        columns.add(new TextFilteredJooqColumn(Boolean.class, Model.of("nullable"), "nullable", this, provider));
-        columns.add(new TextFilteredJooqColumn(Integer.class, Model.of("length"), "length", this, provider));
-        columns.add(new TextFilteredJooqColumn(Integer.class, Model.of("precision"), "precision", this, provider));
-        columns.add(new TextFilteredJooqColumn(Integer.class, Model.of("order"), "order", this, provider));
-        columns.add(new ActionFilteredJooqColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "Delete"));
+        columns.add(new TextFilteredColumn(String.class, Model.of("name"), "name", this, provider));
+        columns.add(new TextFilteredColumn(String.class, Model.of("type"), "type", this, provider));
+        columns.add(new TextFilteredColumn(Boolean.class, Model.of("eav"), "eav", this, provider));
+        columns.add(new TextFilteredColumn(Boolean.class, Model.of("system"), "system", this, provider));
+        columns.add(new TextFilteredColumn(Boolean.class, Model.of("nullable"), "nullable", this, provider));
+        columns.add(new TextFilteredColumn(Integer.class, Model.of("length"), "length", this, provider));
+        columns.add(new TextFilteredColumn(Integer.class, Model.of("precision"), "precision", this, provider));
+        columns.add(new TextFilteredColumn(Integer.class, Model.of("order"), "order", this, provider));
+        columns.add(new ActionFilteredColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));

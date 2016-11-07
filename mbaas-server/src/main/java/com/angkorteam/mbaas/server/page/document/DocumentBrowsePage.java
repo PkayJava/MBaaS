@@ -2,7 +2,8 @@ package com.angkorteam.mbaas.server.page.document;
 
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.event.TableEvent;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredColumn;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.AttributeTable;
@@ -31,7 +32,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/3/16.
  */
-public class DocumentBrowsePage extends MBaaSPage implements ActionFilteredJooqColumn.Event {
+public class DocumentBrowsePage extends MBaaSPage implements TableEvent {
 
     private CollectionPojo collection;
 
@@ -65,7 +66,7 @@ public class DocumentBrowsePage extends MBaaSPage implements ActionFilteredJooqC
             ProviderUtils.addColumn(this.provider, columns, attribute, type);
         }
 
-        columns.add(new ActionFilteredJooqColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "Edit", "Delete"));
+        columns.add(new ActionFilteredColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));

@@ -18,7 +18,7 @@ import org.jooq.DSLContext;
 public abstract class CmsPage extends MBaaSPage implements IMarkupResourceStreamProvider {
 
     @Override
-    public String getVariation() {
+    public final String getVariation() {
         return getPageUUID();
     }
 

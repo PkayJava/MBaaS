@@ -59,6 +59,11 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource>, Initializ
         dataSource.setDriverClassName(jdbcDriver);
         dataSource.setUsername(username);
         dataSource.setPassword(password);
+        dataSource.setMaxIdle(5);
+        dataSource.setMinIdle(1);
+        dataSource.setMaxWaitMillis(5000);
+        dataSource.setMaxTotal(40);
+        dataSource.setInitialSize(10);
         dataSource.setUrl(jdbcUrl);
         return dataSource;
     }

@@ -123,7 +123,11 @@ public class Application extends AuthenticatedWebApplication {
             GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(rest.getGroovyId())).fetchOneInto(GroovyPojo.class);
             GroovyCodeSource source = new GroovyCodeSource(groovy.getScript(), groovy.getGroovyId(), "/groovy/script");
             source.setCachable(true);
-            classLoader.parseClass(source, true);
+            try {
+                classLoader.parseClass(source, true);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -138,7 +142,11 @@ public class Application extends AuthenticatedWebApplication {
                 GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layout.getGroovyId())).fetchOneInto(GroovyPojo.class);
                 GroovyCodeSource source = new GroovyCodeSource(groovy.getScript(), groovy.getGroovyId(), "/groovy/script");
                 source.setCachable(true);
-                classLoader.parseClass(source, true);
+                try {
+                    classLoader.parseClass(source, true);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -160,8 +168,12 @@ public class Application extends AuthenticatedWebApplication {
                 GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(page.getGroovyId())).fetchOneInto(GroovyPojo.class);
                 GroovyCodeSource source = new GroovyCodeSource(groovy.getScript(), groovy.getGroovyId(), "/groovy/script");
                 source.setCachable(true);
-                Class<?> pageClass = classLoader.parseClass(source, true);
-                mountPage(page.getPath(), (Class<? extends Page>) pageClass);
+                try {
+                    Class<?> pageClass = classLoader.parseClass(source, true);
+                    mountPage(page.getPath(), (Class<? extends Page>) pageClass);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

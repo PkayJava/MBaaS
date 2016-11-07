@@ -2,9 +2,10 @@ package com.angkorteam.mbaas.server.page.file;
 
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.event.TableEvent;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredColumn;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredJooqColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredColumn;
 import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.FileTable;
@@ -31,7 +32,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/11/16.
  */
-public class FileBrowsePage extends MBaaSPage implements ActionFilteredJooqColumn.Event {
+public class FileBrowsePage extends MBaaSPage implements TableEvent {
 
     @Override
     public String getPageUUID() {
@@ -48,11 +49,11 @@ public class FileBrowsePage extends MBaaSPage implements ActionFilteredJooqColum
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredJooqColumn(String.class, Model.of("fileId"), "fileId", this, provider));
-        columns.add(new TextFilteredJooqColumn(String.class, Model.of("name"), "name", provider));
-        columns.add(new TextFilteredJooqColumn(Integer.class, Model.of("length"), "length", provider));
-        columns.add(new TextFilteredJooqColumn(String.class, Model.of("mime"), "mime", provider));
-        columns.add(new ActionFilteredJooqColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "View", "Edit", "Delete"));
+        columns.add(new TextFilteredColumn(String.class, Model.of("fileId"), "fileId", this, provider));
+        columns.add(new TextFilteredColumn(String.class, Model.of("name"), "name", provider));
+        columns.add(new TextFilteredColumn(Integer.class, Model.of("length"), "length", provider));
+        columns.add(new TextFilteredColumn(String.class, Model.of("mime"), "mime", provider));
+        columns.add(new ActionFilteredColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "View", "Edit", "Delete"));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 17);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
