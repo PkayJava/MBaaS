@@ -9,7 +9,7 @@ allprojects {
     targetCompatibility = JavaVersion.VERSION_1_8
 
     Properties props = new Properties()
-    props.loadFromXML(new FileInputStream(System.getProperty("user.home") + "/.xml/mbaas.properties.xml"))
+    // props.loadFromXML(new FileInputStream(System.getProperty("user.home") + "/.xml/mbaas.properties.xml"))
     props.each { prop ->
         project.ext.set(prop.key, prop.value)
     }

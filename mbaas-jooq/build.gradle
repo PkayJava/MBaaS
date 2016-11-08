@@ -51,9 +51,10 @@ sourceSets {
 }
 
 flyway {
-    driver = project.ext.get('temp.jdbc.driver')
+    // driver = project.ext.get('temp.jdbc.driver')
+    driver = 'com.mysql.jdbc.Driver'
     // url = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + project.ext.get('temp.jdbc.port') + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
-    url = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + 9306 + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
+    url = 'jdbc:mysql://localhost:9306/mbaas_temp?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&serverTimezone=UTC'
     // project.ext.get('temp.jdbc.username')
     user = 'mbaas_temp'
     // project.ext.get('temp.jdbc.password')
@@ -63,15 +64,16 @@ flyway {
 }
 
 jooq {
-    jdbcDriver = project.ext.get('temp.jdbc.driver')
+    // jdbcDriver = project.ext.get('temp.jdbc.driver')
+    jdbcDriver = 'com.mysql.jdbc.Driver'
     // jdbcUrl = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + project.ext.get('temp.jdbc.port') + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
-    jdbcUrl = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + 9306 + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
+    jdbcUrl = 'jdbc:mysql://localhost:9306/mbaas_temp?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&serverTimezone=UTC'
     // jdbcUser = project.ext.get('temp.jdbc.username')
     jdbcUser = 'mbaas_temp';
     // jdbcPassword = project.ext.get('temp.jdbc.password')
     jdbcPassword = 'secret'
-    database = project.ext.get('temp.jdbc.database')
-    dialect = project.ext.get('temp.jdbc.dialect')
+    database = 'mbaas_temp'
+    dialect = 'org.jooq.util.mysql.MySQLDatabase'
     packageName = 'com.angkorteam.mbaas.model.entity'
     outputDirectory = 'buildSrc/src/main/java'
 }
