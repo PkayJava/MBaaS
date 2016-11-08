@@ -45,37 +45,24 @@ public class Constants {
     public static final String JDBC_COLUMN_OWNER_USER_ID = "jdbc.column.owner_user_id";
     public static final String JDBC_COLUMN_DATE_CREATED = "jdbc.column.date_created";
 
-    public static final String ROLE_MBAAS_ADMINISTRATOR = "role.mbaas.administrator";
-    public static final String ROLE_MBAAS_ADMINISTRATOR_DESCRIPTION = "role.mbaas.administrator.description";
-    public static final String ROLE_MBAAS_SYSTEM = "role.mbaas.system";
-    public static final String ROLE_MBAAS_SYSTEM_DESCRIPTION = "role.mbaas.system.description";
-
-    public static final String MENU_ROOT = "menu.root";
-
     public static final String ROLE_ADMINISTRATOR = "role.administrator";
     public static final String ROLE_ADMINISTRATOR_DESCRIPTION = "role.administrator.description";
-    public static final String ROLE_REGISTERED = "role.registered";
-    public static final String ROLE_REGISTERED_DESCRIPTION = "role.registered.description";
-    public static final String ROLE_ANONYMOUS= "role.anonymous";
-    public static final String ROLE_ANONYMOUS_DESCRIPTION = "role.anonymous.description";
-    public static final String ROLE_OAUTH2_AUTHORIZATION = "role.oauth2.authorization";
-    public static final String ROLE_OAUTH2_AUTHORIZATION_DESCRIPTION = "role.oauth2.authorization.description";
-    public static final String ROLE_OAUTH2_IMPLICIT = "role.oauth2.implicit";
-    public static final String ROLE_OAUTH2_IMPLICIT_DESCRIPTION = "role.oauth2.implicit.description";
-    public static final String ROLE_OAUTH2_PASSWORD = "role.oauth2.password";
-    public static final String ROLE_OAUTH2_PASSWORD_DESCRIPTION = "role.oauth2.password.description";
-    public static final String ROLE_OAUTH2_CLIENT = "role.oauth2.client";
-    public static final String ROLE_OAUTH2_CLIENT_DESCRIPTION = "role.oauth2.client.description";
+    public static final String ROLE_SYSTEM = "role.system";
+    public static final String ROLE_SYSTEM_DESCRIPTION = "role.system.description";
+    public static final String ROLE_SERVICE = "role.service";
+    public static final String ROLE_SERVICE_DESCRIPTION = "role.service.description";
 
-    public static final String USER_MBAAS_ADMIN = "user.mbaas.admin";
-    public static final String USER_MBAAS_ADMIN_ROLE = "user.mbaas.admin.role";
-    public static final String USER_MBAAS_ADMIN_PASSWORD = "user.mbaas.admin.password";
-    public static final String USER_MBAAS_SYSTEM = "user.mbaas.system";
-    public static final String USER_MBAAS_SYSTEM_ROLE = "user.mbaas.system.role";
-    public static final String USER_MBAAS_SYSTEM_PASSWORD = "user.mbaas.system.password";
     public static final String USER_ADMIN = "user.admin";
     public static final String USER_ADMIN_ROLE = "user.admin.role";
     public static final String USER_ADMIN_PASSWORD = "user.admin.password";
+
+    public static final String USER_SYSTEM = "user.system";
+    public static final String USER_SYSTEM_ROLE = "user.system.role";
+    public static final String USER_SYSTEM_PASSWORD = "user.system.password";
+
+    public static final String USER_SERVICE = "user.service";
+    public static final String USER_SERVICE_ROLE = "user.service.role";
+    public static final String USER_SERVICE_PASSWORD = "user.service.password";
 
     public static final String PATTERN_DATETIME = "pattern.datetime";
     public static final String PATTERN_TIME = "pattern.time";

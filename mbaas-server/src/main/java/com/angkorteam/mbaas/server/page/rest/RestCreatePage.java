@@ -3,21 +3,29 @@ package com.angkorteam.mbaas.server.page.rest;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
+import com.angkorteam.mbaas.model.entity.tables.RestRoleTable;
 import com.angkorteam.mbaas.model.entity.tables.RestTable;
+import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import com.angkorteam.mbaas.model.entity.tables.records.GroovyRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.RestRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.RestRoleRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
+import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.RestNameValidator;
 import com.angkorteam.mbaas.server.validator.RestPathMethodValidator;
 import groovy.lang.GroovyCodeSource;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
@@ -36,9 +44,15 @@ import java.util.List;
  */
 public class RestCreatePage extends MBaaSPage {
 
+    private String restUuid;
+
     private String requestPath;
     private TextField<String> requestPathField;
     private TextFeedbackPanel requestPathFeedback;
+
+    private List<RolePojo> role;
+    private Select2MultipleChoice<RolePojo> roleField;
+    private TextFeedbackPanel roleFeedback;
 
     private List<String> methods;
     private String method;
@@ -69,9 +83,21 @@ public class RestCreatePage extends MBaaSPage {
     @Override
     protected void doInitialize(Border layout) {
         add(layout);
+        DSLContext context = Spring.getBean(DSLContext.class);
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+
+        System system = Spring.getBean(System.class);
+        this.restUuid = system.randomUUID();
 
         this.form = new Form<>("form");
         layout.add(this.form);
+
+        this.role = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_SERVICE))).fetchInto(RolePojo.class);
+        this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RolesChoiceProvider());
+        this.form.add(this.roleField);
+        this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);
+        this.form.add(this.roleFeedback);
 
         this.methods = Arrays.asList(HttpMethod.GET.name(), HttpMethod.DELETE.name(), HttpMethod.POST.name(), HttpMethod.PUT.name());
         this.methodField = new DropDownChoice<>("methodField", new PropertyModel<>(this, "method"), new PropertyModel<>(this, "methods"));
@@ -103,7 +129,7 @@ public class RestCreatePage extends MBaaSPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        this.groovy = getString("groovy.script");
+        this.groovy = String.format(getString("groovy.script"), this.restUuid);
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
         this.groovyField.setRequired(true);
         this.groovyField.add(new GroovyScriptValidator());
@@ -148,7 +174,7 @@ public class RestCreatePage extends MBaaSPage {
         groovyRecord.store();
 
         RestRecord restRecord = context.newRecord(restTable);
-        restRecord.setRestId(system.randomUUID());
+        restRecord.setRestId(this.restUuid);
         restRecord.setSystem(false);
         restRecord.setName(this.name);
         restRecord.setPath(this.requestPath);
@@ -157,6 +183,15 @@ public class RestCreatePage extends MBaaSPage {
         restRecord.setMethod(this.method);
         restRecord.setGroovyId(groovyId);
         restRecord.store();
+
+        RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
+        for (RolePojo role : this.role) {
+            RestRoleRecord restRoleRecord = context.newRecord(restRoleTable);
+            restRoleRecord.setRestRoleId(system.randomUUID());
+            restRoleRecord.setRoleId(role.getRoleId());
+            restRoleRecord.setRestId(this.restUuid);
+            restRoleRecord.store();
+        }
 
         setResponsePage(RestBrowsePage.class);
     }

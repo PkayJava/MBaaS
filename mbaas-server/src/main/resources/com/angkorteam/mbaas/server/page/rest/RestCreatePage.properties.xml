@@ -3,28 +3,34 @@
 <properties>
     <entry key="groovy.script"><![CDATA[package com.angkorteam.mbaas.server.groovy
 
-import com.angkorteam.mbaas.plain.response.GroovyResponse
+import com.angkorteam.mbaas.plain.response.RestResponse
 import com.angkorteam.mbaas.server.bean.System
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
-import com.angkorteam.mbaas.server.spring.GroovyService
+import com.angkorteam.mbaas.server.spring.RestService
 
 import javax.servlet.http.HttpServletRequest
 
 /**
  * Created by socheat on 11/4/16.
  */
-class SampleService implements GroovyService {
+class SampleService implements RestService {
 
     @Autowired
     private System system
 
     @Override
-    ResponseEntity<GroovyResponse> service(HttpServletRequest request) throws Throwable {
+    ResponseEntity<RestResponse> service(HttpServletRequest request) throws Throwable {
         // enjoy your logic here
-        GroovyResponse response = new GroovyResponse()
+        RestResponse response = new RestResponse()
         response.setData(system.randomUUID())
         return ResponseEntity.ok(response)
+    }
+
+    @Override
+    public final String getRestUUID() {
+        // DO NOT MODIFIED
+        return "%s"
     }
 
 }

@@ -3,18 +3,24 @@ package com.angkorteam.mbaas.server.page.rest;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
+import com.angkorteam.mbaas.model.entity.tables.RestRoleTable;
 import com.angkorteam.mbaas.model.entity.tables.RestTable;
+import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RestPojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import com.angkorteam.mbaas.model.entity.tables.records.GroovyRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.RestRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.RestRoleRecord;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
+import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
 import com.angkorteam.mbaas.server.validator.RestNameValidator;
 import com.angkorteam.mbaas.server.validator.RestPathMethodValidator;
 import groovy.lang.GroovyCodeSource;
@@ -43,6 +49,10 @@ public class RestModifyPage extends MBaaSPage {
     private String requestPath;
     private TextField<String> requestPathField;
     private TextFeedbackPanel requestPathFeedback;
+
+    private List<RolePojo> role;
+    private Select2MultipleChoice<RolePojo> roleField;
+    private TextFeedbackPanel roleFeedback;
 
     private List<String> methods;
     private String method;
@@ -76,6 +86,8 @@ public class RestModifyPage extends MBaaSPage {
 
         DSLContext context = Spring.getBean(DSLContext.class);
         RestTable restTable = Tables.REST.as("restTable");
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
 
         this.restId = getPageParameters().get("restId").toString("");
@@ -87,6 +99,12 @@ public class RestModifyPage extends MBaaSPage {
 
         this.form = new Form<>("form");
         layout.add(this.form);
+
+        this.role = context.select(roleTable.fields()).from(roleTable).innerJoin(restRoleTable).on(roleTable.ROLE_ID.eq(restRoleTable.ROLE_ID)).where(restRoleTable.REST_ID.eq(this.restId)).fetchInto(RolePojo.class);
+        this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RolesChoiceProvider());
+        this.form.add(this.roleField);
+        this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);
+        this.form.add(this.roleFeedback);
 
         this.method = restRecord.getMethod();
         this.methods = Arrays.asList(HttpMethod.GET.name(), HttpMethod.DELETE.name(), HttpMethod.POST.name(), HttpMethod.PUT.name());
@@ -146,8 +164,8 @@ public class RestModifyPage extends MBaaSPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        DSLContext context = Spring.getBean(DSLContext.class);
         System system = Spring.getBean(System.class);
+        DSLContext context = Spring.getBean(DSLContext.class);
         RestTable restTable = Tables.REST.as("restTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
 
@@ -171,6 +189,18 @@ public class RestModifyPage extends MBaaSPage {
         restRecord.setMethod(this.method);
         restRecord.update();
         setResponsePage(RestBrowsePage.class);
+
+        RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
+
+        context.delete(restRoleTable).where(restRoleTable.REST_ID.eq(this.restId)).execute();
+
+        for (RolePojo role : this.role) {
+            RestRoleRecord restRoleRecord = context.newRecord(restRoleTable);
+            restRoleRecord.setRestRoleId(system.randomUUID());
+            restRoleRecord.setRoleId(role.getRoleId());
+            restRoleRecord.setRestId(this.restId);
+            restRoleRecord.store();
+        }
     }
 
 }

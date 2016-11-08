@@ -113,6 +113,7 @@ public class PageModifyPage extends MBaaSPage {
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+
         PagePojo page = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(this.pageUuid)).fetchOneInto(PagePojo.class);
         GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(page.getGroovyId())).fetchOneInto(GroovyPojo.class);
         this.groovyId = groovy.getGroovyId();

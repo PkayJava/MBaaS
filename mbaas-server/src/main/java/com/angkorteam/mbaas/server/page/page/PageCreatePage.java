@@ -189,7 +189,6 @@ public class PageCreatePage extends MBaaSPage {
 
         Application.get().mountPage(this.mountPath, (Class<? extends Page>) pageClass);
 
-
         PageRecord pageRecord = context.newRecord(pageTable);
         pageRecord.setPageId(this.pageUuid);
         if (this.layout != null) {
