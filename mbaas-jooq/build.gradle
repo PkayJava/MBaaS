@@ -95,3 +95,9 @@ task startMySQL {
 }
 
 flywayClean.dependsOn startMySQL
+
+assemble.dependsOn clean 
+assemble.dependsOn startMySQL
+assemble.dependsOn flywayClean 
+assemble.dependsOn flywayMigrate 
+assemble.dependsOn jooq
