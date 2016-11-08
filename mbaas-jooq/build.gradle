@@ -1,8 +1,14 @@
+import com.wix.mysql.config.*;
+import com.wix.mysql.distribution.*
+import java.util.concurrent.*
+import com.wix.mysql.*
+
 buildscript {
     dependencies {
         classpath 'mysql:mysql-connector-java:' + mysqlVersion
         classpath 'org.flywaydb:flyway-gradle-plugin:' + flywayVersion
         classpath 'com.angkorteam.gradle:plugintask:' + plugintaskVersion
+        classpath 'com.wix:wix-embedded-mysql:' + wixVersion
     }
     repositories {
         maven { url "http://dl.bintray.com/socheat/maven" }
@@ -30,6 +36,7 @@ dependencies {
     compile 'org.apache.commons:commons-dbcp2:' + commonsdbcp2Version
     compile 'org.apache.commons:commons-lang3:' + commonslang3Version
     compile 'commons-io:commons-io:' + commonsioVersion
+    compile 'com.wix:wix-embedded-mysql:' + wixVersion
 }
 
 sourceSets {
@@ -45,20 +52,44 @@ sourceSets {
 
 flyway {
     driver = project.ext.get('temp.jdbc.driver')
-    url = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + project.ext.get('temp.jdbc.port') + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
-    user = project.ext.get('temp.jdbc.username')
-    password = project.ext.get('temp.jdbc.password')
+    // url = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + project.ext.get('temp.jdbc.port') + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
+    url = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + 9306 + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
+    // project.ext.get('temp.jdbc.username')
+    user = 'mbaas_temp'
+    // project.ext.get('temp.jdbc.password')
+    password = 'secret'
     encoding = 'UTF-8'
     baselineOnMigrate = true
 }
 
 jooq {
     jdbcDriver = project.ext.get('temp.jdbc.driver')
-    jdbcUrl = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + project.ext.get('temp.jdbc.port') + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
-    jdbcUser = project.ext.get('temp.jdbc.username')
-    jdbcPassword = project.ext.get('temp.jdbc.password')
+    // jdbcUrl = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + project.ext.get('temp.jdbc.port') + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
+    jdbcUrl = 'jdbc:mysql://' + project.ext.get('temp.jdbc.hostname') + ':' + 9306 + '/' + project.ext.get('temp.jdbc.database') + '?' + project.ext.get('temp.jdbc.extra')
+    // jdbcUser = project.ext.get('temp.jdbc.username')
+    jdbcUser = 'mbaas_temp';
+    // jdbcPassword = project.ext.get('temp.jdbc.password')
+    jdbcPassword = 'secret'
     database = project.ext.get('temp.jdbc.database')
     dialect = project.ext.get('temp.jdbc.dialect')
     packageName = 'com.angkorteam.mbaas.model.entity'
     outputDirectory = 'buildSrc/src/main/java'
 }
+
+task startMySQL {
+    doLast {
+        def config = MysqldConfig.aMysqldConfig(Version.v5_6_latest)
+                .withCharset(Charset.UTF8)
+                .withPort(9306)
+                .withUser("mbaas_temp", "secret")
+                .withTimeZone("Asian/Phnom_Penh")
+                .withTimeout(2, TimeUnit.MINUTES)
+                .build();
+
+        def mysqld = EmbeddedMysql.anEmbeddedMysql(config)
+                .addSchema("mbaas_temp")
+                .start();
+    }
+}
+
+flywayClean.dependsOn startMySQL

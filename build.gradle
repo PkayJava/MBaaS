@@ -22,6 +22,7 @@ allprojects {
     ext {
         plugintaskVersion = '1.0.0'
         elasticsearchVersion = '2.4.1'
+        wixVersion = '2.0.6'
         groovyVersion = '2.4.7'
         commonsioVersion = '2.5'
         commonsconfigurationVersion = '1.10'
