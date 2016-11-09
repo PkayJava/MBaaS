@@ -9,5 +9,7 @@ before_install:
 jdk:
 - oraclejdk8
 
+install: true
+
 script:
 - gradle -Ptravis=true clean flywayClean flywayMigrate jooq war
