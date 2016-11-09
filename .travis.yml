@@ -10,4 +10,4 @@ jdk:
 - oraclejdk8
 
 script:
-- bundle exec gradle -Ptravis=true clean flywayClean flywayMigrate jooq war
+- gradle -Ptravis=true clean flywayClean flywayMigrate jooq war
