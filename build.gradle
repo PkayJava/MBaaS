@@ -9,7 +9,12 @@ allprojects {
     targetCompatibility = JavaVersion.VERSION_1_8
 
     Properties props = new Properties()
-    // props.loadFromXML(new FileInputStream(System.getProperty("user.home") + "/.xml/mbaas.properties.xml"))
+    if (project.hasProperty('travis') && project.getProperty('travis')) {
+        props.loadFromXML(new FileInputStream(System.getProperty("user.home") + "/.xml/mbaas.properties.xml"))
+    } else {
+        props.loadFromXML(new FileInputStream("travis-mbaas.properties.xml"))
+    }
+    props.loadFromXML(new FileInputStream(System.getProperty("user.home") + "/.xml/mbaas.properties.xml"))
     props.each { prop ->
         project.ext.set(prop.key, prop.value)
     }
@@ -65,5 +70,4 @@ allprojects {
         javassistVersion = '3.20.0-GA'
         jsonVersion = '20160810'
     }
-
 }
