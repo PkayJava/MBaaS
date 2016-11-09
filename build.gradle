@@ -14,7 +14,6 @@ allprojects {
     } else {
         props.loadFromXML(new FileInputStream(System.getProperty("user.home") + "/.xml/mbaas.properties.xml"))
     }
-    props.loadFromXML(new FileInputStream(System.getProperty("user.home") + "/.xml/mbaas.properties.xml"))
     props.each { prop ->
         project.ext.set(prop.key, prop.value)
     }
