@@ -1,4 +1,4 @@
-sudo: required
+\sudo: required
 
 language: java
 
@@ -8,6 +8,9 @@ before_install:
 
 jdk:
 - oraclejdk8
+
+services:
+  - mysql
 
 install: true
 
