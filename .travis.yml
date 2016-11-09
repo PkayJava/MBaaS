@@ -1,4 +1,6 @@
-\sudo: required
+dist: trusty
+
+sudo: required
 
 language: java
 
@@ -13,6 +15,13 @@ services:
   - mysql
 
 install: true
+
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
 
 script:
 - gradle -Ptravis=true clean flywayClean flywayMigrate jooq war
