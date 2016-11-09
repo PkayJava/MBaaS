@@ -7,7 +7,7 @@ CREATE TABLE query (
   script          TEXT         NOT NULL,
   return_type     VARCHAR(50)  NOT NULL,
   return_sub_type VARCHAR(50),
-  date_created    DATETIME     NOT NULL DEFAULT NOW(),
+  date_created    DATETIME     NOT NULL,
   security        VARCHAR(15)  NOT NULL,
   system          BIT(1)       NOT NULL DEFAULT 0,
 
