@@ -8,7 +8,7 @@ CREATE TABLE file (
   mime         VARCHAR(100),
   extension    VARCHAR(10),
   `length`     INT(11)      NOT NULL,
-  date_created DATETIME     NOT NULL DEFAULT NOW(),
+  date_created DATETIME     NOT NULL,
   system       BIT(1)       NOT NULL DEFAULT 0,
 
   KEY `index__file__system` (system),
