@@ -29,7 +29,7 @@
         <ref bean="interceptor"/>
     </mvc:interceptors>
 
-    <mvc:resources mapping="/resource/**" location="file:${resource.repo}/" cache-period="604800"/>
+    <mvc:resources mapping="/resource/**" location="file:${resource.repo}/" cache-period="604800" order="-1"/>
 
     <task:annotation-driven executor="executor" scheduler="scheduler"/>
 
@@ -39,7 +39,7 @@
         <security:csrf disabled="true"/>
         <security:http-basic/>
         <security:intercept-url access="permitAll" pattern="/api/resource/**"/>
-        <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/groovy/**"/>
+        <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/**"/>
     </security:http>
 
     <security:authentication-manager erase-credentials="true">
