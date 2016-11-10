@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server;
 
+import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
@@ -15,7 +16,9 @@ import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import groovy.lang.GroovyCodeSource;
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.Page;
+import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
@@ -177,4 +180,11 @@ public class Application extends AuthenticatedWebApplication {
             }
         }
     }
+
+    @Override
+    public RuntimeConfigurationType getConfigurationType() {
+        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        return RuntimeConfigurationType.valueOf(configuration.getString(Constants.WICKET));
+    }
+
 }
