@@ -156,7 +156,29 @@ public class AttributeCreatePage extends MBaaSPage {
         requestBody.setEav(this.eav);
         requestBody.setType(this.type);
         requestBody.setCollectionName(this.collection.getName());
-        requestBody.setLength(this.length);
+        if (this.type.equals(TypeEnum.Boolean.getLiteral()) || this.type.equals(TypeEnum.Character.getLiteral())) {
+            requestBody.setLength(1);
+            requestBody.setPrecision(-1);
+        } else if (this.type.equals(TypeEnum.Long.getLiteral())) {
+            requestBody.setLength(this.length);
+            requestBody.setPrecision(-1);
+        } else if (this.type.equals(TypeEnum.Double.getLiteral())) {
+            requestBody.setLength(this.length);
+            requestBody.setPrecision(this.precision);
+        } else if (this.type.equals(TypeEnum.String.getLiteral())) {
+            requestBody.setLength(this.length);
+            requestBody.setPrecision(-1);
+        } else if (this.type.equals(TypeEnum.Text.getLiteral())
+                || this.type.equals(TypeEnum.DateTime.getLiteral())
+                || this.type.equals(TypeEnum.Date.getLiteral())
+                || this.type.equals(TypeEnum.Time.getLiteral())) {
+            requestBody.setLength(-1);
+            requestBody.setPrecision(-1);
+        } else {
+            requestBody.setLength(this.length);
+            requestBody.setPrecision(this.precision);
+        }
+
         if (IndexEnum.INDEX.getLiteral().equals(this.index)) {
             requestBody.setIndex("KEY");
         } else if (IndexEnum.UNIQUE.getLiteral().equals(this.index)) {
@@ -164,7 +186,7 @@ public class AttributeCreatePage extends MBaaSPage {
         } else if (IndexEnum.FULLTEXT.getLiteral().equals(this.index)) {
             requestBody.setIndex("FULLTEXT KEY");
         }
-        requestBody.setPrecision(this.precision);
+
 
         AttributeFunction.createAttribute(requestBody);
 
