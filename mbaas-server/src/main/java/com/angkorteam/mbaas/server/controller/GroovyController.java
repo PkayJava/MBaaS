@@ -11,7 +11,9 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import com.angkorteam.mbaas.plain.response.RestResponse;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.spring.RestService;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.jooq.DSLContext;
@@ -19,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
@@ -63,11 +66,12 @@ public class GroovyController {
         RestPojo restPojo = this.context.select(restTable.fields()).from(restTable).where(restTable.PATH.eq(request.getPathInfo())).and(restTable.METHOD.eq(method)).fetchOneInto(RestPojo.class);
 
         if (restPojo == null) {
-            throw new IllegalArgumentException("service is not found");
+            return notFound();
+
         }
         GroovyPojo groovyPojo = this.context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(restPojo.getGroovyId())).fetchOneInto(GroovyPojo.class);
         if (groovyPojo == null) {
-            throw new IllegalArgumentException("service is not found");
+            return notFound();
         }
 
         Class<?> clazz = classLoader.loadClass(groovyPojo.getJavaClass());
@@ -88,10 +92,31 @@ public class GroovyController {
         }
 
         if (!restRoles.hasAnyRole(userRoles)) {
-            throw new IllegalArgumentException("service is not found");
+            return notFound();
         }
         SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(service, servletContext);
-        return service.service(request);
+        try {
+            return service.service(request);
+        } catch (Throwable e) {
+            RestResponse response = new RestResponse();
+            response.setResultCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setResultMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+            List<String> stackTraces = Lists.newArrayList();
+            for (StackTraceElement element : e.getStackTrace()) {
+                String line = element.getClassName() + "." + element.getMethodName() + "(" + FilenameUtils.getName(element.getFileName()) + ":" + element.getLineNumber() + ")";
+                stackTraces.add(line);
+            }
+            response.setStackTrace(stackTraces);
+            response.setDebugMessage(e.getMessage());
+            return ResponseEntity.ok(response);
+        }
+    }
 
+    protected ResponseEntity<RestResponse> notFound() {
+        RestResponse response = new RestResponse();
+        response.setResultCode(HttpStatus.NOT_FOUND.value());
+        response.setResultMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+        response.setDebugMessage("service is not found");
+        return ResponseEntity.ok(response);
     }
 }
