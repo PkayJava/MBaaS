@@ -1,8 +1,9 @@
 package com.angkorteam.mbaas.server.factory;
 
 import com.angkorteam.mbaas.server.bean.Configuration;
-import com.angkorteam.mbaas.server.bean.System;
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.elasticsearch.common.Strings;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -10,6 +11,7 @@ import org.springframework.web.context.ServletContextAware;
 
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
+import java.io.File;
 
 /**
  * Created by Khauv Socheat on 2/4/2016.
@@ -20,7 +22,7 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource>, Initializ
 
     private ServletContext servletContext;
 
-    private System system;
+    private Configuration configuration;
 
     @Override
     public DataSource getObject() throws Exception {
@@ -39,7 +41,19 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource>, Initializ
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Configuration configuration = this.system.getConfiguration();
+        String configurationFile = this.servletContext.getInitParameter("configuration");
+        File file;
+        if (!Strings.isNullOrEmpty(configurationFile)) {
+            file = new File(configurationFile);
+        } else {
+            File home = new File(java.lang.System.getProperty("user.home"));
+            file = new File(home, ".xml/" + Configuration.KEY);
+        }
+        try {
+            this.configuration = new Configuration(file);
+        } catch (ConfigurationException e) {
+        }
+
         String itest = java.lang.System.getProperty("itest");
         if (itest == null || "".equals(itest)) {
             String jdbcDriver = configuration.getString(Configuration.APP_JDBC_DRIVER);
@@ -78,9 +92,5 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource>, Initializ
     @Override
     public void destroy() throws Exception {
         this.dataSource.close();
-    }
-
-    public void setSystem(System system) {
-        this.system = system;
     }
 }

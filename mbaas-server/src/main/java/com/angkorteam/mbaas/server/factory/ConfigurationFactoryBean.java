@@ -1,6 +1,8 @@
 package com.angkorteam.mbaas.server.factory;
 
 import com.angkorteam.mbaas.server.bean.System;
+import com.google.common.base.Strings;
+import org.apache.commons.configuration.ConfigurationException;
 import org.jooq.Configuration;
 import org.jooq.SQLDialect;
 import org.jooq.conf.MappedSchema;
@@ -13,6 +15,7 @@ import org.springframework.web.context.ServletContextAware;
 
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
+import java.io.File;
 
 /**
  * Created by socheat on 10/23/16.
@@ -24,8 +27,6 @@ public class ConfigurationFactoryBean implements FactoryBean<Configuration>, Ini
     private ServletContext servletContext;
 
     private DataSource dataSource;
-
-    private System system;
 
     @Override
     public Configuration getObject() throws Exception {
@@ -44,7 +45,20 @@ public class ConfigurationFactoryBean implements FactoryBean<Configuration>, Ini
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        com.angkorteam.mbaas.server.bean.Configuration xml = this.system.getConfiguration();
+        com.angkorteam.mbaas.server.bean.Configuration xml = null;
+        String configurationFile = this.servletContext.getInitParameter("configuration");
+        File file;
+        if (!Strings.isNullOrEmpty(configurationFile)) {
+            file = new File(configurationFile);
+        } else {
+            File home = new File(java.lang.System.getProperty("user.home"));
+            file = new File(home, ".xml/" + com.angkorteam.mbaas.server.bean.Configuration.KEY);
+        }
+        try {
+            xml = new com.angkorteam.mbaas.server.bean.Configuration(file);
+        } catch (ConfigurationException e) {
+        }
+
         MappedSchema mappedSchema = new MappedSchema();
         mappedSchema.withInput(xml.getString(com.angkorteam.mbaas.server.bean.Configuration.TEMP_JDBC_DATABASE));
         String itest = java.lang.System.getProperty("itest");
@@ -83,9 +97,5 @@ public class ConfigurationFactoryBean implements FactoryBean<Configuration>, Ini
 
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
-    }
-
-    public void setSystem(System system) {
-        this.system = system;
     }
 }
