@@ -1,10 +1,11 @@
 package com.angkorteam.mbaas.server.spring;
 
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.response.UnknownResponse;
 import com.angkorteam.mbaas.server.MBaaS;
+import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.Configuration;
+import com.angkorteam.mbaas.server.bean.System;
 import com.google.gson.Gson;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,8 +29,9 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        Boolean maintenance = configuration.getBoolean(Constants.MAINTENANCE, false);
+        System system = Spring.getBean(System.class);
+        Configuration configuration = system.getConfiguration();
+        Boolean maintenance = configuration.getBoolean(Configuration.MAINTENANCE, false);
         String id = request.getSession(true).getId();
         if (maintenance) {
             UnknownResponse responseBody = ResponseUtils.unknownResponse(request, HttpStatus.SERVICE_UNAVAILABLE);
@@ -40,7 +42,7 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
             response.getOutputStream().write(json);
             return false;
         }
-        executions.put(id, System.currentTimeMillis());
+        executions.put(id, java.lang.System.currentTimeMillis());
         return true;
     }
 
@@ -48,7 +50,7 @@ public class ExecutionTimeHandlerInterceptor implements HandlerInterceptor {
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         String id = request.getSession(true).getId();
         Long execution = executions.get(id);
-        executions.put(id, System.currentTimeMillis() - execution);
+        executions.put(id, java.lang.System.currentTimeMillis() - execution);
     }
 
     @Override

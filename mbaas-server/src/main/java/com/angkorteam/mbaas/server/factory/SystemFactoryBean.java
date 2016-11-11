@@ -39,7 +39,7 @@ public class SystemFactoryBean implements FactoryBean<System>, InitializingBean,
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.system = new System(this.context, this.jdbcTemplate);
+        this.system = new System(this.context, this.jdbcTemplate, this.servletContext);
     }
 
     public void setContext(DSLContext context) {

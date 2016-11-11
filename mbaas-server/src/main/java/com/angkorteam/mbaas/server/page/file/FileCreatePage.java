@@ -2,14 +2,13 @@ package com.angkorteam.mbaas.server.page.file;
 
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.FileTable;
 import com.angkorteam.mbaas.model.entity.tables.records.FileRecord;
 import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.Configuration;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -83,10 +82,10 @@ public class FileCreatePage extends MBaaSPage {
         System system = Spring.getBean(System.class);
 
         FileUpload file = this.file.get(0);
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        Configuration configuration = system.getConfiguration();
 
-        String patternFolder = configuration.getString(Constants.PATTERN_FOLDER);
-        String repo = configuration.getString(Constants.RESOURCE_REPO);
+        String patternFolder = configuration.getString(Configuration.PATTERN_FOLDER);
+        String repo = configuration.getString(Configuration.RESOURCE_REPO);
         String fileRepo = DateFormatUtils.format(new Date(), patternFolder);
         File container = new File(repo, fileRepo);
         String extension = StringUtils.lowerCase(FilenameUtils.getExtension(file.getClientFileName()));

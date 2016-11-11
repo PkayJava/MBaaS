@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.server.bean;
 
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.PageRoleTable;
@@ -9,7 +8,6 @@ import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
 import com.angkorteam.mbaas.server.Session;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.Component;
 import org.apache.wicket.authorization.Action;
 import org.apache.wicket.authorization.IAuthorizationStrategy;
@@ -43,8 +41,8 @@ public class AuthorizationStrategy implements IAuthorizationStrategy {
     public <T extends IRequestableComponent> boolean isInstantiationAuthorized(Class<T> componentClass) {
         Roles roles = Session.get().getRoles();
         if (roles != null && !roles.isEmpty()) {
-            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-            if (roles.hasRole(configuration.getString(Constants.ROLE_ADMINISTRATOR))) {
+            Configuration configuration = system.getConfiguration();
+            if (roles.hasRole(configuration.getString(Configuration.ROLE_ADMINISTRATOR))) {
                 return true;
             }
         }

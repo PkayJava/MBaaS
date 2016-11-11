@@ -1,6 +1,5 @@
 package com.angkorteam.mbaas.server;
 
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
@@ -10,13 +9,11 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.LayoutPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RestPojo;
-import com.angkorteam.mbaas.server.bean.AuthorizationStrategy;
-import com.angkorteam.mbaas.server.bean.ClassResolver;
-import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
+import com.angkorteam.mbaas.server.bean.*;
+import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
 import groovy.lang.GroovyCodeSource;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.WicketRuntimeException;
@@ -183,8 +180,9 @@ public class Application extends AuthenticatedWebApplication {
 
     @Override
     public RuntimeConfigurationType getConfigurationType() {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        return RuntimeConfigurationType.valueOf(configuration.getString(Constants.WICKET));
+        System system = Spring.getBean(System.class);
+        Configuration configuration = system.getConfiguration();
+        return RuntimeConfigurationType.valueOf(configuration.getString(Configuration.WICKET));
     }
 
 }

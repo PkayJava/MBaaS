@@ -5,7 +5,6 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptTextArea;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.RestRoleTable;
@@ -17,6 +16,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.RestRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.RestRoleRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.Configuration;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
@@ -25,7 +25,6 @@ import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.RestNameValidator;
 import com.angkorteam.mbaas.server.validator.RestPathMethodValidator;
 import groovy.lang.GroovyCodeSource;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
@@ -83,17 +82,17 @@ public class RestCreatePage extends MBaaSPage {
     @Override
     protected void doInitialize(Border layout) {
         add(layout);
+        System system = Spring.getBean(System.class);
         DSLContext context = Spring.getBean(DSLContext.class);
         RoleTable roleTable = Tables.ROLE.as("roleTable");
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        Configuration configuration = system.getConfiguration();
 
-        System system = Spring.getBean(System.class);
         this.restUuid = system.randomUUID();
 
         this.form = new Form<>("form");
         layout.add(this.form);
 
-        this.role = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Constants.ROLE_SERVICE))).fetchInto(RolePojo.class);
+        this.role = context.select(roleTable.fields()).from(roleTable).where(roleTable.NAME.eq(configuration.getString(Configuration.ROLE_SERVICE))).fetchInto(RolePojo.class);
         this.roleField = new Select2MultipleChoice<>("roleField", new PropertyModel<>(this, "role"), new RolesChoiceProvider());
         this.form.add(this.roleField);
         this.roleFeedback = new TextFeedbackPanel("roleFeedback", this.roleField);

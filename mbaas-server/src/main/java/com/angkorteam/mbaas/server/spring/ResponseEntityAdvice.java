@@ -1,9 +1,10 @@
 package com.angkorteam.mbaas.server.spring;
 
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.response.Response;
 import com.angkorteam.mbaas.plain.response.UnknownResponse;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
+import com.angkorteam.mbaas.server.bean.Configuration;
+import com.angkorteam.mbaas.server.bean.System;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,9 @@ import java.util.Map;
 @ControllerAdvice
 public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
 
+    @Autowired
+    private System system;
+
     public ResponseEntityAdvice() {
     }
 
@@ -33,7 +37,7 @@ public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
 
     @Override
     public Response beforeBodyWrite(Response body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        Configuration configuration = system.getConfiguration();
 
         Response responseBody = body;
         if (body == null) {
@@ -59,7 +63,6 @@ public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
             requestHeader.put(entry.getKey(), entry.getValue());
         }
 
-        responseBody.setVersion(configuration.getString(Constants.APP_VERSION));
         responseBody.setMethod(request.getMethod().name());
 
         return responseBody;

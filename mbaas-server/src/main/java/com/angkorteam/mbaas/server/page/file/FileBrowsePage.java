@@ -6,14 +6,14 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredColumn;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredColumn;
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.FileTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.FilePojo;
 import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.Configuration;
+import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.provider.FileProvider;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
@@ -66,12 +66,13 @@ public class FileBrowsePage extends MBaaSPage implements TableEvent {
     @Override
     public void onClickEventLink(String link, Map<String, Object> object) {
         DSLContext context = Spring.getBean(DSLContext.class);
+        System system = Spring.getBean(System.class);
         FileTable fileTable = Tables.FILE.as("fileTable");
         String fileId = (String) object.get("fileId");
         FilePojo fileRecord = context.select(fileTable.fields()).from(fileTable).where(fileTable.FILE_ID.eq(fileId)).fetchOneInto(FilePojo.class);
+        Configuration configuration = system.getConfiguration();
         if ("Delete".equals(link)) {
-            XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-            String repo = configuration.getString(Constants.RESOURCE_REPO);
+            String repo = configuration.getString(Configuration.RESOURCE_REPO);
             String path = fileRecord.getPath();
             String name = fileRecord.getName();
             File file = new File(repo, path + "/" + name);

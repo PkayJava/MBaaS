@@ -1,8 +1,6 @@
 package com.angkorteam.mbaas.server.spring;
 
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.plain.response.UnknownResponse;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.springframework.http.HttpStatus;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +15,6 @@ import java.util.Map;
 public class ResponseUtils {
 
     public static UnknownResponse unknownResponse(HttpServletRequest request, HttpStatus httpStatus) {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
         UnknownResponse responseBody = new UnknownResponse();
         Map<String, List<String>> requestHeader = responseBody.getRequestHeader();
         Enumeration<String> headers = request.getHeaderNames();
@@ -30,7 +27,6 @@ public class ResponseUtils {
             }
             requestHeader.put(header, value);
         }
-        responseBody.setVersion(configuration.getString(Constants.APP_VERSION));
         responseBody.setMethod(request.getMethod());
         responseBody.setResultCode(httpStatus.value());
         responseBody.setResultMessage(httpStatus.getReasonPhrase());

@@ -1,7 +1,7 @@
 package com.angkorteam.mbaas.server.factory;
 
-import com.angkorteam.mbaas.configuration.Constants;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
+import com.angkorteam.mbaas.server.bean.Configuration;
+import com.angkorteam.mbaas.server.bean.System;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -20,6 +20,8 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource>, Initializ
 
     private ServletContext servletContext;
 
+    private System system;
+
     @Override
     public DataSource getObject() throws Exception {
         return this.dataSource;
@@ -37,19 +39,19 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource>, Initializ
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
-        String itest = System.getProperty("itest");
+        Configuration configuration = this.system.getConfiguration();
+        String itest = java.lang.System.getProperty("itest");
         if (itest == null || "".equals(itest)) {
-            String jdbcDriver = configuration.getString(Constants.APP_JDBC_DRIVER);
-            String jdbcUrl = "jdbc:mysql://" + configuration.getString(Constants.APP_JDBC_HOSTNAME) + ":" + configuration.getString(Constants.APP_JDBC_PORT) + "/" + configuration.getString(Constants.APP_JDBC_DATABASE) + "?" + configuration.getString(Constants.APP_JDBC_EXTRA);
-            String username = configuration.getString(Constants.APP_JDBC_USERNAME);
-            String password = configuration.getString(Constants.APP_JDBC_PASSWORD);
+            String jdbcDriver = configuration.getString(Configuration.APP_JDBC_DRIVER);
+            String jdbcUrl = "jdbc:mysql://" + configuration.getString(Configuration.APP_JDBC_HOSTNAME) + ":" + configuration.getString(Configuration.APP_JDBC_PORT) + "/" + configuration.getString(Configuration.APP_JDBC_DATABASE) + "?" + configuration.getString(Configuration.APP_JDBC_EXTRA);
+            String username = configuration.getString(Configuration.APP_JDBC_USERNAME);
+            String password = configuration.getString(Configuration.APP_JDBC_PASSWORD);
             this.dataSource = getDataSource(jdbcDriver, jdbcUrl, username, password);
         } else {
-            String jdbcDriver = configuration.getString(Constants.TEST_JDBC_DRIVER);
-            String jdbcUrl = "jdbc:mysql://" + configuration.getString(Constants.TEST_JDBC_HOSTNAME) + ":" + configuration.getString(Constants.TEST_JDBC_PORT) + "/" + configuration.getString(Constants.TEST_JDBC_DATABASE) + "?" + configuration.getString(Constants.TEST_JDBC_EXTRA);
-            String username = configuration.getString(Constants.TEST_JDBC_USERNAME);
-            String password = configuration.getString(Constants.TEST_JDBC_PASSWORD);
+            String jdbcDriver = configuration.getString(Configuration.TEST_JDBC_DRIVER);
+            String jdbcUrl = "jdbc:mysql://" + configuration.getString(Configuration.TEST_JDBC_HOSTNAME) + ":" + configuration.getString(Configuration.TEST_JDBC_PORT) + "/" + configuration.getString(Configuration.TEST_JDBC_DATABASE) + "?" + configuration.getString(Configuration.TEST_JDBC_EXTRA);
+            String username = configuration.getString(Configuration.TEST_JDBC_USERNAME);
+            String password = configuration.getString(Configuration.TEST_JDBC_PASSWORD);
             this.dataSource = getDataSource(jdbcDriver, jdbcUrl, username, password);
         }
     }
@@ -76,5 +78,9 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource>, Initializ
     @Override
     public void destroy() throws Exception {
         this.dataSource.close();
+    }
+
+    public void setSystem(System system) {
+        this.system = system;
     }
 }

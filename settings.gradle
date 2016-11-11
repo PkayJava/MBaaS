@@ -1,4 +1,4 @@
 rootProject.name = 'mbaas'
 
-include 'mbaas-configuration', 'mbaas-plain', 'mbaas-jooq', 'mbaas-server'
+include 'mbaas-plain', 'mbaas-jooq', 'mbaas-server'
 

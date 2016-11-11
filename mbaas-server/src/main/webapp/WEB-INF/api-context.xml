@@ -80,10 +80,13 @@
         <property name="serializeNulls" value="false"/>
     </bean>
 
-    <bean id="dataSource" class="com.angkorteam.mbaas.server.factory.DataSourceFactoryBean"/>
+    <bean id="dataSource" class="com.angkorteam.mbaas.server.factory.DataSourceFactoryBean">
+        <property name="system" ref="system"/>
+    </bean>
 
     <bean id="configuration" class="com.angkorteam.mbaas.server.factory.ConfigurationFactoryBean">
         <property name="dataSource" ref="dataSource"/>
+        <property name="system" ref="system"/>
     </bean>
 
     <bean id="context" class="com.angkorteam.mbaas.server.factory.DSLContextFactoryBean">

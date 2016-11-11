@@ -1,17 +1,19 @@
 package com.angkorteam.mbaas.server.bean;
 
-import com.angkorteam.mbaas.configuration.Constants;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.FileTable;
 import com.angkorteam.mbaas.model.entity.tables.records.FileRecord;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
+import com.angkorteam.mbaas.server.Spring;
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.elasticsearch.common.Strings;
 import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.util.Date;
 import java.util.UUID;
@@ -22,9 +24,38 @@ public class System {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public System(DSLContext context, JdbcTemplate jdbcTemplate) {
+    private final ServletContext servletContext;
+
+    private Configuration configuration;
+
+    private long lastModified = -1;
+
+    public System(DSLContext context, JdbcTemplate jdbcTemplate, ServletContext servletContext) {
         this.context = context;
+        this.servletContext = servletContext;
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public Configuration getConfiguration() {
+        String configuration = this.servletContext.getInitParameter("configuration");
+        File file;
+        if (!Strings.isNullOrEmpty(configuration)) {
+            file = new File(configuration);
+        } else {
+            File home = new File(java.lang.System.getProperty("user.home"));
+            file = new File(home, ".xml/" + Configuration.KEY);
+        }
+        try {
+            if (this.configuration == null) {
+                this.configuration = new Configuration(file);
+            } else {
+                if (lastModified != file.lastModified()) {
+                    this.configuration = new Configuration(file);
+                }
+            }
+        } catch (ConfigurationException e) {
+        }
+        return this.configuration;
     }
 
     public synchronized String randomUUID() {
@@ -32,10 +63,11 @@ public class System {
     }
 
     public String saveFile(File file) {
-        XMLPropertiesConfiguration configuration = Constants.getXmlPropertiesConfiguration();
+        System system = Spring.getBean(System.class);
+        Configuration configuration = system.getConfiguration();
 
-        String patternFolder = configuration.getString(Constants.PATTERN_FOLDER);
-        String repo = configuration.getString(Constants.RESOURCE_REPO);
+        String patternFolder = configuration.getString(Configuration.PATTERN_FOLDER);
+        String repo = configuration.getString(Configuration.RESOURCE_REPO);
         String fileRepo = DateFormatUtils.format(new Date(), patternFolder);
         File container = new File(repo, fileRepo);
         String extension = StringUtils.lowerCase(FilenameUtils.getExtension(file.getName()));

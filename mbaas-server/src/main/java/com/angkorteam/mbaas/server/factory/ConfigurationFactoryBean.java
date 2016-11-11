@@ -1,7 +1,6 @@
 package com.angkorteam.mbaas.server.factory;
 
-import com.angkorteam.mbaas.configuration.Constants;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
+import com.angkorteam.mbaas.server.bean.System;
 import org.jooq.Configuration;
 import org.jooq.SQLDialect;
 import org.jooq.conf.MappedSchema;
@@ -26,6 +25,8 @@ public class ConfigurationFactoryBean implements FactoryBean<Configuration>, Ini
 
     private DataSource dataSource;
 
+    private System system;
+
     @Override
     public Configuration getObject() throws Exception {
         return configuration;
@@ -43,14 +44,14 @@ public class ConfigurationFactoryBean implements FactoryBean<Configuration>, Ini
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        XMLPropertiesConfiguration xml = Constants.getXmlPropertiesConfiguration();
+        com.angkorteam.mbaas.server.bean.Configuration xml = this.system.getConfiguration();
         MappedSchema mappedSchema = new MappedSchema();
-        mappedSchema.withInput(xml.getString(Constants.TEMP_JDBC_DATABASE));
-        String itest = System.getProperty("itest");
+        mappedSchema.withInput(xml.getString(com.angkorteam.mbaas.server.bean.Configuration.TEMP_JDBC_DATABASE));
+        String itest = java.lang.System.getProperty("itest");
         if (itest == null || "".equals(itest)) {
-            mappedSchema.withOutput(xml.getString(Constants.APP_JDBC_DATABASE));
+            mappedSchema.withOutput(xml.getString(com.angkorteam.mbaas.server.bean.Configuration.APP_JDBC_DATABASE));
         } else {
-            mappedSchema.withOutput(xml.getString(Constants.TEST_JDBC_DATABASE));
+            mappedSchema.withOutput(xml.getString(com.angkorteam.mbaas.server.bean.Configuration.TEST_JDBC_DATABASE));
         }
         RenderMapping renderMapping = new RenderMapping();
         renderMapping.withSchemata(mappedSchema);
@@ -82,5 +83,9 @@ public class ConfigurationFactoryBean implements FactoryBean<Configuration>, Ini
 
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
+    }
+
+    public void setSystem(System system) {
+        this.system = system;
     }
 }

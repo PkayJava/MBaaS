@@ -62,10 +62,6 @@ public abstract class Response<T> implements Serializable {
     private String method;
 
     @Expose
-    @SerializedName("version")
-    private String version;
-
-    @Expose
     @SerializedName("data")
     protected T data;
 
@@ -92,14 +88,6 @@ public abstract class Response<T> implements Serializable {
 
     public void setRequestHeader(Map<String, List<String>> requestHeader) {
         this.requestHeader = requestHeader;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     public String getResultMessage() {
