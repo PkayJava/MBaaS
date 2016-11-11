@@ -32,6 +32,7 @@ dependencies {
 
     compile 'org.flywaydb:flyway-core:' + flywayVersion
     compile 'org.elasticsearch:elasticsearch:' + elasticsearchVersion
+    compile 'commons-configuration:commons-configuration:' + commonsconfigurationVersion
 
     compile 'com.angkorteam.framework.extension:framework-extension:' + frameworkextensionVersion
     compile 'org.apache.wicket:wicket-core:' + wicketVersion
