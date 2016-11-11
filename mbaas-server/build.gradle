@@ -24,7 +24,6 @@ version = '1.0'
 dependencies {
     compile project(':mbaas-plain')
     compile project(':mbaas-jooq')
-    compile project(':mbaas-configuration')
 
     compile 'com.google.code.gson:gson:' + gsonVersion
 
