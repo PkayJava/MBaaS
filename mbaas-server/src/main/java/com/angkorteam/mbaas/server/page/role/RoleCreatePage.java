@@ -6,16 +6,18 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.PageRoleTable;
+import com.angkorteam.mbaas.model.entity.tables.RestRoleTable;
 import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.RestPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.PageRoleRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.RestRoleRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.RoleRecord;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.select2.PagesChoiceProvider;
-import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
+import com.angkorteam.mbaas.server.select2.RestsChoiceProvider;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -41,6 +43,10 @@ public class RoleCreatePage extends MBaaSPage {
     private Select2MultipleChoice<PagePojo> pageField;
     private TextFeedbackPanel pageFeedback;
 
+    private List<RestPojo> rest;
+    private Select2MultipleChoice<RestPojo> restField;
+    private TextFeedbackPanel restFeedback;
+
     private Form<Void> form;
     private Button saveButton;
     private BookmarkablePageLink<Void> closeButton;
@@ -61,6 +67,11 @@ public class RoleCreatePage extends MBaaSPage {
         this.form.add(this.pageField);
         this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);
         this.form.add(this.pageFeedback);
+
+        this.restField = new Select2MultipleChoice<>("restField", new PropertyModel<>(this, "rest"), new RestsChoiceProvider());
+        this.form.add(this.restField);
+        this.restFeedback = new TextFeedbackPanel("restFeedback", this.restField);
+        this.form.add(this.restFeedback);
 
         this.nameField = new TextField<>("nameField", new PropertyModel<>(this, "name"));
         this.nameField.setRequired(true);
@@ -87,6 +98,7 @@ public class RoleCreatePage extends MBaaSPage {
         String roleId = system.randomUUID();
         DSLContext context = Spring.getBean(DSLContext.class);
         PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
+        RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         RoleRecord roleRecord = context.newRecord(roleTable);
         roleRecord.setRoleId(roleId);
@@ -102,6 +114,16 @@ public class RoleCreatePage extends MBaaSPage {
                 pageRoleRecord.setPageId(page.getPageId());
                 pageRoleRecord.setRoleId(roleId);
                 pageRoleRecord.store();
+            }
+        }
+
+        if (this.rest != null && !this.rest.isEmpty()) {
+            for (RestPojo rest : this.rest) {
+                RestRoleRecord restRoleRecord = context.newRecord(restRoleTable);
+                restRoleRecord.setRestRoleId(system.randomUUID());
+                restRoleRecord.setRestId(rest.getRestId());
+                restRoleRecord.setRoleId(roleId);
+                restRoleRecord.store();
             }
         }
 
