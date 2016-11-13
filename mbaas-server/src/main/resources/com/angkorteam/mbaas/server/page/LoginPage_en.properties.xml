@@ -10,4 +10,6 @@
     <entry key="passwordField.Required">Password is required.</entry>
     <entry key="loginField.incorrect">Login is incorrect.</entry>
     <entry key="passwordField.incorrect">Password is incorrect.</entry>
+
+    <entry key="languageField.Required">Language is required.</entry>
 </properties>

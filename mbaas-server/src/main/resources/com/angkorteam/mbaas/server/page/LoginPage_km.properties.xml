@@ -7,9 +7,11 @@
 
     <entry key="button.login">យល់ព្រម</entry>
 
-    <entry key="loginField.Required">ទាមទារអោយមានឈ្មោះសំងាត់</entry>
-    <entry key="passwordField.Required">ទាមទារអោយមានលេខសំងាត់</entry>
+    <entry key="loginField.Required">ទាមទារអោយបញ្ចូលឈ្មោះសំងាត់</entry>
+    <entry key="passwordField.Required">ទាមទារអោយបញ្ចូលលេខសំងាត់</entry>
 
     <entry key="loginField.incorrect">ឈ្មោះសំងាត់មិនត្រឹមត្រូវ</entry>
     <entry key="passwordField.incorrect">លេខសំងាត់មិនត្រឹមត្រូវ</entry>
+
+    <entry key="languageField.Required">ទាមទារអោយជ្រើសរើសភាសា</entry>
 </properties>
