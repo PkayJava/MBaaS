@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="label.login">ឈ្មោះសំងាត់</entry>
+    <entry key="label.password">លេខសំងាត់</entry>
+    <entry key="label.language">ភាសា</entry>
+
+    <entry key="button.login">យល់ព្រម</entry>
+
+    <entry key="loginField.Required">ទាមទារអោយមានឈ្មោះសំងាត់</entry>
+    <entry key="passwordField.Required">ទាមទារអោយមានលេខសំងាត់</entry>
+
+    <entry key="loginField.incorrect">ឈ្មោះសំងាត់មិនត្រឹមត្រូវ</entry>
+    <entry key="passwordField.incorrect">លេខសំងាត់មិនត្រឹមត្រូវ</entry>
+</properties>
