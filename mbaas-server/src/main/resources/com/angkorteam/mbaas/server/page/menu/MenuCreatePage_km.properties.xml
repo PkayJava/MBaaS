@@ -3,12 +3,17 @@
 <properties>
     <entry key="label.title">Title</entry>
     <entry key="label.order">Order</entry>
+    <entry key="label.icon">Icon</entry>
+    <entry key="label.parent">Parent</entry>
+    <entry key="label.section">Section</entry>
     <entry key="button.close">ចាកចេញ</entry>
     <entry key="button.save">រក្សាទុក</entry>
 
     <entry key="titleField.Required">ទាមទារអោយបញ្ចូល Title</entry>
     <entry key="orderField.Required">ទាមទារអោយបញ្ចូល Order</entry>
     <entry key="orderField.IConverter">បញ្ចូល Order មិនមែនជាលេខគត់</entry>
-    <entry key="titleField.SectionTitleValidator.duplicated">Title បញ្ចូលស្ទួន</entry>
+    <entry key="iconField.Required">ទាមទារអោយបញ្ចូល Order</entry>
+    <entry key="parentField.Required">ទាមទារអោយជ្រើសរើស Parent</entry>
+    <entry key="sectionField.Required">ទាមទារអោយជ្រើសរើស Section</entry>
 
 </properties>

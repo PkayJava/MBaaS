@@ -29,7 +29,6 @@ import java.util.List;
  */
 public class MenuCreatePage extends MBaaSPage {
 
-
     private String title;
     private TextField<String> titleField;
     private TextFeedbackPanel titleFeedback;

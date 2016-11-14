@@ -11,37 +11,51 @@
                 <div class="box-body">
                     <!-- Row -->
                     <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                        <label wicket:for="titleField">Title</label>
+                        <label wicket:for="titleField">
+                            <wicket:message key="label.title">Title</wicket:message>
+                        </label>
                         <input wicket:id="titleField" type="text" class="form-control"/>
                         <span wicket:id="titleFeedback" class="help-block"/>
                     </div>
                     <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                        <label wicket:for="iconField">Icon</label>
+                        <label wicket:for="iconField">
+                            <wicket:message key="label.icon">Icon</wicket:message>
+                        </label>
                         <input wicket:id="iconField" type="text" class="form-control"/>
                         <span wicket:id="iconFeedback" class="help-block"/>
                     </div>
                     <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                        <label wicket:for="orderField">Order</label>
+                        <label wicket:for="orderField">
+                            <wicket:message key="label.order">Order</wicket:message>
+                        </label>
                         <input wicket:id="orderField" type="text" class="form-control"/>
                         <span wicket:id="orderFeedback" class="help-block"/>
                     </div>
                     <div class="clearfix"></div>
                     <!-- Row -->
                     <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-4 col-xs-6">
-                        <label wicket:for="parentField">Parent</label>
+                        <label wicket:for="parentField">
+                            <wicket:message key="label.parent">Parent</wicket:message>
+                        </label>
                         <select wicket:id="parentField" class="form-control"/>
                         <span wicket:id="parentFeedback" class="help-block"/>
                     </div>
                     <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-4 col-xs-6">
-                        <label wicket:for="sectionField">Section</label>
+                        <label wicket:for="sectionField">
+                            <wicket:message key="label.section">Section</wicket:message>
+                        </label>
                         <select wicket:id="sectionField" class="form-control"/>
                         <span wicket:id="sectionFeedback" class="help-block"/>
                     </div>
                     <div class="clearfix"></div>
                 </div>
                 <div class="box-footer">
-                    <a wicket:id="closeButton" class="btn btn-default">Close</a>
-                    <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">Save</button>
+                    <a wicket:id="closeButton" class="btn btn-default">
+                        <wicket:message key="button.close">Close</wicket:message>
+                    </a>
+                    <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">
+                        <wicket:message key="button.save">Save</wicket:message>
+                    </button>
                 </div>
             </form>
         </div>
