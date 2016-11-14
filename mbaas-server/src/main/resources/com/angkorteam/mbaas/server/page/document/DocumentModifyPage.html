@@ -15,8 +15,12 @@
                 </div>
 
                 <div class="box-footer">
-                    <a class="btn btn-default" wicket:id="closeButton">Close</a>
-                    <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">Save</button>
+                    <a class="btn btn-default" wicket:id="closeButton">
+                        <wicket:message key="button.close">Close</wicket:message>
+                    </a>
+                    <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">
+                        <wicket:message key="button.save">Save</wicket:message>
+                    </button>
                 </div>
             </form>
         </div>
