@@ -11,8 +11,8 @@
 
     <entry key="titleField.Required">ទាមទារអោយបញ្ចូល Title</entry>
     <entry key="orderField.Required">ទាមទារអោយបញ្ចូល Order</entry>
-    <entry key="orderField.IConverter">បញ្ចូល Order មិនមែនជាលេខគត់</entry>
-    <entry key="iconField.Required">ទាមទារអោយបញ្ចូល Order</entry>
+    <entry key="orderField.IConverter">ទាមទារអោយបញ្ចូល Order ជាលេខគត់</entry>
+    <entry key="iconField.Required">ទាមទារអោយបញ្ចូល Icon</entry>
     <entry key="parentField.Required">ទាមទារអោយជ្រើសរើស Parent</entry>
     <entry key="sectionField.Required">ទាមទារអោយជ្រើសរើស Section</entry>
 

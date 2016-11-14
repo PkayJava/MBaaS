@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="label.title">Title</entry>
+    <entry key="label.icon">Icon</entry>
+    <entry key="label.order">Order</entry>
+    <entry key="label.page">Page</entry>
+    <entry key="label.menu">Menu</entry>
+    <entry key="label.section">Section</entry>
+    <entry key="button.close">Close</entry>
+    <entry key="button.save">Save</entry>
+
+    <entry key="titleField.Required">Title is required.</entry>
+    <entry key="orderField.Required">Order is required.</entry>
+    <entry key="orderField.IConverter">The value of Order is not a valid number.</entry>
+    <entry key="iconField.Required">Icon is required.</entry>
+    <entry key="pageField.Required">Page is required.</entry>
+    <entry key="menuField.Required">Menu is required.</entry>
+    <entry key="sectionField.Required">Section is required.</entry>
+
+</properties>

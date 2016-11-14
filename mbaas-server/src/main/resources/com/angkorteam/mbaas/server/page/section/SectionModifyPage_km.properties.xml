@@ -8,7 +8,7 @@
 
     <entry key="titleField.Required">ទាមទារអោយបញ្ចូល Title</entry>
     <entry key="orderField.Required">ទាមទារអោយបញ្ចូល Order</entry>
-    <entry key="titleField.SectionTitleValidator.duplicated">Title បញ្ចូលស្ទួន</entry>
-    <entry key="orderField.IConverter">បញ្ចូល Order មិនមែនជាលេខគត់</entry>
+    <entry key="orderField.IConverter">ទាមទារអោយបញ្ចូល Order ជាលេខគត់</entry>
+    <entry key="titleField.SectionTitleValidator.duplicated">ទាមទារមិនអោយបញ្ចូល Title ស្ទួន</entry>
 
 </properties>

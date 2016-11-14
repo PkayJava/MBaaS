@@ -2,13 +2,20 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <entry key="label.title">Title</entry>
+    <entry key="label.icon">Icon</entry>
     <entry key="label.order">Order</entry>
+    <entry key="label.page">Page</entry>
+    <entry key="label.menu">Menu</entry>
+    <entry key="label.section">Section</entry>
     <entry key="button.close">ចាកចេញ</entry>
     <entry key="button.save">រក្សាទុក</entry>
 
     <entry key="titleField.Required">ទាមទារអោយបញ្ចូល Title</entry>
     <entry key="orderField.Required">ទាមទារអោយបញ្ចូល Order</entry>
     <entry key="orderField.IConverter">ទាមទារអោយបញ្ចូល Order ជាលេខគត់</entry>
-    <entry key="titleField.SectionTitleValidator.duplicated">ទាមទារមិនអោយបញ្ចូល Title ស្ទួន</entry>
+    <entry key="iconField.Required">ទាមទារអោយបញ្ចូល Icon</entry>
+    <entry key="pageField.Required">ទាមទារអោយជ្រើសរើស Page</entry>
+    <entry key="menuField.Required">ទាមទារអោយជ្រើសរើស Menu</entry>
+    <entry key="sectionField.Required">ទាមទារអោយជ្រើសរើស Section</entry>
 
 </properties>
