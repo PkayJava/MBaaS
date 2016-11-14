@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.model.entity.tables.FileTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.FilePojo;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
+import org.apache.commons.io.FileUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.Form;
@@ -28,8 +29,8 @@ public class FileModifyPage extends MBaaSPage {
     private TextField<String> nameField;
     private TextFeedbackPanel nameFeedback;
 
-    private Integer length;
-    private Label lengthLabel;
+    private String size;
+    private Label sizeLabel;
 
     private String mime;
     private Label mimeLabel;
@@ -71,21 +72,21 @@ public class FileModifyPage extends MBaaSPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        this.length = fileRecord.getLength();
-        this.lengthLabel = new Label("lengthLabel", new PropertyModel<>(this, "length"));
-        this.form.add(lengthLabel);
+        this.size = FileUtils.byteCountToDisplaySize(fileRecord.getLength());
+        this.sizeLabel = new Label("sizeLabel", new PropertyModel<>(this, "size"));
+        this.form.add(this.sizeLabel);
 
         this.mime = fileRecord.getMime();
         this.mimeLabel = new Label("mimeLabel", new PropertyModel<>(this, "mime"));
-        this.form.add(mimeLabel);
+        this.form.add(this.mimeLabel);
 
         this.extension = fileRecord.getExtension();
         this.extensionLabel = new Label("extensionLabel", new PropertyModel<>(this, "extension"));
-        this.form.add(extensionLabel);
+        this.form.add(this.extensionLabel);
 
         this.pathText = fileRecord.getPath();
         this.pathLabel = new Label("pathLabel", new PropertyModel<>(this, "pathText"));
-        this.form.add(pathLabel);
+        this.form.add(this.pathLabel);
 
         this.saveButton = new Button("saveButton");
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);

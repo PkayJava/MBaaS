@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+    <entry key="label.name">Name</entry>
+    <entry key="label.file">File</entry>
+    <entry key="button.close">Close</entry>
+    <entry key="button.save">Save</entry>
+
+    <entry key="nameField.Required">Name is required.</entry>
+    <entry key="fileField.Required">File is required.</entry>
+
+</properties>
