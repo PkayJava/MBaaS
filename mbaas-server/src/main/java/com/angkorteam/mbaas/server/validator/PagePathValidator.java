@@ -29,12 +29,12 @@ public class PagePathValidator implements IValidator<String> {
         String path = validatable.getValue();
         if (!Strings.isNullOrEmpty(path)) {
             if (path.startsWith("/api")) {
-                validatable.error(new ValidationError(this, "format"));
+                validatable.error(new ValidationError(this, "invalid"));
                 return;
             }
 
             if (path.charAt(0) != '/') {
-                validatable.error(new ValidationError(this, "format"));
+                validatable.error(new ValidationError(this, "invalid"));
                 return;
             }
 
@@ -42,13 +42,13 @@ public class PagePathValidator implements IValidator<String> {
                 for (int i = 1; i < path.length(); i++) {
                     char ch = path.charAt(i);
                     if (ch != '/' && !Application.CHARACTERS.contains(ch) && !Application.NUMBERS.contains(ch)) {
-                        validatable.error(new ValidationError(this, "format"));
+                        validatable.error(new ValidationError(this, "invalid"));
                         return;
                     }
                 }
             }
             if (path.contains("//")) {
-                validatable.error(new ValidationError(this, "format"));
+                validatable.error(new ValidationError(this, "invalid"));
                 return;
             }
             DSLContext context = Spring.getBean(DSLContext.class);

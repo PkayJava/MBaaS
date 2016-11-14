@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="label.title">Title</entry>
+    <entry key="label.path">Path</entry>
+    <entry key="label.code">Code</entry>
+    <entry key="label.layout">Layout</entry>
+    <entry key="label.role">Role</entry>
+    <entry key="label.description">Description</entry>
+    <entry key="label.html">HTML</entry>
+    <entry key="label.groovy">Groovy</entry>
+
+    <entry key="button.close">ចាកចេញ</entry>
+    <entry key="button.save">រក្សាទុក</entry>
+
+    <entry key="pathField.Required">ទាមទារអោយបញ្ចូល Path</entry>
+    <entry key="pathField.PagePathValidator.invalid">បញ្ចូល Path មិនត្រឹមត្រូវ</entry>
+    <entry key="pathField.PagePathValidator.duplicated">ទាមទារមិនអោយបញ្ចូល Path ស្ទួន</entry>
+    <entry key="codeField.Required">ទាមទារអោយបញ្ចូល Code</entry>
+    <entry key="codeField.PageCodeValidator.duplicated">ទាមទារមិនអោយបញ្ចូល Code ស្ទួន</entry>
+    <entry key="layoutField.Required">ទាមទារអោយបញ្ចូល Layout</entry>
+    <entry key="titleField.Required">ទាមទារអោយបញ្ចូល Title</entry>
+    <entry key="descriptionField.Required">ទាមទារអោយបញ្ចូល Description</entry>
+    <entry key="htmlField.Required">ទាមទារអោយបញ្ចូល HTML</entry>
+    <entry key="groovyField.Required">ទាមទារអោយបញ្ចូល Groovy</entry>
+    <entry key="groovyField.GroovyScriptValidator.error">ការត្រូតពិនិត្យ Groovy បរាជ័យដោយសារតែ '${reason}'.</entry>
+    <entry key="groovyField.GroovyScriptValidator.invalid">ឈ្មោះ Package របស់ ${object} មិនត្រឹមត្រូវ</entry>
+    <entry key="groovyField.GroovyScriptValidator.duplicated">ទាមទារមិនអោយបង្កើត ${object} ស្ទួន.</entry>
+
+</properties>

@@ -24,6 +24,7 @@ import com.angkorteam.mbaas.server.choice.LayoutChoiceRenderer;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
+import com.angkorteam.mbaas.server.validator.PageCodeValidator;
 import com.angkorteam.mbaas.server.validator.PagePathValidator;
 import groovy.lang.GroovyCodeSource;
 import org.apache.wicket.Page;
@@ -125,6 +126,7 @@ public class PageCreatePage extends MBaaSPage {
 
         this.codeField = new TextField<>("codeField", new PropertyModel<>(this, "code"));
         this.codeField.setRequired(true);
+        this.codeField.add(new PageCodeValidator());
         this.form.add(this.codeField);
         this.codeFeedback = new TextFeedbackPanel("codeFeedback", this.codeField);
         this.form.add(this.codeFeedback);

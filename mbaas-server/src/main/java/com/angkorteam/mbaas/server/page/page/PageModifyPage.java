@@ -7,11 +7,7 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.JavascriptText
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2MultipleChoice;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
-import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
-import com.angkorteam.mbaas.model.entity.tables.PageRoleTable;
-import com.angkorteam.mbaas.model.entity.tables.PageTable;
-import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.LayoutPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
@@ -26,6 +22,8 @@ import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.choice.LayoutChoiceRenderer;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
+import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
+import com.angkorteam.mbaas.server.validator.PageCodeValidator;
 import com.angkorteam.mbaas.server.validator.PagePathValidator;
 import groovy.lang.GroovyCodeSource;
 import org.apache.wicket.Page;
@@ -152,12 +150,14 @@ public class PageModifyPage extends MBaaSPage {
 
         this.codeField = new TextField<>("codeField", new PropertyModel<>(this, "code"));
         this.codeField.setRequired(true);
+        this.codeField.add(new PageCodeValidator(this.pageUuid));
         this.form.add(this.codeField);
         this.codeFeedback = new TextFeedbackPanel("codeFeedback", this.codeField);
         this.form.add(this.codeFeedback);
 
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
         this.groovyField.setRequired(true);
+        this.groovyField.add(new GroovyScriptValidator(this.pageUuid));
         this.form.add(this.groovyField);
         this.groovyFeedback = new TextFeedbackPanel("groovyFeedback", this.groovyField);
         this.form.add(this.groovyFeedback);
