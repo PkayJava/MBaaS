@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+    <entry key="label.name">Name</entry>
+    <entry key="label.type">Type</entry>
+    <entry key="label.index">Index</entry>
+    <entry key="label.length">Length</entry>
+    <entry key="label.precision">Precision</entry>
+    <entry key="label.order">Order</entry>
+    <entry key="label.nullable">Nullable</entry>
+    <entry key="label.eav">EAV</entry>
+    <entry key="button.close">Close</entry>
+    <entry key="button.save">Save</entry>
+
+    <entry key="nameField.Required">Name is required.</entry>
+    <entry key="nameField.AttributeNameValidator.invalid">Name is invalid.</entry>
+    <entry key="nameField.AttributeNameValidator.duplicated">Name is duplicated.</entry>
+    <entry key="indexField.Required">Index is required.</entry>
+    <entry key="lengthField.Required">Length is required.</entry>
+    <entry key="lengthField.IConverter">The value of Length is not a valid number.</entry>
+    <entry key="precisionField.Required">Precision is required.</entry>
+    <entry key="precisionField.IConverter">The value of Precision is not a valid number.</entry>
+    <entry key="orderField.Required">Order is required.</entry>
+    <entry key="orderField.IConverter">The value of Order is not a valid number.</entry>
+    <entry key="nullableField.Required">Nullable is required.</entry>
+    <entry key="eavField.Required">EAV is required.</entry>
+
+</properties>

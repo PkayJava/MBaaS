@@ -33,14 +33,14 @@ public class AttributeNameValidator implements IValidator<String> {
         String name = validatable.getValue();
         if (!Strings.isNullOrEmpty(name)) {
             if (!Application.CHARACTERS.contains(name.charAt(0))) {
-                validatable.error(new ValidationError(this, "format"));
+                validatable.error(new ValidationError(this, "invalid"));
                 return;
             }
             if (name.length() > 1) {
                 for (int i = 1; i < name.length(); i++) {
                     char ch = name.charAt(i);
                     if (ch != '_' && !Application.CHARACTERS.contains(ch) && !Application.NUMBERS.contains(ch)) {
-                        validatable.error(new ValidationError(this, "format"));
+                        validatable.error(new ValidationError(this, "invalid"));
                         return;
                     }
                 }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+    <entry key="label.name">Name</entry>
+    <entry key="label.type">Type</entry>
+    <entry key="label.index">Index</entry>
+    <entry key="label.length">Length</entry>
+    <entry key="label.precision">Precision</entry>
+    <entry key="label.order">Order</entry>
+    <entry key="label.nullable">Nullable</entry>
+    <entry key="label.eav">EAV</entry>
+    <entry key="button.close">ចាកចេញ</entry>
+    <entry key="button.save">រក្សាទុក</entry>
+
+    <entry key="nameField.Required">ទាមទារអោយបញ្ចូល Name</entry>
+    <entry key="nameField.AttributeNameValidator.invalid">បញ្ចូល Name មិនត្រឹមត្រូវ</entry>
+    <entry key="nameField.AttributeNameValidator.duplicated">ទាមទារមិនអោយបញ្ចូល Name ស្ទួន</entry>
+    <entry key="indexField.Required">ទាមទារអោយបញ្ចូល Index</entry>
+    <entry key="lengthField.Required">ទាមទារអោយបញ្ចូល Length</entry>
+    <entry key="lengthField.IConverter">ទាមទារអោយបញ្ចូល Length ជាលេខគត់</entry>
+    <entry key="precisionField.Required">ទាមទារអោយបញ្ចូល Precision</entry>
+    <entry key="precisionField.IConverter">ទាមទារអោយបញ្ចូល Precision ជាលេខគត់</entry>
+    <entry key="orderField.Required">ទាមទារអោយបញ្ចូល Order</entry>
+    <entry key="orderField.IConverter">ទាមទារអោយបញ្ចូល Order ជាលេខគត់</entry>
+    <entry key="nullableField.Required">ទាមទារអោយបញ្ចូល Nullable</entry>
+    <entry key="eavField.Required">ទាមទារអោយបញ្ចូល EAV</entry>
+
+</properties>

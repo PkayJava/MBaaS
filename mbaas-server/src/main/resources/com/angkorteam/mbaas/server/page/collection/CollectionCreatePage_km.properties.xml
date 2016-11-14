@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+    <entry key="label.name">ឈ្មោះ</entry>
+    <entry key="button.close">ចាកចេញ</entry>
+    <entry key="button.save">រក្សាទុក</entry>
+
+    <entry key="nameField.Required">ទាមទារអោយបញ្ចូលឈ្មោះ</entry>
+    <entry key="nameField.CollectionNameValidator.invalid">បញ្ចូលឈ្មោះមិនត្រឹមត្រូវ</entry>
+    <entry key="nameField.CollectionNameValidator.duplicated">ទាមទារមិនអោយបញ្ចូលឈ្មោះស្ទួន</entry>
+
+</properties>

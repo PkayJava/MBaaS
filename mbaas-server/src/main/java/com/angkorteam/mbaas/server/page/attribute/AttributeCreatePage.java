@@ -20,6 +20,8 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.validation.validator.RangeValidator;
+import org.elasticsearch.common.Strings;
 import org.jooq.DSLContext;
 
 import java.util.ArrayList;
@@ -98,7 +100,17 @@ public class AttributeCreatePage extends MBaaSPage {
 
         this.types = new ArrayList<>(Arrays.asList(TypeEnum.Boolean.getLiteral(), TypeEnum.Long.getLiteral(), TypeEnum.Double.getLiteral(), TypeEnum.Character.getLiteral(), TypeEnum.String.getLiteral(), TypeEnum.Text.getLiteral(), TypeEnum.Time.getLiteral(), TypeEnum.Date.getLiteral(), TypeEnum.DateTime.getLiteral()));
         this.type = TypeEnum.String.getLiteral();
-        this.typeField = new DropDownChoice<>("typeField", new PropertyModel<>(this, "type"), new PropertyModel<>(this, "types"));
+        this.typeField = new DropDownChoice<String>("typeField", new PropertyModel<>(this, "type"), new PropertyModel<>(this, "types")) {
+            @Override
+            protected boolean wantOnSelectionChangedNotifications() {
+                return true;
+            }
+
+            @Override
+            protected void onSelectionChanged(String newSelection) {
+                typeSelectionChanged(newSelection);
+            }
+        };
         this.typeField.setRequired(true);
         this.form.add(this.typeField);
         this.typeFeedback = new TextFeedbackPanel("typeFeedback", this.typeField);
@@ -147,6 +159,39 @@ public class AttributeCreatePage extends MBaaSPage {
         parameters.add("collectionId", this.collectionId);
         closeButton = new BookmarkablePageLink<>("closeButton", AttributeBrowsePage.class, parameters);
         this.form.add(closeButton);
+
+        typeSelectionChanged(TypeEnum.String.getLiteral());
+    }
+
+    private void typeSelectionChanged(String newValue) {
+        this.lengthField.setRequired(false);
+        this.lengthField.getBehaviors().clear();
+        this.precisionField.setRequired(false);
+        this.precisionField.getBehaviors().clear();
+        if (!Strings.isNullOrEmpty(newValue)) {
+            if (TypeEnum.String.equals(newValue)) {
+                this.lengthField.setRequired(true);
+                this.lengthField.setType(Integer.class);
+                this.lengthField.add(RangeValidator.range(2, 255));
+            } else if (TypeEnum.Long.equals(newValue)) {
+                this.lengthField.setRequired(true);
+                this.lengthField.setType(Integer.class);
+                this.lengthField.add(RangeValidator.range(1, 11));
+            } else if (TypeEnum.Double.equals(newValue)) {
+                this.lengthField.setRequired(true);
+                this.lengthField.setType(Integer.class);
+                this.lengthField.add(RangeValidator.range(1, 15));
+                this.precisionField.setRequired(true);
+                this.precisionField.setType(Integer.class);
+                this.precisionField.add(RangeValidator.range(0, 4));
+            } else if (TypeEnum.Boolean.equals(newValue)) {
+            } else if (TypeEnum.Text.equals(newValue)) {
+            } else if (TypeEnum.Time.equals(newValue)) {
+            } else if (TypeEnum.Date.equals(newValue)) {
+            } else if (TypeEnum.Character.equals(newValue)) {
+            } else if (TypeEnum.DateTime.equals(newValue)) {
+            }
+        }
     }
 
     private void saveButtonOnSubmit(Button button) {
