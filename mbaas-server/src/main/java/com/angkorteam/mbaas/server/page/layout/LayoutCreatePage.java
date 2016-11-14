@@ -15,6 +15,7 @@ import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
+import com.angkorteam.mbaas.server.validator.LayoutTitleValidator;
 import groovy.lang.GroovyCodeSource;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -76,6 +77,7 @@ public class LayoutCreatePage extends MBaaSPage {
 
         this.titleField = new TextField<>("titleField", new PropertyModel<>(this, "title"));
         this.titleField.setRequired(true);
+        this.titleField.add(new LayoutTitleValidator());
         this.form.add(this.titleField);
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);
@@ -128,7 +130,6 @@ public class LayoutCreatePage extends MBaaSPage {
         groovyRecord.setJavaClass(layoutClass.getName());
         groovyRecord.setScript(this.groovy);
         groovyRecord.store();
-
 
         LayoutRecord layoutRecord = context.newRecord(layoutTable);
         layoutRecord.setLayoutId(this.layoutUuid);

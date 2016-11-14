@@ -37,11 +37,11 @@ public class GroovyScriptValidator implements IValidator<String> {
             try {
                 groovyClass = classLoader.parseClass(source, false);
             } catch (CompilationFailedException e) {
-                validatable.error(new ValidationError(this, "error"));
+                validatable.error(new ValidationError(this, "error").setVariable("reason", e.getMessage()));
                 return;
             }
             if (!groovyClass.getName().startsWith("com.angkorteam.mbaas.server.groovy.")) {
-                validatable.error(new ValidationError(this, "invalid"));
+                validatable.error(new ValidationError(this, "invalid").setVariable("object", groovyClass.getName()));
                 return;
             }
             int count = 0;
@@ -53,7 +53,7 @@ public class GroovyScriptValidator implements IValidator<String> {
                 count = context.selectCount().from(table).where(table.JAVA_CLASS.eq(groovyClass.getName())).and(table.GROOVY_ID.notEqual(this.documentId)).fetchOneInto(int.class);
             }
             if (count > 0) {
-                validatable.error(new ValidationError(this, "duplicated"));
+                validatable.error(new ValidationError(this, "duplicated").setVariable("object", groovyClass.getName()));
             }
         }
     }

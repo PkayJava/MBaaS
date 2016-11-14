@@ -36,4 +36,5 @@ class ExampleLayout extends CmsLayout {
 
 }
 ]]></entry>
+
 </properties>

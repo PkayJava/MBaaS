@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+    <entry key="label.title">Title</entry>
+    <entry key="label.description">Description</entry>
+    <entry key="label.html">HTML</entry>
+    <entry key="label.groovy">Groovy</entry>
+    <entry key="button.close">Close</entry>
+    <entry key="button.save">Save</entry>
+
+    <entry key="titleField.Required">Title is required.</entry>
+    <entry key="titleField.LayoutTitleValidator.duplicated">Title is duplicated.</entry>
+    <entry key="descriptionField.Required">Description is required.</entry>
+    <entry key="htmlField.Required">HTML is required.</entry>
+    <entry key="groovyField.Required">Groovy is required.</entry>
+    <entry key="groovyField.GroovyScriptValidator.error">Groovy is not compiled due to this reason '${reason}'.</entry>
+    <entry key="groovyField.GroovyScriptValidator.invalid">${object} is not invalid package name.</entry>
+    <entry key="groovyField.GroovyScriptValidator.duplicated">${object} is duplicated.</entry>
+
+</properties>

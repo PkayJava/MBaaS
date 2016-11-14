@@ -16,6 +16,7 @@ import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
+import com.angkorteam.mbaas.server.validator.LayoutTitleValidator;
 import groovy.lang.GroovyCodeSource;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -89,6 +90,7 @@ public class LayoutModifyPage extends MBaaSPage {
 
         this.titleField = new TextField<>("titleField", new PropertyModel<>(this, "title"));
         this.titleField.setRequired(true);
+        this.titleField.add(new LayoutTitleValidator(this.layoutUuid));
         this.form.add(this.titleField);
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);
