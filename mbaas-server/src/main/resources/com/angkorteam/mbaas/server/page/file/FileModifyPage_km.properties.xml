@@ -10,6 +10,6 @@
     <entry key="button.close">ចាកចេញ</entry>
     <entry key="button.save">រក្សាទុក</entry>
 
-    <entry key="nameField.Required">ទាមទារអោយបញ្ចូល Name</entry>
+    <entry key="nameField.Required">ទាមទារអោយបញ្ចូលឈ្មោះ</entry>
 
 </properties>
