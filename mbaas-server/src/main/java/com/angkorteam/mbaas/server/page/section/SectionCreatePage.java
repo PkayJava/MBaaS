@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.SectionRecord;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
+import com.angkorteam.mbaas.server.validator.SectionTitleValidator;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -46,6 +47,7 @@ public class SectionCreatePage extends MBaaSPage {
 
         this.titleField = new TextField<>("titleField", new PropertyModel<>(this, "title"));
         this.titleField.setRequired(true);
+        this.titleField.add(new SectionTitleValidator());
         this.form.add(this.titleField);
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);

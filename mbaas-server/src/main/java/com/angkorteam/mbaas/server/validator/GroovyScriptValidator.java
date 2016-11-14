@@ -17,13 +17,13 @@ import org.jooq.DSLContext;
  */
 public class GroovyScriptValidator implements IValidator<String> {
 
-    private String groovyId;
+    private String documentId;
 
     public GroovyScriptValidator() {
     }
 
-    public GroovyScriptValidator(String groovyId) {
-        this.groovyId = groovyId;
+    public GroovyScriptValidator(String documentId) {
+        this.documentId = documentId;
     }
 
     @Override
@@ -46,11 +46,11 @@ public class GroovyScriptValidator implements IValidator<String> {
             }
             int count = 0;
             DSLContext context = Spring.getBean(DSLContext.class);
-            GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
-            if (Strings.isNullOrEmpty(this.groovyId)) {
-                count = context.selectCount().from(groovyTable).where(groovyTable.JAVA_CLASS.eq(groovyClass.getName())).fetchOneInto(int.class);
+            GroovyTable table = Tables.GROOVY.as("table");
+            if (Strings.isNullOrEmpty(this.documentId)) {
+                count = context.selectCount().from(table).where(table.JAVA_CLASS.eq(groovyClass.getName())).fetchOneInto(int.class);
             } else {
-                count = context.selectCount().from(groovyTable).where(groovyTable.JAVA_CLASS.eq(groovyClass.getName())).and(groovyTable.GROOVY_ID.notEqual(this.groovyId)).fetchOneInto(int.class);
+                count = context.selectCount().from(table).where(table.JAVA_CLASS.eq(groovyClass.getName())).and(table.GROOVY_ID.notEqual(this.documentId)).fetchOneInto(int.class);
             }
             if (count > 0) {
                 validatable.error(new ValidationError(this, "duplicated"));

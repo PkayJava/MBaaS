@@ -15,13 +15,13 @@ import org.jooq.DSLContext;
  */
 public class PagePathValidator implements IValidator<String> {
 
-    private String pageId;
+    private String documentId;
 
     public PagePathValidator() {
     }
 
-    public PagePathValidator(String pageId) {
-        this.pageId = pageId;
+    public PagePathValidator(String documentId) {
+        this.documentId = documentId;
     }
 
     @Override
@@ -52,12 +52,12 @@ public class PagePathValidator implements IValidator<String> {
                 return;
             }
             DSLContext context = Spring.getBean(DSLContext.class);
-            PageTable pageTable = Tables.PAGE.as("pageTable");
+            PageTable table = Tables.PAGE.as("table");
             int count = 0;
-            if (Strings.isNullOrEmpty(this.pageId)) {
-                count = context.selectCount().from(pageTable).where(pageTable.PATH.eq(path)).fetchOneInto(int.class);
+            if (Strings.isNullOrEmpty(this.documentId)) {
+                count = context.selectCount().from(table).where(table.PATH.eq(path)).fetchOneInto(int.class);
             } else {
-                count = context.selectCount().from(pageTable).where(pageTable.PATH.eq(path)).and(pageTable.PAGE_ID.notEqual(this.pageId)).fetchOneInto(int.class);
+                count = context.selectCount().from(table).where(table.PATH.eq(path)).and(table.PAGE_ID.notEqual(this.documentId)).fetchOneInto(int.class);
             }
             if (count > 0) {
                 validatable.error(new ValidationError(this, "duplicated"));

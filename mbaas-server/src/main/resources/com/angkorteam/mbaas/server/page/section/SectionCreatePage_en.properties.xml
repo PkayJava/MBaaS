@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="label.title">Title</entry>
+    <entry key="label.order">Order</entry>
+    <entry key="button.close">Close</entry>
+    <entry key="button.save">Save</entry>
+
+    <entry key="titleField.Required">Title is required.</entry>
+    <entry key="orderField.Required">Order is required.</entry>
+    <entry key="titleField.SectionTitleValidator.duplicated">Title is duplicated.</entry>
+    <entry key="orderField.IConverter">The value of Order is not a valid number.</entry>
+
+</properties>

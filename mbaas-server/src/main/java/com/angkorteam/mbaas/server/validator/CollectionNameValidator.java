@@ -15,13 +15,13 @@ import org.jooq.DSLContext;
  */
 public class CollectionNameValidator implements IValidator<String> {
 
-    private String collectionId;
+    private String documentId;
 
     public CollectionNameValidator() {
     }
 
-    public CollectionNameValidator(String collectionId) {
-        this.collectionId = collectionId;
+    public CollectionNameValidator(String documentId) {
+        this.documentId = documentId;
     }
 
     @Override
@@ -43,11 +43,11 @@ public class CollectionNameValidator implements IValidator<String> {
             }
             int count = 0;
             DSLContext context = Spring.getBean(DSLContext.class);
-            CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
-            if (Strings.isNullOrEmpty(this.collectionId)) {
-                count = context.selectCount().from(collectionTable).where(collectionTable.NAME.eq(name)).fetchOneInto(int.class);
+            CollectionTable table = Tables.COLLECTION.as("table");
+            if (Strings.isNullOrEmpty(this.documentId)) {
+                count = context.selectCount().from(table).where(table.NAME.eq(name)).fetchOneInto(int.class);
             } else {
-                count = context.selectCount().from(collectionTable).where(collectionTable.NAME.eq(name)).and(collectionTable.COLLECTION_ID.notEqual(this.collectionId)).fetchOneInto(int.class);
+                count = context.selectCount().from(table).where(table.NAME.eq(name)).and(table.COLLECTION_ID.notEqual(this.documentId)).fetchOneInto(int.class);
             }
             if (count > 0) {
                 validatable.error(new ValidationError(this, "duplicated"));

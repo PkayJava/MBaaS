@@ -15,13 +15,13 @@ import org.jooq.DSLContext;
  */
 public class QueryNameValidator implements IValidator<String> {
 
-    private String queryId;
+    private String documentId;
 
     public QueryNameValidator() {
     }
 
-    public QueryNameValidator(String queryId) {
-        this.queryId = queryId;
+    public QueryNameValidator(String documentId) {
+        this.documentId = documentId;
     }
 
     @Override
@@ -42,12 +42,12 @@ public class QueryNameValidator implements IValidator<String> {
                 }
             }
             DSLContext context = Spring.getBean(DSLContext.class);
-            QueryTable queryTable = Tables.QUERY.as("queryTable");
+            QueryTable table = Tables.QUERY.as("table");
             int count = 0;
-            if (Strings.isNullOrEmpty(this.queryId)) {
-                count = context.selectCount().from(queryTable).where(queryTable.NAME.eq(name)).fetchOneInto(int.class);
+            if (Strings.isNullOrEmpty(this.documentId)) {
+                count = context.selectCount().from(table).where(table.NAME.eq(name)).fetchOneInto(int.class);
             } else {
-                count = context.selectCount().from(queryTable).where(queryTable.NAME.eq(name)).and(queryTable.QUERY_ID.notEqual(this.queryId)).fetchOneInto(int.class);
+                count = context.selectCount().from(table).where(table.NAME.eq(name)).and(table.QUERY_ID.notEqual(this.documentId)).fetchOneInto(int.class);
             }
             if (count > 0) {
                 validatable.error(new ValidationError(this, "duplicated"));

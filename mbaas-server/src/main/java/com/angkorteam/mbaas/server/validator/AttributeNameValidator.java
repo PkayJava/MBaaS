@@ -15,16 +15,16 @@ import org.jooq.DSLContext;
  */
 public class AttributeNameValidator implements IValidator<String> {
 
-    private final String collectionId;
+    private final String documentId;
 
     private String attributeId;
 
-    public AttributeNameValidator(String collectionId) {
-        this.collectionId = collectionId;
+    public AttributeNameValidator(String documentId) {
+        this.documentId = documentId;
     }
 
-    public AttributeNameValidator(String collectionId, String attributeId) {
-        this.collectionId = collectionId;
+    public AttributeNameValidator(String documentId, String attributeId) {
+        this.documentId = documentId;
         this.attributeId = attributeId;
     }
 
@@ -46,12 +46,12 @@ public class AttributeNameValidator implements IValidator<String> {
                 }
             }
             DSLContext context = Spring.getBean(DSLContext.class);
-            AttributeTable attributeTable = Tables.ATTRIBUTE.as("attributeTable");
+            AttributeTable table = Tables.ATTRIBUTE.as("table");
             int count = 0;
             if (Strings.isNullOrEmpty(this.attributeId)) {
-                count = context.selectCount().from(attributeTable).where(attributeTable.NAME.eq(name)).and(attributeTable.COLLECTION_ID.eq(this.collectionId)).fetchOneInto(int.class);
+                count = context.selectCount().from(table).where(table.NAME.eq(name)).and(table.COLLECTION_ID.eq(this.documentId)).fetchOneInto(int.class);
             } else {
-                count = context.selectCount().from(attributeTable).where(attributeTable.NAME.eq(name)).and(attributeTable.COLLECTION_ID.eq(this.collectionId)).and(attributeTable.ATTRIBUTE_ID.notEqual(this.attributeId)).fetchOneInto(int.class);
+                count = context.selectCount().from(table).where(table.NAME.eq(name)).and(table.COLLECTION_ID.eq(this.documentId)).and(table.ATTRIBUTE_ID.notEqual(this.attributeId)).fetchOneInto(int.class);
             }
             if (count > 0) {
                 validatable.error(new ValidationError(this, "duplicated"));

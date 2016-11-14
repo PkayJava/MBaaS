@@ -1608,7 +1608,7 @@ function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 
   var columns = [
     {
-      &quot;tableColumn&quot;:&quot;pageId&quot;,
+      &quot;tableColumn&quot;:&quot;documentId&quot;,
       &quot;htmlColumn&quot;:&quot;Label&quot;,
       &quot;queryColumn&quot;:&quot;page.page_id&quot;,
       &quot;classColumn&quot;:String.class
@@ -1644,7 +1644,7 @@ function onInitialize(requestCycle, disk, jdbcTemplate, factory, pageModel) {
 // Edit it is name of link
 // on_click it is event name
 function form_table_operation_Edit__on_click(requestCycle, disk, jdbcTemplate, factory, itemModel){
-  print(itemModel.get(&quot;pageId&quot;));
+  print(itemModel.get(&quot;documentId&quot;));
 }
 
 // this function will be executed for query data from database

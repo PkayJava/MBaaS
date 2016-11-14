@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="label.title">Title</entry>
+    <entry key="label.order">Order</entry>
+    <entry key="button.close">ចាកចេញ</entry>
+    <entry key="button.save">រក្សាទុក</entry>
+
+    <entry key="titleField.Required">ទាមទារអោយបញ្ចូល Title</entry>
+    <entry key="orderField.Required">ទាមទារអោយបញ្ចូល Order</entry>
+    <entry key="titleField.SectionTitleValidator.duplicated">Title បញ្ចូលស្ទួន</entry>
+    <entry key="orderField.IConverter">បញ្ចូល Order មិនមែនជាលេខគត់</entry>
+
+</properties>

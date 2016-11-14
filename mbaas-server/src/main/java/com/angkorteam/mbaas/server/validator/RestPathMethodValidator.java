@@ -17,7 +17,7 @@ import org.jooq.DSLContext;
  */
 public class RestPathMethodValidator extends AbstractFormValidator {
 
-    private String restId;
+    private String documentId;
 
     private TextField<String> pathField;
 
@@ -31,8 +31,8 @@ public class RestPathMethodValidator extends AbstractFormValidator {
         this.components = new FormComponent<?>[]{this.pathField, this.methodField};
     }
 
-    public RestPathMethodValidator(String restId, TextField<String> pathField, DropDownChoice<String> methodField) {
-        this.restId = restId;
+    public RestPathMethodValidator(String documentId, TextField<String> pathField, DropDownChoice<String> methodField) {
+        this.documentId = documentId;
         this.pathField = pathField;
         this.methodField = methodField;
         this.components = new FormComponent<?>[]{this.pathField, this.methodField};
@@ -55,12 +55,12 @@ public class RestPathMethodValidator extends AbstractFormValidator {
         }
         if (!Strings.isNullOrEmpty(path) && !Strings.isNullOrEmpty(method)) {
             DSLContext context = Spring.getBean(DSLContext.class);
-            RestTable restTable = Tables.REST.as("restTable");
+            RestTable table = Tables.REST.as("table");
             int count = 0;
-            if (Strings.isNullOrEmpty(this.restId)) {
-                count = context.selectCount().from(restTable).where(restTable.PATH.eq(path)).and(restTable.METHOD.eq(method)).fetchOneInto(int.class);
+            if (Strings.isNullOrEmpty(this.documentId)) {
+                count = context.selectCount().from(table).where(table.PATH.eq(path)).and(table.METHOD.eq(method)).fetchOneInto(int.class);
             } else {
-                count = context.selectCount().from(restTable).where(restTable.PATH.eq(path)).and(restTable.METHOD.eq(method)).and(restTable.REST_ID.notEqual(this.restId)).fetchOneInto(int.class);
+                count = context.selectCount().from(table).where(table.PATH.eq(path)).and(table.METHOD.eq(method)).and(table.REST_ID.notEqual(this.documentId)).fetchOneInto(int.class);
             }
             if (count > 0) {
                 this.pathField.error(new ValidationError("duplicated"));

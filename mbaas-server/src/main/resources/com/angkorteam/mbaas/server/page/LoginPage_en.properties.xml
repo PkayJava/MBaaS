@@ -4,8 +4,8 @@
     <entry key="label.login">Login</entry>
     <entry key="label.password">Password</entry>
     <entry key="label.language">Language</entry>
-
     <entry key="button.login">Login</entry>
+
     <entry key="loginField.Required">Login is required.</entry>
     <entry key="passwordField.Required">Password is required.</entry>
     <entry key="loginField.incorrect">Login is incorrect.</entry>
