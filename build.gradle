@@ -24,7 +24,7 @@ allprojects {
         mavenCentral()
     }
     ext {
-        plugintaskVersion = '1.0.0'
+        plugintaskVersion = '1.0.4'
         elasticsearchVersion = '2.4.1'
         wixVersion = '2.0.6'
         groovyVersion = '2.4.7'
