@@ -157,7 +157,7 @@ public class PageModifyPage extends MBaaSPage {
 
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
         this.groovyField.setRequired(true);
-        this.groovyField.add(new GroovyScriptValidator(this.pageUuid));
+        this.groovyField.add(new GroovyScriptValidator(this.groovyId));
         this.form.add(this.groovyField);
         this.groovyFeedback = new TextFeedbackPanel("groovyFeedback", this.groovyField);
         this.form.add(this.groovyFeedback);
