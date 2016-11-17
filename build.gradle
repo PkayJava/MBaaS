@@ -31,6 +31,7 @@ allprojects {
         commonsioVersion = '2.5'
         commonsconfigurationVersion = '1.10'
         commonslang3Version = '3.4'
+        commonsbeanutilsVersion = '1.9.3'
         gsonVersion = '2.8.0'
         jodatimeVersion = '2.9.4'
         jooqVersion = '3.8.6'
