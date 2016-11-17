@@ -29,7 +29,7 @@ import org.sql2o.Sql2o
 
 class SampleService implements RestService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SampleService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SampleService.class)
 
     @Autowired
     private System system
@@ -42,10 +42,10 @@ class SampleService implements RestService {
     private Gson gson
 
     @Autowired
-    private ServletContext servletContext;
+    private ServletContext servletContext
 
     @Autowired
-    private Sql2o sql2o;
+    private Sql2o sql2o
 
     @Override
     ResponseEntity<RestResponse> service(HttpServletRequest request) throws Throwable {
