@@ -56,7 +56,7 @@ class SampleService implements RestService {
     }
 
     @Override
-    public final String getRestUUID() {
+    final String getRestUUID() {
         // DO NOT MODIFIED
         return "%s"
     }
