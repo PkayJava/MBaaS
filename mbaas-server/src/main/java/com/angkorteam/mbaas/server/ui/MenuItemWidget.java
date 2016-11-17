@@ -7,6 +7,7 @@ import com.angkorteam.mbaas.model.entity.tables.PageTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.MenuItemPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
 import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -38,6 +39,7 @@ public class MenuItemWidget extends Panel {
     @Override
     protected void onInitialize() {
         super.onInitialize();
+        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         DSLContext context = Spring.getBean(DSLContext.class);
         this.menuItemContainer = new WebMarkupContainer("menuItemContainer");
         this.menuItemContainer.add(AttributeModifier.replace("class", new PropertyModel<>(this, "cssClass")));
@@ -55,13 +57,13 @@ public class MenuItemWidget extends Panel {
         Class<? extends WebPage> page = null;
         if (!pagePojo.getCmsPage()) {
             try {
-                page = (Class<? extends WebPage>) Class.forName(pagePojo.getPageId());
+                page = (Class<? extends WebPage>) classLoader.loadClass(pagePojo.getPageId());
             } catch (ClassNotFoundException e) {
             }
         } else {
             try {
                 String javaClass = context.select(groovyTable.JAVA_CLASS).from(groovyTable).where(groovyTable.GROOVY_ID.eq(pagePojo.getGroovyId())).fetchOneInto(String.class);
-                page = (Class<? extends WebPage>) Class.forName(javaClass);
+                page = (Class<? extends WebPage>) classLoader.loadClass(javaClass);
             } catch (ClassNotFoundException e) {
             }
         }
