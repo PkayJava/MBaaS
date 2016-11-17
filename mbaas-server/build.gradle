@@ -48,6 +48,8 @@ dependencies {
     compile 'org.apache.wicket:wicket-native-websocket-javax:' + wicketVersion
     compile 'javax.websocket:javax.websocket-api:' + javaxwebsocketVersion
 
+    compile 'org.sql2o:sql2o:' + sql2oVersion
+
     compile 'org.json:json:' + jsonVersion
 
     compile 'org.springframework:spring-core:' + springVersion

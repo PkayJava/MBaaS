@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import javax.servlet.http.HttpServletRequest
+import org.sql2o.Sql2o
 
 class SampleService implements RestService {
 
@@ -42,6 +43,9 @@ class SampleService implements RestService {
 
     @Autowired
     private ServletContext servletContext;
+
+    @Autowired
+    private Sql2o sql2o;
 
     @Override
     ResponseEntity<RestResponse> service(HttpServletRequest request) throws Throwable {

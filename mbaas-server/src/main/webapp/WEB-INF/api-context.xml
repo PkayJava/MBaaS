@@ -86,6 +86,10 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
+    <bean id="sql2o" class="com.angkorteam.mbaas.server.factory.Sql2oFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
     <bean id="context" class="com.angkorteam.mbaas.server.factory.DSLContextFactoryBean">
         <property name="configuration" ref="configuration"/>
     </bean>
