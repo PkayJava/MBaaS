@@ -77,6 +77,8 @@ public class AttributeCreatePage extends MBaaSPage {
     private RangeValidator<Integer> rangeValidator1_15;
     private RangeValidator<Integer> rangeValidator0_4;
 
+    private List<RangeValidator<Integer>> validators;
+
     @Override
     public String getPageUUID() {
         return AttributeCreatePage.class.getName();
@@ -89,6 +91,7 @@ public class AttributeCreatePage extends MBaaSPage {
         this.rangeValidator1_11 = RangeValidator.range(1, 11);
         this.rangeValidator1_15 = RangeValidator.range(1, 15);
         this.rangeValidator0_4 = RangeValidator.range(0, 4);
+        this.validators = Arrays.asList(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
         DSLContext context = Spring.getBean(DSLContext.class);
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
 
@@ -174,29 +177,53 @@ public class AttributeCreatePage extends MBaaSPage {
 
     private void typeSelectionChanged(String newValue) {
         this.lengthField.setRequired(false);
-        this.lengthField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
+        for (RangeValidator<Integer> validator : this.validators) {
+            try {
+                this.lengthField.remove(validator);
+            } catch (IllegalStateException e) {
+            }
+        }
         this.precisionField.setRequired(false);
         this.precisionField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
         if (!Strings.isNullOrEmpty(newValue)) {
             if (TypeEnum.String.equals(newValue)) {
                 this.lengthField.setRequired(true);
                 this.lengthField.setType(Integer.class);
-                this.lengthField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
+                for (RangeValidator<Integer> validator : this.validators) {
+                    try {
+                        this.lengthField.remove(validator);
+                    } catch (IllegalStateException e) {
+                    }
+                }
                 this.lengthField.add(this.rangeValidator2_255);
             } else if (TypeEnum.Long.equals(newValue)) {
                 this.lengthField.setRequired(true);
                 this.lengthField.setType(Integer.class);
-                this.lengthField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
+                for (RangeValidator<Integer> validator : this.validators) {
+                    try {
+                        this.lengthField.remove(validator);
+                    } catch (IllegalStateException e) {
+                    }
+                }
                 this.lengthField.add(this.rangeValidator1_11);
             } else if (TypeEnum.Double.equals(newValue)) {
                 this.lengthField.setRequired(true);
                 this.lengthField.setType(Integer.class);
-                this.lengthField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
+                for (RangeValidator<Integer> validator : this.validators) {
+                    try {
+                        this.lengthField.remove(validator);
+                    } catch (IllegalStateException e) {
+                    }
+                }
                 this.lengthField.add(this.rangeValidator1_15);
                 this.precisionField.setRequired(true);
                 this.precisionField.setType(Integer.class);
-                this.precisionField.add(RangeValidator.range(0, 4));
-                this.precisionField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
+                for (RangeValidator<Integer> validator : this.validators) {
+                    try {
+                        this.precisionField.remove(validator);
+                    } catch (IllegalStateException e) {
+                    }
+                }
                 this.precisionField.add(this.rangeValidator0_4);
             } else if (TypeEnum.Boolean.equals(newValue)) {
             } else if (TypeEnum.Text.equals(newValue)) {
