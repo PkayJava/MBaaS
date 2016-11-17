@@ -19,9 +19,9 @@ allprojects {
     }
 
     repositories {
+        mavenCentral()
         maven { url "http://dl.bintray.com/socheat/maven" }
         jcenter()
-        mavenCentral()
     }
     ext {
         plugintaskVersion = '1.0.4'
@@ -41,7 +41,7 @@ allprojects {
         springVersion = '4.3.3.RELEASE'
         springIntegrationVersion = '4.3.2.RELEASE'
         springsecurityVersion = '4.1.3.RELEASE'
-        servletVersion = '  3.1.0'
+        servletVersion = '3.1.0'
         sigarVersion = '1.6.4'
         reflectionsVersion = '0.9.10'
         jasyptVersion = '1.9.2'
