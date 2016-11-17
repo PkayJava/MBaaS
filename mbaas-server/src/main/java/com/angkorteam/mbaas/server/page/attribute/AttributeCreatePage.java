@@ -72,6 +72,11 @@ public class AttributeCreatePage extends MBaaSPage {
     private Form<Void> form;
     private Button saveButton;
 
+    private RangeValidator<Integer> rangeValidator2_255;
+    private RangeValidator<Integer> rangeValidator1_11;
+    private RangeValidator<Integer> rangeValidator1_15;
+    private RangeValidator<Integer> rangeValidator0_4;
+
     @Override
     public String getPageUUID() {
         return AttributeCreatePage.class.getName();
@@ -80,6 +85,10 @@ public class AttributeCreatePage extends MBaaSPage {
     @Override
     protected void doInitialize(Border layout) {
         add(layout);
+        this.rangeValidator2_255 = RangeValidator.range(2, 255);
+        this.rangeValidator1_11 = RangeValidator.range(1, 11);
+        this.rangeValidator1_15 = RangeValidator.range(1, 15);
+        this.rangeValidator0_4 = RangeValidator.range(0, 4);
         DSLContext context = Spring.getBean(DSLContext.class);
         CollectionTable collectionTable = Tables.COLLECTION.as("collectionTable");
 
@@ -165,25 +174,30 @@ public class AttributeCreatePage extends MBaaSPage {
 
     private void typeSelectionChanged(String newValue) {
         this.lengthField.setRequired(false);
-        this.lengthField.getBehaviors().clear();
+        this.lengthField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
         this.precisionField.setRequired(false);
-        this.precisionField.getBehaviors().clear();
+        this.precisionField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
         if (!Strings.isNullOrEmpty(newValue)) {
             if (TypeEnum.String.equals(newValue)) {
                 this.lengthField.setRequired(true);
                 this.lengthField.setType(Integer.class);
-                this.lengthField.add(RangeValidator.range(2, 255));
+                this.lengthField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
+                this.lengthField.add(this.rangeValidator2_255);
             } else if (TypeEnum.Long.equals(newValue)) {
                 this.lengthField.setRequired(true);
                 this.lengthField.setType(Integer.class);
-                this.lengthField.add(RangeValidator.range(1, 11));
+                this.lengthField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
+                this.lengthField.add(this.rangeValidator1_11);
             } else if (TypeEnum.Double.equals(newValue)) {
                 this.lengthField.setRequired(true);
                 this.lengthField.setType(Integer.class);
-                this.lengthField.add(RangeValidator.range(1, 15));
+                this.lengthField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
+                this.lengthField.add(this.rangeValidator1_15);
                 this.precisionField.setRequired(true);
                 this.precisionField.setType(Integer.class);
                 this.precisionField.add(RangeValidator.range(0, 4));
+                this.precisionField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
+                this.precisionField.add(this.rangeValidator0_4);
             } else if (TypeEnum.Boolean.equals(newValue)) {
             } else if (TypeEnum.Text.equals(newValue)) {
             } else if (TypeEnum.Time.equals(newValue)) {
