@@ -184,7 +184,12 @@ public class AttributeCreatePage extends MBaaSPage {
             }
         }
         this.precisionField.setRequired(false);
-        this.precisionField.remove(this.rangeValidator0_4, this.rangeValidator1_11, this.rangeValidator1_15, this.rangeValidator2_255);
+        for (RangeValidator<Integer> validator : this.validators) {
+            try {
+                this.precisionField.remove(validator);
+            } catch (IllegalStateException e) {
+            }
+        }
         if (!Strings.isNullOrEmpty(newValue)) {
             if (TypeEnum.String.equals(newValue)) {
                 this.lengthField.setRequired(true);
