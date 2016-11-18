@@ -80,7 +80,7 @@ public class SystemController {
         try (Connection connection = sql2o.open()) {
             if (sync.getPages() != null && !sync.getPages().isEmpty()) {
                 for (Page clientPage : sync.getPages()) {
-                    Query query = connection.createQuery("select page.path as mountPath, groovy.groovy_id as groovyId, page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where pageId = :pageId");
+                    Query query = connection.createQuery("select page.path as mountPath, groovy.groovy_id as groovyId, page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.page_id = :pageId");
                     query.addParameter("pageId", clientPage.getPageId());
                     Page serverPage = query.executeAndFetchFirst(Page.class);
                     boolean groovyConflicted = !clientPage.getServerGroovyCrc32().equals(serverPage.getServerGroovyCrc32());
@@ -142,7 +142,7 @@ public class SystemController {
             if (sync.getRests() != null && !sync.getRests().isEmpty()) {
                 for (Rest clientRest : sync.getRests()) {
                     restIds.add(clientRest.getRestId());
-                    Query query = connection.createQuery("select groovy.groovy_id as groovyId, rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where restId = :restId");
+                    Query query = connection.createQuery("select groovy.groovy_id as groovyId, rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.rest_id = :restId");
                     query.addParameter("restId", clientRest.getRestId());
                     Rest serverRest = query.executeAndFetchFirst(Rest.class);
                     boolean groovyConflicted = !clientRest.getServerGroovyCrc32().equals(serverRest.getServerGroovyCrc32());
@@ -179,7 +179,7 @@ public class SystemController {
 
             List<Page> serverPages;
             if (!pageIds.isEmpty()) {
-                Query query = connection.createQuery("select groovy.java_class as javaClass, page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.system = false and pageId not in (:pageId)");
+                Query query = connection.createQuery("select groovy.java_class as javaClass, page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.system = false and page.page_id not in (:pageId)");
                 query.addParameter("pageId", pageIds);
                 serverPages = query.executeAndFetch(Page.class);
             } else {
@@ -199,7 +199,7 @@ public class SystemController {
 
             List<Rest> serverRests;
             if (!restIds.isEmpty()) {
-                Query query = connection.createQuery("select groovy.java_class as javaClass, rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.system = false and restId not in (:restId)");
+                Query query = connection.createQuery("select groovy.java_class as javaClass, rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.system = false and rest.rest_id not in (:restId)");
                 query.addParameter("restId", restIds);
                 serverRests = query.executeAndFetch(Rest.class);
             } else {
