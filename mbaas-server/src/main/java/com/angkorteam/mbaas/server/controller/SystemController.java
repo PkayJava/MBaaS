@@ -113,11 +113,11 @@ public class SystemController {
             }
             List<Page> serverPages;
             if (!pageIds.isEmpty()) {
-                Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where pageId not in (:pageId)");
+                Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.system = false and pageId not in (:pageId)");
                 query.addParameter("pageId", pageIds);
                 serverPages = query.executeAndFetch(Page.class);
             } else {
-                Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id");
+                Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.system = false");
                 serverPages = query.executeAndFetch(Page.class);
             }
             if (serverPages != null && !serverPages.isEmpty()) {
@@ -129,11 +129,11 @@ public class SystemController {
             }
             List<Rest> serverRests;
             if (!restIds.isEmpty()) {
-                Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where restId not in (:restId)");
+                Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.system = false and restId not in (:restId)");
                 query.addParameter("restId", restIds);
                 serverRests = query.executeAndFetch(Rest.class);
             } else {
-                Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id");
+                Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.system = false");
                 serverRests = query.executeAndFetch(Rest.class);
             }
             if (serverRests != null && !serverRests.isEmpty()) {
