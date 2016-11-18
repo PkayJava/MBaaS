@@ -6,6 +6,7 @@ import com.angkorteam.mbaas.server.gson.Page;
 import com.angkorteam.mbaas.server.gson.Rest;
 import com.angkorteam.mbaas.server.gson.Sync;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
@@ -79,7 +80,7 @@ public class SystemController {
                     pageIds.add(clientPage.getPageId());
                     Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where pageId = :pageId");
                     query.addParameter("pageId", clientPage.getPageId());
-                    Page serverPage = query.executeScalar(Page.class);
+                    Page serverPage = query.executeAndFetchFirst(Page.class);
                     boolean groovyConflicted = !clientPage.getServerGroovyCrc32().equals(serverPage.getServerGroovyCrc32());
                     clientPage.setGroovyConflicted(groovyConflicted);
                     clientPage.setServerGroovyCrc32(serverPage.getServerGroovyCrc32());
@@ -101,7 +102,7 @@ public class SystemController {
                     restIds.add(clientRest.getRestId());
                     Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where restId = :restId");
                     query.addParameter("restId", clientRest.getRestId());
-                    Rest serverRest = query.executeScalar(Rest.class);
+                    Rest serverRest = query.executeAndFetchFirst(Rest.class);
                     boolean groovyConflicted = !clientRest.getServerGroovyCrc32().equals(serverRest.getServerGroovyCrc32());
                     clientRest.setGroovyConflicted(groovyConflicted);
                     clientRest.setServerGroovyCrc32(serverRest.getServerGroovyCrc32());
@@ -111,33 +112,40 @@ public class SystemController {
                     }
                 }
             }
+
             List<Page> serverPages;
             if (!pageIds.isEmpty()) {
-                Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.system = false and pageId not in (:pageId)");
+                Query query = connection.createQuery("select groovy.java_class as javaClass, page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.system = false and pageId not in (:pageId)");
                 query.addParameter("pageId", pageIds);
                 serverPages = query.executeAndFetch(Page.class);
             } else {
-                Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.system = false");
+                Query query = connection.createQuery("select groovy.java_class as javaClass, page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.system = false");
                 serverPages = query.executeAndFetch(Page.class);
             }
             if (serverPages != null && !serverPages.isEmpty()) {
                 for (Page serverPage : serverPages) {
+                    String path = StringUtils.replaceChars(serverPage.getJavaClass(), '.', '/');
+                    serverPage.setHtmlPath(path + ".html");
+                    serverPage.setGroovyPath(path + ".groovy");
                     serverPage.setGroovyConflicted(false);
                     serverPage.setHtmlConflicted(false);
                     sync.addPage(serverPage);
                 }
             }
+
             List<Rest> serverRests;
             if (!restIds.isEmpty()) {
-                Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.system = false and restId not in (:restId)");
+                Query query = connection.createQuery("select groovy.java_class as javaClass, rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.system = false and restId not in (:restId)");
                 query.addParameter("restId", restIds);
                 serverRests = query.executeAndFetch(Rest.class);
             } else {
-                Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.system = false");
+                Query query = connection.createQuery("select groovy.java_class as javaClass, rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.system = false");
                 serverRests = query.executeAndFetch(Rest.class);
             }
             if (serverRests != null && !serverRests.isEmpty()) {
                 for (Rest restPage : serverRests) {
+                    String path = StringUtils.replaceChars(restPage.getJavaClass(), '.', '/');
+                    restPage.setGroovyPath(path + ".groovy");
                     restPage.setGroovyConflicted(false);
                     sync.addRest(restPage);
                 }
