@@ -229,6 +229,7 @@ public class PageModifyPage extends MBaaSPage {
         FileUtils.deleteQuietly(groovyTemp);
 
         PageRecord pageRecord = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(this.pageUuid)).fetchOneInto(pageTable);
+        Application.get().unmount(pageRecord.getPath());
 
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         classLoader.removeSourceCache(this.groovyId);
