@@ -4,6 +4,7 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.RestTable;
 import com.angkorteam.mbaas.server.Spring;
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
@@ -48,7 +49,7 @@ public class RestPathMethodValidator extends AbstractFormValidator {
         String path = this.pathField.getConvertedInput();
         String method = this.methodField.getConvertedInput();
         if (!Strings.isNullOrEmpty(path)) {
-            if (!path.startsWith("/") || path.equals("/resource") || path.startsWith("/resource/") || path.endsWith("/") || path.contains("//")) {
+            if (!path.startsWith("/") || path.equals("/system") || StringUtils.startsWithIgnoreCase(path, "/system/") || path.equals("/resource") || StringUtils.startsWithIgnoreCase(path, "/resource/") || path.endsWith("/") || path.contains("//")) {
                 this.pathField.error(new ValidationError("invalid"));
                 return;
             }

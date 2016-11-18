@@ -25,6 +25,8 @@ import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.RestNameValidator;
 import com.angkorteam.mbaas.server.validator.RestPathMethodValidator;
 import groovy.lang.GroovyCodeSource;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
@@ -35,6 +37,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 import org.springframework.http.HttpMethod;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -158,6 +162,20 @@ public class RestCreatePage extends MBaaSPage {
         RestTable restTable = Tables.REST.as("restTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
 
+        File groovyTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".groovy");
+        try {
+            FileUtils.write(groovyTemp, this.groovy, "UTF-8");
+        } catch (IOException e) {
+        }
+
+        long groovyCrc32 = -1;
+        try {
+            groovyCrc32 = FileUtils.checksumCRC32(groovyTemp);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileUtils.deleteQuietly(groovyTemp);
+
         String groovyId = system.randomUUID();
 
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
@@ -170,6 +188,7 @@ public class RestCreatePage extends MBaaSPage {
         groovyRecord.setSystem(false);
         groovyRecord.setJavaClass(serviceClass.getName());
         groovyRecord.setScript(this.groovy);
+        groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
         groovyRecord.store();
 
         RestRecord restRecord = context.newRecord(restTable);

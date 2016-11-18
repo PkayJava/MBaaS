@@ -27,6 +27,8 @@ import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.PageCodeValidator;
 import com.angkorteam.mbaas.server.validator.PagePathValidator;
 import groovy.lang.GroovyCodeSource;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -34,10 +36,11 @@ import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -175,6 +178,34 @@ public class PageCreatePage extends MBaaSPage {
         PageTable pageTable = Tables.PAGE.as("pageTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
 
+        File htmlTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".html");
+        try {
+            FileUtils.write(htmlTemp, this.html, "UTF-8");
+        } catch (IOException e) {
+        }
+
+        long htmlCrc32 = -1;
+        try {
+            htmlCrc32 = FileUtils.checksumCRC32(htmlTemp);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileUtils.deleteQuietly(htmlTemp);
+
+        File groovyTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".groovy");
+        try {
+            FileUtils.write(groovyTemp, this.groovy, "UTF-8");
+        } catch (IOException e) {
+        }
+
+        long groovyCrc32 = -1;
+        try {
+            groovyCrc32 = FileUtils.checksumCRC32(groovyTemp);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileUtils.deleteQuietly(groovyTemp);
+
         String groovyId = system.randomUUID();
 
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
@@ -185,6 +216,7 @@ public class PageCreatePage extends MBaaSPage {
         GroovyRecord groovyRecord = context.newRecord(groovyTable);
         groovyRecord.setGroovyId(groovyId);
         groovyRecord.setScript(this.groovy);
+        groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
         groovyRecord.setSystem(false);
         groovyRecord.setJavaClass(pageClass.getName());
         groovyRecord.store();
@@ -203,6 +235,7 @@ public class PageCreatePage extends MBaaSPage {
         pageRecord.setGroovyId(groovyId);
         pageRecord.setTitle(this.title);
         pageRecord.setHtml(this.html);
+        pageRecord.setHtmlCrc32(String.valueOf(htmlCrc32));
         pageRecord.setCode(this.code);
         pageRecord.setPath(this.mountPath);
         pageRecord.setDescription(this.description);

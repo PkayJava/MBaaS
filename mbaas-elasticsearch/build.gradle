@@ -1,0 +1,16 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+group = 'mbaas-elasticsearch'
+version = '1.0'
+
+dependencies {
+    compile 'com.google.code.gson:gson:' + gsonVersion
+    compile 'com.mashape.unirest:unirest-java:' + unirestVersion
+    compile 'commons-io:commons-io:' + commonsioVersion
+    compile 'org.elasticsearch:elasticsearch:' + elasticsearchVersion
+    compile 'org.apache.commons:commons-lang3:' + commonslang3Version
+}
