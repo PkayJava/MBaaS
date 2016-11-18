@@ -8,9 +8,19 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Page {
 
+    private String javaClass;
+
     @Expose
     @SerializedName("pageId")
     private String pageId;
+
+    @Expose
+    @SerializedName("htmlPath")
+    private String htmlPath;
+
+    @Expose
+    @SerializedName("groovyPath")
+    private String groovyPath;
 
     @Expose
     @SerializedName("clientHtml")
@@ -138,5 +148,29 @@ public class Page {
 
     public void setGroovyConflicted(boolean groovyConflicted) {
         this.groovyConflicted = groovyConflicted;
+    }
+
+    public String getHtmlPath() {
+        return htmlPath;
+    }
+
+    public void setHtmlPath(String htmlPath) {
+        this.htmlPath = htmlPath;
+    }
+
+    public String getGroovyPath() {
+        return groovyPath;
+    }
+
+    public void setGroovyPath(String groovyPath) {
+        this.groovyPath = groovyPath;
+    }
+
+    public String getJavaClass() {
+        return javaClass;
+    }
+
+    public void setJavaClass(String javaClass) {
+        this.javaClass = javaClass;
     }
 }

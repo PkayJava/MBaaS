@@ -12,6 +12,12 @@ public class Rest {
     @SerializedName("restId")
     private String restId;
 
+    private String javaClass;
+
+    @Expose
+    @SerializedName("groovyPath")
+    private String groovyPath;
+
     @Expose
     @SerializedName("clientGroovy")
     private String clientGroovy;
@@ -78,5 +84,21 @@ public class Rest {
 
     public void setServerGroovyCrc32(String serverGroovyCrc32) {
         this.serverGroovyCrc32 = serverGroovyCrc32;
+    }
+
+    public String getGroovyPath() {
+        return groovyPath;
+    }
+
+    public void setGroovyPath(String groovyPath) {
+        this.groovyPath = groovyPath;
+    }
+
+    public String getJavaClass() {
+        return javaClass;
+    }
+
+    public void setJavaClass(String javaClass) {
+        this.javaClass = javaClass;
     }
 }
