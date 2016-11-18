@@ -68,10 +68,13 @@ public class SystemController {
     public ResponseEntity<RestResponse> sync(Authentication authentication, HttpServletRequest request) throws Throwable {
         String json = org.apache.commons.io.IOUtils.toString(request.getInputStream(), "UTF-8");
         Sync sync = this.gson.fromJson(json, Sync.class);
+        if (sync == null) {
+            sync = new Sync();
+        }
         List<String> pageIds = new ArrayList<>();
         List<String> restIds = new ArrayList<>();
         try (Connection connection = sql2o.open()) {
-            if (sync != null && sync.getPages() != null && !sync.getPages().isEmpty()) {
+            if (sync.getPages() != null && !sync.getPages().isEmpty()) {
                 for (Page clientPage : sync.getPages()) {
                     pageIds.add(clientPage.getPageId());
                     Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where pageId = :pageId");
@@ -93,7 +96,7 @@ public class SystemController {
                     }
                 }
             }
-            if (sync != null && sync.getRests() != null && !sync.getRests().isEmpty()) {
+            if (sync.getRests() != null && !sync.getRests().isEmpty()) {
                 for (Rest clientRest : sync.getRests()) {
                     restIds.add(clientRest.getRestId());
                     Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where restId = :restId");
