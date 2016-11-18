@@ -24,9 +24,7 @@ import org.sql2o.Sql2o;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by socheat on 11/3/16.
@@ -70,9 +68,12 @@ public class SystemController {
     public ResponseEntity<RestResponse> sync(Authentication authentication, HttpServletRequest request) throws Throwable {
         String json = org.apache.commons.io.IOUtils.toString(request.getInputStream(), "UTF-8");
         Sync sync = this.gson.fromJson(json, Sync.class);
+        List<String> pageIds = new ArrayList<>();
+        List<String> restIds = new ArrayList<>();
         try (Connection connection = sql2o.open()) {
             if (sync != null && sync.getPages() != null && !sync.getPages().isEmpty()) {
                 for (Page clientPage : sync.getPages()) {
+                    pageIds.add(clientPage.getPageId());
                     Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where pageId = :pageId");
                     query.addParameter("pageId", clientPage.getPageId());
                     Page serverPage = query.executeScalar(Page.class);
@@ -94,6 +95,7 @@ public class SystemController {
             }
             if (sync != null && sync.getRests() != null && !sync.getRests().isEmpty()) {
                 for (Rest clientRest : sync.getRests()) {
+                    restIds.add(clientRest.getRestId());
                     Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where restId = :restId");
                     query.addParameter("restId", clientRest.getRestId());
                     Rest serverRest = query.executeScalar(Rest.class);
@@ -104,6 +106,37 @@ public class SystemController {
                     if (!groovyConflicted) {
                         // update rest groovy
                     }
+                }
+            }
+            List<Page> serverPages;
+            if (!pageIds.isEmpty()) {
+                Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where pageId not in (:pageId)");
+                query.addParameter("pageId", pageIds);
+                serverPages = query.executeAndFetch(Page.class);
+            } else {
+                Query query = connection.createQuery("select page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id");
+                serverPages = query.executeAndFetch(Page.class);
+            }
+            if (serverPages != null && !serverPages.isEmpty()) {
+                for (Page serverPage : serverPages) {
+                    serverPage.setGroovyConflicted(false);
+                    serverPage.setHtmlConflicted(false);
+                    sync.addPage(serverPage);
+                }
+            }
+            List<Rest> serverRests;
+            if (!restIds.isEmpty()) {
+                Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where restId not in (:restId)");
+                query.addParameter("restId", restIds);
+                serverRests = query.executeAndFetch(Rest.class);
+            } else {
+                Query query = connection.createQuery("select rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id");
+                serverRests = query.executeAndFetch(Rest.class);
+            }
+            if (serverRests != null && !serverRests.isEmpty()) {
+                for (Rest restPage : serverRests) {
+                    restPage.setGroovyConflicted(false);
+                    sync.addRest(restPage);
                 }
             }
         }
