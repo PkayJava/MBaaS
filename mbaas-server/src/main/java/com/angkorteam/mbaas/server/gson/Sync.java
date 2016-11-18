@@ -1,5 +1,8 @@
 package com.angkorteam.mbaas.server.gson;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,8 +11,12 @@ import java.util.List;
  */
 public class Sync {
 
+    @Expose
+    @SerializedName("pages")
     private List<Page> pages = new ArrayList<>();
 
+    @Expose
+    @SerializedName("rests")
     private List<Rest> rests = new ArrayList<>();
 
     public List<Page> getPages() {
