@@ -14,6 +14,16 @@ public class Rest {
 
     private String javaClass;
 
+    private String groovyId;
+
+    public String getGroovyId() {
+        return groovyId;
+    }
+
+    public void setGroovyId(String groovyId) {
+        this.groovyId = groovyId;
+    }
+
     @Expose
     @SerializedName("groovyPath")
     private String groovyPath;

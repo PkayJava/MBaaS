@@ -10,6 +10,26 @@ public class Page {
 
     private String javaClass;
 
+    private String groovyId;
+
+    private String mountPath;
+
+    public String getMountPath() {
+        return mountPath;
+    }
+
+    public void setMountPath(String mountPath) {
+        this.mountPath = mountPath;
+    }
+
+    public String getGroovyId() {
+        return groovyId;
+    }
+
+    public void setGroovyId(String groovyId) {
+        this.groovyId = groovyId;
+    }
+
     @Expose
     @SerializedName("pageId")
     private String pageId;
