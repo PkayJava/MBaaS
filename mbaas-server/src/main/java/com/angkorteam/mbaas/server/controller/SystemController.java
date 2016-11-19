@@ -52,15 +52,15 @@ public class SystemController {
     private DSLContext context;
 
     @Autowired
-    private GroovyClassLoader classLoader;
+    private Sql2o sql2o;
 
     @Autowired
-    private Sql2o sql2o;
+    private GroovyClassLoader classLoader;
 
     @RequestMapping(path = "/system/monitor")
     public ResponseEntity<RestResponse> monitor(Authentication authentication, HttpServletRequest request) throws Throwable {
         Map<String, Object> monitor = new HashMap<>();
-        monitor.put("time", DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
+        monitor.put("time", DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
         RestResponse response = new RestResponse();
         response.setResultCode(HttpStatus.OK.value());
         response.setResultMessage(HttpStatus.OK.getReasonPhrase());
@@ -80,7 +80,7 @@ public class SystemController {
         try (Connection connection = sql2o.open()) {
             if (sync.getPages() != null && !sync.getPages().isEmpty()) {
                 for (Page clientPage : sync.getPages()) {
-                    Query query = connection.createQuery("select page.path as mountPath, groovy.groovy_id as groovyId, page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.page_id = :pageId");
+                    Query query = connection.createQuery("select groovy.java_class as javaClass, page.path as mountPath, groovy.groovy_id as groovyId, page.page_id as pageId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from page inner join groovy on page.groovy_id = groovy.groovy_id where page.page_id = :pageId");
                     query.addParameter("pageId", clientPage.getPageId());
                     Page serverPage = query.executeAndFetchFirst(Page.class);
                     boolean groovyConflicted = !clientPage.getServerGroovyCrc32().equals(serverPage.getServerGroovyCrc32());
@@ -88,10 +88,11 @@ public class SystemController {
                     pageIds.add(clientPage.getPageId());
                     clientPage.setGroovyConflicted(groovyConflicted);
                     clientPage.setHtmlConflicted(htmlConflicted);
+                    String path = StringUtils.replaceChars(serverPage.getJavaClass(), '.', '/');
+                    clientPage.setHtmlPath(path + ".html");
+                    clientPage.setGroovyPath(path + ".groovy");
                     if (!groovyConflicted && !htmlConflicted && Strings.isNullOrEmpty(clientPage.getClientGroovyCrc32()) && Strings.isNullOrEmpty(clientPage.getClientHtmlCrc32())) {
-                        String path = StringUtils.replaceChars(serverPage.getJavaClass(), '.', '/');
-                        clientPage.setHtmlPath(path + ".html");
-                        clientPage.setGroovyPath(path + ".groovy");
+                        // delete command
                         clientPage.setServerGroovyCrc32(null);
                         clientPage.setServerGroovy(null);
                         clientPage.setServerHtmlCrc32(null);
@@ -104,34 +105,39 @@ public class SystemController {
                         Application.get().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
                     } else {
                         if (!groovyConflicted) {
+                            // update command
                             classLoader.removeSourceCache(serverPage.getGroovyId());
                             classLoader.removeClassCache(serverPage.getJavaClass());
-                            GroovyCodeSource source = new GroovyCodeSource(clientPage.getClientGroovy(), serverPage.getGroovyId(), "/groovy/script");
+                            GroovyCodeSource source = new GroovyCodeSource(Strings.isNullOrEmpty(clientPage.getClientGroovy()) ? serverPage.getServerGroovy() : clientPage.getClientGroovy(), serverPage.getGroovyId(), "/groovy/script");
                             source.setCachable(true);
                             Class<?> pageClass = classLoader.parseClass(source, true);
                             Application.get().mountPage(serverPage.getMountPath(), (Class<? extends org.apache.wicket.Page>) pageClass);
                             connection.createQuery("update groovy set script = :script, script_crc32 = :script_crc32, java_class = :java_class where groovy_id = :groovy_id")
-                                    .addParameter("script", clientPage.getClientGroovy())
+                                    .addParameter("script", Strings.isNullOrEmpty(clientPage.getClientGroovy()) ? serverPage.getServerGroovy() : clientPage.getClientGroovy())
                                     .addParameter("script_crc32", clientPage.getClientGroovyCrc32())
                                     .addParameter("java_class", pageClass.getName())
                                     .addParameter("groovy_id", serverPage.getGroovyId())
                                     .executeUpdate();
                             clientPage.setServerGroovyCrc32(clientPage.getClientGroovyCrc32());
-                            clientPage.setServerGroovy(clientPage.getClientGroovy());
+                            clientPage.setServerGroovy(Strings.isNullOrEmpty(clientPage.getClientGroovy()) ? serverPage.getServerGroovy() : clientPage.getClientGroovy());
                         } else {
                             clientPage.setServerGroovyCrc32(serverPage.getServerGroovyCrc32());
                             clientPage.setServerGroovy(serverPage.getServerGroovy());
+                            if (Strings.isNullOrEmpty(clientPage.getClientGroovy()) && Strings.isNullOrEmpty(clientPage.getClientGroovyCrc32())) {
+                                clientPage.setGroovyConflicted(false);
+                            }
                         }
 
                         if (!htmlConflicted) {
+                            // update command
                             connection.createQuery("update page set html = :html, html_crc32 = :html_crc32 where page_id = :page_id")
-                                    .addParameter("html", clientPage.getClientHtml())
+                                    .addParameter("html", Strings.isNullOrEmpty(clientPage.getClientHtml()) ? serverPage.getServerHtml() : clientPage.getClientHtml())
                                     .addParameter("html_crc32", clientPage.getClientHtmlCrc32())
-                                    .addParameter("page_id", clientPage.getPageId())
+                                    .addParameter("page_id", serverPage.getPageId())
                                     .executeUpdate();
                             Application.get().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
                             clientPage.setServerHtmlCrc32(serverPage.getClientHtmlCrc32());
-                            clientPage.setServerHtml(serverPage.getClientHtml());
+                            clientPage.setServerHtml(Strings.isNullOrEmpty(clientPage.getClientHtml()) ? serverPage.getServerHtml() : clientPage.getClientHtml());
                         } else {
                             clientPage.setServerHtmlCrc32(serverPage.getServerHtmlCrc32());
                             clientPage.setServerHtml(serverPage.getServerHtml());
@@ -142,14 +148,15 @@ public class SystemController {
             if (sync.getRests() != null && !sync.getRests().isEmpty()) {
                 for (Rest clientRest : sync.getRests()) {
                     restIds.add(clientRest.getRestId());
-                    Query query = connection.createQuery("select groovy.groovy_id as groovyId, rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.rest_id = :restId");
+                    Query query = connection.createQuery("select groovy.java_class as javaClass, groovy.groovy_id as groovyId, rest.rest_id as restId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from rest inner join groovy on rest.groovy_id = groovy.groovy_id where rest.rest_id = :restId");
                     query.addParameter("restId", clientRest.getRestId());
                     Rest serverRest = query.executeAndFetchFirst(Rest.class);
                     boolean groovyConflicted = !clientRest.getServerGroovyCrc32().equals(serverRest.getServerGroovyCrc32());
                     clientRest.setGroovyConflicted(groovyConflicted);
+                    String path = StringUtils.replaceChars(serverRest.getJavaClass(), '.', '/');
+                    clientRest.setGroovyPath(path + ".groovy");
                     if (!groovyConflicted && Strings.isNullOrEmpty(clientRest.getClientGroovyCrc32())) {
-                        String path = StringUtils.replaceChars(serverRest.getJavaClass(), '.', '/');
-                        clientRest.setGroovyPath(path + ".groovy");
+                        // delete command
                         clientRest.setServerGroovy(null);
                         clientRest.setServerGroovyCrc32(null);
                         classLoader.removeSourceCache(serverRest.getGroovyId());
@@ -158,17 +165,20 @@ public class SystemController {
                         connection.createQuery("delete from groovy where groovy_id = :groovy_id").addParameter("groovy_id", serverRest.getGroovyId()).executeUpdate();
                     } else {
                         if (!groovyConflicted) {
-                            GroovyCodeSource source = new GroovyCodeSource(clientRest.getClientGroovy(), serverRest.getGroovyId(), "/groovy/script");
+                            // update command
+                            classLoader.removeSourceCache(serverRest.getGroovyId());
+                            classLoader.removeClassCache(serverRest.getJavaClass());
+                            GroovyCodeSource source = new GroovyCodeSource(Strings.isNullOrEmpty(clientRest.getClientGroovy()) ? serverRest.getServerGroovy() : clientRest.getClientGroovy(), serverRest.getGroovyId(), "/groovy/script");
                             source.setCachable(true);
                             Class<?> serviceClass = classLoader.parseClass(source, true);
                             connection.createQuery("update groovy set script = :script, script_crc32 = :script_crc32, java_class = :java_class where groovy_id = :groovy_id")
-                                    .addParameter("script", clientRest.getClientGroovy())
+                                    .addParameter("script", Strings.isNullOrEmpty(clientRest.getClientGroovy()) ? serverRest.getServerGroovy() : clientRest.getClientGroovy())
                                     .addParameter("script_crc32", clientRest.getClientGroovyCrc32())
                                     .addParameter("java_class", serviceClass.getName())
-                                    .addParameter("groovy_id", clientRest.getGroovyId())
+                                    .addParameter("groovy_id", serverRest.getGroovyId())
                                     .executeUpdate();
                             clientRest.setServerGroovyCrc32(clientRest.getClientGroovyCrc32());
-                            clientRest.setServerGroovy(clientRest.getClientGroovy());
+                            clientRest.setServerGroovy(Strings.isNullOrEmpty(clientRest.getClientGroovy()) ? serverRest.getServerGroovy() : clientRest.getClientGroovy());
                         } else {
                             clientRest.setServerGroovyCrc32(serverRest.getServerGroovyCrc32());
                             clientRest.setServerGroovy(serverRest.getServerGroovy());

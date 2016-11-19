@@ -1,12 +1,11 @@
 buildscript {
     repositories {
+        maven { url "http://dl.bintray.com/socheat/maven" }
         jcenter()
         mavenCentral()
     }
     dependencies {
-        //classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
-        //classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.11'
-        //classpath 'io.github.robwin:swagger2markup-gradle-plugin:0.9.2'
+        // classpath 'com.angkorteam.mbaas:plugin:1.1.0'
     }
 }
 
@@ -14,6 +13,7 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'war'
 apply plugin: 'maven'
+apply plugin: 'com.angkorteam.mbaas'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -24,6 +24,8 @@ version = '1.0'
 dependencies {
     compile project(':mbaas-plain')
     compile project(':mbaas-jooq')
+
+    compile gradleApi()
 
     compile 'com.google.code.gson:gson:' + gsonVersion
 
