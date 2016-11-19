@@ -13,7 +13,7 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'war'
 apply plugin: 'maven'
-apply plugin: 'com.angkorteam.mbaas'
+// apply plugin: 'com.angkorteam.mbaas'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
