@@ -136,7 +136,7 @@ public class SystemController {
                                     .addParameter("page_id", serverPage.getPageId())
                                     .executeUpdate();
                             Application.get().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
-                            clientPage.setServerHtmlCrc32(serverPage.getClientHtmlCrc32());
+                            clientPage.setServerHtmlCrc32(clientPage.getClientHtmlCrc32());
                             clientPage.setServerHtml(Strings.isNullOrEmpty(clientPage.getClientHtml()) ? serverPage.getServerHtml() : clientPage.getClientHtml());
                         } else {
                             clientPage.setServerHtmlCrc32(serverPage.getServerHtmlCrc32());
