@@ -41,7 +41,7 @@ public class PagePathValidator implements IValidator<String> {
             if (path.length() > 1) {
                 for (int i = 1; i < path.length(); i++) {
                     char ch = path.charAt(i);
-                    if (ch != '/' && !Application.CHARACTERS.contains(ch) && !Application.NUMBERS.contains(ch)) {
+                    if (!Application.CHARACTERS.contains(ch) || !Application.NUMBERS.contains(ch)) {
                         validatable.error(new ValidationError(this, "invalid"));
                         return;
                     }

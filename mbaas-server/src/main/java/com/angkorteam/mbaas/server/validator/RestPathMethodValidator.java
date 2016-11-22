@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.validator;
 
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.RestTable;
+import com.angkorteam.mbaas.server.Application;
 import com.angkorteam.mbaas.server.Spring;
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +53,15 @@ public class RestPathMethodValidator extends AbstractFormValidator {
             if (!path.startsWith("/") || path.equals("/system") || StringUtils.startsWithIgnoreCase(path, "/system/") || path.equals("/resource") || StringUtils.startsWithIgnoreCase(path, "/resource/") || path.endsWith("/") || path.contains("//")) {
                 this.pathField.error(new ValidationError("invalid"));
                 return;
+            }
+            if (path.length() > 1) {
+                for (int i = 1; i < path.length(); i++) {
+                    char ch = path.charAt(i);
+                    if (!Application.CHARACTERS.contains(ch) || !Application.NUMBERS.contains(ch)) {
+                        this.pathField.error(new ValidationError("invalid"));
+                        return;
+                    }
+                }
             }
         }
         if (!Strings.isNullOrEmpty(path) && !Strings.isNullOrEmpty(method)) {
