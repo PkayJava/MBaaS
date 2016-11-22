@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // classpath 'com.angkorteam.mbaas:plugin:1.1.0'
+        // classpath 'com.angkorteam.mbaas:plugin:1.1.6'
     }
 }
 
