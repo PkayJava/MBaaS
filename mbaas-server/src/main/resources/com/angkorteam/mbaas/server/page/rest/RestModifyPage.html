@@ -11,46 +11,62 @@
                 <div class="box-body">
                     <!-- Row -->
                     <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                        <label wicket:for="nameField">Name</label>
+                        <label wicket:for="nameField">
+                            <wicket:message key="label.name">Name</wicket:message>
+                        </label>
                         <input type="text" wicket:id="nameField" class="form-control"/>
                         <span wicket:id="nameFeedback" class="help-block"/>
                     </div>
                     <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                        <label wicket:for="roleField">Role</label>
+                        <label wicket:for="roleField">
+                            <wicket:message key="label.role">Role</wicket:message>
+                        </label>
                         <select wicket:id="roleField" class="form-control select2" style="width: 100%;"></select>
                         <span wicket:id="roleFeedback" class="help-block"/>
                     </div>
                     <div class="clearfix"></div>
                     <!-- Row -->
                     <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                        <label wicket:for="requestPathField">Path</label>
+                        <label wicket:for="requestPathField">
+                            <wicket:message key="label.path">Path</wicket:message>
+                        </label>
                         <input wicket:id="requestPathField" type="text" class="form-control"/>
                         <span wicket:id="requestPathFeedback" class="help-block"/>
                     </div>
                     <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                        <label wicket:for="methodField">Method</label>
+                        <label wicket:for="methodField">
+                            <wicket:message key="label.method">Method</wicket:message>
+                        </label>
                         <select wicket:id="methodField" class="form-control"/>
                         <span wicket:id="methodFeedback" class="help-block"/>
                     </div>
                     <div class="clearfix"></div>
                     <!-- Row -->
                     <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <label wicket:for="descriptionField">Description</label>
+                        <label wicket:for="descriptionField">
+                            <wicket:message key="label.description">Description</wicket:message>
+                        </label>
                         <input wicket:id="descriptionField" type="text" class="form-control"/>
                         <span wicket:id="descriptionFeedback" class="help-block"/>
                     </div>
                     <div class="clearfix"></div>
                     <!-- Row -->
                     <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <label wicket:for="groovyField">Groovy</label>
+                        <label wicket:for="groovyField">
+                            <wicket:message key="label.groovy">Groovy</wicket:message>
+                        </label>
                         <textarea wicket:id="groovyField" rows="25" class="form-control"/>
                         <span wicket:id="groovyFeedback" class="help-block"/>
                     </div>
                     <div class="clearfix"></div>
                 </div>
                 <div class="box-footer">
-                    <a class="btn btn-default" wicket:id="closeButton">Close</a>
-                    <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">Save</button>
+                    <a class="btn btn-default" wicket:id="closeButton">
+                        <wicket:message key="button.close">Close</wicket:message>
+                    </a>
+                    <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">
+                        <wicket:message key="button.save">Save</wicket:message>
+                    </button>
                 </div>
             </form>
         </div>

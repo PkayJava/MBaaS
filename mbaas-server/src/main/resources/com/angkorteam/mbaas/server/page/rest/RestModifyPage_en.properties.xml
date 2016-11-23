@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="label.name">Name</entry>
+    <entry key="label.path">Path</entry>
+    <entry key="label.method">Method</entry>
+    <entry key="label.role">Role</entry>
+    <entry key="label.description">Description</entry>
+    <entry key="label.groovy">Groovy</entry>
+
+    <entry key="button.close">Close</entry>
+    <entry key="button.save">Save</entry>
+
+    <entry key="nameField.Required">Name is required.</entry>
+    <entry key="pathField.Required">Path is required.</entry>
+    <entry key="pathField.RestPathMethodValidator.invalid">Path is invalid.</entry>
+    <entry key="pathField.RestPathMethodValidator.duplicated">Path is duplicated.</entry>
+    <entry key="methodField.Required">Method is required.</entry>
+    <entry key="methodField.RestPathMethodValidator.invalid">Method is invalid.</entry>
+    <entry key="methodField.RestPathMethodValidator.duplicated">Method is duplicated.</entry>
+    <entry key="descriptionField.Required">Description is required.</entry>
+    <entry key="groovyField.Required">Groovy is required.</entry>
+    <entry key="groovyField.GroovyScriptValidator.error">Groovy is not compiled due to this reason '${reason}'.</entry>
+    <entry key="groovyField.GroovyScriptValidator.invalid">${object} is not invalid package name.</entry>
+    <entry key="groovyField.GroovyScriptValidator.duplicated">${object} is duplicated.</entry>
+
+</properties>
