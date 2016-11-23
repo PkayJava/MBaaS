@@ -106,7 +106,7 @@ public class GroovyController {
 
         restPojo = candidates.get(0);
 
-        String[] candidateSegments = StringUtils.split(restPojo.getPathVariable(), '/');
+        String[] candidateSegments = StringUtils.split(restPojo.getPath(), '/');
         for (int i = 0; i < candidateSegments.length; i++) {
             String candidateSegment = candidateSegments[i];
             if (StringUtils.startsWithIgnoreCase(candidateSegment, "{") && StringUtils.endsWithIgnoreCase(candidateSegment, "}")) {
@@ -121,7 +121,22 @@ public class GroovyController {
         }
 
         Class<?> clazz = classLoader.loadClass(groovyPojo.getJavaClass());
-        RestService service = (RestService) clazz.newInstance();
+        RestService service = null;
+        try {
+            service = (RestService) clazz.newInstance();
+        } catch (Throwable e) {
+            RestResponse response = new RestResponse();
+            response.setResultCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setResultMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+            List<String> stackTraces = Lists.newArrayList();
+            for (StackTraceElement element : e.getStackTrace()) {
+                String line = element.getClassName() + "." + element.getMethodName() + "(" + FilenameUtils.getName(element.getFileName()) + ":" + element.getLineNumber() + ")";
+                stackTraces.add(line);
+            }
+            response.setStackTrace(stackTraces);
+            response.setDebugMessage(e.getMessage());
+            return ResponseEntity.ok(response);
+        }
         Roles userRoles = new Roles();
         for (GrantedAuthority authority : authentication.getAuthorities()) {
             userRoles.add(authority.getAuthority());
