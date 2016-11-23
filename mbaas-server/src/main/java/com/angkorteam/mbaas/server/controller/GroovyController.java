@@ -11,7 +11,9 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import com.angkorteam.mbaas.plain.response.RestResponse;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.spring.RestService;
+import com.angkorteam.mbaas.server.validator.RestPathMethodValidator;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +34,9 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 11/3/16.
@@ -63,12 +67,54 @@ public class GroovyController {
         String method = StringUtils.upperCase(request.getMethod());
         RestTable restTable = Tables.REST.as("restTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
-        RestPojo restPojo = this.context.select(restTable.fields()).from(restTable).where(restTable.PATH.eq(request.getPathInfo())).and(restTable.METHOD.eq(method)).fetchOneInto(RestPojo.class);
 
-        if (restPojo == null) {
+        String pathInfo = request.getPathInfo();
+        Map<String, String> pathVariables = Maps.newHashMap();
+        String[] segments = StringUtils.split(pathInfo, "/");
+        int segmentCount = StringUtils.countMatches(pathInfo, '/');
+
+        List<RestPojo> restPojos = this.context.select(restTable.fields()).from(restTable).where(restTable.SEGMENT.eq(segmentCount)).and(restTable.METHOD.eq(method)).fetchInto(RestPojo.class);
+        if (restPojos == null || restPojos.isEmpty()) {
             return notFound();
-
         }
+
+        RestPojo restPojo = null;
+
+        List<RestPojo> candidates = new ArrayList<>(restPojos);
+        for (int index = 0; index < segmentCount; index++) {
+            List<RestPojo> newNameCandidates = Lists.newLinkedList();
+            List<RestPojo> newLikeCandidates = Lists.newLinkedList();
+            while (!candidates.isEmpty()) {
+                RestPojo candidate = candidates.remove(0);
+                String[] dbSegment = StringUtils.split(candidate.getPathVariable(), '/');
+                if (StringUtils.endsWithIgnoreCase(segments[index], dbSegment[index])) {
+                    newNameCandidates.add(candidate);
+                } else if (StringUtils.equalsIgnoreCase(dbSegment[index], RestPathMethodValidator.PATH)) {
+                    newLikeCandidates.add(candidate);
+                }
+            }
+            if (!newNameCandidates.isEmpty()) {
+                candidates.addAll(newNameCandidates);
+            } else {
+                candidates.addAll(newLikeCandidates);
+            }
+        }
+
+        if (candidates.isEmpty()) {
+            return notFound();
+        }
+
+        restPojo = candidates.get(0);
+
+        String[] candidateSegments = StringUtils.split(restPojo.getPathVariable(), '/');
+        for (int i = 0; i < candidateSegments.length; i++) {
+            String candidateSegment = candidateSegments[i];
+            if (StringUtils.startsWithIgnoreCase(candidateSegment, "{") && StringUtils.endsWithIgnoreCase(candidateSegment, "}")) {
+                String name = StringUtils.substring(candidateSegment, 1, StringUtils.length(candidateSegment) - 1);
+                pathVariables.put(name, segments[i]);
+            }
+        }
+
         GroovyPojo groovyPojo = this.context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(restPojo.getGroovyId())).fetchOneInto(GroovyPojo.class);
         if (groovyPojo == null) {
             return notFound();
@@ -96,7 +142,7 @@ public class GroovyController {
         }
         SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(service, servletContext);
         try {
-            return service.service(request);
+            return service.service(request, pathVariables);
         } catch (Throwable e) {
             RestResponse response = new RestResponse();
             response.setResultCode(HttpStatus.INTERNAL_SERVER_ERROR.value());

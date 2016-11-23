@@ -5,6 +5,7 @@ import com.angkorteam.mbaas.model.entity.tables.PageTable;
 import com.angkorteam.mbaas.server.Application;
 import com.angkorteam.mbaas.server.Spring;
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
@@ -28,7 +29,7 @@ public class PagePathValidator implements IValidator<String> {
     public void validate(IValidatable<String> validatable) {
         String path = validatable.getValue();
         if (!Strings.isNullOrEmpty(path)) {
-            if (path.startsWith("/api")) {
+            if (StringUtils.startsWithIgnoreCase(path, "/api")) {
                 validatable.error(new ValidationError(this, "invalid"));
                 return;
             }
@@ -41,13 +42,14 @@ public class PagePathValidator implements IValidator<String> {
             if (path.length() > 1) {
                 for (int i = 1; i < path.length(); i++) {
                     char ch = path.charAt(i);
-                    if (!Application.CHARACTERS.contains(ch) || !Application.NUMBERS.contains(ch)) {
+                    if (ch == '/' || Application.CHARACTERS.contains(ch) || Application.NUMBERS.contains(ch)) {
+                    } else {
                         validatable.error(new ValidationError(this, "invalid"));
                         return;
                     }
                 }
             }
-            if (path.contains("//")) {
+            if (StringUtils.containsIgnoreCase(path, "//")) {
                 validatable.error(new ValidationError(this, "invalid"));
                 return;
             }

@@ -24,9 +24,11 @@ import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.RestNameValidator;
 import com.angkorteam.mbaas.server.validator.RestPathMethodValidator;
+import com.google.common.collect.Lists;
 import groovy.lang.GroovyCodeSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
@@ -34,6 +36,7 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
+import org.elasticsearch.common.Strings;
 import org.jooq.DSLContext;
 import org.springframework.http.HttpMethod;
 
@@ -191,11 +194,25 @@ public class RestCreatePage extends MBaaSPage {
         groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
         groovyRecord.store();
 
+        String[] segments = StringUtils.split(this.requestPath, "/");
+        List<String> newSegments = Lists.newLinkedList();
+        for (String segment : segments) {
+            if (!Strings.isNullOrEmpty(segment)) {
+                if (StringUtils.startsWithIgnoreCase(segment, "{") && StringUtils.endsWithIgnoreCase(segment, "}")) {
+                    newSegments.add(RestPathMethodValidator.PATH);
+                } else {
+                    newSegments.add(segment);
+                }
+            }
+        }
+
         RestRecord restRecord = context.newRecord(restTable);
         restRecord.setRestId(this.restUuid);
         restRecord.setSystem(false);
         restRecord.setName(this.name);
         restRecord.setPath(this.requestPath);
+        restRecord.setPathVariable("/" + StringUtils.join(newSegments, "/"));
+        restRecord.setSegment(StringUtils.countMatches(this.requestPath, '/'));
         restRecord.setSecurity(SecurityEnum.Granted.getLiteral());
         restRecord.setDescription(this.description);
         restRecord.setMethod(this.method);

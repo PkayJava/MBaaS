@@ -1,5 +1,9 @@
 package com.angkorteam.mbaas.server;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -252,5 +256,10 @@ public abstract class MBaaS {
         COUNTRIES.add("Yemen");
         COUNTRIES.add("Zambia");
         COUNTRIES.add("Zimbabwe");
+    }
+
+    public static void main(String[] args) throws IOException {
+        File file = new File("/opt/home/socheat/Documents/git/PkayJava/MBaaS/mbaas-jooq/build.gradle");
+        System.out.println(FileUtils.checksumCRC32(file));
     }
 }
