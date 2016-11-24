@@ -191,7 +191,7 @@ public class AttributeCreatePage extends MBaaSPage {
             }
         }
         if (!Strings.isNullOrEmpty(newValue)) {
-            if (TypeEnum.String.equals(newValue)) {
+            if (TypeEnum.String.getLiteral().equals(newValue)) {
                 this.lengthField.setRequired(true);
                 this.lengthField.setType(Integer.class);
                 for (RangeValidator<Integer> validator : this.validators) {
@@ -201,7 +201,7 @@ public class AttributeCreatePage extends MBaaSPage {
                     }
                 }
                 this.lengthField.add(this.rangeValidator2_255);
-            } else if (TypeEnum.Long.equals(newValue)) {
+            } else if (TypeEnum.Long.getLiteral().equals(newValue)) {
                 this.lengthField.setRequired(true);
                 this.lengthField.setType(Integer.class);
                 for (RangeValidator<Integer> validator : this.validators) {
@@ -211,7 +211,7 @@ public class AttributeCreatePage extends MBaaSPage {
                     }
                 }
                 this.lengthField.add(this.rangeValidator1_11);
-            } else if (TypeEnum.Double.equals(newValue)) {
+            } else if (TypeEnum.Double.getLiteral().equals(newValue)) {
                 this.lengthField.setRequired(true);
                 this.lengthField.setType(Integer.class);
                 for (RangeValidator<Integer> validator : this.validators) {
@@ -230,12 +230,12 @@ public class AttributeCreatePage extends MBaaSPage {
                     }
                 }
                 this.precisionField.add(this.rangeValidator0_4);
-            } else if (TypeEnum.Boolean.equals(newValue)) {
-            } else if (TypeEnum.Text.equals(newValue)) {
-            } else if (TypeEnum.Time.equals(newValue)) {
-            } else if (TypeEnum.Date.equals(newValue)) {
-            } else if (TypeEnum.Character.equals(newValue)) {
-            } else if (TypeEnum.DateTime.equals(newValue)) {
+            } else if (TypeEnum.Boolean.getLiteral().equals(newValue)) {
+            } else if (TypeEnum.Text.getLiteral().equals(newValue)) {
+            } else if (TypeEnum.Time.getLiteral().equals(newValue)) {
+            } else if (TypeEnum.Date.getLiteral().equals(newValue)) {
+            } else if (TypeEnum.Character.getLiteral().equals(newValue)) {
+            } else if (TypeEnum.DateTime.getLiteral().equals(newValue)) {
             }
         }
     }
