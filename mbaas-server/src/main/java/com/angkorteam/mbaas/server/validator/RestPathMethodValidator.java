@@ -70,7 +70,7 @@ public class RestPathMethodValidator extends AbstractFormValidator {
             if (path.length() > 1) {
                 for (int i = 1; i < path.length(); i++) {
                     char ch = path.charAt(i);
-                    if (ch == '/' || Application.CURLLY_BRACES.contains(ch) || Application.CHARACTERS.contains(ch) || Application.NUMBERS.contains(ch)) {
+                    if (ch == '/' || ch == '_' || Application.CURLLY_BRACES.contains(ch) || Application.CHARACTERS.contains(ch) || Application.NUMBERS.contains(ch)) {
                     } else {
                         this.pathField.error(new ValidationError("invalid"));
                         return;
