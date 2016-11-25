@@ -4,6 +4,7 @@ import com.angkorteam.framework.extension.share.provider.JooqProvider;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.CollectionTable;
 import com.angkorteam.mbaas.server.Spring;
+import com.google.common.collect.Lists;
 import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -54,7 +55,9 @@ public class CollectionProvider extends JooqProvider {
 
     @Override
     protected List<Condition> where() {
-        return null;
+        List<Condition> where = Lists.newArrayList();
+        where.add(this.collectionTable.SYSTEM.eq(false).or(this.collectionTable.NAME.eq("user")));
+        return where;
     }
 
     @Override
