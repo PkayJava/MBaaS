@@ -8,6 +8,7 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredColumn;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.provider.PageProvider;
+import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.border.Border;
@@ -34,6 +35,7 @@ public class PageBrowsePage extends MBaaSPage implements TableEvent {
         add(layout);
 
         PageProvider provider = new PageProvider();
+        provider.setSort("title", SortOrder.ASCENDING);
         provider.selectField("pageId", String.class);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);

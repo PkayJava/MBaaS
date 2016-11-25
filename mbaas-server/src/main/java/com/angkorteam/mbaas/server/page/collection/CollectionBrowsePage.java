@@ -12,6 +12,7 @@ import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.page.attribute.AttributeBrowsePage;
 import com.angkorteam.mbaas.server.page.document.DocumentBrowsePage;
 import com.angkorteam.mbaas.server.provider.CollectionProvider;
+import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.border.Border;
@@ -37,6 +38,7 @@ public class CollectionBrowsePage extends MBaaSPage implements TableEvent {
     protected void doInitialize(Border layout) {
         add(layout);
         CollectionProvider provider = new CollectionProvider();
+        provider.setSort("name", SortOrder.ASCENDING);
         provider.selectField("collectionId", String.class);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
