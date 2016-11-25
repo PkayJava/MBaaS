@@ -11,6 +11,7 @@ import com.angkorteam.mbaas.model.entity.tables.RestTable;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.provider.RestProvider;
+import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.border.Border;
@@ -40,6 +41,7 @@ public class RestBrowsePage extends MBaaSPage implements TableEvent {
         RestProvider provider = new RestProvider();
         provider.selectField("restId", String.class);
         provider.selectField("system", Boolean.class);
+        provider.setSort("name", SortOrder.ASCENDING);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         layout.add(filterForm);
