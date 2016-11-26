@@ -17,6 +17,8 @@ public class QueryBuilder {
     private List<String> orderBy = Lists.newArrayList();
     private List<String> having = Lists.newArrayList();
     private List<String> groupBy = Lists.newArrayList();
+    private Long offset;
+    private Long number;
 
     public void addSelect(String field) {
         this.select.add(field);
@@ -40,6 +42,11 @@ public class QueryBuilder {
 
     public void addHaving(String field) {
         this.having.add(field);
+    }
+
+    public void setLimit(long offset, long number) {
+        this.offset = offset;
+        this.number = number;
     }
 
     public void setFrom(String from) {
@@ -67,6 +74,9 @@ public class QueryBuilder {
         }
         if (!this.orderBy.isEmpty()) {
             builder.append(" ORDER BY ").append(StringUtils.join(this.orderBy, ", "));
+        }
+        if (this.offset != null && this.number != null) {
+            builder.append(" LIMIT " + this.offset + "," + this.number);
         }
         return builder.toString();
     }
