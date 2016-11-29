@@ -34,9 +34,11 @@ public class Application extends AuthenticatedWebApplication {
 
     public static final List<Character> CHARACTERS = new ArrayList<>();
     public static final List<Character> NUMBERS = new ArrayList<>();
-    public static final List<Character> CURRLY_BRACES = new ArrayList<>();
+    public static final List<Character> CURLLY_BRACES = new ArrayList<>();
 
     static {
+        CURLLY_BRACES.add('{');
+        CURLLY_BRACES.add('}');
         CHARACTERS.add('a');
         CHARACTERS.add('b');
         CHARACTERS.add('c');
@@ -73,12 +75,6 @@ public class Application extends AuthenticatedWebApplication {
         NUMBERS.add('7');
         NUMBERS.add('8');
         NUMBERS.add('9');
-        CURRLY_BRACES.add('{');
-        CURRLY_BRACES.add('}');
-    }
-
-    public static void main(String[] args) {
-        java.lang.System.out.println(java.lang.System.currentTimeMillis() + "");
     }
 
     public Application() {
