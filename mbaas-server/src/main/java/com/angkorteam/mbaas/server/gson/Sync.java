@@ -19,6 +19,18 @@ public class Sync {
     @SerializedName("rests")
     private List<Rest> rests = new ArrayList<>();
 
+    @Expose
+    @SerializedName("layouts")
+    private List<Layout> layouts = new ArrayList<>();
+
+    public List<Layout> getLayouts() {
+        return layouts;
+    }
+
+    public void addLayout(Layout layout) {
+        this.layouts.add(layout);
+    }
+
     public List<Page> getPages() {
         return pages;
     }

@@ -3,6 +3,7 @@ package com.angkorteam.mbaas.server.controller;
 import com.angkorteam.mbaas.plain.response.RestResponse;
 import com.angkorteam.mbaas.server.Application;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
+import com.angkorteam.mbaas.server.gson.Layout;
 import com.angkorteam.mbaas.server.gson.Page;
 import com.angkorteam.mbaas.server.gson.Rest;
 import com.angkorteam.mbaas.server.gson.Sync;
@@ -77,6 +78,7 @@ public class SystemController {
         }
         List<String> pageIds = new ArrayList<>();
         List<String> restIds = new ArrayList<>();
+        List<String> layoutIds = new ArrayList<>();
         try (Connection connection = sql2o.open()) {
             if (sync.getPages() != null && !sync.getPages().isEmpty()) {
                 for (Page clientPage : sync.getPages()) {
@@ -184,6 +186,67 @@ public class SystemController {
                             clientRest.setServerGroovy(serverRest.getServerGroovy());
                         }
                     }
+                }
+            }
+            if (sync.getLayouts() != null && !sync.getLayouts().isEmpty()) {
+                for (Layout clientRest : sync.getLayouts()) {
+                    layoutIds.add(clientRest.getLayoutId());
+                    Query query = connection.createQuery("select groovy.java_class as javaClass, groovy.groovy_id as groovyId, layout.layout_id as layoutId, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from layout inner join groovy on layout.groovy_id = groovy.groovy_id where layout.layout_id = :layoutId");
+                    query.addParameter("layoutId", clientRest.getLayoutId());
+                    Layout serverLayout = query.executeAndFetchFirst(Layout.class);
+                    boolean groovyConflicted = !clientRest.getServerGroovyCrc32().equals(serverLayout.getServerGroovyCrc32());
+                    clientRest.setGroovyConflicted(groovyConflicted);
+                    String path = StringUtils.replaceChars(serverLayout.getJavaClass(), '.', '/');
+                    clientRest.setGroovyPath(path + ".groovy");
+                    if (!groovyConflicted && Strings.isNullOrEmpty(clientRest.getClientGroovyCrc32())) {
+                        // delete command
+                        clientRest.setServerGroovy(null);
+                        clientRest.setServerGroovyCrc32(null);
+                        classLoader.removeSourceCache(serverLayout.getGroovyId());
+                        classLoader.removeClassCache(serverLayout.getJavaClass());
+                        connection.createQuery("delete from layout where layout_id = :layout_id").addParameter("layout_id", serverLayout.getLayoutId()).executeUpdate();
+                        connection.createQuery("delete from groovy where groovy_id = :groovy_id").addParameter("groovy_id", serverLayout.getGroovyId()).executeUpdate();
+                    } else {
+                        if (!groovyConflicted) {
+                            // update command
+                            classLoader.removeSourceCache(serverLayout.getGroovyId());
+                            classLoader.removeClassCache(serverLayout.getJavaClass());
+                            GroovyCodeSource source = new GroovyCodeSource(Strings.isNullOrEmpty(clientRest.getClientGroovy()) ? serverLayout.getServerGroovy() : clientRest.getClientGroovy(), serverLayout.getGroovyId(), "/groovy/script");
+                            source.setCachable(true);
+                            Class<?> serviceClass = classLoader.parseClass(source, true);
+                            connection.createQuery("update groovy set script = :script, script_crc32 = :script_crc32, java_class = :java_class where groovy_id = :groovy_id")
+                                    .addParameter("script", Strings.isNullOrEmpty(clientRest.getClientGroovy()) ? serverLayout.getServerGroovy() : clientRest.getClientGroovy())
+                                    .addParameter("script_crc32", clientRest.getClientGroovyCrc32())
+                                    .addParameter("java_class", serviceClass.getName())
+                                    .addParameter("groovy_id", serverLayout.getGroovyId())
+                                    .executeUpdate();
+                            clientRest.setServerGroovyCrc32(clientRest.getClientGroovyCrc32());
+                            clientRest.setServerGroovy(Strings.isNullOrEmpty(clientRest.getClientGroovy()) ? serverLayout.getServerGroovy() : clientRest.getClientGroovy());
+                        } else {
+                            clientRest.setServerGroovyCrc32(serverLayout.getServerGroovyCrc32());
+                            clientRest.setServerGroovy(serverLayout.getServerGroovy());
+                        }
+                    }
+                }
+            }
+
+            List<Layout> serverLayouts;
+            if (!layoutIds.isEmpty()) {
+                Query query = connection.createQuery("select groovy.java_class as javaClass, layout.layout_id as layoutId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from layout inner join groovy on layout.groovy_id = groovy.groovy_id where layout.system = false and layout.layout_id not in (:layoutId)");
+                query.addParameter("layoutId", layoutIds);
+                serverLayouts = query.executeAndFetch(Layout.class);
+            } else {
+                Query query = connection.createQuery("select groovy.java_class as javaClass, layout.layout_id as layoutId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from layout inner join groovy on layout.groovy_id = groovy.groovy_id where layout.system = false");
+                serverLayouts = query.executeAndFetch(Layout.class);
+            }
+            if (serverLayouts != null && !serverLayouts.isEmpty()) {
+                for (Layout serverLayout : serverLayouts) {
+                    String path = StringUtils.replaceChars(serverLayout.getJavaClass(), '.', '/');
+                    serverLayout.setHtmlPath(path + ".html");
+                    serverLayout.setGroovyPath(path + ".groovy");
+                    serverLayout.setGroovyConflicted(false);
+                    serverLayout.setHtmlConflicted(false);
+                    sync.addLayout(serverLayout);
                 }
             }
 
