@@ -14,21 +14,17 @@ public class Layout {
 
     private String mountPath;
 
-    public String getMountPath() {
-        return mountPath;
-    }
+    @Expose
+    @SerializedName("class")
+    private String clazz;
 
-    public void setMountPath(String mountPath) {
-        this.mountPath = mountPath;
-    }
+    @Expose
+    @SerializedName("title")
+    private String title;
 
-    public String getGroovyId() {
-        return groovyId;
-    }
-
-    public void setGroovyId(String groovyId) {
-        this.groovyId = groovyId;
-    }
+    @Expose
+    @SerializedName("description")
+    private String description;
 
     @Expose
     @SerializedName("layoutId")
@@ -194,4 +190,43 @@ public class Layout {
         this.javaClass = javaClass;
     }
 
+    public String getMountPath() {
+        return mountPath;
+    }
+
+    public void setMountPath(String mountPath) {
+        this.mountPath = mountPath;
+    }
+
+    public String getGroovyId() {
+        return groovyId;
+    }
+
+    public void setGroovyId(String groovyId) {
+        this.groovyId = groovyId;
+    }
+
+    public String getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(String clazz) {
+        this.clazz = clazz;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

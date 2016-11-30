@@ -135,7 +135,7 @@ public class RestCreatePage extends MBaaSPage {
         this.nameFeedback = new TextFeedbackPanel("nameFeedback", this.nameField);
         this.form.add(this.nameFeedback);
 
-        this.groovy = String.format(getString("groovy.script"), this.restUuid);
+        this.groovy = String.format(getString("groovy.script"), "SampleService", "SampleService", this.restUuid);
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
         this.groovyField.setRequired(true);
         this.groovyField.add(new GroovyScriptValidator());

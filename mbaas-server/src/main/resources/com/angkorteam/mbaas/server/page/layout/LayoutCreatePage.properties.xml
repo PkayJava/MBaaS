@@ -17,9 +17,9 @@
     <entry key="layout.groovy"><![CDATA[package com.angkorteam.mbaas.server.groovy
 import com.angkorteam.mbaas.server.page.CmsLayout
 
-class ExampleLayout extends CmsLayout {
+class %s extends CmsLayout {
 
-    ExampleLayout(String id) {
+    %s(String id) {
         super(id)
     }
 

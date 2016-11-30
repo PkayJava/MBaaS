@@ -8,21 +8,33 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Rest {
 
-    @Expose
-    @SerializedName("restId")
-    private String restId;
-
     private String javaClass;
 
     private String groovyId;
 
-    public String getGroovyId() {
-        return groovyId;
-    }
+    @Expose
+    @SerializedName("class")
+    private String clazz;
 
-    public void setGroovyId(String groovyId) {
-        this.groovyId = groovyId;
-    }
+    @Expose
+    @SerializedName("path")
+    private String path;
+
+    @Expose
+    @SerializedName("method")
+    private String method;
+
+    @Expose
+    @SerializedName("name")
+    private String name;
+
+    @Expose
+    @SerializedName("description")
+    private String description;
+
+    @Expose
+    @SerializedName("restId")
+    private String restId;
 
     @Expose
     @SerializedName("groovyPath")
@@ -110,5 +122,53 @@ public class Rest {
 
     public void setJavaClass(String javaClass) {
         this.javaClass = javaClass;
+    }
+
+    public String getGroovyId() {
+        return groovyId;
+    }
+
+    public void setGroovyId(String groovyId) {
+        this.groovyId = groovyId;
+    }
+
+    public String getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(String clazz) {
+        this.clazz = clazz;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

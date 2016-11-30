@@ -28,9 +28,9 @@ import org.springframework.beans.factory.annotation.Qualifier
 import javax.servlet.http.HttpServletRequest
 import org.sql2o.Sql2o
 
-class SampleService implements RestService {
+class %s implements RestService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SampleService.class)
+    private static final Logger LOGGER = LoggerFactory.getLogger(%s.class)
 
     @Autowired
     private System system

@@ -82,7 +82,7 @@ public class LayoutCreatePage extends MBaaSPage {
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);
 
-        this.groovy = String.format(getString("layout.groovy"), this.layoutUuid);
+        this.groovy = String.format(getString("layout.groovy"), "ExampleLayout", "ExampleLayout", this.layoutUuid);
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
         this.groovyField.setRequired(true);
         this.groovyField.add(new GroovyScriptValidator());

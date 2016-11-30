@@ -22,7 +22,7 @@
 import com.angkorteam.mbaas.server.page.CmsPage
 import org.apache.wicket.markup.html.border.Border
 
-class ExamplePage extends CmsPage {
+class %s extends CmsPage {
 
     @Override
     protected void doInitialize(Border layout) {
