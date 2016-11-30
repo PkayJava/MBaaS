@@ -4,3 +4,5 @@
 
 # Goto Wiki for more Reference and Demo
 https://pkayjava.github.com/MBaaS
+
+[![Sputnik](https://sputnik.ci/conf/badge)](https://sputnik.ci/app#/builds/PkayJava/MBaaS)
