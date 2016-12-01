@@ -1,16 +1,11 @@
 package com.angkorteam.mbaas.server.controller;
 
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
-import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
-import com.angkorteam.mbaas.model.entity.tables.PageRoleTable;
-import com.angkorteam.mbaas.model.entity.tables.PageTable;
+import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.pojos.LayoutPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
-import com.angkorteam.mbaas.model.entity.tables.records.GroovyRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.LayoutRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.PageRecord;
-import com.angkorteam.mbaas.model.entity.tables.records.PageRoleRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.*;
+import com.angkorteam.mbaas.plain.enums.SecurityEnum;
 import com.angkorteam.mbaas.plain.response.RestResponse;
 import com.angkorteam.mbaas.server.Application;
 import com.angkorteam.mbaas.server.Spring;
@@ -22,6 +17,8 @@ import com.angkorteam.mbaas.server.gson.Rest;
 import com.angkorteam.mbaas.server.gson.Sync;
 import com.angkorteam.mbaas.server.page.layout.LayoutCreatePage;
 import com.angkorteam.mbaas.server.page.page.PageCreatePage;
+import com.angkorteam.mbaas.server.page.rest.RestCreatePage;
+import com.angkorteam.mbaas.server.validator.RestPathMethodValidator;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -390,7 +387,196 @@ public class SystemController {
     @RequestMapping(method = RequestMethod.POST, path = "/system/rest")
     public ResponseEntity<RestResponse> rest(Authentication authentication, HttpServletRequest request) throws Throwable {
         Rest rest = this.gson.fromJson(new InputStreamReader(request.getInputStream()), Rest.class);
-        return null;
+        try {
+
+            if (rest == null) {
+                throw new IllegalArgumentException("invalid rest");
+            }
+
+            {
+                // class name validation
+                String className = rest.getClassName();
+                if (Strings.isNullOrEmpty(className)) {
+                    throw new IllegalArgumentException("invalid class name");
+                }
+
+                for (int i = 0; i < StringUtils.length(className); i++) {
+                    char ch = className.charAt(i);
+                    if (!Application.CHARACTERS.contains(Character.toLowerCase(ch))) {
+                        throw new IllegalArgumentException("invalid class name");
+                    }
+                }
+
+                int count = context.selectCount().from(Tables.GROOVY).where(Tables.GROOVY.JAVA_CLASS.eq("com.angkorteam.mbaas.server.groovy." + className)).fetchOneInto(int.class);
+                if (count > 0) {
+                    throw new IllegalArgumentException("invalid class name");
+                }
+            }
+
+            {
+                String newPath = null;
+                String method = rest.getMethod();
+                String path = rest.getPath();
+                if (StringUtils.equalsIgnoreCase(RequestMethod.GET.name(), rest.getMethod())
+                        || StringUtils.equalsIgnoreCase(RequestMethod.POST.name(), rest.getMethod())
+                        || StringUtils.equalsIgnoreCase(RequestMethod.PUT.name(), rest.getMethod())
+                        || StringUtils.equalsIgnoreCase(RequestMethod.DELETE.name(), rest.getMethod())) {
+                } else {
+                    throw new IllegalArgumentException("invalid method");
+                }
+
+                if (Strings.isNullOrEmpty(rest.getPath())) {
+                    throw new IllegalArgumentException("invalid mount path");
+                }
+
+                List<String> segmentNames = Lists.newArrayList();
+                if (!StringUtils.startsWithIgnoreCase(path, "/")
+                        || StringUtils.equalsIgnoreCase(path, "/system")
+                        || StringUtils.startsWithIgnoreCase(path, "/system/")
+                        || StringUtils.equalsIgnoreCase(path, "/resource")
+                        || StringUtils.startsWithIgnoreCase(path, "/resource/")
+                        || StringUtils.endsWithIgnoreCase(path, "/")
+                        || StringUtils.endsWithIgnoreCase(path, "//")) {
+                    throw new IllegalArgumentException("invalid mount path");
+                }
+                if (path.length() > 1) {
+                    for (int i = 1; i < path.length(); i++) {
+                        char ch = path.charAt(i);
+                        if (ch == '/' || ch == '_' || Application.CURLLY_BRACES.contains(ch) || Application.CHARACTERS.contains(ch) || Application.NUMBERS.contains(ch)) {
+                        } else {
+                            throw new IllegalArgumentException("invalid mount path");
+                        }
+                    }
+                }
+                String[] segments = StringUtils.split(path, "/");
+                List<String> newSegments = Lists.newLinkedList();
+                for (String segment : segments) {
+                    if (!Strings.isNullOrEmpty(segment)) {
+                        if (StringUtils.startsWithIgnoreCase(segment, "{") && StringUtils.endsWithIgnoreCase(segment, "}")) {
+                            String name = segment.substring(1, segment.length() - 1);
+                            if (StringUtils.containsIgnoreCase(name, "{") || StringUtils.containsIgnoreCase(name, "}")) {
+                                throw new IllegalArgumentException("invalid mount path");
+                            } else {
+                                if (segmentNames.contains(name)) {
+                                    throw new IllegalArgumentException("invalid mount path");
+                                } else {
+                                    segmentNames.add(name);
+                                }
+                            }
+                            newSegments.add(RestPathMethodValidator.PATH);
+                        } else {
+                            if (StringUtils.containsIgnoreCase(segment, "{") || StringUtils.containsIgnoreCase(segment, "}")) {
+                                throw new IllegalArgumentException("invalid mount path");
+                            }
+                            newSegments.add(segment);
+                        }
+                    }
+                }
+                newPath = "/" + StringUtils.join(newSegments, "/");
+                if (!Strings.isNullOrEmpty(newPath) && !Strings.isNullOrEmpty(method)) {
+                    DSLContext context = Spring.getBean(DSLContext.class);
+                    RestTable table = Tables.REST.as("table");
+                    int count = context.selectCount().from(table).where(table.PATH_VARIABLE.eq(newPath)).and(table.METHOD.eq(method)).fetchOneInto(int.class);
+                    if (count > 0) {
+                        throw new IllegalArgumentException("invalid mount path");
+                    }
+                }
+            }
+
+            XMLPropertiesConfiguration configuration = new XMLPropertiesConfiguration();
+            try (InputStream inputStream = RestCreatePage.class.getResourceAsStream("RestCreatePage.properties.xml")) {
+                configuration.load(inputStream);
+            }
+
+            DSLContext context = Spring.getBean(DSLContext.class);
+            System system = Spring.getBean(System.class);
+            RestTable restTable = Tables.REST.as("restTable");
+            GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+
+            String restId = system.randomUUID();
+
+            String restGroovy = String.format(configuration.getString("groovy.script"), rest.getClassName(), rest.getClassName(), restId);
+
+            File groovyTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".groovy");
+            try {
+                FileUtils.write(groovyTemp, restGroovy, "UTF-8");
+            } catch (IOException e) {
+            }
+
+            long groovyCrc32 = -1;
+            try {
+                groovyCrc32 = FileUtils.checksumCRC32(groovyTemp);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileUtils.deleteQuietly(groovyTemp);
+
+            String groovyId = system.randomUUID();
+
+            GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+            GroovyCodeSource source = new GroovyCodeSource(restGroovy, groovyId, "/groovy/script");
+            source.setCachable(true);
+            Class<?> serviceClass = classLoader.parseClass(source, true);
+
+            GroovyRecord groovyRecord = context.newRecord(groovyTable);
+            groovyRecord.setGroovyId(groovyId);
+            groovyRecord.setSystem(false);
+            groovyRecord.setJavaClass(serviceClass.getName());
+            groovyRecord.setScript(restGroovy);
+            groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
+            groovyRecord.store();
+
+            String[] segments = StringUtils.split(rest.getPath(), "/");
+            List<String> newSegments = Lists.newLinkedList();
+            for (String segment : segments) {
+                if (!org.elasticsearch.common.Strings.isNullOrEmpty(segment)) {
+                    if (StringUtils.startsWithIgnoreCase(segment, "{") && StringUtils.endsWithIgnoreCase(segment, "}")) {
+                        newSegments.add(RestPathMethodValidator.PATH);
+                    } else {
+                        newSegments.add(segment);
+                    }
+                }
+            }
+
+            RestRecord restRecord = context.newRecord(restTable);
+            restRecord.setRestId(restId);
+            restRecord.setSystem(false);
+            restRecord.setName(rest.getName());
+            restRecord.setPath(rest.getPath());
+            restRecord.setPathVariable("/" + StringUtils.join(newSegments, "/"));
+            restRecord.setSegment(StringUtils.countMatches(rest.getPath(), '/'));
+            restRecord.setSecurity(SecurityEnum.Granted.getLiteral());
+            restRecord.setDescription(rest.getDescription());
+            restRecord.setMethod(rest.getMethod());
+            restRecord.setGroovyId(groovyId);
+            restRecord.store();
+
+            RolePojo role = this.context.select(Tables.ROLE.fields()).from(Tables.ROLE).where(Tables.ROLE.NAME.eq("service")).fetchOneInto(RolePojo.class);
+
+            RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
+            RestRoleRecord restRoleRecord = context.newRecord(restRoleTable);
+            restRoleRecord.setRestRoleId(system.randomUUID());
+            restRoleRecord.setRoleId(role.getRoleId());
+            restRoleRecord.setRestId(restId);
+            restRoleRecord.store();
+
+            RestResponse response = new RestResponse();
+            response.setResultCode(HttpStatus.OK.value());
+            response.setResultMessage(HttpStatus.OK.getReasonPhrase());
+            return ResponseEntity.ok(response);
+        } catch (Throwable e) {
+            RestResponse response = new RestResponse();
+            response.setResultCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setResultMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+            List<String> stackTraces = Lists.newArrayList();
+            for (StackTraceElement element : e.getStackTrace()) {
+                String line = element.getClassName() + "." + element.getMethodName() + "(" + FilenameUtils.getName(element.getFileName()) + ":" + element.getLineNumber() + ")";
+                stackTraces.add(line);
+            }
+            response.setStackTrace(stackTraces);
+            response.setDebugMessage(e.getMessage());
+            return ResponseEntity.ok(response);
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/system/monitor")
