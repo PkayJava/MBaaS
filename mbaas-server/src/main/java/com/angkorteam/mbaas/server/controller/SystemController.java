@@ -276,13 +276,13 @@ public class SystemController {
 
             {
                 // class name validation
-                String clazz = layout.getClazz();
+                String clazz = layout.getClassName();
                 if (Strings.isNullOrEmpty(clazz)) {
                     throw new IllegalArgumentException("invalid class name");
                 }
 
                 for (int i = 0; i < StringUtils.length(clazz); i++) {
-                    char ch = layout.getClazz().charAt(i);
+                    char ch = layout.getClassName().charAt(i);
                     if (!Application.CHARACTERS.contains(Character.toLowerCase(ch))) {
                         throw new IllegalArgumentException("invalid class name");
                     }
