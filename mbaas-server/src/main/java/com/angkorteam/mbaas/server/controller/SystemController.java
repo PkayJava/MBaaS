@@ -165,7 +165,7 @@ public class SystemController {
             String pageId = this.system.randomUUID();
             Properties configuration = new Properties();
             try (InputStream inputStream = PageCreatePage.class.getResourceAsStream("PageCreatePage.properties.xml")) {
-                configuration.load(inputStream);
+                configuration.loadFromXML(inputStream);
             }
             String pageGroovy = String.format(configuration.getProperty("page.groovy"), page.getClassName(), pageId);
             String pageHtml = configuration.getProperty("page.html");
@@ -296,7 +296,7 @@ public class SystemController {
 
             Properties configuration = new Properties();
             try (InputStream inputStream = LayoutCreatePage.class.getResourceAsStream("LayoutCreatePage.properties.xml")) {
-                configuration.load(inputStream);
+                configuration.loadFromXML(inputStream);
             }
 
             String layoutId = system.randomUUID();
@@ -484,7 +484,7 @@ public class SystemController {
 
             Properties configuration = new Properties();
             try (InputStream inputStream = RestCreatePage.class.getResourceAsStream("RestCreatePage.properties.xml")) {
-                configuration.load(inputStream);
+                configuration.loadFromXML(inputStream);
             }
 
             DSLContext context = Spring.getBean(DSLContext.class);
