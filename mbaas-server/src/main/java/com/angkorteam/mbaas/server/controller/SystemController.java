@@ -99,19 +99,19 @@ public class SystemController {
 
             {
                 // class name validation
-                String clazz = page.getClassName();
-                if (Strings.isNullOrEmpty(clazz)) {
+                String className = page.getClassName();
+                if (Strings.isNullOrEmpty(className)) {
                     throw new IllegalArgumentException("invalid class name");
                 }
 
-                for (int i = 0; i < StringUtils.length(clazz); i++) {
+                for (int i = 0; i < StringUtils.length(className); i++) {
                     char ch = page.getClassName().charAt(i);
                     if (!Application.CHARACTERS.contains(Character.toLowerCase(ch))) {
                         throw new IllegalArgumentException("invalid class name");
                     }
                 }
 
-                int count = context.selectCount().from(Tables.GROOVY).where(Tables.GROOVY.JAVA_CLASS.eq("com.angkorteam.mbaas.server.groovy." + clazz)).fetchOneInto(int.class);
+                int count = context.selectCount().from(Tables.GROOVY).where(Tables.GROOVY.JAVA_CLASS.eq("com.angkorteam.mbaas.server.groovy." + className)).fetchOneInto(int.class);
                 if (count > 0) {
                     throw new IllegalArgumentException("invalid class name");
                 }
@@ -280,19 +280,19 @@ public class SystemController {
 
             {
                 // class name validation
-                String clazz = layout.getClassName();
-                if (Strings.isNullOrEmpty(clazz)) {
+                String className = layout.getClassName();
+                if (Strings.isNullOrEmpty(className)) {
                     throw new IllegalArgumentException("invalid class name");
                 }
 
-                for (int i = 0; i < StringUtils.length(clazz); i++) {
+                for (int i = 0; i < StringUtils.length(className); i++) {
                     char ch = layout.getClassName().charAt(i);
                     if (!Application.CHARACTERS.contains(Character.toLowerCase(ch))) {
                         throw new IllegalArgumentException("invalid class name");
                     }
                 }
 
-                int count = context.selectCount().from(Tables.GROOVY).where(Tables.GROOVY.JAVA_CLASS.eq("com.angkorteam.mbaas.server.groovy." + clazz)).fetchOneInto(int.class);
+                int count = context.selectCount().from(Tables.GROOVY).where(Tables.GROOVY.JAVA_CLASS.eq("com.angkorteam.mbaas.server.groovy." + className)).fetchOneInto(int.class);
                 if (count > 0) {
                     throw new IllegalArgumentException("invalid class name");
                 }
@@ -524,7 +524,7 @@ public class SystemController {
             }
             if (sync.getLayouts() != null && !sync.getLayouts().isEmpty()) {
                 for (Layout clientLayout : sync.getLayouts()) {
-                    Query query = connection.createQuery("select groovy.java_class as javaClass, page.path as mountPath, groovy.groovy_id as groovyId, layout.layout_id as layoutId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from layout inner join groovy on layout.groovy_id = groovy.groovy_id where layout.layout_id = :layoutId");
+                    Query query = connection.createQuery("select groovy.java_class as javaClass, groovy.groovy_id as groovyId, layout.layout_id as layoutId, html as serverHtml, html_crc32 as serverHtmlCrc32, groovy.script as serverGroovy, groovy.script_crc32 as serverGroovyCrc32 from layout inner join groovy on layout.groovy_id = groovy.groovy_id where layout.layout_id = :layoutId");
                     query.addParameter("layoutId", clientLayout.getLayoutId());
                     Layout serverLayout = query.executeAndFetchFirst(Layout.class);
                     boolean groovyConflicted = !clientLayout.getServerGroovyCrc32().equals(serverLayout.getServerGroovyCrc32());
