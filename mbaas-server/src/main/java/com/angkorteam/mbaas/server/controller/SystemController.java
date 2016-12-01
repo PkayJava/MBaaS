@@ -23,7 +23,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import groovy.lang.GroovyCodeSource;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -164,12 +163,12 @@ public class SystemController {
             }
 
             String pageId = this.system.randomUUID();
-            XMLPropertiesConfiguration configuration = new XMLPropertiesConfiguration();
+            Properties configuration = new Properties();
             try (InputStream inputStream = PageCreatePage.class.getResourceAsStream("PageCreatePage.properties.xml")) {
                 configuration.load(inputStream);
             }
-            String pageGroovy = String.format(configuration.getString("page.groovy"), page.getClassName(), pageId);
-            String pageHtml = configuration.getString("page.html");
+            String pageGroovy = String.format(configuration.getProperty("page.groovy"), page.getClassName(), pageId);
+            String pageHtml = configuration.getProperty("page.html");
 
             DSLContext context = Spring.getBean(DSLContext.class);
             System system = Spring.getBean(System.class);
@@ -295,14 +294,14 @@ public class SystemController {
                 }
             }
 
-            XMLPropertiesConfiguration configuration = new XMLPropertiesConfiguration();
+            Properties configuration = new Properties();
             try (InputStream inputStream = LayoutCreatePage.class.getResourceAsStream("LayoutCreatePage.properties.xml")) {
                 configuration.load(inputStream);
             }
 
             String layoutId = system.randomUUID();
-            String layoutGroovy = String.format(configuration.getString("layout.groovy"), layout.getClassName(), layout.getClassName(), layoutId);
-            String layoutHtml = configuration.getString("layout.html");
+            String layoutGroovy = String.format(configuration.getProperty("layout.groovy"), layout.getClassName(), layout.getClassName(), layoutId);
+            String layoutHtml = configuration.getProperty("layout.html");
 
             File htmlTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".html");
             try {
@@ -483,7 +482,7 @@ public class SystemController {
                 }
             }
 
-            XMLPropertiesConfiguration configuration = new XMLPropertiesConfiguration();
+            Properties configuration = new Properties();
             try (InputStream inputStream = RestCreatePage.class.getResourceAsStream("RestCreatePage.properties.xml")) {
                 configuration.load(inputStream);
             }
@@ -495,7 +494,7 @@ public class SystemController {
 
             String restId = system.randomUUID();
 
-            String restGroovy = String.format(configuration.getString("groovy.script"), rest.getClassName(), rest.getClassName(), restId);
+            String restGroovy = String.format(configuration.getProperty("groovy.script"), rest.getClassName(), rest.getClassName(), restId);
 
             File groovyTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".groovy");
             try {
