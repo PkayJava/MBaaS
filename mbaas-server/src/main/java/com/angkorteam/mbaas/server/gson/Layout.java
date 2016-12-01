@@ -12,8 +12,6 @@ public class Layout {
 
     private String groovyId;
 
-    private String mountPath;
-
     @Expose
     @SerializedName("className")
     private String className;
@@ -188,14 +186,6 @@ public class Layout {
 
     public void setJavaClass(String javaClass) {
         this.javaClass = javaClass;
-    }
-
-    public String getMountPath() {
-        return mountPath;
-    }
-
-    public void setMountPath(String mountPath) {
-        this.mountPath = mountPath;
     }
 
     public String getGroovyId() {

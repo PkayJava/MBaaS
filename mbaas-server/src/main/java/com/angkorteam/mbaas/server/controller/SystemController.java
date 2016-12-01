@@ -99,13 +99,13 @@ public class SystemController {
 
             {
                 // class name validation
-                String clazz = page.getClazz();
+                String clazz = page.getClassName();
                 if (Strings.isNullOrEmpty(clazz)) {
                     throw new IllegalArgumentException("invalid class name");
                 }
 
                 for (int i = 0; i < StringUtils.length(clazz); i++) {
-                    char ch = page.getClazz().charAt(i);
+                    char ch = page.getClassName().charAt(i);
                     if (!Application.CHARACTERS.contains(Character.toLowerCase(ch))) {
                         throw new IllegalArgumentException("invalid class name");
                     }
@@ -171,7 +171,7 @@ public class SystemController {
             try (InputStream inputStream = PageCreatePage.class.getResourceAsStream("PageCreatePage.properties.xml")) {
                 configuration.load(inputStream);
             }
-            String pageGroovy = String.format(configuration.getString("page.groovy"), page.getClazz(), pageId);
+            String pageGroovy = String.format(configuration.getString("page.groovy"), page.getClassName(), pageId);
             String pageHtml = configuration.getString("page.html");
 
             DSLContext context = Spring.getBean(DSLContext.class);
@@ -545,7 +545,6 @@ public class SystemController {
                         classLoader.removeClassCache(serverLayout.getJavaClass());
                         connection.createQuery("delete from layout where layout_id = :layout_id").addParameter("layout_id", serverLayout.getLayoutId()).executeUpdate();
                         connection.createQuery("delete from groovy where groovy_id = :groovy_id").addParameter("groovy_id", serverLayout.getGroovyId()).executeUpdate();
-                        Application.get().unmount(serverLayout.getMountPath());
                         Application.get().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
                     } else {
                         if (!groovyConflicted) {
@@ -555,7 +554,6 @@ public class SystemController {
                             GroovyCodeSource source = new GroovyCodeSource(Strings.isNullOrEmpty(clientLayout.getClientGroovy()) ? serverLayout.getServerGroovy() : clientLayout.getClientGroovy(), serverLayout.getGroovyId(), "/groovy/script");
                             source.setCachable(true);
                             Class<?> pageClass = classLoader.parseClass(source, true);
-                            Application.get().mountPage(serverLayout.getMountPath(), (Class<? extends org.apache.wicket.Page>) pageClass);
                             connection.createQuery("update groovy set script = :script, script_crc32 = :script_crc32, java_class = :java_class where groovy_id = :groovy_id")
                                     .addParameter("script", Strings.isNullOrEmpty(clientLayout.getClientGroovy()) ? serverLayout.getServerGroovy() : clientLayout.getClientGroovy())
                                     .addParameter("script_crc32", clientLayout.getClientGroovyCrc32())
