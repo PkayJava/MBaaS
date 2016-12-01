@@ -17,6 +17,8 @@ import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.LayoutTitleValidator;
 import groovy.lang.GroovyCodeSource;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
@@ -25,6 +27,8 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -112,6 +116,35 @@ public class LayoutCreatePage extends MBaaSPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
+
+        File htmlTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".html");
+        try {
+            FileUtils.write(htmlTemp, this.html, "UTF-8");
+        } catch (IOException e) {
+        }
+
+        long htmlCrc32 = -1;
+        try {
+            htmlCrc32 = FileUtils.checksumCRC32(htmlTemp);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileUtils.deleteQuietly(htmlTemp);
+
+        File groovyTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".groovy");
+        try {
+            FileUtils.write(groovyTemp, this.groovy, "UTF-8");
+        } catch (IOException e) {
+        }
+
+        long groovyCrc32 = -1;
+        try {
+            groovyCrc32 = FileUtils.checksumCRC32(groovyTemp);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileUtils.deleteQuietly(groovyTemp);
+
         System system = Spring.getBean(System.class);
         DSLContext context = Spring.getBean(DSLContext.class);
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
@@ -128,6 +161,7 @@ public class LayoutCreatePage extends MBaaSPage {
         groovyRecord.setGroovyId(groovyId);
         groovyRecord.setSystem(false);
         groovyRecord.setJavaClass(layoutClass.getName());
+        groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
         groovyRecord.setScript(this.groovy);
         groovyRecord.store();
 
@@ -138,6 +172,7 @@ public class LayoutCreatePage extends MBaaSPage {
         layoutRecord.setDateModified(new Date());
         layoutRecord.setTitle(this.title);
         layoutRecord.setHtml(this.html);
+        layoutRecord.setHtmlCrc32(String.valueOf(htmlCrc32));
         layoutRecord.setDescription(this.description);
         layoutRecord.setSystem(false);
         layoutRecord.setModified(true);

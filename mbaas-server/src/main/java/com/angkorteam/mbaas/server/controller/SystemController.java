@@ -2,11 +2,13 @@ package com.angkorteam.mbaas.server.controller;
 
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
+import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
 import com.angkorteam.mbaas.model.entity.tables.PageRoleTable;
 import com.angkorteam.mbaas.model.entity.tables.PageTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.LayoutPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
 import com.angkorteam.mbaas.model.entity.tables.records.GroovyRecord;
+import com.angkorteam.mbaas.model.entity.tables.records.LayoutRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.PageRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.PageRoleRecord;
 import com.angkorteam.mbaas.plain.response.RestResponse;
@@ -18,6 +20,7 @@ import com.angkorteam.mbaas.server.gson.Layout;
 import com.angkorteam.mbaas.server.gson.Page;
 import com.angkorteam.mbaas.server.gson.Rest;
 import com.angkorteam.mbaas.server.gson.Sync;
+import com.angkorteam.mbaas.server.page.layout.LayoutCreatePage;
 import com.angkorteam.mbaas.server.page.page.PageCreatePage;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -167,85 +170,86 @@ public class SystemController {
             XMLPropertiesConfiguration configuration = new XMLPropertiesConfiguration();
             try (InputStream inputStream = PageCreatePage.class.getResourceAsStream("PageCreatePage.properties.xml")) {
                 configuration.load(inputStream);
-                String pageGroovy = String.format(configuration.getString("page.groovy"), page.getClazz(), pageId);
-                String pageHtml = configuration.getString("page.html");
-
-                DSLContext context = Spring.getBean(DSLContext.class);
-                System system = Spring.getBean(System.class);
-                PageTable pageTable = Tables.PAGE.as("pageTable");
-                GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
-
-                File htmlTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".html");
-                try {
-                    FileUtils.write(htmlTemp, pageHtml, "UTF-8");
-                } catch (IOException e) {
-                }
-
-                long htmlCrc32 = -1;
-                try {
-                    htmlCrc32 = FileUtils.checksumCRC32(htmlTemp);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                FileUtils.deleteQuietly(htmlTemp);
-
-                File groovyTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".groovy");
-                try {
-                    FileUtils.write(groovyTemp, pageGroovy, "UTF-8");
-                } catch (IOException e) {
-                }
-
-                long groovyCrc32 = -1;
-                try {
-                    groovyCrc32 = FileUtils.checksumCRC32(groovyTemp);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                FileUtils.deleteQuietly(groovyTemp);
-
-                String groovyId = system.randomUUID();
-
-                GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
-                GroovyCodeSource source = new GroovyCodeSource(pageGroovy, groovyId, "/groovy/script");
-                source.setCachable(true);
-                Class<?> pageClass = classLoader.parseClass(source, true);
-
-                GroovyRecord groovyRecord = context.newRecord(groovyTable);
-                groovyRecord.setGroovyId(groovyId);
-                groovyRecord.setScript(pageGroovy);
-                groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
-                groovyRecord.setSystem(false);
-                groovyRecord.setJavaClass(pageClass.getName());
-                groovyRecord.store();
-
-                Application.get().mountPage(page.getPath(), (Class<? extends org.apache.wicket.Page>) pageClass);
-
-                PageRecord pageRecord = context.newRecord(pageTable);
-                pageRecord.setPageId(pageId);
-                pageRecord.setLayoutId(layout.getLayoutId());
-                pageRecord.setDateCreated(new Date());
-                pageRecord.setDateModified(new Date());
-                pageRecord.setGroovyId(groovyId);
-                pageRecord.setTitle(page.getTitle());
-                pageRecord.setHtml(pageHtml);
-                pageRecord.setHtmlCrc32(String.valueOf(htmlCrc32));
-                pageRecord.setCode(page.getCode());
-                pageRecord.setPath(page.getPath());
-                pageRecord.setDescription(page.getDescription());
-                pageRecord.setSystem(false);
-                pageRecord.setModified(true);
-                pageRecord.setCmsPage(true);
-                pageRecord.store();
-
-                RolePojo role = this.context.select(Tables.ROLE.fields()).from(Tables.ROLE).where(Tables.ROLE.NAME.eq("administrator")).fetchOneInto(RolePojo.class);
-
-                PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
-                PageRoleRecord pageRoleRecord = context.newRecord(pageRoleTable);
-                pageRoleRecord.setPageRoleId(system.randomUUID());
-                pageRoleRecord.setRoleId(role.getRoleId());
-                pageRoleRecord.setPageId(pageId);
-                pageRoleRecord.store();
             }
+            String pageGroovy = String.format(configuration.getString("page.groovy"), page.getClazz(), pageId);
+            String pageHtml = configuration.getString("page.html");
+
+            DSLContext context = Spring.getBean(DSLContext.class);
+            System system = Spring.getBean(System.class);
+            PageTable pageTable = Tables.PAGE.as("pageTable");
+            GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+
+            File htmlTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".html");
+            try {
+                FileUtils.write(htmlTemp, pageHtml, "UTF-8");
+            } catch (IOException e) {
+            }
+
+            long htmlCrc32 = -1;
+            try {
+                htmlCrc32 = FileUtils.checksumCRC32(htmlTemp);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileUtils.deleteQuietly(htmlTemp);
+
+            File groovyTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".groovy");
+            try {
+                FileUtils.write(groovyTemp, pageGroovy, "UTF-8");
+            } catch (IOException e) {
+            }
+
+            long groovyCrc32 = -1;
+            try {
+                groovyCrc32 = FileUtils.checksumCRC32(groovyTemp);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileUtils.deleteQuietly(groovyTemp);
+
+            String groovyId = system.randomUUID();
+
+            GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+            GroovyCodeSource source = new GroovyCodeSource(pageGroovy, groovyId, "/groovy/script");
+            source.setCachable(true);
+            Class<?> pageClass = classLoader.parseClass(source, true);
+
+            GroovyRecord groovyRecord = context.newRecord(groovyTable);
+            groovyRecord.setGroovyId(groovyId);
+            groovyRecord.setScript(pageGroovy);
+            groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
+            groovyRecord.setSystem(false);
+            groovyRecord.setJavaClass(pageClass.getName());
+            groovyRecord.store();
+
+            Application.get().mountPage(page.getPath(), (Class<? extends org.apache.wicket.Page>) pageClass);
+
+            PageRecord pageRecord = context.newRecord(pageTable);
+            pageRecord.setPageId(pageId);
+            pageRecord.setLayoutId(layout.getLayoutId());
+            pageRecord.setDateCreated(new Date());
+            pageRecord.setDateModified(new Date());
+            pageRecord.setGroovyId(groovyId);
+            pageRecord.setTitle(page.getTitle());
+            pageRecord.setHtml(pageHtml);
+            pageRecord.setHtmlCrc32(String.valueOf(htmlCrc32));
+            pageRecord.setCode(page.getCode());
+            pageRecord.setPath(page.getPath());
+            pageRecord.setDescription(page.getDescription());
+            pageRecord.setSystem(false);
+            pageRecord.setModified(true);
+            pageRecord.setCmsPage(true);
+            pageRecord.store();
+
+            RolePojo role = this.context.select(Tables.ROLE.fields()).from(Tables.ROLE).where(Tables.ROLE.NAME.eq("administrator")).fetchOneInto(RolePojo.class);
+
+            PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
+            PageRoleRecord pageRoleRecord = context.newRecord(pageRoleTable);
+            pageRoleRecord.setPageRoleId(system.randomUUID());
+            pageRoleRecord.setRoleId(role.getRoleId());
+            pageRoleRecord.setPageId(pageId);
+            pageRoleRecord.store();
+
             RestResponse response = new RestResponse();
             response.setResultCode(HttpStatus.OK.value());
             response.setResultMessage(HttpStatus.OK.getReasonPhrase());
@@ -293,6 +297,76 @@ public class SystemController {
                     throw new IllegalArgumentException("invalid class name");
                 }
             }
+
+            XMLPropertiesConfiguration configuration = new XMLPropertiesConfiguration();
+            try (InputStream inputStream = LayoutCreatePage.class.getResourceAsStream("LayoutCreatePage.properties.xml")) {
+                configuration.load(inputStream);
+            }
+
+            String layoutId = system.randomUUID();
+            String layoutGroovy = String.format(configuration.getString("layout.groovy"), layout.getClassName(), layout.getClassName(), layoutId);
+            String layoutHtml = configuration.getString("layout.html");
+
+            File htmlTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".html");
+            try {
+                FileUtils.write(htmlTemp, layoutHtml, "UTF-8");
+            } catch (IOException e) {
+            }
+
+            long htmlCrc32 = -1;
+            try {
+                htmlCrc32 = FileUtils.checksumCRC32(htmlTemp);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileUtils.deleteQuietly(htmlTemp);
+
+            File groovyTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".groovy");
+            try {
+                FileUtils.write(groovyTemp, layoutGroovy, "UTF-8");
+            } catch (IOException e) {
+            }
+
+            long groovyCrc32 = -1;
+            try {
+                groovyCrc32 = FileUtils.checksumCRC32(groovyTemp);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileUtils.deleteQuietly(groovyTemp);
+
+            System system = Spring.getBean(System.class);
+            DSLContext context = Spring.getBean(DSLContext.class);
+            LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
+            GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+
+            String groovyId = system.randomUUID();
+
+            GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+            GroovyCodeSource source = new GroovyCodeSource(layoutGroovy, groovyId, "/groovy/script");
+            source.setCachable(true);
+            Class<?> layoutClass = classLoader.parseClass(source, true);
+
+            GroovyRecord groovyRecord = context.newRecord(groovyTable);
+            groovyRecord.setGroovyId(groovyId);
+            groovyRecord.setSystem(false);
+            groovyRecord.setJavaClass(layoutClass.getName());
+            groovyRecord.setScript(layoutGroovy);
+            groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
+            groovyRecord.store();
+
+            LayoutRecord layoutRecord = context.newRecord(layoutTable);
+            layoutRecord.setLayoutId(layoutId);
+            layoutRecord.setGroovyId(groovyId);
+            layoutRecord.setDateCreated(new Date());
+            layoutRecord.setDateModified(new Date());
+            layoutRecord.setTitle(layout.getTitle());
+            layoutRecord.setHtml(layoutHtml);
+            layoutRecord.setHtmlCrc32(String.valueOf(htmlCrc32));
+            layoutRecord.setDescription(layout.getDescription());
+            layoutRecord.setSystem(false);
+            layoutRecord.setModified(true);
+            layoutRecord.store();
 
             RestResponse response = new RestResponse();
             response.setResultCode(HttpStatus.OK.value());
