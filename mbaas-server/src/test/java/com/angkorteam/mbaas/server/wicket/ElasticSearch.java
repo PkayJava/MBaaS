@@ -24,7 +24,7 @@ public class ElasticSearch {
         HttpRequestWithBody requestBody = requestWithBody.header("content-type", MediaType.APPLICATION_JSON_VALUE);
         Map<String, Object> body = new HashMap<>();
         body.put("name", "Late Night with Elasticsearch");
-        body.put("date", DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
+        body.put("date", DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
         RequestBodyEntity requestBodyEntity = requestBody.body(gson.toJson(body));
         System.out.println(gson.toJson(gson.fromJson(requestBodyEntity.asString().getBody(), Object.class)));
     }

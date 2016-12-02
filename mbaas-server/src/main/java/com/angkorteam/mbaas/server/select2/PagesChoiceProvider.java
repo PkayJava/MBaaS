@@ -54,20 +54,6 @@ public class PagesChoiceProvider extends MultipleChoiceProvider<PagePojo> {
     }
 
     @Override
-    public int size() {
-        DSLContext context = Spring.getBean(DSLContext.class);
-        PageTable pageTable = Tables.PAGE.as("pageTable");
-        return context.selectCount().from(pageTable).fetchOneInto(int.class);
-    }
-
-    @Override
-    public PagePojo get(int index) {
-        DSLContext context = Spring.getBean(DSLContext.class);
-        PageTable pageTable = Tables.PAGE.as("pageTable");
-        return context.select(pageTable.fields()).from(pageTable).orderBy(pageTable.TITLE.asc()).limit(index, 1).fetchOneInto(PagePojo.class);
-    }
-
-    @Override
     public Object getDisplayValue(PagePojo object) {
         return object.getTitle();
     }

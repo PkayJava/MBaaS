@@ -30,7 +30,7 @@ public class DateTimePanel extends Panel {
         super.onInitialize();
         Label label = new Label("label", this.name);
         this.add(label);
-        DateTextField field = DateTextField.forDatePattern("field", new PropertyModel<>(this.fields, this.name), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
+        DateTextField field = DateTextField.forDatePattern("field", new PropertyModel<>(this.fields, this.name), DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.getPattern());
         field.setType(Date.class);
         this.fields.put(this.name, new Date());
         field.setLabel(Model.of(name));

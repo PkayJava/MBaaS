@@ -24,13 +24,13 @@ public class ApplicationJson {
         requestBody = requestBody.header("content-type", MediaType.APPLICATION_JSON_VALUE);
         requestBody = requestBody.header("user-agent", "hello");
         requestBody = requestBody.header("authorization", "hello");
-        requestBody = requestBody.header("dob", DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
-        HttpRequest httpRequest = requestBody.queryString("game", Arrays.asList(DateFormatUtils.ISO_DATE_FORMAT.format(new Date()), DateFormatUtils.ISO_DATE_FORMAT.format(new Date())));
+        requestBody = requestBody.header("dob", DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date()));
+        HttpRequest httpRequest = requestBody.queryString("game", Arrays.asList(DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date()), DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date())));
         httpRequest.queryString("sessionId", UUID.randomUUID().toString());
         Map<String, Object> body = new HashMap<>();
         {
-            body.put("list_datetime_required", Arrays.asList(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date())));
-            body.put("list_datetime_optional", Arrays.asList(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date())));
+            body.put("list_datetime_required", Arrays.asList(DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date())));
+            body.put("list_datetime_optional", Arrays.asList(DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date())));
         }
         {
             body.put("boolean_enum_required", true);
@@ -69,8 +69,8 @@ public class ApplicationJson {
             body.put("long_enum_optional", 1);
         }
         {
-            body.put("list_date_required", Arrays.asList(DateFormatUtils.ISO_DATE_FORMAT.format(new Date())));
-            body.put("list_date_optional", Arrays.asList(DateFormatUtils.ISO_DATE_FORMAT.format(new Date())));
+            body.put("list_date_required", Arrays.asList(DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date())));
+            body.put("list_date_optional", Arrays.asList(DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date())));
         }
         {
             body.put("list_date_enum_required", Arrays.asList("2016-09-02"));
@@ -81,8 +81,8 @@ public class ApplicationJson {
             body.put("list_long_optional", Arrays.asList(1, 2, 3));
         }
         {
-            body.put("list_time_required", Arrays.asList(DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(new Date())));
-            body.put("list_time_optional", Arrays.asList(DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(new Date())));
+            body.put("list_time_required", Arrays.asList(DateFormatUtils.ISO_8601_EXTENDED_TIME_FORMAT.format(new Date())));
+            body.put("list_time_optional", Arrays.asList(DateFormatUtils.ISO_8601_EXTENDED_TIME_FORMAT.format(new Date())));
         }
         {
             body.put("date_enum_required", "2016-09-02");
@@ -150,12 +150,12 @@ public class ApplicationJson {
             body.put("string_enum_optional", "student");
         }
         {
-            body.put("time_required", DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(new Date()));
-            body.put("time_optional", DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(new Date()));
+            body.put("time_required", DateFormatUtils.ISO_8601_EXTENDED_TIME_FORMAT.format(new Date()));
+            body.put("time_optional", DateFormatUtils.ISO_8601_EXTENDED_TIME_FORMAT.format(new Date()));
         }
         {
-            body.put("datetime_required", DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
-            body.put("datetime_optional", DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
+            body.put("datetime_required", DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
+            body.put("datetime_optional", DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
         }
         {
             body.put("list_boolean_enum_required", Arrays.asList(true, false));
@@ -166,8 +166,8 @@ public class ApplicationJson {
             body.put("list_character_enum_optional", Arrays.asList('a', 'b', 'c'));
         }
         {
-            body.put("date_required", DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
-            body.put("date_optional", DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
+            body.put("date_required", DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date()));
+            body.put("date_optional", DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date()));
         }
         requestBody.body(gson.toJson(body));
         System.out.println(gson.toJson(gson.fromJson(requestBody.asString().getBody(), Object.class)));

@@ -54,20 +54,6 @@ public class RolesChoiceProvider extends MultipleChoiceProvider<RolePojo> {
     }
 
     @Override
-    public int size() {
-        DSLContext context = Spring.getBean(DSLContext.class);
-        RoleTable roleTable = Tables.ROLE.as("roleTable");
-        return context.selectCount().from(roleTable).fetchOneInto(int.class);
-    }
-
-    @Override
-    public RolePojo get(int index) {
-        DSLContext context = Spring.getBean(DSLContext.class);
-        RoleTable roleTable = Tables.ROLE.as("roleTable");
-        return context.select(roleTable.fields()).from(roleTable).orderBy(roleTable.NAME.asc()).limit(index, 1).fetchOneInto(RolePojo.class);
-    }
-
-    @Override
     public Object getDisplayValue(RolePojo object) {
         return object.getName();
     }

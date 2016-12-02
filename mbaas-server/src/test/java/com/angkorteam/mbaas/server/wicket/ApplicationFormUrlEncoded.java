@@ -21,8 +21,8 @@ public class ApplicationFormUrlEncoded {
         HttpRequestWithBody requestBody = Unirest.post("http://demo.ddns.net:9080/api/javascript/hello");
         requestBody = requestBody.header("user-agent", "hello");
         requestBody = requestBody.header("authorization", "hello");
-        requestBody = requestBody.header("dob", DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
-        HttpRequest httpRequest = requestBody.queryString("game", Arrays.asList(DateFormatUtils.ISO_DATE_FORMAT.format(new Date()), DateFormatUtils.ISO_DATE_FORMAT.format(new Date())));
+        requestBody = requestBody.header("dob", DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date()));
+        HttpRequest httpRequest = requestBody.queryString("game", Arrays.asList(DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date()), DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date())));
         httpRequest.queryString("sessionId", UUID.randomUUID().toString());
         MultipartBody body = null;
         {
@@ -33,14 +33,14 @@ public class ApplicationFormUrlEncoded {
         }
         {
             List<String> list_datetime_required = new ArrayList<>();
-            list_datetime_required.add(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
-            list_datetime_required.add(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
-            list_datetime_required.add(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
+            list_datetime_required.add(DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
+            list_datetime_required.add(DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
+            list_datetime_required.add(DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
             body = body.field("list_datetime_required", list_datetime_required);
         }
         {
             List<String> list_datetime_optional = new ArrayList<>();
-            list_datetime_optional.add(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
+            list_datetime_optional.add(DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
             body = body.field("list_datetime_optional", list_datetime_optional);
         }
         {

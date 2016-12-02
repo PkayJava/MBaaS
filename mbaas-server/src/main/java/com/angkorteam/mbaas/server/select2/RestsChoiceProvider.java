@@ -54,20 +54,6 @@ public class RestsChoiceProvider extends MultipleChoiceProvider<RestPojo> {
     }
 
     @Override
-    public int size() {
-        DSLContext context = Spring.getBean(DSLContext.class);
-        RestTable restTable = Tables.REST.as("restTable");
-        return context.selectCount().from(restTable).fetchOneInto(int.class);
-    }
-
-    @Override
-    public RestPojo get(int index) {
-        DSLContext context = Spring.getBean(DSLContext.class);
-        RestTable restTable = Tables.REST.as("restTable");
-        return context.select(restTable.fields()).from(restTable).orderBy(restTable.NAME.asc()).limit(index, 1).fetchOneInto(RestPojo.class);
-    }
-
-    @Override
     public Object getDisplayValue(RestPojo object) {
         return object.getName();
     }
@@ -83,6 +69,5 @@ public class RestsChoiceProvider extends MultipleChoiceProvider<RestPojo> {
         RestTable restTable = Tables.REST.as("restTable");
         return context.select(restTable.fields()).from(restTable).where(restTable.REST_ID.eq(id)).fetchOneInto(RestPojo.class);
     }
-
 
 }
