@@ -65,6 +65,7 @@ public class Application extends AuthenticatedWebApplication {
         CHARACTERS.add('w');
         CHARACTERS.add('y');
         CHARACTERS.add('z');
+        CHARACTERS.add('-');
         NUMBERS.add('0');
         NUMBERS.add('1');
         NUMBERS.add('2');
