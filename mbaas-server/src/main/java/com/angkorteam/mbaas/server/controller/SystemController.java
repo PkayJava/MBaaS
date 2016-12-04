@@ -168,7 +168,7 @@ public class SystemController {
             try (InputStream inputStream = PageCreatePage.class.getResourceAsStream("PageCreatePage.properties.xml")) {
                 configuration.loadFromXML(inputStream);
             }
-            String pageGroovy = String.format(configuration.getProperty("page.groovy"), page.getClassName(), pageId);
+            String pageGroovy = String.format(configuration.getProperty("page.groovy"), page.getClassName(), page.getClassName(), pageId);
             String pageHtml = configuration.getProperty("page.html");
 
             DSLContext context = Spring.getBean(DSLContext.class);
@@ -303,7 +303,7 @@ public class SystemController {
             }
 
             String layoutId = system.randomUUID();
-            String layoutGroovy = String.format(configuration.getProperty("layout.groovy"), layout.getClassName(), layout.getClassName(), layoutId);
+            String layoutGroovy = String.format(configuration.getProperty("layout.groovy"), layout.getClassName(), layout.getClassName(), layout.getClassName(), layoutId);
             String layoutHtml = configuration.getProperty("layout.html");
 
             File htmlTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".html");

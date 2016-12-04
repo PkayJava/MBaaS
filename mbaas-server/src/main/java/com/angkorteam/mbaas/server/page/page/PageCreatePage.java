@@ -135,7 +135,7 @@ public class PageCreatePage extends MBaaSPage {
         this.codeFeedback = new TextFeedbackPanel("codeFeedback", this.codeField);
         this.form.add(this.codeFeedback);
 
-        this.groovy = String.format(getString("page.groovy"), "ExamplePage", this.pageUuid);
+        this.groovy = String.format(getString("page.groovy"), "ExamplePage", "ExamplePage", this.pageUuid);
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
         this.groovyField.setRequired(true);
         this.groovyField.add(new GroovyScriptValidator());
