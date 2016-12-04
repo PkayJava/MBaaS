@@ -30,6 +30,7 @@ import groovy.lang.GroovyCodeSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.wicket.Page;
+import org.apache.wicket.core.util.lang.PropertyResolver;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
@@ -173,6 +174,7 @@ public class PageCreatePage extends MBaaSPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
+        PropertyResolver.destroy(org.apache.wicket.Application.get());
         DSLContext context = Spring.getBean(DSLContext.class);
         System system = Spring.getBean(System.class);
         PageTable pageTable = Tables.PAGE.as("pageTable");

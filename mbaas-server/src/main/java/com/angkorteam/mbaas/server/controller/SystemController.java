@@ -28,6 +28,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.wicket.core.util.lang.PropertyResolver;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +85,6 @@ public class SystemController {
 
     @RequestMapping(method = RequestMethod.POST, path = "/system/page")
     public ResponseEntity<RestResponse> page(Authentication authentication, HttpServletRequest request) throws Throwable {
-
         Page page = this.gson.fromJson(new InputStreamReader(request.getInputStream()), Page.class);
 
         try {
@@ -92,6 +92,7 @@ public class SystemController {
             if (page == null) {
                 throw new IllegalArgumentException("invalid page");
             }
+            PropertyResolver.destroy(org.apache.wicket.Application.get());
 
             {
                 // class name validation
@@ -273,6 +274,8 @@ public class SystemController {
             if (layout == null) {
                 throw new IllegalArgumentException("invalid layout");
             }
+
+            PropertyResolver.destroy(org.apache.wicket.Application.get());
 
             {
                 // class name validation
@@ -595,6 +598,7 @@ public class SystemController {
         if (sync == null) {
             sync = new Sync();
         }
+        PropertyResolver.destroy(org.apache.wicket.Application.get());
         List<String> pageIds = new ArrayList<>();
         List<String> restIds = new ArrayList<>();
         List<String> layoutIds = new ArrayList<>();

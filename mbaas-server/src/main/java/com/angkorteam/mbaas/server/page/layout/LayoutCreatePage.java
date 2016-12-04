@@ -19,6 +19,7 @@ import com.angkorteam.mbaas.server.validator.LayoutTitleValidator;
 import groovy.lang.GroovyCodeSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.wicket.core.util.lang.PropertyResolver;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
@@ -116,7 +117,7 @@ public class LayoutCreatePage extends MBaaSPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-
+        PropertyResolver.destroy(org.apache.wicket.Application.get());
         File htmlTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".html");
         try {
             FileUtils.write(htmlTemp, this.html, "UTF-8");
