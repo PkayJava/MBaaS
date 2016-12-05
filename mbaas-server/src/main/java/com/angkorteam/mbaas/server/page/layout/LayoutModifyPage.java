@@ -129,7 +129,7 @@ public class LayoutModifyPage extends MBaaSPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        PropertyResolver.destroy(org.apache.wicket.Application.get());
+        // PropertyResolver.destroy(org.apache.wicket.Application.get());
         File htmlTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".html");
         try {
             FileUtils.write(htmlTemp, this.html, "UTF-8");

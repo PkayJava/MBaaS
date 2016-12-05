@@ -195,7 +195,7 @@ public class PageModifyPage extends MBaaSPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        PropertyResolver.destroy(org.apache.wicket.Application.get());
+        // PropertyResolver.destroy(org.apache.wicket.Application.get());
         System system = Spring.getBean(System.class);
         DSLContext context = Spring.getBean(DSLContext.class);
         PageTable pageTable = Tables.PAGE.as("pageTable");

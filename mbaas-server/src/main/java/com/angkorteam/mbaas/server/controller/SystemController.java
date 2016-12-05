@@ -92,7 +92,7 @@ public class SystemController {
             if (page == null) {
                 throw new IllegalArgumentException("invalid page");
             }
-            PropertyResolver.destroy(org.apache.wicket.Application.get());
+            // PropertyResolver.destroy(org.apache.wicket.Application.get());
 
             {
                 // class name validation
@@ -275,7 +275,7 @@ public class SystemController {
                 throw new IllegalArgumentException("invalid layout");
             }
 
-            PropertyResolver.destroy(org.apache.wicket.Application.get());
+            // PropertyResolver.destroy(org.apache.wicket.Application.get());
 
             {
                 // class name validation
@@ -598,7 +598,7 @@ public class SystemController {
         if (sync == null) {
             sync = new Sync();
         }
-        PropertyResolver.destroy(org.apache.wicket.Application.get());
+        // PropertyResolver.destroy(org.apache.wicket.Application.get());
         List<String> pageIds = new ArrayList<>();
         List<String> restIds = new ArrayList<>();
         List<String> layoutIds = new ArrayList<>();

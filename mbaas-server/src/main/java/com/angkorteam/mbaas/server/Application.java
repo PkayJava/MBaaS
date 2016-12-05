@@ -19,6 +19,7 @@ import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
+import org.apache.wicket.core.util.lang.PropertyResolver;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.resource.DynamicJQueryResourceReference;
 import org.apache.wicket.settings.ExceptionSettings;
@@ -83,6 +84,7 @@ public class Application extends AuthenticatedWebApplication {
 
     @Override
     protected void init() {
+        PropertyResolver.setLocator(this, new PropertyResolver.DefaultPropertyLocator());
         getSecuritySettings().setUnauthorizedComponentInstantiationListener(this);
         AuthorizationStrategy authorizationStrategy = Spring.getBean(AuthorizationStrategy.class);
         getExceptionSettings().setAjaxErrorHandlingStrategy(ExceptionSettings.AjaxErrorStrategy.REDIRECT_TO_ERROR_PAGE);
