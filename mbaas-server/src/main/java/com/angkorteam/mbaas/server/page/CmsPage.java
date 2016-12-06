@@ -4,12 +4,11 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.PageTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
 import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.wicket.StringResourceStream;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.DefaultMarkupResourceStreamProvider;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
-import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.util.resource.IResourceStream;
-import org.apache.wicket.util.resource.StringResourceStream;
 import org.jooq.DSLContext;
 
 /**
@@ -29,7 +28,7 @@ public abstract class CmsPage extends MBaaSPage implements IMarkupResourceStream
             PageTable pageTable = Tables.PAGE.as("pageTable");
             PagePojo page = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(getPageUUID())).fetchOneInto(PagePojo.class);
             String html = page.getHtml();
-            StringResourceStream stream = new StringResourceStream(html);
+            StringResourceStream stream = new StringResourceStream("page_" + page.getPageId(), html);
             return stream;
         } else {
             DefaultMarkupResourceStreamProvider streamProvider = new DefaultMarkupResourceStreamProvider();
