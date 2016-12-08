@@ -2,21 +2,21 @@ package com.angkorteam.mbaas.server.page.collection;
 
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.event.TableEvent;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredColumn;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.*;
 import com.angkorteam.mbaas.plain.request.collection.CollectionDeleteRequest;
 import com.angkorteam.mbaas.server.function.CollectionFunction;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.page.attribute.AttributeBrowsePage;
 import com.angkorteam.mbaas.server.page.document.DocumentBrowsePage;
 import com.angkorteam.mbaas.server.provider.CollectionProvider;
+import com.google.common.collect.Maps;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * Created by socheat on 3/1/16.
  */
-public class CollectionBrowsePage extends MBaaSPage implements TableEvent {
+public class CollectionBrowsePage extends MBaaSPage {
 
     @Override
     public String getPageUUID() {
@@ -45,11 +45,11 @@ public class CollectionBrowsePage extends MBaaSPage implements TableEvent {
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredColumn(String.class, Model.of("name"), "name", this, provider));
-        columns.add(new TextFilteredColumn(String.class, Model.of("system"), "system", this, provider));
-        columns.add(new TextFilteredColumn(String.class, Model.of("locked"), "locked", this, provider));
-        columns.add(new TextFilteredColumn(String.class, Model.of("mutable"), "mutable", this, provider));
-        columns.add(new ActionFilteredColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "Attribute", "Delete"));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("name"), "name", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("locked"), "locked", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("mutable"), "mutable", this::getModelValue));
+        columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -62,8 +62,7 @@ public class CollectionBrowsePage extends MBaaSPage implements TableEvent {
         layout.add(createLink);
     }
 
-    @Override
-    public void onClickEventLink(String link, Map<String, Object> object) {
+    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget ajaxRequestTarget) {
         String collectionId = (String) object.get("collectionId");
         if ("name".equals(link)) {
             PageParameters parameters = new PageParameters();
@@ -83,8 +82,14 @@ public class CollectionBrowsePage extends MBaaSPage implements TableEvent {
         }
     }
 
-    @Override
-    public boolean isClickableEventLink(String link, Map<String, Object> object) {
+    private Map<String, IModel<String>> actions() {
+        Map<String, IModel<String>> actions = Maps.newHashMap();
+        actions.put("Attribute", Model.of("Attribute"));
+        actions.put("Delete", Model.of("Delete"));
+        return actions;
+    }
+
+    private Boolean clickable(String link, Map<String, Object> object) {
         Boolean system = (Boolean) object.get("system");
         Boolean mutable = (Boolean) object.get("mutable");
         if ("name".equals(link)) {
@@ -105,19 +110,17 @@ public class CollectionBrowsePage extends MBaaSPage implements TableEvent {
         return false;
     }
 
-    @Override
-    public boolean isVisibleEventLink(String link, Map<String, Object> object) {
-        return true;
-    }
-
-    @Override
-    public String onCSSLink(String link, Map<String, Object> object) {
+    private ItemCss itemCss(String link, Map<String, Object> model) {
         if ("Delete".equals(link)) {
-            return "btn-xs btn-danger";
+            return ItemCss.DANGER;
         }
         if ("Attribute".equals(link)) {
-            return "btn-xs btn-info";
+            return ItemCss.PRIMARY;
         }
-        return "";
+        return ItemCss.NONE;
+    }
+
+    private Object getModelValue(String name, Map<String, Object> stringObjectMap) {
+        return stringObjectMap.get(name);
     }
 }

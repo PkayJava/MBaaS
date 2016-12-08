@@ -2,20 +2,20 @@ package com.angkorteam.mbaas.server.page.rest;
 
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.event.TableEvent;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredColumn;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.*;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.RestTable;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.provider.RestProvider;
+import com.google.common.collect.Maps;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * Created by socheat on 8/3/16.
  */
-public class RestBrowsePage extends MBaaSPage implements TableEvent {
+public class RestBrowsePage extends MBaaSPage {
 
     @Override
     public String getPageUUID() {
@@ -47,10 +47,10 @@ public class RestBrowsePage extends MBaaSPage implements TableEvent {
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredColumn(String.class, Model.of("name"), "name", this, provider));
-        columns.add(new TextFilteredColumn(String.class, Model.of("path"), "path", provider));
-        columns.add(new TextFilteredColumn(String.class, Model.of("method"), "method", provider));
-        columns.add(new ActionFilteredColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "Edit", "Delete"));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("name"), "name", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("method"), "method", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("path"), "path", this::getModelValue));
+        columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -63,19 +63,18 @@ public class RestBrowsePage extends MBaaSPage implements TableEvent {
         layout.add(refreshLink);
     }
 
-    @Override
-    public String onCSSLink(String link, Map<String, Object> object) {
-        if ("Edit".equals(link)) {
-            return "btn-xs btn-info";
-        }
-        if ("Delete".equals(link)) {
-            return "btn-xs btn-danger";
-        }
-        return "";
+    private Map<String, IModel<String>> actions() {
+        Map<String, IModel<String>> actions = Maps.newHashMap();
+        actions.put("Edit", Model.of("Edit"));
+        actions.put("Delete", Model.of("Delete"));
+        return actions;
     }
 
-    @Override
-    public void onClickEventLink(String link, Map<String, Object> object) {
+    private Object getModelValue(String name, Map<String, Object> stringObjectMap) {
+        return stringObjectMap.get(name);
+    }
+
+    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget ajaxRequestTarget) {
         String restId = (String) object.get("restId");
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
@@ -91,17 +90,7 @@ public class RestBrowsePage extends MBaaSPage implements TableEvent {
         }
     }
 
-    @Override
-    public boolean isClickableEventLink(String link, Map<String, Object> object) {
-        return hasAccess(link, object);
-    }
-
-    @Override
-    public boolean isVisibleEventLink(String link, Map<String, Object> object) {
-        return hasAccess(link, object);
-    }
-
-    private boolean hasAccess(String link, Map<String, Object> object) {
+    private Boolean clickable(String link, Map<String, Object> object) {
         if ("Edit".equals(link)) {
             return true;
         }
@@ -114,4 +103,15 @@ public class RestBrowsePage extends MBaaSPage implements TableEvent {
         }
         return false;
     }
+
+    private ItemCss itemCss(String link, Map<String, Object> model) {
+        if ("Edit".equals(link)) {
+            return ItemCss.PRIMARY;
+        }
+        if ("Delete".equals(link)) {
+            return ItemCss.DANGER;
+        }
+        return ItemCss.NONE;
+    }
+
 }

@@ -2,19 +2,19 @@ package com.angkorteam.mbaas.server.page.user;
 
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.event.TableEvent;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.ActionFilteredColumn;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
-import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.TextFilteredColumn;
+import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.*;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.provider.UserProvider;
+import com.google.common.collect.Maps;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * Created by socheat on 10/24/16.
  */
-public class UserBrowsePage extends MBaaSPage implements TableEvent {
+public class UserBrowsePage extends MBaaSPage {
 
     @Override
     public String getPageUUID() {
@@ -44,12 +44,12 @@ public class UserBrowsePage extends MBaaSPage implements TableEvent {
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilteredColumn(String.class, Model.of("fullName"), "fullName", this, provider));
-        columns.add(new TextFilteredColumn(String.class, Model.of("login"), "login", this, provider));
-        columns.add(new TextFilteredColumn(String.class, Model.of("roleName"), "roleName", this, provider));
-        columns.add(new TextFilteredColumn(Boolean.class, Model.of("status"), "status", provider));
-        columns.add(new TextFilteredColumn(Boolean.class, Model.of("system"), "system", provider));
-        columns.add(new ActionFilteredColumn(Model.of("action"), Model.of("filter"), Model.of("clear"), this, "Reset PWD", "Edit", "Delete"));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("fullName"), "fullName", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("login"), "login", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("roleName"), "roleName", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("status"), "status", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::getModelValue));
+        columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
         dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
@@ -62,61 +62,64 @@ public class UserBrowsePage extends MBaaSPage implements TableEvent {
         layout.add(createLink);
     }
 
-    @Override
-    public String onCSSLink(String s, Map<String, Object> map) {
-        if ("Reset PWD".equals(s) || "Edit".equals(s)) {
-            return "btn-xs btn-info";
-        }
-        if ("Delete".equals(s)) {
-            return "btn-xs btn-danger";
-        }
-        return "";
+    private Map<String, IModel<String>> actions() {
+        Map<String, IModel<String>> actions = Maps.newHashMap();
+        actions.put("Reset PWD", Model.of("Reset PWD"));
+        actions.put("Edit", Model.of("Edit"));
+        actions.put("Delete", Model.of("Delete"));
+        return actions;
     }
 
-    @Override
-    public void onClickEventLink(String s, Map<String, Object> map) {
-        String userId = (String) map.get("userId");
-        if ("Edit".equals(s)) {
+    private Object getModelValue(String name, Map<String, Object> stringObjectMap) {
+        return stringObjectMap.get(name);
+    }
+
+    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget ajaxRequestTarget) {
+        String userId = (String) object.get("userId");
+        if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
             parameters.add("userId", userId);
             setResponsePage(UserModifyPage.class, parameters);
         }
-        if ("Delete".equals(s)) {
+        if ("Delete".equals(link)) {
             UserTable userTable = Tables.USER.as("userTable");
             DSLContext context = Spring.getBean(DSLContext.class);
             context.delete(userTable).where(userTable.USER_ID.eq(userId)).execute();
         }
-        if ("Reset PWD".equals(s)) {
+        if ("Reset PWD".equals(link)) {
             PageParameters parameters = new PageParameters();
             parameters.add("userId", userId);
             setResponsePage(UserPasswordPage.class, parameters);
         }
     }
 
-    @Override
-    public boolean isClickableEventLink(String s, Map<String, Object> map) {
-        Boolean system = (Boolean) map.get("system");
-        if ("Edit".equals(s)) {
+    private Boolean clickable(String link, Map<String, Object> object) {
+        Boolean system = (Boolean) object.get("system");
+        if ("Edit".equals(link)) {
             if (system) {
                 return false;
             }
             return true;
         }
-        if ("Delete".equals(s)) {
+        if ("Delete".equals(link)) {
             if (system) {
                 return false;
             }
             return true;
         }
-        if ("Reset PWD".equals(s)) {
+        if ("Reset PWD".equals(link)) {
             return true;
         }
         return false;
     }
 
-    @Override
-    public boolean isVisibleEventLink(String s, Map<String, Object> map) {
-        return true;
+    private ItemCss itemCss(String link, Map<String, Object> model) {
+        if ("Reset PWD".equals(link) || "Edit".equals(link)) {
+            return ItemCss.PRIMARY;
+        }
+        if ("Delete".equals(link)) {
+            return ItemCss.DANGER;
+        }
+        return ItemCss.NONE;
     }
-
 }
