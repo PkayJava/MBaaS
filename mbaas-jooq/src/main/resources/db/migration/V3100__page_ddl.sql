@@ -21,6 +21,7 @@ CREATE TABLE page (
   KEY `index__page__title` (title),
   KEY `index__page__html_crc32` (html_crc32),
   KEY `index__page__groovy_id` (groovy_id),
+  KEY `index__page__cms_page` (cms_page),
   KEY `index__page__layout_id` (layout_id),
   KEY `index__page__description` (description),
   KEY `index__page__modified` (modified),
