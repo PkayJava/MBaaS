@@ -219,13 +219,15 @@ public class RestCreatePage extends MBaaSPage {
         restRecord.setGroovyId(groovyId);
         restRecord.store();
 
-        RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
-        for (RolePojo role : this.role) {
-            RestRoleRecord restRoleRecord = context.newRecord(restRoleTable);
-            restRoleRecord.setRestRoleId(system.randomUUID());
-            restRoleRecord.setRoleId(role.getRoleId());
-            restRoleRecord.setRestId(this.restUuid);
-            restRoleRecord.store();
+        if (this.role != null) {
+            RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
+            for (RolePojo role : this.role) {
+                RestRoleRecord restRoleRecord = context.newRecord(restRoleTable);
+                restRoleRecord.setRestRoleId(system.randomUUID());
+                restRoleRecord.setRoleId(role.getRoleId());
+                restRoleRecord.setRestId(this.restUuid);
+                restRoleRecord.store();
+            }
         }
 
         setResponsePage(RestBrowsePage.class);

@@ -232,12 +232,14 @@ public class RestModifyPage extends MBaaSPage {
 
         context.delete(restRoleTable).where(restRoleTable.REST_ID.eq(this.restId)).execute();
 
-        for (RolePojo role : this.role) {
-            RestRoleRecord restRoleRecord = context.newRecord(restRoleTable);
-            restRoleRecord.setRestRoleId(system.randomUUID());
-            restRoleRecord.setRoleId(role.getRoleId());
-            restRoleRecord.setRestId(this.restId);
-            restRoleRecord.store();
+        if (this.role != null) {
+            for (RolePojo role : this.role) {
+                RestRoleRecord restRoleRecord = context.newRecord(restRoleTable);
+                restRoleRecord.setRestRoleId(system.randomUUID());
+                restRoleRecord.setRoleId(role.getRoleId());
+                restRoleRecord.setRestId(this.restId);
+                restRoleRecord.store();
+            }
         }
     }
 

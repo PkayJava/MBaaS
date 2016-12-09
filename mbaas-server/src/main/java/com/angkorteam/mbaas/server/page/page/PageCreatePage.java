@@ -246,13 +246,15 @@ public class PageCreatePage extends MBaaSPage {
         pageRecord.setCmsPage(true);
         pageRecord.store();
 
-        PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
-        for (RolePojo role : this.role) {
-            PageRoleRecord pageRoleRecord = context.newRecord(pageRoleTable);
-            pageRoleRecord.setPageRoleId(system.randomUUID());
-            pageRoleRecord.setRoleId(role.getRoleId());
-            pageRoleRecord.setPageId(this.pageUuid);
-            pageRoleRecord.store();
+        if (this.role != null) {
+            PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
+            for (RolePojo role : this.role) {
+                PageRoleRecord pageRoleRecord = context.newRecord(pageRoleTable);
+                pageRoleRecord.setPageRoleId(system.randomUUID());
+                pageRoleRecord.setRoleId(role.getRoleId());
+                pageRoleRecord.setPageId(this.pageUuid);
+                pageRoleRecord.store();
+            }
         }
 
         setResponsePage(PageBrowsePage.class);
