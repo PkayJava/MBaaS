@@ -58,6 +58,7 @@ public class LoginPage extends AdminLTEPage {
         this.passwordFeedback = new TextFeedbackPanel("passwordFeedback", this.passwordField);
         this.form.add(this.passwordFeedback);
 
+        this.language = "ភាសាខ្មែរ";
         this.languageField = new DropDownChoice<String>("languageField", new PropertyModel<>(this, "language"), new PropertyModel<>(this, "languages")) {
             @Override
             protected boolean wantOnSelectionChangedNotifications() {
