@@ -29,12 +29,7 @@ public class PagePathValidator implements IValidator<String> {
     public void validate(IValidatable<String> validatable) {
         String path = validatable.getValue();
         if (!Strings.isNullOrEmpty(path)) {
-            if (StringUtils.startsWithIgnoreCase(path, "/api")) {
-                validatable.error(new ValidationError(this, "invalid"));
-                return;
-            }
-
-            if (path.charAt(0) != '/') {
+            if (StringUtils.startsWithIgnoreCase(path, "/api") || StringUtils.equalsIgnoreCase(path, "/")) {
                 validatable.error(new ValidationError(this, "invalid"));
                 return;
             }
