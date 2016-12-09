@@ -263,4 +263,24 @@ VALUES
     </body>
 </wicket:extend>
 </body>
+</html>'),
+  ('/index', 'com.angkorteam.mbaas.server.groovy.IndexPage',
+             'com.angkorteam.mbaas.server.groovy.IndexPage',
+             'com.angkorteam.mbaas.server.groovy.IndexPage',
+             'Index', 'Index',
+             'com.angkorteam.mbaas.server.groovy.EmptyLayout',
+             FALSE, FALSE, now(), now(), TRUE, 2531822391, '<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<wicket:extend>
+    <body class="hold-transition skin-blue sidebar-mini">
+        <div wicket:id="layout">
+            <!-- your page content go here -->
+        </div>
+    </body>
+</wicket:extend>
+</body>
 </html>');

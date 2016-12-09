@@ -261,12 +261,14 @@ public class PageModifyPage extends MBaaSPage {
         }
         pageRecord.update();
 
-        for (RolePojo role : this.role) {
-            PageRoleRecord pageRoleRecord = context.newRecord(pageRoleTable);
-            pageRoleRecord.setPageRoleId(system.randomUUID());
-            pageRoleRecord.setRoleId(role.getRoleId());
-            pageRoleRecord.setPageId(this.pageUuid);
-            pageRoleRecord.store();
+        if (this.role != null) {
+            for (RolePojo role : this.role) {
+                PageRoleRecord pageRoleRecord = context.newRecord(pageRoleTable);
+                pageRoleRecord.setPageRoleId(system.randomUUID());
+                pageRoleRecord.setRoleId(role.getRoleId());
+                pageRoleRecord.setPageId(this.pageUuid);
+                pageRoleRecord.store();
+            }
         }
 
         getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();

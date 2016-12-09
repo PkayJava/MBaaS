@@ -198,5 +198,29 @@ class SettingPage extends CmsPage {
         return "com.angkorteam.mbaas.server.groovy.SettingPage"
     }
 
-}', FALSE);
+}', FALSE),
+  ('com.angkorteam.mbaas.server.groovy.IndexPage',
+   'com.angkorteam.mbaas.server.groovy.IndexPage', 3750756267, 'package com.angkorteam.mbaas.server.groovy
 
+import com.angkorteam.mbaas.server.page.CmsPage
+import org.apache.wicket.markup.html.border.Border
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+class IndexPage extends CmsPage {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexPage.class)
+
+    @Override
+    protected void doInitialize(Border layout) {
+        add(layout)
+        // place your initialization logic here
+    }
+
+    @Override
+    final String getPageUUID() {
+        // DO NOT MODIFIED
+        return "com.angkorteam.mbaas.server.groovy.IndexPage"
+    }
+
+}', FALSE);
