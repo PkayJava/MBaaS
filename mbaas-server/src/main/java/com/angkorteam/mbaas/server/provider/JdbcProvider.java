@@ -2,6 +2,7 @@ package com.angkorteam.mbaas.server.provider;
 
 import com.angkorteam.framework.extension.share.provider.AbstractJdbcProvider;
 import com.angkorteam.mbaas.server.Spring;
+import groovy.lang.Closure;
 
 import javax.sql.DataSource;
 
@@ -16,6 +17,8 @@ public class JdbcProvider extends AbstractJdbcProvider {
 
     @Override
     protected DataSource getDataSource() {
+        Closure<String> pp = null;
+        pp.call();
         return Spring.getBean(DataSource.class);
     }
 

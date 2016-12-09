@@ -104,22 +104,93 @@ class EmptyLayout extends CmsLayout {
 
 }',
    FALSE),
-  ('com.angkorteam.mbaas.server.groovy.SettingPage', 'com.angkorteam.mbaas.server.groovy.SettingPage', 873908450, 'package com.angkorteam.mbaas.server.groovy
+  ('com.angkorteam.mbaas.server.groovy.SettingPage', 'com.angkorteam.mbaas.server.groovy.SettingPage', 548400907, 'package com.angkorteam.mbaas.server.groovy
 
+import com.angkorteam.framework.extension.wicket.ajax.markup.html.form.AjaxButton
+import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Select2SingleChoice
+import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel
+import com.angkorteam.mbaas.server.Spring
 import com.angkorteam.mbaas.server.page.CmsPage
+import com.angkorteam.mbaas.server.select2.Item
+import com.angkorteam.mbaas.server.select2.JdbcSingleChoiceProvider
+import org.apache.wicket.ajax.AjaxRequestTarget
+import org.apache.wicket.lambda.WicketBiConsumer
 import org.apache.wicket.markup.html.border.Border
+import org.apache.wicket.markup.html.form.Form
+import org.apache.wicket.model.PropertyModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.sql2o.Connection
+import org.sql2o.Query
+import org.sql2o.Sql2o
 
 class SettingPage extends CmsPage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingPage.class)
 
+    Item homePage
+    Select2SingleChoice<Item> homePageField
+    TextFeedbackPanel homePageFeedback
+
+    AjaxButton saveButton
+    Form<Void> form
+
     @Override
     protected void doInitialize(Border layout) {
         add(layout)
         // place your initialization logic here
+
+        this.form = new Form<>("form")
+        layout.add(this.form)
+
+        this.homePageField = new Select2SingleChoice<>("homePageField", new PropertyModel<Item>(this, "homePage"), new JdbcSingleChoiceProvider("page", "page_id", "title"))
+        this.homePageField.setRequired(true)
+        this.form.add(this.homePageField)
+        this.homePageFeedback = new TextFeedbackPanel("homePageFeedback", this.homePageField)
+        this.form.add(this.homePageFeedback)
+
+        this.saveButton = new AjaxButton("saveButton")
+        this.saveButton.setOnError(saveButtonError)
+        this.saveButton.setOnSubmit(saveButtonSubmit)
+        this.form.add(this.saveButton)
+
+        Sql2o sql2o = Spring.getBean(Sql2o.class)
+        Connection connection = sql2o.open()
+        connection.withCloseable {
+            loadSetting(connection)
+        }
     }
+
+    void loadSetting(Connection connection) {
+        loadHomePage(connection)
+    }
+
+    void loadHomePage(Connection connection) {
+        Query query = connection.createQuery("SELECT page.page_id id, page.title value FROM setting INNER JOIN page on setting.value = page.page_id where name = :name")
+        query.addParameter("name", "home_page")
+        this.homePage = query.executeAndFetchFirst(Item.class)
+    }
+
+    def saveButtonSubmit = { AjaxButton button, AjaxRequestTarget target ->
+        saveHomePage()
+        setResponsePage(SettingPage.class)
+    } as WicketBiConsumer<AjaxButton, AjaxRequestTarget>
+
+    void saveHomePage() {
+        Sql2o sql2o = Spring.getBean(Sql2o.class)
+        Connection connection = sql2o.beginTransaction()
+        connection.withCloseable {
+            Query query = connection.createQuery("UPDATE setting set value = :value where name = :name")
+            query.addParameter("name", "home_page")
+            query.addParameter("value", this.homePage.getId())
+            query.executeUpdate()
+            connection.commit()
+        }
+    }
+
+    def saveButtonError = { AjaxButton button, AjaxRequestTarget target ->
+        target.add(form)
+    } as WicketBiConsumer<AjaxButton, AjaxRequestTarget>
 
     @Override
     final String getPageUUID() {

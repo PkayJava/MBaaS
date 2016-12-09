@@ -234,7 +234,7 @@ VALUES
                'com.angkorteam.mbaas.server.groovy.SettingPage',
                'Setting', 'Setting',
                'com.angkorteam.mbaas.server.page.MBaaSLayout',
-               FALSE, FALSE, now(), now(), TRUE, 2531822391, '<!DOCTYPE html>
+               FALSE, FALSE, now(), now(), TRUE, 3025548620, '<!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
 <head>
     <meta charset="utf-8"/>
@@ -242,11 +242,25 @@ VALUES
 <body>
 <wicket:extend>
     <body class="hold-transition skin-blue sidebar-mini">
-        <div wicket:id="layout">
-            <!-- your page content go here -->
+    <div wicket:id="layout">
+        <div class="box box-primary">
+            <form role="form" wicket:id="form">
+                <div class="box-body">
+                    <!-- Row -->
+                    <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label wicket:for="homePageField">Home Page</label>
+                        <select wicket:id="homePageField" class="form-control select2" style="width: 100%;"></select>
+                        <span wicket:id="homePageFeedback" class="help-block"/>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="box-footer">
+                    <button wicket:id="saveButton" type="submit" class="btn btn-info pull-right">Save</button>
+                </div>
+            </form>
         </div>
+    </div>
     </body>
 </wicket:extend>
 </body>
 </html>');
-

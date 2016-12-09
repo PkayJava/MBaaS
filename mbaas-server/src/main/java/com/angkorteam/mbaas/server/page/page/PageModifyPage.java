@@ -23,15 +23,14 @@ import com.angkorteam.mbaas.server.choice.LayoutChoiceRenderer;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
-import com.angkorteam.mbaas.server.validator.PageCodeValidator;
 import com.angkorteam.mbaas.server.validator.PagePathValidator;
 import groovy.lang.GroovyCodeSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.wicket.Page;
-import org.apache.wicket.core.util.lang.PropertyResolver;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
@@ -67,8 +66,7 @@ public class PageModifyPage extends MBaaSPage {
     private TextFeedbackPanel roleFeedback;
 
     private String code;
-    private TextField<String> codeField;
-    private TextFeedbackPanel codeFeedback;
+    private Label codeLabel;
 
     private String html;
     private HtmlTextArea htmlField;
@@ -153,12 +151,8 @@ public class PageModifyPage extends MBaaSPage {
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);
 
-        this.codeField = new TextField<>("codeField", new PropertyModel<>(this, "code"));
-        this.codeField.setRequired(true);
-        this.codeField.add(new PageCodeValidator(this.pageUuid));
-        this.form.add(this.codeField);
-        this.codeFeedback = new TextFeedbackPanel("codeFeedback", this.codeField);
-        this.form.add(this.codeFeedback);
+        this.codeLabel = new Label("codeLabel", new PropertyModel<>(this, "code"));
+        this.form.add(this.codeLabel);
 
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
         this.groovyField.setRequired(true);

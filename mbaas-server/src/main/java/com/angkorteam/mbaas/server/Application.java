@@ -23,7 +23,11 @@ import org.apache.wicket.core.util.lang.PropertyResolver;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.resource.DynamicJQueryResourceReference;
 import org.apache.wicket.settings.ExceptionSettings;
+import org.elasticsearch.common.Strings;
 import org.jooq.DSLContext;
+import org.sql2o.Connection;
+import org.sql2o.Query;
+import org.sql2o.Sql2o;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +120,21 @@ public class Application extends AuthenticatedWebApplication {
 
     @Override
     public Class<? extends Page> getHomePage() {
-        return DashboardPage.class;
+        Sql2o sql2o = Spring.getBean(Sql2o.class);
+        try (Connection connection = sql2o.open()) {
+            Query query = connection.createQuery("SELECT groovy.java_class FROM setting INNER JOIN page on setting.value = page.page_id INNER JOIN groovy on page.groovy_id = groovy.groovy_id where setting.name = 'home_page'");
+            String javaClass = query.executeAndFetchFirst(String.class);
+            if (Strings.isNullOrEmpty(javaClass)) {
+                return DashboardPage.class;
+            } else {
+                GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+                try {
+                    return (Class<? extends Page>) classLoader.loadClass(javaClass);
+                } catch (ClassNotFoundException | ClassCastException e) {
+                    return DashboardPage.class;
+                }
+            }
+        }
     }
 
     protected void initService() {
