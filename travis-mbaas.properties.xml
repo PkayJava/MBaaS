@@ -52,7 +52,7 @@
     <entry key="user.system">system</entry>
     <entry key="user.system.role">role.system</entry>
     <entry key="user.system.password">system</entry>
-    <!-- administrator -->
+    <!-- service -->
     <entry key="user.service">service</entry>
     <entry key="user.service.role">role.service</entry>
     <entry key="user.service.password">service</entry>
@@ -61,7 +61,7 @@
     <entry key="mail.port">465</entry>
     <entry key="mail.protocol">smtps</entry>
     <entry key="mail.login">mbaas.angkorteam@gmail.com</entry>
-    <entry key="mail.password">27april27</entry>
+    <entry key="mail.password"></entry>
     <entry key="mail.from">mbaas.angkorteam@gmail.com</entry>
 
     <entry key="executor.pool_size">10</entry>
