@@ -70,18 +70,11 @@ public class Configuration extends XMLPropertiesConfiguration {
     public static final String PATTERN_TIME = "pattern.time";
     public static final String PATTERN_DATE = "pattern.date";
     public static final String PATTERN_FOLDER = "pattern.folder";
-    public static final String PATTERN_ATTRIBUTE_NAME = "pattern.attribute.name";
-    public static final String PATTERN_OAUTH_ROLE_NAME = "pattern.oauth.role.name";
-    public static final String PATTERN_PATH = "pattern.path";
-    public static final String PATTERN_QUERY_PARAMETER_NAME = "pattern.query.parameter.name";
 
     public static final String ENCRYPTION_PASSWORD = "encryption.password";
     public static final String ENCRYPTION_OUTPUT = "encryption.output";
 
     public static final String RESOURCE_REPO = "resource.repo";
-
-    public static final String AUTHORIZATION_TIME_TO_LIVE = "authorization.time_to_live";
-    public static final String ACCESS_TOKEN_TIME_TO_LIVE = "access_token.time_to_live";
 
     public static final String MAIL_SERVER = "mail.server";
     public static final String MAIL_PORT = "mail.port";
@@ -92,8 +85,6 @@ public class Configuration extends XMLPropertiesConfiguration {
 
     public static final String EXECUTOR_POOL_SIZE = "executor.pool_size";
     public static final String EXECUTOR_QUEUE_CAPACITY = "executor.queue_capacity";
-
-    public static final String PUSH_SERVER_URL = "push.server.url";
 
     public Configuration() {
     }

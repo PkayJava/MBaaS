@@ -14,7 +14,7 @@
 
     <context:component-scan base-package="com.angkorteam.mbaas.server"/>
 
-    <context:property-placeholder location="file:${user.home}/.xml/mbaas.properties.xml" file-encoding="UTF-8"/>
+    <context:property-placeholder properties-ref="properties" file-encoding="UTF-8"/>
 
     <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
         <mvc:message-converters>
@@ -24,6 +24,8 @@
         </mvc:message-converters>
         <mvc:path-matching path-matcher="pathMatcher" suffix-pattern="false" registered-suffixes-only="true"/>
     </mvc:annotation-driven>
+
+    <bean id="properties" class="com.angkorteam.mbaas.server.factory.PropertiesFactoryBean"/>
 
     <mvc:interceptors>
         <ref bean="interceptor"/>

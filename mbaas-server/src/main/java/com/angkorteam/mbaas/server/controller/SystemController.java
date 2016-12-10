@@ -275,8 +275,6 @@ public class SystemController {
                 throw new IllegalArgumentException("invalid layout");
             }
 
-            // PropertyResolver.destroy(org.apache.wicket.Application.get());
-
             {
                 // class name validation
                 String className = layout.getClassName();
