@@ -29,6 +29,8 @@ import java.util.Map;
  */
 public class RestBrowsePage extends MBaaSPage {
 
+    private DataTable<Map<String, Object>, String> dataTable;
+
     @Override
     public String getPageUUID() {
         return RestBrowsePage.class.getName();
@@ -52,9 +54,9 @@ public class RestBrowsePage extends MBaaSPage {
         columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("path"), "path", this::getModelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
-        DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
-        dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
-        filterForm.add(dataTable);
+        this.dataTable = new DefaultDataTable<>("table", columns, provider, 20);
+        this.dataTable.addTopToolbar(new FilterToolbar(this.dataTable, filterForm));
+        filterForm.add(this.dataTable);
 
         BookmarkablePageLink<Void> createLink = new BookmarkablePageLink<>("createLink", RestCreatePage.class);
         layout.add(createLink);
@@ -74,7 +76,7 @@ public class RestBrowsePage extends MBaaSPage {
         return stringObjectMap.get(name);
     }
 
-    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget ajaxRequestTarget) {
+    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget target) {
         String restId = (String) object.get("restId");
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
@@ -86,6 +88,7 @@ public class RestBrowsePage extends MBaaSPage {
             DSLContext context = Spring.getBean(DSLContext.class);
             RestTable restTable = Tables.REST.as("restTable");
             context.delete(restTable).where(restTable.REST_ID.eq(restId)).execute();
+            target.add(this.dataTable);
             return;
         }
     }

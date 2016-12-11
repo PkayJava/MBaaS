@@ -37,6 +37,8 @@ public class AttributeBrowsePage extends MBaaSPage {
 
     private CollectionPojo collection;
 
+    private DataTable<Map<String, Object>, String> dataTable;
+
     @Override
     public String getPageUUID() {
         return AttributeBrowsePage.class.getName();
@@ -71,9 +73,9 @@ public class AttributeBrowsePage extends MBaaSPage {
         columns.add(new TextFilterColumn(provider, ItemClass.Integer, Model.of("order"), "order", this::getModelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
-        DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
-        dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
-        filterForm.add(dataTable);
+        this.dataTable = new DefaultDataTable<>("table", columns, provider, 20);
+        this.dataTable.addTopToolbar(new FilterToolbar(this.dataTable, filterForm));
+        filterForm.add(this.dataTable);
 
         PageParameters parameters = new PageParameters();
         parameters.add("collectionId", this.collectionId);
@@ -84,7 +86,7 @@ public class AttributeBrowsePage extends MBaaSPage {
         layout.add(refreshLink);
     }
 
-    private void itemClick(String s, Map<String, Object> object, AjaxRequestTarget ajaxRequestTarget) {
+    private void itemClick(String s, Map<String, Object> object, AjaxRequestTarget target) {
         String attributeId = (String) object.get("attributeId");
         if ("delete".equals(s)) {
             DSLContext context = Spring.getBean(DSLContext.class);
@@ -94,6 +96,7 @@ public class AttributeBrowsePage extends MBaaSPage {
             requestBody.setAttributeName(attribute.getName());
             requestBody.setCollectionName(this.collection.getName());
             AttributeFunction.deleteAttribute(requestBody);
+            target.add(this.dataTable);
         }
     }
 

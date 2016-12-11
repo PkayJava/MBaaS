@@ -34,6 +34,8 @@ import java.util.Map;
  */
 public class FileBrowsePage extends MBaaSPage {
 
+    private DataTable<Map<String, Object>, String> dataTable;
+
     @Override
     public String getPageUUID() {
         return FileBrowsePage.class.getName();
@@ -55,15 +57,15 @@ public class FileBrowsePage extends MBaaSPage {
         columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("mime"), "mime", this::getModelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
-        DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 17);
-        dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
-        filterForm.add(dataTable);
+        this.dataTable = new DefaultDataTable<>("table", columns, provider, 17);
+        this.dataTable.addTopToolbar(new FilterToolbar(this.dataTable, filterForm));
+        filterForm.add(this.dataTable);
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", FileBrowsePage.class);
         layout.add(refreshLink);
     }
 
-    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget ajaxRequestTarget) {
+    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget target) {
         DSLContext context = Spring.getBean(DSLContext.class);
         System system = Spring.getBean(System.class);
         FileTable fileTable = Tables.FILE.as("fileTable");
@@ -77,6 +79,7 @@ public class FileBrowsePage extends MBaaSPage {
             File file = new File(repo, path + "/" + name);
             FileUtils.deleteQuietly(file);
             context.delete(fileTable).where(fileTable.FILE_ID.eq(fileId)).execute();
+            target.add(this.dataTable);
             return;
         }
         if ("Edit".equals(link)) {

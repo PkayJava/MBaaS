@@ -1,5 +1,6 @@
 package com.angkorteam.mbaas.server.page.file;
 
+import com.angkorteam.framework.extension.wicket.ajax.markup.html.form.AjaxButton;
 import com.angkorteam.framework.extension.wicket.markup.html.form.Button;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.model.entity.Tables;
@@ -12,6 +13,7 @@ import com.angkorteam.mbaas.server.page.MBaaSPage;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -39,7 +41,7 @@ public class FileCreatePage extends MBaaSPage {
     private FileUploadField fileField;
     private TextFeedbackPanel fileFeedback;
 
-    private Button saveButton;
+    private AjaxButton saveButton;
     private Form<Void> form;
     private BookmarkablePageLink<Void> closeButton;
 
@@ -68,7 +70,8 @@ public class FileCreatePage extends MBaaSPage {
         this.fileFeedback = new TextFeedbackPanel("fileFeedback", this.fileField);
         this.form.add(fileFeedback);
 
-        this.saveButton = new Button("saveButton");
+        this.saveButton = new AjaxButton("saveButton");
+        this.saveButton.setOnError(this::saveButtonOnError);
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(saveButton);
 
@@ -76,7 +79,11 @@ public class FileCreatePage extends MBaaSPage {
         this.form.add(this.closeButton);
     }
 
-    private void saveButtonOnSubmit(Button button) {
+    private void saveButtonOnError(AjaxButton button, AjaxRequestTarget target) {
+        target.add(this.form);
+    }
+
+    private void saveButtonOnSubmit(AjaxButton button, AjaxRequestTarget target) {
         DSLContext context = Spring.getBean(DSLContext.class);
         FileTable fileTable = Tables.FILE.as("fileTable");
         System system = Spring.getBean(System.class);

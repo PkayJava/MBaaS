@@ -29,6 +29,8 @@ import java.util.Map;
  */
 public class CollectionBrowsePage extends MBaaSPage {
 
+    private DataTable<Map<String, Object>, String> dataTable;
+
     @Override
     public String getPageUUID() {
         return CollectionBrowsePage.class.getName();
@@ -51,9 +53,9 @@ public class CollectionBrowsePage extends MBaaSPage {
         columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("mutable"), "mutable", this::getModelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
-        DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
-        dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
-        filterForm.add(dataTable);
+        this.dataTable = new DefaultDataTable<>("table", columns, provider, 20);
+        this.dataTable.addTopToolbar(new FilterToolbar(this.dataTable, filterForm));
+        filterForm.add(this.dataTable);
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", CollectionBrowsePage.class);
         layout.add(refreshLink);
@@ -62,7 +64,7 @@ public class CollectionBrowsePage extends MBaaSPage {
         layout.add(createLink);
     }
 
-    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget ajaxRequestTarget) {
+    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget target) {
         String collectionId = (String) object.get("collectionId");
         if ("name".equals(link)) {
             PageParameters parameters = new PageParameters();
@@ -74,6 +76,7 @@ public class CollectionBrowsePage extends MBaaSPage {
             requestBody.setCollectionName((String) object.get("name"));
             CollectionFunction.deleteCollection(requestBody);
             setResponsePage(CollectionBrowsePage.class);
+            target.add(this.dataTable);
         }
         if ("Attribute".equals(link)) {
             PageParameters parameters = new PageParameters();

@@ -28,6 +28,8 @@ import java.util.Map;
  */
 public class UserBrowsePage extends MBaaSPage {
 
+    private DataTable<Map<String, Object>, String> dataTable;
+
     @Override
     public String getPageUUID() {
         return UserBrowsePage.class.getName();
@@ -51,9 +53,9 @@ public class UserBrowsePage extends MBaaSPage {
         columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::getModelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
-        DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
-        dataTable.addTopToolbar(new FilterToolbar(dataTable, filterForm));
-        filterForm.add(dataTable);
+        this.dataTable = new DefaultDataTable<>("table", columns, provider, 20);
+        this.dataTable.addTopToolbar(new FilterToolbar(this.dataTable, filterForm));
+        filterForm.add(this.dataTable);
 
         BookmarkablePageLink<Void> refreshLink = new BookmarkablePageLink<>("refreshLink", UserBrowsePage.class);
         layout.add(refreshLink);
@@ -74,7 +76,7 @@ public class UserBrowsePage extends MBaaSPage {
         return stringObjectMap.get(name);
     }
 
-    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget ajaxRequestTarget) {
+    private void itemClick(String link, Map<String, Object> object, AjaxRequestTarget target) {
         String userId = (String) object.get("userId");
         if ("Edit".equals(link)) {
             PageParameters parameters = new PageParameters();
@@ -85,6 +87,7 @@ public class UserBrowsePage extends MBaaSPage {
             UserTable userTable = Tables.USER.as("userTable");
             DSLContext context = Spring.getBean(DSLContext.class);
             context.delete(userTable).where(userTable.USER_ID.eq(userId)).execute();
+            target.add(this.dataTable);
         }
         if ("Reset PWD".equals(link)) {
             PageParameters parameters = new PageParameters();
