@@ -17,8 +17,6 @@ public class JdbcProvider extends AbstractJdbcProvider {
 
     @Override
     protected DataSource getDataSource() {
-        Closure<String> pp = null;
-        pp.call();
         return Spring.getBean(DataSource.class);
     }
 
