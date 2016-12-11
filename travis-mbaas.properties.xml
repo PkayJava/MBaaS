@@ -52,47 +52,29 @@
     <entry key="user.system">system</entry>
     <entry key="user.system.role">role.system</entry>
     <entry key="user.system.password">system</entry>
-    <!-- administrator -->
+    <!-- service -->
     <entry key="user.service">service</entry>
     <entry key="user.service.role">role.service</entry>
     <entry key="user.service.password">service</entry>
-
-    <!-- menu -->
-    <entry key="menu.root">Page Console</entry>
 
     <entry key="mail.server">smtp.googlemail.com</entry>
     <entry key="mail.port">465</entry>
     <entry key="mail.protocol">smtps</entry>
     <entry key="mail.login">mbaas.angkorteam@gmail.com</entry>
-    <entry key="mail.password">27april27</entry>
+    <entry key="mail.password"></entry>
     <entry key="mail.from">mbaas.angkorteam@gmail.com</entry>
 
     <entry key="executor.pool_size">10</entry>
     <entry key="executor.queue_capacity">500</entry>
 
-    <entry key="authorization.time_to_live">15</entry>
-    <!-- 604800 seconds (one week) -->
-    <entry key="access_token.time_to_live">1800</entry>
-
     <entry key="pattern.datetime">yyyy-MM-dd'T'HH:mm:ssZZ</entry>
     <entry key="pattern.date">yyyy-MM-dd</entry>
     <entry key="pattern.time">HH:mm:ss</entry>
     <entry key="pattern.folder">/yyyy/MM/dd/HH/mm/ss</entry>
-    <entry key="pattern.path"><![CDATA[^[a-z]{1}[a-z0-9\\_]*[a-z0-9]{1}$]]></entry>
-    <entry key="pattern.attribute.name"><![CDATA[^[a-z]{1}[a-z0-9\\_]*[a-z0-9]{1}$]]></entry>
-    <entry key="pattern.collection.name"><![CDATA[^[a-z]{1}[a-z0-9\\_]*[a-z0-9]{1}$]]></entry>
-    <entry key="pattern.oauth.role.name"><![CDATA[^[a-z]{1}[a-z]*]]></entry>
-    <entry key="pattern.query.parameter.name">\:[a-z]{1}[a-z0-9\_]*</entry>
-
-    <entry key="push.server.url">http://db:6080/ag-push</entry>
 
     <entry key="resource.repo">/opt/sandbox/mbaas</entry>
 
     <entry key="encryption.password"><![CDATA[7808654h4zzx05DheFMZ]]></entry>
     <entry key="encryption.output">base64</entry>
-
-    <entry key="xmpp.keystore.file">keystore.jks</entry>
-    <entry key="xmpp.keystore.password">123123a</entry>
-    <entry key="xmpp.address">192.168.1.115</entry>
 
 </properties>
