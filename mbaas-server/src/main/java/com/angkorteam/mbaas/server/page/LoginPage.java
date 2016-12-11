@@ -6,11 +6,15 @@ import com.angkorteam.framework.extension.wicket.markup.html.form.Form;
 import com.angkorteam.framework.extension.wicket.markup.html.panel.TextFeedbackPanel;
 import com.angkorteam.mbaas.server.Session;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.NonResettingRestartException;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.validation.ValidationError;
 
 import java.util.Arrays;
@@ -35,6 +39,7 @@ public class LoginPage extends AdminLTEPage {
     private DropDownChoice<String> languageField;
     private TextFeedbackPanel languageFeedback;
 
+    private Url originalUrl;
 
     private Form<Void> form;
     private Button loginButton;
@@ -42,6 +47,8 @@ public class LoginPage extends AdminLTEPage {
     @Override
     protected void onInitialize() {
         super.onInitialize();
+
+        this.originalUrl = RestartResponseAtInterceptPageException.getOriginalUrl();
 
         this.form = new Form<>("form");
         this.add(this.form);
@@ -90,7 +97,12 @@ public class LoginPage extends AdminLTEPage {
     private void loginButtonOnSubmit(Button button) {
         boolean valid = Session.get().signIn(this.login, this.password);
         if (valid) {
-            setResponsePage(getApplication().getHomePage());
+            if (this.originalUrl != null) {
+                String url = RequestCycle.get().getUrlRenderer().renderUrl(this.originalUrl);
+                throw new NonResettingRestartException(url);
+            } else {
+                setResponsePage(getApplication().getHomePage());
+            }
         } else {
             this.loginField.error(new ValidationError().addKey("incorrect"));
             this.passwordField.error(new ValidationError().addKey("incorrect"));
