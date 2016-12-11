@@ -189,7 +189,6 @@ public class PageModifyPage extends MBaaSPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        // PropertyResolver.destroy(org.apache.wicket.Application.get());
         System system = Spring.getBean(System.class);
         DSLContext context = Spring.getBean(DSLContext.class);
         PageTable pageTable = Tables.PAGE.as("pageTable");
@@ -244,6 +243,8 @@ public class PageModifyPage extends MBaaSPage {
         groovyRecord.setJavaClass(pageClass.getName());
         groovyRecord.update();
 
+        getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
+
         context.delete(pageRoleTable).where(pageRoleTable.PAGE_ID.eq(this.pageUuid)).execute();
 
         Application.get().mountPage(this.mountPath, (Class<? extends Page>) pageClass);
@@ -270,8 +271,6 @@ public class PageModifyPage extends MBaaSPage {
                 pageRoleRecord.store();
             }
         }
-
-        getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
 
         setResponsePage(PageBrowsePage.class);
     }

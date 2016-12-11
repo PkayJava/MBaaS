@@ -129,7 +129,6 @@ public class LayoutModifyPage extends MBaaSPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        // PropertyResolver.destroy(org.apache.wicket.Application.get());
         File htmlTemp = new File(FileUtils.getTempDirectory(), java.lang.System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(10) + ".html");
         try {
             FileUtils.write(htmlTemp, this.html, "UTF-8");
@@ -167,8 +166,8 @@ public class LayoutModifyPage extends MBaaSPage {
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         classLoader.removeSourceCache(this.groovyId);
         classLoader.removeClassCache(this.javaClass);
-        String cacheKey = this.javaClass + "_" + layoutRecord.getLayoutId() + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-        getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
+
+        getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
 
         GroovyCodeSource source = new GroovyCodeSource(this.groovy, this.layoutUuid, "/groovy/script");
         source.setCachable(true);

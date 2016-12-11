@@ -174,7 +174,6 @@ public class PageCreatePage extends MBaaSPage {
     }
 
     private void saveButtonOnSubmit(Button button) {
-        // PropertyResolver.destroy(org.apache.wicket.Application.get());
         DSLContext context = Spring.getBean(DSLContext.class);
         System system = Spring.getBean(System.class);
         PageTable pageTable = Tables.PAGE.as("pageTable");
