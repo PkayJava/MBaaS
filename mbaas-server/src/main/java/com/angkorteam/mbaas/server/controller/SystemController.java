@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -642,7 +643,21 @@ public class SystemController {
                             pageClass = classLoader.compileGroovy(javaClass);
 
                             Application.get().unmount(serverPage.getMountPath());
-                            Application.get().mountPage(serverPage.getMountPath(), (Class<? extends org.apache.wicket.Page>) pageClass);
+
+                            JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
+                            for (Class<?> clazz : classLoader.getLoadedClasses()) {
+                                try {
+                                    String groovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
+                                    if (!org.elasticsearch.common.Strings.isNullOrEmpty(groovyId)) {
+                                        String paths = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
+                                        if (!org.elasticsearch.common.Strings.isNullOrEmpty(path)) {
+                                            Application.get().mountPage(paths, (Class<? extends org.apache.wicket.Page>) clazz);
+                                        }
+                                    }
+                                } catch (EmptyResultDataAccessException e) {
+                                }
+                            }
+
                             connection.createQuery("update groovy set script = :script, script_crc32 = :script_crc32, java_class = :java_class where groovy_id = :groovy_id")
                                     .addParameter("script", groovyScript)
                                     .addParameter("script_crc32", clientPage.getClientGroovyCrc32())

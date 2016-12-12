@@ -37,7 +37,10 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.elasticsearch.common.Strings;
 import org.jooq.DSLContext;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -250,8 +253,20 @@ public class PageModifyPage extends MBaaSPage {
 
         context.delete(pageRoleTable).where(pageRoleTable.PAGE_ID.eq(this.pageUuid)).execute();
 
-        // Application.get().unmount(this.mountPath);
-        Application.get().mountPage(this.mountPath, (Class<? extends Page>) pageClass);
+        Application.get().unmount(this.mountPath);
+        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
+        for (Class<?> clazz : classLoader.getLoadedClasses()) {
+            try {
+                String groovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
+                if (!Strings.isNullOrEmpty(groovyId)) {
+                    String path = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
+                    if (!Strings.isNullOrEmpty(path)) {
+                        Application.get().mountPage(path, (Class<? extends Page>) clazz);
+                    }
+                }
+            } catch (EmptyResultDataAccessException e) {
+            }
+        }
 
         pageRecord.setTitle(this.title);
         pageRecord.setDescription(this.description);
