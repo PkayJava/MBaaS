@@ -642,22 +642,6 @@ public class SystemController {
                             classLoader.writeGroovy(javaClass, groovyScript);
                             pageClass = classLoader.compileGroovy(javaClass);
 
-                            Application.get().unmount(serverPage.getMountPath());
-
-                            JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
-                            for (Class<?> clazz : classLoader.getLoadedClasses()) {
-                                try {
-                                    String groovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
-                                    if (!org.elasticsearch.common.Strings.isNullOrEmpty(groovyId)) {
-                                        String paths = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
-                                        if (!org.elasticsearch.common.Strings.isNullOrEmpty(path)) {
-                                            Application.get().mountPage(paths, (Class<? extends org.apache.wicket.Page>) clazz);
-                                        }
-                                    }
-                                } catch (EmptyResultDataAccessException e) {
-                                }
-                            }
-
                             connection.createQuery("update groovy set script = :script, script_crc32 = :script_crc32, java_class = :java_class where groovy_id = :groovy_id")
                                     .addParameter("script", groovyScript)
                                     .addParameter("script_crc32", clientPage.getClientGroovyCrc32())
@@ -870,6 +854,21 @@ public class SystemController {
                 }
             }
         }
+
+        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
+        for (Class<?> clazz : classLoader.getLoadedClasses()) {
+            try {
+                String groovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
+                if (!org.elasticsearch.common.Strings.isNullOrEmpty(groovyId)) {
+                    String paths = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
+                    if (!org.elasticsearch.common.Strings.isNullOrEmpty(paths)) {
+                        Application.get().mountPage(paths, (Class<? extends org.apache.wicket.Page>) clazz);
+                    }
+                }
+            } catch (EmptyResultDataAccessException e) {
+            }
+        }
+
         RestResponse response = new RestResponse();
         response.setData(sync);
         response.setResultCode(HttpStatus.OK.value());
