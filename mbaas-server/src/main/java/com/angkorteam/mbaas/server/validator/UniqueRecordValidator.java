@@ -53,7 +53,7 @@ public class UniqueRecordValidator<T> implements IValidator<T> {
             Sql2o sql2o = Spring.getBean(Sql2o.class);
             try (Connection connection = sql2o.open()) {
                 int count = 0;
-                if (this.idFieldValue != null) {
+                if (this.idFieldValue == null) {
                     Query query = connection.createQuery("SELECT COUNT(*) FROM " + this.tableName + " WHERE " + this.fieldName + " = :newValue");
                     query.addParameter("newValue", newValue);
                     count = query.executeAndFetchFirst(int.class);
