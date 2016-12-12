@@ -24,6 +24,7 @@
     <entry key="ClientNameValidator.duplicated">is taken</entry>
     <entry key="JobNameValidator.duplicated">is taken</entry>
     <entry key="JobCronValidator.format">is bad format</entry>
+    <entry key="UniqueRecordValidator.error">${message}</entry>
 
     <entry key="Duplicated">is duplicated</entry>
     <entry key="Conflicted">is conflicted</entry>

@@ -5,9 +5,8 @@ import com.angkorteam.mbaas.server.select2.Item;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
-import org.sql2o.Connection;
-import org.sql2o.Query;
-import org.sql2o.Sql2o;
+import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Created by socheat on 12/6/16.
@@ -50,22 +49,19 @@ public class UniqueRecordValidator<T> implements IValidator<T> {
             }
         }
         if (newValue != null) {
-            Sql2o sql2o = Spring.getBean(Sql2o.class);
-            try (Connection connection = sql2o.open()) {
+            try {
+                JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
                 int count = 0;
                 if (this.idFieldValue == null) {
-                    Query query = connection.createQuery("SELECT COUNT(*) FROM " + this.tableName + " WHERE " + this.fieldName + " = :newValue");
-                    query.addParameter("newValue", newValue);
-                    count = query.executeAndFetchFirst(int.class);
+                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + this.tableName + " WHERE " + this.fieldName + " = ?", int.class, newValue);
                 } else {
-                    Query query = connection.createQuery("SELECT COUNT(*) FROM " + this.tableName + " WHERE " + this.fieldName + " = :newValue AND " + this.idFieldName + " != :id");
-                    query.addParameter("newValue", newValue);
-                    query.addParameter("id", this.idFieldValue);
-                    count = query.executeAndFetchFirst(int.class);
+                    count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + this.tableName + " WHERE " + this.fieldName + " = ? AND " + this.idFieldName + " != ?", int.class, newValue, this.idFieldValue);
                 }
                 if (count > 0) {
                     validatable.error(new ValidationError(this, "duplicated"));
                 }
+            } catch (BadSqlGrammarException e) {
+                validatable.error(new ValidationError(this, "error").setVariable("message", e.getMessage()));
             }
         }
     }
