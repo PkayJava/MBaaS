@@ -640,6 +640,7 @@ public class SystemController {
 
                             classLoader.writeGroovy(javaClass, groovyScript);
                             pageClass = classLoader.compileGroovy(javaClass);
+
                             Application.get().unmount(serverPage.getMountPath());
                             Application.get().mountPage(serverPage.getMountPath(), (Class<? extends org.apache.wicket.Page>) pageClass);
                             connection.createQuery("update groovy set script = :script, script_crc32 = :script_crc32, java_class = :java_class where groovy_id = :groovy_id")
@@ -700,11 +701,11 @@ public class SystemController {
                             GroovyCodeSource source = new GroovyCodeSource(groovyScript, serverRest.getGroovyId(), "/groovy/script");
                             source.setCachable(false);
                             Class<?> serviceClass = classLoader.parseClass(source, false);
+                            String javaClass = serviceClass.getName();
 
                             classLoader.removeSourceCache(serverRest.getJavaClass());
                             classLoader.removeClassCache(serverRest.getJavaClass());
 
-                            String javaClass = serviceClass.getName();
                             classLoader.writeGroovy(javaClass, groovyScript);
                             classLoader.compileGroovy(javaClass);
 

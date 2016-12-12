@@ -250,7 +250,7 @@ public class PageModifyPage extends MBaaSPage {
 
         context.delete(pageRoleTable).where(pageRoleTable.PAGE_ID.eq(this.pageUuid)).execute();
 
-        Application.get().unmount(this.mountPath);
+        // Application.get().unmount(this.mountPath);
         Application.get().mountPage(this.mountPath, (Class<? extends Page>) pageClass);
 
         pageRecord.setTitle(this.title);
