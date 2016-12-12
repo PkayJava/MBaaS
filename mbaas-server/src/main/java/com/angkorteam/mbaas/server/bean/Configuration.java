@@ -12,6 +12,8 @@ import java.net.URL;
  */
 public class Configuration extends XMLPropertiesConfiguration {
 
+    public static final String GROOVY = "mbaas";
+
     public static final String KEY = "mbaas.properties.xml";
 
     public static final String MAINTENANCE = "maintenance";

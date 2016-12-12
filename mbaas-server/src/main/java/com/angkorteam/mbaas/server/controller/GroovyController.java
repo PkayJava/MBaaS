@@ -119,7 +119,6 @@ public class GroovyController {
         if (groovyPojo == null) {
             return notFound();
         }
-
         Class<?> clazz = classLoader.loadClass(groovyPojo.getJavaClass());
         RestService service = null;
         try {

@@ -227,27 +227,32 @@ public class PageModifyPage extends MBaaSPage {
         Application.get().unmount(pageRecord.getPath());
 
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
-        classLoader.removeSourceCache(this.groovyId);
+
+        // pre-compile to get class name
+        GroovyCodeSource source = new GroovyCodeSource(this.groovy, this.groovyId, "/groovy/script");
+        source.setCachable(false);
+        Class<?> pageClass = classLoader.parseClass(source, false);
+        String javaClassName = pageClass.getName();
+
+        classLoader.removeSourceCache(this.javaClass);
         classLoader.removeClassCache(this.javaClass);
 
-        String cacheKey = this.javaClass + "_" + pageRecord.getPageId() + "_" + getSession().getStyle() + "_" + getLocale().toString() + ".html";
-        getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().removeMarkup(cacheKey);
-
-        GroovyCodeSource source = new GroovyCodeSource(this.groovy, this.groovyId, "/groovy/script");
-        source.setCachable(true);
-        Class<?> pageClass = classLoader.parseClass(source, true);
+        classLoader.writeGroovy(pageClass.getName(), this.groovy);
+        pageClass = classLoader.compileGroovy(pageClass.getName());
 
         GroovyRecord groovyRecord = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(pageRecord.getGroovyId())).fetchOneInto(groovyTable);
         groovyRecord.setScript(this.groovy);
         groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
-        groovyRecord.setJavaClass(pageClass.getName());
+        groovyRecord.setJavaClass(javaClassName);
         groovyRecord.update();
 
         getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
 
         context.delete(pageRoleTable).where(pageRoleTable.PAGE_ID.eq(this.pageUuid)).execute();
 
+        Application.get().unmount(this.mountPath);
         Application.get().mountPage(this.mountPath, (Class<? extends Page>) pageClass);
+
         pageRecord.setTitle(this.title);
         pageRecord.setDescription(this.description);
         pageRecord.setHtml(this.html);

@@ -193,12 +193,17 @@ public class RestModifyPage extends MBaaSPage {
         FileUtils.deleteQuietly(groovyTemp);
 
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
-        classLoader.removeSourceCache(this.groovyId);
-        classLoader.removeClassCache(this.javaClass);
 
         GroovyCodeSource source = new GroovyCodeSource(this.groovy, this.groovyId, "/groovy/script");
-        source.setCachable(true);
-        Class<?> serviceClass = classLoader.parseClass(source, true);
+        source.setCachable(false);
+        Class<?> serviceClass = classLoader.parseClass(source, false);
+        String javaClass = serviceClass.getName();
+
+        classLoader.removeSourceCache(this.javaClass);
+        classLoader.removeClassCache(this.javaClass);
+
+        classLoader.writeGroovy(javaClass, this.groovy);
+        classLoader.compileGroovy(javaClass);
 
         GroovyRecord groovyRecord = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(this.groovyId)).fetchOneInto(groovyTable);
         groovyRecord.setScript(this.groovy);

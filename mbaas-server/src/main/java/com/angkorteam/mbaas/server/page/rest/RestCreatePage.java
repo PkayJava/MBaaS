@@ -183,13 +183,18 @@ public class RestCreatePage extends MBaaSPage {
 
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         GroovyCodeSource source = new GroovyCodeSource(this.groovy, groovyId, "/groovy/script");
-        source.setCachable(true);
-        Class<?> serviceClass = classLoader.parseClass(source, true);
+        source.setCachable(false);
+
+        Class<?> serviceClass = classLoader.parseClass(source, false);
+        String javaClass = serviceClass.getName();
+
+        classLoader.writeGroovy(javaClass, this.groovy);
+        classLoader.compileGroovy(javaClass);
 
         GroovyRecord groovyRecord = context.newRecord(groovyTable);
         groovyRecord.setGroovyId(groovyId);
         groovyRecord.setSystem(false);
-        groovyRecord.setJavaClass(serviceClass.getName());
+        groovyRecord.setJavaClass(javaClass);
         groovyRecord.setScript(this.groovy);
         groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
         groovyRecord.store();

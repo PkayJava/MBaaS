@@ -4,7 +4,6 @@ import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.server.Spring;
 import com.google.common.base.Strings;
-import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyCodeSource;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
@@ -29,13 +28,16 @@ public class GroovyScriptValidator implements IValidator<String> {
     @Override
     public void validate(IValidatable<String> validatable) {
         String script = validatable.getValue();
+        com.angkorteam.mbaas.server.bean.GroovyClassLoader classLoader = Spring.getBean(com.angkorteam.mbaas.server.bean.GroovyClassLoader.class);
+        String sourceId = System.currentTimeMillis() + "";
+        String className = null;
         if (!Strings.isNullOrEmpty(script)) {
-            GroovyClassLoader classLoader = new GroovyClassLoader();
-            GroovyCodeSource source = new GroovyCodeSource(script, System.currentTimeMillis() + "", "/groovy/script");
+            GroovyCodeSource source = new GroovyCodeSource(script, sourceId, "/groovy/script");
             source.setCachable(false);
             Class<?> groovyClass = null;
             try {
                 groovyClass = classLoader.parseClass(source, false);
+                className = groovyClass.getName();
             } catch (CompilationFailedException e) {
                 validatable.error(new ValidationError(this, "error").setVariable("reason", e.getMessage()));
                 return;

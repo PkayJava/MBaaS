@@ -28,7 +28,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.wicket.core.util.lang.PropertyResolver;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -620,7 +619,7 @@ public class SystemController {
                         clientPage.setServerGroovy(null);
                         clientPage.setServerHtmlCrc32(null);
                         clientPage.setServerHtml(null);
-                        classLoader.removeSourceCache(serverPage.getGroovyId());
+                        classLoader.removeSourceCache(serverPage.getJavaClass());
                         classLoader.removeClassCache(serverPage.getJavaClass());
                         connection.createQuery("delete from page where page_id = :page_id").addParameter("page_id", serverPage.getPageId()).executeUpdate();
                         connection.createQuery("delete from groovy where groovy_id = :groovy_id").addParameter("groovy_id", serverPage.getGroovyId()).executeUpdate();
@@ -629,20 +628,28 @@ public class SystemController {
                     } else {
                         if (!groovyConflicted) {
                             // update command
-                            classLoader.removeSourceCache(serverPage.getGroovyId());
+
+                            String groovyScript = Strings.isNullOrEmpty(clientPage.getClientGroovy()) ? serverPage.getServerGroovy() : clientPage.getClientGroovy();
+                            GroovyCodeSource source = new GroovyCodeSource(groovyScript, serverPage.getGroovyId(), "/groovy/script");
+                            source.setCachable(false);
+                            Class<?> pageClass = classLoader.parseClass(source, false);
+                            String javaClass = pageClass.getName();
+
+                            classLoader.removeSourceCache(serverPage.getJavaClass());
                             classLoader.removeClassCache(serverPage.getJavaClass());
-                            GroovyCodeSource source = new GroovyCodeSource(Strings.isNullOrEmpty(clientPage.getClientGroovy()) ? serverPage.getServerGroovy() : clientPage.getClientGroovy(), serverPage.getGroovyId(), "/groovy/script");
-                            source.setCachable(true);
-                            Class<?> pageClass = classLoader.parseClass(source, true);
+
+                            classLoader.writeGroovy(javaClass, groovyScript);
+                            pageClass = classLoader.compileGroovy(javaClass);
+                            Application.get().unmount(serverPage.getMountPath());
                             Application.get().mountPage(serverPage.getMountPath(), (Class<? extends org.apache.wicket.Page>) pageClass);
                             connection.createQuery("update groovy set script = :script, script_crc32 = :script_crc32, java_class = :java_class where groovy_id = :groovy_id")
-                                    .addParameter("script", Strings.isNullOrEmpty(clientPage.getClientGroovy()) ? serverPage.getServerGroovy() : clientPage.getClientGroovy())
+                                    .addParameter("script", groovyScript)
                                     .addParameter("script_crc32", clientPage.getClientGroovyCrc32())
                                     .addParameter("java_class", pageClass.getName())
                                     .addParameter("groovy_id", serverPage.getGroovyId())
                                     .executeUpdate();
                             clientPage.setServerGroovyCrc32(clientPage.getClientGroovyCrc32());
-                            clientPage.setServerGroovy(Strings.isNullOrEmpty(clientPage.getClientGroovy()) ? serverPage.getServerGroovy() : clientPage.getClientGroovy());
+                            clientPage.setServerGroovy(groovyScript);
                         } else {
                             clientPage.setServerGroovyCrc32(serverPage.getServerGroovyCrc32());
                             clientPage.setServerGroovy(serverPage.getServerGroovy());
@@ -682,26 +689,33 @@ public class SystemController {
                         // delete command
                         clientRest.setServerGroovy(null);
                         clientRest.setServerGroovyCrc32(null);
-                        classLoader.removeSourceCache(serverRest.getGroovyId());
+                        classLoader.removeSourceCache(serverRest.getJavaClass());
                         classLoader.removeClassCache(serverRest.getJavaClass());
                         connection.createQuery("delete from rest where rest_id = :rest_id").addParameter("rest_id", serverRest.getRestId()).executeUpdate();
                         connection.createQuery("delete from groovy where groovy_id = :groovy_id").addParameter("groovy_id", serverRest.getGroovyId()).executeUpdate();
                     } else {
                         if (!groovyConflicted) {
                             // update command
-                            classLoader.removeSourceCache(serverRest.getGroovyId());
+                            String groovyScript = Strings.isNullOrEmpty(clientRest.getClientGroovy()) ? serverRest.getServerGroovy() : clientRest.getClientGroovy();
+                            GroovyCodeSource source = new GroovyCodeSource(groovyScript, serverRest.getGroovyId(), "/groovy/script");
+                            source.setCachable(false);
+                            Class<?> serviceClass = classLoader.parseClass(source, false);
+
+                            classLoader.removeSourceCache(serverRest.getJavaClass());
                             classLoader.removeClassCache(serverRest.getJavaClass());
-                            GroovyCodeSource source = new GroovyCodeSource(Strings.isNullOrEmpty(clientRest.getClientGroovy()) ? serverRest.getServerGroovy() : clientRest.getClientGroovy(), serverRest.getGroovyId(), "/groovy/script");
-                            source.setCachable(true);
-                            Class<?> serviceClass = classLoader.parseClass(source, true);
+
+                            String javaClass = serviceClass.getName();
+                            classLoader.writeGroovy(javaClass, groovyScript);
+                            classLoader.compileGroovy(javaClass);
+
                             connection.createQuery("update groovy set script = :script, script_crc32 = :script_crc32, java_class = :java_class where groovy_id = :groovy_id")
-                                    .addParameter("script", Strings.isNullOrEmpty(clientRest.getClientGroovy()) ? serverRest.getServerGroovy() : clientRest.getClientGroovy())
+                                    .addParameter("script", groovyScript)
                                     .addParameter("script_crc32", clientRest.getClientGroovyCrc32())
                                     .addParameter("java_class", serviceClass.getName())
                                     .addParameter("groovy_id", serverRest.getGroovyId())
                                     .executeUpdate();
                             clientRest.setServerGroovyCrc32(clientRest.getClientGroovyCrc32());
-                            clientRest.setServerGroovy(Strings.isNullOrEmpty(clientRest.getClientGroovy()) ? serverRest.getServerGroovy() : clientRest.getClientGroovy());
+                            clientRest.setServerGroovy(groovyScript);
                         } else {
                             clientRest.setServerGroovyCrc32(serverRest.getServerGroovyCrc32());
                             clientRest.setServerGroovy(serverRest.getServerGroovy());
@@ -728,7 +742,7 @@ public class SystemController {
                         clientLayout.setServerGroovy(null);
                         clientLayout.setServerHtmlCrc32(null);
                         clientLayout.setServerHtml(null);
-                        classLoader.removeSourceCache(serverLayout.getGroovyId());
+                        classLoader.removeSourceCache(serverLayout.getJavaClass());
                         classLoader.removeClassCache(serverLayout.getJavaClass());
                         connection.createQuery("delete from layout where layout_id = :layout_id").addParameter("layout_id", serverLayout.getLayoutId()).executeUpdate();
                         connection.createQuery("delete from groovy where groovy_id = :groovy_id").addParameter("groovy_id", serverLayout.getGroovyId()).executeUpdate();
@@ -736,19 +750,26 @@ public class SystemController {
                     } else {
                         if (!groovyConflicted) {
                             // update command
-                            classLoader.removeSourceCache(serverLayout.getGroovyId());
+                            String groovyScript = Strings.isNullOrEmpty(clientLayout.getClientGroovy()) ? serverLayout.getServerGroovy() : clientLayout.getClientGroovy();
+                            GroovyCodeSource source = new GroovyCodeSource(groovyScript, serverLayout.getGroovyId(), "/groovy/script");
+                            source.setCachable(false);
+                            Class<?> pageClass = classLoader.parseClass(source, false);
+                            String javaClass = pageClass.getName();
+
+                            classLoader.removeSourceCache(serverLayout.getJavaClass());
                             classLoader.removeClassCache(serverLayout.getJavaClass());
-                            GroovyCodeSource source = new GroovyCodeSource(Strings.isNullOrEmpty(clientLayout.getClientGroovy()) ? serverLayout.getServerGroovy() : clientLayout.getClientGroovy(), serverLayout.getGroovyId(), "/groovy/script");
-                            source.setCachable(true);
-                            Class<?> pageClass = classLoader.parseClass(source, true);
+
+                            classLoader.writeGroovy(javaClass, groovyScript);
+                            classLoader.compileGroovy(javaClass);
+
                             connection.createQuery("update groovy set script = :script, script_crc32 = :script_crc32, java_class = :java_class where groovy_id = :groovy_id")
-                                    .addParameter("script", Strings.isNullOrEmpty(clientLayout.getClientGroovy()) ? serverLayout.getServerGroovy() : clientLayout.getClientGroovy())
+                                    .addParameter("script", groovyScript)
                                     .addParameter("script_crc32", clientLayout.getClientGroovyCrc32())
                                     .addParameter("java_class", pageClass.getName())
                                     .addParameter("groovy_id", serverLayout.getGroovyId())
                                     .executeUpdate();
                             clientLayout.setServerGroovyCrc32(clientLayout.getClientGroovyCrc32());
-                            clientLayout.setServerGroovy(Strings.isNullOrEmpty(clientLayout.getClientGroovy()) ? serverLayout.getServerGroovy() : clientLayout.getClientGroovy());
+                            clientLayout.setServerGroovy(groovyScript);
                         } else {
                             clientLayout.setServerGroovyCrc32(serverLayout.getServerGroovyCrc32());
                             clientLayout.setServerGroovy(serverLayout.getServerGroovy());

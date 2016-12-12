@@ -13,7 +13,7 @@ import com.angkorteam.mbaas.server.bean.*;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
-import groovy.lang.GroovyCodeSource;
+import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.WicketRuntimeException;
@@ -29,6 +29,7 @@ import org.sql2o.Connection;
 import org.sql2o.Query;
 import org.sql2o.Sql2o;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,9 +104,15 @@ public class Application extends AuthenticatedWebApplication {
         getMarkupSettings().setStripComments(true);
         getApplicationSettings().setClassResolver(Spring.getBean(ClassResolver.class));
         getJavaScriptLibrarySettings().setJQueryReference(new DynamicJQueryResourceReference());
-        initLayout();
+        File temp = new File(FileUtils.getTempDirectory(), Configuration.GROOVY);
+        temp.mkdirs();
+        writeLayout();
+        writeService();
+        writePage();
+        compileLayout();
+        compileService();
+        compilePage();
         initPageMount();
-        initService();
     }
 
     @Override
@@ -137,7 +144,7 @@ public class Application extends AuthenticatedWebApplication {
         }
     }
 
-    protected void initService() {
+    protected void writeService() {
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         DSLContext context = Spring.getBean(DSLContext.class);
         RestTable restTable = Tables.REST.as("restTable");
@@ -145,17 +152,39 @@ public class Application extends AuthenticatedWebApplication {
         List<RestPojo> rests = context.select(restTable.fields()).from(restTable).fetchInto(RestPojo.class);
         for (RestPojo rest : rests) {
             GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(rest.getGroovyId())).fetchOneInto(GroovyPojo.class);
-            GroovyCodeSource source = new GroovyCodeSource(groovy.getScript(), groovy.getGroovyId(), "/groovy/script");
-            source.setCachable(true);
-            try {
-                classLoader.parseClass(source, true);
-            } catch (Throwable e) {
-                e.printStackTrace();
+            classLoader.writeGroovy(groovy.getJavaClass(), groovy.getScript());
+        }
+    }
+
+
+    protected void compileService() {
+        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+        DSLContext context = Spring.getBean(DSLContext.class);
+        RestTable restTable = Tables.REST.as("restTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+        List<RestPojo> rests = context.select(restTable.fields()).from(restTable).fetchInto(RestPojo.class);
+        for (RestPojo rest : rests) {
+            GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(rest.getGroovyId())).fetchOneInto(GroovyPojo.class);
+            classLoader.compileGroovy(groovy.getJavaClass());
+
+        }
+    }
+
+    protected void writeLayout() {
+        DSLContext context = Spring.getBean(DSLContext.class);
+        LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+        List<LayoutPojo> layouts = context.select(layoutTable.fields()).from(layoutTable).fetchInto(LayoutPojo.class);
+        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+        for (LayoutPojo layout : layouts) {
+            if (!layout.getSystem()) {
+                GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layout.getGroovyId())).fetchOneInto(GroovyPojo.class);
+                classLoader.writeGroovy(groovy.getJavaClass(), groovy.getScript());
             }
         }
     }
 
-    protected void initLayout() {
+    protected void compileLayout() {
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         DSLContext context = Spring.getBean(DSLContext.class);
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
@@ -164,13 +193,21 @@ public class Application extends AuthenticatedWebApplication {
         for (LayoutPojo layout : layouts) {
             if (!layout.getSystem()) {
                 GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layout.getGroovyId())).fetchOneInto(GroovyPojo.class);
-                GroovyCodeSource source = new GroovyCodeSource(groovy.getScript(), groovy.getGroovyId(), "/groovy/script");
-                source.setCachable(true);
-                try {
-                    classLoader.parseClass(source, true);
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
+                classLoader.compileGroovy(groovy.getJavaClass());
+            }
+        }
+    }
+
+    protected void writePage() {
+        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+        DSLContext context = Spring.getBean(DSLContext.class);
+        PageTable pageTable = Tables.PAGE.as("pageTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+        List<PagePojo> pages = context.select(pageTable.fields()).from(pageTable).fetchInto(PagePojo.class);
+        for (PagePojo page : pages) {
+            if (page.getCmsPage()) {
+                GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(page.getGroovyId())).fetchOneInto(GroovyPojo.class);
+                classLoader.writeGroovy(groovy.getJavaClass(), groovy.getScript());
             }
         }
     }
@@ -190,14 +227,26 @@ public class Application extends AuthenticatedWebApplication {
                 }
             } else {
                 GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(page.getGroovyId())).fetchOneInto(GroovyPojo.class);
-                GroovyCodeSource source = new GroovyCodeSource(groovy.getScript(), groovy.getGroovyId(), "/groovy/script");
-                source.setCachable(true);
                 try {
-                    Class<?> pageClass = classLoader.parseClass(source, true);
+                    Class<?> pageClass = classLoader.loadClass(groovy.getJavaClass());
                     mountPage(page.getPath(), (Class<? extends Page>) pageClass);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
+            }
+        }
+    }
+
+    protected void compilePage() {
+        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+        DSLContext context = Spring.getBean(DSLContext.class);
+        PageTable pageTable = Tables.PAGE.as("pageTable");
+        GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
+        List<PagePojo> pages = context.select(pageTable.fields()).from(pageTable).fetchInto(PagePojo.class);
+        for (PagePojo page : pages) {
+            if (page.getCmsPage()) {
+                GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(page.getGroovyId())).fetchOneInto(GroovyPojo.class);
+                classLoader.compileGroovy(groovy.getJavaClass());
             }
         }
     }

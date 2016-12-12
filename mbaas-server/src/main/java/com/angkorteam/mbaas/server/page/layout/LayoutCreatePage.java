@@ -19,7 +19,6 @@ import com.angkorteam.mbaas.server.validator.LayoutTitleValidator;
 import groovy.lang.GroovyCodeSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.wicket.core.util.lang.PropertyResolver;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
@@ -154,13 +153,18 @@ public class LayoutCreatePage extends MBaaSPage {
 
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         GroovyCodeSource source = new GroovyCodeSource(this.groovy, groovyId, "/groovy/script");
-        source.setCachable(true);
-        Class<?> layoutClass = classLoader.parseClass(source, true);
+        source.setCachable(false);
+        Class<?> layoutClass = classLoader.parseClass(source, false);
+
+        String javaClassName = layoutClass.getName();
+
+        classLoader.writeGroovy(javaClassName, this.groovy);
+        classLoader.compileGroovy(javaClassName);
 
         GroovyRecord groovyRecord = context.newRecord(groovyTable);
         groovyRecord.setGroovyId(groovyId);
         groovyRecord.setSystem(false);
-        groovyRecord.setJavaClass(layoutClass.getName());
+        groovyRecord.setJavaClass(javaClassName);
         groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
         groovyRecord.setScript(this.groovy);
         groovyRecord.store();

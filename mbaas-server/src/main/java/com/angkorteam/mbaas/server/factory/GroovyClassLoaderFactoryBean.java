@@ -29,6 +29,6 @@ public class GroovyClassLoaderFactoryBean implements FactoryBean<GroovyClassLoad
     @Override
     public void afterPropertiesSet() throws Exception {
         this.loader = new GroovyClassLoader();
-
+        this.loader.setShouldRecompile(true);
     }
 }

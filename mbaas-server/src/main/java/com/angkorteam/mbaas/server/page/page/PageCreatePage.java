@@ -30,7 +30,6 @@ import groovy.lang.GroovyCodeSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.wicket.Page;
-import org.apache.wicket.core.util.lang.PropertyResolver;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
@@ -211,15 +210,19 @@ public class PageCreatePage extends MBaaSPage {
 
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         GroovyCodeSource source = new GroovyCodeSource(this.groovy, groovyId, "/groovy/script");
-        source.setCachable(true);
-        Class<?> pageClass = classLoader.parseClass(source, true);
+        source.setCachable(false);
+        Class<?> pageClass = classLoader.parseClass(source, false);
+        String javaClassName = pageClass.getName();
+
+        classLoader.writeGroovy(javaClassName, this.groovy);
+        classLoader.compileGroovy(javaClassName);
 
         GroovyRecord groovyRecord = context.newRecord(groovyTable);
         groovyRecord.setGroovyId(groovyId);
         groovyRecord.setScript(this.groovy);
         groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
         groovyRecord.setSystem(false);
-        groovyRecord.setJavaClass(pageClass.getName());
+        groovyRecord.setJavaClass(javaClassName);
         groovyRecord.store();
 
         Application.get().mountPage(this.mountPath, (Class<? extends Page>) pageClass);

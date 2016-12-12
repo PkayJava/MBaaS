@@ -164,17 +164,22 @@ public class LayoutModifyPage extends MBaaSPage {
         LayoutRecord layoutRecord = context.select(layoutTable.fields()).from(layoutTable).where(layoutTable.LAYOUT_ID.eq(this.layoutUuid)).fetchOneInto(layoutTable);
 
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
-        classLoader.removeSourceCache(this.groovyId);
-        classLoader.removeClassCache(this.javaClass);
 
         getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
 
         GroovyCodeSource source = new GroovyCodeSource(this.groovy, this.layoutUuid, "/groovy/script");
-        source.setCachable(true);
-        Class<?> layoutClass = classLoader.parseClass(source, true);
+        source.setCachable(false);
+        Class<?> layoutClass = classLoader.parseClass(source, false);
+        String javaClass = layoutClass.getName();
+
+         classLoader.removeSourceCache(this.javaClass);
+        classLoader.removeClassCache(this.javaClass);
+
+        classLoader.writeGroovy(javaClass, this.groovy);
+        classLoader.compileGroovy(javaClass);
 
         GroovyRecord groovyRecord = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layoutRecord.getGroovyId())).fetchOneInto(groovyTable);
-        groovyRecord.setJavaClass(layoutClass.getName());
+        groovyRecord.setJavaClass(javaClass);
         groovyRecord.setScript(this.groovy);
         groovyRecord.setScriptCrc32(String.valueOf(groovyCrc32));
         groovyRecord.update();
