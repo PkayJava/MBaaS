@@ -47,6 +47,20 @@ public class UniqueRecordValidator<T> implements IValidator<T> {
         this.idFieldValue = idFieldValue.getId();
     }
 
+    public UniqueRecordValidator(String tableName, String fieldName, String idFieldName, Boolean idFieldValue) {
+        this.tableName = tableName;
+        this.fieldName = fieldName;
+        this.idFieldName = idFieldName;
+        this.idFieldValue = idFieldValue;
+    }
+
+    public UniqueRecordValidator(String tableName, String fieldName, String idFieldName, Character idFieldValue) {
+        this.tableName = tableName;
+        this.fieldName = fieldName;
+        this.idFieldName = idFieldName;
+        this.idFieldValue = String.valueOf(idFieldValue);
+    }
+
     @Override
     public void validate(IValidatable<T> validatable) {
         T value = validatable.getValue();
