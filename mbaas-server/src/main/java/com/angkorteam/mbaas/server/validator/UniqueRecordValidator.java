@@ -26,15 +26,25 @@ public class UniqueRecordValidator<T> implements IValidator<T> {
         this.fieldName = fieldName;
     }
 
-    public UniqueRecordValidator(String tableName, String fieldName, String idFieldName, T idFieldValue) {
+    public UniqueRecordValidator(String tableName, String fieldName, String idFieldName, String idFieldValue) {
         this.tableName = tableName;
         this.fieldName = fieldName;
         this.idFieldName = idFieldName;
-        if (idFieldValue instanceof Item) {
-            this.idFieldValue = ((Item) idFieldValue).getId();
-        } else {
-            this.idFieldValue = idFieldValue;
-        }
+        this.idFieldValue = idFieldValue;
+    }
+
+    public UniqueRecordValidator(String tableName, String fieldName, String idFieldName, Number idFieldValue) {
+        this.tableName = tableName;
+        this.fieldName = fieldName;
+        this.idFieldName = idFieldName;
+        this.idFieldValue = String.valueOf(idFieldValue);
+    }
+
+    public UniqueRecordValidator(String tableName, String fieldName, String idFieldName, Item idFieldValue) {
+        this.tableName = tableName;
+        this.fieldName = fieldName;
+        this.idFieldName = idFieldName;
+        this.idFieldValue = idFieldValue.getId();
     }
 
     @Override
