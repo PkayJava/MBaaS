@@ -19,6 +19,10 @@
     </listener>
 
     <listener>
+        <listener-class>com.angkorteam.mbaas.server.spring.ServletRequestListener</listener-class>
+    </listener>
+
+    <listener>
         <listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
     </listener>
 
