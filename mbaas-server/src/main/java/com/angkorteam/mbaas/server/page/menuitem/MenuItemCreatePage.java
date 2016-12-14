@@ -99,21 +99,21 @@ public class MenuItemCreatePage extends MBaaSPage {
         this.iconFeedback = new TextFeedbackPanel("iconFeedback", this.iconField);
         this.form.add(this.iconFeedback);
 
-        this.cmsPages = context.select(pageTable.fields()).from(pageTable).where(pageTable.SYSTEM.eq(false)).fetchInto(PagePojo.class);
+        this.cmsPages = context.select(pageTable.fields()).from(pageTable).where(pageTable.SYSTEM.eq(false)).orderBy(pageTable.TITLE.asc()).fetchInto(PagePojo.class);
         this.pageField = new DropDownChoice<>("pageField", new PropertyModel<>(this, "cmsPage"), new PropertyModel<>(this, "cmsPages"), new PageChoiceRenderer());
         this.pageField.setRequired(true);
         this.form.add(this.pageField);
         this.pageFeedback = new TextFeedbackPanel("pageFeedback", this.pageField);
         this.form.add(this.pageFeedback);
 
-        this.menus = context.select(menuTable.fields()).from(menuTable).fetchInto(MenuPojo.class);
+        this.menus = context.select(menuTable.fields()).from(menuTable).orderBy(menuTable.TITLE.asc()).fetchInto(MenuPojo.class);
         this.menuField = new DropDownChoice<>("menuField", new PropertyModel<>(this, "menu"), new PropertyModel<>(this, "menus"), new MenuChoiceRenderer());
         this.menuField.setNullValid(true);
         this.form.add(this.menuField);
         this.menuFeedback = new TextFeedbackPanel("menuFeedback", this.menuField);
         this.form.add(this.menuFeedback);
 
-        this.sections = context.select(sectionTable.fields()).from(sectionTable).fetchInto(SectionPojo.class);
+        this.sections = context.select(sectionTable.fields()).from(sectionTable).orderBy(sectionTable.TITLE.asc()).fetchInto(SectionPojo.class);
         this.sectionField = new DropDownChoice<>("sectionField", new PropertyModel<>(this, "section"), new PropertyModel<>(this, "sections"), new SectionChoiceRenderer());
         this.sectionField.setNullValid(true);
         this.form.add(this.sectionField);

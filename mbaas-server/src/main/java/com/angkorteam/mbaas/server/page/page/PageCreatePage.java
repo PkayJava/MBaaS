@@ -157,7 +157,7 @@ public class PageCreatePage extends MBaaSPage {
 
         DSLContext context = Spring.getBean(DSLContext.class);
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
-        this.layouts = context.select(layoutTable.fields()).from(layoutTable).fetchInto(LayoutPojo.class);
+        this.layouts = context.select(layoutTable.fields()).from(layoutTable).orderBy(layoutTable.TITLE.asc()).fetchInto(LayoutPojo.class);
         this.layoutField = new DropDownChoice<>("layoutField", new PropertyModel<>(this, "layout"), new PropertyModel<>(this, "layouts"), new LayoutChoiceRenderer());
         this.layoutField.setRequired(true);
         this.form.add(this.layoutField);

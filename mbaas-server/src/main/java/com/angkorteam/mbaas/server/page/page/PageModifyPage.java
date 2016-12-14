@@ -176,7 +176,7 @@ public class PageModifyPage extends MBaaSPage {
         this.htmlFeedback = new TextFeedbackPanel("htmlFeedback", this.htmlField);
         this.form.add(this.htmlFeedback);
 
-        this.layouts = context.select(layoutTable.fields()).from(layoutTable).fetchInto(LayoutPojo.class);
+        this.layouts = context.select(layoutTable.fields()).from(layoutTable).orderBy(layoutTable.TITLE.asc()).fetchInto(LayoutPojo.class);
         this.layoutField = new DropDownChoice<>("layoutField", new PropertyModel<>(this, "layout"), new PropertyModel<>(this, "layouts"), new LayoutChoiceRenderer());
         this.layoutField.setRequired(true);
         this.form.add(this.layoutField);
