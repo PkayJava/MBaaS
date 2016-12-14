@@ -20,4 +20,13 @@ public class JdbcProvider extends AbstractJdbcProvider {
         return Spring.getBean(DataSource.class);
     }
 
+    @Override
+    public void addWhere(String filter) {
+        super.addWhere(filter);
+    }
+
+    @Override
+    public void addHaving(String filter) {
+        super.addHaving(filter);
+    }
 }
