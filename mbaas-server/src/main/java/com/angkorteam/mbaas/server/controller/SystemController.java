@@ -57,6 +57,7 @@ import java.util.*;
  * Created by socheat on 11/3/16.
  */
 @Controller
+@RequestMapping(path = "/system")
 public class SystemController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SystemController.class);
@@ -83,7 +84,7 @@ public class SystemController {
     @Autowired
     private System system;
 
-    @RequestMapping(method = RequestMethod.POST, path = "/system/page")
+    @RequestMapping(method = RequestMethod.POST, path = "/page")
     public ResponseEntity<RestResponse> page(Authentication authentication, HttpServletRequest request) throws Throwable {
         Page page = this.gson.fromJson(new InputStreamReader(request.getInputStream()), Page.class);
 
@@ -266,7 +267,7 @@ public class SystemController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/system/layout")
+    @RequestMapping(method = RequestMethod.POST, path = "/layout")
     public ResponseEntity<RestResponse> layout(Authentication authentication, HttpServletRequest request) throws Throwable {
         Layout layout = this.gson.fromJson(new InputStreamReader(request.getInputStream()), Layout.class);
         try {
@@ -384,7 +385,7 @@ public class SystemController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/system/rest")
+    @RequestMapping(method = RequestMethod.POST, path = "/rest")
     public ResponseEntity<RestResponse> rest(Authentication authentication, HttpServletRequest request) throws Throwable {
         Rest rest = this.gson.fromJson(new InputStreamReader(request.getInputStream()), Rest.class);
         try {
@@ -579,7 +580,7 @@ public class SystemController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/system/monitor")
+    @RequestMapping(method = RequestMethod.GET, path = "/monitor")
     public ResponseEntity<RestResponse> monitor(Authentication authentication, HttpServletRequest request) throws Throwable {
         Map<String, Object> monitor = new HashMap<>();
         monitor.put("time", DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(new Date()));
@@ -590,7 +591,7 @@ public class SystemController {
         return ResponseEntity.ok(response);
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/system/sync")
+    @RequestMapping(method = RequestMethod.POST, path = "/sync")
     public ResponseEntity<RestResponse> sync(Authentication authentication, HttpServletRequest request) throws Throwable {
         Sync sync = this.gson.fromJson(new InputStreamReader(request.getInputStream()), Sync.class);
         if (sync == null) {

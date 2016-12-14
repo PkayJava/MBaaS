@@ -1,13 +1,11 @@
 package com.angkorteam.mbaas.server.controller;
 
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
-import com.angkorteam.mbaas.model.entity.tables.RestRoleTable;
-import com.angkorteam.mbaas.model.entity.tables.RestTable;
-import com.angkorteam.mbaas.model.entity.tables.RoleTable;
+import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RestPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.UserPojo;
 import com.angkorteam.mbaas.plain.response.RestResponse;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.spring.RestService;
@@ -28,6 +26,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
@@ -35,6 +36,7 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -63,7 +65,7 @@ public class GroovyController {
     private GroovyClassLoader classLoader;
 
     @RequestMapping(path = "/**")
-    public ResponseEntity<RestResponse> execute(Authentication authentication, HttpServletRequest request) throws Throwable {
+    public ResponseEntity<RestResponse> execute(HttpServletRequest request) throws Throwable {
         String method = StringUtils.upperCase(request.getMethod());
         RestTable restTable = Tables.REST.as("restTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
@@ -124,52 +126,39 @@ public class GroovyController {
         try {
             service = (RestService) clazz.newInstance();
         } catch (Throwable e) {
-            RestResponse response = new RestResponse();
-            response.setResultCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            response.setResultMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-            List<String> stackTraces = Lists.newArrayList();
-            for (StackTraceElement element : e.getStackTrace()) {
-                String line = element.getClassName() + "." + element.getMethodName() + "(" + FilenameUtils.getName(element.getFileName()) + ":" + element.getLineNumber() + ")";
-                stackTraces.add(line);
-            }
-            response.setStackTrace(stackTraces);
-            response.setDebugMessage(e.getMessage());
-            return ResponseEntity.ok(response);
-        }
-        Roles userRoles = new Roles();
-        for (GrantedAuthority authority : authentication.getAuthorities()) {
-            userRoles.add(authority.getAuthority());
+            return catchError(e);
         }
 
-        RoleTable roleTable = Tables.ROLE.as("roleTable");
         RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
-        List<RolePojo> rolePojos = this.context.select(roleTable.fields()).from(roleTable).innerJoin(restRoleTable).on(roleTable.ROLE_ID.eq(restRoleTable.ROLE_ID)).where(restRoleTable.REST_ID.eq(restPojo.getRestId())).fetchInto(RolePojo.class);
-        Roles restRoles = new Roles();
-        if (rolePojos != null) {
-            for (RolePojo rolePojo : rolePojos) {
-                restRoles.add(rolePojo.getName());
+        RoleTable roleTable = Tables.ROLE.as("roleTable");
+        List<String> serviceRoles = context.select(roleTable.NAME).from(roleTable).innerJoin(restRoleTable).on(roleTable.ROLE_ID.eq(restRoleTable.ROLE_ID)).where(restRoleTable.REST_ID.eq(restPojo.getRestId())).fetchInto(String.class);
+        if (serviceRoles == null || serviceRoles.isEmpty()) {
+        } else {
+            String userRole = service.lookupUserRole(request, pathVariables);
+            if (userRole == null || "".equals(userRole) || !serviceRoles.contains(userRole)) {
+                return forbidden();
             }
-        }
-
-        if (!restRoles.hasAnyRole(userRoles)) {
-            return notFound();
         }
         SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(service, servletContext);
         try {
             return service.service(request, pathVariables);
         } catch (Throwable e) {
-            RestResponse response = new RestResponse();
-            response.setResultCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            response.setResultMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-            List<String> stackTraces = Lists.newArrayList();
-            for (StackTraceElement element : e.getStackTrace()) {
-                String line = element.getClassName() + "." + element.getMethodName() + "(" + FilenameUtils.getName(element.getFileName()) + ":" + element.getLineNumber() + ")";
-                stackTraces.add(line);
-            }
-            response.setStackTrace(stackTraces);
-            response.setDebugMessage(e.getMessage());
-            return ResponseEntity.ok(response);
+            return catchError(e);
         }
+    }
+
+    protected ResponseEntity<RestResponse> catchError(Throwable e) {
+        RestResponse response = new RestResponse();
+        response.setResultCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        response.setResultMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        List<String> stackTraces = Lists.newArrayList();
+        for (StackTraceElement element : e.getStackTrace()) {
+            String line = element.getClassName() + "." + element.getMethodName() + "(" + FilenameUtils.getName(element.getFileName()) + ":" + element.getLineNumber() + ")";
+            stackTraces.add(line);
+        }
+        response.setStackTrace(stackTraces);
+        response.setDebugMessage(e.getMessage());
+        return ResponseEntity.ok(response);
     }
 
     protected ResponseEntity<RestResponse> notFound() {
@@ -177,6 +166,14 @@ public class GroovyController {
         response.setResultCode(HttpStatus.NOT_FOUND.value());
         response.setResultMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
         response.setDebugMessage("service is not found");
+        return ResponseEntity.ok(response);
+    }
+
+    protected ResponseEntity<RestResponse> forbidden() {
+        RestResponse response = new RestResponse();
+        response.setResultCode(HttpStatus.FORBIDDEN.value());
+        response.setResultMessage(HttpStatus.FORBIDDEN.getReasonPhrase());
+        response.setDebugMessage("service is forbidden");
         return ResponseEntity.ok(response);
     }
 }

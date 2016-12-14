@@ -13,6 +13,10 @@ public interface RestService {
 
     ResponseEntity<RestResponse> service(HttpServletRequest request, Map<String, String> pathVariables) throws Throwable;
 
+    default String lookupUserRole(HttpServletRequest request, Map<String, String> pathVariables) {
+        return null;
+    }
+
     String getRestUUID();
 
 }

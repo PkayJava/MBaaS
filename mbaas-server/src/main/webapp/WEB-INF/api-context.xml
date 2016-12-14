@@ -40,8 +40,12 @@
     <security:http realm="MBaaS" use-expressions="true" create-session="stateless">
         <security:csrf disabled="true"/>
         <security:http-basic/>
-        <security:intercept-url access="permitAll" pattern="/api/resource/**"/>
-        <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/**"/>
+        <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/page"/>
+        <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/layout"/>
+        <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/rest"/>
+        <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/monitor"/>
+        <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/sync"/>
+        <security:intercept-url access="permitAll" pattern="/api/**"/>
     </security:http>
 
     <security:authentication-manager erase-credentials="true">
