@@ -3,7 +3,9 @@ package com.angkorteam.mbaas.server.select2;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.MultipleChoiceProvider;
 import com.angkorteam.framework.extension.wicket.markup.html.form.select2.Option;
 import com.angkorteam.mbaas.server.Spring;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.model.IModel;
 import org.sql2o.Connection;
 import org.sql2o.Query;
@@ -23,17 +25,27 @@ public class JdbcMultipleChoiceProvider extends MultipleChoiceProvider<Item> {
 
     private final String valueField;
 
+    private final List<String> where;
+
     public JdbcMultipleChoiceProvider(String table, String idField, String valueField) {
         this.table = table;
         this.idField = idField;
         this.valueField = valueField;
+        this.where = Lists.newArrayList();
+    }
+
+    public void addWhere(String filter) {
+        this.where.add(filter);
     }
 
     @Override
     public List<Item> toChoices(List<String> list) {
         Sql2o sql2o = Spring.getBean(Sql2o.class);
         try (Connection connection = sql2o.open()) {
-            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.valueField + " value " + " FROM " + this.table + " WHERE " + idField + " IN (:id)");
+            List<String> where = new ArrayList<>();
+            where.addAll(this.where);
+            where.add(this.idField + " IN (:id)");
+            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.valueField + " value " + " FROM " + this.table + " WHERE " + StringUtils.join(where, " AND "));
             query.addParameter("id", list);
             return query.executeAndFetch(Item.class);
         }
@@ -43,16 +55,17 @@ public class JdbcMultipleChoiceProvider extends MultipleChoiceProvider<Item> {
     public List<Option> query(String s, int i) {
         List<Option> options = new ArrayList<>();
         Sql2o sql2o = Spring.getBean(Sql2o.class);
-
         try (Connection connection = sql2o.open()) {
-            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.valueField + " value " + " FROM " + this.table + " WHERE " + valueField + " LIKE :value ORDER BY " + valueField + " ASC");
+            List<String> where = new ArrayList<>();
+            where.addAll(this.where);
+            where.add(this.valueField + " LIKE :value");
+            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.valueField + " value " + " FROM " + this.table + " WHERE " + StringUtils.join(where, " AND ") + " ORDER BY " + this.valueField + " ASC");
             query.addParameter("value", s + "%");
             List<Item> items = query.executeAndFetch(Item.class);
             for (Item item : items) {
                 options.add(new Option(item.getId(), item.getValue()));
             }
         }
-
         return options;
     }
 
@@ -80,7 +93,10 @@ public class JdbcMultipleChoiceProvider extends MultipleChoiceProvider<Item> {
     public Item getObject(String id, IModel<? extends List<? extends Item>> choices) {
         Sql2o sql2o = Spring.getBean(Sql2o.class);
         try (Connection connection = sql2o.open()) {
-            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.valueField + " value " + " FROM " + this.table + " WHERE " + idField + " = :id");
+            List<String> where = new ArrayList<>();
+            where.addAll(this.where);
+            where.add(this.idField + " = :id");
+            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.valueField + " value " + " FROM " + this.table + " WHERE " + StringUtils.join(where, " AND "));
             query.addParameter("id", id);
             return query.executeAndFetchFirst(Item.class);
         }
