@@ -292,6 +292,19 @@ public class PageModifyPage extends MBaaSPage {
             }
         }
 
+        for (Class<?> clazz : classLoader.getLoadedClasses()) {
+            try {
+                String groovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
+                if (!org.elasticsearch.common.Strings.isNullOrEmpty(groovyId)) {
+                    String paths = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
+                    if (!org.elasticsearch.common.Strings.isNullOrEmpty(paths)) {
+                        Application.get().mountPage(paths, (Class<? extends org.apache.wicket.Page>) clazz);
+                    }
+                }
+            } catch (EmptyResultDataAccessException e) {
+            }
+        }
+
         setResponsePage(PageBrowsePage.class);
     }
 }
