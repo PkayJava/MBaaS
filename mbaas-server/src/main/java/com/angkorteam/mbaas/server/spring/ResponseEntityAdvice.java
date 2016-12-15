@@ -2,7 +2,6 @@ package com.angkorteam.mbaas.server.spring;
 
 import com.angkorteam.mbaas.plain.response.Response;
 import com.angkorteam.mbaas.plain.response.UnknownResponse;
-import com.angkorteam.mbaas.server.bean.Configuration;
 import com.angkorteam.mbaas.server.bean.System;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
@@ -22,7 +21,7 @@ import java.util.Map;
  * Created by socheat on 2/16/16.
  */
 @ControllerAdvice
-public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
+public class ResponseEntityAdvice implements ResponseBodyAdvice<Object> {
 
     @Autowired
     private System system;
@@ -36,35 +35,37 @@ public class ResponseEntityAdvice implements ResponseBodyAdvice<Response> {
     }
 
     @Override
-    public Response beforeBodyWrite(Response body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        Configuration configuration = system.getConfiguration();
+    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+        if (body instanceof Response) {
 
-        Response responseBody = body;
-        if (body == null) {
-            responseBody = new UnknownResponse();
-            responseBody.setResultCode(HttpStatus.OK.value());
-            responseBody.setResultMessage(HttpStatus.OK.getReasonPhrase());
-        } else {
-            if (responseBody.getResultCode() == null) {
+
+            Response responseBody = (Response) body;
+            if (body == null) {
+                responseBody = new UnknownResponse();
                 responseBody.setResultCode(HttpStatus.OK.value());
                 responseBody.setResultMessage(HttpStatus.OK.getReasonPhrase());
-            }
-            if (responseBody.getResultMessage() == null) {
-                try {
-                    responseBody.setResultMessage(HttpStatus.valueOf(responseBody.getResultCode()).getReasonPhrase());
-                } catch (IllegalArgumentException e) {
-                    responseBody.setResultMessage("Unknown");
+            } else {
+                if (responseBody.getResultCode() == null) {
+                    responseBody.setResultCode(HttpStatus.OK.value());
+                    responseBody.setResultMessage(HttpStatus.OK.getReasonPhrase());
+                }
+                if (responseBody.getResultMessage() == null) {
+                    try {
+                        responseBody.setResultMessage(HttpStatus.valueOf(responseBody.getResultCode()).getReasonPhrase());
+                    } catch (IllegalArgumentException e) {
+                        responseBody.setResultMessage("Unknown");
+                    }
                 }
             }
+            HttpHeaders httpHeaders = request.getHeaders();
+            Map<String, List<String>> requestHeader = responseBody.getRequestHeader();
+            for (Map.Entry<String, List<String>> entry : httpHeaders.entrySet()) {
+                requestHeader.put(entry.getKey(), entry.getValue());
+            }
+            responseBody.setMethod(request.getMethod().name());
+            return responseBody;
+        } else {
+            return body;
         }
-        HttpHeaders httpHeaders = request.getHeaders();
-        Map<String, List<String>> requestHeader = responseBody.getRequestHeader();
-        for (Map.Entry<String, List<String>> entry : httpHeaders.entrySet()) {
-            requestHeader.put(entry.getKey(), entry.getValue());
-        }
-
-        responseBody.setMethod(request.getMethod().name());
-
-        return responseBody;
     }
 }
