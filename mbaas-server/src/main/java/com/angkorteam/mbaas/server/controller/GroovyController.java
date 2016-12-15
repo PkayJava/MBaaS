@@ -65,7 +65,7 @@ public class GroovyController {
     private GroovyClassLoader classLoader;
 
     @RequestMapping(path = "/**")
-    public ResponseEntity<RestResponse> execute(HttpServletRequest request) throws Throwable {
+    public ResponseEntity<?> execute(HttpServletRequest request) throws Throwable {
         String method = StringUtils.upperCase(request.getMethod());
         RestTable restTable = Tables.REST.as("restTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");

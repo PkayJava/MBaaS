@@ -49,7 +49,7 @@ class %s implements RestService {
     private Sql2o sql2o
 
     @Override
-    ResponseEntity<RestResponse> service(HttpServletRequest request, Map<String, String> pathVariables) throws Throwable {
+    ResponseEntity<?> service(HttpServletRequest request, Map<String, String> pathVariables) throws Throwable {
         // enjoy your logic here
         RestResponse response = new RestResponse()
         response.setData(system.randomUUID())
