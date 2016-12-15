@@ -71,6 +71,9 @@ public class GroovyController {
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
 
         String pathInfo = request.getPathInfo();
+        if (pathInfo.length() > 1 && pathInfo.endsWith("/")) {
+            pathInfo = pathInfo.substring(0, pathInfo.length() - 1);
+        }
         Map<String, String> pathVariables = Maps.newHashMap();
         String[] segments = StringUtils.split(pathInfo, "/");
         int segmentCount = StringUtils.countMatches(pathInfo, '/');
