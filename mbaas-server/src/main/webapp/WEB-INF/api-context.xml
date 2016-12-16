@@ -45,7 +45,7 @@
         <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/rest"/>
         <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/monitor"/>
         <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/sync"/>
-        <security:intercept-url access="permitAll" pattern="/api/**"/>
+        <security:intercept-url filters="none" pattern="/api/**"/>
     </security:http>
 
     <security:authentication-manager erase-credentials="true">
