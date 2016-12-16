@@ -19,25 +19,25 @@ public class ProviderUtils {
     public static void addColumn(TableProvider provider, List<IColumn<Map<String, Object>, String>> columns, AttributePojo attribute, TypeEnum type) {
         String column = attribute.getName();
         if (TypeEnum.Boolean == type) {
-            columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of(column), column, ProviderUtils::getModelValue));
+            columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of(column), column, ProviderUtils::modelValue));
         } else if (TypeEnum.Long == type) {
-            columns.add(new TextFilterColumn(provider, ItemClass.Long, Model.of(column), column, ProviderUtils::getModelValue));
+            columns.add(new TextFilterColumn(provider, ItemClass.Long, Model.of(column), column, ProviderUtils::modelValue));
         } else if (TypeEnum.Double == type) {
-            columns.add(new TextFilterColumn(provider, ItemClass.Double, Model.of(column), column, ProviderUtils::getModelValue));
+            columns.add(new TextFilterColumn(provider, ItemClass.Double, Model.of(column), column, ProviderUtils::modelValue));
         } else if (TypeEnum.Character == type) {
-            columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of(column), column, ProviderUtils::getModelValue));
+            columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of(column), column, ProviderUtils::modelValue));
         } else if (TypeEnum.String == type || TypeEnum.Text == type) {
-            columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of(column), column, ProviderUtils::getModelValue));
+            columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of(column), column, ProviderUtils::modelValue));
         } else if (TypeEnum.Time == type) {
-            columns.add(new TextFilterColumn(provider, ItemClass.Time, Model.of(column), column, ProviderUtils::getModelValue));
+            columns.add(new TextFilterColumn(provider, ItemClass.Time, Model.of(column), column, ProviderUtils::modelValue));
         } else if (TypeEnum.Date == type) {
-            columns.add(new TextFilterColumn(provider, ItemClass.Date, Model.of(column), column, ProviderUtils::getModelValue));
+            columns.add(new TextFilterColumn(provider, ItemClass.Date, Model.of(column), column, ProviderUtils::modelValue));
         } else if (TypeEnum.DateTime == type) {
-            columns.add(new TextFilterColumn(provider, ItemClass.DateTime, Model.of(column), column, ProviderUtils::getModelValue));
+            columns.add(new TextFilterColumn(provider, ItemClass.DateTime, Model.of(column), column, ProviderUtils::modelValue));
         }
     }
 
-    private static Object getModelValue(String s, Map<String, Object> stringObjectMap) {
+    private static Object modelValue(String s, Map<String, Object> stringObjectMap) {
         return stringObjectMap.get(s);
     }
 }

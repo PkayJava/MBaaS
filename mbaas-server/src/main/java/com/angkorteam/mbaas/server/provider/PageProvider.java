@@ -45,6 +45,10 @@ public class PageProvider extends JooqProvider {
         return this.pageTable.SYSTEM;
     }
 
+    public Field<Boolean> getCmsPage() {
+        return this.pageTable.CMS_PAGE;
+    }
+
     public Field<String> getDescription() {
         return this.pageTable.DESCRIPTION;
     }

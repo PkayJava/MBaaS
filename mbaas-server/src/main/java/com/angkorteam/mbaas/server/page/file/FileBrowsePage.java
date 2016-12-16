@@ -51,10 +51,10 @@ public class FileBrowsePage extends MBaaSPage {
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("fileId"), "fileId", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("name"), "name", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Integer, Model.of("length"), "length", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("mime"), "mime", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("fileId"), "fileId", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("name"), "name", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Integer, Model.of("length"), "length", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("mime"), "mime", this::modelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
         this.dataTable = new DefaultDataTable<>("table", columns, provider, 17);
@@ -123,15 +123,15 @@ public class FileBrowsePage extends MBaaSPage {
             return ItemCss.DANGER;
         }
         if ("Edit".equals(link)) {
-            return ItemCss.PRIMARY;
+            return ItemCss.INFO;
         }
         if ("View".equals(link)) {
-            return ItemCss.PRIMARY;
+            return ItemCss.INFO;
         }
         return ItemCss.NONE;
     }
 
-    private Object getModelValue(String name, Map<String, Object> stringObjectMap) {
+    private Object modelValue(String name, Map<String, Object> stringObjectMap) {
         return stringObjectMap.get(name);
     }
 

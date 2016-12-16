@@ -6,6 +6,7 @@ import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.RestTable;
 import com.angkorteam.mbaas.server.Spring;
+import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.provider.RestProvider;
 import com.google.common.collect.Maps;
@@ -18,7 +19,9 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.elasticsearch.common.Strings;
 import org.jooq.DSLContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +52,9 @@ public class RestBrowsePage extends MBaaSPage {
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("name"), "name", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("method"), "method", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("path"), "path", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("name"), "name", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("method"), "method", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("path"), "path", this::modelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
         this.dataTable = new DefaultDataTable<>("table", columns, provider, 20);
@@ -72,7 +75,7 @@ public class RestBrowsePage extends MBaaSPage {
         return actions;
     }
 
-    private Object getModelValue(String name, Map<String, Object> stringObjectMap) {
+    private Object modelValue(String name, Map<String, Object> stringObjectMap) {
         return stringObjectMap.get(name);
     }
 
@@ -85,9 +88,17 @@ public class RestBrowsePage extends MBaaSPage {
             return;
         }
         if ("Delete".equals(link)) {
-            DSLContext context = Spring.getBean(DSLContext.class);
-            RestTable restTable = Tables.REST.as("restTable");
-            context.delete(restTable).where(restTable.REST_ID.eq(restId)).execute();
+            JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
+            Map<String, Object> restRecord = jdbcTemplate.queryForMap("SELECT * FROM rest WHERE rest_id = ?", restId);
+            String groovyId = (String) restRecord.get("groovy_id");
+            if (!Strings.isNullOrEmpty(groovyId)) {
+                Map<String, Object> groovyRecord = jdbcTemplate.queryForMap("SELECT * FROM groovy WHERE groovy_id = ?", groovyId);
+                jdbcTemplate.update("DELETE FROM groovy WHERE groovy_id = ?", groovyId);
+                GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+                classLoader.removeClassCache((String) groovyRecord.get("java_class"));
+                classLoader.removeSourceCache((String) groovyRecord.get("java_class"));
+            }
+            jdbcTemplate.update("DELETE FROM rest WHERE rest_id = ?", restId);
             target.add(this.dataTable);
             return;
         }
@@ -109,7 +120,7 @@ public class RestBrowsePage extends MBaaSPage {
 
     private ItemCss itemCss(String link, Map<String, Object> model) {
         if ("Edit".equals(link)) {
-            return ItemCss.PRIMARY;
+            return ItemCss.INFO;
         }
         if ("Delete".equals(link)) {
             return ItemCss.DANGER;

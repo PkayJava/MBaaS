@@ -42,11 +42,15 @@ public class LayoutProvider extends JooqProvider {
         return this.layoutTable.SYSTEM;
     }
 
+    public Field<Boolean> getCmsLayout() {
+        return this.layoutTable.CMS_LAYOUT;
+    }
+
     public Field<Date> getDateCreated() {
         return this.layoutTable.DATE_CREATED;
     }
 
-    public Field<Date> getDateModifies() {
+    public Field<Date> getDateModified() {
         return this.layoutTable.DATE_MODIFIED;
     }
 

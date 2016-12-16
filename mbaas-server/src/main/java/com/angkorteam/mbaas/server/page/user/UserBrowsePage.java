@@ -46,11 +46,11 @@ public class UserBrowsePage extends MBaaSPage {
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("fullName"), "fullName", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("login"), "login", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("roleName"), "roleName", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("status"), "status", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("fullName"), "fullName", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("login"), "login", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("roleName"), "roleName", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("status"), "status", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::modelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
         this.dataTable = new DefaultDataTable<>("table", columns, provider, 20);
@@ -72,7 +72,7 @@ public class UserBrowsePage extends MBaaSPage {
         return actions;
     }
 
-    private Object getModelValue(String name, Map<String, Object> stringObjectMap) {
+    private Object modelValue(String name, Map<String, Object> stringObjectMap) {
         return stringObjectMap.get(name);
     }
 
@@ -99,16 +99,10 @@ public class UserBrowsePage extends MBaaSPage {
     private Boolean clickable(String link, Map<String, Object> object) {
         Boolean system = (Boolean) object.get("system");
         if ("Edit".equals(link)) {
-            if (system) {
-                return false;
-            }
-            return true;
+            return !system;
         }
         if ("Delete".equals(link)) {
-            if (system) {
-                return false;
-            }
-            return true;
+            return !system;
         }
         if ("Reset PWD".equals(link)) {
             return true;
@@ -118,7 +112,7 @@ public class UserBrowsePage extends MBaaSPage {
 
     private ItemCss itemCss(String link, Map<String, Object> model) {
         if ("Reset PWD".equals(link) || "Edit".equals(link)) {
-            return ItemCss.PRIMARY;
+            return ItemCss.INFO;
         }
         if ("Delete".equals(link)) {
             return ItemCss.DANGER;

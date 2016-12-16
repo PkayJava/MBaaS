@@ -47,10 +47,10 @@ public class CollectionBrowsePage extends MBaaSPage {
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("name"), "name", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("locked"), "locked", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("mutable"), "mutable", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("name"), "name", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("locked"), "locked", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("mutable"), "mutable", this::modelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
         this.dataTable = new DefaultDataTable<>("table", columns, provider, 20);
@@ -118,12 +118,12 @@ public class CollectionBrowsePage extends MBaaSPage {
             return ItemCss.DANGER;
         }
         if ("Attribute".equals(link)) {
-            return ItemCss.PRIMARY;
+            return ItemCss.INFO;
         }
         return ItemCss.NONE;
     }
 
-    private Object getModelValue(String name, Map<String, Object> stringObjectMap) {
+    private Object modelValue(String name, Map<String, Object> stringObjectMap) {
         return stringObjectMap.get(name);
     }
 }

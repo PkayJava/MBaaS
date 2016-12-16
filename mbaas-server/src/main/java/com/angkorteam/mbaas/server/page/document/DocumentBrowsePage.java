@@ -114,7 +114,7 @@ public class DocumentBrowsePage extends MBaaSPage {
             return ItemCss.DANGER;
         }
         if ("Edit".equals(link)) {
-            return ItemCss.PRIMARY;
+            return ItemCss.INFO;
         }
         return ItemCss.NONE;
     }
@@ -133,7 +133,7 @@ public class DocumentBrowsePage extends MBaaSPage {
         }
     }
 
-    private Object getModelValue(String name, Map<String, Object> stringObjectMap) {
+    private Object modelValue(String name, Map<String, Object> stringObjectMap) {
         return stringObjectMap.get(name);
     }
 

@@ -63,14 +63,14 @@ public class AttributeBrowsePage extends MBaaSPage {
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
 
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("name"), "name", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("type"), "type", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("eav"), "eav", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("nullable"), "nullable", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Integer, Model.of("length"), "length", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Integer, Model.of("precision"), "precision", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Integer, Model.of("order"), "order", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("name"), "name", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("type"), "type", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("eav"), "eav", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("nullable"), "nullable", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Integer, Model.of("length"), "length", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Integer, Model.of("precision"), "precision", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Integer, Model.of("order"), "order", this::modelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
         this.dataTable = new DefaultDataTable<>("table", columns, provider, 20);
@@ -120,7 +120,7 @@ public class AttributeBrowsePage extends MBaaSPage {
         return ItemCss.DANGER;
     }
 
-    private Object getModelValue(String name, Map<String, Object> stringObjectMap) {
+    private Object modelValue(String name, Map<String, Object> stringObjectMap) {
         return stringObjectMap.get(name);
     }
 }

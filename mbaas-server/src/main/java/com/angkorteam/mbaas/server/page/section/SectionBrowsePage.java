@@ -40,8 +40,8 @@ public class SectionBrowsePage extends MBaaSPage {
         layout.add(filterForm);
 
         List<IColumn<Map<String, Object>, String>> columns = new ArrayList<>();
-        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("title"), "title", this::getModelValue));
-        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::getModelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.String, Model.of("title"), "title", this::modelValue));
+        columns.add(new TextFilterColumn(provider, ItemClass.Boolean, Model.of("system"), "system", this::modelValue));
         columns.add(new ActionFilterColumn(Model.of("action"), this::actions, this::clickable, this::itemCss, this::itemClick));
 
         DataTable<Map<String, Object>, String> dataTable = new DefaultDataTable<>("table", columns, provider, 20);
@@ -61,7 +61,7 @@ public class SectionBrowsePage extends MBaaSPage {
         return actions;
     }
 
-    private Object getModelValue(String name, Map<String, Object> stringObjectMap) {
+    private Object modelValue(String name, Map<String, Object> stringObjectMap) {
         return stringObjectMap.get(name);
     }
 
@@ -85,7 +85,7 @@ public class SectionBrowsePage extends MBaaSPage {
 
     private ItemCss itemCss(String link, Map<String, Object> model) {
         if ("Edit".equals(link)) {
-            return ItemCss.PRIMARY;
+            return ItemCss.INFO;
         }
         return ItemCss.NONE;
 
