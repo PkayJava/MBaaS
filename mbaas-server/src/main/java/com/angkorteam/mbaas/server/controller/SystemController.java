@@ -15,6 +15,7 @@ import com.angkorteam.mbaas.server.gson.Layout;
 import com.angkorteam.mbaas.server.gson.Page;
 import com.angkorteam.mbaas.server.gson.Rest;
 import com.angkorteam.mbaas.server.gson.Sync;
+import com.angkorteam.mbaas.server.page.CmsPage;
 import com.angkorteam.mbaas.server.page.layout.LayoutCreatePage;
 import com.angkorteam.mbaas.server.page.page.PageCreatePage;
 import com.angkorteam.mbaas.server.page.rest.RestCreatePage;
@@ -617,6 +618,8 @@ public class SystemController {
                     clientPage.setGroovyPath(path + ".groovy");
                     if (!groovyConflicted && !htmlConflicted && Strings.isNullOrEmpty(clientPage.getClientGroovyCrc32()) && Strings.isNullOrEmpty(clientPage.getClientHtmlCrc32())) {
                         // delete command
+                        Application.get().unmount(serverPage.getMountPath());
+                        Application.get().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
                         clientPage.setServerGroovyCrc32(null);
                         clientPage.setServerGroovy(null);
                         clientPage.setServerHtmlCrc32(null);
@@ -625,8 +628,6 @@ public class SystemController {
                         classLoader.removeClassCache(serverPage.getJavaClass());
                         connection.createQuery("delete from page where page_id = :page_id").addParameter("page_id", serverPage.getPageId()).executeUpdate();
                         connection.createQuery("delete from groovy where groovy_id = :groovy_id").addParameter("groovy_id", serverPage.getGroovyId()).executeUpdate();
-                        Application.get().unmount(serverPage.getMountPath());
-                        Application.get().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
                     } else {
                         if (!groovyConflicted) {
                             // update command
@@ -857,19 +858,26 @@ public class SystemController {
         }
 
         JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
-        for (Class<?> clazz : classLoader.getLoadedClasses()) {
+        List<Map<String, Object>> groovys = jdbcTemplate.queryForList("SELECT * FROM groovy WHERE script_crc32 IS NULL");
+        for (Map<String, Object> groovy : groovys) {
+            String javaClass = (String) groovy.get("java_class");
+            String groovyId = (String) groovy.get("groovy_id");
             try {
-                String groovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
-                if (!org.elasticsearch.common.Strings.isNullOrEmpty(groovyId)) {
-                    String paths = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
-                    if (!org.elasticsearch.common.Strings.isNullOrEmpty(paths)) {
-                        Application.get().mountPage(paths, (Class<? extends org.apache.wicket.Page>) clazz);
+                Class<?> clazz = classLoader.loadClass(javaClass);
+                if (CmsPage.class.isAssignableFrom(clazz)) {
+                    try {
+                        String path = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
+                        if (!Strings.isNullOrEmpty(path)) {
+                            Application.get().mountPage(path, (Class<? extends org.apache.wicket.Page>) clazz);
+                        }
+                    } catch (EmptyResultDataAccessException e) {
+                        LOGGER.info(e.getMessage(), e);
                     }
                 }
-            } catch (EmptyResultDataAccessException e) {
+            } catch (ClassNotFoundException e) {
+                LOGGER.info(e.getMessage(), e);
             }
         }
-
         RestResponse response = new RestResponse();
         response.setData(sync);
         response.setResultCode(HttpStatus.OK.value());
