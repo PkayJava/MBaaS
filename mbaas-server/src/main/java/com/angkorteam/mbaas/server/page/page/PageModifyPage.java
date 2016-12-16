@@ -304,7 +304,7 @@ public class PageModifyPage extends MBaaSPage {
             String groovyId = (String) groovy.get("groovy_id");
             try {
                 Class<?> clazz = classLoader.loadClass(javaClass);
-                if (CmsPage.class.isAssignableFrom(clazz)) {
+                if (CmsPage.class.isAssignableFrom(clazz) || clazz.isAssignableFrom(CmsPage.class)) {
                     try {
                         String path = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
                         if (!com.google.common.base.Strings.isNullOrEmpty(path)) {
