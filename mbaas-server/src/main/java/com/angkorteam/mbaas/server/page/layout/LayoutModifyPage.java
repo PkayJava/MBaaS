@@ -12,16 +12,16 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.LayoutPojo;
 import com.angkorteam.mbaas.model.entity.tables.records.GroovyRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.LayoutRecord;
+import com.angkorteam.mbaas.server.Application;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.LayoutTitleValidator;
-import com.angkorteam.mbaas.server.wicket.ProviderUtils;
+import com.google.common.base.Strings;
 import groovy.lang.GroovyCodeSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.wicket.core.util.lang.PropertyResolver;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.border.Border;
@@ -30,6 +30,9 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +42,8 @@ import java.util.Date;
  * Created by socheatkhauv on 10/26/16.
  */
 public class LayoutModifyPage extends MBaaSPage {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LayoutModifyPage.class);
 
     private String layoutUuid;
     private String groovyId;
@@ -172,7 +177,7 @@ public class LayoutModifyPage extends MBaaSPage {
         Class<?> layoutClass = classLoader.parseClass(source, false);
         String javaClass = layoutClass.getName();
 
-         classLoader.removeSourceCache(this.javaClass);
+        classLoader.removeSourceCache(this.javaClass);
         classLoader.removeClassCache(this.javaClass);
 
         classLoader.writeGroovy(javaClass, this.groovy);
@@ -193,6 +198,23 @@ public class LayoutModifyPage extends MBaaSPage {
         layoutRecord.update();
 
         setResponsePage(LayoutBrowsePage.class);
+
+        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
+        Class<?> clazzes[] = classLoader.getLoadedClasses();
+        for (int i = 0; i < clazzes.length; i++) {
+            try {
+                Class<?> clazz = clazzes[i];
+                String groovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
+                if (!Strings.isNullOrEmpty(groovyId)) {
+                    String paths = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
+                    if (!Strings.isNullOrEmpty(paths)) {
+                        Application.get().mountPage(paths, (Class<? extends org.apache.wicket.Page>) clazz);
+                    }
+                }
+            } catch (Throwable e) {
+                LOGGER.info(e.getMessage(), e);
+            }
+        }
     }
 
     @Override
