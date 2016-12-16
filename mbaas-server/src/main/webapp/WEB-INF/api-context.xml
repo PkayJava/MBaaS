@@ -37,7 +37,7 @@
 
     <security:global-method-security secured-annotations="enabled"/>
 
-    <security:http realm="MBaaS" use-expressions="true" create-session="stateless">
+    <security:http pattern="/api/system/**" realm="MBaaS" use-expressions="true" create-session="stateless">
         <security:csrf disabled="true"/>
         <security:http-basic/>
         <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/page"/>
@@ -45,8 +45,9 @@
         <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/rest"/>
         <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/monitor"/>
         <security:intercept-url access="hasAnyAuthority('${role.administrator}', '${role.service}')" pattern="/api/system/sync"/>
-        <security:intercept-url filters="none" pattern="/api/**"/>
     </security:http>
+
+    <security:http pattern="/api/**" security="none"/>
 
     <security:authentication-manager erase-credentials="true">
         <security:authentication-provider user-service-ref="userDetailsService">
