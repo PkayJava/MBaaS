@@ -132,6 +132,8 @@ public class GroovyController {
             return catchError(e);
         }
 
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(service, servletContext);
+
         RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
         RoleTable roleTable = Tables.ROLE.as("roleTable");
         List<String> serviceRoles = context.select(roleTable.NAME).from(roleTable).innerJoin(restRoleTable).on(roleTable.ROLE_ID.eq(restRoleTable.ROLE_ID)).where(restRoleTable.REST_ID.eq(restPojo.getRestId())).fetchInto(String.class);
@@ -142,7 +144,6 @@ public class GroovyController {
                 return forbidden();
             }
         }
-        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(service, servletContext);
         try {
             return service.service(request, pathVariables);
         } catch (Throwable e) {
