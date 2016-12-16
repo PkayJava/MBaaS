@@ -15,7 +15,6 @@ import com.angkorteam.mbaas.server.gson.Layout;
 import com.angkorteam.mbaas.server.gson.Page;
 import com.angkorteam.mbaas.server.gson.Rest;
 import com.angkorteam.mbaas.server.gson.Sync;
-import com.angkorteam.mbaas.server.page.CmsPage;
 import com.angkorteam.mbaas.server.page.layout.LayoutCreatePage;
 import com.angkorteam.mbaas.server.page.page.PageCreatePage;
 import com.angkorteam.mbaas.server.page.rest.RestCreatePage;
@@ -34,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -857,27 +855,23 @@ public class SystemController {
             }
         }
 
-        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
-        List<Map<String, Object>> groovys = jdbcTemplate.queryForList("SELECT * FROM groovy WHERE script_crc32 IS NULL");
-        for (Map<String, Object> groovy : groovys) {
-            String javaClass = (String) groovy.get("java_class");
-            String groovyId = (String) groovy.get("groovy_id");
+
+        Class<?> clazzes[] = classLoader.getLoadedClasses();
+        for (int i = 0; i < clazzes.length; i++) {
             try {
-                Class<?> clazz = classLoader.loadClass(javaClass);
-                if (CmsPage.class.isAssignableFrom(clazz) || clazz.isAssignableFrom(CmsPage.class)) {
-                    try {
-                        String path = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
-                        if (!Strings.isNullOrEmpty(path)) {
-                            Application.get().mountPage(path, (Class<? extends org.apache.wicket.Page>) clazz);
-                        }
-                    } catch (EmptyResultDataAccessException e) {
-                        LOGGER.info(e.getMessage(), e);
+                Class<?> clazz = clazzes[i];
+                String groovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
+                if (!Strings.isNullOrEmpty(groovyId)) {
+                    String paths = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
+                    if (!Strings.isNullOrEmpty(paths)) {
+                        Application.get().mountPage(paths, (Class<? extends org.apache.wicket.Page>) clazz);
                     }
                 }
-            } catch (ClassNotFoundException e) {
+            } catch (Throwable e) {
                 LOGGER.info(e.getMessage(), e);
             }
         }
+
         RestResponse response = new RestResponse();
         response.setData(sync);
         response.setResultCode(HttpStatus.OK.value());
