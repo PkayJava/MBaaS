@@ -38,6 +38,7 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +88,7 @@ public class RestModifyPage extends MBaaSPage {
 
     private Form<Void> form;
     private Button saveButton;
+    private Button saveAndCloseButton;
     private BookmarkablePageLink<Void> closeButton;
 
     @Override
@@ -169,6 +171,10 @@ public class RestModifyPage extends MBaaSPage {
         this.saveButton.setOnSubmit(this::saveButtonOnSubmit);
         this.form.add(this.saveButton);
 
+        this.saveAndCloseButton = new Button("saveAndCloseButton");
+        this.saveAndCloseButton.setOnSubmit(this::saveButtonOnSubmit);
+        this.form.add(this.saveAndCloseButton);
+
         this.form.add(new RestPathMethodValidator(this.restId, this.requestPathField, this.methodField));
     }
 
@@ -237,7 +243,6 @@ public class RestModifyPage extends MBaaSPage {
         restRecord.setPath(this.requestPath);
         restRecord.setMethod(this.method);
         restRecord.update();
-        setResponsePage(RestBrowsePage.class);
 
         RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
 
@@ -268,6 +273,14 @@ public class RestModifyPage extends MBaaSPage {
             } catch (Throwable e) {
                 LOGGER.info(e.getMessage(), e);
             }
+        }
+
+        if (saveButton.getId().equals("saveButton")) {
+            PageParameters parameters = new PageParameters();
+            parameters.add("restId", restId);
+            setResponsePage(RestModifyPage.class, parameters);
+        } else {
+            setResponsePage(RestBrowsePage.class);
         }
     }
 
