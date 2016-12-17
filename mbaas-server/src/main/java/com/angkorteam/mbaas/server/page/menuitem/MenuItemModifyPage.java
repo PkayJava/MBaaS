@@ -160,12 +160,18 @@ public class MenuItemModifyPage extends MBaaSPage {
         menuItemRecord.setIcon(this.icon);
         if (this.cmsPage != null) {
             menuItemRecord.setPageId(this.cmsPage.getPageId());
+        } else {
+            menuItemRecord.setPageId(null);
         }
         if (this.menu != null) {
             menuItemRecord.setMenuId(this.menu.getMenuId());
+        } else {
+            menuItemRecord.setMenuId(null);
         }
         if (this.section != null) {
             menuItemRecord.setSectionId(this.section.getSectionId());
+        } else {
+            menuItemRecord.setSectionId(null);
         }
         menuItemRecord.update();
         setResponsePage(MenuItemBrowsePage.class);
