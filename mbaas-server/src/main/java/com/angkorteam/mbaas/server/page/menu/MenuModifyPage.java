@@ -139,10 +139,14 @@ public class MenuModifyPage extends MBaaSPage {
         if (this.menuParent != null) {
             menuRecord.setParentMenuId(this.menuParent.getMenuId());
             menuRecord.setPath(this.menuParent.getPath() + " > " + this.title);
+        } else {
+            menuRecord.setParentMenuId(null);
         }
         if (this.section != null) {
             menuRecord.setPath(this.section.getTitle() + " > " + this.title);
             menuRecord.setSectionId(this.section.getSectionId());
+        } else {
+            menuRecord.setSectionId(null);
         }
         menuRecord.update();
         setResponsePage(MenuBrowsePage.class);
