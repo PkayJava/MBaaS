@@ -13,6 +13,7 @@ import com.angkorteam.mbaas.server.bean.*;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.DashboardPage;
 import com.angkorteam.mbaas.server.page.LoginPage;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
@@ -25,6 +26,8 @@ import org.apache.wicket.resource.DynamicJQueryResourceReference;
 import org.apache.wicket.settings.ExceptionSettings;
 import org.elasticsearch.common.Strings;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
 import org.sql2o.Query;
 import org.sql2o.Sql2o;
@@ -37,6 +40,8 @@ import java.util.List;
  * Created by socheat on 10/23/16.
  */
 public class Application extends AuthenticatedWebApplication {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static final List<Character> CHARACTERS = new ArrayList<>();
     public static final List<Character> NUMBERS = new ArrayList<>();
@@ -109,10 +114,17 @@ public class Application extends AuthenticatedWebApplication {
         writeLayout();
         writeService();
         writePage();
-        compileLayout();
-        compileService();
-        compilePage();
+        List<GroovyPojo> groovys = Lists.newArrayList();
+        groovys.addAll(compileLayout());
+        groovys.addAll(compileService());
+        groovys.addAll(compilePage());
+        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+        groovys.parallelStream().forEach(groovy -> {
+            classLoader.compileGroovy(groovy.getJavaClass());
+            LOGGER.info("{} is compiled", groovy.getJavaClass());
+        });
         initPageMount();
+        LOGGER.info("application is initialized");
     }
 
     @Override
@@ -157,17 +169,17 @@ public class Application extends AuthenticatedWebApplication {
     }
 
 
-    protected void compileService() {
-        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+    protected List<GroovyPojo> compileService() {
+        List<GroovyPojo> groovys = Lists.newArrayList();
         DSLContext context = Spring.getBean(DSLContext.class);
         RestTable restTable = Tables.REST.as("restTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
         List<RestPojo> rests = context.select(restTable.fields()).from(restTable).fetchInto(RestPojo.class);
         for (RestPojo rest : rests) {
             GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(rest.getGroovyId())).fetchOneInto(GroovyPojo.class);
-            classLoader.compileGroovy(groovy.getJavaClass());
-
+            groovys.add(groovy);
         }
+        return groovys;
     }
 
     protected void writeLayout() {
@@ -184,8 +196,8 @@ public class Application extends AuthenticatedWebApplication {
         }
     }
 
-    protected void compileLayout() {
-        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+    protected List<GroovyPojo> compileLayout() {
+        List<GroovyPojo> groovys = Lists.newArrayList();
         DSLContext context = Spring.getBean(DSLContext.class);
         LayoutTable layoutTable = Tables.LAYOUT.as("layoutTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
@@ -193,9 +205,11 @@ public class Application extends AuthenticatedWebApplication {
         for (LayoutPojo layout : layouts) {
             if (!layout.getSystem()) {
                 GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layout.getGroovyId())).fetchOneInto(GroovyPojo.class);
-                classLoader.compileGroovy(groovy.getJavaClass());
+                groovys.add(groovy);
+
             }
         }
+        return groovys;
     }
 
     protected void writePage() {
@@ -237,8 +251,8 @@ public class Application extends AuthenticatedWebApplication {
         }
     }
 
-    protected void compilePage() {
-        GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
+    protected List<GroovyPojo> compilePage() {
+        List<GroovyPojo> groovys = Lists.newArrayList();
         DSLContext context = Spring.getBean(DSLContext.class);
         PageTable pageTable = Tables.PAGE.as("pageTable");
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
@@ -246,9 +260,10 @@ public class Application extends AuthenticatedWebApplication {
         for (PagePojo page : pages) {
             if (page.getCmsPage()) {
                 GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(page.getGroovyId())).fetchOneInto(GroovyPojo.class);
-                classLoader.compileGroovy(groovy.getJavaClass());
+                groovys.add(groovy);
             }
         }
+        return groovys;
     }
 
     @Override

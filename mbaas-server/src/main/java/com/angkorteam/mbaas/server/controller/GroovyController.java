@@ -1,11 +1,12 @@
 package com.angkorteam.mbaas.server.controller;
 
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.*;
+import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
+import com.angkorteam.mbaas.model.entity.tables.RestRoleTable;
+import com.angkorteam.mbaas.model.entity.tables.RestTable;
+import com.angkorteam.mbaas.model.entity.tables.RoleTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.GroovyPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.RestPojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.RolePojo;
-import com.angkorteam.mbaas.model.entity.tables.pojos.UserPojo;
 import com.angkorteam.mbaas.plain.response.RestResponse;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.spring.RestService;
@@ -15,7 +16,6 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +24,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
@@ -36,7 +31,6 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -92,7 +86,7 @@ public class GroovyController {
             while (!candidates.isEmpty()) {
                 RestPojo candidate = candidates.remove(0);
                 String[] dbSegment = StringUtils.split(candidate.getPathVariable(), '/');
-                if (StringUtils.endsWithIgnoreCase(segments[index], dbSegment[index])) {
+                if (StringUtils.equalsIgnoreCase(segments[index], dbSegment[index])) {
                     newNameCandidates.add(candidate);
                 } else if (StringUtils.equalsIgnoreCase(dbSegment[index], RestPathMethodValidator.PATH)) {
                     newLikeCandidates.add(candidate);
@@ -107,6 +101,10 @@ public class GroovyController {
 
         if (candidates.isEmpty()) {
             return notFound();
+        }
+
+        if (candidates.size() > 1) {
+            return internalServerError();
         }
 
         restPojo = candidates.get(0);
@@ -170,6 +168,14 @@ public class GroovyController {
         response.setResultCode(HttpStatus.NOT_FOUND.value());
         response.setResultMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
         response.setDebugMessage("service is not found");
+        return ResponseEntity.ok(response);
+    }
+
+    protected ResponseEntity<RestResponse> internalServerError() {
+        RestResponse response = new RestResponse();
+        response.setResultCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        response.setResultMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        response.setDebugMessage("service is internal error");
         return ResponseEntity.ok(response);
     }
 
