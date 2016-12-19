@@ -15,6 +15,7 @@ import com.angkorteam.mbaas.model.entity.tables.records.GroovyRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.RestRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.RestRoleRecord;
 import com.angkorteam.mbaas.plain.enums.SecurityEnum;
+import com.angkorteam.mbaas.server.Application;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.Configuration;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
@@ -24,6 +25,7 @@ import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.RestNameValidator;
 import com.angkorteam.mbaas.server.validator.RestPathMethodValidator;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import groovy.lang.GroovyCodeSource;
 import org.apache.commons.io.FileUtils;
@@ -36,9 +38,11 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
-import org.elasticsearch.common.Strings;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,6 +53,8 @@ import java.util.List;
  * Created by socheat on 8/3/16.
  */
 public class RestCreatePage extends MBaaSPage {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestCreatePage.class);
 
     private String restUuid;
 
@@ -232,6 +238,26 @@ public class RestCreatePage extends MBaaSPage {
                 restRoleRecord.setRoleId(role.getRoleId());
                 restRoleRecord.setRestId(this.restUuid);
                 restRoleRecord.store();
+            }
+        }
+
+        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
+        Class<?> clazzes[] = classLoader.getLoadedClasses();
+        for (int i = 0; i < clazzes.length; i++) {
+            Class<?> clazz = null;
+            String tempGroovyId = null;
+            String path = null;
+            try {
+                clazz = clazzes[i];
+                tempGroovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
+                if (!Strings.isNullOrEmpty(tempGroovyId)) {
+                    path = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, tempGroovyId);
+                    if (!Strings.isNullOrEmpty(path)) {
+                        Application.get().mountPage(path, (Class<? extends org.apache.wicket.Page>) clazz);
+                    }
+                }
+            } catch (Throwable e) {
+                LOGGER.info("reload error {} class {} groovy id {} path {}", e.getMessage(), (clazz != null ? clazz.getSimpleName() : ""), tempGroovyId, path);
             }
         }
 

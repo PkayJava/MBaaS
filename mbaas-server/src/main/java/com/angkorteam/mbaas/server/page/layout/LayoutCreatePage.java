@@ -10,12 +10,14 @@ import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
 import com.angkorteam.mbaas.model.entity.tables.LayoutTable;
 import com.angkorteam.mbaas.model.entity.tables.records.GroovyRecord;
 import com.angkorteam.mbaas.model.entity.tables.records.LayoutRecord;
+import com.angkorteam.mbaas.server.Application;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.bean.System;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.LayoutTitleValidator;
+import com.google.common.base.Strings;
 import groovy.lang.GroovyCodeSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -26,6 +28,9 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +40,8 @@ import java.util.Date;
  * Created by socheatkhauv on 10/26/16.
  */
 public class LayoutCreatePage extends MBaaSPage {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LayoutCreatePage.class);
 
     private String layoutUuid;
 
@@ -181,6 +188,27 @@ public class LayoutCreatePage extends MBaaSPage {
         layoutRecord.setSystem(false);
         layoutRecord.setModified(true);
         layoutRecord.store();
+
+        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
+        Class<?> clazzes[] = classLoader.getLoadedClasses();
+        for (int i = 0; i < clazzes.length; i++) {
+            Class<?> clazz = null;
+            String tempGroovyId = null;
+            String path = null;
+            try {
+                clazz = clazzes[i];
+                tempGroovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
+                if (!Strings.isNullOrEmpty(tempGroovyId)) {
+                    path = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, tempGroovyId);
+                    if (!Strings.isNullOrEmpty(path)) {
+                        Application.get().mountPage(path, (Class<? extends org.apache.wicket.Page>) clazz);
+                    }
+                }
+            } catch (Throwable e) {
+                LOGGER.info("reload error {} class {} groovy id {} path {}", e.getMessage(), (clazz != null ? clazz.getSimpleName() : ""), tempGroovyId, path);
+            }
+        }
+
         setResponsePage(LayoutBrowsePage.class);
     }
 

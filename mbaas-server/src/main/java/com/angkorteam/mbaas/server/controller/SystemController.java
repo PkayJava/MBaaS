@@ -855,20 +855,22 @@ public class SystemController {
             }
         }
 
-
         Class<?> clazzes[] = classLoader.getLoadedClasses();
         for (int i = 0; i < clazzes.length; i++) {
+            Class<?> clazz = null;
+            String tempGroovyId = null;
+            String path = null;
             try {
-                Class<?> clazz = clazzes[i];
-                String groovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
-                if (!Strings.isNullOrEmpty(groovyId)) {
-                    String paths = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, groovyId);
-                    if (!Strings.isNullOrEmpty(paths)) {
-                        Application.get().mountPage(paths, (Class<? extends org.apache.wicket.Page>) clazz);
+                clazz = clazzes[i];
+                tempGroovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
+                if (!Strings.isNullOrEmpty(tempGroovyId)) {
+                    path = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, tempGroovyId);
+                    if (!Strings.isNullOrEmpty(path)) {
+                        Application.get().mountPage(path, (Class<? extends org.apache.wicket.Page>) clazz);
                     }
                 }
             } catch (Throwable e) {
-                LOGGER.info(e.getMessage(), e);
+                LOGGER.info("reload error {} class {} groovy id {} path {}", e.getMessage(), (clazz != null ? clazz.getSimpleName() : ""), tempGroovyId, path);
             }
         }
 

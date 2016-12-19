@@ -26,6 +26,7 @@ import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
 import com.angkorteam.mbaas.server.validator.PageCodeValidator;
 import com.angkorteam.mbaas.server.validator.PagePathValidator;
+import com.google.common.base.Strings;
 import groovy.lang.GroovyCodeSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -38,6 +39,9 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +52,8 @@ import java.util.List;
  * Created by socheat on 10/27/16.
  */
 public class PageCreatePage extends MBaaSPage {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PageCreatePage.class);
 
     private String pageUuid;
 
@@ -256,6 +262,26 @@ public class PageCreatePage extends MBaaSPage {
                 pageRoleRecord.setRoleId(role.getRoleId());
                 pageRoleRecord.setPageId(this.pageUuid);
                 pageRoleRecord.store();
+            }
+        }
+
+        JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
+        Class<?> clazzes[] = classLoader.getLoadedClasses();
+        for (int i = 0; i < clazzes.length; i++) {
+            Class<?> clazz = null;
+            String tempGroovyId = null;
+            String path = null;
+            try {
+                clazz = clazzes[i];
+                tempGroovyId = jdbcTemplate.queryForObject("SELECT groovy_id FROM groovy WHERE java_class = ?", String.class, clazz.getName());
+                if (!Strings.isNullOrEmpty(tempGroovyId)) {
+                    path = jdbcTemplate.queryForObject("SELECT path FROM page WHERE groovy_id = ?", String.class, tempGroovyId);
+                    if (!Strings.isNullOrEmpty(path)) {
+                        Application.get().mountPage(path, (Class<? extends org.apache.wicket.Page>) clazz);
+                    }
+                }
+            } catch (Throwable e) {
+                LOGGER.info("reload error {} class {} groovy id {} path {}", e.getMessage(), (clazz != null ? clazz.getSimpleName() : ""), tempGroovyId, path);
             }
         }
 
