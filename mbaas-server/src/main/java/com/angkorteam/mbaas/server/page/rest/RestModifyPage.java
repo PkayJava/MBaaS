@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by socheat on 8/3/16.
@@ -275,7 +276,7 @@ public class RestModifyPage extends MBaaSPage {
             }
         }
 
-        if (saveButton.getId().equals("saveButton")) {
+        if (Objects.equals(button.getId(), "saveButton")) {
             PageParameters parameters = new PageParameters();
             parameters.add("restId", restId);
             setResponsePage(RestModifyPage.class, parameters);
