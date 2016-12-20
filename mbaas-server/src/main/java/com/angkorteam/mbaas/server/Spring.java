@@ -11,15 +11,21 @@ import javax.servlet.ServletContext;
  */
 public class Spring {
 
+    private static ServletContext servletContext = null;
+
     public static <T> T getBean(String name, Class<T> requiredType) throws BeansException {
-        ServletContext servletContext = Application.get().getServletContext();
+        if (servletContext == null) {
+            servletContext = Application.get().getServletContext();
+        }
         ApplicationContext applicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
         return applicationContext.getBean(name, requiredType);
     }
 
 
     public static <T> T getBean(Class<T> requiredType) throws BeansException {
-        ServletContext servletContext = Application.get().getServletContext();
+        if (servletContext == null) {
+            servletContext = Application.get().getServletContext();
+        }
         ApplicationContext applicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
         return applicationContext.getBean(requiredType);
     }
