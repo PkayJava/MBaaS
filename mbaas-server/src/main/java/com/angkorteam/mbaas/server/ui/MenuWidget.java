@@ -11,9 +11,8 @@ import com.google.common.collect.Lists;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 
@@ -32,6 +31,8 @@ public class MenuWidget extends Panel {
     private String cssClass;
 
     private WebMarkupContainer menuContainer;
+
+    private boolean access = false;
 
     public MenuWidget(String id, String menuId) {
         super(id);
@@ -63,31 +64,37 @@ public class MenuWidget extends Panel {
         this.items.addAll(menuItemPojos);
         Collections.sort(items, new SectionWidget.Comparator());
 
-        ListView<Object> itemWidgets = new ListView<Object>("itemWidgets", items) {
-
-            @Override
-            protected void populateItem(ListItem<Object> item) {
-                Object object = item.getModelObject();
-                if (object instanceof MenuPojo) {
-                    MenuWidget itemWidget = new MenuWidget("itemWidget", ((MenuPojo) object).getMenuId());
-                    item.add(itemWidget);
-                } else if (object instanceof MenuItemPojo) {
-                    MenuItemWidget itemWidget = new MenuItemWidget("itemWidget", ((MenuItemPojo) object).getMenuItemId());
-                    item.add(itemWidget);
-                }
+        RepeatingView itemWidgets = new RepeatingView("itemWidgets", new PropertyModel<Boolean>(this, "access"));
+        for (Object item : items) {
+            if (item instanceof MenuPojo) {
+                MenuWidget itemWidget = new MenuWidget(itemWidgets.newChildId(), ((MenuPojo) item).getMenuId());
+                itemWidgets.add(itemWidget);
+            } else if (item instanceof MenuItemPojo) {
+                MenuItemWidget itemWidget = new MenuItemWidget(itemWidgets.newChildId(), ((MenuItemPojo) item).getMenuItemId());
+                itemWidgets.add(itemWidget);
             }
-
-        };
+        }
         this.menuContainer.add(itemWidgets);
 
         setVisible(!this.items.isEmpty());
     }
 
+    public boolean isAccess() {
+        return access;
+    }
+
+    public void setAccess(boolean access) {
+        this.access = this.access || access;
+        PropertyModel<Boolean> model = (PropertyModel<Boolean>) getParent().getDefaultModel();
+        model.setObject(access);
+    }
+
     @Override
     protected void onBeforeRender() {
-        super.onBeforeRender();
+        setVisible(this.access);
         MBaaSPage mBaaSPage = (MBaaSPage) getPage();
         this.cssClass = mBaaSPage.isMenuWidgetSelected(this.menuId) ? "treeview active" : "treeview";
+        super.onBeforeRender();
     }
 
     protected static class Comparator implements java.util.Comparator<Object> {

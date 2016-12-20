@@ -9,9 +9,9 @@ import com.angkorteam.mbaas.model.entity.tables.pojos.MenuPojo;
 import com.angkorteam.mbaas.server.Spring;
 import com.google.common.collect.Lists;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 
 import java.util.Collections;
@@ -24,11 +24,12 @@ public class SectionWidget extends Panel {
 
     private String sectionId;
 
-    private List<Object> items;
+    private boolean access = false;
 
     public SectionWidget(String id, String sectionId) {
         super(id);
         this.sectionId = sectionId;
+        this.access = false;
     }
 
     @Override
@@ -44,32 +45,31 @@ public class SectionWidget extends Panel {
         MenuItemTable menuItemTable = Tables.MENU_ITEM.as("menuItemTable");
         List<MenuPojo> menuPojos = context.select(menuTable.fields()).from(menuTable).where(menuTable.SECTION_ID.eq(this.sectionId)).orderBy(menuTable.ORDER.asc()).fetchInto(MenuPojo.class);
         List<MenuItemPojo> menuItemPojos = context.select(menuItemTable.fields()).from(menuItemTable).where(menuItemTable.SECTION_ID.eq(this.sectionId)).orderBy(menuItemTable.ORDER.asc()).fetchInto(MenuItemPojo.class);
-        this.items = Lists.newArrayList();
-        this.items.addAll(menuPojos);
-        this.items.addAll(menuItemPojos);
-        Collections.sort(this.items, new Comparator());
+        List<Object> items = Lists.newArrayList();
+        items.addAll(menuPojos);
+        items.addAll(menuItemPojos);
+        Collections.sort(items, new Comparator());
 
-        ListView<Object> itemWidgets = new ListView<Object>("itemWidgets", items) {
-
-            @Override
-            protected void populateItem(ListItem<Object> item) {
-                Object object = item.getModelObject();
-                if (object instanceof MenuPojo) {
-                    MenuWidget itemWidget = new MenuWidget("itemWidget", ((MenuPojo) object).getMenuId());
-                    item.add(itemWidget);
-                } else if (object instanceof MenuItemPojo) {
-                    MenuItemWidget itemWidget = new MenuItemWidget("itemWidget", ((MenuItemPojo) object).getMenuItemId());
-                    item.add(itemWidget);
-                }
+        RepeatingView itemWidgets = new RepeatingView("itemWidgets", new PropertyModel<Boolean>(this, "access"));
+        for (Object item : items) {
+            if (item instanceof MenuPojo) {
+                MenuWidget itemWidget = new MenuWidget(itemWidgets.newChildId(), ((MenuPojo) item).getMenuId());
+                itemWidgets.add(itemWidget);
+            } else if (item instanceof MenuItemPojo) {
+                MenuItemWidget itemWidget = new MenuItemWidget(itemWidgets.newChildId(), ((MenuItemPojo) item).getMenuItemId());
+                itemWidgets.add(itemWidget);
             }
-
-        };
+        }
         add(itemWidgets);
-
-        setVisible(!this.items.isEmpty());
     }
 
-    protected static class Comparator implements java.util.Comparator<Object> {
+    @Override
+    protected void onBeforeRender() {
+        setVisible(this.access);
+        super.onBeforeRender();
+    }
+
+    public static class Comparator implements java.util.Comparator<Object> {
 
         @Override
         public int compare(Object o1, Object o2) {

@@ -1,15 +1,14 @@
 package com.angkorteam.mbaas.server.ui;
 
 import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.GroovyTable;
-import com.angkorteam.mbaas.model.entity.tables.MenuItemTable;
-import com.angkorteam.mbaas.model.entity.tables.PageTable;
+import com.angkorteam.mbaas.model.entity.tables.*;
 import com.angkorteam.mbaas.model.entity.tables.pojos.MenuItemPojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
@@ -17,6 +16,8 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
+
+import java.util.List;
 
 /**
  * Created by socheat on 10/23/16.
@@ -30,6 +31,8 @@ public class MenuItemWidget extends Panel {
     private WebMarkupContainer menuItemContainer;
 
     private Label menuItemLabel;
+
+    private boolean access = false;
 
     public MenuItemWidget(String id, String menuItemId) {
         super(id);
@@ -53,6 +56,27 @@ public class MenuItemWidget extends Panel {
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
 
         PagePojo pagePojo = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(menuItemPojo.getPageId())).fetchOneInto(PagePojo.class);
+        Roles sessionRoles = getSession().getRoles();
+        if (sessionRoles.hasRole("administrator")) {
+            this.access = true;
+            PropertyModel<Boolean> model = (PropertyModel<Boolean>) getParent().getDefaultModel();
+            model.setObject(true);
+        } else {
+            PageRoleTable pageRoleTable = Tables.PAGE_ROLE.as("pageRoleTable");
+            RoleTable roleTable = Tables.ROLE.as("roleTable");
+            List<String> pageRoles = context.select(roleTable.NAME).from(roleTable).innerJoin(pageRoleTable).on(roleTable.ROLE_ID.eq(pageRoleTable.ROLE_ID)).and(pageRoleTable.PAGE_ID.eq(pagePojo.getPageId())).fetchInto(String.class);
+
+            if (pageRoles != null && !pageRoles.isEmpty()) {
+                for (String role : pageRoles) {
+                    if (sessionRoles.hasRole(role)) {
+                        this.access = true;
+                        PropertyModel<Boolean> model = (PropertyModel<Boolean>) getParent().getDefaultModel();
+                        model.setObject(true);
+                        break;
+                    }
+                }
+            }
+        }
 
         Class<? extends WebPage> page = null;
         if (!pagePojo.getCmsPage()) {
@@ -82,8 +106,14 @@ public class MenuItemWidget extends Panel {
 
     @Override
     protected void onBeforeRender() {
-        super.onBeforeRender();
+        setVisible(this.access);
         MBaaSPage mBaaSPage = (MBaaSPage) getPage();
         this.cssClass = mBaaSPage.isMenuItemWidgetSelected(this.menuItemId) ? "active" : "";
+        super.onBeforeRender();
+    }
+
+    @Override
+    public com.angkorteam.mbaas.server.Session getSession() {
+        return (com.angkorteam.mbaas.server.Session) super.getSession();
     }
 }

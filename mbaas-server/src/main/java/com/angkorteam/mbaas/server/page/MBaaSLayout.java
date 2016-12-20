@@ -12,8 +12,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 
@@ -45,16 +44,20 @@ public class MBaaSLayout extends Border implements UUIDLayout {
 
         SectionTable sectionTable = Tables.SECTION.as("sectionTable");
         List<SectionPojo> sectionPojos = context.select(sectionTable.fields()).from(sectionTable).orderBy(sectionTable.ORDER.asc()).fetchInto(SectionPojo.class);
-        ListView<SectionPojo> sectionWidgets = new ListView<SectionPojo>("sectionWidgets", sectionPojos) {
 
-            @Override
-            protected void populateItem(ListItem<SectionPojo> item) {
-                SectionPojo sectionPojo = item.getModelObject();
-                SectionWidget sectionWidget = new SectionWidget("sectionWidget", sectionPojo.getSectionId());
-                item.add(sectionWidget);
+        RepeatingView sectionWidgets = new RepeatingView("sectionWidgets");
+        if (getSession().getRoles().hasRole("administrator")) {
+            for (SectionPojo sectionPojo : sectionPojos) {
+                SectionWidget sectionWidget = new SectionWidget(sectionWidgets.newChildId(), sectionPojo.getSectionId());
+                sectionWidgets.add(sectionWidget);
             }
+        } else {
+            for (SectionPojo sectionPojo : sectionPojos) {
+                SectionWidget sectionWidget = new SectionWidget(sectionWidgets.newChildId(), sectionPojo.getSectionId());
+                sectionWidgets.add(sectionWidget);
+            }
+        }
 
-        };
         addToBorder(sectionWidgets);
 
         BookmarkablePageLink<Void> logoutPage = new BookmarkablePageLink<>("logoutPage", LogoutPage.class);
@@ -76,6 +79,11 @@ public class MBaaSLayout extends Border implements UUIDLayout {
         PageTable pageTable = Tables.PAGE.as("pageTable");
         PagePojo pagePojo = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(pageId)).fetchOneInto(PagePojo.class);
         return pagePojo != null ? pagePojo.getDescription() : "";
+    }
+
+    @Override
+    public final com.angkorteam.mbaas.server.Session getSession() {
+        return (com.angkorteam.mbaas.server.Session) super.getSession();
     }
 
     @Override
