@@ -1,6 +1,5 @@
 # setting table
 
-INSERT INTO setting (setting_id, name, description, value, system)
+INSERT INTO setting (setting_id, name, value)
 VALUES
-  (1, 'home_page', 'home page for the application (home page id)', 'com.angkorteam.mbaas.server.page.DashboardPage',
-   TRUE);
+  (1, 'home_page', 'com.angkorteam.mbaas.server.page.DashboardPage');

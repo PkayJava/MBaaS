@@ -21,6 +21,7 @@ import org.elasticsearch.common.Strings;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,8 @@ public class PageBrowsePage extends MBaaSPage {
         provider.setSort("title", SortOrder.ASCENDING);
         provider.selectField("pageId", String.class);
         provider.selectField("cmsPage", Boolean.class);
+        provider.selectField("dateModified", Date.class);
+        provider.setSort("dateModified", SortOrder.DESCENDING);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         layout.add(filterForm);
@@ -99,9 +102,8 @@ public class PageBrowsePage extends MBaaSPage {
 
     private Boolean clickable(String link, Map<String, Object> object) {
         Boolean system = (Boolean) object.get("system");
-        Boolean cms = (Boolean) object.get("cmsPage");
         if ("Edit".equals(link)) {
-            return cms;
+            return true;
         } else if ("Delete".equals(link)) {
             return !system;
         }

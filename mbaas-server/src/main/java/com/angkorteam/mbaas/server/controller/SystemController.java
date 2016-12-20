@@ -230,7 +230,6 @@ public class SystemController {
             pageRecord.setTitle(page.getTitle());
             pageRecord.setHtml(pageHtml);
             pageRecord.setHtmlCrc32(String.valueOf(htmlCrc32));
-            pageRecord.setCode(page.getCode());
             pageRecord.setPath(page.getPath());
             pageRecord.setDescription(page.getDescription());
             pageRecord.setSystem(false);
@@ -540,6 +539,9 @@ public class SystemController {
 
             RestRecord restRecord = context.newRecord(restTable);
             restRecord.setRestId(restId);
+            restRecord.setModified(true);
+            restRecord.setDateCreated(new Date());
+            restRecord.setDateModified(new Date());
             restRecord.setSystem(false);
             restRecord.setName(rest.getName());
             restRecord.setPath(rest.getPath());

@@ -47,6 +47,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -227,6 +228,9 @@ public class RestCreatePage extends MBaaSPage {
         restRecord.setSecurity(SecurityEnum.Granted.getLiteral());
         restRecord.setDescription(this.description);
         restRecord.setMethod(this.method);
+        restRecord.setModified(true);
+        restRecord.setDateCreated(new Date());
+        restRecord.setDateModified(new Date());
         restRecord.setGroovyId(groovyId);
         restRecord.store();
 

@@ -9,6 +9,7 @@ import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.TableLike;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,6 +36,8 @@ public class RestProvider extends JooqProvider {
         return this.restTable.METHOD;
     }
 
+
+
     public Field<String> getPath() {
         return this.restTable.PATH;
     }
@@ -49,6 +52,10 @@ public class RestProvider extends JooqProvider {
 
     public Field<Boolean> getSystem() {
         return this.restTable.SYSTEM;
+    }
+
+    public Field<Date> getDateModified() {
+        return this.restTable.DATE_MODIFIED;
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.provider.LayoutProvider;
 import com.google.common.collect.Maps;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.markup.html.border.Border;
@@ -20,6 +21,7 @@ import org.elasticsearch.common.Strings;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +44,8 @@ public class LayoutBrowsePage extends MBaaSPage {
         LayoutProvider provider = new LayoutProvider();
         provider.selectField("layoutId", String.class);
         provider.selectField("cmsLayout", Boolean.class);
+        provider.selectField("dateModified", Date.class);
+        provider.setSort("dateModified", SortOrder.DESCENDING);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         layout.add(filterForm);

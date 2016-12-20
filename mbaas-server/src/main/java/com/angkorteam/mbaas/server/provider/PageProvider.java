@@ -10,6 +10,7 @@ import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.TableLike;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -47,6 +48,10 @@ public class PageProvider extends JooqProvider {
 
     public Field<Boolean> getCmsPage() {
         return this.pageTable.CMS_PAGE;
+    }
+
+    public Field<Date> getDateModified() {
+        return this.pageTable.DATE_MODIFIED;
     }
 
     public Field<String> getDescription() {

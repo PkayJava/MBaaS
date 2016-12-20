@@ -48,8 +48,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by socheat on 8/3/16.
@@ -243,6 +243,8 @@ public class RestModifyPage extends MBaaSPage {
         restRecord.setSegment(StringUtils.countMatches(this.requestPath, '/'));
         restRecord.setPath(this.requestPath);
         restRecord.setMethod(this.method);
+        restRecord.setModified(true);
+        restRecord.setDateModified(new Date());
         restRecord.update();
 
         RestRoleTable restRoleTable = Tables.REST_ROLE.as("restRoleTable");
@@ -279,7 +281,7 @@ public class RestModifyPage extends MBaaSPage {
             }
         }
 
-        if (Objects.equals(button.getId(), "saveButton")) {
+        if ("saveButton".equals(button.getId())) {
             PageParameters parameters = new PageParameters();
             parameters.add("restId", restId);
             setResponsePage(RestModifyPage.class, parameters);

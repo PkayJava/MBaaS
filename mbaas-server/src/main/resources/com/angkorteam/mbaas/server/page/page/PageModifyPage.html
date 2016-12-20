@@ -34,10 +34,11 @@
                         <span wicket:id="titleFeedback" class="help-block"/>
                     </div>
                     <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                        <label>
-                            <wicket:message key="label.code">Code</wicket:message>
+                        <label wicket:for="descriptionField">
+                            <wicket:message key="label.description">Description</wicket:message>
                         </label>
-                        <span wicket:id="codeLabel" type="text" class="form-control" disabled="true"/>
+                        <input wicket:id="descriptionField" type="text" class="form-control"/>
+                        <span wicket:id="descriptionFeedback" class="help-block"/>
                     </div>
                     <div class="form-group col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
                         <label wicket:for="layoutField">
@@ -48,14 +49,6 @@
                     </div>
                     <div class="clearfix"></div>
                     <!-- Row -->
-                    <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <label wicket:for="descriptionField">
-                            <wicket:message key="label.description">Description</wicket:message>
-                        </label>
-                        <input wicket:id="descriptionField" type="text" class="form-control"/>
-                        <span wicket:id="descriptionFeedback" class="help-block"/>
-                    </div>
-                    <div class="clearfix"></div>
                     <!-- Row -->
                     <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
                         <label wicket:for="htmlField">
@@ -77,6 +70,7 @@
                     <button wicket:id="saveButton" type="submit" class="btn btn-info">
                         <wicket:message key="button.save">Save</wicket:message>
                     </button>
+                    <button wicket:id="saveAndCloseButton" type="submit" class="btn btn-info">Save & Close</button>
                     <a wicket:id="closeButton" class="btn btn-default pull-right">
                         <wicket:message key="button.close">Close</wicket:message>
                     </a>

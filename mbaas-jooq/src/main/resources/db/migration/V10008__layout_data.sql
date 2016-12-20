@@ -15,4 +15,4 @@ VALUES
     <!-- footer-->
 
 </wicket:border>
-</html>', 1597099448, FALSE, now(), now(), TRUE, FALSE);
+</html>', 1597099448, FALSE, now(), now(), TRUE, TRUE);

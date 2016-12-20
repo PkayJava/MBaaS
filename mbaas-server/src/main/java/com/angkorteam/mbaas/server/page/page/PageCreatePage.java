@@ -24,7 +24,6 @@ import com.angkorteam.mbaas.server.choice.LayoutChoiceRenderer;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
 import com.angkorteam.mbaas.server.select2.RolesChoiceProvider;
 import com.angkorteam.mbaas.server.validator.GroovyScriptValidator;
-import com.angkorteam.mbaas.server.validator.PageCodeValidator;
 import com.angkorteam.mbaas.server.validator.PagePathValidator;
 import com.google.common.base.Strings;
 import groovy.lang.GroovyCodeSource;
@@ -68,10 +67,6 @@ public class PageCreatePage extends MBaaSPage {
     private String title;
     private TextField<String> titleField;
     private TextFeedbackPanel titleFeedback;
-
-    private String code;
-    private TextField<String> codeField;
-    private TextFeedbackPanel codeFeedback;
 
     private String html;
     private HtmlTextArea htmlField;
@@ -132,13 +127,6 @@ public class PageCreatePage extends MBaaSPage {
         this.form.add(this.titleField);
         this.titleFeedback = new TextFeedbackPanel("titleFeedback", this.titleField);
         this.form.add(this.titleFeedback);
-
-        this.codeField = new TextField<>("codeField", new PropertyModel<>(this, "code"));
-        this.codeField.setRequired(true);
-        this.codeField.add(new PageCodeValidator());
-        this.form.add(this.codeField);
-        this.codeFeedback = new TextFeedbackPanel("codeFeedback", this.codeField);
-        this.form.add(this.codeFeedback);
 
         this.groovy = String.format(getString("page.groovy"), "ExamplePage", "ExamplePage", this.pageUuid);
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
@@ -246,7 +234,6 @@ public class PageCreatePage extends MBaaSPage {
         pageRecord.setTitle(this.title);
         pageRecord.setHtml(this.html);
         pageRecord.setHtmlCrc32(String.valueOf(htmlCrc32));
-        pageRecord.setCode(this.code);
         pageRecord.setPath(this.mountPath);
         pageRecord.setDescription(this.description);
         pageRecord.setSystem(false);

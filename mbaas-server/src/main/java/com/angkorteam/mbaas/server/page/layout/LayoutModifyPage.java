@@ -67,6 +67,7 @@ public class LayoutModifyPage extends MBaaSPage {
 
     private Form<Void> form;
     private Button saveButton;
+    private Button saveAndCloseButton;
     private BookmarkablePageLink<Void> closeButton;
 
     @Override
@@ -131,6 +132,10 @@ public class LayoutModifyPage extends MBaaSPage {
 
         this.closeButton = new BookmarkablePageLink<>("closeButton", LayoutBrowsePage.class);
         this.form.add(this.closeButton);
+
+        this.saveAndCloseButton = new Button("saveAndCloseButton");
+        this.saveAndCloseButton.setOnSubmit(this::saveButtonOnSubmit);
+        this.form.add(this.saveAndCloseButton);
     }
 
     private void saveButtonOnSubmit(Button button) {
@@ -197,8 +202,6 @@ public class LayoutModifyPage extends MBaaSPage {
         layoutRecord.setDateModified(new Date());
         layoutRecord.update();
 
-        setResponsePage(LayoutBrowsePage.class);
-
         JdbcTemplate jdbcTemplate = Spring.getBean(JdbcTemplate.class);
         Class<?> clazzes[] = classLoader.getLoadedClasses();
         for (int i = 0; i < clazzes.length; i++) {
@@ -217,6 +220,14 @@ public class LayoutModifyPage extends MBaaSPage {
             } catch (Throwable e) {
                 LOGGER.info("reload error {} class {} groovy id {} path {}", e.getMessage(), (clazz != null ? clazz.getSimpleName() : ""), tempGroovyId, path);
             }
+        }
+
+        if ("saveButton".equals(button.getId())) {
+            PageParameters parameters = new PageParameters();
+            parameters.add("layoutId", this.layoutUuid);
+            setResponsePage(LayoutModifyPage.class, parameters);
+        } else {
+            setResponsePage(LayoutBrowsePage.class);
         }
     }
 

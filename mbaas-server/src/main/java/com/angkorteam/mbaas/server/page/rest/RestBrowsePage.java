@@ -3,8 +3,6 @@ package com.angkorteam.mbaas.server.page.rest;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.DefaultDataTable;
 import com.angkorteam.framework.extension.wicket.extensions.markup.html.repeater.data.table.filter.*;
-import com.angkorteam.mbaas.model.entity.Tables;
-import com.angkorteam.mbaas.model.entity.tables.RestTable;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.bean.GroovyClassLoader;
 import com.angkorteam.mbaas.server.page.MBaaSPage;
@@ -20,10 +18,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.elasticsearch.common.Strings;
-import org.jooq.DSLContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +44,8 @@ public class RestBrowsePage extends MBaaSPage {
         RestProvider provider = new RestProvider();
         provider.selectField("restId", String.class);
         provider.selectField("system", Boolean.class);
-        provider.setSort("name", SortOrder.ASCENDING);
+        provider.selectField("dateModified", Date.class);
+        provider.setSort("dateModified", SortOrder.DESCENDING);
 
         FilterForm<Map<String, String>> filterForm = new FilterForm<>("filter-form", provider);
         layout.add(filterForm);

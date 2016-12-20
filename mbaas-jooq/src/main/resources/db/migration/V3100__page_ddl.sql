@@ -3,7 +3,6 @@ CREATE TABLE page (
 
   page_id       VARCHAR(100) NOT NULL,
   layout_id     VARCHAR(100),
-  code          VARCHAR(100) NOT NULL,
   title         VARCHAR(100) NOT NULL, #INSTANCE
   path          VARCHAR(255) NOT NULL,
   description   VARCHAR(255) NOT NULL,
@@ -16,7 +15,6 @@ CREATE TABLE page (
   date_modified DATETIME     NOT NULL,
   cms_page      BIT(1)       NOT NULL DEFAULT TRUE,
 
-  UNIQUE KEY `unique__page__code` (code),
   UNIQUE KEY `unique__page__path` (path),
   KEY `index__page__title` (title),
   KEY `index__page__html_crc32` (html_crc32),
