@@ -152,10 +152,7 @@ public class PageModifyPage extends MBaaSPage {
 
         this.pathField = new TextField<>("pathField", new PropertyModel<>(this, "mountPath"));
         this.pathField.setRequired(this.pageCms);
-        this.pathField.setEnabled(!this.pageCms);
-        if (!this.pageCms) {
-            this.pathField.add(AttributeModifier.replace("disabled", "disabled"));
-        }
+        this.pathField.setEnabled(this.pageCms);
         this.pathField.add(new PagePathValidator(this.pageUuid));
         this.form.add(this.pathField);
         this.pathFeedback = new TextFeedbackPanel("pathFeedback", this.pathField);
@@ -169,10 +166,7 @@ public class PageModifyPage extends MBaaSPage {
 
         this.groovyField = new JavascriptTextArea("groovyField", new PropertyModel<>(this, "groovy"));
         this.groovyField.setRequired(this.pageCms);
-        this.groovyField.setEnabled(!this.pageCms);
-        if (!this.pageCms) {
-            this.groovyField.add(AttributeModifier.replace("disabled", "disabled"));
-        }
+        this.groovyField.setEnabled(this.pageCms);
         this.groovyField.add(new GroovyScriptValidator(this.groovyId));
         this.form.add(this.groovyField);
         this.groovyFeedback = new TextFeedbackPanel("groovyFeedback", this.groovyField);
@@ -186,10 +180,7 @@ public class PageModifyPage extends MBaaSPage {
 
         this.htmlField = new HtmlTextArea("htmlField", new PropertyModel<>(this, "html"));
         this.htmlField.setRequired(this.pageCms);
-        this.htmlField.setEnabled(!this.pageCms);
-        if (!this.pageCms) {
-            this.htmlField.add(AttributeModifier.replace("disabled", "disabled"));
-        }
+        this.htmlField.setEnabled(this.pageCms);
         this.form.add(this.htmlField);
         this.htmlFeedback = new TextFeedbackPanel("htmlFeedback", this.htmlField);
         this.form.add(this.htmlFeedback);
@@ -197,10 +188,7 @@ public class PageModifyPage extends MBaaSPage {
         this.layouts = context.select(layoutTable.fields()).from(layoutTable).orderBy(layoutTable.TITLE.asc()).fetchInto(LayoutPojo.class);
         this.layoutField = new DropDownChoice<>("layoutField", new PropertyModel<>(this, "layout"), new PropertyModel<>(this, "layouts"), new LayoutChoiceRenderer());
         this.layoutField.setRequired(this.pageCms);
-        this.layoutField.setEnabled(!this.pageCms);
-        if (!this.pageCms) {
-            this.layoutField.add(AttributeModifier.replace("disabled", "disabled"));
-        }
+        this.layoutField.setEnabled(this.pageCms);
         this.form.add(this.layoutField);
         this.layoutFeedback = new TextFeedbackPanel("layoutFeedback", this.layoutField);
         this.form.add(this.layoutFeedback);
