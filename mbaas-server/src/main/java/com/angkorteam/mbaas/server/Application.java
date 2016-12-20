@@ -102,7 +102,7 @@ public class Application extends AuthenticatedWebApplication {
         getExceptionSettings().setUnexpectedExceptionDisplay(ExceptionSettings.SHOW_EXCEPTION_PAGE);
         getSecuritySettings().setAuthorizationStrategy(authorizationStrategy);
         getRequestCycleSettings().setBufferResponse(true);
-        getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
+        // getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
         getMarkupSettings().setCompressWhitespace(true);
         getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
         getMarkupSettings().setStripWicketTags(true);
