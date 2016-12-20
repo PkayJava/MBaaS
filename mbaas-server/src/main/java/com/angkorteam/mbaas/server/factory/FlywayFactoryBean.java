@@ -57,6 +57,7 @@ public class FlywayFactoryBean implements FactoryBean<Flyway>, InitializingBean,
             }
         }
         Flyway flyway = new Flyway();
+        flyway.setBaselineOnMigrate(true);
         flyway.setDataSource(this.dataSource);
         flyway.setLocations(this.location);
         FlywayException error = null;
