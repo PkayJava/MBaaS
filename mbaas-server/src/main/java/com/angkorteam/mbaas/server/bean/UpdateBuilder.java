@@ -6,25 +6,22 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 /**
- * Created by socheat on 11/25/16.
+ * Created by socheatkhauv on 12/22/16.
  */
-public class InsertBuilder {
+public class UpdateBuilder {
 
     private final String table;
 
-    private List<String> value = Lists.newArrayList();
+    private List<String> where = Lists.newArrayList();
 
     private List<String> field = Lists.newArrayList();
 
-    private List<String> where = Lists.newArrayList();
-
-    public InsertBuilder(String table) {
+    public UpdateBuilder(String table) {
         this.table = table;
     }
 
-    public void addField(String name, String value) {
-        this.field.add(name);
-        this.value.add(value);
+    public void addField(String field) {
+        this.field.add(field);
     }
 
     public void addWhere(String filter) {
@@ -33,13 +30,11 @@ public class InsertBuilder {
 
     public String toSQL() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("INSERT INTO ").append(this.table);
-        buffer.append("(").append(StringUtils.join(this.field, ", ")).append(")");
-        buffer.append(" ").append("VALUES").append("(").append(StringUtils.join(this.value, ", ")).append(")");
+        buffer.append("UPDATE  ").append(this.table);
+        buffer.append(" SET ").append(StringUtils.join(this.field, ", "));
         if (!this.where.isEmpty()) {
             buffer.append(" WHERE " + StringUtils.join(this.where, " AND "));
         }
         return buffer.toString();
     }
-
 }
