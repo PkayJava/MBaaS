@@ -18,9 +18,15 @@ public class Session extends AuthenticatedWebSession {
 
     private Roles roles;
 
+    private String userId;
+
     public Session(Request request) {
         super(request);
         this.roles = new Roles();
+    }
+
+    public final String getUserId() {
+        return this.userId;
     }
 
     @Override
@@ -34,6 +40,7 @@ public class Session extends AuthenticatedWebSession {
             if (role != null) {
                 this.roles.add(role.getName());
             }
+            this.userId = user.getUserId();
         }
         return user != null;
     }

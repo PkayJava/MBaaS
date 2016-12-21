@@ -36,4 +36,8 @@ public abstract class CmsPage extends MBaaSPage implements IMarkupResourceStream
         }
     }
 
+    @Override
+    public com.angkorteam.mbaas.server.Session getSession() {
+        return (com.angkorteam.mbaas.server.Session) super.getSession();
+    }
 }
