@@ -134,7 +134,7 @@ public class RoleModifyPage extends MBaaSPage {
             }
         }
 
-        context.delete(restRoleTable).where(restRoleTable.REST_ID.eq(this.roleId)).execute();
+        context.delete(restRoleTable).where(restRoleTable.ROLE_ID.eq(this.roleId)).execute();
 
         if (this.rest != null && !this.rest.isEmpty()) {
             for (RestPojo rest : this.rest) {
