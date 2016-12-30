@@ -34,7 +34,7 @@ public class LoginPage extends AdminLTEPage {
     private PasswordTextField passwordField;
     private TextFeedbackPanel passwordFeedback;
 
-    private List<String> languages = Arrays.asList("English", "ភាសាខ្មែរ");
+    private List<String> languages = Arrays.asList("English", "Khmer");
     private String language;
     private DropDownChoice<String> languageField;
     private TextFeedbackPanel languageFeedback;
@@ -64,7 +64,7 @@ public class LoginPage extends AdminLTEPage {
         this.passwordFeedback = new TextFeedbackPanel("passwordFeedback", this.passwordField);
         this.form.add(this.passwordFeedback);
 
-        this.language = "ភាសាខ្មែរ";
+        this.language = "Khmer";
         this.languageField = new DropDownChoice<String>("languageField", new PropertyModel<>(this, "language"), new PropertyModel<>(this, "languages")) {
             @Override
             protected boolean wantOnSelectionChangedNotifications() {
@@ -73,7 +73,7 @@ public class LoginPage extends AdminLTEPage {
 
             @Override
             protected void onSelectionChanged(String newSelection) {
-                if (StringUtils.equalsIgnoreCase("ភាសាខ្មែរ", newSelection)) {
+                if (StringUtils.equalsIgnoreCase("Khmer", newSelection)) {
                     this.getSession().setLocale(new Locale("km"));
                 } else {
                     this.getSession().setLocale(new Locale("en"));

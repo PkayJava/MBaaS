@@ -326,6 +326,9 @@ public class PageModifyPage extends MBaaSPage {
                 }
             }
         } else {
+
+            context.delete(pageRoleTable).where(pageRoleTable.PAGE_ID.eq(this.pageUuid)).execute();
+
             PageRecord pageRecord = context.select(pageTable.fields()).from(pageTable).where(pageTable.PAGE_ID.eq(this.pageUuid)).fetchOneInto(pageTable);
             pageRecord.setTitle(this.title);
             pageRecord.setDescription(this.description);

@@ -3,8 +3,10 @@ package com.angkorteam.mbaas.server.page;
 import com.angkorteam.mbaas.model.entity.Tables;
 import com.angkorteam.mbaas.model.entity.tables.PageTable;
 import com.angkorteam.mbaas.model.entity.tables.SectionTable;
+import com.angkorteam.mbaas.model.entity.tables.UserTable;
 import com.angkorteam.mbaas.model.entity.tables.pojos.PagePojo;
 import com.angkorteam.mbaas.model.entity.tables.pojos.SectionPojo;
+import com.angkorteam.mbaas.model.entity.tables.pojos.UserPojo;
 import com.angkorteam.mbaas.server.Spring;
 import com.angkorteam.mbaas.server.ui.SectionWidget;
 import com.google.common.base.Strings;
@@ -17,11 +19,14 @@ import org.apache.wicket.model.PropertyModel;
 import org.jooq.DSLContext;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by socheat on 11/3/16.
  */
 public class MBaaSLayout extends Border implements UUIDLayout {
+
+    private String welcomeName;
 
     public MBaaSLayout(String id) {
         super(id);
@@ -63,6 +68,10 @@ public class MBaaSLayout extends Border implements UUIDLayout {
         BookmarkablePageLink<Void> logoutPage = new BookmarkablePageLink<>("logoutPage", LogoutPage.class);
         addToBorder(logoutPage);
 
+        UserPojo userPojo = context.select(Tables.USER.fields()).from(Tables.USER).where(Tables.USER.USER_ID.eq(getSession().getUserId())).fetchOneInto(UserPojo.class);
+        this.welcomeName = Strings.isNullOrEmpty(userPojo.getFullName()) ? userPojo.getLogin() : userPojo.getFullName();
+        Label welcomeNameLabel = new Label("welcomeNameLabel", new PropertyModel<>(this, "welcomeName"));
+        addToBorder(welcomeNameLabel);
     }
 
     public String getHtmlPageTitle() {
