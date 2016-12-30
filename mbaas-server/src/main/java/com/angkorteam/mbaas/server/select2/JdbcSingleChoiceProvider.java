@@ -23,14 +23,25 @@ public class JdbcSingleChoiceProvider extends SingleChoiceProvider<Item> {
 
     private final String idField;
 
-    private final String valueField;
+    private final String queryField;
+
+    private final String labelField;
 
     private final List<String> where;
 
-    public JdbcSingleChoiceProvider(String table, String idField, String valueField) {
+    public JdbcSingleChoiceProvider(String table, String idField) {
+        this(table, idField, idField);
+    }
+
+    public JdbcSingleChoiceProvider(String table, String idField, String queryField) {
+        this(table, idField, queryField, queryField);
+    }
+
+    public JdbcSingleChoiceProvider(String table, String idField, String queryField, String labelField) {
         this.table = table;
         this.idField = idField;
-        this.valueField = valueField;
+        this.labelField = labelField;
+        this.queryField = queryField;
         this.where = Lists.newArrayList();
     }
 
@@ -45,7 +56,7 @@ public class JdbcSingleChoiceProvider extends SingleChoiceProvider<Item> {
             List<String> where = new ArrayList<>();
             where.addAll(this.where);
             where.add(this.idField + " = :id");
-            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.valueField + " value " + " FROM " + this.table + " WHERE " + StringUtils.join(where, " AND "));
+            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.labelField + " value " + " FROM " + this.table + " WHERE " + StringUtils.join(where, " AND "));
             query.addParameter("id", s);
             return query.executeAndFetchFirst(Item.class);
         }
@@ -58,8 +69,8 @@ public class JdbcSingleChoiceProvider extends SingleChoiceProvider<Item> {
         try (Connection connection = sql2o.open()) {
             List<String> where = new ArrayList<>();
             where.addAll(this.where);
-            where.add(this.valueField + " LIKE :value");
-            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.valueField + " value " + " FROM " + this.table + " WHERE " + StringUtils.join(where, " AND ") + " ORDER BY " + this.valueField + " ASC");
+            where.add(this.queryField + " LIKE :value");
+            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.labelField + " value " + " FROM " + this.table + " WHERE " + StringUtils.join(where, " AND ") + " ORDER BY " + this.labelField + " ASC");
             query.addParameter("value", s + "%");
             List<Item> items = query.executeAndFetch(Item.class);
             for (Item item : items) {
@@ -97,7 +108,7 @@ public class JdbcSingleChoiceProvider extends SingleChoiceProvider<Item> {
             List<String> where = new ArrayList<>();
             where.addAll(this.where);
             where.add(this.idField + " = :id");
-            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.valueField + " value " + " FROM " + this.table + " WHERE " + StringUtils.join(where, " AND "));
+            Query query = connection.createQuery("SELECT " + this.idField + " id, " + this.labelField + " value " + " FROM " + this.table + " WHERE " + StringUtils.join(where, " AND "));
             query.addParameter("id", id);
             return query.executeAndFetchFirst(Item.class);
         }
