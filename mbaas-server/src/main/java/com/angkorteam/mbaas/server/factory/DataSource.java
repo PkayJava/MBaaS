@@ -1,6 +1,7 @@
 package com.angkorteam.mbaas.server.factory;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -18,6 +19,8 @@ public class DataSource implements javax.sql.DataSource {
 
     public static final String CONNECTION = "CONNECTION";
 
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DataSource.class);
+
     private final BasicDataSource dataSource;
 
     public DataSource(BasicDataSource dataSource) {
@@ -26,7 +29,12 @@ public class DataSource implements javax.sql.DataSource {
 
     @Override
     public Connection getConnection() throws SQLException {
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        ServletRequestAttributes servletRequestAttributes = null;
+        try {
+            servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        } catch (IllegalStateException e) {
+            LOGGER.info(e.getMessage());
+        }
         HttpServletRequest request = null;
         if (servletRequestAttributes != null) {
             request = servletRequestAttributes.getRequest();
@@ -44,7 +52,12 @@ public class DataSource implements javax.sql.DataSource {
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        ServletRequestAttributes servletRequestAttributes = null;
+        try {
+            servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        } catch (IllegalStateException e) {
+            LOGGER.info(e.getMessage());
+        }
         HttpServletRequest request = null;
         if (servletRequestAttributes != null) {
             request = servletRequestAttributes.getRequest();
