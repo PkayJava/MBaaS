@@ -42,6 +42,7 @@ public class ServletRequestListener implements javax.servlet.ServletRequestListe
             }
         }
         this.connection = null;
+        sre.getServletRequest().removeAttribute(com.angkorteam.mbaas.server.factory.DataSource.CONNECTION);
     }
 
     @Override
