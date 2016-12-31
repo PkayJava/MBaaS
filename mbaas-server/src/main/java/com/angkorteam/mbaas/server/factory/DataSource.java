@@ -35,7 +35,7 @@ public class DataSource implements javax.sql.DataSource {
             return this.dataSource.getConnection();
         }
         Connection connection = (Connection) request.getAttribute(CONNECTION);
-        if (connection == null) {
+        if (connection == null || connection.isClosed()) {
             connection = this.dataSource.getConnection();
             request.setAttribute(CONNECTION, connection);
         }
@@ -53,7 +53,7 @@ public class DataSource implements javax.sql.DataSource {
             return this.dataSource.getConnection(username, password);
         }
         Connection connection = (Connection) request.getAttribute(CONNECTION);
-        if (connection == null) {
+        if (connection == null || connection.isClosed()) {
             connection = this.dataSource.getConnection(username, password);
             request.setAttribute(CONNECTION, connection);
         }
