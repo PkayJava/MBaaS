@@ -20,21 +20,28 @@ public class ServletRequestListener implements javax.servlet.ServletRequestListe
     @Override
     public void requestDestroyed(ServletRequestEvent sre) {
         if (this.connection != null) {
+            boolean closed = true;
             try {
-                this.connection.commit();
+                closed = this.connection.isClosed();
             } catch (SQLException e) {
+            }
+            if (!closed) {
                 try {
-                    this.connection.rollback();
-                } catch (SQLException e1) {
+                    this.connection.commit();
+                } catch (SQLException e) {
+                    try {
+                        this.connection.rollback();
+                    } catch (SQLException e1) {
+                    }
+                }
+                try {
+                    this.connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
             }
-            try {
-                this.connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            this.connection = null;
         }
+        this.connection = null;
     }
 
     @Override
