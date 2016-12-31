@@ -57,7 +57,7 @@ public class ServletRequestListener implements javax.servlet.ServletRequestListe
         DataSource dataSource = applicationContext.getBean(DataSource.class);
         try {
             this.connection = dataSource.getConnection();
-            this.connection.setAutoCommit(false);
+            this.connection.setAutoCommit(true);
         } catch (SQLException e) {
         }
     }
