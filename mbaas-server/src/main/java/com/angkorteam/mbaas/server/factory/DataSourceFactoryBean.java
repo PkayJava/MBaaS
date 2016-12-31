@@ -18,7 +18,7 @@ import java.io.File;
  */
 public class DataSourceFactoryBean implements FactoryBean<DataSource>, InitializingBean, ServletContextAware, DisposableBean {
 
-    private BasicDataSource dataSource;
+    private com.angkorteam.mbaas.server.factory.DataSource dataSource;
 
     private ServletContext servletContext;
 
@@ -55,19 +55,21 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource>, Initializ
         }
 
         String itest = java.lang.System.getProperty("itest");
+        BasicDataSource basicDataSource = null;
         if (itest == null || "".equals(itest)) {
             String jdbcDriver = configuration.getString(Configuration.APP_JDBC_DRIVER);
             String jdbcUrl = "jdbc:mysql://" + configuration.getString(Configuration.APP_JDBC_HOSTNAME) + ":" + configuration.getString(Configuration.APP_JDBC_PORT) + "/" + configuration.getString(Configuration.APP_JDBC_DATABASE) + "?" + configuration.getString(Configuration.APP_JDBC_EXTRA);
             String username = configuration.getString(Configuration.APP_JDBC_USERNAME);
             String password = configuration.getString(Configuration.APP_JDBC_PASSWORD);
-            this.dataSource = getDataSource(jdbcDriver, jdbcUrl, username, password);
+            basicDataSource = getDataSource(jdbcDriver, jdbcUrl, username, password);
         } else {
             String jdbcDriver = configuration.getString(Configuration.TEST_JDBC_DRIVER);
             String jdbcUrl = "jdbc:mysql://" + configuration.getString(Configuration.TEST_JDBC_HOSTNAME) + ":" + configuration.getString(Configuration.TEST_JDBC_PORT) + "/" + configuration.getString(Configuration.TEST_JDBC_DATABASE) + "?" + configuration.getString(Configuration.TEST_JDBC_EXTRA);
             String username = configuration.getString(Configuration.TEST_JDBC_USERNAME);
             String password = configuration.getString(Configuration.TEST_JDBC_PASSWORD);
-            this.dataSource = getDataSource(jdbcDriver, jdbcUrl, username, password);
+            basicDataSource = getDataSource(jdbcDriver, jdbcUrl, username, password);
         }
+        this.dataSource = new com.angkorteam.mbaas.server.factory.DataSource(basicDataSource);
     }
 
     protected BasicDataSource getDataSource(String jdbcDriver, String jdbcUrl, String username, String password) {
@@ -93,4 +95,5 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource>, Initializ
     public void destroy() throws Exception {
         this.dataSource.close();
     }
+
 }
