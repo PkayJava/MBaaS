@@ -189,7 +189,7 @@ public class Application extends AuthenticatedWebApplication {
         List<LayoutPojo> layouts = context.select(layoutTable.fields()).from(layoutTable).fetchInto(LayoutPojo.class);
         GroovyClassLoader classLoader = Spring.getBean(GroovyClassLoader.class);
         for (LayoutPojo layout : layouts) {
-            if (!layout.getSystem()) {
+            if (layout.getCmsLayout()) {
                 GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layout.getGroovyId())).fetchOneInto(GroovyPojo.class);
                 classLoader.writeGroovy(groovy.getJavaClass(), groovy.getScript());
             }
@@ -203,7 +203,7 @@ public class Application extends AuthenticatedWebApplication {
         GroovyTable groovyTable = Tables.GROOVY.as("groovyTable");
         List<LayoutPojo> layouts = context.select(layoutTable.fields()).from(layoutTable).fetchInto(LayoutPojo.class);
         for (LayoutPojo layout : layouts) {
-            if (!layout.getSystem()) {
+            if (layout.getCmsLayout()) {
                 GroovyPojo groovy = context.select(groovyTable.fields()).from(groovyTable).where(groovyTable.GROOVY_ID.eq(layout.getGroovyId())).fetchOneInto(GroovyPojo.class);
                 groovys.add(groovy);
 
